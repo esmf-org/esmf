@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.24 2004/04/26 22:32:47 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.25 2004/04/27 13:54:25 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -66,7 +66,7 @@
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_VMGet(vm, npets=npets, mypet=my_id, rc=rc)
+    call ESMF_VMGet(vm, petCount=npets, localPet=my_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (npets .ne. 4) then
@@ -234,7 +234,7 @@
       call ESMF_GridCompGet(comp, vm=vm, rc=rc)
 
       ! Make sure we were given enough pets for what we expected.
-      call ESMF_VMGet(vm, npets=npets, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
    
       if (npets .ne. 4) then
