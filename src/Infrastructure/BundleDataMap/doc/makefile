@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/06/03 14:08:42 nscollins Exp $ 
+# $Id: makefile,v 1.3 2005/03/01 20:59:15 nscollins Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -53,7 +53,7 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 CLEANDIRS   = BundleDataMap_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               BundleDataMap_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 

@@ -44,6 +44,6 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   = Config_reqdoc Config_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
-              *.ORIG ConfigAttr_reqdoc.tex $(PDFFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
+              ConfigAttr_reqdoc.tex $(PDFFILES)
 CLOBBERDIRS =
