@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $
+! $Id: ESMF_StateCreate.F90,v 1.2 2003/12/19 21:46:40 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -33,7 +33,7 @@
     integer :: timestep
     integer, dimension(2) :: delist
     character(ESMF_MAXSTR) :: cname, sname, bname, fname
-    type(ESMF_Array) :: array1
+    type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1, field2
     type(ESMF_Bundle) :: bundle1, bundle2, bundle3, qbundle
     type(ESMF_State) :: state1, state2, state3, state4, state5
@@ -369,6 +369,53 @@
     P_OUT("ESMF_StateDestroy")
 
     P_END("State Test 6: Nested States")
+    P_BLANK()
+
+
+!-------------------------------------------------------------------------
+!   ! Test 7:
+!   !
+!   !  Quick Test - Add multiple arrays to a state
+ 
+    P_START("State Test 7: Multiple Arrays in a State")
+
+    P_IN("ESMF_ArrayCreate")
+    array1 = ESMF_ArrayCreate(rank=3, kind=ESMF_I4, type=ESMF_DATA_INTEGER, &
+                              counts=(/ 3,4,5 /), rc=rc)
+    P_OUT("ESMF_ArrayCreate")
+
+    P_IN("ESMF_ArrayCreate")
+    array2 = ESMF_ArrayCreate(rank=2, kind=ESMF_R8, type=ESMF_DATA_REAL, &
+                              counts=(/ 5,6 /), rc=rc)
+    P_OUT("ESMF_ArrayCreate")
+
+    cname = "Atmosphere"
+    sname = "Atmosphere Import"
+    P_IN("ESMF_StateCreate")
+    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, cname, rc=rc)  
+    P_OUT2("ESMF_StateCreate", trim(sname))
+
+    P_IN("ESMF_StateAddData (Array)")
+    call ESMF_StateAddData(state1, array1, rc=rc)
+    P_OUT("ESMF_StateAddData (Array)")
+    
+    P_IN("ESMF_StatePrint")
+    call ESMF_StatePrint(state1, rc=rc)
+    P_OUT("ESMF_StatePrint")
+
+    P_IN("ESMF_StateAddData (Array)")
+    call ESMF_StateAddData(state1, array2, rc=rc)
+    P_OUT("ESMF_StateAddData (Array)")
+    
+    P_IN("ESMF_StatePrint")
+    call ESMF_StatePrint(state1, rc=rc)
+    P_OUT("ESMF_StatePrint")
+
+    P_IN("ESMF_StateDestroy")
+    call ESMF_StateDestroy(state1, rc=rc)
+    P_OUT("ESMF_StateDestroy")
+
+    P_END("State Test 7 finished")
     P_BLANK()
 
 
