@@ -1,4 +1,4 @@
- $Id: README,v 1.19 2003/07/01 15:28:49 jwolfe Exp $
+ $Id: README,v 1.20 2003/07/02 23:11:06 cdeluca Exp $
 ================================================================================
                                    README
 
@@ -6,7 +6,7 @@
 
 ================================================================================
 
-README file for ESMF v1.0 release.
+README file for ESMF v1.0.0rp2 release.
 
 The files contained here include the ESMF source code and build system.
 
@@ -15,7 +15,7 @@ More information about the ESMF project can be found at the ESMF web site:
 	http://www.esmf.ucar.edu
 
 For additional documentation on building and running the ESMF please see the
-ESMF User's Guide on the ESMF Web pages, under the "Downloads &
+ESMF User's Guide on the ESMF web site, under the "Downloads &
 Documentation" link.
 
 The ESMF library source code is also available for download at:
@@ -47,8 +47,6 @@ Directories
 CVS:            Contains the CVSROOT information.
 
 build:          Contains the build system.
-
-include:        There are currently no files in this directory.
 
 scripts:        Contains scripts for testing and uniprocessor runs, and some
                 templates.
@@ -163,21 +161,34 @@ Final documentation files will be located in the ${ESMF_DIR}/doc directory.
 Usage
 -----
 
-The ESMF builds libraries as both static archives (.a) and dynamic shared
-objects (.so).  They are located in the ${ESMF_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
-directory.  For additional information about linking with dynamic shared
-objects on a particular platform, please see the ESMF User's Guide on the ESMF
-Web pages, under the "Downloads & Documentation" link.
+To use ESMF from Fortran, add the directory that contains
+the ESMF *.mod file(s),
 
-To use ESMF from Fortran, add the ESMF mod directory
-(${ESMF_DIR}/mod/mod${BOPT}/${ESMF_ARCH}) to the search path for include files
-and .mod files, and link with the ESMF library (either libesmf.a or libesmf.so).
-There is a single ESMF module, called ESMF_Mod, that should be included in
-applications with the Fortran USE statement. 
+${ESMF_DIR}/mod/mod${BOPT}/${ESMF_ARCH}
 
-To use ESMF from C/C++, link with the ESMF library (either libesmf.a or
-libesmf.so) and include the ESMC.h file. 
+to your search path for *.mod files.  For most compilers this path 
+is identified either with a -I or a -M.  You must also link 
+with the ESMF shared object library.  This is a file called 
+{\tt libesmf.so} that is located in the following directory:
 
+${ESMF_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
+
+The details of how to link on specific platforms are included in the 
+next section.
+
+There is a single ESMF module, called ESMF_Mod, that should be 
+included in applications with the Fortran USE statement.  It 
+is not necessary to include any header files in Fortran.
+
+To use ESMF from C/C++, link with the ESMF shared object library 
+and include the ESMC.h file. 
+
+If you prefer standard libraries, a *.a file is provided  
+in the same library directory as the shared object file.  
+
+For information on how to link with shared libraries on a particular 
+platform, please see the ESMF User's Guide on the ESMF web site, 
+under the "Downloads & Documentation" link.
 
 ================================================================================
 
@@ -191,5 +202,4 @@ build procedures outlined above.
 Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
-
 
