@@ -13,69 +13,62 @@
 !
 !\begin{verbatim}
 
-!   ! Example program showing various ways to create a Grid object
-    program ESMF_GridCreateEx
+!     ! Example program showing various ways to create a Grid object
+      program ESMF_GridCreateEx
 
-    ! ESMF Framework module
-    use ESMF_Mod
+      ! ESMF Framework module
+      use ESMF_Mod
     
-    implicit none
+      implicit none
     
-!   ! Local variables
-    integer :: i_max, j_max
-    integer :: delist(4)
-    integer :: horz_gridtype, vert_gridtype
-    integer :: horz_stagger, vert_stagger
-    integer :: horz_coord_system, vert_coord_system
-    integer :: status
-    real :: x_min, x_max, y_min, y_max
-    type(ESMF_Grid) :: grid
-    type(ESMF_DELayout) :: layout
-    character (len = ESMF_MAXSTR) :: name
+!     ! Local variables
+      integer :: status, rc
+      integer :: delist(4)
+      integer :: horz_gridtype, horz_stagger
+      integer, dimension(2) :: counts
+      real(ESMF_KIND_R8), dimension(2) :: min, max
+      type(ESMF_CoordSystem) :: horz_coord_system
+      type(ESMF_DELayout) :: layout
+      type(ESMF_Grid) :: grid
+      character (len = ESMF_MAXSTR) :: name
         
+      call ESMF_Initialize(rc)
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
 !   !  The user creates a simple horizontal Grid internally by passing all
 !   !  necessary information through the CreateInternal argument list.
 
-      i_max = 10
-      j_max = 12
+      counts(1) = 10
+      counts(2) = 12
       horz_gridtype = ESMF_GridType_XY
-      vert_gridtype = ESMF_GridType_Unknown
       horz_stagger = ESMF_GridStagger_A
-      vert_stagger = ESMF_GridStagger_Unknown
       horz_coord_system = ESMF_CoordSystem_Cartesian
-      vert_coord_system = ESMF_CoordSystem_Unknown
-      x_min = 0.0
-      x_max = 10.0
-      y_min = 0.0
-      y_max = 12.0
+      min(1) = 0.0
+      max(1) = 10.0
+      min(2) = 0.0
+      max(2) = 12.0
       name = "test grid 1"
  
       ! Create a 2 x 2 layout for the Grid
       delist = (/ 0, 1, 2, 3 /)
       layout = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc=status)
 
-      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                             layout=layout, &
-                             horz_gridtype=horz_gridtype, &
-                             vert_gridtype=vert_gridtype, &
+      grid = ESMF_GridCreate(numDims=2, counts=counts, min=min, max=max, &
+                             layout=layout, horz_gridtype=horz_gridtype, &
                              horz_stagger=horz_stagger, &
-                             vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
-                             vert_coord_system=vert_coord_system, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
                              name=name, rc=status)
 
       print *, "Grid example 1 returned"
 
-     call ESMF_GridDestroy(grid, status)
+      call ESMF_GridDestroy(grid, status)
 
-     print *, "Grid example 1 destroyed"
+      print *, "Grid example 1 destroyed"
 
-     end program ESMF_GridCreateEx
+      call ESMF_Finalize(rc)
+
+      end program ESMF_GridCreateEx
     
 !\end{verbatim}
     
