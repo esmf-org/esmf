@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.5 2003/03/27 01:54:41 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.6 2003/03/28 01:29:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,9 +57,9 @@
       type ESMF_TimeInterval
       sequence                           ! match C++ storage order
       private                            !   (members opaque on F90 side)
-        type(ESMF_BaseTime) :: basetime  ! inherit base class
-        type(ESMF_Calendar) :: calendar  ! optional calendar for calendar
-                                         !   intervals
+        type(ESMF_BaseTime) :: basetime            ! inherit base class
+        type(ESMF_Calendar), pointer :: calendar   ! optional calendar for 
+                                                   !   calendar intervals
       end type
 
 !------------------------------------------------------------------------------
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.5 2003/03/27 01:54:41 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.6 2003/03/28 01:29:03 eschwab Exp $'
 
 !==============================================================================
 !
