@@ -1,4 +1,4 @@
-// $Id: ESMC_RouteEx.C,v 1.2 2004/02/18 22:18:18 nscollins Exp $
+// $Id: ESMC_RouteEx.C,v 1.3 2004/04/20 19:37:32 nscollins Exp $
 //
 // Example/test code which creates a new field.
 
@@ -18,6 +18,7 @@
 #include "ESMC.h"
 #include "ESMC_Field.h"
 #include "ESMC_Comp.h"
+#include "ESMC_Init.h"
 
 #include <stdio.h>
     
