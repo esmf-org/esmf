@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.15 2003/10/20 20:13:57 cdeluca Exp $
+// $Id: ESMC_Comp.C,v 1.16 2004/02/23 20:52:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,6 +26,11 @@
 #include "ESMC_Machine.h"
 #include "ESMC.h"
 
+// public globals, to be filled in by ESMC_Initialize()
+//  and used by MPI_Init().   set once, treat as read-only!
+int globalargc;
+char **globalargv;
+
 //-----------------------------------------------------------------------------
 //BOP
 // !CLASS: Component object
@@ -52,7 +57,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.15 2003/10/20 20:13:57 cdeluca Exp $";
+           "$Id: ESMC_Comp.C,v 1.16 2004/02/23 20:52:39 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -396,6 +401,39 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 
     int rc;
     ESMC_MainLanguage l = ESMF_MAIN_C;
+
+    globalargc = 0;
+    globalargv = NULL;
+
+    FTN(f_esmf_frameworkinitialize)((int*)&l, &rc);
+
+    return rc;
+
+ } // end ESMC_Initialize
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Initialize - Initialize the ESMF Framework
+//
+// !INTERFACE:
+      int ESMC_Initialize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int argc, char **argv) {     // in - the arguments to the program
+//
+// !DESCRIPTION:
+//
+//EOP
+
+    int rc;
+    ESMC_MainLanguage l = ESMF_MAIN_C;
+
+    // make this public so the mpi init code in Machine can grab them.
+    globalargc = argc;
+    globalargv = argv;
 
     FTN(f_esmf_frameworkinitialize)((int*)&l, &rc);
 

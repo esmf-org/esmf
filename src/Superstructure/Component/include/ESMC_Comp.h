@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.11 2003/10/20 20:13:57 cdeluca Exp $
+// $Id: ESMC_Comp.h,v 1.12 2004/02/23 20:52:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -137,6 +137,7 @@ extern const char *ESMC_SetReadRestart;
  int ESMC_CompDestroy(ESMC_Comp *comp);
 
  int ESMC_Initialize(void);
+ int ESMC_Initialize(int argc, char **argv);
  int ESMC_Finalize(void);
 
 // prototypes for fortran interface routines
