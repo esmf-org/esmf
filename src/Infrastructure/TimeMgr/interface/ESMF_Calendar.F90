@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.36 2003/11/06 17:45:58 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.37 2003/11/06 17:56:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.36 2003/11/06 17:45:58 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.37 2003/11/06 17:56:19 eschwab Exp $'
 
 !==============================================================================
 
@@ -238,7 +238,7 @@
       !   daysPerMonth
       integer :: monthsPerYear = 0
 
-      ! get size of given ringing alarm list for C++ validation
+      ! get size of given daysPerMonth array for C++ validation
       if (present(daysPerMonth)) then
         monthsPerYear = size(daysPerMonth)
       end if
