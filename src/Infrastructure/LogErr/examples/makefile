@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.2 2003/04/03 20:05:11 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/04/14 16:48:01 shep_smith Exp $ 
 
 ALL: 
 
 CFLAGS    =
-FFLAGS    =
+FFLAGS    = -D__DIR__=\"esmf/src/Infrastructure/LogErr/src\"
 SOURCEC	  = 
 SOURCEF	  =
 
