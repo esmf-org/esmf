@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.15.4.1 2005/02/09 21:48:40 nscollins Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.15.4.2 2005/03/03 22:28:26 nscollins Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -70,7 +70,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Find out how many PETs we were started with
-    call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (npets .lt. 4) then
@@ -167,15 +167,11 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Component Finalize finished, rc =", rc
 
-      ! Figure out our local processor id for message below.
-      call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-
-      print *, "-----------------------------------------------------------------"
-      print *, "-----------------------------------------------------------------"
+      print *, "---------------------------------------------------------------"
+      print *, "---------------------------------------------------------------"
       print *, "Test finished, pet_id = ", pet_id
-      print *, "-----------------------------------------------------------------"
-      print *, "-----------------------------------------------------------------"
+      print *, "---------------------------------------------------------------"
+      print *, "---------------------------------------------------------------"
 
       print *, "Comp Finalize returned"
 
