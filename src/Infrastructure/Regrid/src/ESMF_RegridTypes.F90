@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.36 2004/04/08 15:45:45 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.37 2004/04/09 17:01:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.36 2004/04/08 15:45:45 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.37 2004/04/09 17:01:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -575,7 +575,7 @@
       end function ESMF_RegridRouteConstruct
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridTypeGet - Get attribute of a Regrid type
 
 ! !INTERFACE:
@@ -624,7 +624,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       logical :: rcpresent
@@ -821,7 +821,7 @@
       end subroutine ESMF_RegridConstructEmpty
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridDestruct - Free any Regrid memory allocated internally
 
 ! !INTERFACE:
@@ -846,7 +846,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: status                           ! Error status

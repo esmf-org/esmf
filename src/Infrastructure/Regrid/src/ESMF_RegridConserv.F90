@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.17 2004/04/08 16:38:16 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.18 2004/04/09 16:59:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.17 2004/04/08 16:38:16 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.18 2004/04/09 16:59:44 jwolfe Exp $'
 
 !==============================================================================
 
@@ -89,7 +89,7 @@
 ! This section includes the conservative Regrid construct methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConstructConserv - Constructs conservative Regrid structure 
 
 ! !INTERFACE:
@@ -144,7 +144,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -458,7 +458,7 @@
       end function ESMF_RegridConstructConserv
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConservSearch - Searches a conservative Regrid structure
 
 ! !INTERFACE:
@@ -549,7 +549,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1221,7 +1221,7 @@
      end subroutine ESMF_RegridConservSearch
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConservLineInt - Line integrals for conservative scheme
 
 ! !INTERFACE:
@@ -1278,7 +1278,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
      !  variables used locally
      real (ESMF_KIND_R8) :: &
@@ -1394,7 +1394,7 @@
       end subroutine ESMF_RegridConservLineInt
 
 !-----------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConservIntersect - finds next intersection
 ! !INTERFACE:
 
@@ -1491,7 +1491,7 @@
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
      ! local variables
      integer ::      &
@@ -1856,7 +1856,7 @@
    end subroutine ESMF_RegridConservIntersect
 
 !-----------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConservIntersectPole
 ! !INTERFACE:
 
@@ -1946,7 +1946,7 @@
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
      ! local variables
      integer :: &
@@ -2290,7 +2290,7 @@
      end subroutine ESMF_RegridConservIntersectPole
 
 !----------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LatLonToPoleXY
 ! !INTERFACE:
 
@@ -2318,7 +2318,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
      ! local variables
      real (ESMF_KIND_R8) :: rns           ! sign factor for transformation
@@ -2346,7 +2346,7 @@
      end subroutine ESMF_LatLonToPoleXY
 
 !----------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PoleXYToLatLon
 ! !INTERFACE:
 
@@ -2375,7 +2375,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
      ! local variables
      real (ESMF_KIND_R8) :: rns            ! sign factor for transformation

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.58 2004/04/02 18:36:35 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.59 2004/04/09 16:59:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.58 2004/04/02 18:36:35 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.59 2004/04/09 16:59:01 jwolfe Exp $'
 
 !==============================================================================
 
@@ -70,7 +70,7 @@
 ! This section includes the bilinear Regrid construct methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConstructBilinear - Constructs bilinear Regrid structure 
 
 ! !INTERFACE:
@@ -117,7 +117,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -375,7 +375,7 @@
       end function ESMF_RegridConstructBilinear
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridBilinearSearch - Searches a bilinear Regrid structure
 
 ! !INTERFACE:
@@ -441,7 +441,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present

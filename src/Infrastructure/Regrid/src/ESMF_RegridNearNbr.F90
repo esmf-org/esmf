@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.12 2004/03/18 22:23:59 nscollins Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.13 2004/04/09 17:00:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,14 +57,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.12 2004/03/18 22:23:59 nscollins Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.13 2004/04/09 17:00:53 jwolfe Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_RegridConstructNearNbr
 
@@ -76,7 +76,7 @@
 !     This interface provides a single entry to the Regrid construct methods 
 !     specifically for a nearest-neighbor distance-weighted regridding. 
 !
-!EOP
+!EOPI
       end interface
 !
 !==============================================================================
@@ -88,7 +88,7 @@
 ! This section includes the nearest-neighbor Regrid construct methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConsByFieldNearNbr - Constructs nearest-neighbor Regrid structure for a field pair
 
 ! !INTERFACE:
@@ -133,7 +133,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer ::           &
          i,j,n,iDE,iter,   &! loop counters
@@ -369,7 +369,7 @@
       end function ESMF_RegridConsByFieldNearNbr
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConsByBundleNearNbr - Constructs nearest-neighbor Regrid structure for a bundle pair
 
 ! !INTERFACE:
@@ -409,7 +409,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       !TODO: Insert code here
       type (ESMF_RegridType) :: temp

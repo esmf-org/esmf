@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.13 2004/04/02 18:36:35 nscollins Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.14 2004/04/09 17:00:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.13 2004/04/02 18:36:35 nscollins Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.14 2004/04/09 17:00:41 jwolfe Exp $'
 
 !==============================================================================
 
@@ -70,7 +70,7 @@
 ! This section includes the linear Regrid construct methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConstructLinear - Constructs linear Regrid structure 
 
 ! !INTERFACE:
@@ -119,7 +119,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -337,7 +337,7 @@
       end function ESMF_RegridConstructLinear
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridLinearSearch - Searches a linear Regrid structure
 
 ! !INTERFACE:
@@ -391,7 +391,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
