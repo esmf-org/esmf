@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.44 2003/09/18 22:57:26 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.45 2003/10/09 22:57:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,22 +28,116 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt ESMF\_PhysGrid} class and is responsible
-! for computing or initializing physical properties of grids.   Such
-! properties include coordinate information necessary for describing grids,
-! metric information for grid distances, grid masks and assignment of
-! region identifiers to grids.
+! The code in this file implements the {\tt ESMF\_PhysGrid} class and is 
+! responsible for computing or initializing physical properties of grids.   
+! {\tt ESMF\_PhysGrid} properties include coordinate information necessary 
+! for describing grids, grid metric information and grid masks.
 !
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
-      use ESMF_LocalArrayMod
       use ESMF_DataMapMod
+      use ESMF_LocalArrayMod
+      use ESMF_ArrayBaseMod
+      use ESMF_ArrayExpandMod
+      use ESMF_PhysCoordMod
+
       implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
+
+!------------------------------------------------------------------------------
+!     !  ESMF_PhysLocation
+!
+!     !  Physical locations for a set of points defining the grid.
+
+      type ESMF_PhysLocation
+      sequence
+      private
+        type (ESMF_Base)    :: base     ! mostly for name
+
+        type (ESMF_Array), dimension(:), pointer :: & !dimensioned num_dims
+          locations            ! coordinates for in each physical dimension
+                               !   for each point in grid
+                               ! Note that for aligned coordinates, the array
+                               !   is a simple vector of values along axis
+                               ! otherwise, array must have coords for all
+                               !   points in grid
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_RegionKind
+!
+!     ! Type to specify kind of region for defined PhysGrid regions.
+
+      type ESMF_RegionKind
+      sequence
+      private
+        integer :: region_kind
+      end type
+
+!------------------------------------------------------------------------------
+!     !  ESMF_PhysRegion
+!
+!     !  Physical locations for a set of points defining regions of the grid
+!     !  (e.g. cell centers or domains of influence).
+
+      type ESMF_PhysRegion
+      sequence
+        type (ESMF_Base)    :: base     ! mostly for name
+   
+        type (ESMF_RegionKind) :: &
+          region_type            ! type of region: polygon or circular
+
+        integer :: &
+          num_vertices           ! number of vertices for a polygonal region
+                                 ! if variable, should be set to largest
+                                 !   number - vertices can be degenerate
+   
+        type (ESMF_Array), dimension(:,:), pointer :: &
+          vertices             ! coordinates in each direction for each 
+                               !   corner of each region 
+                               ! dimensioned num_dims, num_vertices
+
+        type (ESMF_Array), dimension(:,:), pointer :: &
+          bbox                 ! bounding box for each region to aid 
+                               !   search methods
+                               ! dimensioned num_dims, 2(1=min,2=max)
+
+        type (ESMF_Array), dimension(2) :: &! elliptic, circular regions
+          ellipse              ! parameters of ellipse describing region
+                               !   around each point
+      
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_GridMaskKind
+!
+!     ! Type to specify kind of region for defined PhysGrid regions.
+
+      type ESMF_GridMaskKind
+      sequence
+        integer :: mask_kind
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_GridMask
+!
+!     ! Data type describing masks for a PhysGrid.  Masks are named and can
+!     ! be of different types, including logical masks, multiplicative masks,
+!     ! and integer region IDs.
+
+      type ESMF_GridMask
+      sequence
+   
+        type (ESMF_Base)         :: base      ! name especially
+        type (ESMF_GridMaskKind) :: mask_type ! type of mask
+
+        type (ESMF_Array), pointer :: data   ! array containing mask data at 
+                                             ! each grid point
+      end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_PhysGridType
@@ -54,58 +148,40 @@
       sequence
       private
 
-        type (ESMF_Base) :: base
+        type (ESMF_Base) :: base  ! mostly for name
 
-        type (ESMF_RelLoc) :: relloc
-                                   ! relative location
+        type (ESMF_RelLoc) ::    &! if this PhysGrid describes staggered part
+          relloc                  ! of grid, this is the RelLoc for easy 
+                                  ! determination of PhysGrid associated
+                                  ! with a staggered location
 
-        integer :: dim_num         ! number of dimensions
+        type (ESMF_CoordSystem) :: &  ! enum to identify coordinate system
+          coord_system                !  (eg Cartesian, Spherical, ...etc)
 
-        character (len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: &
-           dim_names,             &! dimension names
-           dim_units               ! dimension units
+        integer :: num_dims  ! number of physical dimensions to span the grid
+   
+        type (ESMF_PhysCoord), dimension(:), pointer :: &
+          coords                 ! description of each physical coordinate
+                                 ! axis, including axis extents for this grid
+      
+        type (ESMF_PhysLocation) :: &
+          locations              ! holds coordinates of grid locations in
+                                 ! each coord dir
+      
+        type (ESMF_PhysRegion) :: &
+          regions                ! information about grid regions - typically
+                                 ! describes each grid cell, but can be either
+                                 ! polygons or circles/spheres
 
-        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: &
-           global_min,            &! global coordinate minimums
-           global_max,            &! global coordinate maximums
-           local_min,             &! local  coordinate minimums
-           local_max               ! local  coordinate maximums
+        integer :: num_masks
+        type (ESMF_GridMask), dimension(:), pointer :: &
+          masks                  ! includes both logical, multiplicative masks
+                                 ! first mask is default mask?
+                                 ! region IDs could be included here too
 
-        integer :: num_corners     ! number of corners for each
-                                   ! grid cell (can be degenerate)
-        integer :: num_faces       ! likely assume same as num_corners
-                                   ! but might specify storage of only
-                                   ! 2 of 4 faces, for example
-        type (ESMF_LocalArray) ::      &
-           center_coord,          &! coordinates of centers each cell
-           corner_coord,          &! coordinates of corners each cell
-           face_coord              ! coords of face centers each cell
-
-        integer :: num_metrics     ! counter for number of metrics
-        character (len=ESMF_MAXSTR), dimension(:), pointer :: &
-           metric_names            ! array of names for each metric
-        type (ESMF_LocalArray), dimension(:), pointer ::      &
-           metrics                 ! an array of defined grid metrics
-
-        integer :: num_lmasks      ! counter for number of logical masks
-        character (len=ESMF_MAXSTR), dimension(:), pointer :: &
-           lmask_names             ! names for each defined logical mask
-        type (ESMF_LocalArray), dimension(:), pointer ::      & 
-           lmask                   ! array of defined logical masks 
-
-        integer :: num_mmasks      ! counter for number of multiplicative masks
-        character (len=ESMF_MAXSTR), dimension(:), pointer :: &
-           mmask_names             ! names for each multiplicative mask
-        type (ESMF_LocalArray), dimension(:), pointer ::      &
-           mmask                   ! array of defined multiplicative masks
-
-        integer :: num_region_ids  ! counter for the number of region 
-                                   ! identifiers
-        character (len=ESMF_MAXSTR), dimension(:), pointer :: &
-           region_id_names         ! names associated with each region id
-        type (ESMF_LocalArray), pointer ::      &
-           region_id               ! array assigning region identifier
-                                   ! to each cell
+        integer :: num_metrics      
+        type (ESMF_Array), dimension(:), pointer :: &
+          metrics                ! user-defined metrics
 
       end type
 
@@ -122,67 +198,75 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-   public ESMF_PhysGrid, ESMF_PhysGridType
+      public ESMF_PhysGrid, ESMF_PhysGridType, ESMF_RegionKind, ESMF_GridMaskKind
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-   public ESMF_PhysGridCreate
-   public ESMF_PhysGridDestroy
+      public ESMF_PhysGridCreate
+      public ESMF_PhysGridDestroy
 
-   public ESMF_PhysGridGet
-   public ESMF_PhysGridSet
-   public ESMF_PhysGridGetCoord
-   public ESMF_PhysGridSetCoord
-   public ESMF_PhysGridGetMetric
-   public ESMF_PhysGridSetMetric
-   public ESMF_PhysGridGetLMask
-   public ESMF_PhysGridSetLMask
-   public ESMF_PhysGridGetMMask
-   public ESMF_PhysGridSetMMask
-   public ESMF_PhysGridGetRegionID
-   public ESMF_PhysGridSetRegionID
+      public ESMF_PhysGridGet
+      public ESMF_PhysGridSet
+      public ESMF_PhysGridGetCoord
+      public ESMF_PhysGridSetCoord
+      public ESMF_PhysGridGetLocations
+      public ESMF_PhysGridSetLocations
+      public ESMF_PhysGridGetRegions
+      public ESMF_PhysGridSetRegions
+      public ESMF_PhysGridGetMask
+      public ESMF_PhysGridSetMask
+      public ESMF_PhysGridGetMetric
+      public ESMF_PhysGridSetMetric
 
-   public ESMF_PhysGridValidate
-   public ESMF_PhysGridPrint
+      public ESMF_PhysGridValidate
+      public ESMF_PhysGridPrint
 
 !   public ESMF_PhysGridSearchBboxSpherical
 !   public ESMF_PhysGridSearchGeneralSpherical
 !   public ESMF_PhysGridSearchBboxCartesian
 
-   public ESMF_PhysGridPointInCell
+      public ESMF_PhysGridPointInCell
 
-   public ESMF_PhysGridCompDistSpherical
-   public ESMF_PhysGridCompDistCartesian
+      public ESMF_PhysGridCompDistSpherical
+      public ESMF_PhysGridCompDistCartesian
  
+      public operator(==), operator(/=) ! for overloading region, mask
+                                        ! comparison functions
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC DATA MEMBERS:
 
-   integer, parameter, public ::        &! internally-recognized grid metrics
-      ESMF_GridMetric_Unknown     =  0, &! unknown or undefined metric
-      ESMF_GridMetric_Area        =  1, &! area of grid cell
-      ESMF_GridMetric_Volume      =  2, &! volume of 3-d grid cell
-      ESMF_GridMetric_FaceLength  =  3, &! length of 2d grid cell along face
-      ESMF_GridMetric_NbrDist     =  4, &! cell center to neighbor center dist
-      ESMF_GridMetric_FaceDist    =  5, &! cell center to cell face distance
-      ESMF_GridMetric_CornDist    =  6   ! cell center to cell corner distance
+      ! Supported ESMF PhysGrid Region Types
+      !   Unknown     = unknown or undefined region type
+      !   Polygonal   = polygons defined by vertex coordinates
+      !   Elliptical  = ellipse centered on grid point, defined by two params
 
-   integer, parameter, public ::        &! internally-recognized cell locations
-      ESMF_CellLoc_Unknown        =  0, &! unknown or undefined metric
-      ESMF_CellLoc_Center_X       =  1, &! cell center, x-coordinate  
-      ESMF_CellLoc_Center_Y       =  2, &! cell center, y-coordinate  
-      ESMF_CellLoc_Corner_X       =  3, &! cell vertex, x-coordinate  
-      ESMF_CellLoc_Corner_Y       =  4, &! cell vertex, y-coordinate  
-      ESMF_CellLoc_Face_X         =  5, &! cell face center, x-coordinate  
-      ESMF_CellLoc_Face_Y         =  6   ! cell face center, y-coordinate  
+      type (ESMF_RegionKind), parameter, public :: &! types of PhysGrid regions
+         ESMF_RegionKind_Unknown      = ESMF_RegionKind( 0), &
+         ESMF_RegionKind_Polygon      = ESMF_RegionKind( 1), &
+         ESMF_RegionKind_Ellipse      = ESMF_RegionKind( 2)
+
+      ! Supported ESMF PhysGrid Mask Types
+      !   Unknown        = unknown or undefined mask type
+      !   Logical        = logical mask
+      !   Multiplicative = multiplicative mask
+      !   RegionID       = integer assigning unique ID to each point
+
+      type (ESMF_GridMaskKind), parameter, public :: &! types of grid masks
+         ESMF_GridMaskKind_Unknown        = ESMF_GridMaskKind( 0), &
+         ESMF_GridMaskKind_Logical        = ESMF_GridMaskKind( 1), &
+         ESMF_GridMaskKind_Multiplicative = ESMF_GridMaskKind( 2), &
+         ESMF_GridMaskKind_RegionID       = ESMF_GridMaskKind( 3)
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.44 2003/09/18 22:57:26 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.45 2003/10/09 22:57:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -195,76 +279,21 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_PhysGridCreateNew
-!        module procedure ESMF_PhysGridCreateEmpty
-         module procedure ESMF_PhysGridCreateInternal
-         module procedure ESMF_PhysGridCreateSpecd
+!        module procedure ESMF_PhysGridCreateInternal
 !        module procedure ESMF_PhysGridCreateStagger
 !        module procedure ESMF_PhysGridCreateRead
 !        module procedure ESMF_PhysGridCreateCopy
 !        module procedure ESMF_PhysGridCreateCutout
 !        module procedure ESMF_PhysGridCreateChangeResolution
 !        module procedure ESMF_PhysGridCreateExchange
-
+!
 ! !DESCRIPTION:
-!     This interface provides a single entry point for {\tt ESMF\_PhysGrid} create
-!     methods.
+!     This interface provides a single entry point for {\tt ESMF\_PhysGrid} 
+!     create methods.
 !
 !EOP
       end interface 
 !
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      interface ESMF_PhysGridSetCoord
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_PhysGridSetCoordFromArray
-         module procedure ESMF_PhysGridSetCoordInternal
-         module procedure ESMF_PhysGridSetCoordSpecd
-!        module procedure ESMF_PhysGridSetCoordStagger
-!        module procedure ESMF_PhysGridSetCoordRead
-
-! !DESCRIPTION:
-!     This interface provides a single function for various methods of
-!     computing grid coordinates.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      interface ESMF_PhysGridSetMetric
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_PhysGridSetMetricFromArray
-!        module procedure ESMF_PhysGridSetMetricInternal
-!        module procedure ESMF_PhysGridSetMetricStagger
-!        module procedure ESMF_PhysGridSetMetricRead
-
-! !DESCRIPTION:
-!     This interface provides a single function for computing or initializing
-!     grid metric information.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      interface ESMF_PhysGridConstruct
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_PhysGridConstructNew
-         module procedure ESMF_PhysGridConstructInternal
-         module procedure ESMF_PhysGridConstructSpecd
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that construct
-!     a complete {\tt ESMF\_PhysGrid}.
-!
-!EOP
-      end interface 
 !------------------------------------------------------------------------------
 !!BOP
 !! !INTERFACE:
@@ -313,6 +342,41 @@
 !!
 !!EOP
 !      end interface 
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator (==)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridMaskKindEqual
+         module procedure ESMF_RegionKindEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF region and mask kind data types.  It is provided for easy
+!     comparisons of region types with defined values.
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator (/=)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridMaskKindNotEqual
+         module procedure ESMF_RegionKindNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF region and mask kind data types.  It is provided for easy
+!     comparisons of region types with defined values.
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
 !==============================================================================
 
       contains
@@ -326,23 +390,42 @@
 ! !IROUTINE: ESMF_PhysGridCreateNew - Create a new PhysGrid
 
 ! !INTERFACE:
-      function ESMF_PhysGridCreateNew(name, rc)
+      function ESMF_PhysGridCreateNew(num_dims, relloc, name, coord_system, &
+                                      rc)
 !
 ! !RETURN VALUE:
       type(ESMF_PhysGrid) :: ESMF_PhysGridCreateNew
 !
 ! !ARGUMENTS:
+      integer, intent(in) :: num_dims
+      type (ESMF_RelLoc), intent(in) :: relloc
+
       character (len = *), intent(in), optional :: name  
+      type (ESMF_CoordSystem), intent(in), optional :: coord_system
+
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_PhysGrid} object and constructs its
-!     internals.  Returns a pointer to a new {\tt ESMF\_PhysGrid}.
+!     Allocates new {\tt ESMF\_PhysGrid} object and initializes some of
+!     its scalar internals.  Returns a pointer to a new {\tt ESMF\_PhysGrid}.  
+!     Values not known at time of this call can be set later using
+!     a variety of {\tt ESMF\_PhysGridSet} calls.  Also, most arrays
+!     must be set with set calls specific to those arrays.
 !
 !     The arguments are:
 !     \begin{description}
+!     \item[num\_dims]
+!          Number of physical dimensions.
+!     \item[relloc]
+!          Relative location in grid cell for which this PhysGrid
+!          is being defined.  For example, in a staggered grid,
+!          this PhysGrid could be defined for the grid associated
+!          with center points or corner points or face points.
 !     \item[[name]]
 !          {\tt ESMF\_PhysGrid} name.
+!     \item[[coord\_system]]
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.).
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -351,34 +434,42 @@
 !EOP
 
       type(ESMF_PhysGridType), pointer :: physgrid   ! Pointer to new physgrid
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
 
 !     Initialize pointers
       nullify(physgrid)
       nullify(ESMF_PhysGridCreateNew%ptr)
 
 !     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 
       allocate(physgrid, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
+      if(status /= ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridCreateNew: Allocate"
         return
       endif
 
-!     Call construction method to allocate and initialize grid internals.
-      call ESMF_PhysGridConstruct(physgrid, name, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridCreateNew: PhysGrid construct"
-        return
+!     Fill new physgrid with supplied variables.
+
+      physgrid%num_dims = num_dims
+      physgrid%relloc   = relloc
+      
+      if (present(coord_system)) then
+         physgrid%coord_system = coord_system
+      endif
+      
+      if (present(name)) then
+         call ESMF_SetName(physgrid%base, name, "PhysGrid", status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridCreateNew: set name"
+            return
+         endif
       endif
 
 !     Set return values.
@@ -389,217 +480,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridCreateInternal - Create a new PhysGrid internally
-
-! !INTERFACE:
-      function ESMF_PhysGridCreateInternal(dim_num, relloc,  &
-                                          local_min , local_max , local_nmax , &
-                                          global_min, global_max, global_nmax, &
-                                          name, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_PhysGrid) :: ESMF_PhysGridCreateInternal
-!
-! !ARGUMENTS:
-
-      integer, intent(in) :: dim_num  ! number of dimensions for grid
-
-      type(ESMF_RelLoc), intent(in) :: relloc
-
-      integer, dimension(dim_num), intent(in) :: &
-         local_nmax,    &! local number of grid increments in each direction
-         global_nmax     ! global number of grid increments in each direction
-
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: &
-         local_min,     &! local coordinate minimum in each direction
-         local_max,     &! local coordinate maximum in each direction
-         global_min,    &! global coordinate minimum in each direction
-         global_max      ! global coordinate maximum in each direction
-
-      character (len = *), intent(in), optional :: name  ! name for grid
-
-      integer, intent(out), optional :: rc  ! return code               
-!
-! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_PhysGrid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_PhysGrid}.  Returns a
-!     pointer to the new {\tt ESMF\_PhysGrid}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[dim\_num]
-!          Number of physical dimensions for this grid.
-!     \item[relloc]
-!          Relative location of the data to an element of the grid.
-!     \item[local\_min]
-!          Minimum local physical coordinate in each coordinate direction.
-!     \item[local\_max]
-!          Maximum local physical coordinate in each coordinate direction.
-!     \item[local\_nmax]
-!          Number of local grid increments in each coordinate direction.
-!     \item[global\_min]
-!          Minimum global physical coordinate in each coordinate direction.
-!     \item[global\_max]
-!          Maximum global physical coordinate in each coordinate direction.
-!     \item[global\_nmax]
-!          Number of global grid increments in each coordinate direction.
-!     \item[[name]]
-!          {\tt ESMF\_PhysGrid} name.
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-! !REQUIREMENTS:  TODO
-!EOP
-
-      type(ESMF_PhysGridType), pointer :: physgrid   ! Pointer to new physgrid
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
-
-!     Initialize pointers
-      nullify(physgrid)
-      nullify(ESMF_PhysGridCreateInternal%ptr)
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(physgrid, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridCreateInternal: Allocate"
-        return
-      endif
-
-!     Call construction method to allocate and initialize grid internals.
-      call ESMF_PhysGridConstructInternal(physgrid, dim_num, relloc,     &
-                                          local_min , local_max , local_nmax , &
-                                          global_min, global_max, global_nmax, &
-                                          name, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridCreateInternal: PhysGrid construct"
-        return
-      endif
-
-!     Set return values.
-      ESMF_PhysGridCreateInternal%ptr => physgrid
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_PhysGridCreateInternal
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridCreateSpecd - Create a new PhysGrid from specifications
-
-! !INTERFACE:
-      function ESMF_PhysGridCreateSpecd(dim_num, relloc, delta1, delta2, local_min, &
-                                        local_max, global_min, global_max, &
-                                        counts, dim_names, dim_units, name, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_PhysGrid) :: ESMF_PhysGridCreateSpecd
-!
-! !ARGUMENTS:
-      integer, intent(in) :: dim_num
-      type(ESMF_RelLoc), intent(in) :: relloc
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: local_min
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: local_max
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: global_min
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: global_max
-      integer, dimension(dim_num), intent(in) :: counts
-      character (len=*), dimension(:), intent(in), optional :: dim_names
-      character (len=*), dimension(:), intent(in), optional :: dim_units
-      character (len = *), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_PhysGrid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_PhysGrid}.  Returns a
-!     pointer to the new {\tt ESMF\_PhysGrid}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[dim\_num]
-!          Number of physical dimensions for this grid.
-!     \item[relloc]
-!          Relative location of data to the element in the grid - center, faces,
-!          vertices, etc.
-!     \item[delta1]
-!          Array of physical increments between nodes in the first direction.
-!     \item[delta2]
-!          Array of physical increments between nodes in the second direction.
-!     \item[local\_min]
-!          Minimum local physical coordinate in each coordinate direction.
-!     \item[local\_max]
-!          Maximum local physical coordinate in each coordinate direction.
-!     \item[global\_min]
-!          Minimum global physical coordinate in each coordinate direction.
-!     \item[global\_max]
-!          Maximum global physical coordinate in each coordinate direction.
-!     \item[counts]
-!          Array of number of grid increments in each direction.
-!     \item[{[dim\_names]}]
-!          Array of dimension names.
-!     \item[{[dim\_units]}]
-!          Array of dimension units.
-!     \item[{[name]}]
-!          {\tt ESMF\_PhysGrid} name.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-! !REQUIREMENTS:  TODO
-!EOP
-
-      type(ESMF_PhysGridType), pointer :: physgrid   ! Pointer to new physgrid
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
-
-!     Initialize pointers
-      nullify(physgrid)
-      nullify(ESMF_PhysGridCreateSpecd%ptr)
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(physgrid, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridCreateSpecd: Allocate"
-        return
-      endif
-
-!     Call construction method to allocate and initialize grid internals.
-      call ESMF_PhysGridConstruct(physgrid, relloc, dim_num, delta1, delta2, &
-                                  local_min, local_max, global_min, global_max, &
-                                  counts, dim_names, dim_units, name, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridCreateSpecd: PhysGrid construct"
-        return
-      endif
-
-!     Set return values.
-      ESMF_PhysGridCreateSpecd%ptr => physgrid
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_PhysGridCreateSpecd
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridDestroy - Free all resources associated with a PhysGrid 
+! !IROUTINE: ESMF_PhysGridDestroy - Free resources associated with a PhysGrid 
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridDestroy(physgrid, rc)
@@ -623,18 +504,12 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rcpresent = .TRUE.
 
-      call ESMF_PhysGridDestruct(physgrid%ptr, status)
+      ! Destroy all components of physgrid
 
       nullify(physgrid%ptr)
       if (rcpresent) rc = status
@@ -643,154 +518,33 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridConstructNew - Construct new empty PhysGrid 
+! !IROUTINE: ESMF_PhysGridSet - Sets value of selected PhysGrid quantities.
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridConstructNew(physgrid, name, rc)
+      subroutine ESMF_PhysGridSet(physgrid, name, coord_system, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGridType) :: physgrid  
-      character (len = *), intent(in), optional :: name  ! name
-      integer, intent(out), optional :: rc               ! return code
-!
+      type (ESMF_PhysGrid), intent(inout) :: physgrid
+
+      character (len = *), intent(in), optional :: name  
+      type (ESMF_CoordSystem), intent(in), optional :: coord_system
+
+      integer, intent(out), optional :: rc               
+
 ! !DESCRIPTION:
-!     ESMF routine which fills in the contents of an already
-!     allocated {\tt ESMF\_PhysGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding {\tt ESMF\_PhysGridDestruct}
-!     routine to free the additional memory.  Intended for internal
-!     ESMF use only; end-users use {\tt ESMF\_PhysGridCreate}, which calls
-!     {\tt ESMF\_PhysGridConstruct}. 
+!     Sets a few individual parts of an existing {\tt ESMF\_PhysGrid}. Can be
+!     used for only name and coord system.  All other quantities have
+!     specific set calls.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[physgrid] 
-!          Pointer to a {\tt ESMF\_PhysGrid}.
-!     \item[[name]] 
-!          {\tt ESMF\_PhysGrid} name.
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:  TODO
-!EOP
-
-      integer :: status                            ! Error status
-      logical :: rcpresent                         ! Return code present
-      integer :: i
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     Set the PhysGrid name if present, otherwise construct a default one
-      if (present(name)) then
-         call ESMF_SetName(physgrid%base, name, "PhysGrid", status)
-      else
-         call ESMF_SetName(physgrid%base, "PhysGridNoName", "PhysGrid", status)
-      endif
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridConstructNew: Setname"
-        return
-      endif
-
-!     Initialize physgrid contents  TODO: an integer "flag" for uninit, like -9999
-      physgrid%dim_num = 0
-      physgrid%num_corners = 0
-      physgrid%num_faces = 0
-      physgrid%num_metrics = 0
-      physgrid%num_lmasks = 0
-      physgrid%num_mmasks = 0
-      physgrid%num_region_ids = 0
-
-      do i = 1,ESMF_MAXGRIDDIM
-        physgrid%dim_names(i) = ' '
-        physgrid%dim_units(i) = ' '
-        physgrid%global_min(i) = 0.0
-        physgrid%global_max(i) = 0.0
-        physgrid%local_min(i) = 0.0
-        physgrid%local_max(i) = 0.0
-      enddo
-
-      ! nullify(physgrid%center_coord)  TODO: what about LocalArrays?
-      ! nullify(physgrid%corner_coord)
-      ! nullify(physgrid%face_coord)
-      nullify(physgrid%metrics)
-      nullify(physgrid%lmask)
-      nullify(physgrid%mmask)
-      nullify(physgrid%region_id)
-
-      nullify(physgrid%metric_names)
-      nullify(physgrid%lmask_names)
-      nullify(physgrid%mmask_names)
-      nullify(physgrid%region_id_names)
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridConstructNew
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridConstructInternal - Construct the internals of an allocated PhysGrid
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridConstructInternal(physgrid, dim_num, relloc,  &
-                                               local_min , local_max , local_nmax , &
-                                               global_min, global_max, global_nmax, &
-                                               name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_PhysGridType) :: physgrid  
-
-      integer, intent(in) :: dim_num  ! number of dimensions for grid
-
-      type(ESMF_RelLoc) :: relloc
-
-      integer, dimension(dim_num), intent(in) :: &
-         local_nmax,    &! local number of grid increments in each direction
-         global_nmax     ! global number of grid increments in each direction
-
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: &
-         local_min,     &! local coordinate minimum in each direction
-         local_max,     &! local coordinate maximum in each direction
-         global_min,    &! global coordinate minimum in each direction
-         global_max      ! global coordinate maximum in each direction
-
-      character (len = *), intent(in), optional :: name  ! name for grid
-
-      integer, intent(out), optional :: rc               ! return code
-!
-! !DESCRIPTION:
-!     ESMF routine which fills in the contents of an already
-!     allocated {\tt ESMF\_PhysGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding {\tt ESMF\_PhysGridDestruct}
-!     routine to free the additional memory.  Intended for internal
-!     ESMF use only; end-users use {\tt ESMF\_PhysGridCreate}, which calls
-!     {\tt ESMF\_PhysGridConstruct}. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[dim\_num]
-!          Number of physical dimensions for this grid.
-!     \item[relloc]
-!          Relative location of data to an element of the grid.
-!     \item[local\_min]
-!          Minimum local physical coordinate in each coordinate direction.
-!     \item[local\_max]
-!          Maximum local physical coordinate in each coordinate direction.
-!     \item[local\_nmax]
-!          Number of local grid increments in each coordinate direction.
-!     \item[global\_min]
-!          Minimum global physical coordinate in each coordinate direction.
-!     \item[global\_max]
-!          Maximum global physical coordinate in each coordinate direction.
-!     \item[global\_nmax]
-!          Number of global grid increments in each coordinate direction.
+!     \item[physgrid]
+!          Existing {\tt ESMF\_PhysGrid} for which quantity is to be set.
 !     \item[[name]]
 !          {\tt ESMF\_PhysGrid} name.
+!     \item[[coord\_system]]
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.).
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -798,526 +552,139 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
 
 !     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 
-!     Initialize the derived type contents
+      if (present(coord_system)) then
+         physgrid%ptr%coord_system = coord_system
+      endif
+      
       if (present(name)) then
-         call ESMF_PhysGridConstructNew(physgrid, name=name, rc=status)
-      else
-         call ESMF_PhysGridConstructNew(physgrid, rc=status)
-      endif
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridConstructInternal: PhysGrid construct"
-        return
+         call ESMF_SetName(physgrid%ptr%base, name, "PhysGrid", status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridSet: set name"
+            return
+         endif
       endif
 
-!      Fill in physgrid derived type with function arguments
-       call ESMF_PhysGridSet(physgrid, relloc=relloc, dim_num=dim_num, &
-                             local_min=local_min, local_max=local_max, &
-                             global_min=global_min, global_max=global_max, &
-                             rc=status)
-
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridConstructInternal: PhysGrid set"
-        return
-      endif
-
+!     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_PhysGridConstructInternal
-
+      end subroutine ESMF_PhysGridSet
+!
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridConstructSpecd - Construct the internals of an allocated PhysGrid
+! !IROUTINE: ESMF_PhysGridGet - Retrieves selected internal PhysGrid quantities.
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridConstructSpecd(physgrid, relloc, dim_num, &
-                                             delta1, delta2, local_min, local_max, &
-                                             global_min, global_max, counts, &
-                                             dim_names, dim_units, name, rc)
+      subroutine ESMF_PhysGridGet(physgrid, relloc, name,        &
+                                  num_dims, coord_system, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGridType) :: physgrid  
-      type(ESMF_RelLoc), intent(in) :: relloc
-      integer, intent(in) :: dim_num
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: local_min
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: local_max
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: global_min
-      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: global_max
-      integer, dimension(dim_num), intent(in) :: counts
-      character (len=*), dimension(:), intent(in), optional :: dim_names
-      character (len=*), dimension(:), intent(in), optional :: dim_units
-      character (len = *), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
+      type (ESMF_PhysGrid), intent(in) :: physgrid
+
+      type (ESMF_RelLoc), intent(out), optional :: relloc
+      type (ESMF_CoordSystem), intent(out), optional :: coord_system
+
+      integer, intent(out), optional :: num_dims
+      character (len = *), intent(out), optional :: name  
+
+      integer, intent(out), optional :: rc               
+
 ! !DESCRIPTION:
-!     ESMF routine which fills in the contents of an already
-!     allocated {\tt ESMF\_PhysGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding {\tt ESMF\_PhysGridDestruct}
-!     routine to free the additional memory.  Intended for internal
-!     ESMF use only; end-users use {\tt ESMF\_PhysGridCreate}, which calls
-!     {\tt ESMF\_PhysGridConstruct}. 
+!     Retrieves individual parts of an existing {\tt ESMF\_PhysGrid}. Can be
+!     used for only a few parts; most array components have specific
+!     get calls.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[dim\_num]
-!          Number of physical dimensions for this grid.
-!     \item[relloc]
-!          Location of data relative to the centers, faces, and vertices of a grid
-!          element.
-!     \item[delta1]
-!          Array of physical increments between nodes in the first direction.
-!     \item[delta2]
-!          Array of physical increments between nodes in the second direction.
-!     \item[local\_min]
-!          Minimum local physical coordinate in each coordinate direction.
-!     \item[local\_max]
-!          Maximum local physical coordinate in each coordinate direction.
-!     \item[global\_min]
-!          Minimum global physical coordinate in each coordinate direction.
-!     \item[global\_max]
-!          Maximum global physical coordinate in each coordinate direction.
-!     \item[counts]
-!          Number of global grid increments in each coordinate direction.
-!     \item[{[dim\_names]}]
-!          Array of dimension names.
-!     \item[{[dim\_units]}]
-!          Array of dimension units.
-!     \item[{[name]}]
+!     \item[name]
+!          Existing {\tt ESMF\_PhysGrid} from which quantity is to be extracted.
+!     \item[[name]]
 !          {\tt ESMF\_PhysGrid} name.
-!     \item[{[rc]}] 
+!     \item[[relloc]]
+!          {\tt ESMF\_RelLoc} referring to position in staggered grid
+!          to which grid quantities refer.
+!     \item[[num\_dims]]
+!          Number of physical dimensions.
+!     \item[[coord\_system]]
+!          {\tt ESMF\_CoordSystem} identifying coordinate system 
+!          (e.g. spherical, cartesian, pressure, etc.).
+!     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: i
-      integer :: ncoord_locs
-      integer, dimension(6) :: coord_loc
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
 
 !     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
-
-!     Initialize the derived type contents
-      call ESMF_PhysGridConstructNew(physgrid, name=name, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridConstructSpecd: PhysGrid construct"
-        return
-      endif
-
-!     Fill in physgrid derived type with function arguments
-      call ESMF_PhysGridSet(physgrid, relloc=relloc, dim_num=dim_num, &
-                            global_min=global_min, global_max=global_max, &
-                            local_min=local_min, local_max=local_max, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridConstructSpecd: PhysGrid set"
-        return
-      endif
-
-!     Set up necessary coordinate structure  TODO: do this once in Grid and
-!                                                  point at data?
-      coord_loc(1) = 1
-      coord_loc(2) = 2
-      ncoord_locs  = 2
-      call ESMF_PhysGridSetCoord(physgrid, ncoord_locs, coord_loc, &
-                                 1, counts(1), 1, counts(2), &
-                                 delta1, delta2, status)
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridConstructSpecd
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridDestruct - Free any PhysGrid memory allocated internally
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridDestruct(physgrid, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_PhysGridType), intent(inout) :: physgrid    
-      integer, intent(out), optional :: rc         
-!
-! !DESCRIPTION:
-!     ESMF routine which deallocates any space allocated by
-!    {\tt ESMF\_PhysGridConstruct}, does any additional cleanup before the
-!     original {\tt ESMF\_PhysGrid} object is freed.  Intended for internal ESMF
-!     use only; end-users use {\tt ESMF\_PhysGridDestroy}, which calls
-!     {\tt ESMF\_PhysGridDestruct}.  
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid] 
-!          The class to be destructed.
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: i
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     nullify(physgrid%base)   TODO: ?
-
-      physgrid%dim_num = 0
-      physgrid%num_corners = 0
-      physgrid%num_faces = 0
-      physgrid%num_metrics = 0
-      physgrid%num_lmasks = 0
-      physgrid%num_mmasks = 0
-      physgrid%num_region_ids = 0
-
-      do i = 1,ESMF_MAXGRIDDIM
-        physgrid%dim_names(i) = ' '
-        physgrid%dim_units(i) = ' '
-        physgrid%global_min(i) = 0.0
-        physgrid%global_max(i) = 0.0
-        physgrid%local_min(i) = 0.0
-        physgrid%local_max(i) = 0.0
-      enddo
-
-      !TODO: deallocate these instead of nullify
-      ! nullify(physgrid%center_coord)  TODO: what about LocalArrays?
-      ! nullify(physgrid%corner_coord)
-      ! nullify(physgrid%face_coord)
-      nullify(physgrid%metrics)
-      nullify(physgrid%lmask)
-      nullify(physgrid%mmask)
-      nullify(physgrid%region_id)
-
-      !TODO: deallocate these instead of nullify
-      nullify(physgrid%metric_names)
-      nullify(physgrid%lmask_names)
-      nullify(physgrid%mmask_names)
-      nullify(physgrid%region_id_names)
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridDestruct
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridGet - Get information from a PhysGrid
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridGet(physgrid   , name      , &
-                                  dim_num    , relloc    , &
-                                  num_corners, num_faces , &
-                                  dim_names  , dim_units , &
-                                  global_min , global_max, &
-                                  local_min  , local_max , &
-                                  rc)
-!
-! !ARGUMENTS:
-      type(ESMF_PhysGridType), intent(in) :: physgrid
-
-      character (*), intent(inout), optional :: name ! name of grid
-
-      type(ESMF_RelLoc), intent(inout), optional :: relloc  
-                                  ! relative location of physgrid
-
-      integer, intent(out), optional :: &
-         dim_num,                &! number of physical dimensions
-         num_corners,            &! number of corners in each cell
-         num_faces                ! number of faces for each cell
-
-      character (*), dimension(:), intent(inout), optional :: &
-         dim_names,              &! names for each dimension
-         dim_units                ! units for each dimension
-
-      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: &
-         local_min,              &! local minimum in each coord direction
-         local_max,              &! local maximum in each coord direction
-         global_min,             &! global minimum in each coord direction
-         global_max               ! global maximum in each coord direction
-
-      integer, intent(out), optional :: rc ! return code              
-!
-! !DESCRIPTION:
-!     This version gets a variety of information about a {\tt ESMF\_PhysGrid}, depending
-!     on a list of optional arguments.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid] 
-!          Pointer to a {\tt ESMF\_PhysGrid}.
-!     \item[[name]]
-!          {\tt ESMF\_PhysGrid} name.
-!     \item[[dim\_num]] 
-!          Number of physical dimensions for this grid.
-!     \item[[dim\_names]] 
-!          Names for each physical dimension of this grid.
-!     \item[[dim\_units]] 
-!          Units for each physical dimension of this grid.
-!     \item[[num\_corners]] 
-!          Number of corners for each grid cell (can be degenerate).
-!     \item[[num\_faces]] 
-!          Number of faces for each grid cell.
-!     \item[[local\_min]]
-!          Minimum local physical coordinate in each coordinate direction.
-!     \item[[local\_max]]
-!          Maximum local physical coordinate in each coordinate direction.
-!     \item[[global\_min]]
-!          Minimum global physical coordinates in each coordinate direction.
-!     \item[[global\_max]]
-!          Maximum global physical coordinates in each coordinate direction.
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     if present, get information from physgrid derived type
 
       if (present(name)) then
-         call ESMF_GetName(physgrid%base, name, status)
+         call ESMF_GetName(physgrid%ptr%base, name, status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridGet: get name"
+            return
+         endif
       endif
 
-      if (present(relloc)) then
-         relloc = physgrid%relloc
-      endif
-      if (present(dim_num)) then
-         dim_num = physgrid%dim_num
-      endif
-      if (present(num_corners)) then
-         num_corners = physgrid%num_corners
-      endif
-      if (present(num_faces)) then
-         num_faces = physgrid%num_faces
-      endif
-      if (present(dim_names)) then
-         dim_names = physgrid%dim_names
-      endif
-      if (present(dim_units)) then
-         dim_units = physgrid%dim_units
-      endif
-      if (present(local_min)) then
-         local_min = physgrid%local_min
-      endif
-      if (present(local_max)) then
-         local_max = physgrid%local_max
-      endif
-      if (present(global_min)) then
-         global_min = physgrid%global_min
-      endif
-      if (present(global_max)) then
-         global_max = physgrid%global_max
-      endif
+      if (present(relloc      )) relloc       = physgrid%ptr%relloc
+      if (present(num_dims    )) num_dims     = physgrid%ptr%num_dims
+      if (present(coord_system)) coord_system = physgrid%ptr%coord_system
 
+!     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridSet - Set information for a PhysGrid
+! !IROUTINE: ESMF_PhysGridSetCoord - Adds a physical coordinate to a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridSet(physgrid   , name      , &
-                                  dim_num    , relloc    , &
-                                  num_corners, num_faces , &
-                                  dim_names  , dim_units , &
-                                  global_min , global_max, &
-                                  local_min  , local_max , &
-                                  rc)
-!
-! !ARGUMENTS:
-      type(ESMF_PhysGridType), intent(inout) :: physgrid
-
-      character (*), intent(in), optional :: name ! name of grid
-
-      type(ESMF_RelLoc), intent(in), optional :: relloc
-
-      integer, intent(in), optional :: &
-         dim_num,                &! number of physical dimensions
-         num_corners,            &! number of corners in each cell
-         num_faces                ! number of faces for each cell
-
-      character (*), dimension(ESMF_MAXGRIDDIM), intent(in), optional :: &
-         dim_names,              &! names for each dimension
-         dim_units                ! units for each dimension
-
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM), &
-         intent(in), optional :: &
-         local_min,              &! local minimum in each coord direction
-         local_max,              &! local maximum in each coord direction
-         global_min,             &! global minimum in each coord direction
-         global_max               ! global maximum in each coord direction
-
-      integer, intent(out), optional :: rc ! return code              
-!
-! !DESCRIPTION:
-!     This version sets a variety of information about a {\tt ESMF\_PhysGrid}, depending
-!     on a list of optional arguments.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid] 
-!          Pointer to a {\tt ESMF\_PhysGrid}.
-!     \item[{[relloc]}]
-!          Relative location of data to an element on this grid.
-!     \item[{[name]}]
-!          {\tt ESMF\_PhysGrid} name.
-!     \item[{[dim\_num]}] 
-!          Number of physical dimensions for this grid.
-!     \item[{[dim\_names]}] 
-!          Names for each physical dimension of this grid.
-!     \item[{[dim\_units]}] 
-!          Units for each physical dimension of this grid.
-!     \item[{[num\_corners]}] 
-!          Number of corners for each grid cell (can be degenerate).
-!     \item[{[num\_faces]}] 
-!          Number of faces for each grid cell.
-!     \item[{[local\_min]}]
-!          Minimum local physical coordinate in each coordinate direction.
-!     \item[{[local\_max]}]
-!          Maximum local physical coordinate in each coordinate direction.
-!     \item[{[global\_min]}]
-!          Minimum global physical coordinates in each coordinate direction.
-!     \item[{[global\_max]}]
-!          Maximum global physical coordinates in each coordinate direction.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     if present, set information filling in physgrid derived type
-
-      if (present(relloc)) then
-         physgrid%relloc = relloc
-      endif
-
-      if (present(name)) then
-         call ESMF_SetName(physgrid%base, name, "PhysGrids", status)
-      endif
-
-      if (present(dim_num)) then
-         physgrid%dim_num = dim_num
-      endif
-      if (present(num_corners)) then
-         physgrid%num_corners = num_corners
-      endif
-      if (present(num_faces)) then
-         physgrid%num_faces = num_faces
-      endif
-      if (present(dim_names)) then
-         physgrid%dim_names = dim_names
-      endif
-      if (present(dim_units)) then
-         physgrid%dim_units = dim_units
-      endif
-      if (present(local_min)) then
-         physgrid%local_min = local_min
-      endif
-      if (present(local_max)) then
-         physgrid%local_max = local_max
-      endif
-      if (present(global_min)) then
-         physgrid%global_min = global_min
-      endif
-      if (present(global_max)) then
-         physgrid%global_max = global_max
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridSet
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridGetCoord - Gets PhysGrid coordinate arrays
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridGetCoord(physgrid, center_coord,   &
-                                       corner_coord, face_coord, rc)
+      subroutine ESMF_PhysGridSetCoord(physgrid, phys_coord, dim_order, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_PhysGridType), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
 
-      type(ESMF_LocalArray), optional :: &
-         center_coord,       &! coordinates for each cell center
-         corner_coord,       &! coordinates for corners of each cell
-         face_coord           ! coordinates for face centers of each cell
+      type (ESMF_PhysCoord), intent(in) :: &
+         phys_coord           ! pre-defined physical coordinate to be added
+                              ! to physgrid
+
+      !TODO: make this optional
+      integer, intent(in) ::  &
+         dim_order            ! location in coord array where user would
+                              ! like this stored (e.g. x=1st, y=2nd)
 
       integer, intent(out), optional :: rc            
-
 !
 ! !DESCRIPTION:
-!     Extracts coordinate information from a {\tt ESMF\_PhysGrid} structure.
+!     Adds a {\tt ESMF\_PhysCoord} to a {\tt ESMF\_PhysGrid}.  The  
+!     {\tt ESMF\_PhysCoord} must be already defined by a call to the
+!     {\tt ESMF\_PhysCoordCreate} routine.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} for which coordinates are to be defined.
-!     \item[[center\_coord]]
-!          Coordinates of each cell center.  The dimension index should
-!          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
-!     \item[[corner\_coord]]
-!          Coordinates of corners of each cell.  The dimension index should
-!          be defined first, followed by the corner index.  Corners can
-!          be numbered in either clockwise or counter-clockwise direction,
-!          but must be numbered consistently throughout grid.
-!     \item[[face\_coord]]
-!          Coordinates of corners of each cell.  The dimension index should
-!          be defined first, followed by the face index.  Faces should 
-!          be numbered consistently with corners.  For example, face 1 should
-!          correspond to the face between corners 1,2.
+!          {\tt ESMF\_PhysGrid} for which coordinate is to be added.
+!     \item[phys\_coord]
+!          A previously-created {\tt ESMF\_PhysCoord} to add to the PhysGrid.
+!     \item[dim\_order]
+!          Dimension to which this coordinate will be assigned (e.g. x coord =1,
+!          (y coord = 2)
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1325,508 +692,628 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
+      integer :: idim, n
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+!
 !     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
+!
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
-
-      if (present(center_coord)) then
-         center_coord = physgrid%center_coord
+!
+!     if coordinate array not allocated yet, do so now
+!
+      if (.not. associated(physgrid%ptr%coords)) then
+        allocate(physgrid%ptr%coords(physgrid%ptr%num_dims), stat=status)
+        if (status /= ESMF_SUCCESS) then
+          print *,'ERROR in PhysGridSetCoord: error allocating coord'
+          return
+        endif
       endif
+!
+!     add coordinate
+!
+      !TODO: if dim_order optional, store these in the order called
+      !      would require checking for next empty slot
+      physgrid%ptr%coords(dim_order) = phys_coord
+!
+!     set return code
+!
+      if (rcpresent) rc = ESMF_SUCCESS
 
-      if (present(corner_coord)) then
-         corner_coord = physgrid%corner_coord
+      end subroutine ESMF_PhysGridSetCoord
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_PhysGridGetCoord - Gets a physical coordinate from a PhysGrid
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridGetCoord(physgrid, phys_coord, &
+                                       dim_order, name, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_PhysGrid), intent(in) :: physgrid
+
+      type (ESMF_PhysCoord), intent(out) :: &
+         phys_coord           ! pre-defined physical coordinate to be added
+                              ! to physgrid
+
+      integer, intent(in), optional ::  &
+         dim_order            ! location in coord array where user would
+                              ! like has stored this coord
+
+      character (*), intent(in), optional :: &
+         name                 ! name of coordinate to be retrieved
+         
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     Gets a {\tt ESMF\_PhysCoord} from a {\tt ESMF\_PhysGrid}.  Either  
+!     the dimension assigned to this coordinate (when attached to the
+!     PhysGrid) or the name must be supplied.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid]
+!          {\tt ESMF\_PhysGrid} from which coordinate is to be retrieved.
+!     \item[phys\_coord]
+!          An {\tt ESMF\_PhysCoord} where the retrieved coord will be stored.
+!     \item[[dim\_order]]
+!          If known, the dimension index assigned to this coordinate when
+!          it was added to PhysGrid.
+!     \item[[name]]
+!          If dim\_order not supplied, a name must be supplied to identify
+!          the coordinate to be retrieved.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: idim, n
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.,              &! Return code present
+                 found                            ! flag for name search
+!
+!     Initialize return code
+!
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
       endif
-
-      if (present(face_coord)) then
-         face_coord = physgrid%face_coord
+!
+!     if dimension supplied, just grab the coordinate
+!
+      if (present(dim_order)) &
+         phys_coord = physgrid%ptr%coords(dim_order)
+!
+!     if a name supplied, search for a coord with given name
+!
+      if (present(name)) then
+         found = .false.
+         name_srch: do n=1,physgrid%ptr%num_dims
+            if (name == trim(ESMF_PhysCoordGetName(physgrid%ptr%coords(n)))) then
+               found = .true.
+               idim = n
+               exit name_srch
+            endif
+         end do name_srch
+         
+         if (found) then
+            phys_coord = physgrid%ptr%coords(idim)
+         else
+            print *,'ERROR in PhysGridGetCoord: no coordinate with that name'
+            return
+         endif
+!
+!     if neither supplied, return an error
+!
+      else
+         print *,'ERROR in PhysGridGetCoord: name or dim must be supplied'
+         return
       endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
+!
+!     set return code
+!
+      if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGetCoord
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridSetCoordFromArray - Sets PhysGrid coords from input array
+! !IROUTINE: ESMF_PhysGridGetLocations - Gets locations from a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridSetCoordFromArray(physgrid, center_coord,   &
-                                                corner_coord, face_coord, &
-                                                rc)
+      subroutine ESMF_PhysGridGetLocations(physgrid, name, location_array, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_PhysGridType), intent(inout) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
 
-      type(ESMF_LocalArray), intent(in), optional :: &
-         center_coord,       &! coordinates for each cell center
-         corner_coord,       &! coordinates for corners of each cell
-         face_coord           ! coordinates for face centers of each cell
+      character(*), intent(out), optional :: name ! name to assign to regions
+
+      type (ESMF_Array), dimension(:), intent(out), optional :: &
+         location_array       ! array of ESMF_arrays containing location
+                              ! coordinates in each physical dimension 
+                              ! array dimension is assumed num_dims with
+                              ! the ESMF_Array consistent with other grid arrays
+
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     Retrieves information about defined locations of a {\tt ESMF\_PhysGrid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid]
+!          {\tt ESMF\_PhysGrid} holding locations to be queried.
+!     \item[[name]]
+!          Name assigned to the locations.
+!     \item[[location\_array]]
+!          Array of {\tt ESMF\_Array}s containing the coordinates in each
+!          physical dimension for each location.
+!          The array is assumed to be dimensioned (num\_dims)
+!          while the {\tt ESMF\_Array} would typically be consistent with
+!          other grid arrays.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: i, n
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      logical :: found                            ! name search flag
+
+!
+!     Initialize return code
+!
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+!
+!     if name requested, get name
+!
+      if (present(name)) then
+         call ESMF_GetName(physgrid%ptr%locations%base, name, status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridGetLocations: error getting name"
+            return
+         endif
+      endif
+!
+!     if locations requested, get them
+!
+      if (present(location_array)) then
+         location_array = physgrid%ptr%locations%locations
+      endif
+!
+!     set return code
+!
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridGetLocations
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_PhysGridSetLocations - Sets grid regions from input array.
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridSetLocations(physgrid, location_array, name, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
+
+      type (ESMF_Array), dimension(:), pointer, intent(in) :: &
+         location_array       ! array of ESMF_arrays containing location
+                              ! coordinates in each physical dimension 
+                              ! array dimension is assumed num_dims with
+                              ! the ESMF_Array consistent with other grid arrays
+
+      character(*), intent(in), optional :: name ! name to assign to regions
+
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     Defines a set of locations in a {\tt ESMF\_PhysGrid} using 
+!     user-defined data sent in an input array.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid]
+!          {\tt ESMF\_PhysGrid} for which locations are to be added.
+!     \item[[name]]
+!          Optional name to assign to the locations.
+!     \item[[location\_array]]
+!          Array of {\tt ESMF\_Array}s containing the coordinates in each
+!          physical dimension for each location.
+!          The array is assumed to be dimensioned (num\_dims)
+!          while the {\tt ESMF\_Array} would typically be consistent with
+!          other grid arrays.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: i, n
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      character (len=ESMF_MAXSTR) :: name_tmp     ! temp for name creation 
+!
+!     Initialize return code
+!
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+!
+!     if name specified, add name.  otherwise, make one up based on PhysGrid.
+!
+      if (present(name)) then
+        call ESMF_SetName(physgrid%ptr%regions%base, name, &
+                          "PhysGridLocations", status)
+      else
+        call ESMF_GetName(physgrid%ptr%base, name_tmp, status)
+        name_tmp = trim(name_tmp) // 'Locations'
+        call ESMF_SetName(physgrid%ptr%regions%base, name_tmp, &
+                          "PhysGridLocations", status)
+      endif
+      if (status /= ESMF_SUCCESS) then
+         print *, "ERROR in ESMF_PhysGridSetLocations: error setting name"
+         return
+      endif
+!
+!     set locations
+!
+      physgrid%ptr%locations%locations => location_array
+!
+!     set return code
+!
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridSetLocations
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_PhysGridSetRegions - Sets grid regions from input array.
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridSetRegions(physgrid, region_type, name, &
+                                         num_vertices, vertex_array,  &
+                                         ellipse_array, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
+
+      type(ESMF_RegionKind), intent(in) :: &
+         region_type          ! type of region (polygonal, elliptical)
+
+      character(*), intent(in), optional :: name ! name to assign to regions
+
+      integer, intent(in), optional :: &
+         num_vertices         ! max number of vertices for polygonal regions
+
+      type (ESMF_Array), dimension(:,:), pointer, intent(in), optional :: &
+         vertex_array         ! array of ESMF_arrays containing vertex
+                              ! coordinates for each vertex of each polygonal
+                              ! region in each physical dimension
+                              ! dimensions are assumed num_vertices, num_dims
+
+      type (ESMF_Array), dimension(2), intent(in), optional :: &
+         ellipse_array        ! array of ESMF_arrays containing ellipse
+                              !  parameters describing elliptical region at
+                              !  each grid point
+
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     Defines a set of regions or cells in a {\tt ESMF\_PhysGrid} using 
+!     user-defined data sent in an input array.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid]
+!          {\tt ESMF\_PhysGrid} for which regions are to be added.
+!     \item[region\_type]
+!          {\tt ESMF\_RegionKind} denoting the type of region (e.g. polygonal,
+!          elliptical)
+!     \item[[name]]
+!          Optional name to assign to the regions.
+!     \item[[num\_vertices]]
+!          If regions are polygonal, the number of vertices needed to describe
+!          the regions.  Note that if the number of vertices varies, this 
+!          should be set to the maximum number - regions with fewer vertices
+!          are defined with degenerate vertex points.
+!     \item[[vertex\_array]]
+!          Array of {\tt ESMF\_Array}s containing the coordinates in each
+!          physical dimension for each vertex point at each logical grid point. 
+!          The array is assumed to be dimensioned (num\_dims,num\_vertices)
+!          while the {\tt ESMF\_Array} would typically be consistent with
+!          other grid arrays.
+!     \item[[ellipse\_array]]
+!          Array of {\tt ESMF\_Array}s containing the two parameters
+!          necessary for describing the elliptical region at each grid point.
+!          The array is dimensioned (2) while the {\tt ESMF\_Array} would 
+!          typically be consistent with other grid arrays.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: i, n
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      character (len=ESMF_MAXSTR) :: name_tmp     ! temp for name creation 
+!
+!     Initialize return code
+!
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+!
+!     if name specified, add name.  otherwise, make one up based on PhysGrid.
+!
+      if (present(name)) then
+        call ESMF_SetName(physgrid%ptr%regions%base, name, &
+                          "PhysGridRegions", status)
+      else
+        call ESMF_GetName(physgrid%ptr%base, name_tmp, status)
+        name_tmp = trim(name_tmp) // 'Region'
+        call ESMF_SetName(physgrid%ptr%regions%base, name_tmp, &
+                          "PhysGridRegions", status)
+      endif
+      if (status /= ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_PhysGridSetRegions: error setting name"
+        return
+      endif
+!
+!     set region type
+!
+      physgrid%ptr%regions%region_type = region_type
+!
+!     set region arrays depending on type of region
+!
+      if (region_type == ESMF_RegionKind_Polygon) then
+        physgrid%ptr%regions%num_vertices = num_vertices
+        physgrid%ptr%regions%vertices => vertex_array
+
+      else if (region_type == ESMF_RegionKind_Ellipse) then
+        physgrid%ptr%regions%ellipse = ellipse_array
+
+      else
+        print *, "ERROR in ESMF_PhysGridSetRegions: unknown region type"
+        return
+
+      endif
+!
+!     define bounding box for each region to aid in future searches
+!
+      if (region_type == ESMF_RegionKind_Polygon) then
+         !TODO: create bbox array for polygons
+
+      else if (region_type == ESMF_RegionKind_Ellipse) then
+         !TODO: define bounding box for elliptical region
+
+      else
+         print *, "ERROR in ESMF_PhysGridSetRegions: unknown region type"
+         return
+
+      endif
+!
+!     set return code
+!
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridSetRegions
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_PhysGridGetRegions - Gets region information from a PhysGrid
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridGetRegions(physgrid, region_type, name, &
+                                         num_vertices, vertex_array, &
+                                         ellipse_array, bbox_array, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
+
+      type(ESMF_RegionKind), intent(inout), optional :: &
+         region_type          ! type of region (polygonal, elliptical)
+
+      character(*), intent(inout), optional :: name ! name to assign to regions
+
+      integer, intent(inout), optional :: &
+         num_vertices         ! max number of vertices for polygonal regions
+
+      type (ESMF_Array), dimension(:,:), intent(inout), optional :: &
+         vertex_array         ! array of ESMF_arrays containing vertex
+                              ! coordinates for each vertex of each polygonal
+                              ! region in each physical dimension
+                              ! dimensions are assumed num_vertices, num_dims
+
+      type (ESMF_Array), dimension(2), intent(inout), optional :: &
+         ellipse_array        ! array of ESMF_arrays containing ellipse
+                              ! parameters describing elliptical region at
+                              ! each grid point
+
+      type (ESMF_Array), dimension(:,:), intent(inout), optional :: &
+         bbox_array           ! array of ESMF_arrays containing bounding
+                              ! boxes for each region
+                              ! dimensions are assumed num_dims,2 (1=min,2=max)
+
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     Retrieves information about defined regions of a {\tt ESMF\_PhysGrid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid]
+!          {\tt ESMF\_PhysGrid} holding regions to be queried.
+!     \item[[region\_type]]
+!          {\tt ESMF\_RegionKind} denoting the type of region (e.g. polygonal,
+!          elliptical)
+!     \item[[name]]
+!          Name assigned to the regions.
+!     \item[[num\_vertices]]
+!          If regions are polygonal, the number of vertices needed to describe
+!          the regions.  Note that if the number of vertices varies, this 
+!          should be set to the maximum number - regions with fewer vertices
+!          are defined with degenerate vertex points.
+!     \item[[vertex\_array]]
+!          Array of {\tt ESMF\_Array}s containing the coordinates in each
+!          physical dimension for each vertex point at each logical grid point. 
+!          The array is assumed to be dimensioned (num\_dims,num\_vertices)
+!          while the {\tt ESMF\_Array} would typically be consistent with
+!          other grid arrays.
+!     \item[[ellipse\_array]]
+!          Array of {\tt ESMF\_Array}s containing the two parameters
+!          necessary for describing the elliptical region at each grid point.
+!          The array is dimensioned (2) while the {\tt ESMF\_Array} would 
+!          typically be consistent with other grid arrays.
+!     \item[[bbox\_array]]
+!          Array of {\tt ESMF\_Array}s containing the bounding box
+!          of each defined region.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: i, n
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      logical :: found                            ! name search flag
+
+!
+!     Initialize return code
+!
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+!
+!     if name requested, get name
+!
+      if (present(name)) then
+         call ESMF_GetName(physgrid%ptr%regions%base, name, status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridGetRegions: error getting name"
+            return
+         endif
+      endif
+!
+!     if number of vertices requested, get it
+!
+      if (present(num_vertices)) then
+         if (physgrid%ptr%regions%region_type == ESMF_RegionKind_Polygon) then
+            num_vertices = physgrid%ptr%regions%num_vertices
+         else
+            print *, "ERROR in ESMF_PhysGridGetRegions: invalid region type"
+            return
+         endif
+      endif
+!
+!     if vertex coordinates requested, get them
+!
+      if (present(vertex_array)) then
+         if (physgrid%ptr%regions%region_type == ESMF_RegionKind_Polygon) then
+            !TODO: consistency check for array sizes, shapes
+            !TODO: return pointer or copy array?
+            vertex_array = physgrid%ptr%regions%vertices
+         else
+            print *, "ERROR in ESMF_PhysGridGetRegions: invalid region type"
+            return
+         endif
+      endif
+!
+!     if ellipses requested, get them
+!
+      if (present(ellipse_array)) then
+         if (physgrid%ptr%regions%region_type == ESMF_RegionKind_Ellipse) then
+            !TODO: consistency check for array sizes, shapes
+            !TODO: return pointer or copy array?
+            ellipse_array = physgrid%ptr%regions%ellipse
+         else
+            print *, "ERROR in ESMF_PhysGridGetRegions: invalid region type"
+            return
+         endif
+      endif
+!
+!     if bounding boxes requested, get them
+!
+      if (present(bbox_array)) then
+         !TODO: consistency check for array sizes, shapes
+         !TODO: return pointer or copy array?
+         !bbox_array = physgrid%ptr%regions%bbox
+      endif
+!
+!     set return code
+!
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridGetRegions
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_PhysGridSetMask - Sets grid mask from input array.
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridSetMask(physgrid, mask_array, mask_type, &
+                                      name, id, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
+
+      type(ESMF_Array), pointer, intent(in) :: &
+         mask_array         ! array containing mask value for each cell
+
+      type(ESMF_GridMaskKind), intent(in) :: &
+         mask_type          ! type of mask (logical, mult, regionID)
+
+      character(*), intent(in) :: name ! name to assign to mask
+
+      integer, intent(out), optional :: id  ! id assigned to mask
 
       integer, intent(out), optional :: rc            
 
 !
 ! !DESCRIPTION:
-!     Assigns a {\tt ESMF\_PhysGrid}'s coordinates from user-defined coordinates
+!     Assigns a mask to a {\tt ESMF\_PhysGrid} using user-defined data 
 !     sent in an input array.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} for which coordinates are to be defined.
-!     \item[[center\_coord]]
-!          Coordinates of each cell center.  The dimension index should
-!          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
-!     \item[[corner\_coord]]
-!          Coordinates of corners of each cell.  The dimension index should
-!          be defined first, followed by the corner index.  Corners can
-!          be numbered in either clockwise or counter-clockwise direction,
-!          but must be numbered consistently throughout grid.
-!     \item[[face\_coord]]
-!          Coordinates of corners of each cell.  The dimension index should
-!          be defined first, followed by the face index.  Faces should 
-!          be numbered consistently with corners.  For example, face 1 should
-!          correspond to the face between corners 1,2.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      if (present(center_coord)) then
-         physgrid%center_coord = center_coord
-      endif
-
-      if (present(corner_coord)) then
-         physgrid%corner_coord = corner_coord
-      endif
-
-      if (present(face_coord)) then
-         physgrid%face_coord = face_coord
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridSetCoordFromArray
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridSetCoordInternal - Set Coords for a PhysGrid internally
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridSetCoordInternal(physgrid, ncoord_locs, &
-                                               coord_loc, &
-                                               global_nmin1, global_nmax1, &
-                                               global_nmin2, global_nmax2, &
-                                               delta1, delta2, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_PhysGridType) :: physgrid
-      integer, intent(in) :: ncoord_locs
-      integer, dimension(:), intent(in) :: coord_loc
-      integer, intent(in) :: global_nmin1
-      integer, intent(in) :: global_nmax1
-      integer, intent(in) :: global_nmin2
-      integer, intent(in) :: global_nmax2
-      real(ESMF_KIND_R8), intent(in) :: delta1
-      real(ESMF_KIND_R8), intent(in) :: delta2
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Compute a {\tt ESMF\_PhysGrid}'s coordinates from a given gridtype and set of
-!     physical parameters.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid]
-!          Class to be modified.
-!     \item[[ncoord\_locs]]
-!          Number of coordinate location specifiers
-!     \item[[coord\_loc]]
-!          Array of integer specifiers to denote coordinate location relative
-!          to the cell (center, corner, face)
-!     \item[[global\_nmin1]]
-!          Global minimum counter in the 1st direction
-!     \item[[global\_nmax1]]
-!          Global maximum counter in the 1st direction
-!     \item[[global\_nmin2]]
-!          Global minimum counter in the 2nd direction
-!     \item[[global\_nmax2]]
-!          Global maximum counter in the 2nd direction
-!     \item[[delta1]]
-!          Grid cell size in the 1st direction (assumed constant for now)
-!     \item[[delta2]]
-!          Grid cell size in the 2nd direction (assumed constant for now)
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      integer :: i                                ! local counter
-      integer :: global_n1, global_n2             ! counters
-      integer :: local_n1, local_n2               ! counters
-      integer :: l1, l2, counts(3)
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_DataType) :: type
-      type(ESMF_DataKind) :: kind
-      real(ESMF_KIND_R8) :: crap
-      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: temp
-      type(ESMF_LocalArray) :: array_temp
-      
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     If no coordinate location specifiers, return with error
-      if(ncoord_locs.le.0) then
-        print *, "ERROR in ESMF_PhysGridSetCoordInternal: bad ncoord_locs"
-        return
-      endif
-
-      l1 = (global_nmax1 - global_nmin1) + 1
-      l2 = (global_nmax2 - global_nmin2) + 1
-      allocate(temp(l1,l2,2))    ! TODO: hardcoded for dim=2 for now
-   !   type = ESMF_DATA_REAL
-   !   kind = ESMF_R8
-   !   counts(1) = (global_nmax1 - global_nmin1) + 1
-   !   counts(2) = (global_nmax2 - global_nmin2) + 1
-   !   counts(3) = 2            ! TODO: hardcoded for dim=2 for now
-   !   array_temp = ESMF_LocalArrayCreate(3, type, kind, counts, status)
-   !   call ESMF_LocalArrayGetData(array_temp, temp, &
-   !                               ESMF_DATA_REF, status)
-
-!     Loop over number of coordinate location specifiers
-      do i = 1,ncoord_locs
-
-!       For now, a case construct for the different coordinate locations
-        select case (coord_loc(i))
-
-        case (ESMF_CellLoc_Unknown)
-          status = ESMF_FAILURE
-
-        case (ESMF_CellLoc_Center_X)
-          do global_n1 = global_nmin1,global_nmax1
-            local_n1 = (global_n1 - global_nmin1) + 1
-            do global_n2 = global_nmin2,global_nmax2
-              local_n2 = (global_n2 - global_nmin2) + 1
-              crap = delta1*0.5d0*real(global_n1+global_n1-1)
-              temp(local_n1,local_n2,1) = crap
-              write(*,*) '1,2,3,temp,crap',local_n1,local_n2,temp(local_n1,local_n2,1),crap
-            enddo
-          enddo
-          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-          physgrid%center_coord = array_temp
-
-        case (ESMF_CellLoc_Center_Y)
-          do global_n2 = global_nmin2,global_nmax2
-            local_n2 = (global_n2 - global_nmin2) + 1
-            do global_n1 = global_nmin1,global_nmax1
-              local_n1 = (global_n1 - global_nmin1) + 1
-              temp(local_n1,local_n2,2) = delta2*0.5d0*real(global_n2+global_n2-1)
-            enddo
-          enddo
-          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-          physgrid%center_coord = array_temp
-
-        case (ESMF_CellLoc_Corner_X)
-          do global_n1 = global_nmin1,global_nmax1
-            local_n1 = (global_n1 - global_nmin1) + 1
-            do global_n2 = global_nmin2,global_nmax2
-              local_n2 = (global_n2 - global_nmin2) + 1
-              temp(local_n1,local_n2,1) = delta1*real(global_n1)
-            enddo
-          enddo
-          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-          physgrid%corner_coord = array_temp
-
-  !      case (ESMF_CellLoc_Corner_Y)
-  !        do global_n2 = global_nmin2,global_nmax2
-  !          local_n2 = (global_n2 - global_nmin2) + 1
-  !          do global_n1 = global_nmin1,global_nmax1
-  !            local_n1 = (global_n1 - global_nmin1) + 1
-  !            temp(local_n1,local_n2,2) = delta2*real(global_n2)
-  !          enddo
-  !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-  !        physgrid%corner_coord = array_temp
-
-  !      case (ESMF_CellLoc_NFace_X)
-  !        do global_n1 = global_nmin1,global_nmax1
-  !          local_n1 = (global_n1 - global_nmin1) + 1
-  !          do global_n2 = global_nmin2,global_nmax2
-  !            local_n2 = (global_n2 - global_nmin2) + 1
-  !            temp(local_n1,local_n2,1) = delta1*0.5*real(global_n1+global_n1-1)
-  !          enddo
-  !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-  !        physgrid%nface_coord = array_temp
-
-  !      case (ESMF_CellLoc_NFace_Y)
-  !        do global_n2 = global_nmin2,global_nmax2
-  !          local_n2 = (global_n2 - global_nmin2) + 1
-  !          do global_n1 = global_nmin1,global_nmax1
-  !            local_n1 = (global_n1 - global_nmin1) + 1
-  !            temp(local_n1,local_n2,2) = delta2*real(global_n2)
-  !          enddo
-  !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-  !        physgrid%nface_coord = array_temp
-
-  !      case (ESMF_CellLoc_EFace_X)
-  !        do global_n1 = global_nmin1,global_nmax1
-  !          local_n1 = (global_n1 - global_nmin1) + 1
-  !          do global_n2 = global_nmin2,global_nmax2
-  !            local_n2 = (global_n2 - global_nmin2) + 1
-  !            temp(local_n1,local_n2,1) = delta1*real(global_n1)
-  !          enddo
-  !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-  !        physgrid%eface_coord = array_temp
-
-  !      case (ESMF_CellLoc_EFace_Y)
-  !        do global_n2 = global_nmin2,global_nmax2
-  !          local_n2 = (global_n2 - global_nmin2) + 1
-  !          do global_n1 = global_nmin1,global_nmax1
-  !            local_n1 = (global_n1 - global_nmin1) + 1
-  !            temp(local_n1,local_n2,2) = delta2*0.5*real(global_n2+global_n2-1)
-  !          enddo
-  !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-  !        physgrid%eface_coord = array_temp
-
-        end select
-
-      enddo
-
-  !    deallocate(temp)    ! TODO: figure out how to load one array
-
-!     call ESMF_LocalArrayPrint(physgrid%center_coord1, "foo", rc)
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridSetCoordInternal
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridSetCoordSpecd - Set Coords for a PhysGrid from specs
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridSetCoordSpecd(physgrid, ncoord_locs, coord_loc, &
-                                            local_nmin1, local_nmax1, &
-                                            local_nmin2, local_nmax2, &
-                                            delta1, delta2, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_PhysGridType) :: physgrid
-      integer, intent(in) :: ncoord_locs
-      integer, dimension(:), intent(in) :: coord_loc
-      integer, intent(in) :: local_nmin1
-      integer, intent(in) :: local_nmax1
-      integer, intent(in) :: local_nmin2
-      integer, intent(in) :: local_nmax2
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Compute a {\tt ESMF\_PhysGrid}'s coordinates from a given gridtype and set of
-!     physical parameters.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid]
-!          Class to be modified.
-!     \item[[ncoord\_locs]]
-!          Number of coordinate location specifiers
-!     \item[[coord\_loc]]
-!          Array of integer specifiers to denote coordinate location relative
-!          to the cell (center, corner, face)
-!     \item[[local\_nmin1]]
-!          Local minimum counter in the 1st direction
-!     \item[[local\_nmax1]]
-!          Local maximum counter in the 1st direction
-!     \item[[local\_nmin2]]
-!          Local minimum counter in the 2nd direction
-!     \item[[local\_nmax2]]
-!          Local maximum counter in the 2nd direction
-!     \item[[delta1]]
-!          Array of grid cell sizes in the 1st direction
-!     \item[[delta2]]
-!          Array of grid cell sizes in the 2nd direction
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      integer :: i                                ! local counter
-      integer :: local_n1, local_n2               ! counters
-      integer :: l1, l2, counts(3)
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_DataType) :: type
-      type(ESMF_DataKind) :: kind
-      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: temp
-      real(ESMF_KIND_R8) :: xLoc, yLoc
-      type(ESMF_LocalArray) :: array_temp
-      
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     If no coordinate location specifiers, return with error
-      if(ncoord_locs.le.0) then
-        print *, "ERROR in ESMF_PhysGridSetCoordSpecd: bad ncoord_locs"
-        return
-      endif
-
-      l1 = (local_nmax1 - local_nmin1) + 1
-      l2 = (local_nmax2 - local_nmin2) + 1
-      allocate(temp(l1,l2,2))    ! TODO: hardcoded for dim=2 for now
-  !    type = ESMF_DATA_REAL
-  !    kind = ESMF_R8
-  !    counts(1) = (local_nmax1 - local_nmin1) + 1
-  !    counts(2) = (local_nmax2 - local_nmin2) + 1
-  !    counts(3) = 2            ! TODO: hardcoded for dim=2 for now
-  !    array_temp = ESMF_LocalArrayCreate(3, type, kind, counts, status)
-  !    call ESMF_LocalArrayGetData(array_temp, temp, &
-  !                                ESMF_DATA_REF, status)
-
-!     Loop over number of coordinate location specifiers
-      do i = 1,ncoord_locs
-
-!       For now, a case construct for the different coordinate locations
-        select case (coord_loc(i))
-
-        case (ESMF_CellLoc_Unknown)
-          status = ESMF_FAILURE
-
-        case (ESMF_CellLoc_Center_X)
-          xLoc = physgrid%local_min(1)
-          do local_n1 = local_nmin1,local_nmax1
-            do local_n2 = local_nmin2,local_nmax2
-              temp(local_n1,local_n2,1) = 0.5d0*delta1(local_n1) + xLoc
-            enddo
-            xLoc = xLoc + delta1(local_n1)
-          enddo
-          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-          physgrid%center_coord = array_temp
-
-        case (ESMF_CellLoc_Center_Y)
-          yLoc = physgrid%local_min(2)
-          do local_n2 = local_nmin2,local_nmax2
-            do local_n1 = local_nmin1,local_nmax1
-              temp(local_n1,local_n2,2) = 0.5d0*delta2(local_n2) + yLoc
-            enddo
-            yLoc = yLoc + delta2(local_n2)
-          enddo
-          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-          physgrid%center_coord = array_temp
-
-        case (ESMF_CellLoc_Corner_X)
-          xLoc = physgrid%local_min(1)
-          do local_n1 = local_nmin1,local_nmax1
-            do local_n2 = local_nmin2,local_nmax2
-              temp(local_n1,local_n2,1) = delta1(local_n1) + xLoc
-            enddo
-            xLoc = xLoc + delta1(local_n1)
-          enddo
-          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-          physgrid%corner_coord = array_temp
-
-  !      case (ESMF_CellLoc_Corner_Y)
-  !        yLoc = physgrid%local_min(2)
-  !        do local_n2 = local_nmin2,local_nmax2
-  !          do local_n1 = local_nmin1,local_nmax1
-  !            temp(local_n1,local_n2,2) = delta2(local_n2) + yLoc
-  !          enddo
-  !          yLoc = yLoc + delta2(local_n2)
-  !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
-  !        physgrid%corner_coord = array_temp
-
-        end select
-
-      enddo
-
-  !    deallocate(temp)    ! TODO: figure out how to load one array
-
-!     call ESMF_LocalArrayPrint(physgrid%center_coord1, "foo", rc)
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridSetCoordSpecd
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridGetMetric - Gets a defined metric from a PhysGrid
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridGetMetric(physgrid, metric_array, name, id, rc)
-!
-! !ARGUMENTS:
-
-      type(ESMF_PhysGridType), intent(in) :: physgrid
-
-      type(ESMF_LocalArray), pointer :: metric_array
-
-      character(*), intent(in), optional :: name
-
-      integer, intent(in), optional :: id
-
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Extracts metric information from a {\tt ESMF\_PhysGrid} structure.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} containing metrics.
-!     \item[metric\_array]
-!          Pointer to array in which metric is stored.
-!     \item[[name]]
-!          Name assigned to this metric when it was defined.
+!          {\tt ESMF\_PhysGrid} for which mask is to be added.
+!     \item[mask\_array]
+!          Array containing mask values at for each grid cell.
+!     \item[name]
+!          Name to assign to mask.
+!     \item[mask\_type]
+!          {\tt ESMF\_GridMaskKind} describing type of mask (e.g. logical,
+!          multiplicative, region ID).
 !     \item[[id]]
-!          Integer id assigned to the metric when it was defined.
-!          Either the name or id must be supplied.  The id permits
-!          more direct access of metric.
+!          Integer id assigned to mask which allows faster access
+!          when retrieving mask.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1834,66 +1321,222 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: i
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
+      integer :: i, n, nmask_old, nmask_new
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      type(ESMF_GridMask), dimension(:), allocatable :: temp_mask
+                                             ! temporary array of masks
+!
 !     Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
+!
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
-
-      if (present(id)) then
-         ! get metric directly
-
-         if (id > 0 .and. id <= physgrid%num_metrics) then
-            metric_array => physgrid%metrics(id)
-         else
-            print *,'Invalid metric id'
-            status = ESMF_FAILURE
+!
+!     increment mask counter
+!
+      nmask_old = physgrid%ptr%num_masks
+      nmask_new = nmask_old + 1
+!
+!     if first mask, allocate mask array
+!
+      if (nmask_new == 1) then
+         allocate(physgrid%ptr%masks(1), stat=status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridSetMask: mask allocate"
+            return
          endif
 
-      else if (present(name)) then
-         srch_loop: do i=1,physgrid%num_metrics
-            if (name == trim(physgrid%metric_names(i))) exit srch_loop
-         end do srch_loop
-
-         if (i <= physgrid%num_metrics) then
-            metric_array => physgrid%metrics(id)
-         else
-            print *,'No metric of that name defined'
-            status = ESMF_FAILURE
-         endif
+!
+!     if not first mask, resize mask array to make room for new mask
+!
       else
-         print *,'Must supply either name or id'
-         status = ESMF_FAILURE
+         allocate(temp_mask(nmask_old), stat=status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridSetMask: temp_mask allocate"
+            return
+         endif
+
+         ! store old values before resizing array
+         do n = 1, nmask_old
+            temp_mask(n) = physgrid%ptr%masks(n)
+         enddo
+
+         ! destroy old array to create new one
+         deallocate(physgrid%ptr%masks, stat=status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridSetMask: mask deallocate"
+            return
+         endif
+
+         ! allocate new mask array of correct size
+         allocate(physgrid%ptr%masks(nmask_new), stat=status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridSetMask: mask reallocate"
+            return
+         endif
+
+         ! fill new array with old values
+         do n = 1, nmask_old
+            physgrid%ptr%masks(n) = temp_mask(n)
+         enddo
+
+         deallocate(temp_mask, stat=status)
+         if (status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridSetMask: temp_mask deallocate"
+            return
+         endif
       endif
 
-      if(rcpresent) rc = status
+!
+!     reset number of masks and add new mask
+!
+      if (present(id)) id = nmask_new
+      physgrid%ptr%num_masks = nmask_new
 
-      end subroutine ESMF_PhysGridGetMetric
+      call ESMF_SetName(physgrid%ptr%masks(nmask_new)%base, name, &
+                        "PhysGridMask", status)
+      if (status /= ESMF_SUCCESS) then
+         print *, "ERROR in ESMF_PhysGridSetMask: error setting mask name"
+         return
+      endif
+
+      physgrid%ptr%masks(nmask_new)%mask_type = mask_type
+      physgrid%ptr%masks(nmask_new)%data => mask_array
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridSetMask
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridSetMetricFromArray - Sets grid metrics from input array
+! !IROUTINE: ESMF_PhysGridGetMask - Gets grid mask from PhysGrid object.
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridSetMetricFromArray(physgrid, metric_array,   &
-                                                 name, id, rc)
+      subroutine ESMF_PhysGridGetMask(physgrid, mask_array, name, id, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_PhysGridType), intent(inout) :: physgrid
+      type(ESMF_PhysGrid), intent(in) :: physgrid
 
-      type(ESMF_LocalArray), intent(in), target :: &
-         metric_array         ! array containing metric value for each cell
+      type(ESMF_Array), intent(out) :: &
+         mask_array         ! array containing mask value for each cell
+
+      character(*), intent(in), optional :: name ! name of mask to get
+
+      integer, intent(in), optional :: id  ! id for mask if known
+
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Retrieves a mask from a {\tt ESMF\_PhysGrid} based on either a name
+!     or previously-assigned id.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid]
+!          {\tt ESMF\_PhysGrid} from which mask is to be retrieved.
+!     \item[mask\_array]
+!          Array containing mask value at each grid cell.
+!     \item[[name]]
+!          If supplied, mask matching this name will be returned.
+!     \item[[id]]
+!          If supplied, mask matching this assigned id will be returned.
+!          This is a faster method as the id refers to exact mask array
+!          location.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: i, n
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      logical :: found                            ! name search flag
+      character (len=ESMF_MAXSTR) :: name_tmp     ! temp for name check 
+
+!
+!     Initialize return code
+!
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+!
+!     if id supplied, check for valid id and return appropriate mask
+!
+      if (present(id)) then
+
+         ! check for valid id
+         if (id < 1 .or. id > physgrid%ptr%num_masks) then
+            print *, "ERROR in ESMF_PhysGridGetMask: invalid mask id"
+            return
+         endif
+
+         ! get mask associated with id
+         mask_array = physgrid%ptr%masks(id)%data
+
+!
+!     if name supplied, check for valid id and return appropriate mask
+!
+      else if (present(name)) then
+
+         found = .false.
+         name_loop: do n=1,physgrid%ptr%num_masks
+            
+            call ESMF_GetName(physgrid%ptr%masks(n)%base, name_tmp, status)
+            if(status /= ESMF_SUCCESS) then
+               print *, "ERROR in ESMF_PhysGridGetMask: error retrieving name"
+               return
+            endif
+
+            if (trim(name) == trim(name_tmp)) then
+               mask_array = physgrid%ptr%masks(id)%data
+               found = .true.
+               exit name_loop
+            endif
+         end do name_loop
+
+         if (.not. found) then
+            print *, "ERROR in ESMF_PhysGridGetMask: no mask matches name"
+            print *, "Requested name:",trim(name)
+            return
+         endif
+
+!
+!     if we enter this else branch, neither id nor mask has been 
+!     supplied so return error
+!
+      else
+         print *, "ERROR in ESMF_PhysGridGetMask: id or name must be supplied"
+         return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridGetMask
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_PhysGridSetMetric - Sets grid metric from input array.
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridSetMetric(physgrid, metric_array, name, id, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
+
+      type(ESMF_Array), intent(in) :: &
+        metric_array         ! array containing metric value for each cell
 
       character(*), intent(in) :: name ! name to assign to metric
 
-      integer, intent(out) :: id  ! id assigned to metric
+      integer, intent(out), optional :: id  ! id assigned to metric
 
       integer, intent(out), optional :: rc            
 
@@ -1905,14 +1548,14 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} for which coordinates are to be defined.
+!          {\tt ESMF\_PhysGrid} for which metric is to be added.
 !     \item[metric\_array]
-!          Array containing metric values at for each grid cell.
+!          Array containing metric values at each grid cell.
 !     \item[name]
 !          Name to assign to metric.
-!     \item[id]
-!          Integer id assigned to metric which allows direct reference
-!          into metric array.
+!     \item[[id]]
+!          Integer id assigned to metric which allows faster access
+!          when retrieving metric.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1920,178 +1563,131 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: i, n
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_LocalArray), dimension(:), allocatable, target :: temp_metrics
+      integer :: n, nmetric_old, nmetric_new
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      type(ESMF_Array), dimension(:), allocatable :: temp_metric
                                              ! temporary array of metrics
-
+!
 !     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
+!
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 !
-!     increment metric counter and allocate memory
+!     increment metric counter
 !
-      physgrid%num_metrics = physgrid%num_metrics + 1
-      n = physgrid%num_metrics
-      if(n .eq. 1) then
-        allocate(physgrid%metrics(1), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMetricFromArray: metrics allocate"
+      nmetric_old = physgrid%ptr%num_metrics
+      nmetric_new = nmetric_old + 1
+!
+!     if first metric, allocate metric array
+!
+      if (nmetric_new == 1) then
+        allocate(physgrid%ptr%metrics(1), stat=status)
+        if (status /= ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_PhysGridSetMetric: metric allocate"
           return
         endif
+
+!
+!     if not first metric, resize metric array to make room for new metric
+!
+
       else
-        allocate(temp_metrics(n), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMetricFromArray: temp_metrics allocate"
+        allocate(temp_metric(nmetric_old), stat=status)
+        if (status /= ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_PhysGridSetMetric: temp_metric allocate"
           return
         endif
-        do i = 1, n - 1
-          temp_metrics(i) = physgrid%metrics(i)
+
+        ! store old values before resizing array
+        do n = 1, nmetric_old
+          temp_metric(n) = physgrid%ptr%metrics(n)
         enddo
-        deallocate(physgrid%metrics, stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMetricFromArray: metrics deallocate"
+
+        ! destroy old array to create new one
+        deallocate(physgrid%ptr%metrics, stat=status)
+        if (status /= ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_PhysGridSetMetric: metric deallocate"
           return
         endif
-        allocate(physgrid%metrics(n), stat=status)  ! TODO: is this necessary?
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMetricFromArray: metrics allocate"
+
+        ! allocate new metric array of correct size
+        allocate(physgrid%ptr%metrics(nmetric_new), stat=status)
+        if (status /= ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_PhysGridSetMetric: metric reallocate"
+          return
+        endif
+
+        ! fill new array with old values
+        do n = 1, nmetric_old
+          physgrid%ptr%metrics(n) = temp_metric(n)
+        enddo
+
+        deallocate(temp_metric, stat=status)
+        if (status /= ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_PhysGridSetMetric: temp_metric deallocate"
           return
         endif
       endif
-      temp_metrics(n) = metric_array
-      physgrid%metric_names(n) = name
-      physgrid%metrics => temp_metrics
+!
+!     reset number of metrics and add new metric
+!
+      if (present(id)) id = nmetric_new
+      physgrid%ptr%num_metrics = nmetric_new
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! TODO: create Array method for SetName
+   !   call ESMF_ArraySetName(physgrid%ptr%metrics(nmetric_new), name, &
+   !                          "PhysGridMetric", status)
+   !   if (status /= ESMF_SUCCESS) then
+   !      print *, "ERROR in ESMF_PhysGridSetMetric: error setting metric name"
+   !      return
+   !   endif
 
-      end subroutine ESMF_PhysGridSetMetricFromArray
+      physgrid%ptr%metrics(nmetric_new) = metric_array
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridSetMetric
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridGetLMask - Gets a defined logical mask from a PhysGrid
+! !IROUTINE: ESMF_PhysGridGetMetric - Gets grid metric from PhysGrid object.
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridGetLMask(physgrid, lmask_array, name, id, rc)
+      subroutine ESMF_PhysGridGetMetric(physgrid, metric_array, name, id, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_PhysGridType), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(in) :: physgrid
 
-      type(ESMF_LocalArray), pointer :: lmask_array
+      type(ESMF_Array), intent(out) :: &
+         metric_array         ! array containing metric value for each cell
 
-      character(*), intent(in), optional :: name
+      character(*), intent(in), optional :: name ! name of metric to get
 
-      integer, intent(in), optional :: id
+      integer, intent(in), optional :: id  ! id for metric if known
 
       integer, intent(out), optional :: rc            
 
 !
 ! !DESCRIPTION:
-!     Extracts logical mask information from a {\tt ESMF\_PhysGrid} structure.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} containing metrics.
-!     \item[lmask\_array]
-!          Pointer to the requested logical mask.
-!     \item[[name]]
-!          Name assigned to this lmask when it was defined.
-!     \item[[id]]
-!          Integer id assigned to the lmask when it was defined.
-!          Either the name or id must be supplied.  The id permits
-!          more direct access to the lmask.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: i
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      if (present(id)) then
-         ! get lmask directly
-
-         if (id > 0 .and. id <= physgrid%num_lmasks) then
-            lmask_array => physgrid%lmask(id)
-         else
-            print *,'Invalid lmask id'
-            status = ESMF_FAILURE
-         endif
-
-      else if (present(name)) then
-         srch_loop: do i=1,physgrid%num_lmasks
-            if (name == trim(physgrid%lmask_names(i))) exit srch_loop
-         end do srch_loop
-
-         if (i <= physgrid%num_lmasks) then
-            lmask_array => physgrid%lmask(id)
-         else
-            print *,'No lmask of that name defined'
-            status = ESMF_FAILURE
-         endif
-      else
-         print *,'Must supply either name or id'
-         status = ESMF_FAILURE
-      endif
-
-      if(rcpresent) rc = status
-
-      end subroutine ESMF_PhysGridGetLMask
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridSetLMask - Sets grid logical mask from input array
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridSetLMask(physgrid, lmask_array, name, id, rc)
-!
-! !ARGUMENTS:
-
-      type(ESMF_PhysGridType), intent(inout) :: physgrid
-
-      type(ESMF_LocalArray), intent(in), target :: &
-         lmask_array         ! array containing logical mask value for each cell
-
-      character(*), intent(in) :: name ! name to assign to logical mask
-
-      integer, intent(out) :: id  ! id assigned to logical mask
-
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Assigns a logical mask to a {\tt ESMF\_PhysGrid} using user-defined data 
+!     Assigns a metric to a {\tt ESMF\_PhysGrid} using user-defined data 
 !     sent in an input array.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} for which mask is to be added.
-!     \item[lmask\_array]
-!          Array containing logical mask values at for each grid cell.
-!     \item[name]
-!          Name to assign to logical mask.
-!     \item[id]
-!          Integer id assigned to logical mask which allows direct reference
-!          into logical mask array.
+!          {\tt ESMF\_PhysGrid} from which metric is to be retrieved.
+!     \item[metric\_array]
+!          Array containing metric values at for each grid cell.
+!     \item[[name]]
+!          If supplied, metric matching this name will be returned.
+!     \item[[id]]
+!          If supplied, metric matching this assigned id will be returned.
+!          This is a faster method as the id refers to exact metric array
+!          location.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2100,359 +1696,70 @@
 ! !REQUIREMENTS: 
 
       integer :: i, n
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_LocalArray), dimension(:), allocatable, target :: temp_lmask
-                                             ! temporary array of lmasks
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      logical :: found                            ! name search flag
+      character (len=ESMF_MAXSTR) :: name_tmp     ! temp for name check 
 
+!
 !     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
+!
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 !
-!     increment logical mask counter and allocate memory
+!     if id supplied, check for valid id and return appropriate metric
 !
-      physgrid%num_lmasks = physgrid%num_lmasks + 1
-      n = physgrid%num_lmasks
-      if(n .eq. 1) then
-        allocate(physgrid%lmask(1), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetLMaskFromArray: lmask allocate"
-          return
-        endif
-      else
-        allocate(temp_lmask(n), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetLMaskFromArray: temp_lmask allocate"
-          return
-        endif
-        do i = 1, n - 1
-          temp_lmask(i) = physgrid%lmask(i)
-        enddo
-        deallocate(physgrid%lmask, stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetLMaskFromArray: lmask deallocate"
-          return
-        endif
-        allocate(physgrid%lmask(n), stat=status)  ! TODO: is this necessary?
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetLMaskFromArray: lmask allocate"
-          return
-        endif
-      endif
-      temp_lmask(n) = lmask_array
-      physgrid%lmask_names(n) = name
-      physgrid%lmask => temp_lmask
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridSetLMask
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridGetMMask - Gets a defined multiplicative mask from a PhysGrid
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridGetMMask(physgrid, mmask_array, name, id, rc)
-!
-! !ARGUMENTS:
-
-      type(ESMF_PhysGridType), intent(in) :: physgrid
-
-      type(ESMF_LocalArray), pointer :: mmask_array
-
-      character(*), intent(in), optional :: name
-
-      integer, intent(in), optional :: id
-
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Extracts multiplicative mask information from a {\tt ESMF\_PhysGrid} structure.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} containing requested mask.
-!     \item[mmask\_array]
-!          Pointer to the requested multiplicative mask.
-!     \item[[name]]
-!          Name assigned to this mmask when it was defined.
-!     \item[[id]]
-!          Integer id assigned to the mmask when it was defined.
-!          Either the name or id must be supplied.  The id permits
-!          more direct access to the mmask.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: i
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
       if (present(id)) then
-         ! get mmask directly
 
-         if (id > 0 .and. id <= physgrid%num_mmasks) then
-            mmask_array => physgrid%mmask(id)
-         else
-            print *,'Invalid mmask id'
-            status = ESMF_FAILURE
-         endif
+        ! check for valid id
+        if (id < 1 .or. id > physgrid%ptr%num_metrics) then
+          print *, "ERROR in ESMF_PhysGridGetMetric: invalid metric id"
+          return
+        endif
 
+        ! get metric associated with id
+        metric_array = physgrid%ptr%metrics(id)
+!
+!     if name supplied, check for valid id and return appropriate metric
+!
       else if (present(name)) then
-         srch_loop: do i=1,physgrid%num_mmasks
-            if (name == trim(physgrid%mmask_names(i))) exit srch_loop
-         end do srch_loop
 
-         if (i <= physgrid%num_mmasks) then
-            mmask_array => physgrid%mmask(id)
-         else
-            print *,'No mmask of that name defined'
-            status = ESMF_FAILURE
-         endif
+        found = .false.
+        name_loop: do n=1,physgrid%ptr%num_metrics
+            
+          call ESMF_ArrayGetName(physgrid%ptr%metrics(n), name_tmp, status)
+          if(status /= ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_PhysGridGetMetric: error retrieving name"
+            return
+          endif
+
+          if (trim(name) == trim(name_tmp)) then
+            metric_array = physgrid%ptr%metrics(id)
+            found = .true.
+            exit name_loop
+          endif
+        end do name_loop
+
+        if (.not. found) then
+          print *, "ERROR in ESMF_PhysGridGetMetric: no metric matches name"
+          print *, "Requested name:",trim(name)
+          return
+        endif
+
+!
+!     if we enter this else branch, neither id nor name has been 
+!     supplied so return error
+!
       else
-         print *,'Must supply either name or id'
-         status = ESMF_FAILURE
+        print *, "ERROR in ESMF_PhysGridGetMetric: id or name must be supplied"
+        return
       endif
-
-      if(rcpresent) rc = status
-
-      end subroutine ESMF_PhysGridGetMMask
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridSetMMask - Sets multiplicative mask from input array
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridSetMMask(physgrid, mmask_array, name, id, rc)
-!
-! !ARGUMENTS:
-
-      type(ESMF_PhysGridType), intent(inout) :: physgrid
-
-      type(ESMF_LocalArray), intent(in), target :: &
-         mmask_array         ! array containing multiplicative mask value for each cell
-
-      character(*), intent(in) :: name ! name to assign to multiplicative mask
-
-      integer, intent(out) :: id  ! id assigned to multiplicative mask
-
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Assigns a multiplicative mask to a {\tt ESMF\_PhysGrid} using user-defined data 
-!     sent in an input array.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} for which mask is to be added.
-!     \item[lmask\_array]
-!          Array containing multiplicative mask values at for each grid cell.
-!     \item[name]
-!          Name to assign to multiplicative mask.
-!     \item[id]
-!          Integer id assigned to multiplicative mask which allows direct 
-!          reference into multiplicative mask array.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: i, n
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_LocalArray), dimension(:), allocatable, target :: temp_mmask
-                                             ! temporary array of mmasks
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-!
-!     increment multiplicative mask counter and allocate memory
-!
-      physgrid%num_mmasks = physgrid%num_mmasks + 1
-      n = physgrid%num_mmasks
-      if(n .eq. 1) then
-        allocate(physgrid%mmask(1), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMMaskFromArray: mmask allocate"
-          return
-        endif
-      else
-        allocate(temp_mmask(n), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMMaskFromArray: temp_mmasks allocate"
-          return
-        endif
-        do i = 1, n - 1
-          temp_mmask(i) = physgrid%mmask(i)
-        enddo
-        deallocate(physgrid%mmask, stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMMaskFromArray: mmask deallocate"
-          return
-        endif
-        allocate(physgrid%mmask(n), stat=status)  ! TODO: is this necessary?
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMMaskFromArray: mmask allocate"
-          return
-        endif
-      endif
-      temp_mmask(n) = mmask_array
-      physgrid%mmask_names(n) = name
-      physgrid%mmask => temp_mmask
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_PhysGridSetMMask
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridGetRegionID - Gets a defined region id from a PhysGrid
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridGetRegionID(physgrid, &
-                                          region_array, region_names, rc)
-!
-! !ARGUMENTS:
-
-      type(ESMF_PhysGridType), intent(in) :: physgrid
-
-      type(ESMF_LocalArray), pointer :: region_array
-
-      character(*), dimension(:), intent(out) :: region_names
-
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Extracts region id information from a {\tt ESMF\_PhysGrid} structure.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} containing requested region id.
-!     \item[region\_array]
-!          Pointer to the array assigning a region ID to each grid point.
-!     \item[region\_names]
-!          Name assigned to each region number.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: i
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      region_array => physgrid%region_id
-      do i=1,physgrid%num_region_ids
-         region_names(i) = physgrid%region_id_names(i)
-      end do
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridGetRegionID
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridSetRegionID - Sets grid region id from input array
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridSetRegionID(physgrid, &
-                                          region_array, region_names, rc)
-!
-! !ARGUMENTS:
-
-      type(ESMF_PhysGridType), intent(inout) :: physgrid
-
-      type(ESMF_LocalArray), intent(in), target :: &
-         region_array         ! array containing region ids for each cell
-
-      character(*), dimension(:), intent(in), target :: &
-         region_names         ! name to assign to each region id
-
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Assigns region ids to a {\tt ESMF\_PhysGrid} using user-defined data 
-!     sent in an input array.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid]
-!          {\tt ESMF\_PhysGrid} for which region ids are to be defined.
-!     \item[region\_array]
-!          Array containing region id for each grid cell.
-!     \item[region\_names]
-!          Name to assign to each region.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: n
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-!
-!     increment logical mask counter
-!
-      physgrid%num_region_ids = size(region_names)
-      !TODO: check for consistency with region ids in array
-!
-!     set pointers to region id
-!
-      physgrid%region_id_names => region_names
-      physgrid%region_id => region_array
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_PhysGridSetRegionID
+      end subroutine ESMF_PhysGridGetMetric
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2521,23 +1828,23 @@
 ! is necessary to have some information available currently.
 
       print *, 'Physgrid:'
-      print *, ' Dimensions:', physgrid%ptr%dim_num
+      print *, ' Dimensions:', physgrid%ptr%num_dims
 
       print *, ' Coordinate Extents:'
 
 ! The global and local coordinate extents
       print *, '  Global Extents:'
-      do i=1, physgrid%ptr%dim_num
-         print *, '   ', physgrid%ptr%global_min(i), &
-         ',', physgrid%ptr%global_max(i)
-      if (i .ne. physgrid%ptr%dim_num) print *, '      x'
+      do i=1, physgrid%ptr%num_dims
+  !       print *, '   ', physgrid%ptr%global_min(i), &
+  !       ',', physgrid%ptr%global_max(i)
+      if (i .ne. physgrid%ptr%num_dims) print *, '      x'
       enddo
 
       print *, '  Local Extents:'
-      do i=1, physgrid%ptr%dim_num
-         print *, '   ', physgrid%ptr%local_min(i), &
-         ',', physgrid%ptr%local_max(i)
-      if (i .ne. physgrid%ptr%dim_num) print *, '      x'
+      do i=1, physgrid%ptr%num_dims
+  !       print *, '   ', physgrid%ptr%local_min(i), &
+  !       ',', physgrid%ptr%local_max(i)
+      if (i .ne. physgrid%ptr%num_dims) print *, '      x'
       enddo
 
       end subroutine ESMF_PhysGridPrint
@@ -3033,17 +2340,17 @@
 ! !IROUTINE: ESMF_PhysGridPointInCell - Checks whether cell contains point
 !
 ! !INTERFACE:
-      function ESMF_PhysGridPointInCell(xpoint, ypoint, corner_x, corner_y, rc)
+      function ESMF_PhysGridPointInCell(point_x, point_y, corner_x, corner_y, rc)
 
 !
 ! !RETURN VALUE:
       logical :: ESMF_PhysGridPointInCell ! true if point located in cell
 !
 ! !ARGUMENTS:
-      real(kind=ESMF_KIND_R8), intent(in) :: &
-         xpoint, ypoint  ! x,y coordinates of search point 
+      real(kind=ESMF_KIND_R8), intent(in) ::  point_x   ! x coord of search point 
+      real(kind=ESMF_KIND_R8), intent(in) ::  point_y   ! y coord of search point 
 
-      real(kind=ESMF_KIND_R8), dimension(:), intent(in) :: &
+      real(kind=ESMF_KIND_R8), dimension(4), intent(in) :: &  ! TODO: unhardwire
          corner_x,     & ! x coordinates of cell corners
          corner_y        ! y coordinates of cell corners 
 
@@ -3058,10 +2365,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[xpoint]
-!          x coordinate of search point.
-!     \item[ypoint]
-!          y coordinate of search point.
+!     \item[point\_x]
+!          x-coordinate of search point.
+!     \item[point\_y]
+!          y-coordinate of search point.
 !     \item[corner\_x]
 !          x-coordinate of grid cell corners.
 !     \item[corner\_y]
@@ -3090,23 +2397,12 @@
       ref_product,     &! the cross product for first non-zero value
       sign_test,       &! test to see if cross products are same sign
       zero, one
-   real(kind=ESMF_KIND_R8) :: min_x, max_x, min_y, max_y
+
 !
 !     set default return value
 !
+
       ESMF_PhysGridPointInCell = .false.
-!
-!     quick and dirty screen test first
-!
-      min_x = minval(corner_x)
-      max_x = maxval(corner_x)
-      min_y = minval(corner_y)
-      max_y = maxval(corner_y)
-      if (xpoint.lt.min_x .or. xpoint.gt.max_x .or. &
-          ypoint.lt.min_y .or. ypoint.gt.max_y) then
-        if (present(rc)) rc = ESMF_SUCCESS
-        return
-      endif
 !
 !     set constants
 !
@@ -3114,44 +2410,50 @@
 !
 !     perform the cross product for each cell side
 !
+
       num_corners = size(corner_x)
 
       corner_loop: do ncorn=1,num_corners
          next_n = MOD(ncorn,num_corners) + 1
+
 !
 !        here we take the cross product of the vector making
 !        up each cell side with the vector formed by the vertex
 !        and search point.  if all the cross products are
 !        the same sign, the point is contained in the cell.
 !
+
          vec1_x = corner_x(next_n) - corner_x(ncorn)
          vec1_y = corner_y(next_n) - corner_y(ncorn)
-         vec2_x = xpoint - corner_x(ncorn)
-         vec2_y = ypoint - corner_y(ncorn)
+         vec2_x = point_x - corner_x(ncorn)
+         vec2_y = point_y - corner_y(ncorn)
+
 !
 !        if search point coincident with vertex
 !        then cell contains the point
 !
+
          if (vec2_x == 0 .and. vec2_y == 0) then
             ESMF_PhysGridPointInCell = .true.
             exit corner_loop
          endif
+
 !
 !        if cell side has zero length (degenerate vertices)
 !         then skip the side and move on to the next
 !
+
          if (vec1_x == 0 .and. vec1_y == 0) cycle corner_loop
 
 !        compute cross product
 
          cross_product = vec1_x*vec2_y - vec2_x*vec1_y
+
 !
 !        if the cross product is zero, the point
 !        lies exactly on the side and is contained in the cell
-!        TODO:  talk to Phil - not exactly true since if either all
-!               three x-points or all three y-points are colinear the
-!               cross product will be zero but the point not necessarily inside
 !
+
          if (cross_product == zero) then
             ESMF_PhysGridPointInCell = .true.
             exit corner_loop
@@ -3173,9 +2475,11 @@
          if (test_product < zero) exit corner_loop ! x-prod has different sign
 
       end do corner_loop
+
 !
 !     if cross products all same sign this location contains the pt
 !
+
       if (test_product > zero)  ESMF_PhysGridPointInCell = .true.
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -3185,10 +2489,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridCompDistSpherical - Distance in spherical coords
+! !IROUTINE: ESMF_PhysGridCompDistSpherical - compute distance spherical coords
 !
 ! !INTERFACE:
-      function ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, rc)
+      function ESMF_PhysGridCompDistSpherical(lon1, lat1, lon2, lat2, radius,rc)
 
 !
 ! !RETURN VALUE:
@@ -3196,21 +2500,33 @@
 !
 ! !ARGUMENTS:
       real(kind=ESMF_KIND_R8), intent(in) :: &
-         x1, y1,        & ! x,y coordinates of points between which to 
-         x2, y2           !   compute distance: x=longitude(deg), y=lat (deg)
+         lon1, lat1,   & ! longitude and latitude coordinates of points between
+         lon2, lat2      !   which to compute distance
 
-      integer, intent(out) :: rc  ! return code
+      real(kind=ESMF_KIND_R8), intent(in), optional :: &
+         radius          ! if supplied, distance will be in length units on
+                         !   a sphere of this radius.
+
+      integer, intent(out), optional :: rc  ! return code
+
 !
 ! !DESCRIPTION:
 !     This routine computes the distance between two points defined by
-!     the input coordinates.  This version computes the angular distance
-!     in spherical coordinates given longitude, latitude in degrees.
+!     the input coordinates.  This version computes the angular distance 
+!     in radians between points in spherical coordinates given longitude, 
+!     latitude in degrees.  If an optional radius is supplied, the distance
+!     will be returned in length units on the surface of a sphere of the
+!     specified radius.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[x1,y1,x2,y2]
-!          Coordinates of points between which distance is computed.
-!     \item[rc]
+!     \item[lon1,lat1,lon2,lat2]
+!          Longitude and latitude coordinates (in degrees) of points between 
+!          which distance is computed.
+!     \item[[radius]]
+!          If supplied, distance will be returned in length units (same units
+!          as radius) on the surface of a sphere of the specified radius.
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -3222,14 +2538,13 @@
 !
 
       real(kind=ESMF_KIND_R8) :: &
-         lon1, lat1, lon2, lat2  ! lon/lat in radians
+         rlon1, rlat1, rlon2, rlat2  ! lon/lat in radians
       real(kind=ESMF_KIND_R8) :: pi
 
 !
 !     initialize return code
 !
-
-      rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_SUCCESS
 !
 !     set constants
 !
@@ -3237,26 +2552,24 @@
 !
 !     convert input coordinates to radians
 !
-
-      lon1 = x1*pi/180.d0
-      lat1 = y1*pi/180.d0
-      lon2 = x2*pi/180.d0
-      lat2 = y2*pi/180.d0
-
+      rlon1 = lon1*pi/180.d0
+      rlat1 = lat1*pi/180.d0
+      rlon2 = lon2*pi/180.d0
+      rlat2 = lat2*pi/180.d0
 !
 !     compute angular distance
 !
-
       ESMF_PhysGridCompDistSpherical = &
-         acos( cos(lat1)*cos(lat2)*cos(lon1)*cos(lon2) + &
-               cos(lat1)*cos(lat2)*sin(lon1)*sin(lon2) + &
-               sin(lat1)*sin(lat2) )
-
+         acos( cos(rlat1)*cos(rlat2)*cos(rlon1)*cos(rlon2) + &
+               cos(rlat1)*cos(rlat2)*sin(rlon1)*sin(rlon2) + &
+               sin(rlat1)*sin(rlat2) )
 !
-!     set return code
+!     if radius present, convert to linear distance
 !
-
-      rc = ESMF_SUCCESS
+      if (present(radius)) then
+         ESMF_PhysGridCompDistSpherical = radius*ESMF_PhysGridCompDistSpherical
+   !  ???? JW
+      endif
 
       end function ESMF_PhysGridCompDistSpherical
 
@@ -3276,7 +2589,7 @@
          x1, y1,        & ! x,y coordinates of points between which to 
          x2, y2           !   compute distance
 
-      integer, intent(out) :: rc  ! return code
+      integer, intent(out), optional :: rc  ! return code
 !
 ! !DESCRIPTION:
 !     This routine computes the distance between two points defined by
@@ -3287,7 +2600,7 @@
 !     \begin{description}
 !     \item[x1,y1,x2,y2]
 !          Coordinates of points between which distance is computed.
-!     \item[rc]
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -3298,7 +2611,7 @@
 !     initialize return code
 !
 
-      rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_SUCCESS
 
 !
 !     compute distance using the usual Cartesian formula
@@ -3306,14 +2619,145 @@
 
       ESMF_PhysGridCompDistCartesian = sqrt( (x2-x1)**2 + (y2-y1)**2 )
 
-!
-!     set return code
-!
-
-      rc = ESMF_SUCCESS
-
       end function ESMF_PhysGridCompDistCartesian
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridMaskKindEqual - equality of PhysGrid mask types
+!
+! !INTERFACE:
+      function ESMF_GridMaskKindEqual(GridMaskKind1, GridMaskKind2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridMaskKindEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridMaskKind), intent(in) :: &
+         GridMaskKind1,      &! Two region types to compare for
+         GridMaskKind2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF PhysGrid mask types to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridMaskKind1, GridMaskKind2]
+!          Two mask types to compare for equality
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_GridMaskKindEqual = (GridMaskKind1%mask_kind == &
+                                GridMaskKind2%mask_kind)
+
+      end function ESMF_GridMaskKindEqual
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridMaskKindNotEqual - non-equality of PhysGrid mask types
+!
+! !INTERFACE:
+      function ESMF_GridMaskKindNotEqual(GridMaskKind1, GridMaskKind2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridMaskKindNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridMaskKind), intent(in) :: &
+         GridMaskKind1,      &! Two PhysGrid mask types to compare for
+         GridMaskKind2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF PhysGrid mask types to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridMaskKind1, GridMaskKind2]
+!          Two kinds of PhysGrid mask types to compare for inequality
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_GridMaskKindNotEqual = (GridMaskKind1%mask_kind /= &
+                                   GridMaskKind2%mask_kind)
+
+      end function ESMF_GridMaskKindNotEqual
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RegionKindEqual - equality of PhysGrid region kinds
+!
+! !INTERFACE:
+      function ESMF_RegionKindEqual(RegionKind1, RegionKind2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegionKindEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_RegionKind), intent(in) :: &
+         RegionKind1,      &! Two region types to compare for
+         RegionKind2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF PhysGrid region types to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegionKind1, RegionKind2]
+!          Two region types to compare for equality
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_RegionKindEqual = (RegionKind1%region_kind == &
+                              RegionKind2%region_kind)
+
+      end function ESMF_RegionKindEqual
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RegionKindNotEqual - non-equality of PhysGrid region kinds
+!
+! !INTERFACE:
+      function ESMF_RegionKindNotEqual(RegionKind1, RegionKind2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegionKindNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_RegionKind), intent(in) :: &
+         RegionKind1,      &! Two PhysGrid region types to compare for
+         RegionKind2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF PhysGrid region types to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegionKind1, RegionKind2]
+!          Two kinds of PhysGrid regions to compare for inequality
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_RegionKindNotEqual = (RegionKind1%region_kind /= &
+                                 RegionKind2%region_kind)
+
+      end function ESMF_RegionKindNotEqual
 
 !------------------------------------------------------------------------------
 
       end module ESMF_PhysGridMod
+
