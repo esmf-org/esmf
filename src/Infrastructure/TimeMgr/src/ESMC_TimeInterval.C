@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.72 2004/11/12 01:04:16 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.73 2004/11/18 23:02:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.72 2004/11/12 01:04:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.73 2004/11/18 23:02:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1164,8 +1164,6 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_TimeInterval::operator/(timeinterval)"
 
-    // TODO: fractional interval parts
-
     // TODO: use some form of polymorphism to share logic with operator% and
     //       Compare method ?
 
@@ -1178,6 +1176,9 @@
                                             ESMC_NULL_POINTER);
       return(0.0);
     }
+
+    // create zero basetime for comparison
+    ESMC_BaseTime zeroBaseTime;
 
     // create local copies to manipulate and divide 
     ESMC_TimeInterval ti1 = *this;
@@ -1192,13 +1193,7 @@
     if (ti1.yy == 0 && ti2.yy == 0 &&
         ti1.mm == 0 && ti2.mm == 0 &&
         ti1.d  == 0 && ti2.d  == 0) {
-      if (ti2.ESMC_FractionGetw() != 0) {  // TODO: fractions
-        return((ESMF_KIND_R8) ti1.ESMC_FractionGetw() /
-               (ESMF_KIND_R8) ti2.ESMC_FractionGetw());
-      } else {
-        ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
-        return(0.0);
-      }
+      return(ti1.ESMC_BaseTime::operator/(ti2));
     }
 
     // calendars must be the same for divide on relative parts
@@ -1225,8 +1220,7 @@
           return(0.0);
 
         // all relative case (yy (reduced to mm), mm, no seconds)
-        } else if (ti1.ESMC_FractionGetw() == 0 &&
-                   ti2.ESMC_FractionGetw() == 0) { // TODO: fractions (sN == 0)
+        } else if (zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           if (ti2.mm != 0) {
             return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
           } else {
@@ -1238,11 +1232,11 @@
         // below here are mixed (relative, absolute) cases
 
         // dividend zero
-        } else if (ti1.mm == 0 && ti1.ESMC_FractionGetw() == 0) {
+        } else if (ti1.mm == 0 && zeroBaseTime == ti1) {
           return(0.0); // ok
 
         // divisor zero
-        } else if (ti2.mm == 0 && ti2.ESMC_FractionGetw() == 0) {
+        } else if (ti2.mm == 0 && zeroBaseTime == ti2) {
           ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO,
                                              ESMC_NULL_POINTER);
           return(0.0);
@@ -1283,7 +1277,7 @@
         if ( (ti1.yy != 0 || ti2.yy != 0) &&
               ti1.mm == 0 && ti2.mm == 0  &&
               ti1.d  == 0 && ti2.d  == 0  &&
-              ti1.ESMC_FractionGetw() == 0 && ti2.ESMC_FractionGetw() == 0) {
+              zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // divide years only
           if (ti2.yy != 0) {
             return((ESMF_KIND_R8) ti1.yy / (ESMF_KIND_R8) ti2.yy);
@@ -1295,8 +1289,7 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0   &&
                    (ti1.mm != 0 || ti2.mm != 0)  &&
                     ti1.d  == 0 && ti2.d  == 0   &&
-                    ti1.ESMC_FractionGetw() == 0 &&
-                    ti2.ESMC_FractionGetw() == 0) {
+                    zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // divide months only
           if (ti2.mm != 0) {
             return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
@@ -1308,8 +1301,7 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                     ti1.mm == 0 && ti2.mm == 0  &&
                    (ti1.d  != 0 || ti2.d  != 0) &&
-                    ti1.ESMC_FractionGetw() == 0 &&
-                    ti2.ESMC_FractionGetw() == 0) {
+                    zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // divide days only
           if (ti2.d != 0) {
             return((ESMF_KIND_R8) ti1.d / (ESMF_KIND_R8) ti2.d);
@@ -1554,10 +1546,11 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_TimeInterval::operator%(timeinterval)"
 
-    // TODO: fractional interval parts
-
     // TODO: use some form of polymorphism to share logic with
     //       operator/ (return real) and Compare method ?
+
+    // create zero basetime for comparison
+    ESMC_BaseTime zeroBaseTime;
 
     // initialize result to zero
     ESMC_TimeInterval remainder;
@@ -1590,14 +1583,8 @@
     if (ti1.yy == 0 && ti2.yy == 0 &&
         ti1.mm == 0 && ti2.mm == 0 &&
         ti1.d  == 0 && ti2.d  == 0) {
-      if (ti2.ESMC_FractionGetw() != 0) {  // TODO: fractions
-        remainder.ESMC_FractionSetw(ti1.ESMC_FractionGetw() %
-                                    ti2.ESMC_FractionGetw());
-        return(remainder);
-      } else {
-        ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
-        return(remainder);
-      }
+      remainder = ti1.ESMC_BaseTime::operator%(ti2);
+      return(remainder);
     }
 
     // calendars must be the same for modulus on relative parts
@@ -1624,8 +1611,7 @@
           return(remainder);
 
         // all relative case (yy (reduced to mm), mm, no seconds)
-        } else if (ti1.ESMC_FractionGetw() == 0 &&
-                   ti2.ESMC_FractionGetw() == 0) { // TODO: fractions (sN == 0)
+        } else if (zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           if (ti2.mm != 0) {
             remainder.mm = ti1.mm % ti2.mm;
             return(remainder);
@@ -1638,11 +1624,11 @@
         // below here are mixed (relative, absolute) cases
 
         // dividend zero
-        } else if (ti1.mm == 0 && ti1.ESMC_FractionGetw() == 0) {
+        } else if (ti1.mm == 0 && zeroBaseTime == ti1) {
           return(remainder); // ok
 
         // divisor zero
-        } else if (ti2.mm == 0 && ti2.ESMC_FractionGetw() == 0) {
+        } else if (ti2.mm == 0 && zeroBaseTime == ti2) {
           ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO,
                                              ESMC_NULL_POINTER);
           return(remainder);
@@ -1683,8 +1669,7 @@
         if ( (ti1.yy != 0 || ti2.yy != 0) &&
               ti1.mm == 0 && ti2.mm == 0  &&
               ti1.d  == 0 && ti2.d  == 0  &&
-              ti1.ESMC_FractionGetw() == 0 &&
-              ti2.ESMC_FractionGetw() == 0) {
+              zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // modulus years only
           if (ti2.yy != 0) {
             remainder.yy = ti1.yy % ti2.yy;
@@ -1697,8 +1682,7 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                    (ti1.mm != 0 || ti2.mm != 0) &&
                     ti1.d  == 0 && ti2.d  == 0  &&
-                    ti1.ESMC_FractionGetw() == 0 &&
-                    ti2.ESMC_FractionGetw() == 0) {
+                    zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // modulus months only
           if (ti2.mm != 0) {
             remainder.mm = ti1.mm % ti2.mm;
@@ -1711,8 +1695,7 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                     ti1.mm == 0 && ti2.mm == 0  &&
                    (ti1.d  != 0 || ti2.d  != 0) &&
-                    ti1.ESMC_FractionGetw() == 0 &&
-                    ti2.ESMC_FractionGetw() == 0) {
+                    zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // modulus days only
           if (ti2.d != 0) {
             remainder.d = ti1.d % ti2.d;
@@ -2322,6 +2305,9 @@
       return(false);
     }
 
+    // create zero basetime for comparison
+    ESMC_BaseTime zeroBaseTime;
+
     // create local copies to manipulate and compare 
     ESMC_TimeInterval ti1 = *this;
     ESMC_TimeInterval ti2 = timeinterval;
@@ -2375,8 +2361,7 @@
           return(false);
 
         // all relative case (yy (reduced to mm), mm, no seconds)
-        } else if (ti1.ESMC_FractionGetw() == 0 &&
-                   ti2.ESMC_FractionGetw() == 0) { // TODO: fractions (sN == 0)
+        } else if (zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           switch (comparisonType)
           {
             case ESMC_EQ:
@@ -2394,11 +2379,11 @@
           };
 
         // below here are mixed (relative, absolute) cases
-        } else if (((ti1.mm != 0 || ti1.ESMC_FractionGetw() != 0) &&
-                     ti2.mm == 0 && ti2.ESMC_FractionGetw() == 0)
+        } else if (((ti1.mm != 0 || zeroBaseTime != ti1) &&
+                     ti2.mm == 0 && zeroBaseTime == ti2)
                                                 ||
-                   ((ti2.mm != 0 || ti2.ESMC_FractionGetw() != 0) &&
-                     ti1.mm == 0 && ti1.ESMC_FractionGetw() == 0)) {
+                   ((ti2.mm != 0 || zeroBaseTime != ti2) &&
+                     ti1.mm == 0 && zeroBaseTime == ti1)) {
           // ti1 non-zero and ti2 zero or vice versa
           // TODO: sign analysis ?  can't do if mixed signs ?
           switch (comparisonType)
@@ -2454,7 +2439,7 @@
         if ( (ti1.yy != 0 || ti2.yy != 0) &&
               ti1.mm == 0 && ti2.mm == 0  &&
               ti1.d  == 0 && ti2.d  == 0  &&
-              ti1.ESMC_FractionGetw() == 0 && ti2.ESMC_FractionGetw() == 0) {
+              zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // compare years only
           switch (comparisonType)
           {
@@ -2474,8 +2459,7 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                    (ti1.mm != 0 || ti2.mm != 0) &&
                     ti1.d  == 0 && ti2.d  == 0  &&
-                    ti1.ESMC_FractionGetw() == 0 &&
-                    ti2.ESMC_FractionGetw() == 0) {
+                    zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // compare months only
           switch (comparisonType)
           {
@@ -2495,8 +2479,7 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                     ti1.mm == 0 && ti2.mm == 0  &&
                    (ti1.d  != 0 || ti2.d  != 0) &&
-                    ti1.ESMC_FractionGetw() == 0 &&
-                    ti2.ESMC_FractionGetw() == 0) {
+                    zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // compare days only
           switch (comparisonType)
           {
