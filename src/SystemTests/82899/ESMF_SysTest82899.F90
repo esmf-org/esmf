@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.2 2003/08/01 16:03:30 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.3 2003/08/01 21:10:12 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -27,12 +27,11 @@
     ! Subroutine to set entry points.
     external setserv
 
-    ! Local variables
+    ! Global variables
     type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1
     type(ESMF_DELayout) :: layout1, deflayout
-    !integer, dimension(12) :: delist
-    integer, dimension(4) :: delist
+    integer, dimension(12) :: delist
     integer :: de_id
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
@@ -67,19 +66,17 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_DELayoutGetNumDEs(deflayout, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    !if (ndes .ne. 12) then
-    !    print *, "This system test needs to run 12-way, current np = ", ndes
-    !    goto 10
-    !endif
+    if (ndes .ne. 12) then
+        print *, "This system test needs to run 12-way, current np = ", ndes
+        goto 10
+    endif
 
     call ESMF_DELayoutGetDEId(deflayout, de_id, rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
     
 !   Create a DELayout for the Component
-    !delist = (/ (i, i=0, 11) /)
-    !layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
-    delist = (/ (i, i=0, 3) /)
-    layout1 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
+    delist = (/ (i, i=0, 11) /)
+    layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test #82899"
@@ -144,7 +141,7 @@
       write(failMsg, *) "System Test failure"
       write(testname, *) "System Test 82899: Field Halo Test"
 
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test(rc.eq.ESMF_SUCCESS, &
                         testname, failMsg, testresult, ESMF_SRCLINE)
 
       ! Separate message to console, for quick confirmation of success/failure
@@ -158,7 +155,8 @@
       write(0, *) trim(testname)
       write(0, *) trim(finalMsg)
       write(0, *) ""
-
+  
+      call ESMF_FrameworkFinalize(rc)
     endif
     
     end program ESMF_SysTest82899
@@ -375,7 +373,8 @@
 
       ! Local variables
       integer :: i, j, ni, nj, xpos, ypos, nx, ny
-      integer :: de_id, mismatch, target
+      integer :: de_id, target
+      integer :: mismatch
       integer :: pattern(3,3), halo_width
       integer(ESMF_IKIND_I4), dimension(:,:), pointer :: ldata
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
@@ -442,7 +441,7 @@
 
       ! bottom middle
       if (ypos .eq. 0) then
-        target = -1
+        target = (ny-1)*nx + xpos  ! used to be -1 before periodic was on.
       else
         target = de_id - nx 
       endif
@@ -456,7 +455,7 @@
       enddo
       ! top middle
       if (ypos .eq. ny-1) then
-        target = -1
+        target = xpos  ! used to be -1 before periodic was on.
       else
         target = de_id + nx 
       endif
@@ -499,7 +498,11 @@
 
       ! and finally corners
       ! lower left
-      if ((xpos .eq. 0) .or. (ypos .eq. 0)) then
+      if ((xpos .eq. 0) .and. (ypos .eq. 0)) then
+        target = -1
+      else if (ypos .eq. 0) then
+        target = (ny-1)*nx + xpos - 1  ! used to be -1 before periodic was on.
+      else if (xpos .eq. 0) then
         target = -1
       else
         target = de_id - nx - 1
@@ -513,7 +516,11 @@
         enddo
       enddo
       ! lower right
-      if ((xpos .eq. nx-1) .or. (ypos .eq. 0)) then
+      if ((xpos .eq. nx-1) .and. (ypos .eq. 0)) then
+        target = -1
+      else if (ypos .eq. 0) then
+        target = (ny-1)*nx + xpos + 1  ! used to be -1 before periodic was on.
+      else if (xpos .eq. nx-1) then
         target = -1
       else
         target = de_id - nx + 1
@@ -527,7 +534,11 @@
         enddo
       enddo
       ! upper left
-      if ((xpos .eq. 0) .or. (ypos .eq. ny-1)) then
+      if ((xpos .eq. 0) .and. (ypos .eq. ny-1)) then
+        target = -1
+      else if (ypos .eq. ny-1) then
+        target = xpos - 1  ! used to be -1 before periodic was on.
+      else if (xpos .eq. 0) then
         target = -1
       else
         target = de_id + nx - 1
@@ -541,7 +552,11 @@
         enddo
       enddo
       ! upper right
-      if ((xpos .eq. nx-1) .or. (ypos .eq. ny-1)) then
+      if ((xpos .eq. nx-1) .and. (ypos .eq. ny-1)) then
+        target = -1
+      else if (ypos .eq. ny-1) then
+        target = xpos + 1 ! used to be -1 before periodic was on.
+      else if (xpos .eq. nx-1) then
         target = -1
       else
         target = de_id + nx + 1
