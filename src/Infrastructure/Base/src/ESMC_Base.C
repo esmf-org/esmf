@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.26 2004/02/05 21:48:18 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.27 2004/02/05 23:26:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.26 2004/02/05 21:48:18 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.27 2004/02/05 23:26:53 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -1895,7 +1895,7 @@ extern "C" {
               printf("ESMF_AttributeGet: cannot return character string here\n");
               break;
             default:  
-              printf("ESMF_AttributeGet: unknown data type\n");
+              printf("ESMF_AttributeGet: 1 unknown data type\n");
               return ESMF_FAILURE;
           }
  
@@ -1904,14 +1904,17 @@ extern "C" {
             case ESMF_DATA_INTEGER:
               for (i=0; i<attr->items; i++)
                   ((int *)value)[i] = attr->vip[i];
+              break;
             case ESMF_DATA_REAL:
               for (i=0; i<attr->items; i++)
                   ((double *)value)[i] = attr->vrp[i];
+              break;
             case ESMF_DATA_LOGICAL:
               for (i=0; i<attr->items; i++)
                   ((ESMC_Logical *)value)[i] = attr->vlp[i];
+              break;
             default:  
-              printf("ESMF_AttributeGet: unknown data type\n");
+              printf("ESMF_AttributeGet: 2 unknown data type\n");
               return ESMF_FAILURE;
           }
       }
@@ -1980,7 +1983,7 @@ extern "C" {
               printf("ESMF_AttributeGet: cannot return character string here\n");
               break;
             default:  
-              printf("ESMF_AttributeGet: unknown data type\n");
+              printf("ESMF_AttributeGet: 3 unknown data type\n");
               return ESMF_FAILURE;
           }
  
@@ -1989,14 +1992,17 @@ extern "C" {
             case ESMF_DATA_INTEGER:
               for (i=0; i<attr->items; i++)
                   ((int *)value)[i] = attr->vip[i];
+              break;
             case ESMF_DATA_REAL:
               for (i=0; i<attr->items; i++)
                   ((double *)value)[i] = attr->vrp[i];
+              break;
             case ESMF_DATA_LOGICAL:
               for (i=0; i<attr->items; i++)
                   ((ESMC_Logical *)value)[i] = attr->vlp[i];
+              break;
             default:  
-              printf("ESMF_AttributeGet: unknown data type\n");
+              printf("ESMF_AttributeGet: 4 unknown data type\n");
               return ESMF_FAILURE;
           }
       }
@@ -2477,10 +2483,13 @@ extern "C" {
   if (!name)
       attrName[0] = '\0';
   else {
-      len = strlen(name);
-      if (len >= ESMF_MAXSTR)
+      len = strlen(name)+1;   // strlen doesn't count trailing null
+      if (len > ESMF_MAXSTR) {
+          printf("ERROR in ESMF_SetAttribute: attr name longer than %d\n",
+                                                ESMF_MAXSTR);
           return; 
-      strncpy(attrName, name, MIN(len, ESMF_MAXSTR-1));
+      }
+      memcpy(attrName, name, len);
   }
 
   dt = datatype;
