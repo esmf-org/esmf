@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.1 2003/09/23 15:16:25 nscollins Exp $
+// $Id: ESMC_GridComp.h,v 1.2 2003/09/23 17:26:44 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -140,7 +140,7 @@ extern "C" {
                          ESMC_Clock *clock, int *phase, int *rc);
  void FTN(f_esmf_gridcompget)(const ESMC_GridComp *gcomp, int *rc);
  void FTN(f_esmf_gridcompset)(ESMC_GridComp *gcomp, int *rc);
- void FTN(f_esmf_gridcompvalidate)(ESMC_GridComp *gcomp, const char *options, int *rc, int olen);
- void FTN(f_esmf_gridcompprint)(ESMC_GridComp *gcomp, const char *options, int *rc, int olen);
+ void FTN(f_esmf_gridcompvalidate)(const ESMC_GridComp *gcomp, const char *options, int *rc, int olen);
+ void FTN(f_esmf_gridcompprint)(const ESMC_GridComp *gcomp, const char *options, int *rc, int olen);
 };
 #endif   // ESMC_GridComp_H

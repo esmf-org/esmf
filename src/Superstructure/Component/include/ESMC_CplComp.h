@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.1 2003/09/23 15:16:25 nscollins Exp $
+// $Id: ESMC_CplComp.h,v 1.2 2003/09/23 17:26:27 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -136,8 +136,8 @@ extern "C" {
                          ESMC_Clock *clock, int *phase, int *rc);
  void FTN(f_esmf_cplcompget)(const ESMC_CplComp *ccomp, int *rc);
  void FTN(f_esmf_cplcompset)(ESMC_CplComp *ccomp, int *rc);
- void FTN(f_esmf_cplcompvalidate)(ESMC_CplComp *ccomp, const char *options, int *rc, int olen);
- void FTN(f_esmf_cplcompprint)(ESMC_CplComp *ccomp, const char *options, int *rc, int olen);
+ void FTN(f_esmf_cplcompvalidate)(const ESMC_CplComp *ccomp, const char *options, int *rc, int olen);
+ void FTN(f_esmf_cplcompprint)(const ESMC_CplComp *ccomp, const char *options, int *rc, int olen);
 };
 
 #endif   // ESMC_CplComp_H
