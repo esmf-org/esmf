@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.88 2004/12/02 18:19:55 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.89 2004/12/09 21:18:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -323,7 +323,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.88 2004/12/02 18:19:55 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.89 2004/12/09 21:18:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2058,7 +2058,7 @@
           cellMinX = minval(cornerX(:,i,j))
           cellMaxX = maxval(cornerX(:,i,j))
           cellMinY = minval(cornerY(:,i,j))
-          cellMinY = maxval(cornerY(:,i,j))
+          cellMaxY = maxval(cornerY(:,i,j))
 
           if (point(1).gt.cellMinX .AND. point(1).le.cellMaxX .AND. &
               point(2).gt.cellMinY .AND. point(2).le.cellMaxY) then ! point is in this cell
