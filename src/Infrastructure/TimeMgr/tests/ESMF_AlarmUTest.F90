@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.21 2004/10/05 16:22:29 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.22 2004/10/27 18:54:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.21 2004/10/05 16:22:29 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.22 2004/10/27 18:54:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -909,6 +909,85 @@
       enddo
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.18), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Fractional Time Alarms 1
+      write(failMsg, *) " Did not return nstep=8, and ESMF_SUCCESS"
+      write(name, *) "Fractional Time Alarm Test 1"
+      call ESMF_TimeIntervalSet(timeStep, ms=10, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, ms=100, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, m=59, s=59, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=1999, mm=12, dd=31, h=23, m=59, s=59, &
+                        ms=200, calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                ringInterval=alarmStep, rc=rc)
+
+      ! number of clock time steps alarm rings for
+      nstep = 0
+
+      ! run the clock
+      do while (.not. ESMF_ClockIsStopTime(clock2, rc=rc))
+        if (ESMF_AlarmIsRinging(alarm4)) then
+          nstep = nstep + 1
+          call ESMF_AlarmRingerOff(alarm4)
+        endif
+        call ESMF_ClockAdvance(clock2, rc=rc)
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.8), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Fractional Time Alarms 2
+      write(failMsg, *) " Did not return nstep=4, and ESMF_SUCCESS"
+      write(name, *) "Fractional Time Alarm Test 2"
+      call ESMF_TimeIntervalSet(timeStep, sN=-22, sD=7, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, sN=-44, sD=7, rc=rc)
+      call ESMF_TimeSet(startTime, yy=2000, mm=1, dd=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=1999, mm=12, dd=31, h=23, m=59, s=28, &
+                        sN=4, sD=7, calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=1999, mm=12, dd=31, h=23, m=59, s=53, &
+                        sN=2, sD=7, calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                ringInterval=alarmStep, rc=rc)
+
+      print *, "stopTime = "
+      call ESMF_TimePrint(stopTime)
+      print *, "alarmTime = "
+      call ESMF_TimePrint(alarmTime)
+      print *, "timeStep = "
+      call ESMF_TimeIntervalPrint(timeStep)
+      print *, "alarmStep = "
+      call ESMF_TimeIntervalPrint(alarmStep)
+
+      ! number of clock time steps alarm rings for
+      nstep = 0
+
+      ! run the clock
+      do while (.not. ESMF_ClockIsStopTime(clock2, rc=rc))
+        if (ESMF_AlarmIsRinging(alarm4)) then
+          nstep = nstep + 1
+          call ESMF_AlarmRingerOff(alarm4)
+        endif
+        call ESMF_ClockAdvance(clock2, rc=rc)
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.4), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.76 2004/10/05 16:27:04 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.77 2004/10/27 18:54:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.76 2004/10/05 16:27:04 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.77 2004/10/27 18:54:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -66,6 +66,9 @@
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
                              no_leapCalendar, esmf_360dayCalendar
       type(ESMF_CalendarType) :: cal_type
+
+      ! to retrieve time in string format
+      character(ESMF_MAXSTR) :: timeString
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep
@@ -1561,6 +1564,146 @@
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
+      write(name, *) "Millisecond clock test"
+      call ESMF_TimeSet(startTime, yy=2004, mm=9, dd=28, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime,  yy=2004, mm=9, dd=28, &
+                                h=0, m=1, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, ms=1, rc=rc)
+      clock = ESMF_ClockCreate("Millisecond Clock", &
+                                         timeStep, startTime, stopTime, rc=rc)
+
+      if (rc.eq.ESMF_SUCCESS) then
+      	! time step from start time to stop time
+      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
+        	call ESMF_ClockAdvance(clock, rc=rc)
+      	end do
+      end if
+
+      call ESMF_ClockPrint(clock, "currtime string", rc=rc)
+      call ESMF_ClockPrint(clock, "timestep", rc=rc)
+      call ESMF_ClockPrint(clock, "timestep string", rc=rc)
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      write(failMsg, *) "Millisecond clock advanced ", advanceCounts, &
+                        ", not 60,000 or not ESMF_SUCCESS."
+      call ESMF_Test((advanceCounts.eq.60000.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock, rc)
+      print *, "Millisecond clock advanced ", advanceCounts, " times."
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Microsecond clock test"
+      call ESMF_TimeSet(startTime, yy=2004, mm=9, dd=28, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime,  yy=2004, mm=9, dd=28, &
+                                s=1, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, us=100, rc=rc)
+      clock = ESMF_ClockCreate("Microsecond Clock", &
+                                         timeStep, startTime, stopTime, rc=rc)
+
+      if (rc.eq.ESMF_SUCCESS) then
+      	! time step from start time to stop time
+      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
+        	call ESMF_ClockAdvance(clock, rc=rc)
+      	end do
+      end if
+
+      call ESMF_ClockPrint(clock, "currtime string", rc=rc)
+      call ESMF_ClockPrint(clock, "timestep", rc=rc)
+      call ESMF_ClockPrint(clock, "timestep string", rc=rc)
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      write(failMsg, *) "Microsecond clock advanced ", advanceCounts, &
+                        ", not 10,000 or not ESMF_SUCCESS."
+      call ESMF_Test((advanceCounts.eq.10000.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock, rc)
+      print *, "Microsecond clock advanced ", advanceCounts, " times."
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Nanosecond clock test"
+      call ESMF_TimeSet(startTime,  yy=2004, mm=9, dd=28, ns=10000, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2004, mm=9, dd=28, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, ns=-1, rc=rc)
+      clock = ESMF_ClockCreate("Nanosecond Clock", &
+                                         timeStep, startTime, stopTime, rc=rc)
+
+      call ESMF_ClockPrint(clock, "currtime string", rc=rc)
+
+      if (rc.eq.ESMF_SUCCESS) then
+      	! time step from start time to stop time
+      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
+        	call ESMF_ClockAdvance(clock, rc=rc)
+      	end do
+      end if
+
+      call ESMF_ClockPrint(clock, "currtime string", rc=rc)
+      call ESMF_ClockPrint(clock, "timestep", rc=rc)
+      call ESMF_ClockPrint(clock, "timestep string", rc=rc)
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      write(failMsg, *) "Nanosecond clock advanced ", advanceCounts, &
+                        ", not 10,000 or not ESMF_SUCCESS."
+      call ESMF_Test((advanceCounts.eq.10000.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "Nanosecond clock advanced ", advanceCounts, " times."
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Nanosecond time string test"
+      call ESMF_ClockGet(clock, startTime=startTime, rc=rc)
+      call ESMF_TimeGet(startTime, timeString=timeString, rc=rc)
+      write(failMsg, *) "Nanosecond time string not 2004-09-28T00:00:00.000010000 or not ESMF_SUCCESS."
+      call ESMF_Test((timeString=="2004-09-28T00:00:00.000010000" .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_ClockDestroy(clock, rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Nanosecond time interval string test"
+      call ESMF_TimeIntervalGet(timeStep, timeString=timeString, rc=rc)
+      write(failMsg, *) "Nanosecond time interval string not P0Y0M0DT0H0M-0.000000001S or not ESMF_SUCCESS."
+      call ESMF_Test((timeString=="P0Y0M0DT0H0M-0.000000001S" .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Rational fraction time step clock test"
+      call ESMF_TimeSet(startTime, yy=2004, mm=9, dd=28, sN=1, sD=3, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime,  yy=2004, mm=9, dd=28, s=1, sN=2, sD=3, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, sN=1, sD=3, rc=rc)
+      clock = ESMF_ClockCreate("1/3 second Clock", &
+                                         timeStep, startTime, stopTime, rc=rc)
+
+      if (rc.eq.ESMF_SUCCESS) then
+      	! time step from start time to stop time
+      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
+        	call ESMF_ClockAdvance(clock, rc=rc)
+      	end do
+      end if
+
+      call ESMF_ClockPrint(clock, "currtime", rc=rc)
+      call ESMF_ClockPrint(clock, "currtime string", rc=rc)
+      call ESMF_ClockPrint(clock, "timestep", rc=rc)
+      call ESMF_ClockPrint(clock, "timestep string", rc=rc)
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      write(failMsg, *) "1/3 second clock advanced ", advanceCounts, &
+                        ", not 4 or not ESMF_SUCCESS."
+      call ESMF_Test((advanceCounts.eq.4.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock, rc)
+      print *, "1/3 second clock advanced ", advanceCounts, " times."
+
+      ! ----------------------------------------------------------------------------
 #endif
       ! destroy calendars
       call ESMF_CalendarDestroy(gregorianCalendar, rc)

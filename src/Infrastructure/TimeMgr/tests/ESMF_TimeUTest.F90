@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.10 2004/10/05 16:30:03 svasquez Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.11 2004/10/27 18:54:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.10 2004/10/05 16:30:03 svasquez Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.11 2004/10/27 18:54:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, S, MM, DD, YY, D, npets, dayOfYear, dayOfWeek
+      integer :: rc, H, M, S, US, MM, DD, YY, D, npets, dayOfYear, dayOfWeek
+      integer :: sN, sD
       logical :: bool
 
       type(ESMF_VM):: vm
@@ -62,6 +63,11 @@
       type(ESMF_Time) :: startTime, stopTime, startTime2, midMonth
       type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
                              noLeapCalendar, day360Calendar
+
+      ! instantitate some general times and timeintervals
+      type(ESMF_Time) :: time1, time2, time3, time4, time5
+      type(ESMF_TimeInterval) :: timeInterval2, timeInterval3, timeInterval4, &
+                                 timeInterval5
 
 !-------------------------------------------------------------------------------
 !    The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -415,6 +421,199 @@
       write(name, *) "Convert Gregorian to Julian Day Test 2"
       call ESMF_Test((D.eq.2440588).and.(rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      ! Fractional times tests
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a Millisecond Time 
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeSet(time1, yy=2004, mm=10, dd=14, h=15, m=52, s=58, &
+                        ms=10, calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Set Millisecond Time Initialization Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a Microsecond Time 
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeSet(time2, yy=2004, mm=10, dd=14, h=15, m=52, s=58, &
+                        us=20, calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Set Microsecond Time Initialization Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a Rational Fraction Time 1
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeSet(time4, yy=2004, mm=10, dd=22, h=13, m=45, &
+                        sN=5, sD=9, calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Set Rational Fraction Time Initialization Test 1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a Rational Fraction Time 2
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeSet(time5, yy=2004, mm=10, dd=21, h=13, m=45, &
+                        sN=17, sD=11, calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Set Rational Fraction Time Initialization Test 2"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a Millisecond Time Interval
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval2, s=1, ms=40, rc=rc)
+      write(name, *) "Set Millisecond Time Interval Initialization Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a Rational Fraction Time Interval
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval4, sN=3, sD=4, rc=rc)
+      write(name, *) "Set Rational Fraction Time Interval Initialization Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test differencing two fractional times 1
+      write(failMsg, *) " Did not return 9980 us and ESMF_SUCCESS"
+      timeInterval3 = time1 - time2
+      call ESMF_TimeIntervalGet(timeInterval3, us=US, rc=rc)
+      call ESMF_TimeIntervalPrint(timeInterval3, rc=rc)
+      write(name, *) "Difference between two fractional Times Test 2"
+      call ESMF_Test((US.eq.9980.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test differencing two fractional times 2
+      write(failMsg, *) " Did not return D=0, H=-23, M=-59, S=-59, -1/99 seconds and ESMF_SUCCESS"
+      timeInterval5 = time5 - time4
+      call ESMF_TimeIntervalGet(timeInterval5, d=D, h=H, m=M, s=S, &
+                                sN=sN, sD=sD, rc=rc)
+      call ESMF_TimeIntervalPrint(timeInterval5, rc=rc)
+      write(name, *) "Difference between two fractional Times Test 2"
+      call ESMF_Test((D.eq.0.and.H.eq.-23.and.M.eq.-59.and.S.eq.-59 &
+                      .and.sN.eq.-1.and.sD.eq.99.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test adding a fractional time and time interval
+      write(failMsg, *) " Did not return 10/14/2004 15:52:59.040020 and ESMF_SUCCESS"
+      time3 = time2 + timeInterval2
+      call ESMF_TimeGet(time3, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, us=US, rc=rc)
+      call ESMF_TimePrint(time3, rc=rc)
+      write(name, *) "Adding fractional Time and Timeinterval Test"
+      call ESMF_Test((YY.eq.2004.and.MM.eq.10.and.DD.eq.14.and.H.eq.15.and. &
+                      M.eq.52.and.S.eq.59.and.US.eq.40020 &
+                      .and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test subtracting a fractional time and time interval
+      write(failMsg, *) " Did not return 10/22/2004 13:44:59 29/36 second and ESMF_SUCCESS"
+      time5 = time4 - timeInterval4
+      call ESMF_TimeGet(time5, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, sN=sN, &
+                        sD=sD, rc=rc)
+      call ESMF_TimePrint(time5, rc=rc)
+      write(name, *) "Subtracting fractional Time and Timeinterval Test"
+      call ESMF_Test((YY.eq.2004.and.MM.eq.10.and.DD.eq.22.and.H.eq.13.and. &
+                      M.eq.44.and.S.eq.59.and.sN.eq.29.and.sD.eq.36 &
+                      .and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (>) two fractional times 1
+      write(failMsg, *) " Did not return (time1 > time2)"
+      bool = time1 > time2
+      write(name, *) "Fractional time1 > time2 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (>) two fractional times 2
+      write(failMsg, *) " Did not return (time4 > time5)"
+      bool = time4 > time5
+      write(name, *) "Fractional time4 > time5 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (<) two fractional times 1
+      write(failMsg, *) " Did not return (time2 < time3)"
+      bool = time2 < time3
+      write(name, *) "Fractional time2 < time3 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (<) two fractional times 2
+      write(failMsg, *) " Did not return (time2 < time5)"
+      bool = time2 < time5
+      write(name, *) "Fractional time2 < time5 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (==) two fractional times
+      write(failMsg, *) " Did not return (time3 == time3)"
+      bool = time3 == time3
+      write(name, *) "Fractional time3 == time3 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (/=) two fractional times
+      write(failMsg, *) " Did not return (time1 /= time2)"
+      bool = time1 /= time2
+      write(name, *) "Fractional time1 /= time2 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (>=) two fractional times
+      write(failMsg, *) " Did not return (time1 >= time2)"
+      bool = time1 >= time2
+      write(name, *) "Fractional time1 >= time2 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (<=) two fractional times
+      write(failMsg, *) " Did not return (time1 <= time3)"
+      bool = time1 <= time3
+      write(name, *) "Fractional time1 <= time3 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 

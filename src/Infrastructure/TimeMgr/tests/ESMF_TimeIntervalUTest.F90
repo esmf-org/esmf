@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.33 2004/10/05 16:28:26 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.34 2004/10/27 18:54:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.33 2004/10/05 16:28:26 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.34 2004/10/27 18:54:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -45,7 +45,7 @@
 
       ! individual test result code
       integer :: rc, H, M, S, MM, DD, D, YY, days, months, years, &
-                 hours, secs, ans, npets
+                 hours, secs, ans, npets, ns, sN, sD
       logical :: bool
 
       ! individual test name
@@ -64,6 +64,8 @@
       type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
                              noLeapCalendar, day360Calendar
       type(ESMF_TimeInterval) :: absoluteTime
+      type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3, &
+                                 timeInterval4, timeInterval5, timeInterval6
       integer(ESMF_KIND_I8) :: days2
       real(ESMF_KIND_R8) :: ratio
 
@@ -2187,6 +2189,175 @@
       bool = timeStep > timeStep2    
       call ESMF_Test((bool), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      ! Fractional time interval tests
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a millisecond Time Interval
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval1, ms=5, rc=rc)
+      write(name, *) "Set millisecond Time Interval Initialization Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a nanosecond Time Interval
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval2, ns=70, rc=rc)
+      write(name, *) "Set nanosecond Time Interval Initialization Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a rational fraction Time Interval 1
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval4, sN=1, sD=2, rc=rc)
+      write(name, *) "Set rational fraction Time Interval Initialization Test 1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting a rational fraction Time Interval 2
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval5, sN=-3, sD=4, rc=rc)
+      write(name, *) "Set rational fraction Time Interval Initialization Test 2"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test adding two fractional Time Intervals 1
+      write(failMsg, *) " Did not return 5,000,070 nanoseconds and ESMF_SUCCESS"
+      timeInterval3 = timeInterval1 + timeInterval2
+      call ESMF_TimeIntervalGet(timeInterval3, ns=ns, rc=rc)
+      write(name, *) "Sum of two fractional Time Intervals Test"
+      call ESMF_Test((ns.eq.5000070.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test subtracting two fractional Time Intervals 1
+      write(failMsg, *) " Did not return -4,999,930 nanoseconds and ESMF_SUCCESS"
+      timeInterval3 = timeInterval2 - timeInterval1
+      call ESMF_TimeIntervalGet(timeInterval3, ns=ns, rc=rc)
+      write(name, *) "Difference of two fractional Time Intervals Test"
+      call ESMF_Test((ns.eq.-4999930.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test incrementing a fractional Time Interval with another
+      write(failMsg, *) " Did not return 70 nanoseconds and ESMF_SUCCESS"
+      timeInterval3 = timeInterval3 + timeInterval1
+      call ESMF_TimeIntervalGet(timeInterval3, ns=ns, rc=rc)
+      write(name, *) "Incrementing a fractional Time Interval with another Test"
+      call ESMF_Test((ns.eq.70.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test adding two fractional Time Intervals 2
+      write(failMsg, *) " Did not return -1/4 seconds and ESMF_SUCCESS"
+      timeInterval6 = timeInterval4 + timeInterval5
+      call ESMF_TimeIntervalGet(timeInterval6, sN=sN, sD=sD, rc=rc)
+      write(name, *) "Sum of two fractional Time Intervals Test 2"
+      call ESMF_Test((sN.eq.-1.and.sD.eq.4.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test subtracting two fractional Time Intervals 2
+      write(failMsg, *) " Did not return 1 1/4 seconds and ESMF_SUCCESS"
+      timeInterval6 = timeInterval4 - timeInterval5
+      call ESMF_TimeIntervalGet(timeInterval6, s=S, sN=sN, sD=sD, rc=rc)
+      write(name, *) "Difference of two fractional Time Intervals Test 2"
+      call ESMF_Test((S.eq.1.and.sN.eq.1.and.sD.eq.4.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (==) two fractional time intervals
+      write(failMsg, *) " Did not return (timeInterval3 == timeInterval2)"
+      bool = timeInterval3 == timeInterval2
+      write(name, *) "Fractional timeInterval3 == timeInterval2 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (/=) two fractional time intervals
+      write(failMsg, *) " Did not return (timeInterval1 /= timeInterval2)"
+      bool = timeInterval1 /= timeInterval2
+      write(name, *) "Fractional timeInterval1 /= timeInterval2 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (>) two fractional time intervals 1
+      write(failMsg, *) " Did not return (timeInterval1 > timeInterval2)"
+      bool = timeInterval1 > timeInterval2
+      write(name, *) "Fractional timeInterval1 > timeInterval2 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (>) two fractional time intervals 2
+      write(failMsg, *) " Did not return (timeInterval4 > timeInterval5)"
+      bool = timeInterval4 > timeInterval5
+      write(name, *) "Fractional timeInterval4 > timeInterval5 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (<) two fractional time intervals 1
+      write(failMsg, *) " Did not return (timeInterval2 < timeInterval1)"
+      bool = timeInterval2 < timeInterval1
+      write(name, *) "Fractional timeInterval2 < timeInterval1 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (<) two fractional time intervals 2
+      write(failMsg, *) " Did not return (timeInterval1 < timeInterval4)"
+      bool = timeInterval1 < timeInterval4
+      write(name, *) "Fractional timeInterval1 < timeInterval4 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (>=) two fractional time intervals
+      write(failMsg, *) " Did not return (timeInterval1 >= timeInterval2)"
+      bool = timeInterval1 >= timeInterval2
+      write(name, *) "Fractional timeInterval1 >= timeInterval2 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test comparing (<=) two fractional time intervals
+      write(failMsg, *) " Did not return (timeInterval3 <= timeInterval2)"
+      bool = timeInterval3 <= timeInterval2
+      write(name, *) "Fractional timeInterval3 <= timeInterval2 Test"
+      call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)
