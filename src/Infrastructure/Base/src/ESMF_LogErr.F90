@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.47 2004/12/03 22:03:52 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.48 2004/12/03 22:10:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -124,7 +124,7 @@ type ESMF_Log
     type(ESMF_LOGENTRY), dimension(:,:),pointer       ::  LOG_ENTRY=>Null()
     type(ESMF_LOGARRAY), dimension(:),pointer       ::  LOG_ARRAY =>Null()
 #else
-    type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
+    type(ESMF_LOGENTRY), dimension(:,:),pointer       ::  LOG_ENTRY
     type(ESMF_LOGARRAY), dimension(:),pointer       ::  LOG_ARRAY
 #endif                                        
     type(ESMF_VM)                                   ::  vm  
