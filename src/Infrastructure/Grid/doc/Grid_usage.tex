@@ -1,27 +1,14 @@
-% $Id: Grid_usage.tex,v 1.4 2003/10/21 03:44:13 cdeluca Exp $
+% $Id: Grid_usage.tex,v 1.5 2003/11/13 23:43:27 jwolfe Exp $
 
 %\subsection{Design and Implementation Notes}
 
-Each Grid contains at least one Distributed Grid and one Physical Grid.  
-The separation into two internal classes allows the code to differentiate
-between functions which define the local decomposition of data and
-the local representation of the grid.  The Grid class itself maintains
-general information about the global grid (e.g. the grid type, staggering,
-and coordinate system).  The Grid class is relatively thin and
-otherwise presents a unified interface for DistGrid and PhysGrid
-functions.
 
-The Grid class contains all information about the computational grid
-for a Component, and must provide access to any necessary grid information
-to the rest of the ESMF.  A single Grid can have more than one related
-DistGrid and PhysGrid set, called a SubGrid.  Each SubGrid corresponds to
-a different representation of the Grid.  For example, a staggered Grid could
-have separate subGrids representing cell centers and cell vertices.  A
-vertical grid may also be represented as a SubGrid.
+In typical applications, Grids are created either internally or read in from
+a file.  The ESMF\_Grid class provides methods for both.  It also has a variety
+of methods to set and get Grid parameters like the number of cells on any
+particular processor.  Some methods which have a Grid interface are actually
+implemented at the underlying DistGrid or PhysGrid level; they will be inherited
+by the Grid class.  This allows the API to present functions at the level which
+is most consistent to the application without restricting where inside the ESMF
+the actual implementation is done.
 
-Some methods which have a Grid interface are actually implemented
-at the underlying DistGrid or PhysGrid level; they will be inherited
-by the Grid class.  This allows the API to present functions at the 
-level which is most consistent
-to the application without restricting where inside the ESMF the actual
-implementation is done.

@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.4 2003/11/13 00:12:13 jwolfe Exp $
+% $Id: Grid_desc.tex,v 1.5 2003/11/13 23:42:17 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,16 +10,24 @@
 
 % <Describe class function and relation to other classes.>
 
-The ESMF Grid class represents the computational domain and its
-decomposition in a parallel-processing environment.  The ESFM Grid class
+The ESMF Grid class represents all aspects of the computational domain and its
+decomposition in a parallel-processing environment, and must provide access to
+any necessary grid information to the rest of the ESMF.  The ESMF Grid class
 is aggregated into the Field class and/or the Gridded Component class
-and provides communication capabilities to those classes like halo and
+and provides information needed in data communication methods like halo and
 redistribution.  It has methods to internally generate a variety of
 simple grids or read in more complicated grids provided by a user.  The
 ESMF Grid class supports multi-component coupling by providing a common
 structure necessary for Regridding.
 
-\subsection{Grid Classes}
+A single Grid can have more than one related subGrid.  Each subGrid corresponds to
+a different representation of the Grid.  For example, a staggered Grid could
+have separate subGrids representing cell centers and cell faces.  A vertical
+grid may also be represented as a subGrid.
+
+More on methods....   ordering?
+
+\subsubsection{Grid Classes}
 The Grid class aggregates two internal classes: the DistGrid (Distributed
 Grid) class and the PhysGrid (Physical Grid) class.  The separation into two
 classes allows the code to differentiate between functions which define the
@@ -39,3 +47,4 @@ methods to aid in the collection and communication of global data.
 representation of a Grid, including all necessary data and masks.  PhysGrids
 can represent subGrids, like vertical Grids, of a single Grid and be
 aggregated by the same Grid object. 
+\end{itemize}
