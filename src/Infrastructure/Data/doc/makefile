@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/11/04 22:15:43 nscollins Exp $ 
+# $Id: makefile,v 1.2 2003/01/10 21:59:25 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -15,14 +15,14 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Data/doc
 
 DVIFILES  = \
-		${ESMC_DOCDIR}/Data_reqdoc.dvi 
+#		${ESMC_DOCDIR}/Data_reqdoc.dvi 
 #		${ESMC_DOCDIR}/Data_desdoc.dvi \
 #		${ESMC_DOCDIR}/Data_refdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
 HTMLFILES = \
-		${ESMC_DOCDIR}/Data_reqdoc 
+#		${ESMC_DOCDIR}/Data_reqdoc 
 #		${ESMC_DOCDIR}/Data_desdoc \
 #		${ESMC_DOCDIR}/Data_refdoc
 
