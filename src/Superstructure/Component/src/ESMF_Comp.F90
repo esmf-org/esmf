@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.49 2003/05/07 17:39:52 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.50 2003/06/26 23:03:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,23 +81,16 @@
 !------------------------------------------------------------------------------
 !     ! ESMF Entry Point Names
 
-      character(len=16), parameter :: ESMF_SETINIT  = "ESMF_Initialize"
-      character(len=16), parameter :: ESMF_SETRUN   = "ESMF_Run"
-      character(len=16), parameter :: ESMF_SETFINAL = "ESMF_Finalize"
+      character(len=16), parameter :: ESMF_SETINIT        = "ESMF_Initialize"
+      character(len=16), parameter :: ESMF_SETRUN         = "ESMF_Run"
+      character(len=16), parameter :: ESMF_SETFINAL       = "ESMF_Finalize"
+      character(len=16), parameter :: ESMF_SETCHECKPOINT  = "ESMF_Checkpoint"
+      character(len=16), parameter :: ESMF_SETRESTORE     = "ESMF_Restore"
  
 !------------------------------------------------------------------------------
 !     ! ESMF Phase number
       integer, parameter :: ESMF_SINGLEPHASE = 0
 
-!------------------------------------------------------------------------------
-!     ! wrapper for Component objects going across F90/C++ boundary
-      type ESMF_CWrap
-      sequence
-      private
-          type(ESMF_CompClass), pointer :: compp
-      end type
-
-      
 !------------------------------------------------------------------------------
 !     ! Configuration placeholder - TODO: replace with real config object
 !
@@ -115,7 +108,7 @@
       type ESMF_CompClass
       sequence
       private
-         type(ESMF_Pointer) :: this        ! C++ ftable pointer - MUST BE FIRST
+         type(ESMF_Pointer) :: this           ! C++ ftable pointer - MUST BE FIRST
          type(ESMF_Base) :: base                  ! base class
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
@@ -130,6 +123,14 @@
          character(len=ESMF_MAXSTR) :: dirpath    ! relative dirname, app only
          type(ESMF_Grid) :: grid                  ! default grid, gcomp only
          type(ESMF_ModelType) :: mtype            ! model type, gcomp only
+      end type
+
+!------------------------------------------------------------------------------
+!     ! wrapper for Component objects going across F90/C++ boundary
+      type ESMF_CWrap
+      sequence
+      private
+          type(ESMF_CompClass), pointer :: compp => NULL()
       end type
 
 !------------------------------------------------------------------------------
@@ -167,9 +168,9 @@
 
       public ESMF_CompConstruct, ESMF_CompDestruct
       public ESMF_CompInitialize, ESMF_CompRun, ESMF_CompFinalize
+      public ESMF_CompCheckpoint, ESMF_CompRestore
       public ESMF_CompGet, ESMF_CompSet 
 
-      public ESMF_CompCheckpoint, ESMF_CompWrite 
       public ESMF_CompValidate, ESMF_CompPrint
 
 !EOPI
@@ -179,7 +180,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.49 2003/05/07 17:39:52 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.50 2003/06/26 23:03:13 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -479,12 +480,13 @@ end function
 ! !IROUTINE: ESMF_CompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompInitialize(compp, importstate, exportstate, &
+      subroutine ESMF_CompInitialize(compp, statecount, importstate, exportstate, &
                                        statelist, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
+      integer, intent(in) :: statecount
       type (ESMF_State), intent(inout), optional :: importstate
       type (ESMF_State), intent(inout), optional :: exportstate
       type (ESMF_State), intent(inout), target, optional :: statelist
@@ -502,6 +504,8 @@ end function
 !   \item[compp]
 !    Component to call Initialization routine for.
 !
+!   \item[statecount] 1 or 2 States being passed through interface.
+!       
 !   \item[{[importstate]}]  Import data for initialization.
 !
 !   \item[{[exportstate]}]  Export data for initialization.
@@ -559,7 +563,7 @@ end function
         compw%compp => compp
 
         ! Set up the arguments before the call     
-        if (compp%ctype .eq. ESMF_GRIDCOMPTYPE) then
+        if (statecount .eq. 2) then
           call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETINIT, phase, &
                                compw, importstate, exportstate, clock, status)
         else
@@ -582,44 +586,35 @@ end function
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
+! !IROUTINE: ESMF_CompCheckpoint -- Call the Component's checkpoint routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompRun(compp, importstate, exportstate, &
-                                                  statelist, clock, phase, rc)
+      subroutine ESMF_CompCheckpoint(compp, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_State), intent(inout), target, optional :: statelist
+      type(ESMF_IOSpec), intent(in), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user run code for a component.
+!  Call the associated user checkpoint code for a component.
 !
 !    
 !  The arguments are:
 !  \begin{description}
 !
 !   \item[compp]
-!    Component to call Run routine for.
+!    Component to call Checkpoint routine for.
 !
-!   \item[{[importstate]}]  Import data for run.
-!
-!   \item[{[exportstate]}]  Export data for run.
-!
-!   \item[{[statelist]}]  
-!       State containing list of nested import and export states for coupling.
+!   \item[{[iospec]}]  Controls for how the component's data will be written.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
-!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
+!   \item[{[phase]}]  If multiple-phase checkpoint, which phase number this is.
 !      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[rc]}]
@@ -639,7 +634,7 @@ end function
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
 
-        ! Run return code; assume failure until success is certain
+        ! Checkpoint return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -667,41 +662,130 @@ end function
         compw%compp => compp
 
         ! Set up the arguments before the call     
-        if (compp%ctype .eq. ESMF_GRIDCOMPTYPE) then
-          call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETRUN, phase, compw, &
-                                       importstate, exportstate, clock, status)
-        else
-          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETRUN, phase, &
-                                              compw, statelist, clock, status)
-        endif
+        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETCHECKPOINT, phase, &
+                                                compw, iospec, clock, status)
 
         ! Call user-defined run routine
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, &
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETCHECKPOINT, &
                                                                phase, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component run error"
+          print *, "Component checkpoint error"
           return
         endif
 
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_CompRun
-
+        end subroutine ESMF_CompCheckpoint
 
 
 !------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CompRestore -- Call the Component's restore routine
+
+! !INTERFACE:
+      subroutine ESMF_CompRestore(compp, iospec, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_CompClass), pointer :: compp
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user restore code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[compp]
+!    Component to call Restore routine for.
+!
+!   \item[{[iospec]}]  Controls for how the component's data will be read back.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase restore, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+
+        ! local vars
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
+        integer :: gde_id                       ! the global DE
+        integer :: lde_id                       ! the DE in the subcomp layout
+        character(ESMF_MAXSTR) :: cname
+        type(ESMF_CWrap) :: compw
+
+        ! Restore return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! See if this is currently running on a DE which is part of the
+        ! proper Layout.
+	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
+	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
+        if (status .ne. ESMF_SUCCESS) then
+          ! this is not our DE
+          print *, "Global DE ", gde_id, " is not present in this layout"
+          if (rcpresent) rc = ESMF_SUCCESS
+          return
+        endif
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+
+        ! TODO: handle optional args, do framework setup for this comp.
+
+        call ESMF_GetName(compp%base, cname, status)
+
+        ! Wrap comp so it's passed to C++ correctly.
+        compw%compp => compp
+
+        ! Set up the arguments before the call     
+        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETRESTORE, phase, &
+                                                compw, iospec, clock, status)
+
+        ! Call user-defined run routine
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRESTORE, &
+                                                               phase, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component restore error"
+          return
+        endif
+
+        ! Set return values
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_CompRestore
+
+
+
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_CompFinalize -- Call the Component's finalize routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompFinalize(compp, importstate, exportstate, &
+      subroutine ESMF_CompFinalize(compp, statecount, importstate, exportstate, &
                                       statelist, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
+      integer, intent(in) :: statecount
       type (ESMF_State), intent(inout), optional :: importstate
       type (ESMF_State), intent(inout), optional :: exportstate
       type (ESMF_State), intent(inout), target, optional :: statelist
@@ -719,6 +803,8 @@ end function
 !   \item[compp]
 !    Component to call Finalize routine for.
 !
+!   \item[statecount] 1 or 2 States being passed through interface.
+!       
 !   \item[{[importstate]}]  Import data for finalize.
 !
 !   \item[{[exportstate]}]  Export data for finalize.
@@ -796,6 +882,117 @@ end function
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CompFinalize
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
+
+! !INTERFACE:
+      subroutine ESMF_CompRun(compp, statecount, importstate, exportstate, &
+                                                  statelist, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_CompClass), pointer :: compp
+      integer, intent(in) :: statecount
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_State), intent(inout), target, optional :: statelist
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user run code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[compp]
+!    Component to call Run routine for.
+!
+!   \item[statecount] 1 or 2 States being passed through interface.
+!       
+!   \item[{[importstate]}]  Import data for run.
+!
+!   \item[{[exportstate]}]  Export data for run.
+!
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+
+        ! local vars
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
+        integer :: gde_id                       ! the global DE
+        integer :: lde_id                       ! the DE in the subcomp layout
+        character(ESMF_MAXSTR) :: cname
+        type(ESMF_CWrap) :: compw
+
+        ! Run return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! See if this is currently running on a DE which is part of the
+        ! proper Layout.
+	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
+	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
+        if (status .ne. ESMF_SUCCESS) then
+          ! this is not our DE
+          print *, "Global DE ", gde_id, " is not present in this layout"
+          if (rcpresent) rc = ESMF_SUCCESS
+          return
+        endif
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+
+        ! TODO: handle optional args, do framework setup for this comp.
+
+        call ESMF_GetName(compp%base, cname, status)
+
+        ! Wrap comp so it's passed to C++ correctly.
+        compw%compp => compp
+
+        ! Set up the arguments before the call     
+        if (statecount .eq. 2) then
+          call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETRUN, phase, compw, &
+                                       importstate, exportstate, clock, status)
+        else
+          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETRUN, phase, &
+                                              compw, statelist, clock, status)
+        endif
+
+        ! Call user-defined run routine
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, &
+                                                               phase, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component run error"
+          return
+        endif
+
+        ! Set return values
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_CompRun
+
 
 
 !------------------------------------------------------------------------------
@@ -962,72 +1159,6 @@ end function
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_CompCheckpoint - Save a Component's state to disk
-!
-! !INTERFACE:
-      subroutine ESMF_CompCheckpoint(compp, iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CompClass):: compp 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc            
-!
-! !DESCRIPTION:
-!      Used to save all data to disk as quickly as possible.  
-!      (see Read/Write for other options).  Internally this routine uses the
-!      same I/O interface as Read/Write, but the default options are to
-!      select the fastest way to save data to disk.
-!
-!EOPI
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!
-        if (present(rc)) rc = ESMF_FAILURE
-
-        end subroutine ESMF_CompCheckpoint
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_CompRestore - Restore a Component's state from disk
-!
-! !INTERFACE:
-      function ESMF_CompRestore(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_CompClass) :: ESMF_CompRestore
-!
-!
-! !ARGUMENTS:
-      character (len = *), intent(in) :: name
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Used to reinitialize
-!      all data associated with a Component from the last call to Checkpoint.
-!
-!EOPI
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!
-        type (ESMF_CompClass) :: a 
-
-        a%mtype = ESMF_OTHER
-
-        ESMF_CompRestore = a 
-
-        if (present(rc)) rc = ESMF_FAILURE
- 
-        end function ESMF_CompRestore
-
-
-!------------------------------------------------------------------------------
-!BOPI
 ! !IROUTINE: ESMF_CompWrite - Write a Component to disk
 !
 ! !INTERFACE:
@@ -1181,6 +1312,11 @@ end function
        ! Parse options and decide what to print
        if(present(options)) then
            ! TODO:  decide what to print
+       endif
+
+       if (.not.associated(compp)) then
+         print *, "Invalid or uninitialized Component"
+         return
        endif
 
        call ESMF_GetName(compp%base, cname, status)
