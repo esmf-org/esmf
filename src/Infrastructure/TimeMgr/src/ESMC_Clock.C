@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.26 2003/07/25 05:17:05 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.27 2003/07/25 19:58:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.26 2003/07/25 05:17:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.27 2003/07/25 19:58:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -609,6 +609,7 @@
 
     // TODO: call each alarm's CheckRingTime method;
     //   compile and return a list of ringing alarms
+    //   ESMC_AlarmCheckRingTime(CurrTime, ...)
 
     return(ESMF_SUCCESS);
 
@@ -650,10 +651,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockRead - restore contents of a Clock
+// !IROUTINE:  ESMC_ClockReadRestart - restore contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockRead(
+      int ESMC_Clock::ESMC_ClockReadRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -681,7 +682,7 @@
         stopTime  == ESMC_NULL_POINTER || refTime   == ESMC_NULL_POINTER ||
         currTime  == ESMC_NULL_POINTER || prevTime  == ESMC_NULL_POINTER ||
         alarmList == ESMC_NULL_POINTER) {
-      cout << "ESMC_Clock::ESMC_ClockRead(): null pointer(s) passed in" << endl;
+      cout << "ESMC_Clock::ESMC_ClockReadRestart(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }
     
@@ -699,14 +700,14 @@
     
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockRead
+ } // end ESMC_ClockReadRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockWrite - save contents of a Clock
+// !IROUTINE:  ESMC_ClockWriteRestart - save contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockWrite(
+      int ESMC_Clock::ESMC_ClockWriteRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -735,7 +736,7 @@
         currTime     == ESMC_NULL_POINTER || prevTime  == ESMC_NULL_POINTER ||
         advanceCount == ESMC_NULL_POINTER || alarmList == ESMC_NULL_POINTER ||
         numAlarms    == ESMC_NULL_POINTER) {
-      cout << "ESMC_Clock::ESMC_ClockWrite(): null pointer(s) passed in"
+      cout << "ESMC_Clock::ESMC_ClockWriteRestart(): null pointer(s) passed in"
            << endl;
       return(ESMF_FAILURE);
     }
@@ -753,7 +754,7 @@
                                // sure Alarms are saved afterward
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockWrite
+ } // end ESMC_ClockWriteRestart
 
 //-------------------------------------------------------------------------
 //BOP

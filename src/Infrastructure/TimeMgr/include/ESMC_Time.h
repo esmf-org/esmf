@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.23 2003/06/07 00:41:59 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.24 2003/07/25 19:58:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -149,10 +149,10 @@
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_TimeRead(ESMF_IKIND_I8 S, int Sn, int Sd,
-                      ESMC_Calendar *cal, int timeZone);
-    int ESMC_TimeWrite(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                       ESMC_Calendar *cal, int *timeZone) const;
+    int ESMC_TimeReadRestart(ESMF_IKIND_I8 S, int Sn, int Sd,
+                             ESMC_Calendar *cal, int timeZone);
+    int ESMC_TimeWriteRestart(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
+                              ESMC_Calendar *cal, int *timeZone) const;
 
     // internal validation
     int ESMC_TimeValidate(const char *options=0) const;  // (TMG 7.1.1)

@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.22 2003/06/12 17:15:41 rstaufer Exp $
+// $Id: ESMC_BaseTime.C,v 1.23 2003/07/25 19:58:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.22 2003/06/12 17:15:41 rstaufer Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.23 2003/07/25 19:58:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -581,10 +581,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseTimeRead - restore BaseTime state
+// !IROUTINE:  ESMC_BaseTimeReadRestart - restore BaseTime state
 //
 // !INTERFACE:
-      int ESMC_BaseTime::ESMC_BaseTimeRead(
+      int ESMC_BaseTime::ESMC_BaseTimeReadRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -606,14 +606,14 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_BaseTimeRead
+}  // end ESMC_BaseTimeReadRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseTimeWrite - save BaseTime state
+// !IROUTINE:  ESMC_BaseTimeWriteRestart - save BaseTime state
 //
 // !INTERFACE:
-      int ESMC_BaseTime::ESMC_BaseTimeWrite(
+      int ESMC_BaseTime::ESMC_BaseTimeWriteRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -631,8 +631,7 @@
 
     if (S  == ESMC_NULL_POINTER || Sn == ESMC_NULL_POINTER ||
         Sd == ESMC_NULL_POINTER) {
-      cout << "ESMC_BaseTime::ESMC_BaseTimeWrite(): null pointer(s) passed in "
-           << endl;
+      cout << "ESMC_BaseTime::ESMC_BaseTimeWriteRestart(): null pointer(s) passed in " << endl;
       return(ESMF_FAILURE);
     }
 
@@ -642,7 +641,7 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_BaseTimeWrite
+}  // end ESMC_BaseTimeWriteRestart
 
 //-------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.39 2003/07/25 05:17:06 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.40 2003/07/25 19:58:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.39 2003/07/25 05:17:06 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.40 2003/07/25 19:58:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -952,10 +952,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeRead - restore Time state
+// !IROUTINE:  ESMC_TimeReadRestart - restore Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeRead(
+      int ESMC_Time::ESMC_TimeReadRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -976,12 +976,13 @@
     int rc;
 
     if (cal == ESMC_NULL_POINTER) {
-      cout << "ESMC_Time::ESMC_TimeRead(): null pointer passed in" << endl;
+      cout << "ESMC_Time::ESMC_TimeReadRestart(): null pointer passed in"
+           << endl;
       return(ESMF_FAILURE);
     }
 
     // use base class Read() first
-    rc = ESMC_BaseTime::ESMC_BaseTimeRead(S, Sn, Sd);
+    rc = ESMC_BaseTime::ESMC_BaseTimeReadRestart(S, Sn, Sd);
 
     Calendar = cal;  // TODO?: this only restores calendar pointer; component
                      // must be sure to restore corresponding calendar first
@@ -989,14 +990,14 @@
   
     return(rc);
 
- }  // end ESMC_TimeRead
+ }  // end ESMC_TimeReadRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeWrite - return Time state
+// !IROUTINE:  ESMC_TimeWriteRestart - return Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeWrite(
+      int ESMC_Time::ESMC_TimeWriteRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1019,12 +1020,13 @@
     if (S  == ESMC_NULL_POINTER || Sn  == ESMC_NULL_POINTER ||
         Sd == ESMC_NULL_POINTER || cal == ESMC_NULL_POINTER ||
         timezone == ESMC_NULL_POINTER) {
-      cout << "ESMC_Time::ESMC_TimeWrite(): null pointer(s) passed in" << endl;
+      cout << "ESMC_Time::ESMC_TimeWriteRestart(): null pointer(s) passed in"
+           << endl;
       return(ESMF_FAILURE);
     }
 
     // use base class Write() first
-    rc = ESMC_BaseTime::ESMC_BaseTimeWrite(S, Sn, Sd);
+    rc = ESMC_BaseTime::ESMC_BaseTimeWriteRestart(S, Sn, Sd);
 
     cal = Calendar;  // TODO?: this only saves calendar pointer; component
                      // must be sure to save corresponding calendar
@@ -1032,7 +1034,7 @@
   
     return(rc);
 
- }  // end ESMC_TimeWrite
+ }  // end ESMC_TimeWriteRestart
 
 //-------------------------------------------------------------------------
 //BOP

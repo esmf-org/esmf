@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.15 2003/06/07 00:41:59 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.16 2003/07/25 19:58:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -142,14 +142,14 @@ class ESMC_Calendar {
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_CalendarRead(ESMC_CalendarType type,
-                          int *daysPerMonth, int secondsPerDay,
-                          int daysPerYear,   int daysPerYearDn,
-                          int daysPerYearDd);
-    int ESMC_CalendarWrite(ESMC_CalendarType *type,
-                           int *daysPerMonth,  int *secondsPerDay,
-                           int *daysPerYear,   int *daysPerYearDn,
-                           int *daysPerYearDd) const;
+    int ESMC_CalendarReadRestart(ESMC_CalendarType type,
+                                 int *daysPerMonth, int secondsPerDay,
+                                 int daysPerYear,   int daysPerYearDn,
+                                 int daysPerYearDd);
+    int ESMC_CalendarWriteRestart(ESMC_CalendarType *type,
+                                  int *daysPerMonth,  int *secondsPerDay,
+                                  int *daysPerYear,   int *daysPerYearDn,
+                                  int *daysPerYearDd) const;
 
     // internal validation
     int ESMC_CalendarValidate(const char *options=0) const;

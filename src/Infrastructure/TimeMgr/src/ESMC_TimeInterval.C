@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.32 2003/07/01 20:12:12 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.33 2003/07/25 19:58:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.32 2003/07/01 20:12:12 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.33 2003/07/25 19:58:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -927,10 +927,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalRead - restore TimeInterval state
+// !IROUTINE:  ESMC_TimeIntervalReadRestart - restore TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalRead(
+      int ESMC_TimeInterval::ESMC_TimeIntervalReadRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -952,7 +952,7 @@
     int rc;
 
     // use base class Read() first
-    rc = ESMC_BaseTime::ESMC_BaseTimeRead(S, Sn, Sd);
+    rc = ESMC_BaseTime::ESMC_BaseTimeReadRestart(S, Sn, Sd);
 
     // restore exclusive Time Interval properties
     this->YY = YY;
@@ -961,14 +961,14 @@
 
     return(rc);
 
- }  // end ESMC_TimeIntervalRead
+ }  // end ESMC_TimeIntervalReadRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalWrite - return TimeInterval state
+// !IROUTINE:  ESMC_TimeIntervalWriteRestart - return TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalWrite(
+      int ESMC_TimeInterval::ESMC_TimeIntervalWriteRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -992,13 +992,12 @@
     if (S  == ESMC_NULL_POINTER || Sn == ESMC_NULL_POINTER ||
         Sd == ESMC_NULL_POINTER || YY == ESMC_NULL_POINTER ||
         MO == ESMC_NULL_POINTER || D  == ESMC_NULL_POINTER) {
-      cout << "ESMC_TimeInterval::ESMC_TimeIntervalWrite(): null pointer(s) "
-           << "passed in" << endl;
+      cout << "ESMC_TimeInterval::ESMC_TimeIntervalWriteRestart(): null pointer(s) " << "passed in" << endl;
       return(ESMF_FAILURE);
     }
 
     // use base class Write() first
-    rc = ESMC_BaseTime::ESMC_BaseTimeWrite(S, Sn, Sd);
+    rc = ESMC_BaseTime::ESMC_BaseTimeWriteRestart(S, Sn, Sd);
 
     //  return exclusive Time Interval properties
     *YY = this->YY;
@@ -1007,7 +1006,7 @@
 
     return(rc);
 
- }  // end ESMC_TimeIntervalWrite
+ }  // end ESMC_TimeIntervalWriteRestart
 
 //-------------------------------------------------------------------------
 //BOP

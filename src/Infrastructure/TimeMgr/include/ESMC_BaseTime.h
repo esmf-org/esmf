@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.15 2003/06/07 00:41:59 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.16 2003/07/25 19:58:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -175,8 +175,8 @@ class ESMC_BaseTime {
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_BaseTimeRead(ESMF_IKIND_I8 S, int Sn, int Sd);
-    int ESMC_BaseTimeWrite(ESMF_IKIND_I8 *S, int *Sn, int *Sd) const;
+    int ESMC_BaseTimeReadRestart(ESMF_IKIND_I8 S, int Sn, int Sd);
+    int ESMC_BaseTimeWriteRestart(ESMF_IKIND_I8 *S, int *Sn, int *Sd) const;
 
     // internal validation
     int ESMC_BaseTimeValidate(const char *options=0) const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.28 2003/06/13 16:11:28 rstaufer Exp $
+// $Id: ESMC_Calendar.C,v 1.29 2003/07/25 19:58:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.28 2003/06/13 16:11:28 rstaufer Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.29 2003/07/25 19:58:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -569,10 +569,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarRead - restore Calendar state
+// !IROUTINE:  ESMC_CalendarReadRestart - restore Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarRead(
+      int ESMC_Calendar::ESMC_CalendarReadRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -592,8 +592,7 @@
 // !REQUIREMENTS:
 
     if (daysPerMonth == ESMC_NULL_POINTER) {
-      cout << "ESMC_Calendar::ESMC_CalendarRead(): null pointer passed in"
-           << endl;
+      cout << "ESMC_Calendar::ESMC_CalendarReadRestart(): null pointer passed in" << endl;
       return(ESMF_FAILURE);
     }
 
@@ -610,14 +609,14 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_CalendarRead
+}  // end ESMC_CalendarReadRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarWrite - save Calendar state
+// !IROUTINE:  ESMC_CalendarWriteRestart - save Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarWrite(
+      int ESMC_Calendar::ESMC_CalendarWriteRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -642,8 +641,7 @@
         daysPerYear   == ESMC_NULL_POINTER ||
         daysPerYearDn == ESMC_NULL_POINTER ||
         daysPerYearDd == ESMC_NULL_POINTER) {
-      cout << "ESMC_Calendar::ESMC_CalendarWrite(): null pointer(s) passed in"
-           << endl;
+      cout << "ESMC_Calendar::ESMC_CalendarWriteRestart(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }
 
@@ -659,7 +657,7 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_CalendarWrite
+}  // end ESMC_CalendarWriteRestart
 
 //-------------------------------------------------------------------------
 //BOP
