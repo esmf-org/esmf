@@ -1,4 +1,4 @@
-# $Id: do_ut_results,v 1.4 2003/04/04 23:28:52 svasquez Exp $
+# $Id: do_ut_results,v 1.5 2003/04/07 14:56:45 svasquez Exp $
 #!/bin/ksh
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
@@ -15,7 +15,7 @@ then
 else
 	echo "Executable unit tests found:"
 	cd $ESMF_DIR/test/testg/$ESMF_ARCH
-	find . -name "*UTest" -print
+	ls -l *UTest 
 	cd $ESMF_DIR
 	echo "" 
 	echo "All of the executable unit tests should have a corresponding stdout file." 
@@ -38,6 +38,9 @@ else
 	echo "Unit test stdout files of zero length indicate that the unit test" 
 	echo "did not run because it failed to compile or it failed to execute. " 
 	echo "" 
+	tests=`grep  PASS $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout | wc -l`
+	echo  $tests " Unit Tests passed " 
+        echo ""
 	if grep -q FAIL $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout
 	then
 		echo "The following Unit Tests Failed: "  
