@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base.site,v 1.2 2002/09/18 20:51:30 jwolfe Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -17,19 +17,17 @@
 # PCONF line at the bottom of this file.
 #
 BLAS_LIB       = -lblas ${FC_LIB}
-LAPACK_LIB     =  -lesslp2 /home/alice/software/blaslapack/lapack_rs6000.a
+# LAPACK_LIB     =  -lesslp2 -L/usr/local/lib32/r4i4 -llapack
+LAPACK_LIB     =  -L/usr/local/lib32/r4i4 -llapack -lessl
+NETCDF_LIB     = -L/usr/local/lib32/r4i4 -lnetcdf
+NETCDF64_LIB   = -L/usr/local/lib64/r4i4 -lnetcdf
 #
 # Location of MPI (Message Passing Interface) software
 #
 MPI_LIB        = 
 MPI_INCLUDE    = 
 MPIRUN         = ${ESMF_DIR}/scripts/mpirun.rs6000_sp
-
-
-
-
-
-
-
-
+MPI64_LIB      = -L/usr/local/mpi64/ppe.poe/lib -lmpi_r -lvtd_r \
+		 -L/usr/local/mpi64/ppe.poe/lib/us -lmpci_r
+HDF_INCLUDE    = -I/usr/local/include/hdf
 

@@ -1,4 +1,4 @@
-# $Id: base_variables.defs,v 1.2 2001/11/15 22:56:37 dneckels Exp $
+# $Id: base_variables.defs,v 1.3 2002/09/18 20:49:52 jwolfe Exp $
    This file contains a complete list of the variables that are defined
 in build/${ESMF_ARCH}/base_variables
 
@@ -13,19 +13,16 @@ C_FC - the Fortran compiler
 C_LINKER - the linker for programs with a main program in C
 F_LINKER - the linker for programs with a main program in Fortran
 C_CVV - the C compiler command to print the compiler version (if it exists)
-C_SYS_LIB - system libraries that Alice must link with 
+C_SYS_LIB - system libraries that ESMF must link with 
 
 G_COPTFLAGS  - compiler options for compiling debugger C code
 G_FOPTFLAGS  - compiler options for compiling debugger Fortran code
 O_COPTFLAGS  - compiler options for compiling optimized C code
 O_FOPTFLAGS  - compiler options for compiling optimized Fortran code
 
-G_ALICEFLAGS  - Alice compile flags that determine what Alice options get compiled
-                in for debugger code
-O_ALICEFLAGS  - same for optimized code
   -DUSE_ESMC_DEBUG - extra run time error checking is done
   -DUSE_ESMC_LOG - compile with in-line profiling (.e.g. -log_summary)
-  -DUSE_ESMC_STACK - compile extra code so that Alice keeps track of its call stack,
+  -DUSE_ESMC_STACK - compile extra code so that ESMF keeps track of its call stack,
                       this helps in debugging crashes
  
 Similar variables with XX or COMP correspond to using the C++ compiler or 

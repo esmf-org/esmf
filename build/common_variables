@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.8 2002/01/15 22:13:38 dneckels Exp $ 
+# $Id: common_variables,v 1.9 2002/09/18 20:50:56 jwolfe Exp $ 
 #
 # LDIR (defined from $ESMF_DIR) determines the libraries that are linked.
 # PDIR (defined from $ESMF_DIR) determines where the libraries are built.
@@ -14,7 +14,7 @@
 # SOBJS         - single precision versions of some object files
 # ESMC_INCLUDE    - locations of include files
 # CPPFLAGS      - preprocessor flags for *.c, *.F preprocessing
-# DOCS          - files that contain Alice documentation, readmes etc.
+# DOCS          - files that contain documentation, readmes etc.
 # ESMC_PARCH      - corresponds to the PARCH_arch in the source files, set in 
 #                 the file build/${ESMF_ARCH}/base
 # ESMF_BUILD    - Root directory to build in.  Set this variable on the make
@@ -22,62 +22,59 @@
 # ESMF_LIB_INSTALL - Directory for install target to place libs.
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
 #
-ESMF_BUILD     = ${ESMF_DIR}
-LDIR	       = ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
-ESMC_MODDIR      = ${ESMF_BUILD}/mod/mod${BOPT}/${ESMF_ARCH}
+
+ESMF_BUILD	= ${ESMF_DIR}
+LDIR		= ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
+ESMC_MODDIR	= ${ESMF_BUILD}/mod/mod${BOPT}/${ESMF_ARCH}
 # Building in the moddir solves problems about trying to copy module files
 # in after the fact.
-ESMC_OBJDIR      = ${ESMC_MODDIR}
-ESMC_TESTDIR     = ${ESMF_DIR}/test${BOPT}/${ESMF_ARCH}
-ESMC_DOCDIR      = ${ESMF_DIR}/doc
-PROTEX           = ${ESMF_DIR}/scripts/doc_templates/templates/protex 
-DO_LATEX         = ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_latex
-DOL2H            = ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_l2h
-PDIR	       = ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
-LIBNAME	       = ${PDIR}/${LIBBASE}.a
-SOURCE	       = ${SOURCEC} ${SOURCEF}
-OBJS	       = ${OBJSC} ${OBJSF}
-ESMC_INCLUDE     = -I${ESMF_DIR}/${LOCDIR} -I${ESMF_DIR} -I${ESMF_DIR}/src/include -I/usr/local/include -I${ESMF_DIR}/build/${ESMF_ARCH} -I${ESMF_DIR}/include ${MPE_INCLUDE} ${AMS_INCLUDE} ${MPI_INCLUDE} ${MP_INCLUDE} ${PCL_INCLUDE} -I${ESMF_DIR}/timing
-CCPPFLAGS      = ${ESMC_INCLUDE} ${PCONF} ${ALICEFLAGS} ${ESMC_PARCH} ${CPPFLAGS} \
-		 -D__SDIR__='"${LOCDIR}"'
-FCPPFLAGS      = ${ESMC_INCLUDE} ${PCONF} ${ALICEFLAGS} ${ESMC_PARCH} ${FPPFLAGS}
-C_SH_LIB_PATH  = ${CLINKER_SLFLAG}${LDIR} ${C_DYLIBPATH}
-F_SH_LIB_PATH  = ${FLINKER_SLFLAG}${LDIR} ${F_DYLIBPATH}
+ESMC_OBJDIR	= ${ESMC_MODDIR}
+ESMC_TESTDIR	= ${ESMF_DIR}/test${BOPT}/${ESMF_ARCH}
+ESMC_DOCDIR	= ${ESMF_DIR}/doc
+PROTEX		= ${ESMF_DIR}/scripts/doc_templates/templates/protex 
+DO_LATEX	= ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_latex
+DOL2H		= ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_l2h
+PDIR		= ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
+LIBNAME		= ${PDIR}/${LIBBASE}.a
+SOURCE		= ${SOURCEC} ${SOURCEF}
+OBJS		= ${OBJSC} ${OBJSF}
+ESMC_INCLUDE	= -I${ESMF_DIR}/${LOCDIR} \
+		  -I${ESMF_DIR} \
+		  -I${ESMF_DIR}/src/include \
+		  -I/usr/local/include \
+		  -I${ESMF_DIR}/build/${ESMF_ARCH} \
+		  -I${ESMF_DIR}/include \
+		  ${MPE_INCLUDE} \
+		  ${AMS_INCLUDE} \
+		  ${MPI_INCLUDE} \
+		  ${MP_INCLUDE} \
+		  ${PCL_INCLUDE} \
+		  ${LOCAL_INCLUDE} \
+		  -I${ESMF_DIR}/timing
+CCPPFLAGS	= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${CPPFLAGS} \
+	 	  -D__SDIR__='"${LOCDIR}"'
+FCPPFLAGS	= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
+C_SH_LIB_PATH	= ${CLINKER_SLFLAG}${LDIR} ${C_DYLIBPATH}
+F_SH_LIB_PATH	= ${FLINKER_SLFLAG}${LDIR} ${F_DYLIBPATH}
 #
-# Defines all libraries needed for using linear and nonlinear solvers, 
-# and all lower level Alice components (such as vectors and matrices).
+# Defines all libraries needed for using linear and nonlinear solvers.
 # The order of listing these libraries is important!
 #
-ESMC_TIME_LIB = -L${LDIR}
-
-
+ESMC_TIME_LIB	 = -L${LDIR}
 #
 # ---------------------------------------------------------------------------------------
 #
 # PCONF - indicates which OPTIONAL external packages are available at your site
 #
 #
-PCONF         = ${ESMC_HAVE_MPE}  ${ESMC_HAVE_BLOCKSOLVE} ${ESMC_HAVE_PVODE} ${ESMC_HAVE_PARMETIS} \
-                ${ESMC_HAVE_AMS}  ${ESMC_HAVE_SPAI}       ${ESMC_HAVE_X11}   ${ESMC_HAVE_MATLAB} \
-                ${ESMC_HAVE_ADIC} ${ESMC_HAVE_JAVA}
-EXTERNAL_LIB  = ${MPE_LIB}        ${BLOCKSOLVE_LIB}        ${PVODE_LIB}        ${PARMETIS_LIB} \
-                ${AMS_LIB}        ${SPAI_LIB}                                                  \
-                ${ADIC_LIB} 
+PCONF		= ${ESMC_HAVE_MPE}  ${ESMC_HAVE_BLOCKSOLVE} ${ESMC_HAVE_PVODE} ${ESMC_HAVE_PARMETIS} \
+                  ${ESMC_HAVE_AMS}  ${ESMC_HAVE_SPAI}       ${ESMC_HAVE_X11}   ${ESMC_HAVE_MATLAB} \
+                  ${ESMC_HAVE_ADIC} ${ESMC_HAVE_JAVA}
+EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}        ${PVODE_LIB}        ${PARMETIS_LIB} \
+                  ${AMS_LIB}        ${SPAI_LIB}                                                  \
+                  ${ADIC_LIB} 
 #
 # ----------------------------------------------------------------------------------------
-#
-# Link if you are using the Alice Fortran interface.
-#
-ESMC_FORTRAN_LIB = -L${LDIR} -lalicefortran
-#
-# Link if you are using code from the contributed part of Alice
-#
-ESMC_CONTRIB = -L${LDIR} -lalicecontrib
-#
-# Some variables used to build shared libraries
-SHLIBS = libalicecontrib libalice libalicemat libalicesles \
-	libalicesnes libalicets libalicevec libalicedm
-SLSUFFIX = so
 #
 # The following include files set customized site, optimization, and version
 # options.  Do NOT remove any of these include files.  You should generally
@@ -87,11 +84,4 @@ SLSUFFIX = so
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base.site
 # (This line MUST be present for certain machines (e.g., Cray T3D))
 include ${ESMF_DIR}/build/common_${BOPT}
-
-
-
-
-
-
-
 

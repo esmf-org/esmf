@@ -1,87 +1,90 @@
-# $Id: base_variables,v 1.3 2002/02/12 20:14:22 dneckels Exp $ 
+# $Id: base_variables,v 1.4 2002/09/18 20:51:45 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
-AR		   = ar
-AR_FLAGS	   = cr
-RM		   = rm -f
-OMAKE		   = ${MAKE}
-RANLIB		   = ranlib
-SHELL		   = /bin/sh
-SED		   = /bin/sed
+AR			= ar
+AR_FLAGS		= cr
+RM			= rm -f
+OMAKE			= ${MAKE}
+RANLIB			= ranlib
+SHELL			= /bin/sh
+SED			= /bin/sed
+# ######################### Fortran compiler options ######################
+#
+C_64BIT			= -q64
+NO_AUTO_PARALLEL	= -qsmp=noauto
+NO_INLINING		= -Q
+REAL8			= -qrealsize=8
+STRICT			= -qstrict
+FPP_PREFIX		= -WF,
+FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
 # ######################### C and Fortran compiler ########################
 #
-C_CC		   = mpcc_r -qsmp=omp
-C_FC		   = mpxlf90_r -qsmp=omp -qfixed=72
-C_FC_MOD           = -I
-C_CLINKER_SLFLAG   = -L
-C_FLINKER_SLFLAG   = -L
-C_CLINKER	   = mpcc_r -qsmp=omp -bmaxdata:0x70000000 
+C_CC			= mpcc_r -qsmp=omp
+C_FC			= mpxlf90_r
+C_FC_MOD		= -I
+C_CLINKER_SLFLAG	= -L
+C_FLINKER_SLFLAG	= -L
+C_CLINKER		= mpcc_r -qsmp=omp -bmaxdata:0x70000000 
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
-C_FLINKER	   = mpxlf90_r -qsmp=omp -bmaxdata:0x70000000 -brtl -lC
-C_CCV		   = unknown
-C_FCV		   = unknown
-C_SYS_LIB	   = /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lisode
+C_FLINKER		= mpxlf90_r -bmaxdata:0x70000000 -lC
+C_CCV			= unknown
+C_FCV			= unknown
+C_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lisode
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS	   = -g  -qfullpath 
-G_FOPTFLAGS	   = -g  -qfullpath
+G_COPTFLAGS		= -g  -qfullpath 
+G_FOPTFLAGS		= -g  -qfullpath
 # ----------------------------- BOPT - O options -----------------------------
 #O_COPTFLAGS	   = -O3 -qarch=pwr2  -qmaxmem=4000 -w -qspill=3000
 #O_FOPTFLAGS	   = -O3  -qarch=pwr2 -w
 
-O_COPTFLAGS	   = -O3 -qfullpath -qmaxmem=4000 -w -qspill=3000
-O_FOPTFLAGS	   = -O3 -qfullpath -w
+O_COPTFLAGS		= -O3 -qfullpath -qmaxmem=4000 -w -qspill=3000
+O_FOPTFLAGS		= -O3 -qfullpath -w
+FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 # ########################## C++ compiler ##################################
 #
-CXX_CC		   = mpCC_r
-CXX_FC		   = mpxlf_r
-CXX_CLINKER_SLFLAG = -L
-CXX_FLINKER_SLFLAG = -L
-CXX_CLINKER	   = mpCC_r
-CXX_FLINKER	   = mpCC_r -brtl
-CXX_CCV		   = unknown
-CXX_SYS_LIB	   = /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lcomplex -lisode
-C_CXXF90LD         = ${CXX_CC}
-C_F90CXXLD         = ${CXX_CC}
-C_CXXF90LIBS       = -L/usr/lpp/ppe.poe/lib/threads -L/usr/lpp/ppe.poe/lib -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser -lpthreads -lm_r -lm -lc_r -lc /usr/lpp/ppe.poe/lib/libc.a
-C_F90CXXLIBS       = -L/usr/lpp/ppe.poe/lib/threads -L/usr/lpp/ppe.poe/lib -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser -lpthreads -lm_r -lm -lc_r -lc /usr/lpp/ppe.poe/lib/libc.a
-C_CXXSO            = cc_r -G
-C_CXXSOLIBS        =  -L/usr/lpp/ppe.poe/lib/threads -L/usr/lpp/ppe.poe/lib -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser -lpthreads -lm_r -lm -lc_r -lc -lC
+CXX_CC			= mpCC_r
+CXX_FC			= mpxlf_r
+CXX_CLINKER_SLFLAG	= -L
+CXX_FLINKER_SLFLAG	= -L
+CXX_CLINKER		= mpCC_r
+CXX_FLINKER		= mpCC_r -brtl
+CXX_CCV			= unknown
+CXX_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lcomplex -lisode
+C_CXXF90LD		= ${CXX_CC}
+C_F90CXXLD		= ${CXX_CC}
+C_CXXF90LIBS		= -L/usr/lpp/ppe.poe/lib/threads \
+			  -L/usr/lpp/ppe.poe/lib \
+			  -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads \
+			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
+			  -lpthreads -lm_r -lm -lc_r -lc \
+			  /usr/lpp/ppe.poe/lib/libc.a
+C_F90CXXLIBS		= -L/usr/lpp/ppe.poe/lib/threads \
+			  -L/usr/lpp/ppe.poe/lib \
+			  -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads \
+			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
+			  -lpthreads -lm_r -lm -lc_r -lc \
+			  /usr/lpp/ppe.poe/lib/libc.a
+C_CXXSO			= cc_r -G
+C_CXXSOLIBS		= -L/usr/lpp/ppe.poe/lib/threads \
+			  -L/usr/lpp/ppe.poe/lib \
+			  -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads \
+			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
+			  -lpthreads -lm_r -lm -lc_r -lc -lC
 # ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS	   = -g  -qfullpath
-GCXX_FOPTFLAGS	   = -g  -qfullpath 
+GCXX_COPTFLAGS		= -g  -qfullpath
+GCXX_FOPTFLAGS		= -g  -qfullpath 
 # ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS	   = -O3  -qmaxmem=4000 -qspill=3000
-OCXX_FOPTFLAGS	   = -O3
+OCXX_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000
+OCXX_FOPTFLAGS		= -O3
 # -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS	   = -g  -qfullpath
-GCOMP_FOPTFLAGS	   = -g  -qfullpath
+GCOMP_COPTFLAGS		= -g  -qfullpath
+GCOMP_FOPTFLAGS		= -g  -qfullpath
 # --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS	   = -O3  -qmaxmem=4000 -qspill=3000
-OCOMP_FOPTFLAGS	   = -O3
-# ########################### Alice install options ###########################
-G_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_g \
-                     -DESMC_USE_STACK 
-O_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_BOPT_O -DESMC_USE_LOG
-GCXX_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_g \
-                     -DESMC_USE_STACK
-OCXX_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_O
-GCOMP_ALICEFLAGS   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_g \
-                     -DESMC_USE_COMPLEX  -DESMC_USE_FORTRAN_KERNELS -DESMC_USE_STACK
-OCOMP_ALICEFLAGS   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_O \
-                     -DESMC_USE_COMPLEX  -DESMC_USE_FORTRAN_KERNELS
-
-
-##################################################################################
+OCOMP_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000
+OCOMP_FOPTFLAGS		= -O3
 #
-#   Alice installers should very rarely ever need to edit anything below this 
-#
-##################################################################################
-#
-PARCH		   = rs6000
+PARCH			= rs6000
 
 include ${ESMF_DIR}/build/common_variables
-
-
-
 

@@ -1,31 +1,48 @@
-# $Id: base,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base,v 1.2 2002/09/18 20:51:16 jwolfe Exp $ 
 #
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
 include ${ESMF_DIR}/build/common
 
 #########
 
-# This F.f rule ensures that the old *.f files are removed.
-
-.F.f:
-	-${RM} $*.f __$*.c
-	-cp $*.F __$*.c
-	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
-	-${RM} __$*.c
+.F90.o:
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 ${FFLAGS} ${FCPPFLAGS} ${LOCAL_INCLUDE} $<
 
 .F.o:
-	-${RM} $*.f __$*.c
-	-cp $< __$*.c
-	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
-	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
-	-${RM} $*.f __$*.c
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=f=F ${FFLAGS} ${LOCAL_INCLUDE} $<
+
+.f90.o:
+	${FC} -c ${FOPTFLAGS} -qfixed=132 -qsuffix=cpp=f90 ${FFLAGS} ${FCPPFLAGS} ${LOCAL_INCLUDE} $<
+
+.f.o:
+	${FC} -c ${FOPTFLAGS} -qfixed=132 -qsuffix=f=f ${FFLAGS} ${LOCAL_INCLUDE} $<
+
+.c.o:
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${LOCAL_INCLUDE} $<
+
+.F90.a:
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 ${FFLAGS} ${FCPPFLAGS} ${LOCAL_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
 
 .F.a:
-	-${RM} $*.f __$*.c
-	-cp $< __$*.c
-	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
-	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
-	-${AR} cr ${LIBNAME} $*.o
-	-${RM} $*.f __$*.c
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=f=F ${FFLAGS} ${LOCAL_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.f90.a:
+	${FC} -c ${FOPTFLAGS} -qfixed=132 -qsuffix=cpp=f90 ${FFLAGS} ${FCPPFLAGS} ${LOCAL_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.f.a:
+	${FC} -c ${FOPTFLAGS} -qfixed=72 -qsuffix=f=f ${FFLAGS} ${LOCAL_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.c.a:
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${LOCAL_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
 
 shared:
