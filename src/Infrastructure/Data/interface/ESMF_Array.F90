@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.18 2003/01/07 22:23:14 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.19 2003/01/09 16:59:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
       type ESMF_Array
       sequence
       private
-        type(ESMF_Array), pointer :: this       ! the C++ class data
+        type(ESMF_Pointer) :: this       ! opaque pointer to the C++ class data
         integer (selected_int_kind(5)),dimension(:),pointer :: int4ptr1d
         integer (selected_int_kind(5)),dimension(:,:),pointer :: int4ptr2d
         integer (selected_int_kind(10)),dimension(:,:),pointer :: int8ptr2d
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.18 2003/01/07 22:23:14 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.19 2003/01/09 16:59:48 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -345,12 +345,12 @@ end function
 
 
 !       local vars
-        type (ESMF_Array), pointer :: ptr   ! opaque pointer to new C++ Array
+        type (ESMF_Array) :: array          ! new C++ Array
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       TODO: need a null pointer to assign to initialize ptr
-!       ptr = NULLPTR
+        array%this = ESMF_NULL_POINTER
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -358,7 +358,7 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        call c_ESMC_ArrayCreate(ptr, rank, type, kind, &
+        call c_ESMC_ArrayCreate(array, rank, type, kind, &
                                 lbounds, ubounds, strides, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array construction error"
@@ -366,7 +366,7 @@ end function
         endif
 
 !       set return values
-        ESMF_ArrayCreateNewBuffer%this => ptr 
+        ESMF_ArrayCreateNewBuffer = array 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayCreateNewBuffer
@@ -423,7 +423,7 @@ end function
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       initialize pointer
-        nullify(a)
+!        nullify(a)
 
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -432,20 +432,15 @@ end function
         endif
 
 !       allocate space for Array object and call Construct method to initalize
-        allocate(a, stat=status)
-        if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
-          print *, "Array allocation error"
-          return
-        endif
+!        allocate(a, stat=status)
+!        if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
+!          print *, "Array allocation error"
+!          return
+!        endif
 
-        call c_ESMC_ArrayConstructBySpec(a, spec, bufaddr, copyflag, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Array construction error"
-          return
-        endif
 
 !       set return values
-        ESMF_ArrayCreateBySpec%this => a
+        ESMF_ArrayCreateBySpec = a
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayCreateBySpec
@@ -494,17 +489,14 @@ end function
 ! !REQUIREMENTS:
 
 !       local vars
-        type (ESMF_Array), target :: thearray ! dummy array object
-        type (ESMF_Array), pointer :: ptr   ! what C++ is going to return
+        type (ESMF_Array) :: array          ! what C++ is going to return
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
         integer :: rank, lengths(2)         ! size info for the array
 
 !       !TODO: need a null pointer to assign to initialize ptr
-!       ptr = NULLPTR
-!       !TODO: this makes fortran think the pointer is associated
-        ptr => thearray
+        array%this = ESMF_NULL_POINTER
 
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -516,7 +508,7 @@ end function
         lengths(1) = size(f90ptr, 1)
         lengths(2) = size(f90ptr, 2)
 
-        call c_ESMC_ArrayCreateByPtr2D(ptr, ESMF_DATA_REAL, ESMF_KIND_8, &
+        call c_ESMC_ArrayCreateByPtr2D(array, ESMF_DATA_REAL, ESMF_KIND_8, &
                                              2, lengths, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array initial construction error"
@@ -526,7 +518,7 @@ end function
 !      !TODO: add code to handle copyflag.  For now, default to NO_COPY
 
 !       set base address
-        call c_ESMC_ArraySetBaseAddr(ptr%this, f90ptr(1,1), status)
+        call c_ESMC_ArraySetBaseAddr(array, f90ptr(1,1), status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array base address construction error"
           return
@@ -534,7 +526,7 @@ end function
 
 
 !       return value set by c_ESMC func above
-        ESMF_ArrayCreateByPtr2DR8%this => ptr%this
+        ESMF_ArrayCreateByPtr2DR8 = array
         ESMF_ArrayCreateByPtr2DR8%real8ptr2d => f90ptr
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -584,28 +576,25 @@ end function
 ! !REQUIREMENTS:
 
 !       local vars
-        type (ESMF_Array), target :: thearray ! dummy array object
-        type (ESMF_Array), pointer :: ptr   ! what C++ is going to return
+        type (ESMF_Array) :: array          ! C++ will fill in %this here
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
         integer :: rank, length             ! size info for the array
 
-!       !TODO: need a null pointer to assign to initialize ptr
-!       ptr = NULLPTR
-!       !TODO: this makes fortran think the pointer is associated
-        ptr => thearray
+!       ! assume failure
+        array%this = ESMF_NULL_POINTER
 
-!       initialize return code; assume failure until success is certain
+!       !initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
-!       call create routine
+!       !call create routine
         length = size(f90ptr, 1)
 
-        call c_ESMC_ArrayCreateByPtr1D(ptr, ESMF_DATA_INTEGER, ESMF_KIND_4, &
+        call c_ESMC_ArrayCreateByPtr1D(array, ESMF_DATA_INTEGER, ESMF_KIND_4, &
                                              1, length, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array initial construction error"
@@ -615,7 +604,7 @@ end function
 !      !TODO: add code to handle copyflag.  For now, default to NO_COPY
 
 !       set base address
-        call c_ESMC_ArraySetBaseAddr(ptr%this, f90ptr(1), status)
+        call c_ESMC_ArraySetBaseAddr(array, f90ptr(1), status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array base address construction error"
           return
@@ -623,7 +612,7 @@ end function
 
 
 !       return value set by c_ESMC func above
-        ESMF_ArrayCreateByPtr1DI4%this => ptr%this
+        ESMF_ArrayCreateByPtr1DI4 = array
         ESMF_ArrayCreateByPtr1DI4%int4ptr1d => f90ptr
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -676,15 +665,12 @@ end function
 ! !REQUIREMENTS:
 
 !       local vars
-        !type (ESMF_Pointer) :: ptr           ! what C++ is going to return
-        type (ESMF_Array), target :: thearray ! the real array
-        type (ESMF_Array), pointer :: ptr   ! what C++ is going to return
+        type (ESMF_Array) :: array   ! what C++ is going to return
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       TODO: need a null pointer to assign to initialize ptr
-!       ptr = NULLPTR
-        ptr => thearray
+        array%this = ESMF_NULL_POINTER
 
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -696,7 +682,7 @@ end function
         call c_ESMC_StoreAllocFunc(ESMF_Allocate2DR4, status);
 
 !       call create routine
-        call c_ESMC_ArrayCreateMTPtr2D(ptr, ni, nj, status)
+        call c_ESMC_ArrayCreateMTPtr2D(array, ni, nj, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array initial construction error"
           return
@@ -709,7 +695,7 @@ end function
         endif
 
 !       set base address
-        call c_ESMC_ArraySetBaseAddr(ptr%this, f90ptr(1,1), status)
+        call c_ESMC_ArraySetBaseAddr(array, f90ptr(1,1), status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array base address construction error"
           return
@@ -717,7 +703,7 @@ end function
 
 
 !       return value set by c_ESMC func above
-        ESMF_ArrayCreateMTPtr2DR8%this => ptr%this
+        ESMF_ArrayCreateMTPtr2DR8 = array
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayCreateMTPtr2DR8  
@@ -766,7 +752,7 @@ end function
 !       !   maybe we need another arg to say deallocate or not?
 
 !       call Destruct first, then free this memory
-        call c_ESMC_ArrayDestroy(array%this, status)
+        call c_ESMC_ArrayDestroy(array, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array contents destruction error"
           return
@@ -1195,9 +1181,7 @@ end function
         type (ESMF_Array) :: a 
 
 !       this is just to shut the compiler up
-        type (ESMF_Array), target :: b 
-        a%this => b
-        nullify(a%this)
+        a%this = ESMF_NULL_POINTER
 
 !
 ! TODO: add code here
@@ -1259,9 +1243,7 @@ end function
         type (ESMF_Array) :: a
 
 !       this is just to shut the compiler up
-        type (ESMF_Array), target :: b 
-        a%this => b
-        nullify(a%this)
+        a%this = ESMF_NULL_POINTER
 
 !
 ! TODO: add code here
@@ -1305,9 +1287,9 @@ end function
        endif
 
        if(present(options)) then
-           call c_ESMC_ArrayPrint(array%this, options, status) 
+           call c_ESMC_ArrayPrint(array, options, status) 
        else
-           call c_ESMC_ArrayPrint(array%this, defaultopts, status) 
+           call c_ESMC_ArrayPrint(array, defaultopts, status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then

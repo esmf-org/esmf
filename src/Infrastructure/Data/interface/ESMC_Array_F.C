@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.12 2003/01/07 21:50:54 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.13 2003/01/09 16:59:48 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,44 +46,37 @@ extern "C" {
      void FTN(c_esmc_storedeallocfunc)(void (*func)(struct c_F90ptr *, int *, int *, int *), int *status) {
          *status = ESMC_DeallocFuncStore(func);
      }
-     void FTN(c_esmc_arraycreate)(ESMC_Array *ptr, int rank, 
+     void FTN(c_esmc_arraycreate)(ESMC_Array **ptr, int rank, 
                                         enum ESMC_DataType type, 
                                         enum ESMC_DataKind kind,
                                         int *lbounds, int *ubounds, 
                                         int *strides, int *status) {
-             ptr = ESMC_ArrayCreate(rank, type, kind, NULL,
+             (*ptr) = ESMC_ArrayCreate(rank, type, kind, NULL,
                                      lbounds, ubounds, strides, status);
      }
 
      void FTN(c_esmc_arrayconstructbyspec)() {
      }
 
-     void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array *ptr, 
+     void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array **ptr, 
                                  enum ESMC_DataType *dt, enum ESMC_DataKind *dk,
                                  int *rank, int *lengths, int *status) {
-             ESMC_Array *lptr;
              
-             lptr = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, lengths,
+             (*ptr) = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, lengths,
                                       NULL, NULL, status);
-
-             *(unsigned long *)ptr = (unsigned long)lptr;
 
      }
  
-     void FTN(c_esmc_arraycreatebyptr1d)(ESMC_Array *ptr, 
+     void FTN(c_esmc_arraycreatebyptr1d)(ESMC_Array **ptr, 
                                  enum ESMC_DataType *dt, enum ESMC_DataKind *dk,
                                  int *rank, int *length, int *status) {
-             ESMC_Array *lptr;
              
-             lptr = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, length,
+             *ptr = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, length,
                                       NULL, NULL, status);
-
-             *(unsigned long *)ptr = (unsigned long)lptr;
 
      }
  
-     void FTN(c_esmc_arraycreatemtptr2d)(ESMC_Array *ptr, int *ni, int *nj, int *status) {
-             ESMC_Array *lptr;
+     void FTN(c_esmc_arraycreatemtptr2d)(ESMC_Array **ptr, int *ni, int *nj, int *status) {
              int lengths[2];
              enum ESMC_DataType dt;
              enum ESMC_DataKind dk;
@@ -94,24 +87,23 @@ extern "C" {
              dt = ESMF_DATA_REAL;
              dk = ESMF_KIND_4;
              
-             lptr = ESMC_ArrayCreate_F(2, dt, dk, NULL, NULL, lengths,
+             (*ptr) = ESMC_ArrayCreate_F(2, dt, dk, NULL, NULL, lengths,
                                       NULL, NULL, status);
 
-             *(unsigned long *)ptr = (unsigned long)lptr;
 
      }
  
-     void FTN(c_esmc_arraydestroy)(ESMC_Array *ptr, int *status) {
-         *status = ESMC_ArrayDestroy(ptr);
+     void FTN(c_esmc_arraydestroy)(ESMC_Array **ptr, int *status) {
+         *status = ESMC_ArrayDestroy(*ptr);
      }
 
-     void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array *ptr, float *base, int *status) {
-          ptr->ESMC_ArraySetBaseAddr((void *)(base));
+     void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
+          (*ptr)->ESMC_ArraySetBaseAddr((void *)(base));
           *status = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_arrayprint)(ESMC_Array *ptr, char *opts, int *status) {
-         *status = ptr->ESMC_ArrayPrint(opts);
+     void FTN(c_esmc_arrayprint)(ESMC_Array **ptr, char *opts, int *status) {
+         *status = (*ptr)->ESMC_ArrayPrint(opts);
      }
 
 };
