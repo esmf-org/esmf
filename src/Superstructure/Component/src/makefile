@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2003/10/22 21:22:22 cdeluca Exp $
+# $Id: makefile,v 1.20 2003/11/05 23:32:38 jwolfe Exp $
 
 # leave alone.
 ALL: lib 
@@ -19,7 +19,7 @@ SOURCEF	  = ESMF_Comp.F90 ESMF_GridComp.F90 ESMF_CplComp.F90 \
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # If you have public .h files in this dir, list them here
-STOREH    =
+STOREH    = ESMC_Comp.h ESMC_FTable.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
