@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.60 2004/01/07 21:36:46 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.61 2004/01/16 23:48:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 
       type ESMF_PhysLocation
       sequence
-      private
+!      private
         type (ESMF_Base)    :: base     ! ESMF Base object, including name
 
         ! One array per number of dimensions:
@@ -100,7 +100,7 @@
 
       type ESMF_PhysRegion
       sequence
-      private
+!      private
         type (ESMF_Base) :: base  ! ESMF Base class object
 
         type (ESMF_RegionKind) :: regionType
@@ -148,7 +148,7 @@
 
       type ESMF_GridMask
       sequence
-      private
+!      private
         type (ESMF_Base) :: base  ! ESMF Base class object
         type (ESMF_GridMaskKind) :: maskType
                                   ! type of mask
@@ -180,7 +180,7 @@
 
       type ESMF_PhysGridType
       sequence
-      private
+!      private
 
         type (ESMF_Base) :: base  ! ESMF Base class object
 
@@ -246,8 +246,11 @@
 
       ! These are public primarily for use by the Grid module and
       ! are not meant to be directly accessible to users.
+      public ESMF_PhysLocation
       public ESMF_RegionKind
+      public ESMF_PhysRegion
       public ESMF_GridMaskKind
+      public ESMF_GridMask
       public ESMF_PhysGridOrientation
       public ESMF_PhysGrid
       public ESMF_PhysGridType
@@ -334,7 +337,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.60 2004/01/07 21:36:46 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.61 2004/01/16 23:48:53 jwolfe Exp $'
 
 !==============================================================================
 !
