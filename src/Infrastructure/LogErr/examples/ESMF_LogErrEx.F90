@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.18 2004/12/17 21:37:48 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.19 2004/12/22 21:52:19 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 !\subsubsection{Default Log}
 
 ! This example shows how to use the default log.  This example does not use cpp
-! macros.
+! macros but does use multi logs.  A separate log will be created for each pet.
 !EOE
 !BOC
     ! Initialize ESMF to initialize the default log
@@ -83,8 +83,8 @@
 !EOC
 !BOE
 !\subsubsection{User Created Log}
-
 ! This example shows how to use a user created log.  This example uses cpp macros.
+! For this example, a single log is used so all pets write to the same log.
 !EOE
 !BOC
 ! File define

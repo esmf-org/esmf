@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.58 2004/12/17 21:37:47 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.59 2004/12/22 21:52:19 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -1101,7 +1101,7 @@ end subroutine ESMF_LogSet
 !            User-provided method string.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	         of the default log.
+!	     of the default log.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
