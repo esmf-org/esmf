@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.17 2003/01/10 18:31:39 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.18 2003/01/10 20:23:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,6 +109,8 @@
         integer :: DE_SW    ! identifier for DE to the southwest
         integer :: lsize                  ! local (on this DE) number of cells
         integer :: gstart                 ! global index of starting count
+                                          ! currently as the constant that
+                                          ! should be added to local index
         type (ESMF_DecompAxis) :: n_dir1  ! local cell count in 1st dir, in
                                           ! global index
         type (ESMF_DecompAxis) :: n_dir2  ! local cell count in 2nd dir, in
@@ -195,7 +197,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.17 2003/01/10 18:31:39 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.18 2003/01/10 20:23:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1225,7 +1227,10 @@
       subroutine ESMF_DistGridGetDE(distgrid, MyDE, MyDEx, MyDEy, &
                                     DE_E, DE_W, DE_N, DE_S, &
                                     DE_NE, DE_NW, DE_SE, DE_SW, &
-                                    lsize, gstart, rc)
+                                    lsize, gstart, &
+                                    n_dir1_start, n_dir1_end, n_dir1_size, &
+                                    n_dir2_start, n_dir2_end, n_dir2_size, &
+                                    rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid
@@ -1242,7 +1247,12 @@
       integer, intent(inout), optional :: DE_SW
       integer, intent(inout), optional :: lsize
       integer, intent(inout), optional :: gstart
-! TODO: figure out format for getting deeper derived type info, N_DIR1 N_DIR2
+      integer, intent(inout), optional :: n_dir1_start
+      integer, intent(inout), optional :: n_dir1_end
+      integer, intent(inout), optional :: n_dir1_size
+      integer, intent(inout), optional :: n_dir2_start
+      integer, intent(inout), optional :: n_dir2_end
+      integer, intent(inout), optional :: n_dir2_size
       integer, intent(out), optional :: rc            
 
 !
@@ -1278,6 +1288,18 @@
 !     \item[[lsize]] 
 !          
 !     \item[[gstart]] 
+!          
+!     \item[[n_dir1_start]] 
+!          
+!     \item[[n_dir1_end]] 
+!          
+!     \item[[n_dir1_size]] 
+!          
+!     \item[[n_dir2_start]] 
+!          
+!     \item[[n_dir2_end]] 
+!          
+!     \item[[n_dir2_size]] 
 !          
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1320,6 +1342,12 @@
       if(present(DE_SW)) DE_SW = distgrid%myDE%DE_SW
       if(present(lsize)) lsize = distgrid%myDE%lsize
       if(present(gstart)) gstart = distgrid%myDE%gstart
+      if(present(n_dir1_start)) n_dir1_start = distgrid%myDE%n_dir1%start
+      if(present(n_dir1_end)) n_dir1_end = distgrid%myDE%n_dir1%end
+      if(present(n_dir1_size)) n_dir1_size = distgrid%myDE%n_dir1%size
+      if(present(n_dir2_start)) n_dir2_start = distgrid%myDE%n_dir2%start
+      if(present(n_dir2_end)) n_dir2_end = distgrid%myDE%n_dir2%end
+      if(present(n_dir2_size)) n_dir2_size = distgrid%myDE%n_dir2%size
 
       if(rcpresent) rc = ESMF_SUCCESS
 
