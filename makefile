@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2003/04/23 21:28:03 flanigan Exp $
+# $Id: makefile,v 1.28 2003/05/02 19:46:39 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -187,9 +187,7 @@ deletelibs: chkopts_basic
 	-${RM} -f $(ESMF_LIBDIR)/*
 
 # esmf_coupled_wave/demo target.
-demo: esmf_coupled_wave
-
-esmf_coupled_wave: chkopts build_libs chkdir_tests
+esmf_coupled_flow: chkopts build_libs chkdir_tests
 	$(MAKE) BOPT=$(BOPT) SYSTEM_TEST=74559 system_tests
 
 

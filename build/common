@@ -1,4 +1,4 @@
-# $Id: common,v 1.43 2003/04/30 23:22:50 flanigan Exp $ 
+# $Id: common,v 1.44 2003/05/02 19:46:39 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -276,8 +276,53 @@ run_tests_uni:  chkopts chkdir_tests
 	-$(MAKE) BOPT=$(BOPT) ACTION=tree_run_tests_uni tree 
 	$(DO_UT_RESULTS)
 
+########################################
+#
+#  demo
+#
 
+demo: chkopts build_libs chkdir_tests
+	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_demo tree
+
+tree_demo: tree_build_demo tree_run_demo
+
+#
+# build_demo
+#
+build_demo: chkopts chkdir_tests
+	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_demo tree
+
+tree_build_demo: $(DEMO_BUILD) 
+
+$(ESMC_TESTDIR)/%App : $(DEMO_OBJ) %Demo.o 
+	$(SL_F_LINKER) -o $@  $^ -lesmf  ${F90CXXLIBS} \
+	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+	$(SL_LINKOPTS)
+	${RM} -f *.o *.mod
+	@echo ""
+	@echo "****************************************"
+	@echo ""
+
+
+
+
+#
+# run_demo
+#
+run_demo:  chkopts chkdir_tests
+	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_demo tree
+
+tree_run_demo: $(DEMO_RUN) 
+
+
+
+##################################################
+#
 # Recursive calls
+#
 tree: ${ACTION}
 	@if [ "${DIRS}" != "" ]; then \
 	  for dir in ${DIRS} foo ; do \

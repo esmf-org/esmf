@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/05/02 19:24:24 nscollins Exp $
+# $Id: makefile,v 1.2 2003/05/02 19:46:40 flanigan Exp $
 
 ALL: demo
 
@@ -24,9 +24,7 @@ DEMO_OBJ      = FlowArraysMod.o InjectArraysMod.o \
                 FlowSolverMod.o InjectorMod.o CouplerMod.o \
                 CoupledFlowDemo.o 
 
-DEMO_RUN      = RUN_ESMF_CoupledFlowApp  
-
-DEMO_RUN_UNI  = RUN_ESMF_CoupledFlowAppUNI
+DEMO_RUN      = RUN_CoupledFlowApp  
 
 DEMO_RM       = ESMF_CoupledFlowApp.rm
 
@@ -38,13 +36,9 @@ CLEANDIRS   =
 CLEANFILES  = *.o *.mod
 CLOBBERDIRS =
 
-RUN_ESMF_CoupledFlowApp:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CoupledFlowApp.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CoupledFlowApp >$(ESMC_TESTDIR)/ESMF_CoupledFlowApp.stdout
-
-RUN_ESMF_CoupledFlowAppUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CoupledFlowApp.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CoupledFlowApp >$(ESMC_TESTDIR)/ESMF_CoupledFlowApp.stdout
+RUN_CoupledFlowApp:
+	-@rm -f testlog stdlog.* logfile.* 
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/CoupledFlowApp >$(ESMC_TESTDIR)/CoupledFlowApp.stdout
 
 ESMF_CoupledFlowApp.rm:
 	echo "ESMF_CoupledFlowApp.rm target called here."
