@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.5 2003/03/22 05:46:04 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.6 2003/03/27 01:50:25 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.5 2003/03/22 05:46:04 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.6 2003/03/27 01:50:25 eschwab Exp $'
 
 !==============================================================================
 !
@@ -700,7 +700,7 @@
 !     TMGn.n.n
 !EOP
       
-      call c_ESMC_BaseValidate(alarm, opt, rc)
+!      call c_ESMC_BaseValidate(alarm, opt, rc)
     
       end subroutine ESMF_BaseValidate
 
@@ -734,7 +734,7 @@
 !     TMGn.n.n
 !EOP
       
-      call c_ESMC_BasePrint(alarm, opt, rc)   
+!      call c_ESMC_BasePrint(alarm, opt, rc)   
 
       end subroutine ESMF_BasePrint
 
