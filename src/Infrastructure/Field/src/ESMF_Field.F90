@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.192 2004/11/30 21:00:48 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.193 2004/12/02 00:08:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -153,7 +153,7 @@
         type (ESMF_Status) :: datastatus
         type (ESMF_Status) :: datamapstatus
 #endif
-        type (ESMF_Grid) :: grid             ! save to satisfy query routines
+        type (ESMF_Grid) :: grid
         type (ESMF_LocalField) :: localfield ! this differs per DE
         type (ESMF_FieldDataMap) :: mapping  ! mapping of array indices to grid
         type (ESMF_IOSpec) :: iospec         ! iospec values
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.192 2004/11/30 21:00:48 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.193 2004/12/02 00:08:09 nscollins Exp $'
 
 !==============================================================================
 !
@@ -4407,7 +4407,7 @@
                                  ESMF_CONTEXT, rc)) return
           endif
       endif
-      call ESMF_GridGetDELocalInfo(grid, horzRelLoc=hRelLoc, &
+      call ESMF_GridGetDELocalInfo(ftype%grid, horzRelLoc=hRelLoc, &
                                    vertRelLoc=vertRelLoc, &
                                    localCellCountPerDim=gridcounts(1:gridRank), &
                                    rc=status)
@@ -4566,7 +4566,7 @@
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype                
-      type(ESMF_Grid) :: grid               
+      type(ESMF_Grid), intent(in) :: grid               
       type(ESMF_ArraySpec), intent(in) :: arrayspec     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -4689,7 +4689,7 @@
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype   
-      type(ESMF_Grid) :: grid                 
+      type(ESMF_Grid), intent(in) :: grid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
@@ -4752,7 +4752,7 @@
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATUS_READY
 
-      call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
+      call ESMF_GridGet(ftype%grid, dimCount=gridRank, rc=status)
       if (present(datamap)) then
         ! this does a copy, datamap ok for user to delete now
         ftype%mapping = datamap   
