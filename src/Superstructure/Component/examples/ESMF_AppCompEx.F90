@@ -1,4 +1,4 @@
-! $Id: ESMF_AppCompEx.F90,v 1.3 2003/02/04 21:11:15 nscollins Exp $
+! $Id: ESMF_AppCompEx.F90,v 1.4 2003/02/18 22:00:10 nscollins Exp $
 !
 ! Example code for an embeddable Application.  See ESMF_AppMainEx.F90
 !   for an example of a main program Application.
@@ -70,9 +70,15 @@
     
         print *, "Internal Comp Create returned, name = ", trim(cname)
     
-        call ESMF_CompSetRoutine(comp1, "init", PHYS_Init)
-        call ESMF_CompSetRoutine(comp1, "run", PHYS_Run)
-        call ESMF_CompSetRoutine(comp1, "final", PHYS_Final)
+        ! this registers the Init, Run, and Final routines
+        call PHYS_CompSetup(comp1)
+     
+        !! the setup routine above will make the following 3 calls,
+        !!  allowing PHYS_Init, PHYS_Run, and PHYS_Final to remain
+        !!  private entry points and not public. 
+        !! call ESMF_CompSetRoutine(comp1, "init", PHYS_Init)
+        !! call ESMF_CompSetRoutine(comp1, "run", PHYS_Run)
+        !! call ESMF_CompSetRoutine(comp1, "final", PHYS_Final)
 
     
         cname = "Atmosphere Dynamics"
@@ -81,10 +87,16 @@
     
         print *, "Internal Comp Create returned, name = ", trim(cname)
     
-        call ESMF_CompSetRoutine(comp2, "init", DYNM_Init)
-        call ESMF_CompSetRoutine(comp2, "run", DYNM_Run)
-        call ESMF_CompSetRoutine(comp2, "final", DYNM_Final)
-    
+        ! this registers the Init, Run, and Final routines
+        call DYNM_CompSetup(comp1)
+     
+        !! the setup routine above will make the following 3 calls,
+        !!  allowing DYNM_Init, DYNM_Run, and DYNM_Final to remain
+        !!  private entry points and not public. 
+        !! call ESMF_CompSetRoutine(comp1, "init", DYNM_Init)
+        !! call ESMF_CompSetRoutine(comp1, "run", DYNM_Run)
+        !! call ESMF_CompSetRoutine(comp1, "final", DYNM_Final)
+
 
         cname = "PhysDyn Coupler"
         cpl = ESMF_CompCreate(cname, layout3, ESMF_CPLCOMP, &
@@ -92,10 +104,16 @@
     
         print *, "Internal Comp Create returned, name = ", trim(cname)
     
-        call ESMF_CompSetRoutine(cpl, "init", CPLR_Init)
-        call ESMF_CompSetRoutine(cpl, "run", CPLR_Run)
-        call ESMF_CompSetRoutine(cpl, "final", CPLR_Final)
-    
+        ! this registers the Init, Run, and Final routines
+        call CPLR_CompSetup(comp1)
+     
+        !! the setup routine above will make the following 3 calls,
+        !!  allowing CPLR_Init, CPLR_Run, and CPLR_Final to remain
+        !!  private entry points and not public. 
+        !! call ESMF_CompSetRoutine(comp1, "init", CPLR_Init)
+        !! call ESMF_CompSetRoutine(comp1, "run", CPLR_Run)
+        !! call ESMF_CompSetRoutine(comp1, "final", CPLR_Final)
+
      
         ! Do any other initialization needed here for the main component, 
         !  and then call nested init routines.
@@ -192,7 +210,6 @@
     type(ESMF_Layout) :: layout
     type(ESMF_Comp) :: comp1, comp2, comp3, comp4
         
-! !TODO: UPDATE THIS 
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
@@ -210,9 +227,16 @@
 
     print *, "Driver Comp Create returned, name = ", trim(cname)
 
-    call ESMF_CompSetRoutine(comp1, "init", NATM_Init)
-    call ESMF_CompSetRoutine(comp1, "run", NATM_Run)
-    call ESMF_CompSetRoutine(comp1, "final", NATM_Final)
+    ! this registers the Init, Run, and Final routines
+    ! it must be a public method.
+    call NATM_CompSetup(comp1)
+     
+    !! the setup routine above will make the following 3 calls,
+    !!  allowing NATM_Init, NATM_Run, and NATM_Final to remain
+    !!  private entry points and not public. 
+    !! call ESMF_CompSetRoutine(comp1, "init", NATM_Init)
+    !! call ESMF_CompSetRoutine(comp1, "run", NATM_Run)
+    !! call ESMF_CompSetRoutine(comp1, "final", NATM_Final)
 
 
     call ESMF_CompInit(comp1, rc)
