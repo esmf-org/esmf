@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.11 2003/04/21 23:41:52 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.12 2003/04/25 09:08:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,11 +38,10 @@ extern "C" {
                                  int *MS, int *US, int *NS,
                                  double *d_, double *h_, double *m_,
                                  double *s_, double *ms_, double *us_,
-                                 double *ns_, int *Sn, int *Sd,
-                                 ESMC_Calendar *cal, int *status) {
+                                 double *ns_, int *Sn, int *Sd, int *status) {
            *status = (ptr)->ESMC_TimeIntervalInit(YY, MO, D, H, M, S, MS,
                                                   US, NS, d_, h_, m_, s_, ms_,
-                                                  us_, ns_, Sn, Sd, cal);
+                                                  us_, ns_, Sn, Sd);
        }
 
        void FTN(c_esmc_timeintervalget)(ESMC_TimeInterval *ptr,
@@ -71,16 +70,76 @@ extern "C" {
                                                  us_, ns_, Sn, Sd);
        }
 
+       void FTN(c_esmc_timeintervalgetstring)(ESMC_TimeInterval *ptr,
+                                              char *timeString, int *status) {
+           *status = (ptr)->ESMC_TimeIntervalGetString(timeString);
+       }
+
+       void FTN(c_esmc_timeintervalabsvalue)(ESMC_TimeInterval *ptr,
+                                    ESMC_TimeInterval *timeIntervalAbsValue) {
+           *timeIntervalAbsValue = (ptr)->ESMC_TimeIntervalAbsValue();
+       }
+
+       void FTN(c_esmc_timeintervalnegabsval)(ESMC_TimeInterval *ptr,
+                                    ESMC_TimeInterval *timeIntervalNegAbsVal) {
+           *timeIntervalNegAbsVal = (ptr)->ESMC_TimeIntervalNegAbsVal();
+       }
+
+       void FTN(c_esmc_timeintervalfquot)(ESMC_TimeInterval *timeInterval1,
+                                          ESMC_TimeInterval *timeInterval2,
+                                          ESMC_Fraction *timeIntervalFQuot) {
+           *timeIntervalFQuot = 
+                        timeInterval1->ESMC_TimeIntervalDiv(*timeInterval2);
+       }
+
+       void FTN(c_esmc_timeintervalrquot)(ESMC_TimeInterval *timeInterval1,
+                                          ESMC_TimeInterval *timeInterval2,
+                                          double *timeIntervalRQuot) {
+           *timeIntervalRQuot = (*timeInterval1 / *timeInterval2);
+       }
+
+       void FTN(c_esmc_timeintervalquoti)(ESMC_TimeInterval *timeInterval,
+                                        int *divisor,
+                                        ESMC_TimeInterval *timeIntervalQuotI) {
+           *timeIntervalQuotI = (*timeInterval / *divisor);
+       }
+
+       void FTN(c_esmc_timeintervalquotr)(ESMC_TimeInterval *timeInterval,
+                                        double *divisor,
+                                        ESMC_TimeInterval *timeIntervalQuotR) {
+           *timeIntervalQuotR = (*timeInterval / *divisor);
+       }
+
+       void FTN(c_esmc_timeintervalprodi)(ESMC_TimeInterval *timeInterval,
+                                        int *multiplier,
+                                        ESMC_TimeInterval *timeIntervalProdI) {
+           *timeIntervalProdI = (*timeInterval * *multiplier);
+       }
+
+       void FTN(c_esmc_timeintervalprodf)(ESMC_TimeInterval *timeInterval,
+                                        ESMC_Fraction *multiplier,
+                                        ESMC_TimeInterval *timeIntervalProdF) {
+           *timeIntervalProdF = (*timeInterval * *multiplier);
+       }
+
+       void FTN(c_esmc_timeintervalprodr)(ESMC_TimeInterval *timeInterval,
+                                        double *multiplier,
+                                        ESMC_TimeInterval *timeIntervalProdR) {
+           *timeIntervalProdR = (*timeInterval * *multiplier);
+       }
+
        void FTN(c_esmc_timeintervalread)(ESMC_TimeInterval *ptr,
                                          ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                                         ESMC_Calendar *cal, int *status) {
-           *status = (ptr)->ESMC_TimeIntervalRead(*S, *Sn, *Sd, cal);   
+                                         ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
+                                         int *status) {
+           *status = (ptr)->ESMC_TimeIntervalRead(*S, *Sn, *Sd, *YY, *MO);   
        }
 
        void FTN(c_esmc_timeintervalwrite)(ESMC_TimeInterval *ptr,
                                           ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                                          ESMC_Calendar *cal, int *status) {
-           *status = (ptr)->ESMC_TimeIntervalWrite(S, Sn, Sd, cal);
+                                         ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
+                                         int *status) {
+           *status = (ptr)->ESMC_TimeIntervalWrite(S, Sn, Sd, YY, MO);
        }
 
        void FTN(c_esmc_timeintervalvalidate)(ESMC_TimeInterval *ptr,
