@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.20 2004/01/28 17:48:55 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.21 2004/01/28 23:54:03 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.20 2004/01/28 17:48:55 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.21 2004/01/28 23:54:03 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -138,7 +138,7 @@ static int globalCount = 0;
   printf("Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
            ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
 
-  if (attrCount > 0) printf("  %d Attributes:\n", attrCount);
+  printf("  %d Attributes:\n", attrCount);
   for (i=0; i<attrCount; i++) {
       printf(" Attr %d: \n");
       // TODO:  add attr value print here
@@ -1416,6 +1416,7 @@ extern "C" {
   ID = ++globalCount;
   refCount = 1;
   strcpy(baseName, "unnamed");
+  ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
   strcpy(className, "global");
   baseStatus = ESMF_STATE_READY;
 
@@ -1450,6 +1451,7 @@ extern "C" {
       strcpy(baseName, name);
   else
       sprintf(baseName, "%s%3d", className, ID);
+  ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
   attrCount = 0;
   attrAlloc = 0;
