@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.167 2004/05/25 07:18:57 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.168 2004/05/26 18:04:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,28 +60,28 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 
+    public ESMF_GridAddVertHeight
     public ESMF_GridCreate
     public ESMF_GridDestroy
-    public ESMF_GridAddVert_Height
     public ESMF_GridDistribute
+    public ESMF_GridGet
     public ESMF_GridGetCoord
-    public ESMF_GridSetCoord
     public ESMF_GridGetDE
-    public ESMF_GridGetAllAxisIndex
+    !public ESMF_GridGetMask
+    !public ESMF_GridGetMetric
     public ESMF_GridGlobalToLocalIndex
     public ESMF_GridLocalToGlobalIndex
-    public ESMF_GridGet
+    public ESMF_GridPrint
     public ESMF_GridSet
-    !public ESMF_GridGetMask
-    public ESMF_GridGetCellMask
+    public ESMF_GridSetCoord
     public ESMF_GridSetMask
-    !public ESMF_GridGetMetric
     public ESMF_GridSetMetric
+    public ESMF_GridValidate
     public ESMF_GridBoxIntersectRecv
     public ESMF_GridBoxIntersectSend
-    public ESMF_GridValidate
-    public ESMF_GridPrint
     public ESMF_GridComputeDistance
+    public ESMF_GridGetAllAxisIndex
+    public ESMF_GridGetCellMask
     !public ESMF_GridSearch
 
 !------------------------------------------------------------------------------
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.167 2004/05/25 07:18:57 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.168 2004/05/26 18:04:11 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -198,9 +198,141 @@
       contains
 
 !==============================================================================
+!BOP
+! !IROUTINE: ESMF_GridAddVertHeight - add a vertical subGrid to an existing Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridAddVertHeight(grid, delta, coord, vertStagger, &
+                                        dimName, dimUnit, name, rc)
+
 !
-! This section includes the Grid Create and Destroy methods.
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord
+      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
+      character(len=*), intent(in), optional :: dimName
+      character(len=*), intent(in), optional :: dimUnit
+      character(len=*), intent(in), optional :: name
+      integer, intent(out), optional :: rc
 !
+! !DESCRIPTION:
+!     This routine adds a vertical subGrid to an already 
+!     allocated {\tt ESMF\_Grid}.
+!     This explicit interface only creates vertical subGrids with coordinate
+!     systems where the zero point is defined at the bottom.
+!     Only one vertical subGrid is allowed for any Grid, 
+!     so if a vertical subGrid
+!     already exists for the Grid that is passed in, an error is returned.
+!     This routine generates {\tt ESMF\_Grid} coordinates from either of two
+!     optional sets of arguments:
+!     \begin{enumerate}
+!     \item given array of deltas (variable delta) and assumes 0 is 
+!        the minimum or starting coordinate
+!     \item given array of coordinates (variable coords)
+!     \end{enumerate}
+!     If neither of these sets of arguments is present and valid, an error
+!     message is issued and an error code returned.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          {\tt ESMF\_Grid} to add vertical grid to.
+!     \item[{[delta]}]
+!          Array of physical increments in the vertical direction.
+!     \item[{[coord]}]
+!          Array of physical coordinates in the vertical direction.
+!     \item[{[vertStagger]}]
+!          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
+!     \item[{[dimName]}]
+!          Dimension name.
+!     \item[{[dimUnit]}]
+!          Dimension unit.
+!     \item[{[name]}]
+!          Name for the vertical grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  TODO
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_GridVertType) :: vertGridType
+      type(ESMF_CoordSystem) :: vertCoordSystem
+      real(ESMF_KIND_R8) :: minGlobalCoord
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Set default values
+      vertGridType    = ESMF_GRID_VERT_TYPE_HEIGHT
+      vertCoordSystem = ESMF_COORD_SYSTEM_HEIGHT
+      minGlobalCoord  = 0.0d0
+
+!     Call GridAddVert routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      !  ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        print *, "ERROR in ESMF_GridAddVertHeight: ", &
+                 "GridStructureUnknown not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridAddVert(grid%ptr, minGlobalCoord, delta, coord, &
+                                vertGridType, vertStagger, &
+                                vertCoordSystem, dimName, dimUnit, &
+                                name, status)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        print *, "ERROR in ESMF_GridAddVertHeight: ", &
+                 "GridStructureLogRectBlock not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        print *, "ERROR in ESMF_GridAddVertHeight: ", &
+                 "GridStructureUnstruct not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        print *, "ERROR in ESMF_GridAddVertHeight: ", &
+                 "GridStructureUser not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case default
+        print *, "ERROR in ESMF_GridAddVertHeight: Invalid grid structure"
+        status = ESMF_FAILURE
+      end select
+
+      if (status /= ESMF_SUCCESS) then
+        rc = status
+        print *, 'ERROR in ESMF_GridAddVertHeight: error in specific call'
+        return
+      endif
+
+!     Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAddVertHeight
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid with no contents
@@ -926,142 +1058,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridAddVert_Height - add a vertical subGrid to an existing Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridAddVert_Height(grid, delta, coord, vertStagger, &
-                                         dimName, dimUnit, name, rc)
-
-!
-! !ARGUMENTS:
-      type(ESMF_Grid) :: grid
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord
-      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
-      character(len=*), intent(in), optional :: dimName
-      character(len=*), intent(in), optional :: dimUnit
-      character(len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This routine adds a vertical subGrid to an already 
-!     allocated {\tt ESMF\_Grid}.
-!     This explicit interface only creates vertical subGrids with coordinate
-!     systems where the zero point is defined at the bottom.
-!     Only one vertical subGrid is allowed for any Grid, 
-!     so if a vertical subGrid
-!     already exists for the Grid that is passed in, an error is returned.
-!     This routine generates {\tt ESMF\_Grid} coordinates from either of two
-!     optional sets of arguments:
-!     \begin{enumerate}
-!     \item given array of deltas (variable delta) and assumes 0 is 
-!        the minimum or starting coordinate
-!     \item given array of coordinates (variable coords)
-!     \end{enumerate}
-!     If neither of these sets of arguments is present and valid, an error
-!     message is issued and an error code returned.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          {\tt ESMF\_Grid} to add vertical grid to.
-!     \item[{[delta]}]
-!          Array of physical increments in the vertical direction.
-!     \item[{[coord]}]
-!          Array of physical coordinates in the vertical direction.
-!     \item[{[vertStagger]}]
-!          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
-!     \item[{[dimName]}]
-!          Dimension name.
-!     \item[{[dimUnit]}]
-!          Dimension unit.
-!     \item[{[name]}]
-!          Name for the vertical grid.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  TODO
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_GridVertType) :: vertGridType
-      type(ESMF_CoordSystem) :: vertCoordSystem
-      real(ESMF_KIND_R8) :: minGlobalCoord
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     Set default values
-      vertGridType    = ESMF_GRID_VERT_TYPE_HEIGHT
-      vertCoordSystem = ESMF_COORD_SYSTEM_HEIGHT
-      minGlobalCoord  = 0.0d0
-
-!     Call GridAddVert routines based on GridStructure
-
-      select case(grid%ptr%gridStructure%gridStructure)
-
-      !-------------
-      !  ESMF_GRID_STRUCTURE_UNKNOWN
-      case(0)
-        print *, "ERROR in ESMF_GridAddVert_Height: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_LOGRECT
-      case(1)
-        call ESMF_LRGridAddVert(grid%ptr, minGlobalCoord, delta, coord, &
-                                vertGridType, vertStagger, &
-                                vertCoordSystem, dimName, dimUnit, &
-                                name, status)
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
-      case(2)
-        print *, "ERROR in ESMF_GridAddVert_Height: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_UNSTRUCT
-      case(3)
-        print *, "ERROR in ESMF_GridAddVert_Height: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_USER
-      case(4)
-        print *, "ERROR in ESMF_GridAddVert_Height: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      case default
-        print *, "ERROR in ESMF_GridAddVert_Height: Invalid grid structure"
-        status = ESMF_FAILURE
-      end select
-
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridAddVert_Height: error in specific call'
-        return
-      endif
-
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridAddVert_Height
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_GridDistribute - Distribute a grid that has already been initialized
 
 ! !INTERFACE:
@@ -1335,208 +1331,6 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGet
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_GridGetAllAxisIndex - Get all axis indices for a Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridGetAllAxisIndex(grid, globalAI, horzRelLoc, &
-                                          vertRelLoc, total, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid) :: grid
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: globalAI
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      logical, intent(in), optional :: total
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Class to be queried.
-!     \item[globalAI]
-!          Global axis indices on all DE's.
-!     \item[{[total]}]
-!          Logical flag for whether the axis indices should be for total
-!          cells or not.  Default is false, which infers computational cells.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     Call GridGetAllAxisIndex routines based on GridStructure
-
-      select case(grid%ptr%gridStructure%gridStructure)
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_UNKNOWN
-      case(0)
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_LOGRECT
-      case(1)
-        call ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzRelLoc, vertRelLoc, &
-                                        total, status)
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
-      case(2)
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_UNSTRUCT
-      case(3)
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_USER
-      case(4)
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      case default
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: Invalid grid structure"
-        status = ESMF_FAILURE
-      end select
-
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridGetAllAxisIndex: error in get'
-        return
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridGetAllAxisIndex
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_GridGetCellMask - Retrieves cell identifier mask for a Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridGetCellMask(grid, maskArray, relloc, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid) :: grid
-      type(ESMF_Array), intent(inout) :: maskArray
-      type(ESMF_RelLoc), intent(in) :: relloc
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of get retrieves an {\tt ESMF\_Array} of cell types for an
-!     {\tt ESMF\_Grid} from a corresponding {\tt ESMF\_PhysGrid}.
-!     This mask is intended for internal use to indicate which cells are in
-!     the computational regime (cellType=0), a ghost region (cellType=1), or a
-!     halo region (cellType=2).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[maskArray]
-!          {\tt ESMF\_Array} to contain the internally-used cell array denoting
-!          whether cells are in the computational regime, a ghost region, or a
-!          halo region.
-!     \item[relloc]
-!          Relative location of the {\tt ESMF\_PhysGrid} to be queried.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-! !REQUIREMENTS:
-!EOPI
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     Call GridGetCellMask routines based on GridStructure
-
-      select case(grid%ptr%gridStructure%gridStructure)
-
-      !-------------
-      !  ESMF_GRID_STRUCTURE_UNKNOWN
-      case(0)
-        print *, "ERROR in ESMF_GridGetCellMask: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_LOGRECT
-      case(1)
-        call ESMF_LRGridGetCellMask(grid, maskArray, relloc, status)
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
-      case(2)
-        print *, "ERROR in ESMF_GridGetCellMask: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_UNSTRUCT
-      case(3)
-        print *, "ERROR in ESMF_GridGetCellMask: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      ! ESMF_GRID_STRUCTURE_USER
-      case(4)
-        print *, "ERROR in ESMF_GridGetCellMask: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
-
-      !-------------
-      case default
-        print *, "ERROR in ESMF_GridGetCellMask: Invalid grid structure"
-        status = ESMF_FAILURE
-      end select
-
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridGetCellMask: error in get call'
-        return
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridGetCellMask
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2799,184 +2593,6 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridComputeDistance - Compute distance between points
-!
-! !INTERFACE:
-      function ESMF_GridComputeDistance(x1, y1, x2, y2, coordSystem, rc)
-
-! !RETURN VALUE:
-      real(ESMF_KIND_R8) :: ESMF_GridComputeDistance
-
-! !ARGUMENTS:
-
-      real(ESMF_KIND_R8), intent(in) :: x1      ! x,y coordinates of two points
-      real(ESMF_KIND_R8), intent(in) :: y1      ! between which the distance is
-      real(ESMF_KIND_R8), intent(in) :: x2      ! to be computed
-      real(ESMF_KIND_R8), intent(in) :: y2
-      type(ESMF_CoordSystem) :: coordSystem    ! coordinate system in which the
-                                                ! points are given
-      integer, optional :: rc                   ! return code
-
-! !DESCRIPTION:
-!     This routine computes the distance between two points given the
-!     coordinates of the two points.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[x1,y1,x2,y2]
-!          Coordinates of two points between which to compute distance.
-!     \item[coordSystem]
-!          Coordinate system in which the points are given
-!          (e.g. spherical, Cartesian)
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!EOPI
-
-      integer :: status
-!
-!     branch to appropriate PhysGrid routine to compute
-!     distance
-!
-      status = ESMF_SUCCESS
-
-      if(coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
-        ESMF_GridComputeDistance = &
-          ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, rc=status)
-      elseif(coordSystem .eq. ESMF_COORD_SYSTEM_CARTESIAN) then
-        ESMF_GridComputeDistance = &
-          ESMF_PhysGridCompDistCartesian(x1, y1, x2, y2, rc=status)
-      else
-        print *,'Distance in coordinate system not yet supported'
-        status = ESMF_FAILURE
-      endif
-!
-!     set return code and exit
-!
-      if (present(rc)) rc = status
-      return
-
-      end function ESMF_GridComputeDistance
-
-!------------------------------------------------------------------------------
-!!BOPI
-!! !IROUTINE: ESMF_GridSearchPoint - Search the grid for a cell containing point
-!
-! !INTERFACE:
-!      subroutine ESMF_GridSearchPoint(dstAdd, x, y, DEID, searchGrid, &
-!                                      physGridID, rc)
-!!
-!! !ARGUMENTS:
-!
-!      integer, dimension(?) :: dstAdd       ! location in grid of grid cell
-!                                            ! containing search point
-!      real (kind=?), intent(in) :: x        ! x coordinates of search point 
-!      real (kind=?), intent(in) :: y        ! y coordinates of search point 
-!      integer, intent(in) :: DEID           ! DE which owns the search point
-!      type(ESMF_Grid), intent(in) :: searchGrid
-!                                            ! grid to search for location of point
-!      integer, intent(in), optional :: physGridID
-!                                            ! id of the subgrid to search
-!                                            ! (if more than one subgrid)
-!      integer, intent(out), optional :: rc  ! return code
-!
-!!
-!! !DESCRIPTION:
-!!     This routine searches for the location in the grid of a grid cell 
-!!     containing the point given by the input x,y coordinates.
-!!
-!!     The arguments are:
-!!     \begin{description}
-!!     \item[dstAdd]
-!!          Address of grid cell containing the search point.
-!!     \item[x]
-!!          X coordinates of search point.
-!!     \item[y]
-!!          Y coordinates of search point.
-!!     \item[DEID]
-!!          id of {\tt ESMF\_DE} that owns search point.
-!!     \item[searchGrid]
-!!          ESMF {\tt ESMF\_Grid} to search for location.
-!!     \item[{[physGridID]}]
-!!          If more than one {\tt ESMF\_PhysGrid} is contained in 
-!!          {\tt ESMF\_Grid}, choose which grid to search (default is 1st
-!!          {\tt ESMF\_PhysGrid}?).
-!!     \item[{[rc]}]
-!!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!!     \end{description}
-!!
-!!EOPI
-!
-!      integer :: status                           ! Error status
-!      logical :: rcpresent                        ! Return code present
-!
-!!     Initialize return code
-!      status = ESMF_FAILURE
-!      rcpresent = .FALSE.
-!      if(present(rc)) then
-!        rcpresent=.TRUE.
-!        rc = ESMF_FAILURE
-!      endif
-!
-!!     Call Search routines based on GridStructure
-!
-!      select case(grid%ptr%gridStructure%gridStructure)
-!
-!      !-------------
-!      ! ESMF_GRID_STRUCTURE_UNKNOWN
-!      case(0)
-!        print *, "ERROR in ESMF_GridSearch: ", &
-!                 "GridStructureUnknown not supported"
-!        status = ESMF_FAILURE
-!
-!      !-------------
-!      ! ESMF_GRID_STRUCTURE_LOGRECT
-!      case(1)
-!        call ESMF_LRGridSearchPoint(dstAdd, x, y, DEID, searchGrid, &
-!                                    physGridID, status)
-!
-!      !-------------
-!      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
-!      case(2)
-!        print *, "ERROR in ESMF_GridSearch: ", &
-!                 "GridStructureLogRectBlock not supported"
-!        status = ESMF_FAILURE
-!
-!      !-------------
-!      ! ESMF_GRID_STRUCTURE_UNSTRUCT
-!      case(3)
-!        print *, "ERROR in ESMF_GridSearch: ", &
-!                 "GridStructureUnstruct not supported"
-!        status = ESMF_FAILURE
-!
-!      !-------------
-!      ! ESMF_GRID_STRUCTURE_USER
-!      case(4)
-!        print *, "ERROR in ESMF_GridSearch: ", &
-!                 "GridStructureUser not supported"
-!        status = ESMF_FAILURE
-!
-!      !-------------
-!      case default
-!         print *, "ERROR in ESMF_GridSearch: Invalid grid structure"
-!         status = ESMF_FAILURE
-!      end select
-!
-!      if (status /= ESMF_SUCCESS) then
-!        rc = status
-!        print *, 'ERROR in ESMF_GridSearch: error in search'
-!        return
-!      endif
-!
-!      if (present(rc)) rc = ESMF_SUCCESS
-!
-!      end subroutine ESMF_GridSearchPoint
-!
-!------------------------------------------------------------------------------
-
-!BOPI
 ! !IROUTINE: ESMF_GridBoxIntersectRecv - Determine a DomainList covering a box
 
 ! !INTERFACE:
@@ -3222,6 +2838,385 @@
 
       end subroutine ESMF_GridBoxIntersectSend
 
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridComputeDistance - Compute distance between points
+!
+! !INTERFACE:
+      function ESMF_GridComputeDistance(x1, y1, x2, y2, coordSystem, rc)
+
+! !RETURN VALUE:
+      real(ESMF_KIND_R8) :: ESMF_GridComputeDistance
+
+! !ARGUMENTS:
+
+      real(ESMF_KIND_R8), intent(in) :: x1      ! x,y coordinates of two points
+      real(ESMF_KIND_R8), intent(in) :: y1      ! between which the distance is
+      real(ESMF_KIND_R8), intent(in) :: x2      ! to be computed
+      real(ESMF_KIND_R8), intent(in) :: y2
+      type(ESMF_CoordSystem) :: coordSystem    ! coordinate system in which the
+                                                ! points are given
+      integer, optional :: rc                   ! return code
+
+! !DESCRIPTION:
+!     This routine computes the distance between two points given the
+!     coordinates of the two points.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[x1,y1,x2,y2]
+!          Coordinates of two points between which to compute distance.
+!     \item[coordSystem]
+!          Coordinate system in which the points are given
+!          (e.g. spherical, Cartesian)
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!EOPI
+
+      integer :: status
+!
+!     branch to appropriate PhysGrid routine to compute
+!     distance
+!
+      status = ESMF_SUCCESS
+
+      if(coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
+        ESMF_GridComputeDistance = &
+          ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, rc=status)
+      elseif(coordSystem .eq. ESMF_COORD_SYSTEM_CARTESIAN) then
+        ESMF_GridComputeDistance = &
+          ESMF_PhysGridCompDistCartesian(x1, y1, x2, y2, rc=status)
+      else
+        print *,'Distance in coordinate system not yet supported'
+        status = ESMF_FAILURE
+      endif
+!
+!     set return code and exit
+!
+      if (present(rc)) rc = status
+      return
+
+      end function ESMF_GridComputeDistance
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridGetAllAxisIndex - Get all axis indices for a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridGetAllAxisIndex(grid, globalAI, horzRelLoc, &
+                                          vertRelLoc, total, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: globalAI
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      logical, intent(in), optional :: total
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be queried.
+!     \item[globalAI]
+!          Global axis indices on all DE's.
+!     \item[{[total]}]
+!          Logical flag for whether the axis indices should be for total
+!          cells or not.  Default is false, which infers computational cells.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOPI
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Call GridGetAllAxisIndex routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
+                 "GridStructureUnknown not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzRelLoc, vertRelLoc, &
+                                        total, status)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
+                 "GridStructureLogRectBlock not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
+                 "GridStructureUnstruct not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
+                 "GridStructureUser not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case default
+        print *, "ERROR in ESMF_GridGetAllAxisIndex: Invalid grid structure"
+        status = ESMF_FAILURE
+      end select
+
+      if (status /= ESMF_SUCCESS) then
+        rc = status
+        print *, 'ERROR in ESMF_GridGetAllAxisIndex: error in get'
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetAllAxisIndex
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridGetCellMask - Retrieves cell identifier mask for a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridGetCellMask(grid, maskArray, relloc, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_Array), intent(inout) :: maskArray
+      type(ESMF_RelLoc), intent(in) :: relloc
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version of get retrieves an {\tt ESMF\_Array} of cell types for an
+!     {\tt ESMF\_Grid} from a corresponding {\tt ESMF\_PhysGrid}.
+!     This mask is intended for internal use to indicate which cells are in
+!     the computational regime (cellType=0), a ghost region (cellType=1), or a
+!     halo region (cellType=2).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
+!     \item[maskArray]
+!          {\tt ESMF\_Array} to contain the internally-used cell array denoting
+!          whether cells are in the computational regime, a ghost region, or a
+!          halo region.
+!     \item[relloc]
+!          Relative location of the {\tt ESMF\_PhysGrid} to be queried.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+! !REQUIREMENTS:
+!EOPI
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Call GridGetCellMask routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      !  ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        print *, "ERROR in ESMF_GridGetCellMask: ", &
+                 "GridStructureUnknown not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridGetCellMask(grid, maskArray, relloc, status)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        print *, "ERROR in ESMF_GridGetCellMask: ", &
+                 "GridStructureLogRectBlock not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        print *, "ERROR in ESMF_GridGetCellMask: ", &
+                 "GridStructureUnstruct not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        print *, "ERROR in ESMF_GridGetCellMask: ", &
+                 "GridStructureUser not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case default
+        print *, "ERROR in ESMF_GridGetCellMask: Invalid grid structure"
+        status = ESMF_FAILURE
+      end select
+
+      if (status /= ESMF_SUCCESS) then
+        rc = status
+        print *, 'ERROR in ESMF_GridGetCellMask: error in get call'
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetCellMask
+
+!------------------------------------------------------------------------------
+!!BOPI
+!! !IROUTINE: ESMF_GridSearchPoint - Search the grid for a cell containing point
+!
+! !INTERFACE:
+!      subroutine ESMF_GridSearchPoint(dstAdd, x, y, DEID, searchGrid, &
+!                                      physGridID, rc)
+!!
+!! !ARGUMENTS:
+!
+!      integer, dimension(?) :: dstAdd       ! location in grid of grid cell
+!                                            ! containing search point
+!      real (kind=?), intent(in) :: x        ! x coordinates of search point 
+!      real (kind=?), intent(in) :: y        ! y coordinates of search point 
+!      integer, intent(in) :: DEID           ! DE which owns the search point
+!      type(ESMF_Grid), intent(in) :: searchGrid
+!                                            ! grid to search for location of point
+!      integer, intent(in), optional :: physGridID
+!                                            ! id of the subgrid to search
+!                                            ! (if more than one subgrid)
+!      integer, intent(out), optional :: rc  ! return code
+!
+!!
+!! !DESCRIPTION:
+!!     This routine searches for the location in the grid of a grid cell 
+!!     containing the point given by the input x,y coordinates.
+!!
+!!     The arguments are:
+!!     \begin{description}
+!!     \item[dstAdd]
+!!          Address of grid cell containing the search point.
+!!     \item[x]
+!!          X coordinates of search point.
+!!     \item[y]
+!!          Y coordinates of search point.
+!!     \item[DEID]
+!!          id of {\tt ESMF\_DE} that owns search point.
+!!     \item[searchGrid]
+!!          ESMF {\tt ESMF\_Grid} to search for location.
+!!     \item[{[physGridID]}]
+!!          If more than one {\tt ESMF\_PhysGrid} is contained in 
+!!          {\tt ESMF\_Grid}, choose which grid to search (default is 1st
+!!          {\tt ESMF\_PhysGrid}?).
+!!     \item[{[rc]}]
+!!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!!     \end{description}
+!!
+!!EOPI
+!
+!      integer :: status                           ! Error status
+!      logical :: rcpresent                        ! Return code present
+!
+!!     Initialize return code
+!      status = ESMF_FAILURE
+!      rcpresent = .FALSE.
+!      if(present(rc)) then
+!        rcpresent=.TRUE.
+!        rc = ESMF_FAILURE
+!      endif
+!
+!!     Call Search routines based on GridStructure
+!
+!      select case(grid%ptr%gridStructure%gridStructure)
+!
+!      !-------------
+!      ! ESMF_GRID_STRUCTURE_UNKNOWN
+!      case(0)
+!        print *, "ERROR in ESMF_GridSearch: ", &
+!                 "GridStructureUnknown not supported"
+!        status = ESMF_FAILURE
+!
+!      !-------------
+!      ! ESMF_GRID_STRUCTURE_LOGRECT
+!      case(1)
+!        call ESMF_LRGridSearchPoint(dstAdd, x, y, DEID, searchGrid, &
+!                                    physGridID, status)
+!
+!      !-------------
+!      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+!      case(2)
+!        print *, "ERROR in ESMF_GridSearch: ", &
+!                 "GridStructureLogRectBlock not supported"
+!        status = ESMF_FAILURE
+!
+!      !-------------
+!      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+!      case(3)
+!        print *, "ERROR in ESMF_GridSearch: ", &
+!                 "GridStructureUnstruct not supported"
+!        status = ESMF_FAILURE
+!
+!      !-------------
+!      ! ESMF_GRID_STRUCTURE_USER
+!      case(4)
+!        print *, "ERROR in ESMF_GridSearch: ", &
+!                 "GridStructureUser not supported"
+!        status = ESMF_FAILURE
+!
+!      !-------------
+!      case default
+!         print *, "ERROR in ESMF_GridSearch: Invalid grid structure"
+!         status = ESMF_FAILURE
+!      end select
+!
+!      if (status /= ESMF_SUCCESS) then
+!        rc = status
+!        print *, 'ERROR in ESMF_GridSearch: error in search'
+!        return
+!      endif
+!
+!      if (present(rc)) rc = ESMF_SUCCESS
+!
+!      end subroutine ESMF_GridSearchPoint
+!
 !------------------------------------------------------------------------------
 
       end module ESMF_GridMod
