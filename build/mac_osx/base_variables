@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.5 2002/12/16 23:04:23 nscollins Exp $ 
+# $Id: base_variables,v 1.6 2003/02/20 17:43:32 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -13,7 +13,7 @@ SH_LD		   = cc
 # ######################### C and Fortran compiler ########################
 #
 C_CC		   = cc
-C_FC		   = f95 -YEXT_NAMES=LCS -s
+C_FC		   = f95 
 C_FC_MOD           = -p
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
@@ -26,12 +26,13 @@ C_SYS_LIB	   = -ldl -lc -lg2c -lm
 #C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
-G_FOPTFLAGS	   = -g
+G_FOPTFLAGS	   = -g 
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
 # ########################## Fortran compiler ##############################
 #
+FFLAGS          = -YEXT_NAMES=LCS -s 
 F_FREECPP       = -ffree
 F_FIXCPP        = -ffixed
 F_FREENOCPP     = -ffree
