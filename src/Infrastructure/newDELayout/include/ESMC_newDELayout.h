@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.h,v 1.8 2004/04/05 17:59:45 theurich Exp $
+// $Id: ESMC_newDELayout.h,v 1.9 2004/04/06 17:17:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -63,6 +63,8 @@ class ESMC_newDELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int *mydes;     // list that holds all of the des indices for this instance
     int ndim;       // dimensionality of this layout
     ESMC_Logical oneToOneFlag;  // indicate whether this is a 1-to-1 layout
+    ESMC_Logical logRectFlag;   // indicate whether this is logical rectangular
+    int *dims;      // sizes of dimensions in a logical rectangular layout
   public:
     // Construct and Destruct
     int ESMC_newDELayoutConstruct1D(ESMC_VM &vm, int nDEs, int *DEtoPET,  
@@ -72,7 +74,8 @@ class ESMC_newDELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_newDELayoutDestruct(void);
     // Get info
     int ESMC_newDELayoutGet(int *nDEs, int *ndim, int *nmyDEs, int *myDEs, 
-      int len, int *localDe, ESMC_Logical *oneToOneFlag);
+      int len_myDEs, int *localDe, ESMC_Logical *oneToOneFlag,
+      ESMC_Logical *logRectFlag, int *deCountPerDim, int len_deCountPerDim);
     int ESMC_newDELayoutGetDE(int DEid, int *DEcoord, int len_coord, 
       int *DEcde, int len_cde, int *DEcw, int len_cw, int *nDEc);
     int ESMC_newDELayoutMyDE(int DE, ESMC_Logical *value);

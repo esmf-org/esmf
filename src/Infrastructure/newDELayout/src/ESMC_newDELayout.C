@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.9 2004/04/05 17:59:46 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.10 2004/04/06 17:17:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.9 2004/04/05 17:59:46 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.10 2004/04/06 17:17:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -215,7 +215,10 @@ int ESMC_newDELayout::ESMC_newDELayoutConstruct1D(ESMC_VM &vm, int nDEs,
   }
   // Setup the dimensionality and coordinates of this layout. This information
   // is only kept for external use!
-  ndim = 1; // this is a 1D routine
+  ndim = 1; // this is a 1D logical rectangular routine
+  logRectFlag = ESMF_TRUE;
+  dims = new int[ndim];
+  dims[0] = ndes;
   for (int i=0; i<ndes; i++){
     des[i].coord = new int[ndim];
     des[i].coord[0] = i;
@@ -256,6 +259,12 @@ int ESMC_newDELayout::ESMC_newDELayoutConstructND(ESMC_VM &vm, int *nDEs,
 //-----------------------------------------------------------------------------
   myvm = &vm;                       // set the pointer onto this VM instance
   int npets =  vm.vmachine_npets(); // get number of PETs
+  ndim = nndim; // set the number of dimensions
+  // this is a N-dim logical rectangular routine
+  logRectFlag = ESMF_TRUE;
+  dims = new int[ndim];
+  for (int i=0; i<ndim; i++)
+    dims[i] = nDEs[i];
   // determine how many DEs there are in this layout
   ndes = 1;
   for (int i=0; i<nndim; i++)
@@ -267,7 +276,6 @@ int ESMC_newDELayout::ESMC_newDELayoutConstructND(ESMC_VM &vm, int *nDEs,
   }
   // Setup the dimensionality and coordinates of this layout. This information
   // is only kept for external use!
-  ndim = nndim; // set the number of dimensions
   for (int i=0; i<ndes; i++){
     des[i].coord = new int[ndim];
   }
@@ -330,6 +338,8 @@ int ESMC_newDELayout::ESMC_newDELayoutDestruct(void){
   }
   delete [] des;
   delete [] mydes;
+  if (logRectFlag == ESMF_TRUE)
+    delete [] dims;
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -347,13 +357,16 @@ int ESMC_newDELayout::ESMC_newDELayoutGet(
 //
 // !ARGUMENTS:
 //
-  int  *nDEs,             // out - Total number of DEs
-  int  *ndim,             // out - Number of dimensions in coordinate tuple
-  int  *nmyDEs,           // out - number of DEs for my PET instance
-  int  *myDEs,            // out - list DEs for my PET instance
-  int  len,               // in  - number of elements in myDEs list
-  int *localDe,           // out - local DE id for 1-to-1 layouts
-  ESMC_Logical *oneToOneFlag){    // out - 1-to-1 layout flag
+  int  *nDEs,                 // out - Total number of DEs
+  int  *ndim,                 // out - Number of dimensions in coordinate tuple
+  int  *nmyDEs,               // out - number of DEs for my PET instance
+  int  *myDEs,                // out - list DEs for my PET instance
+  int  len_myDEs,             // in  - number of elements in myDEs list
+  int *localDe,               // out - local DE id for 1-to-1 layouts
+  ESMC_Logical *oneToOneFlag, // out - 1-to-1 layout flag
+  ESMC_Logical *logRectFlag,  // out - logical rectangular layout flag
+  int  *deCountPerDim,        // out - list of dimension sizes
+  int  len_deCountPerDim){    // in  - number of elements in deCountPerDim list
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -366,14 +379,18 @@ int ESMC_newDELayout::ESMC_newDELayoutGet(
     *ndim = this->ndim;
   if (nmyDEs != ESMC_NULL_POINTER)
     *nmyDEs = nmydes;
-  if (len >= nmydes)
+  if (len_myDEs >= nmydes)
     for (int i=0; i<nmydes; i++)
       myDEs[i] = mydes[i];
-  if (oneToOneFlag != ESMC_NULL_POINTER){
+  if (oneToOneFlag != ESMC_NULL_POINTER)
     *oneToOneFlag = this->oneToOneFlag;
-    if (localDe != ESMC_NULL_POINTER)
-      *localDe = mydes[0];
-  }
+  if (localDe != ESMC_NULL_POINTER)
+    *localDe = mydes[0];
+  if (logRectFlag != ESMC_NULL_POINTER)
+    *logRectFlag = this->logRectFlag;
+  if ((len_deCountPerDim >= this->ndim) && (this->logRectFlag == ESMF_TRUE))
+    for (int i=0; i<this->ndim; i++)
+      deCountPerDim[i] = dims[i];
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

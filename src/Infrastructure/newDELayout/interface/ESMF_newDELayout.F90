@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.17 2004/04/05 17:59:46 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.18 2004/04/06 17:17:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -140,7 +140,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.17 2004/04/05 17:59:46 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.18 2004/04/06 17:17:22 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -461,16 +461,18 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
-    localDeList, localDe, oneToOneFlag, rc)
+    localDeList, localDe, oneToOneFlag, logRectFlag, deCountPerDim, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)            :: delayout
     integer,                intent(out), optional :: deCount
     integer,                intent(out), optional :: dimCount
     integer,                intent(out), optional :: localDeCount
-    integer,                intent(out), optional :: localDeList(:)
+    integer, target,        intent(out), optional :: localDeList(:)
     integer,                intent(out), optional :: localDe
     type(ESMF_Logical),     intent(out), optional :: oneToOneFlag
+    type(ESMF_Logical),     intent(out), optional :: logRectFlag
+    integer, target,        intent(out), optional :: deCountPerDim(:)
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -499,8 +501,10 @@ contains
     integer :: status       ! local error status
     logical :: rcpresent
     integer :: len
-    integer :: dummy(0)     ! used to satisfy the C interface...
-
+    integer :: len_localDeList, len_deCountPerDim
+    integer, target :: dummy(0)     ! used to satisfy the C interface...
+    integer, pointer :: opt_localDeList(:), opt_deCountPerDim(:)
+    
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
     rcpresent = .FALSE.
@@ -509,18 +513,28 @@ contains
       rc = ESMF_FAILURE
     endif
     
-    ! Deal with optional array argument
-    len = 0
-    if (present(localDeList)) len = size(localDeList)
+    ! Deal with optional array arguments
+    ! TODO: make sure that this pointer, target stuff is a portable way of 
+    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
+    if (present(localDeList)) then
+      len_localDeList = size(localDeList)
+      opt_localDeList => localDeList
+    else
+      len_localDeList = 0
+      opt_localDeList => dummy
+    endif
+    if (present(deCountPerDim)) then
+      len_deCountPerDim = size(deCountPerDim)
+      opt_deCountPerDim => deCountPerDim
+    else
+      len_deCountPerDim = 0
+      opt_deCountPerDim => dummy
+    endif
 
     ! Routine which interfaces to the C++ creation routine.
-    if (len==0) then
-      call c_ESMC_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
-        dummy, len, localDe, oneToOneFlag, status)
-    else
-      call c_ESMC_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
-        localDeList, len, localDe, oneToOneFlag, status)
-    endif
+    call c_ESMC_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
+      opt_localDeList, len_localDeList, localDe, oneToOneFlag, logRectFlag, &
+      opt_deCountPerDim, len_deCountPerDim, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutGet error"
       return
