@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.50 2004/03/08 16:03:24 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.51 2004/03/08 22:50:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.50 2004/03/08 16:03:24 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.51 2004/03/08 22:50:43 jwolfe Exp $'
 
 !==============================================================================
 
@@ -107,8 +107,6 @@
 !     \item[dstArray]
 !          Resultant field where regridded source field will be stored.
 ! \item[TODO:]  make match actual arglist
-!     \item[name]
-!          {\tt Regrid} name.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \item[[srcmask]]
@@ -150,7 +148,6 @@
       type(ESMF_RouteHandle) :: rh
       type(ESMF_RegridType) :: tempRegrid
       type(ESMF_TransformValues) :: tv
-      character (len = ESMF_MAXSTR) :: name
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -169,8 +166,7 @@
       endif
 
       ! Set name and field pointers
-      call ESMF_RegridTypeSet(tempRegrid, name=name, srcArray = srcArray, &
-                              dstArray = dstArray, &
+      call ESMF_RegridTypeSet(tempRegrid, srcArray=srcArray, dstArray=dstArray, &
                               method = ESMF_RegridMethod_Bilinear, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: RegridTypeSet ", &
@@ -187,8 +183,8 @@
         return
       endif
       dstCounts(3) = 2
-      call ESMF_GridGetDE(dstGrid, localCellCountPerDim=dstCounts(1:2), &
-                          rc=status)
+      call ESMF_GridGetDE(dstGrid, horzRelLoc=dstRelLoc, &
+                          localCellCountPerDim=dstCounts(1:2), rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
                  "returned failure"
@@ -216,8 +212,8 @@
         return
       endif
       srcCounts(3) = 2
-      call ESMF_GridGetDE(srcGrid, localCellCountPerDim=srcCounts(1:2), &
-                          rc=status)
+      call ESMF_GridGetDE(srcGrid, horzRelLoc=srcRelLoc, &
+                          localCellCountPerDim=srcCounts(1:2), rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
                  "returned failure"
@@ -264,12 +260,14 @@
       ! just do this to get a recDomainList with the right rank -- could be
       ! different using arrays
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
-                                            recvDomainList, total=.false., &
-                                            rc=status)
+                                            recvDomainList, &
+                                            srcDataMap=srcDataMap, &
+                                            total=.false., rc=status)
       ! but this is the one we want to use for gathering grid data
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
-                                            recvDomainListTot, total=.true., &
-                                            rc=status)
+                                            recvDomainListTot, &
+                                            srcDataMap=srcDataMap, &
+                                            total=.true., rc=status)
 
       ! Now use temporary route to gather necessary coordinates
       ! Create arrays for gathered coordinates 
