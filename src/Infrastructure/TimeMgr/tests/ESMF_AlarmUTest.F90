@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.6 2004/04/13 19:53:12 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.7 2004/04/14 19:25:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.6 2004/04/13 19:53:12 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.7 2004/04/14 19:25:58 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
       ! instantiate a clock 
       type(ESMF_Clock) :: clock, clock1
       type(ESMF_Alarm) :: alarm1, alarm2, alarm3
-      logical :: enabled, isringing, sticky
+      logical :: enabled, isringing, sticky, alarmsEqual, alarmsNotEqual
 
       ! Random number
       real :: ranNum
@@ -164,6 +164,66 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Create Alarm Test"
+      alarm3 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1, ringTime=alarmTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Create Alarm Copy Test"
+      alarm2 = ESMF_AlarmCreate(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for alarm equality
+      ! alarmsEqual = ESMF_AlarmOperator(==)(alarm1,alarm2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Alarms Equal Test"
+      alarmsEqual = (alarm1 == alarm2)
+      call ESMF_Test((alarmsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for alarm inequality:
+      ! alarmsEqual = ESMF_AlarmOperator(==)(alarm1,alarm3)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Alarms Not Equal Test"
+      alarmsEqual = (alarm1 == alarm3)
+      call ESMF_Test((.not.alarmsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing alarms equality using:
+      ! alarmsNotEqual = ESMF_AlarmOperator(/=)(alarm1,alarm2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Alarms Equal Test"
+      alarmsNotEqual = (alarm1 /= alarm2)
+      call ESMF_Test((.not.alarmsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing alarms inequality using:
+      ! alarmsNotEqual = ESMF_AlarmOperator(/=)(alarm1,alarm3)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Alarms Not Equal Test"
+      alarmsNotEqual = (alarm1 /= alarm3)
+      call ESMF_Test((alarmsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
