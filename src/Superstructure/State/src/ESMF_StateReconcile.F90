@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.11 2004/12/09 17:18:52 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.12 2004/12/13 21:11:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -70,16 +70,17 @@
       private
         type(ESMF_StateItemInfo), dimension(:), pointer :: childList
         type(ESMF_StateItemInfo), dimension(:), pointer :: attrList
-        type(ESMF_StateItemInfo), pointer :: originalObject
-    ! TODO: these need to be folded in somehow.  temp test.
+    ! TODO: these need to be integrated in a better fashion.
     integer(ESMF_KIND_I4) :: mycount, theircount
     integer(ESMF_KIND_I4), pointer, dimension(:) :: idsend, idrecv
     integer(ESMF_KIND_I4), pointer, dimension(:) :: objsend, objrecv
     integer(ESMF_KIND_I4), pointer, dimension(:,:) :: blindsend, blindrecv
-        integer :: blockType   ! new obj, dup, or end marker
-        integer :: objType     ! ESMF object type
-        integer :: objID       ! must be unique! (get from base class)
-        integer :: childCount  !
+        ! TODO: longer term, build a linked list or tree of objects.
+        !type(ESMF_StateItemInfo), pointer :: originalObject
+        !integer :: blockType   ! new obj, dup, or end marker
+        !integer :: objType     ! ESMF object type
+        !integer :: objID       ! must be unique! (get from base class)
+        !integer :: childCount
       end type
 
       integer, parameter :: ESMF_BT_NEWOBJ = 1, &
@@ -99,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.11 2004/12/09 17:18:52 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.12 2004/12/13 21:11:08 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -160,23 +161,30 @@
     !  compatible (yet) with reconcile.
     domainOption = 0
 
-    ! each PET broadcasts the object ID lists and compares them to what
-    ! they get back.   missing objects are sent so they can be recreated
-    ! on the PETs without those objects.  eventually, we might want to
+    ! Each PET broadcasts the object ID lists and compares them to what
+    ! they get back.   Missing objects are sent so they can be recreated
+    ! on the PETs without those objects.  Eventually we might want to
     ! hash the ID lists so we can send a single number (or short list of
     ! numbers) instead of having to build and send the list each time.
      
+
+    ! This recursively descends the state objects and collects information
+    ! about each one.
     nullify(stateinfo)
     call ESMF_StateInfoBuild(state, stateinfo, vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
     
+    ! This one sends missing objects from the PETs which contain them
+    ! to the PETs which do not.
     call ESMF_StateProxyCreate(state, stateinfo, vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
 
+    ! This frees resources which were allocated during the building of
+    ! the information blocks during the InfoBuild call.
     call ESMF_StateInfoDrop(stateinfo, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
@@ -211,6 +219,9 @@
 !       {\tt ESMF\_State} to collect information from.
 !     \item[stateInfoList]
 !       Array of info blocks, one for each object in the {\tt ESMF\_State}.
+!       This routine allocates and/or extends the array of blocks, so it
+!       can come in as a NULL pointer and will return allocated and filled
+!       with data.
 !     \item[vm]
 !       The current {\tt ESMF\_VM} (virtual machine).  All PETs in this
 !       {\tt ESMF\_VM} will exchange information about objects which might
@@ -229,11 +240,14 @@
     integer :: offset
 
     ! make some initial space
-    allocate(stateInfoList(32), stat=localrc)
+    ! TODO: the current code only uses the first entry and hangs everything
+    ! onto it.  eventually, have an info block for each distinct object in
+    ! the state. 
+    allocate(stateInfoList(4), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for ID list", &
                                    ESMF_CONTEXT, rc)) return
-    allocate(stateInfoList(1)%childList(32), stat=localrc)
+    allocate(stateInfoList(1)%childList(4), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for child ID list", &
                                    ESMF_CONTEXT, rc)) return
@@ -344,10 +358,17 @@
 !
 ! !DESCRIPTION:
 !
+!     Called after the communication is complete, this routine frees
+!     any space allocated during the traversal of the state list and
+!     communication of the object information.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[stateInfoList]
 !       Array of info blocks, one for each object in the {\tt ESMF\_State}.
+!       Allocated by previous code, this routine traverses the blocks
+!       and frees all allocated space.  If no errors, this pointer 
+!       returns nullified.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -359,6 +380,10 @@
     ! shortname for use in the code below
     si => stateInfoList(1)
 
+    ! The receive buffers are allocated and freed during the sending of
+    ! objects.  What remains allocated are the send buffers which still
+    ! need to be freed.  TODO: this needs to be better integrated with the
+    ! object tree code below.
     if (si%mycount .gt. 0) then
         deallocate(si%idsend, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
@@ -374,7 +399,8 @@
                                        ESMF_CONTEXT, rc)) return
     endif
 
-    ! and now the list itself
+    ! The tree of objects - currently we are only using the first entry
+    ! and creating blocks all attached to it.
     deallocate(stateInfoList(1)%childList, stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Deallocating buffer for child ID list", &
@@ -406,12 +432,22 @@
 !
 ! !DESCRIPTION:
 !
+!     Traverse the state object and build blocks for all subobjects.
+!     Communicate with all other PETs in this {\tt ESMF\_VM} and determine
+!     if any objects are unknown to other PETs.  If so, communicate enough
+!     information to build proxy objects, which contain no local data, but
+!     contain information about the size and distribution of the data on
+!     other PETs.  Also communicate attribute information so the remote
+!     object can be queried on any PET and return consistent informaion.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
 !       {\tt ESMF\_State} to add info into.
 !     \item[stateInfoList]
 !       Array of info blocks, one for each object in the {\tt ESMF\_State}.
+!       This was built during the call to {\tt ESMF\_StateInfoBuild()}, and
+!       is released by a call to {\tt ESMF\_StateInfoDrop()}.
 !     \item[vm]
 !       The current {\tt ESMF\_VM} (virtual machine).  All PETs in this
 !       {\tt ESMF\_VM} will exchange information about objects which might
@@ -645,8 +681,11 @@
                                ESMF_CONTEXT, rc)) return
            endif
            
-           ! and now, i have a different object list.   brute force
-           ! rebuild my send list.
+           ! TODO:
+           ! and now, i have a different local object list.   brute force
+           ! rebuild my send list.   Once this code is stable, revisit this
+           ! and make a way to add the new object into my "known object"
+           ! list without reserializing all objects.
 
            call ESMF_StateInfoDrop(stateInfoList, rc=localrc)
            if (ESMF_LogMsgFoundError(localrc, &
