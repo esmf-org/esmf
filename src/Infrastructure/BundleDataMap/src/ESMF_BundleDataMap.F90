@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.16 2004/06/09 23:15:14 jwolfe Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.17 2004/06/10 13:42:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -68,8 +68,8 @@
       end type
 
       type(ESMF_BundleInterleave), parameter ::  &
-                    ESMF_BIL_BYFIELD = ESMF_BundleInterleave(1), &
-                    ESMF_BIL_BYITEM  = ESMF_BundleInterleave(2)
+                    ESMF_INTERLEAVE_BY_ITEM = ESMF_BundleInterleave(1), &
+                    ESMF_INTERLEAVE_BY_FIELD  = ESMF_BundleInterleave(2)
 
 !------------------------------------------------------------------------------
 !  ! ESMF_BundleDataMap
@@ -85,7 +85,7 @@
         ! its own private data map.   
 #ifndef ESMF_NO_INITIALIZERS
         type(ESMF_Status) :: status = ESMF_STATE_UNINIT
-        type(ESMF_BundleInterleave) :: bil = ESMF_BIL_BYFIELD
+        type(ESMF_BundleInterleave) :: bil = ESMF_INTERLEAVE_BY_ITEM
 #else
         type(ESMF_Status) :: status 
         type(ESMF_BundleInterleave) :: bil
@@ -99,7 +99,7 @@
       public ESMF_BundleDataMap
 
       public ESMF_BundleInterleave
-      public ESMF_BIL_BYFIELD, ESMF_BIL_BYITEM
+      public ESMF_INTERLEAVE_BY_ITEM, ESMF_INTERLEAVE_BY_FIELD
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -126,7 +126,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.16 2004/06/09 23:15:14 jwolfe Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.17 2004/06/10 13:42:26 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -200,8 +200,9 @@ end function
 !           An {\tt ESMF\_BundleDataMap}.
 !     \item [{[bundleInterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
-!           a single array.  Possible values are {\tt ESMF\_BIL\_BYITEM} and
-!           {\tt ESMF\_BIL\_BYFIELD}. 
+!           a single array.  Possible values are 
+!           {\tt ESMF\_INTERLEAVE\_BY\_ITEM} and
+!           {\tt ESMF\_INTERLEAVE\_BY\_FIELD}. 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -308,8 +309,8 @@ end function
 !           An {\tt ESMF\_BundleDataMap}.
 !     \item [{[bundleInterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
-!           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
-!           {\tt ESMF\_BIL\_BYFIELD}.
+!           a single array.  Options are {\tt ESMF\_INTERLEAVE\_BY\_ITEM} and
+!           {\tt ESMF\_INTERLEAVE\_BY\_FIELD}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -363,8 +364,8 @@ end function
 !           An {\tt ESMF\_BundleDataMap}.
 !     \item [{[bundleInterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
-!           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
-!           {\tt ESMF\_BIL\_BYFIELD}.  If not specified, the default
+!           a single array.  Options are {\tt ESMF\_INTERLEAVE\_BY\_ITEM} and
+!           {\tt ESMF\_INTERLEAVE\_BY\_FIELD}.  If not specified, the default
 !           is interleave by field.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -386,7 +387,7 @@ end function
         endif
 
         ! set the default
-        bundledatamap%bil = ESMF_BIL_BYFIELD
+        bundledatamap%bil = ESMF_INTERLEAVE_BY_FIELD
 
         ! initialize the contents of the bundle datamap
         if (present(bundleInterleave)) bundledatamap%bil = bundleInterleave
@@ -529,8 +530,8 @@ end function
 !
 !EOPI
 
-        if (interleave .eq. ESMF_BIL_BYFIELD) string = "Interleave by Field"
-        if (interleave .eq. ESMF_BIL_BYITEM) string = "Interleave by Item"
+        if (interleave .eq. ESMF_INTERLEAVE_BY_FIELD) string = "Interleave by Field"
+        if (interleave .eq. ESMF_INTERLEAVE_BY_ITEM) string = "Interleave by Item"
 
         if (present(rc)) rc = ESMF_SUCCESS
 
