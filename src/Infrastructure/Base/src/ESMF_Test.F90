@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.6 2004/10/11 20:13:37 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.7 2004/10/14 20:45:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.6 2004/10/11 20:13:37 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.7 2004/10/14 20:45:52 nscollins Exp $'
 
 !==============================================================================
 
@@ -81,13 +81,13 @@
       if(condition) then
         write(msg, *) "PASS ", trim(name), ", ", trim(file), ", line", line
         print *, msg
-        call ESMF_LogWrite(msg, ESMF_LOG_INFO)
+        call ESMF_LogWrite("PASS "//trim(name), ESMF_LOG_INFO, line, file)
         if (present(unit)) write(unit, *) msg
       else
         write(msg, *) "FAIL ", trim(name), ", ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, msg
-        call ESMF_LogWrite(msg, ESMF_LOG_INFO)
+        call ESMF_LogWrite("FAIL "//trim(name), ESMF_LOG_INFO, line, file)
         if (present(unit)) write(unit, *) msg
         result = result + 1  ! count total failures; 0 = all pass
       end if
@@ -121,7 +121,7 @@
 
       write(msg, *) "Beginning Test, file ", trim(file), ", line", line
       print *, msg
-      call ESMF_LogWrite(msg, ESMF_LOG_INFO)
+      call ESMF_LogWrite("Beginning Test", ESMF_LOG_INFO, line, file)
       if (present(unit)) write(unit, *) msg
 
       write(msg, *) "NUMBER OF PROCESSORS", numPETs
@@ -163,7 +163,7 @@
 
       write(msg, *) "Ending Test, file ", trim(file), ", line", line
       print *, msg
-      call ESMF_LogWrite(msg, ESMF_LOG_INFO)
+      call ESMF_LogWrite("Ending Test", ESMF_LOG_INFO, line, file)
       if (present(unit)) write(unit, *) msg
 
       end subroutine ESMF_TestEnd
