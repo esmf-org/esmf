@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.13 2003/06/16 17:18:06 jwolfe Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.14 2003/06/20 15:24:59 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -279,6 +279,7 @@
       write(failMsg, *)  "System Test failure"
       write(testname, *) "System Test 74559: Coupled Fluid Flow"
   
+      call ESMF_DELayoutGetDEId(layoutApp, de_id, rc)
       if (de_id .eq. 0) then
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
