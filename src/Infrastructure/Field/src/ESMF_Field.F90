@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.168 2004/06/15 22:47:50 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.169 2004/06/16 15:56:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.168 2004/06/15 22:47:50 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.169 2004/06/16 15:56:10 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2956,8 +2956,13 @@
 
 
         if (de_id .eq. 0) then       
-        call ESMF_ArrayGet(out_array, out_rank, arr_type, arr_kind, out_counts, &
-             out_lbounds, out_ubounds, out_strides, rc=rc)
+        call ESMF_ArrayGet(out_array, out_rank, arr_type, arr_kind, rc=rc)
+        allocate(out_counts (out_rank), &
+                 out_lbounds(out_rank), &
+                 out_ubounds(out_rank), &
+                 out_strides(out_rank), stat=rc)
+        call ESMF_ArrayGet(out_array, counts=out_counts, lbounds=out_lbounds, &
+                           ubounds=out_ubounds, strides=out_strides, rc=rc)
 
         out_type = arr_type%dtype
         out_kind = arr_kind%dkind
