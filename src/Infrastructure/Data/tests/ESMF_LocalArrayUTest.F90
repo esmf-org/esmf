@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.2 2003/08/13 23:30:33 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.3 2003/08/15 22:58:31 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -283,8 +283,34 @@
      enddo
     enddo
 
+   !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating Local Array with 2D Real Data based on an existing F90 pointer Test"
     array2 = ESMF_LocalArrayCreate(realptr, ESMF_DATA_REF, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 2 create returned"
+
+   !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Getting Local Array 2D Real Data Test"
+    call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
+    print *, "array 2 getdata returned"
+    print *, "partial print of realptr2 data = ", realptr2(1:3,1:3)
+
+   !NEX_UTest
+    do i=1,ni
+     do j=1,nj
+        if (realptr(i,j).eq.realptr2(i,j)) then
+                result = 0
+        else
+                result = 1
+                exit
+        end if
+     enddo
+    enddo
+    write(failMsg, *) "Array data did not compare."
+    write(name, *) "Compare Local Array 2D Real Data Test"
+    call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_LocalArrayPrint(array2, "foo", rc)
     print *, "array 2 print returned"
@@ -310,7 +336,11 @@
      enddo
     enddo
 
+   !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating Local Array with 2D Real Data based on an existing F90 pointer Test"
     array2 = ESMF_LocalArrayCreate(realptr, ESMF_DATA_COPY, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 2 create returned"
 
     call ESMF_LocalArrayPrint(array2, "foo", rc)
@@ -326,6 +356,28 @@
     call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
     print *, "array 2 getdata returned"
     print *, "realptr2 data = ", realptr2(1:3,1:3)
+
+   !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Getting Local Array 2D Real Data Test"
+    call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
+    print *, "array 2 getdata returned"
+    print *, "realptr2 data = ", realptr2(1:3,1:3)
+
+   !NEX_UTest
+    do i=1,ni
+     do j=1,nj
+        if (realptr(i,j).eq.realptr2(i,j)) then
+                result = 0
+        else
+                result = 1
+                exit
+        end if
+     enddo
+    enddo
+    write(failMsg, *) "Array data should not compare."
+    write(name, *) "Compare Local Array 2D Real Data Test"
+    call ESMF_Test((result.eq.1), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_LocalArrayDestroy(array2)
     print *, "array 2 destroy returned"
