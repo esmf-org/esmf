@@ -1,4 +1,4 @@
-// $Id: ESMC_XformEx.C,v 1.1 2003/10/22 21:00:54 cdeluca Exp $
+// $Id: ESMC_XformEx.C,v 1.2 2003/11/26 22:55:39 svasquez Exp $
 //
 // Example/test code which creates a new Transforms.
 
@@ -41,8 +41,8 @@ main(int argc, char **argv) {
     printf("Xform Example 1n");
 
     // The third arguments here are names of subroutines.
-    rc = ESMF_XformInit(xformlist[0], "AtmToOcn", A2OCPLxform)
-    rc = ESMF_XformInit(xformlist[1], "OcnToAtm", O2ACPLxform)
+    rc = ESMF_XformInit(xformlist[0], "AtmToOcn", A2OCPLxform);
+    rc = ESMF_XformInit(xformlist[1], "OcnToAtm", O2ACPLxform);
 
     printf("Xform Example 1 finished\n");
 
