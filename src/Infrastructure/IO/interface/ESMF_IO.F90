@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.5 2002/12/10 22:30:37 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.6 2002/12/12 23:36:44 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -144,7 +144,7 @@
 
       ALLOCATE(ios)
 
-      ESMF_IOSpecCreateNew = ios
+      ESMF_IOSpecCreateNew => ios
 
       end function ESMF_IOSpecCreateNew
 
