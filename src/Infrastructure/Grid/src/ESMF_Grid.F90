@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.69 2003/07/29 17:56:37 dneckels Exp $
+! $Id: ESMF_Grid.F90,v 1.70 2003/07/31 15:50:39 atrayanov Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.69 2003/07/29 17:56:37 dneckels Exp $'
+      '$Id: ESMF_Grid.F90,v 1.70 2003/07/31 15:50:39 atrayanov Exp $'
 
 !==============================================================================
 !
@@ -440,6 +440,7 @@
                                        horz_gridtype, vert_gridtype, &
                                        horz_stagger, vert_stagger, &
                                        horz_coord_system, vert_coord_system, &
+                                       periodic, & !!! ALT addition
                                        name, rc)
 !
 ! !RETURN VALUE:
@@ -458,6 +459,7 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
+      logical, intent(in), optional :: periodic(:) !!! ALT addition
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -492,6 +494,8 @@
 !          Integer specifier to denote horizontal coordinate system.
 !     \item[{[vert\_coord\_system]}]
 !          Integer specifier to denote vertical coordinate system.
+!     \item[{[periodic]}]
+!          Logical specifier (array) to denote periodicity along the coordinate axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -529,6 +533,7 @@
                               horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
+                              periodic, & !!! ALT addition
                               name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
@@ -981,6 +986,7 @@
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
+                                            periodic, & !!! ALT addition
                                             name, rc)
 !
 ! !ARGUMENTS:
@@ -997,6 +1003,7 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
+      logical, intent(in), optional :: periodic(:)  !!! ALT addition
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -1036,6 +1043,8 @@
 !          Integer specifier to denote horizontal coordinate system.
 !     \item[{[vert\_coord\_system]}]
 !          Integer specifier to denote vertical coordinate system.
+!     \item[{[periodic]}]
+!          Logical specifier (array) to denote periodicity along the coordinate axes.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1064,7 +1073,8 @@
 !     Fill in grid derived type with subroutine arguments
       call ESMF_GridSet(grid, horz_gridtype, vert_gridtype, &
                         horz_stagger, vert_stagger, &
-                        horz_coord_system, vert_coord_system, status)
+                        horz_coord_system, vert_coord_system, &
+                        periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Grid set"
         return
@@ -2004,7 +2014,7 @@
                               horz_coord_system, vert_coord_system, &
                               coord_order, global_min_coords, &
                               global_max_coords, global_cell_dim, &
-                              global_start, name, rc)
+                              global_start, periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -2019,6 +2029,7 @@
       real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_max_coords
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_cell_dim
       integer, intent(out), dimension(:,:), optional :: global_start
+      logical, intent(out), optional :: periodic(:) !!! ALT addition
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -2050,6 +2061,8 @@
 !          Maximum global physical coordinates.
 !     \item[{[global\_nmax]}]
 !          Numbers of global grid increments.
+!     \item[{[periodic]}]
+!          Returns the periodicity along the coordinate axes - logical array.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -2062,6 +2075,7 @@
       integer :: status=ESMF_SUCCESS              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
       integer :: physgrid_id
+      integer :: i                                ! Loop index
       type(ESMF_GridType), pointer :: gridp
 
 !     Initialize return code
@@ -2119,6 +2133,15 @@
         endif
       endif
 
+!!! ALT addition
+      ! get the periodicity
+      if (present(periodic)) then
+         do i=1,ESMF_MAXGRIDDIM
+            if (i > size(periodic)) exit
+            periodic(i) = gridp%periodic(i)
+         enddo
+      endif
+
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGet
@@ -2131,7 +2154,7 @@
       subroutine ESMF_GridSet(grid, horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
-                              coord_order, rc)
+                              coord_order, periodic, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -2142,6 +2165,7 @@
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
       integer, intent(in), optional :: coord_order
+      logical, intent(in), optional :: periodic(:) !!! ALT addition
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2166,6 +2190,8 @@
 !          Integer specifier to denote vertical coordinate system
 !     \item[{[coord\_order]}]
 !          Integer specifier to denote coordinate ordering
+!     \item[{[periodic]}]
+!          Logical specifier (array) to denote periodicity along the coordinate axes.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2174,6 +2200,7 @@
 ! !REQUIREMENTS:
 
       integer :: status=ESMF_SUCCESS              ! Error status
+      integer :: i                                ! loop index
       logical :: rcpresent=.FALSE.                ! Return code present
 
 !     Initialize return code
@@ -2190,6 +2217,14 @@
       if(present(horz_coord_system)) grid%horz_coord_system = horz_coord_system
       if(present(vert_coord_system)) grid%vert_coord_system = vert_coord_system
       if(present(coord_order)) grid%coord_order = coord_order
+!!! ALT addition
+      if (present(periodic)) then
+         do i=1,ESMF_MAXGRIDDIM
+            if (i > size(periodic)) exit
+            grid%periodic(i) = periodic(i)
+         enddo
+      endif
+
 
       if(rcpresent) rc = ESMF_SUCCESS
 
