@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.13 2003/05/07 04:34:31 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.14 2003/05/21 18:33:11 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -50,7 +50,8 @@
       use ESMF_DistGridMod     ! ESMF distributed grid class
       use ESMF_RegridTypesMod  ! ESMF regrid data types and utilities
       use ESMF_RegridBilinMod  ! ESMF regrid methods related to bilinear regrid
-      !use ESMF_RegridConservMod ! ESMF regrid methods related to conservative regrid
+      use ESMF_RegridNearNbrMod  ! ESMF regrid methods related to nearest-nbr regrid
+      use ESMF_RegridConservMod ! ESMF regrid methods related to conservative regrid
 
       implicit none
 
@@ -125,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.13 2003/05/07 04:34:31 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.14 2003/05/21 18:33:11 pwjones Exp $'
 
 !==============================================================================
 !
@@ -271,21 +272,18 @@
                   "Bicubic not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_Conserv1)
-         print *, "ERROR in ESMF_RegridCreateFromField: ", &
-                  "1st-order conservative not yet supported"
-         stat = ESMF_FAILURE
+         regrid = ESMF_RegridConstructConserv(src_field, dst_field, &
+                                              regrid_name, order=1, stat)
       case(ESMF_RegridMethod_Conserv2) ! 2nd-order conservative
-         print *, "ERROR in ESMF_RegridCreateFromField: ", &
-                  "2nd-order conservative not yet supported"
-         stat = ESMF_FAILURE
+         regrid = ESMF_RegridConstructConserv(src_field, dst_field, &
+                                              regrid_name, order=2, stat)
       case(ESMF_RegridMethod_Raster) ! regrid by rasterizing domain
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Raster method not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_NearNbr) ! nearest-neighbor dist-weighted avg
-         print *, "ERROR in ESMF_RegridCreateFromField: ", &
-                  "Nearest-neighbor method not yet supported"
-         stat = ESMF_FAILURE
+         regrid = ESMF_RegridConstructNearNbr(src_field, dst_field, &
+                                              regrid_name, stat)
       case(ESMF_RegridMethod_Fourier) ! Fourier transform
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Fourier transforms not yet supported"
@@ -424,21 +422,21 @@
                   "Bicubic not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_Conserv1)
+         regrid = ESMF_RegridConstructConserv(src_bundle, dst_bundle, &
+                                              regrid_name, order=1, stat)
          print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
                   "1st-order conservative not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_Conserv2) ! 2nd-order conservative
-         print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
-                  "2nd-order conservative not yet supported"
-         stat = ESMF_FAILURE
+         regrid = ESMF_RegridConstructConserv(src_bundle, dst_bundle, &
+                                              regrid_name, order=2, stat)
       case(ESMF_RegridMethod_Raster) ! regrid by rasterizing domain
          print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
                   "Raster method not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_NearNbr) ! nearest-neighbor dist-weighted avg
-         print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
-                  "Nearest-neighbor method not yet supported"
-         stat = ESMF_FAILURE
+         regrid = ESMF_RegridConstructNearNbr(src_bundle, dst_bundle, &
+                                              regrid_name, stat)
       case(ESMF_RegridMethod_Fourier) ! Fourier transform
          print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
                   "Fourier transforms not yet supported"

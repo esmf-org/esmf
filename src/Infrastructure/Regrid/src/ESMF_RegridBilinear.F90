@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.3 2003/05/07 04:34:31 cdeluca Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.4 2003/05/21 18:33:11 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.3 2003/05/07 04:34:31 cdeluca Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.4 2003/05/21 18:33:11 pwjones Exp $'
 
 !==============================================================================
 !
@@ -525,24 +525,32 @@
 
         !             sum_wts = zero
         !             if (src_mask(iii,jjj)) then
-        !                weights(1) = ESMF_PhysGrid_Dist(src_x(1),src_y(1), &
-        !                                      dst_x, dst_y, src_grid%coord_system)
+        !                weights(1) = ESMF_GridComputeDistance( &
+        !                                    src_x(1),src_y(1), &
+        !                                    dst_x, dst_y,      &
+        !                                    src_grid%coord_system, status)
         !                sum_wts = sum_wts + weights(1)
         !             endif
         !             if (src_mask(ip1,jjj)) then
-        !                weights(2) = ESMF_PhysGrid_Dist(src_x(2),src_y(2), &
-        !                                     dst_x, dst_y, src_grid%coord_system)
+        !                weights(2) = ESMF_GridComputeDistance( &
+        !                                    src_x(2),src_y(2), &
+        !                                    dst_x, dst_y,      &
+        !                                    src_grid%coord_system, status)
         !                sum_wts = sum_wts + weights(2)
         !             endif
         !             if (src_mask(ip1,jp1)) then
-        !                weights(3) = ESMF_PhysGrid_Dist(src_x(3),src_y(3), &
-        !                                      dst_x, dst_y, src_grid%coord_system)
+        !                weights(3) = ESMF_GridComputeDistance( &
+        !                                    src_x(3),src_y(3), &
+        !                                    dst_x, dst_y,      &
+        !                                    src_grid%coord_system, status)
         !                sum_wts = sum_wts + weights(3)
         !             endif
         !             if (src_mask(iii,jp1)) then
         !                src_count = src_count + 1
-        !                weights(4) = ESMF_PhysGrid_Dist(src_x(4),src_y(4), &
-        !                                      dst_x, dst_y, src_grid%coord_system)
+        !                weights(4) = ESMF_GridComputeDistance( &
+        !                                    src_x(4),src_y(4), &
+        !                                    dst_x, dst_y,      &
+        !                                    src_grid%coord_system, status)
         !                sum_wts = sum_wts + weights(4)
         !             endif
         !             weights(:) = weights(:)/sum_wts
@@ -560,7 +568,9 @@
         !             src_add(1) = iii
         !             src_add(2) = jjj
         !             src_add(3) = src_DEid
-        !             call ESMF_RegridAddLink(src_add, dst_add, weights(1), rc)
+        !             call ESMF_RegridAddLink(                               &
+        !                             ESMF_RegridConstructFromFieldBilinear, &
+        !                             src_add, dst_add, weights(1), rc)
         !          endif
         !          if (src_mask(ip1,jjj)) then
         !             dst_add(1) = i
@@ -569,7 +579,9 @@
         !             src_add(1) = ip1
         !             src_add(2) = jjj
         !             src_add(3) = src_DEid
-        !             call ESMF_RegridAddLink(src_add, dst_add, weights(2), rc)
+        !             call ESMF_RegridAddLink(                               &
+        !                             ESMF_RegridConstructFromFieldBilinear, &
+        !                             src_add, dst_add, weights(2), rc)
         !          endif
         !          if (src_mask(ip1,jp1)) then
         !             dst_add(1) = i
@@ -578,7 +590,9 @@
         !             src_add(1) = ip1
         !             src_add(2) = jp1
         !             src_add(3) = src_DEid
-        !             call ESMF_RegridAddLink(src_add, dst_add, weights(3), rc)
+        !             call ESMF_RegridAddLink(                               &
+        !                             ESMF_RegridConstructFromFieldBilinear, &
+        !                             src_add, dst_add, weights(3), rc)
         !          endif
         !          if (src_mask(iii,jp1)) then
         !             dst_add(1) = i
@@ -587,7 +601,9 @@
         !             src_add(1) = iii
         !             src_add(2) = jp1
         !             src_add(3) = src_DEid
-        !             call ESMF_RegridAddLink(src_add, dst_add, weights(4), rc)
+        !             call ESMF_RegridAddLink(                               &
+        !                             ESMF_RegridConstructFromFieldBilinear, &
+        !                             src_add, dst_add, weights(4), rc)
         !          endif
 
                   
