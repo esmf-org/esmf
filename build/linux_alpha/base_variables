@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2003/01/27 18:05:14 nscollins Exp $ 
+# $Id: base_variables,v 1.2 2003/02/10 23:15:58 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -44,7 +44,7 @@ CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLD         = fort -mp
-C_F90CXXLIBS       = -lstd -lC
+C_F90CXXLIBS       = 
 C_CXXF90LD         = cxx 
 C_CXXF90LIBS       = 
 C_CXXSO            = cxx -shared

@@ -1,5 +1,5 @@
 static char *machineinfo = "    \n\
-Libraries compiled on Mon Jan 27 11:04:09 MST 2003 on lhotse0   \n\
+Libraries compiled on Mon Feb 10 16:10:42 MST 2003 on lhotse0   \n\
 Machine characteristics: Linux lhotse0 2.4.19-2.4qsnet-5.1gfs #10 SMP Thu Sep 26 09:47:26 MDT 2002 alpha unknown   \n\
 -----------------------------------------  \n\
 Using C compiler: ccc  -g                        -D__SDIR__=''   \n\
@@ -17,11 +17,11 @@ Using ESMF flags:                      \n\
 -----------------------------------------  \n\
 Using configuration flags:  \n\
 -----------------------------------------  \n\
-Using include paths: -I/home/nancy/esmf/esmf/ -I/home/nancy/esmf/esmf//../include -I/home/nancy/esmf/esmf -I/home/nancy/esmf/esmf/src/include -I/usr/local/include -I/home/nancy/esmf/esmf/build/linux_alpha -I/home/nancy/esmf/esmf/include -I/home/nancy/esmf/esmf/mod/modg/linux_alpha  -I/home/nancy/esmf/esmf/timing  \n\
+Using include paths: -I/home/nancy/esmf_local/esmf/ -I/home/nancy/esmf_local/esmf//../include -I/home/nancy/esmf_local/esmf -I/home/nancy/esmf_local/esmf/src/include -I/usr/local/include -I/home/nancy/esmf_local/esmf/build/linux_alpha -I/home/nancy/esmf_local/esmf/include -I/home/nancy/esmf_local/esmf/mod/modg/linux_alpha  -I/home/nancy/esmf_local/esmf/timing  \n\
 -----------------------------------------  \n\
-Using ESMF directory: /home/nancy/esmf/esmf  \n\
+Using ESMF directory: /home/nancy/esmf_local/esmf  \n\
 Using ESMF arch: linux_alpha  \n\
 ------------------------------------------  \n\
-Using C linker: ccc -g  -Wl,-rpath,/home/nancy/esmf/esmf/lib/libg/linux_alpha   \n\
-Using Fortran linker: fort -g -Wl,-rpath,/home/nancy/esmf/esmf/lib/libg/linux_alpha   \n\
-Using libraries: -L/home/nancy/esmf/esmf/lib/libg/linux_alpha "; 
+Using C linker: ccc -g  -Wl,-rpath,/home/nancy/esmf_local/esmf/lib/libg/linux_alpha   \n\
+Using Fortran linker: fort -g -Wl,-rpath,/home/nancy/esmf_local/esmf/lib/libg/linux_alpha   \n\
+Using libraries: -L/home/nancy/esmf_local/esmf/lib/libg/linux_alpha "; 
