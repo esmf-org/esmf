@@ -1,4 +1,4 @@
-!n $Id: ESMF_FieldComm.F90,v 1.35 2004/05/27 14:53:19 nscollins Exp $
+!n $Id: ESMF_FieldComm.F90,v 1.36 2004/06/03 22:04:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.35 2004/05/27 14:53:19 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.36 2004/06/03 22:04:56 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -304,7 +304,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloRun"
 !BOP
-! !IROUTINE: ESMF_FieldHalo - Execute a Halo operation on a Field
+! !IROUTINE: ESMF_FieldHalo - Execute a halo operation on a Field
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldHalo()
@@ -414,7 +414,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloStore"
 !BOP
-! !IROUTINE: ESMF_FieldHaloStore - Precompute a Data Halo operation on a Field
+! !IROUTINE: ESMF_FieldHaloStore - Precompute a halo operation on a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldHaloStore(field, routehandle, halodirection, rc)
@@ -506,7 +506,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRedist"
 !BOP
-! !IROUTINE: ESMF_FieldRedist - Data Redistribution operation on a Field
+! !IROUTINE: ESMF_FieldRedist - Data redistribution operation on a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedist(srcField, dstField, routehandle, blocking, &
@@ -628,7 +628,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRedistStore"
 !BOP
-! !IROUTINE: ESMF_FieldRedistStore - Data Redistribution operation on a Field
+! !IROUTINE: ESMF_FieldRedistStore - Data redistribution operation on a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStore(srcField, dstField, parentDElayout, &
@@ -734,7 +734,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRedistStoreNew"
 !BOP
-! !IROUTINE: ESMF_FieldRedistStore - Data Redistribution operation on a Field
+! !IROUTINE: ESMF_FieldRedistStore - Data redistribution operation on a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStoreNew(srcField, decompIds, dstField, &
@@ -918,7 +918,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegrid"
 !BOP
-! !IROUTINE: ESMF_FieldRegrid - Data Regrid operation on a Field
+! !IROUTINE: ESMF_FieldRegrid - Data regrid operation on a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldRegrid(srcfield, dstfield, routehandle, &
@@ -1111,7 +1111,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridStore"
 !BOP
-! !IROUTINE: ESMF_FieldRegridStore - Data Regrid operation on a Field
+! !IROUTINE: ESMF_FieldRegridStore - Data regrid operation on a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldRegridStore(srcfield, dstfield, parentDElayout, &
@@ -1250,7 +1250,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldScatter"
 !BOP
-! !IROUTINE: ESMF_FieldScatter - Data Scatter operation on a Field
+! !IROUTINE: ESMF_FieldScatter - Data scatter operation on a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldScatter(array, sourceDE, field, &
@@ -1380,7 +1380,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloDeprecated"
 !BOPI
-! !IROUTINE: ESMF_FieldHaloDeprecated - Data Halo operation on a Field
+! !IROUTINE: ESMF_FieldHaloDeprecated - Data halo operation on a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldHaloDeprecated(field, blocking, commhandle, rc)
