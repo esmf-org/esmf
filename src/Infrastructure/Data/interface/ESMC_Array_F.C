@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.40 2003/06/19 16:58:54 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.41 2003/07/07 22:38:21 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,20 +129,22 @@ extern "C" {
          *status = ESMC_ArrayDestroy(*ptr);
      }
 
-     void FTN(c_esmc_arraysetaxisindex)(ESMC_Array **ptr, ESMC_AxisIndex *ai, int *status) {
+     void FTN(c_esmc_arraysetaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt,
+                                        ESMC_AxisIndex *ai, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
           }
-          *status = (*ptr)->ESMC_ArraySetAxisIndex(ai);
+          *status = (*ptr)->ESMC_ArraySetAxisIndex(*dt, ai);
      }
 
-     void FTN(c_esmc_arraygetaxisindex)(ESMC_Array **ptr, ESMC_AxisIndex *ai, int *status) {
+     void FTN(c_esmc_arraygetaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt,
+                                        ESMC_AxisIndex *ai, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
           }
-          *status = (*ptr)->ESMC_ArrayGetAxisIndex(ai);
+          *status = (*ptr)->ESMC_ArrayGetAxisIndex(*dt, ai);
      }
 
      void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_DELayout **layout,

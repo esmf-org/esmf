@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.63 2003/06/27 20:01:09 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.64 2003/07/07 22:38:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -52,8 +52,8 @@
 ! ! ESMF_CopyFlag
 !
 ! ! Indicates whether a data array should be copied or referenced.
-! ! TODO: Should this be moved down to the base class? Is it useful
-! ! anyplace else outside of the Array context?
+! ! This matches an enum on the C++ side and the values must match.
+! ! Update ../include/ESMC_Array.h if you change these values.
 
       type ESMF_CopyFlag
       sequence
@@ -82,6 +82,24 @@
       type(ESMF_ArrayOrigin), parameter :: &
                             ESMF_FROM_FORTRAN = ESMF_ArrayOrigin(1), &
                             ESMF_FROM_CPLUSPLUS = ESMF_ArrayOrigin(2)
+
+!------------------------------------------------------------------------------
+! ! ESMF_DomainType
+!
+! ! Indicates whether a data array should be copied or referenced.
+! ! This matches an enum on the C++ side and the values must match.
+! ! Update ../include/ESMC_Array.h if you change these values.
+
+      type ESMF_DomainType
+      sequence
+      private
+        integer :: dt
+      end type
+
+      type(ESMF_DomainType), parameter :: &
+                            ESMF_DOMAIN_LOCAL = ESMF_DomainType(1), &
+                            ESMF_DOMAIN_COMPUTATIONAL = ESMF_DomainType(2), &
+                            ESMF_DOMAIN_EXCLUSIVE = ESMF_DomainType(3)
 
 !------------------------------------------------------------------------------
 ! ! ESMF_ArraySpec
@@ -296,7 +314,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.63 2003/06/27 20:01:09 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.64 2003/07/07 22:38:21 nscollins Exp $'
 
 !==============================================================================
 !
@@ -16600,10 +16618,11 @@ end function
 ! !IROUTINE: ESMF_ArraySetAxisIndex
 !
 ! !INTERFACE:
-      subroutine ESMF_ArraySetAxisIndex(array, indexlist, rc)
+      subroutine ESMF_ArraySetAxisIndex(array, domain, indexlist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
+      type(ESMF_DomainType), intent(in) :: domain
       type(ESMF_AxisIndex), intent(in) :: indexlist(:)
       integer, intent(out), optional :: rc
 !
@@ -16618,7 +16637,7 @@ end function
 ! TODO: code goes here
 !
         ! call c routine to add index
-        call c_ESMC_ArraySetAxisIndex(array, indexlist, rc)
+        call c_ESMC_ArraySetAxisIndex(array, domain, indexlist, rc)
 
         end subroutine ESMF_ArraySetAxisIndex
 
@@ -16627,10 +16646,11 @@ end function
 ! !IROUTINE: ESMF_ArrayGetAxisIndex
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayGetAxisIndex(array, indexlist, rc)
+      subroutine ESMF_ArrayGetAxisIndex(array, domain, indexlist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
+      type(ESMF_DomainType), intent(in) :: domain
       type(ESMF_AxisIndex), intent(out) :: indexlist(:)
       integer, intent(out), optional :: rc
 !
@@ -16640,11 +16660,8 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
         ! call c routine to query index
-        call c_ESMC_ArrayGetAxisIndex(array, indexlist, rc)
+        call c_ESMC_ArrayGetAxisIndex(array, domain, indexlist, rc)
 
         end subroutine ESMF_ArrayGetAxisIndex
 
