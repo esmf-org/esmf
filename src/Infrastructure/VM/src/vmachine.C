@@ -16,7 +16,7 @@
 // (at least SunOS needs this)  TODO: unconditional for all platforms ?
 #ifdef PARCH_solaris
 #define _POSIX_SOURCE
-#define _POSIX_C_SOURCE 199309
+#define _POSIX_C_SOURCE 199309L
 #endif
 
 // On SunOS, define this to get gethostid() prototype
