@@ -1,6 +1,6 @@
-! $Id: FieldHalo.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: FieldHalo.F90,v 1.2 2003/09/18 22:26:08 cdeluca Exp $
 !
-! System test code #70385
+! System test FieldHalo
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,12 +8,12 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 70385.
+! System test FieldHalo.
 !
 !
 !\begin{verbatim}
 
-    program ESMF_SysTest70385
+    program FieldHalo
 
 #include <ESMF_Macros.inc>
 
@@ -49,9 +49,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "------------------"
-    print *, "System Test #70385:"
-    print *, "------------------"
+    print *, "----------------------"
+    print *, "System Test FieldHalo:"
+    print *, "----------------------"
 
 !
 !-------------------------------------------------------------------------
@@ -60,7 +60,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    app = ESMF_AppCompCreate(name="Application #70385", rc=rc)
+    app = ESMF_AppCompCreate(name="Application FieldHalo", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_AppCompGet(app, layout=deflayout, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -81,7 +81,7 @@
     layout1 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    cname = "System Test #70385"
+    cname = "System Test FieldHalo"
     comp1 = ESMF_GridCompCreate(name=cname, layout=layout1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -135,11 +135,11 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test #70385 complete!"
+10    print *, "System Test FieldHalo complete!"
 
     if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test 70385: Field Halo Test"
+      write(testname, *) "System Test FieldHalo: Field Halo Test"
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
@@ -161,7 +161,7 @@
     call ESMF_AppCompDestroy(app, rc)
     ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
     
-    end program ESMF_SysTest70385
+    end program FieldHalo
     
 
 !

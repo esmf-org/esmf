@@ -1,4 +1,4 @@
-System Test #70385 requires 12 DE's to run.  The mpirun script will not work
+System Test FieldHalo requires 12 DE's to run.  The mpirun script will not work
 for this many processes on all platforms, so the following notes are hints at
 running this test on some of the platforms.
 

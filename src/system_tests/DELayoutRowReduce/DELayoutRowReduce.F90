@@ -1,6 +1,6 @@
-! $Id: DELayoutRowReduce.F90,v 1.1 2003/09/18 21:26:46 cdeluca Exp $
+! $Id: DELayoutRowReduce.F90,v 1.2 2003/09/18 22:26:08 cdeluca Exp $
 !
-! System test code #69527
+! System test DELayoutRowReduce
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,12 +8,12 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 69527.
+! System test DELayoutRowReduce.
 !
 !
 !\begin{verbatim}
 
-    program ESMF_SysTest69527
+    program DELayoutRowReduce
 
 #include <ESMF_Macros.inc>
 
@@ -74,7 +74,7 @@
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    cname = "System Test #69527"
+    cname = "System Test DELayoutRowReduce"
 
     print *, "Create section finished"
 !
@@ -246,13 +246,13 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10     print *, "System Test #69527 complete!"
+10     print *, "System Test DELayoutRowReduce complete!"
 
 
     ! Only print on DE 0 for success, or any DE with an error
     if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *)  "Row Reduction value incorrect"
-      write(testname, *) "System Test 69527: Field Row Reduction"
+      write(testname, *) "System Test DELayoutRowReduce: Row Reduction"
 
       rightvalue = 0
       if (ndes .eq. 1) rightvalue = 7585
@@ -279,7 +279,7 @@
     
     call ESMF_FrameworkFinalize(rc)
 
-    end program ESMF_SysTest69527
+    end program DELayoutRowReduce
     
 !\end{verbatim}
     

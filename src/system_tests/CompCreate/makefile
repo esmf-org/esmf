@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/18 22:16:00 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/18 22:21:39 cdeluca Exp $ 
 
 ALL: system_tests
 
@@ -12,7 +12,7 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/SystemTests/CompCreate
+LOCDIR	  = src/system_tests/CompCreate
 
 
 SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/CompCreate
