@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.16 2004/05/25 09:39:27 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.17 2004/05/26 22:20:59 jwolfe Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -207,7 +207,7 @@
       g_min(2) = y_min
       g_max(1) = x_max
       g_max(2) = y_max
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              horzStagger=ESMF_GRID_HORZ_STAGGER_C_NE, &

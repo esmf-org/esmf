@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.32 2004/05/24 23:00:08 jwolfe Exp $
+! $Id: ESMF_GridUTest.F90,v 1.33 2004/05/26 22:24:55 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.32 2004/05/24 23:00:08 jwolfe Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.33 2004/05/26 22:24:55 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -111,7 +111,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       layout = ESMF_DELayoutCreate(vm, rc=rc)
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
                               horzStagger=horz_stagger, &
@@ -142,7 +142,7 @@
       !EX_UTest
       layout2 = ESMF_DELayoutCreate(vm, rc=rc)
       !call ESMF_DELayoutDestroy(layout2, status)
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
                               horzStagger=horz_stagger, &
@@ -162,7 +162,7 @@
       grid_min(2) = 5.0
       grid_max(2) = 1.0
 
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
                               horzStagger=horz_stagger, &
@@ -207,7 +207,7 @@
 
       !EX_UTest
       ! Test creating an internal Grid
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
                               horzStagger=horz_stagger, &

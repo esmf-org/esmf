@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.14 2004/05/26 15:26:30 jwolfe Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.15 2004/05/26 22:24:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.14 2004/05/26 15:26:30 jwolfe Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.15 2004/05/26 22:24:16 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -127,13 +127,13 @@
       !------------------------------------------------------------------------
       ! Create a Grid Test.
       !NEX_UTest
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
                               horzStagger=horz_stagger, &
                               name=gName, rc=status)
-      call ESMF_GridAddVert_Height(grid, delta, vertStagger=vert_stagger, &
-                                   rc=status)
+      call ESMF_GridAddVertHeight(grid, delta, vertStagger=vert_stagger, &
+                                  rc=status)
 
       call ESMF_GridDistribute(grid, delayout=layout, rc=status)
 
@@ -156,14 +156,14 @@
       !------------------------------------------------------------------------
       ! Create a Grid Test.
       !EX_UTest
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
                               horzStagger=horz_stagger, &
                               name=gName, rc=status)
 
-      call ESMF_GridAddVert_Height(grid, delta, vertStagger=vert_stagger, &
-                                   rc=status)
+      call ESMF_GridAddVertHeight(grid, delta, vertStagger=vert_stagger, &
+                                  rc=status)
 
       call ESMF_GridDistribute(grid, delayout=layout, rc=status)
 

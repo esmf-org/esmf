@@ -73,7 +73,7 @@
       if (status.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &

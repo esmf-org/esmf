@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.15 2004/05/24 23:09:20 jwolfe Exp $
+! $Id: FlowSolverMod.F90,v 1.16 2004/05/26 22:15:39 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -160,7 +160,7 @@
 !
       horz_stagger = ESMF_GRID_HORZ_STAGGER_C_NE
 
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              horzStagger=horz_stagger, &

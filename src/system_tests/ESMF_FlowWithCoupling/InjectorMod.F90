@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.17 2004/05/24 23:09:34 jwolfe Exp $
+! $Id: InjectorMod.F90,v 1.18 2004/05/26 22:15:52 jwolfe Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -165,7 +165,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       horz_stagger = ESMF_GRID_HORZ_STAGGER_C_NE
 
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              horzStagger=horz_stagger, &

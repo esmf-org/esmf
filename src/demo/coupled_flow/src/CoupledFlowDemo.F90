@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.16 2004/05/25 09:39:28 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.17 2004/05/26 22:20:27 jwolfe Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -237,7 +237,7 @@
                                horzStagger=horz_stagger, &      
                                rc=rc)
 
-    gridIN = ESMF_GridCreateHorz_XYUni(counts=counts, &
+    gridIN = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
                              horzStagger=horz_stagger, &      
@@ -247,7 +247,7 @@
 
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
 
-    gridFS = ESMF_GridCreateHorz_XYUni(counts=counts, &
+    gridFS = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
                              horzStagger=horz_stagger, &      
