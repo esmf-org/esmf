@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.10 2003/08/28 17:14:37 flanigan Exp $
+% $Id: ESMF_testing.tex,v 1.11 2003/08/29 15:53:15 flanigan Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -57,7 +57,7 @@ For example, if your esmf source files have been placed in:
 \end{verbatim}
 
 If your platform is a Linux uni-processor that has an installed Lahey
-Fortran compiler and ESMF_SITE has been set to lahey, then the build
+Fortran compiler and ESMF\_SITE has been set to lahey, then the build
 system configuration file will be:
 
 \begin{verbatim}
@@ -164,7 +164,7 @@ and your platform and compiler configuration is:
 \end{verbatim}
 
 and you want to run an optimized version of system test number 62502,
-then you use these commands from \being {\tt ~/esmf} :
+then you use these commands from being {\tt ~/esmf} :
 \begin{verbatim}
        setenv ESMF_PROJECT <project_name>
        gmake ESMF_DIR=`pwd` ESMF_BOPT=O SYSTEM_TEST=62502 system_tests
