@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.48 2003/06/20 19:41:33 rstaufer Exp $";
+            "$Id: ESMC_Array.C,v 1.49 2003/06/23 17:37:37 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -361,7 +361,7 @@
 //      ESMF routine which deallocates any space allocated by
 //      {\tt ESMF\_ArrayConstruct}, does any additional cleanup before the
 //      original {\tt ESMC\_Array} object is freed.  Intended for internal ESMF
-//      use only; end-users use {\tt ESMC\_ArrayDestroy, which calls
+//      use only; end-users use {\tt ESMC\_ArrayDestroy}, which calls
 //      {\tt ESMC\_ArrayDestruct}.  Define for deep classes only.
 //
 //EOP
@@ -675,7 +675,7 @@
       struct ESMC_AxisIndex *indexlist) const {     // out - values to get
 //
 // !DESCRIPTION:
-//     Gets the Array member AxisIndex with the given value.
+//     Gets the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} with the given value.
 //
 //EOP
 // !REQUIREMENTS:  
