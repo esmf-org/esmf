@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.14 2004/02/05 18:44:08 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.15 2004/02/19 21:22:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.14 2004/02/05 18:44:08 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.15 2004/02/19 21:22:43 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -152,12 +152,13 @@
 ! !IROUTINE: ESMF_ArrayGetAllAxisIndices - get all AIs associated with a Grid
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayGetAllAxisIndices(array, grid, totalindex, &
+      subroutine ESMF_ArrayGetAllAxisIndices(array, grid, datamap, totalindex, &
                                              compindex, exclindex, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_Array), intent(in) :: array
       type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_DataMap), intent(in) :: datamap
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: totalindex
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: compindex
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: exclindex
@@ -171,22 +172,43 @@
 !EOP
 ! !REQUIREMENTS:
 
-      integer :: status, nDEs, i, j, numDims
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: globalindex
+      integer :: status, nDEs, i, j, gridrank, datarank
+      integer, dimension(:), allocatable :: dimOrder
+      type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
       type(ESMF_DELayout) :: layout
 
       ! get layout from the grid in order to get the number of DEs
-      call ESMF_GridGet(grid, numDims=numDims, rc=status)
+      call ESMF_ArrayGet(array, rank=datarank, rc=status)
+      call ESMF_GridGet(grid, numDims=gridrank, rc=status)
       call ESMF_GridGetDELayout(grid, layout, status)
       call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
 
-      ! allocate globalindex array and get all of them from the grid
-      allocate(globalindex(nDEs,numDims), stat=status)
-      call ESMF_GridGetAllAxisIndex(grid, globalindex, rc=status)
+      ! allocate dimOrder array and get from datamap
+      allocate(dimOrder(datarank), stat=status)
+      call ESMF_DataMapGet(datamap, dimlist=dimOrder, rc=status)
+
+      ! allocate arrayindex array and get all of them from the array
+      allocate(arrayindex(datarank), stat=status)
+      call ESMF_ArrayGetAxisIndex(array, arrayindex, rc=status)
+
+      ! allocate gridindex array and get all of them from the grid
+      allocate(gridindex(nDEs,gridrank), stat=status)
+      call ESMF_GridGetAllAxisIndex(grid, gridindex, rc=status)
+
+      ! load globalindex with arrayindex and gridindex
+      allocate(globalindex(nDEs,datarank), stat=status)
+      do i = 1,datarank
+        if (dimOrder(i).eq.0) then
+          globalindex(:,i) = arrayindex(i)
+        else
+          globalindex(:,i) = gridindex(:,dimOrder(i))
+        endif
+      enddo
 
       if (present(totalindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_TOTAL, &
-                                           globalindex, nDEs, numDims, &
+                                           globalindex, nDEs, datarank, &
                                            totalindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
           ! translate from C++ to F90
@@ -198,10 +220,9 @@
           enddo
       endif
 
-
       if (present(compindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
-                                           globalindex, nDEs, numDims, &
+                                           globalindex, nDEs, datarank, &
                                            compindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
           ! translate from C++ to F90
@@ -215,7 +236,7 @@
 
       if (present(exclindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
-                                           globalindex, nDEs, numDims, &
+                                           globalindex, nDEs, datarank, &
                                            exclindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
           ! translate from C++ to F90
@@ -232,6 +253,9 @@
  10   continue
 
       ! Clean up
+      deallocate(dimOrder,    stat=status)
+      deallocate(arrayindex,  stat=status)
+      deallocate(gridindex,   stat=status)
       deallocate(globalindex, stat=status)
 
       if (present(rc)) rc = status 
@@ -571,7 +595,7 @@
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
       ! set up things we need to find a cached route or precompute one
-      call ESMF_ArrayGetAllAxisIndices(array, grid, totalindex=dst_AI, &
+      call ESMF_ArrayGetAllAxisIndices(array, grid, datamap, totalindex=dst_AI, &
                                        compindex=src_AI, rc=status)
 
       ! translate AI's into global numbering
