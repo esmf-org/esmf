@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.18 2003/06/27 18:13:26 jwolfe Exp $ 
+# $Id: base_variables,v 1.19 2003/06/27 18:14:43 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -10,6 +10,9 @@ OMAKE			= ${MAKE}
 RANLIB			= ranlib -X64
 SHELL			= /bin/sh
 SED			= /bin/sed
+# ######################### C compiler options ######################
+#
+RESTRICTED_POINTERS     = -qkeyword=restrict
 # ######################### Fortran compiler options ######################
 #
 AR32_64			= ar -X 32_64
@@ -20,7 +23,6 @@ NO_AUTO_PARALLEL	= -qsmp=noauto
 NO_INLINING		= -Q
 NO_LINE_DIRECTIVES	= -P
 REAL8			= -qrealsize=8
-RESTRICTED_POINTERS     = -qkeyword=restrict
 STRICT			= -qstrict
 FPP_PREFIX		= -WF,
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
