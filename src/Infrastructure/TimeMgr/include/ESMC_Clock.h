@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.9 2003/04/15 16:47:36 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.10 2003/04/25 08:59:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,8 @@
     // methods are not required
 
     int ESMC_ClockAddAlarm(ESMC_Alarm *alarm);  // (TMG 4.1, 4.2)
-    int ESMC_ClockGetAlarmList(ESMC_Alarm *alarmList, int *NumAlarms) const;
+    int ESMC_ClockGetAlarmList(ESMC_Alarm ***alarmList, int *NumAlarms) const;
+    int ESMC_ClockGetAlarmList(ESMC_Alarm **alarmList, int *NumAlarms) const;
     int ESMC_ClockGetNumAlarms(int *numAlarms) const; // (TMG 4.3)
 
     int ESMC_ClockSyncToWallClock(void); // TMG3.4.5
