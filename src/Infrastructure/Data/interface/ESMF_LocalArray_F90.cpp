@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.2 2003/07/10 23:03:35 jwolfe Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.3 2003/07/11 23:05:18 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,8 @@
 ! INCLUDES
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
-#include "ESMF_ArrayMacros.h"
+#include "ESMF_LocalArrayMacros.h"
+#include "ESMF_AllocMacros.h"
 !------------------------------------------------------------------------------
 !BOP
 ! !MODULE: ESMF_LocalArrayMod - Manage data arrays uniformly between F90 and C++     
@@ -137,7 +138,7 @@
 !     ! platforms.  These are never seen outside this module.
 !
       ! < these expand into defined type declarations >
-LocalArrayAllTypeMacro()
+ArrayAllTypeMacro()
 
 
 !------------------------------------------------------------------------------
@@ -160,7 +161,7 @@ LocalArrayAllTypeMacro()
  
       public ESMF_LocalArrayF90Allocate
       public ESMF_LocalArrayF90Deallocate
-      public ESMF_LocalArrayConstructF90Ptr    ! needed for C++ callback only
+      public ESMF_LocalArrConstrF90Ptr    ! needed for C++ callback only
 
       public ESMF_LocalArrayWriteRestart
       public ESMF_LocalArrayReadRestart
@@ -175,7 +176,7 @@ LocalArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.2 2003/07/10 23:03:35 jwolfe Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.3 2003/07/11 23:05:18 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -200,16 +201,16 @@ LocalArrayAllTypeMacro()
         
 
 !       ! < interfaces for each T/K/R >
-! --Array--InterfaceMacro(ArrayCreateByMTArr)
+! --LocalArray--InterfaceMacro(LocalArrayCreateByMTArr)
 !
 !       ! < interfaces for each T/K/R >
-! --Array--InterfaceMacro(ArrayCreateByFullArr)
+! --LocalArray--InterfaceMacro(LocalArrayCreateByFullArr)
 
        ! < interfaces for each T/K/R >
-ArrayInterfaceMacro(ArrayCreateByMTPtr)
+LocalArrayInterfaceMacro(LocalArrayCreateByMTPtr)
 
        ! < interfaces for each T/K/R >
-ArrayInterfaceMacro(ArrayCreateByFullPtr)
+LocalArrayInterfaceMacro(LocalArrayCreateByFlPtr)
 
 
 !BOP
@@ -273,7 +274,7 @@ end interface
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
-ArrayInterfaceMacro(LocalArrayGetData)
+LocalArrayInterfaceMacro(LocalArrayGetData)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -385,14 +386,14 @@ end function
 
         ! TODO: should this take the counts, or not?  for now i am going to
         !  set the counts after i have created the f90 array and not here.
-        call c_ESMC_LocalArrayCreateNoData(array, rank, type, kind, &
-                                                   ESMF_FROM_FORTRAN, status)
+        call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
+                                      ESMF_FROM_FORTRAN, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "LocalArray construction error"
           return
         endif
 
-        call ESMF_LocalArrayConstructF90Ptr(array, counts, rank, type, kind, status)
+        call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, status)
 
         ! Set return values
         ESMF_LocalArrayCreateByList = array 
@@ -469,10 +470,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LocalArrayConstructF90Ptr - Create and add F90 ptr to array
+! !IROUTINE: ESMF_LocalArrConstrF90Ptr - Create and add F90 ptr to array
 
 ! !INTERFACE:
-     subroutine ESMF_LocalArrayConstructF90Ptr(array, counts, rank, type, kind, rc)
+     subroutine ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocalArray), intent(inout) :: array
@@ -547,9 +548,9 @@ end function
           case (1)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_LocalArrayConstructF90PtrI41D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrI41D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_LocalArrayConstructF90PtrR41D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrR41D(array, counts, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -557,9 +558,9 @@ end function
           case (2)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_LocalArrayConstructF90PtrI42D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrI42D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_LocalArrayConstructF90PtrR42D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrR42D(array, counts, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -567,9 +568,9 @@ end function
           case (3)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_LocalArrayConstructF90PtrI43D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrI43D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_LocalArrayConstructF90PtrR43D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrR43D(array, counts, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -577,9 +578,9 @@ end function
           case (4)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_LocalArrayConstructF90PtrI44D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrI44D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_LocalArrayConstructF90PtrR44D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrR44D(array, counts, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -587,9 +588,9 @@ end function
           case (5)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_LocalArrayConstructF90PtrI45D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrI45D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_LocalArrayConstructF90PtrR45D(array, counts, rc=status)
+               call ESMF_LocalArrConstrF90PtrR45D(array, counts, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -602,7 +603,7 @@ end function
         ! Set return code if caller specified it
         if (rcpresent) rc = status
 
-        end subroutine ESMF_LocalArrayConstructF90Ptr
+        end subroutine ESMF_LocalArrConstrF90Ptr
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -665,55 +666,55 @@ LocalArrayCreateByMTArrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !! < start of macros which become actual function bodies after expansion >
 
-LocalArrayCreateByFullArrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlArrMacro(integer, I2, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullArrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlArrMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullArrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlArrMacro(integer, I8, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullArrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlArrMacro(integer, I2, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullArrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlArrMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullArrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlArrMacro(integer, I8, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullArrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlArrMacro(integer, I2, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullArrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlArrMacro(integer, I4, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullArrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlArrMacro(integer, I8, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullArrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlArrMacro(integer, I2, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullArrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlArrMacro(integer, I4, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullArrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlArrMacro(integer, I8, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullArrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlArrMacro(integer, I2, 5, COL5, LEN5, LOC5)
 
-LocalArrayCreateByFullArrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlArrMacro(integer, I4, 5, COL5, LEN5, LOC5)
 
-LocalArrayCreateByFullArrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlArrMacro(integer, I8, 5, COL5, LEN5, LOC5)
 
-LocalArrayCreateByFullArrMacro(real, R4, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlArrMacro(real, R4, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullArrMacro(real, R8, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlArrMacro(real, R8, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullArrMacro(real, R4, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlArrMacro(real, R4, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullArrMacro(real, R8, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlArrMacro(real, R8, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullArrMacro(real, R4, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlArrMacro(real, R4, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullArrMacro(real, R8, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlArrMacro(real, R8, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullArrMacro(real, R4, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlArrMacro(real, R4, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullArrMacro(real, R8, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlArrMacro(real, R8, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullArrMacro(real, R4, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlArrMacro(real, R4, 5, COL5, LEN5, LOC5)
 
-LocalArrayCreateByFullArrMacro(real, R8, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlArrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -777,55 +778,55 @@ LocalArrayCreateByMTPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !! < start of macros which become actual function bodies after expansion >
 
-LocalArrayCreateByFullPtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullPtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullPtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullPtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullPtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullPtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullPtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullPtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullPtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullPtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullPtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullPtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullPtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlPtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
 
-LocalArrayCreateByFullPtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlPtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
 
-LocalArrayCreateByFullPtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlPtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
 
-LocalArrayCreateByFullPtrMacro(real, R4, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(real, R4, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullPtrMacro(real, R8, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(real, R8, 1, COL1, LEN1, LOC1)
 
-LocalArrayCreateByFullPtrMacro(real, R4, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(real, R4, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullPtrMacro(real, R8, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(real, R8, 2, COL2, LEN2, LOC2)
 
-LocalArrayCreateByFullPtrMacro(real, R4, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(real, R4, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullPtrMacro(real, R8, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(real, R8, 3, COL3, LEN3, LOC3)
 
-LocalArrayCreateByFullPtrMacro(real, R4, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(real, R4, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullPtrMacro(real, R8, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(real, R8, 4, COL4, LEN4, LOC4)
 
-LocalArrayCreateByFullPtrMacro(real, R4, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlPtrMacro(real, R4, 5, COL5, LEN5, LOC5)
 
-LocalArrayCreateByFullPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 
 !------------------------------------------------------------------------------
@@ -833,55 +834,55 @@ LocalArrayCreateByFullPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !! < start of macros which become actual function bodies after expansion >
 
-LocalArrayConstructF90PtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
 
-LocalArrayConstructF90PtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
-LocalArrayConstructF90PtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
 
-LocalArrayConstructF90PtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
 
-LocalArrayConstructF90PtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
-LocalArrayConstructF90PtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
 
-LocalArrayConstructF90PtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
 
-LocalArrayConstructF90PtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
 
-LocalArrayConstructF90PtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
 
-LocalArrayConstructF90PtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
 
-LocalArrayConstructF90PtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
 
-LocalArrayConstructF90PtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
 
-LocalArrayConstructF90PtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
 
-LocalArrayConstructF90PtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
 
-LocalArrayConstructF90PtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
 
-LocalArrayConstructF90PtrMacro(real, R4, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(real, R4, 1, COL1, LEN1, LOC1)
 
-LocalArrayConstructF90PtrMacro(real, R8, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(real, R8, 1, COL1, LEN1, LOC1)
 
-LocalArrayConstructF90PtrMacro(real, R4, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(real, R4, 2, COL2, LEN2, LOC2)
 
-LocalArrayConstructF90PtrMacro(real, R8, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(real, R8, 2, COL2, LEN2, LOC2)
 
-LocalArrayConstructF90PtrMacro(real, R4, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(real, R4, 3, COL3, LEN3, LOC3)
 
-LocalArrayConstructF90PtrMacro(real, R8, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(real, R8, 3, COL3, LEN3, LOC3)
 
-LocalArrayConstructF90PtrMacro(real, R4, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(real, R4, 4, COL4, LEN4, LOC4)
 
-LocalArrayConstructF90PtrMacro(real, R8, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(real, R8, 4, COL4, LEN4, LOC4)
 
-LocalArrayConstructF90PtrMacro(real, R4, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(real, R4, 5, COL5, LEN5, LOC5)
 
-LocalArrayConstructF90PtrMacro(real, R8, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -1056,22 +1057,22 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
         !   (we will ignore the data) and call deallocate themselves.
 
         ! Call Destruct first, then free this memory
-        call c_ESMC_LocalArrayNeedsDealloc(array, needsdealloc, status)
+        call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
         if (needsdealloc) then
-          call c_ESMC_LocalArrayGetRank(array, rank, status)
-          call c_ESMC_LocalArrayGetType(array, type, status)
-          call c_ESMC_LocalArrayGetKind(array, kind, status)
+          call c_ESMC_ArrayGetRank(array, rank, status)
+          call c_ESMC_ArrayGetType(array, type, status)
+          call c_ESMC_ArrayGetKind(array, kind, status)
           call ESMF_LocalArrayF90Deallocate(array, rank, type, kind, status)
           if (status .ne. ESMF_SUCCESS) then
             print *, "LocalArray contents destruction error"
             return
           endif
-          call c_ESMC_LocalArraySetNoDealloc(array, status)
+          call c_ESMC_ArraySetNoDealloc(array, status)
         endif
 
         ! Calling deallocate first means this will not return back to F90
         !  before returning for good.
-        call c_ESMC_LocalArrayDestroy(array, status)
+        call c_ESMC_ArrayDestroy(array, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "LocalArray destruction error"
           return
@@ -1267,21 +1268,21 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 
       if (present(rank)) then
-         call c_ESMC_LocalArrayGetRank(array, rank, status)
+         call c_ESMC_ArrayGetRank(array, rank, status)
          ! TODO: test status
       endif
 
       if (present(type)) then
-         call c_ESMC_LocalArrayGetType(array, type, status)
+         call c_ESMC_ArrayGetType(array, type, status)
       endif
 
       if (present(kind)) then
-         call c_ESMC_LocalArrayGetKind(array, kind, status)
+         call c_ESMC_ArrayGetKind(array, kind, status)
       endif
 
       if (present(counts)) then
-         call c_ESMC_LocalArrayGetRank(array, lrank, status)
-         call c_ESMC_LocalArrayGetLengths(array, lrank, counts, status)
+         call c_ESMC_ArrayGetRank(array, lrank, status)
+         call c_ESMC_ArrayGetLengths(array, lrank, counts, status)
       endif
 
    
@@ -1329,7 +1330,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       endif
 
       ! TODO: add an interface to the C code here
-      !call c_ESMC_LocalArrayGetName(array, name, status)
+      !call c_ESMC_ArrayGetName(array, name, status)
       !if(status .NE. ESMF_FAILURE) then
       !  print *, "ERROR in ESMF_LocalArrayGetName"
       !  return
@@ -1416,7 +1417,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------ 
-!!! TODO:  the interface now calls ESMF_LocalArrayConstructF90Ptr instead of
+!!! TODO:  the interface now calls ESMF_LocalArrConstrF90Ptr instead of
 !!! this routine.  It maybe can go away?  and can we do something with
 !!! ESMF_LocalArrayF90Deallocate to get rid of it as well, so the interfaces
 !!! are more symmetric?
@@ -1710,7 +1711,7 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
      end select
 
      if (status .ne. 0) then 
-        print *, "ESMC_LocalArrayDelete: Deallocation error"
+        print *, "ESMC_ArrayDelete: Deallocation error"
         return
       endif
 
@@ -1825,9 +1826,9 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
        defaultfile = "datafile"
 
        if(present(filename)) then
-           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(filename), status) 
+           call c_ESMC_ArrayWrite(array, defaultopts, trim(filename), status) 
        else
-           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(defaultfile), status) 
+           call c_ESMC_ArrayWrite(array, defaultopts, trim(defaultfile), status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then
@@ -1921,9 +1922,9 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
        endif
 
        if(present(options)) then
-           !call c_ESMC_LocalArrayValidate(array, options, status) 
+           !call c_ESMC_ArrayValidate(array, options, status) 
        else
-           !call c_ESMC_LocalArrayValidate(array, defaultopts, status) 
+           !call c_ESMC_ArrayValidate(array, defaultopts, status) 
        endif
 
        !if (status .ne. ESMF_SUCCESS) then
@@ -1974,9 +1975,9 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
        defaultopts = "brief"
 
        if(present(options)) then
-           call c_ESMC_LocalArrayPrint(array, options, status) 
+           call c_ESMC_ArrayPrint(array, options, status) 
        else
-           call c_ESMC_LocalArrayPrint(array, defaultopts, status) 
+           call c_ESMC_ArrayPrint(array, defaultopts, status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then
