@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.64 2004/02/23 22:49:13 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.65 2004/02/24 14:52:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,6 +45,11 @@
       use ESMF_ClockMod
       use ESMF_GridTypesMod
       use ESMF_StateMod
+      
+#ifdef ESMF_ENABLE_VM      
+      use ESMF_VMMod
+#endif
+      
       implicit none
 
 !------------------------------------------------------------------------------
@@ -119,6 +124,14 @@
          character(len=ESMF_MAXSTR) :: dirpath    ! relative dirname, app only
          type(ESMF_Grid) :: grid                  ! default grid, gcomp only
          type(ESMF_ModelType) :: mtype            ! model type, gcomp only
+#ifdef ESMF_ENABLE_VM
+         type(ESMF_VM) :: vm_parent               ! reference to the parent VM
+         integer(ESMF_KIND_I4):: npetlist         ! number of PETs in petlist
+         integer(ESMF_KIND_I4),pointer::petlist(:)! list of usble parent PETs 
+         type(ESMF_VMPlan) :: vmplan              ! reference to VMPlam
+         type(ESMF_Pointer) :: vm_info            ! holding pointer to info
+         type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
+#endif         
       end type
 
 !------------------------------------------------------------------------------
@@ -174,6 +187,13 @@
 
       public ESMF_CompValidate, ESMF_CompPrint
 
+#ifdef ESMF_ENABLE_VM
+      public ESMF_CompVMDefMaxThreads
+      public ESMF_CompVMDefMinThreads
+      public ESMF_CompVMDefMaxPEs
+      public ESMF_CompReturn
+#endif
+
 !EOPI
 
       public operator(.eq.), operator(.ne.)
@@ -181,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.64 2004/02/23 22:49:13 svasquez Exp $'
+      '$Id: ESMF_Comp.F90,v 1.65 2004/02/24 14:52:22 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -250,9 +270,12 @@ end function
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
 ! !INTERFACE:
-      subroutine ESMF_CompConstruct(compp, ctype, name, layout, &
-                                              mtype, dirpath, configfile, &
-                                              config, grid, clock, rc)
+      subroutine ESMF_CompConstruct(compp, ctype, name, layout, mtype, &
+                          dirpath, configfile, config, grid, clock, &
+#ifdef ESMF_ENABLE_VM                          
+                          vm, petlist, &
+#endif                          
+                          rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -265,6 +288,10 @@ end function
       type(ESMF_Config), intent(in), optional :: config
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
+#ifdef ESMF_ENABLE_VM      
+      type(ESMF_VM), intent(in), optional :: vm
+      integer(ESMF_KIND_I4), intent(in), optional :: petlist(:)
+#endif      
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -422,6 +449,35 @@ end function
           !!compp%clock = ESMF_NULL_POINTER
         endif
 
+#ifdef ESMF_ENABLE_VM
+        ! parent VM
+        if (present(vm)) then
+          compp%vm_parent = vm
+!          print *, 'gjt: ESMF_CompConstruct, setting up compp%vm_parent'
+        else
+          ! When ESMF is fully VM-enabled this should be an error!
+        endif
+      
+        ! petlist
+        if (present(petlist)) then
+          compp%npetlist = size(petlist)
+          if (size(petlist) > 0) then
+            allocate(compp%petlist(size(petlist)))
+            compp%petlist = petlist
+          endif
+!          print *, 'gjt: ESMF_CompConstruct, setting up compp%petlist', &
+!            size(petlist)
+        else
+          compp%npetlist = 0
+        endif
+      
+        ! instantiate a default VMPlan
+        if (present(vm)) then
+          call ESMF_VMPlanConstruct(compp%vmplan, vm, compp%npetlist, &
+            compp%petlist)
+        endif
+#endif
+
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
         if (status .ne. ESMF_SUCCESS) then
@@ -488,6 +544,17 @@ end function
           print *, "Base Component contents destruction error"
           return
         endif
+        
+#ifdef ESMF_ENABLE_VM
+        ! Deallocate space held for petlist
+        if (compp%npetlist > 0) then
+          deallocate(compp%petlist)
+!          print *, '------------------------- petlist is being deallocated --'
+        endif
+
+        ! destruct the VMPlan
+        call ESMF_VMPlanDestruct(compp%vmplan)
+#endif
 
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -585,7 +652,14 @@ end function
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETINIT, phase, &
                                compw, importstate, exportstate, clock, status)
           
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, phase, status)
+#ifdef ESMF_ENABLE_VM
+        call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
+          compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETINIT, phase, &
+          status)
+#else
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, phase, &
+          status)
+#endif
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
@@ -872,7 +946,14 @@ end function
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETFINAL, phase, &
                                 compw, importstate, exportstate, clock, status)
         
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, phase, status)
+#ifdef ESMF_ENABLE_VM
+        call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
+          compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETFINAL, phase, &
+          status)
+#else
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, phase, &
+          status)
+#endif
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component finalize error"
@@ -969,7 +1050,13 @@ end function
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETRUN, phase, compw, &
                                        importstate, exportstate, clock, status)
         
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, phase, status)
+#ifdef ESMF_ENABLE_VM
+        call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
+          compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETRUN, phase, status)
+#else
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, phase, &
+          status)
+#endif
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component run error"
@@ -1419,6 +1506,15 @@ end function
           return
       endif
 
+#ifdef ESMF_ENABLE_VM
+      ! Initialize the VM. This creates the GlobalVM      
+      call ESMF_VMInitialize(status);
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error initializing VM"
+          return
+      endif
+#endif
+
       already_init = .true.
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -1448,6 +1544,9 @@ end function
 !EOP
 
       logical :: rcpresent                        ! Return code present   
+#ifdef ESMF_ENABLE_VM
+      integer :: status
+#endif
       logical, save :: already_final = .false.    ! Static, maintains state.
 
       ! Initialize return code
@@ -1462,6 +1561,15 @@ end function
           return
       endif
 
+#ifdef ESMF_ENABLE_VM
+      ! Finalize the VM
+      call ESMF_VMFinalize(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error finalizing VM"
+          return
+      endif
+#endif
+
       ! Where MPI is shut down, files closed, etc.
       call ESMF_MachineFinalize()
 
@@ -1470,6 +1578,233 @@ end function
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_Finalize
+
+
+#ifdef ESMF_ENABLE_VM
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CompVMDefMaxThreads - Define a VM for this Component
+
+! !INTERFACE:
+  subroutine ESMF_CompVMDefMaxThreads(compp, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type (ESMF_CompClass), pointer ::             compp
+    integer(ESMF_KIND_I4), intent(in), optional:: max
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
+    integer, intent(out), optional ::             rc           
+!
+! !DESCRIPTION:
+!     Print VM internals
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[compp] 
+!          component object
+!     \item[{[max]}] 
+!          Maximum threading level
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
+      compp%npetlist, compp%petlist, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_VMPlanMaxThreads error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CompVMDefMaxThreads
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CompVMDefMinThreads - Define a VM for this Component
+
+! !INTERFACE:
+  subroutine ESMF_CompVMDefMinThreads(compp, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type (ESMF_CompClass), pointer ::             compp
+    integer(ESMF_KIND_I4), intent(in), optional:: max
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
+    integer, intent(out), optional ::             rc           
+!
+! !DESCRIPTION:
+!     Print VM internals
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[compp] 
+!          component object
+!     \item[{[max]}] 
+!          Maximum threading level
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
+      compp%npetlist, compp%petlist, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_VMPlanMinThreads error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CompVMDefMinThreads
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CompVMDefMaxPEs - Define a VM for this Component
+
+! !INTERFACE:
+  subroutine ESMF_CompVMDefMaxPEs(compp, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type (ESMF_CompClass), pointer ::             compp
+    integer(ESMF_KIND_I4), intent(in), optional:: max
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
+    integer, intent(out), optional ::             rc           
+!
+! !DESCRIPTION:
+!     Print VM internals
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[compp] 
+!          component object
+!     \item[{[max]}] 
+!          Maximum threading level
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
+      compp%npetlist, compp%petlist, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_VMPlanMaxPEs error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CompVMDefMaxPEs
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CompReturn - Wait for component to return
+
+! !INTERFACE:
+  subroutine ESMF_CompReturn(compp, rc)
+!
+! !ARGUMENTS:
+    type (ESMF_CompClass), pointer ::             compp
+    integer, intent(out), optional ::             rc           
+!
+! !DESCRIPTION:
+!     Wait for component to return
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[compp] 
+!          component object
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call into C++ 
+    call c_ESMC_CompReturn(compp%vm_parent, compp%vmplan, compp%vm_info, &
+      compp%vm_cargo, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "c_ESMC_CompReturn error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CompReturn
+!------------------------------------------------------------------------------
+#endif
 
 end module ESMF_CompMod
 
