@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.81 2003/08/26 22:42:23 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.82 2003/08/27 16:44:36 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@
     public ESMF_GridAddPhysGrid
     public ESMF_GridGetConfig
     public ESMF_GridSetConfig
-    !public ESMF_GridGetCoord
+    public ESMF_GridGetCoord
     public ESMF_GridSetCoord
     public ESMF_GridGetDE            ! access DistGrid from above
     public ESMF_GridGetAllAxisIndex  ! access DistGrid from above
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.81 2003/08/26 22:42:23 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.82 2003/08/27 16:44:36 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1957,6 +1957,119 @@
 !  code goes here
 !
       end subroutine ESMF_GridGetValue
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGetCoord - Get the coordinates of a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridGetCoord(grid, physgridId, relloc, center_coord, &
+                                   corner_coord, face_coord, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in), optional :: physgridId
+      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_LocalArray), pointer, optional :: center_coord
+      type(ESMF_LocalArray), pointer, optional :: corner_coord
+      type(ESMF_LocalArray), pointer, optional :: face_coord
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Determines the appropriate physgrid to query from either a physgridId or
+!     relloc and returns the requested information.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt ESMF\_Grid} to be queried.
+!     \item[{[physgridId]}]
+!          Identifier for the {\tt ESMF\_PhysGrid} to be queried.
+!     \item[{[relloc]}]
+!          Relative location of the {\tt ESMF\_PhysGrid} to be queried.
+!          Note: either the physgridId or relloc must be specified.  If both
+!                are, the physgridId will take precedence.
+!     \item[{[center\_coord]}]
+!          Coordinates of each cell center.  The dimension index should
+!          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
+!     \item[{[corner\_coord]}]
+!          Coordinates of corners of each cell.  The dimension index should
+!          be defined first, followed by the corner index.  Corners can
+!          be numbered in either clockwise or counter-clockwise direction,
+!          but must be numbered consistently throughout grid.
+!     \item[{[face\_coord]}]
+!          Coordinates of corners of each cell.  The dimension index should
+!          be defined first, followed by the face index.  Faces should
+!          be numbered consistently with corners.  For example, face 1 should
+!          correspond to the face between corners 1,2.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: physIdUse
+      logical :: rellocIsValid, physIdIsValid
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Initialize other variables
+      physIdUse = -1
+      rellocIsValid = .false.
+      physIdIsValid = .false.
+
+      ! Either the relative location or physgridId must be present and valid
+      if (present(relloc)) then
+!        rellocIsValid = ESMF_RelLocIsValid(relloc)  TODO: assume OK if there for now
+        rellocIsValid = .true.
+      endif
+      if (present(physgridId)) then
+        if ((physgridId.ge.1) .and. (physgridId.le.grid%ptr%num_physgrids)) then
+          physIdIsValid = .true.
+          physIdUse = physgridId
+       endif
+      endif
+      if (.not.(rellocIsValid .or. physIdIsValid)) then
+        print *, "ERROR in ESMF_GridGetCoord: need either relloc or physgridId"
+        return
+      endif
+
+      ! If there is a relloc but no physgrid id, then get the id from the relloc
+      if (rellocIsValid .and. .not.(physIdIsValid)) then
+        call ESMF_GridGetPhysGridID(grid, relloc, physIdUse, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridGetCoord: get physgrid id"
+          return
+        endif
+        if (physIdUse.eq.-1) then
+          print *, "ERROR in ESMF_GridGetCoord: no physgrid corresponding", &
+                   " to relloc"
+          return
+        endif
+      endif
+
+      ! Call PhysGridGet with valid physgrid
+      call ESMF_PhysGridGetCoord(grid%ptr%physgrids(physIdUse)%ptr, &
+                                 center_coord=center_coord, &
+                                 corner_coord=corner_coord, &
+                                 face_coord=face_coord, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridGetCoord: physgrid get coord"
+        return
+      endif
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetCoord
 
 !------------------------------------------------------------------------------
 !BOP
