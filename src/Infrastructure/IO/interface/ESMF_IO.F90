@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.10 2003/07/22 21:23:21 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.11 2003/12/04 21:03:47 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -75,6 +75,7 @@
           type (ESMF_Status) :: iostatus
           type (ESMF_IOFileFormat) :: iofileformat
           type (ESMF_IORWType) :: iorwtype
+          character(len=ESMF_MAXSTR) :: filename
           logical :: async_io       ! TODO: should be a derived type or enum
       end type
 
@@ -191,11 +192,13 @@
 ! !IROUTINE: ESMF_IOSpecSet - set values in an IOSpec
 !
 ! !INTERFACE:
-      subroutine ESMF_IOSpecSet(iospec, iofileformat, iorwtype, async_io, rc)
+      subroutine ESMF_IOSpecSet(iospec, filename, iofileformat, &
+                                iorwtype, async_io, rc)
 !
 !
 ! !PARAMETERS:
       type (ESMF_IOSpec), intent(inout) :: iospec
+      character(len=ESMF_MAXSTR), optional :: filename
       type (ESMF_IOFileFormat), intent(in), optional :: iofileformat
       type (ESMF_IORWType), intent(in), optional :: iorwtype
       logical, intent(in), optional :: async_io
@@ -209,6 +212,12 @@
 ! !REQUIREMENTS: 
 
 !EOP
+
+      if (present(filename)) then
+          iospec%filename = filename
+      else
+          iospec%filename = trim("Default")   ! FIXME
+      endif
 
       if (present(iorwtype)) then
           iospec%iorwtype = iorwtype
@@ -240,11 +249,13 @@
 ! !IROUTINE: ESMF_IOSpecGet - set values in an IOSpec
 !
 ! !INTERFACE:
-      subroutine ESMF_IOSpecGet(iospec, iofileformat, iorwtype, async_io, rc)
+      subroutine ESMF_IOSpecGet(iospec, filename, iofileformat, &
+                                iorwtype, async_io, rc)
 !
 !
 ! !PARAMETERS:
       type (ESMF_IOSpec), intent(inout) :: iospec
+      character(len=ESMF_MAXSTR), optional :: filename
       type (ESMF_IOFileFormat), intent(out), optional :: iofileformat
       type (ESMF_IORWType), intent(out), optional :: iorwtype
       logical, intent(out), optional :: async_io
@@ -258,6 +269,10 @@
 ! !REQUIREMENTS: 
 
 !EOP
+
+      if (present(filename)) then
+          filename = iospec%filename
+      endif
 
       if (present(iorwtype)) then
           iorwtype = iospec%iorwtype
