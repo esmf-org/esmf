@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.51 2004/12/03 23:23:02 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.52 2004/12/03 23:57:02 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -399,10 +399,10 @@ end subroutine ESMF_LogFinalize
    endif
    
    log%LOG_ARRAY(pet)%findex = 1 
-   122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,i0,a,a,a,a,a,i0,a,a,a,a)
-   123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,i0,a,a,a,a,a,i0,a,a)
-   132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,i0,a,a,a,a,a,a,a)
-   133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,i0,a,a,a,a,a)
+   122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,i0,a,a,a,a)
+   123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,i0,a,a)
+   132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,a)
+   133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a)
    
    log%LOG_ARRAY(pet)%flushed = ESMF_TRUE
    log%LOG_ARRAY(pet)%dirty = ESMF_FALSE
