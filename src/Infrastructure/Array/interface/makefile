@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2004/03/18 22:03:12 nscollins Exp $
+# $Id: makefile,v 1.10 2004/03/18 22:48:42 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -47,6 +47,9 @@ CLEANDIRS   =
 CLEANFILES  = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90
 CLOBBERDIRS =
 
+ESMF_ArrayCreate.F90: ESMF_Array.F90
+
+ESMF_ArrayGet.F90: ESMF_Array.F90
 
 ESMF_ArrayCreate.F90: ESMF_ArrayCreate.cpp ESMF_ArrayCreateMacros.h
 
