@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.5 2004/06/08 21:42:19 cdeluca Exp $
+% $Id: ESMF_options.tex,v 1.6 2004/06/09 12:09:05 theurich Exp $
 
 \section{Global Options and Parameters}
 
@@ -70,6 +70,24 @@ Valid values are:
       Refers to indices on the local DE.
 \item [ESMF\_GLOBAL\_INDEX]
       Refers to object-wide indices.
+\end{description}
+
+%////////////////////////////////////////////////////////////
+\mbox{}\hrulefill\
+
+\subsubsection{ESMF\_ReduceFlag}
+
+{\sf DESCRIPTION:\\}
+Indicates reduce operation to a {\tt Reduce()} method.
+
+Valid values are:
+\begin{description}
+   \item [{\tt ESMF\_SUM}]
+         Use arithmetic sum to add all data elements.
+   \item [{\tt ESMF\_MIN}]
+         Determine the minimum of all data elements.
+   \item [{\tt ESMF\_MAX}]
+         Determine the maximum of all data elements.
 \end{description}
 
 %////////////////////////////////////////////////////////////
