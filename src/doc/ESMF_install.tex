@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.40.2.2 2005/03/10 22:11:53 jwolfe Exp $
+% $Id: ESMF_install.tex,v 1.40.2.3 2005/03/11 17:45:28 nscollins Exp $
 
 \subsection{ESMF Download Options}
 
@@ -107,8 +107,10 @@ This option is only supported for ESMF\_ARCH=Linux, ESMF\_COMPILER=intel.
                  CPP flag,
                  and recompile.
 
-  \item[ESMF\_PREC] Precision value of 32 or 64.  When possible the
-                 default value will be 64, otherwise it will be 32.
+  \item[ESMF\_PREC] Variable specifying the size of an address on systems
+                 which can build either 32 or 64 bit executables.
+                 When possible the default value will be 64, otherwise 
+                 it will be 32.
 
   \item[ESMF\_SITE] Build configure file site name or the value default.  
                  If not set, then the value of default is assumed.
