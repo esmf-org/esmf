@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.64 2004/04/28 23:11:53 cdeluca Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.65 2004/04/29 19:35:21 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4691,7 +4691,8 @@
       if (.not.total) then
       call ESMF_PhysGridSetRegions(grid%physGrids(physGridId), &
                                    regionType=ESMF_RegionType_Polygon, &
-                                   vertexArray=cornerArray, rc=status)
+                                   vertexArray=cornerArray, &
+                                   numVertices=4, rc=status)
             ! TODO: add name to set call
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridSetCoordCompute: PhysGrid set regions"
