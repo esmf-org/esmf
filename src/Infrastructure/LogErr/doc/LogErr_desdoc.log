@@ -1,0 +1,549 @@
+This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2001.9.7)  7 AUG 2003 13:42
+**LogErr_desdoc.tex
+(LogErr_desdoc.tex
+LaTeX2e <2000/06/01>
+Babel <v3.7h> and hyphenation patterns for american, french, german, ngerman, i
+talian, nohyphenation, loaded.
+(/usr/share/texmf/tex/latex/base/article.cls
+Document Class: article 2000/05/19 v1.4b Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/size10.clo
+File: size10.clo 2000/05/19 v1.4b Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf/tex/plain/dvips/epsf.tex
+This is `epsf.tex' v2.7k <10 July 1997>
+\epsffilein=\read1
+\epsfframemargin=\dimen103
+\epsfframethickness=\dimen104
+\epsfrsize=\dimen105
+\epsftmp=\dimen106
+\epsftsize=\dimen107
+\epsfxsize=\dimen108
+\epsfysize=\dimen109
+\pspoints=\dimen110
+\epsfnoopenhelp=\toks14
+) (/usr/share/texmf/tex/latex/html/html.sty
+Package: html 1999/07/19 v1.38 hypertext commands for latex2html (nd, hws, rrm)
+
+\c@lpart=\count87
+\c@lchapter=\count88
+\c@chapter=\count89
+\c@lsection=\count90
+\c@lsubsection=\count91
+\c@lsubsubsection=\count92
+\c@lparagraph=\count93
+\c@lsubparagraph=\count94
+\c@lsubsubparagraph=\count95
+\ptrfile=\write3
+)
+(/usr/share/texmf/tex/latex/psnfss/times.sty
+Package: times 2000/01/12 PSNFSS-v8.1 Times font as default roman (SPQR) 
+)
+(/usr/share/texmf/tex/latex/base/fontenc.sty
+Package: fontenc 2000/08/30 v1.91 Standard LaTeX package
+
+(/usr/share/texmf/tex/latex/base/t1enc.def
+File: t1enc.def 2000/08/30 v1.91 Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 38.
+))
+(/usr/share/texmf/tex/latex/graphics/graphics.sty
+Package: graphics 1999/02/16 v1.0l Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/usr/share/texmf/tex/latex/config/graphics.cfg)
+Package graphics Info: Driver file: dvips.def on input line 80.
+
+(/usr/share/texmf/tex/latex/graphics/dvips.def
+File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+))
+(/usr/share/texmf/tex/latex/graphics/color.sty
+Package: color 1999/02/16 v1.0i Standard LaTeX Color (DPC)
+
+(/usr/share/texmf/tex/latex/config/color.cfg)
+Package color Info: Driver file: dvips.def on input line 125.
+
+(/usr/share/texmf/tex/latex/graphics/dvipsnam.def
+File: dvipsnam.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+)) (LogErr_desdoc.aux)
+\openout1 = `LogErr_desdoc.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Try loading font information for T1+ptm on input line 21.
+
+(/usr/share/texmf/tex/latex/psnfss/t1ptm.fd
+File: t1ptm.fd 2000/01/12 PSNFSS-v8.1 font definitions for T1/ptm.
+)
+(../../../../scripts/doc_templates/templates/title_alldoc.tex
+LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <14.4> not available
+(Font)              Font shape `T1/ptm/b/n' tried instead on input line 17.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 27.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 27.
+LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <10> not available
+(Font)              Font shape `T1/ptm/b/n' tried instead on input line 29.
+ [1
+
+])
+(LogErr_desdoc.toc [1])
+\tf@toc=\write4
+\openout4 = `LogErr_desdoc.toc'.
+
+ [2] (LogErr_syn.tex) (LogErr_obj.tex) (Log_param.tex)
+(Err_param.tex [3])
+LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <12> not available
+(Font)              Font shape `T1/ptm/b/n' tried instead on input line 38.
+ (LogErr_desc.tex) (LogErr_design.tex
+Overfull \hbox (65.05971pt too wide) in paragraph at lines 13--22
+\T1/ptm/m/n/10 Although the class con-tains a large num-ber of meth-ods, the mo
+st For-tran/C++ im-por-tant meth-ods are ESMF_LogSet()/ESMC_LogSet()
+ []
+
+
+Overfull \hbox (23.21053pt too wide) in paragraph at lines 13--22
+\T1/ptm/m/n/10 and ESMF_CloseFile()/ESMC_LogCloseFile(), for open-ing and clos-
+ing out-put files; and ESMF_LogErr()/ESMC_LogErr(),
+ []
+
+[4]) (LogErr_def.tex) (LogErr_rest.tex)
+Overfull \hbox (27.46063pt too wide) in paragraph at lines 14--46
+\T1/ptm/m/n/10 There are a few re-stric-tions to keep in mind. First, the er-ro
+r han-dling and warn-ing rou-tines, ESMF_LogErr()/ESMC_LogErr(),
+ []
+
+
+Overfull \hbox (65.41129pt too wide) in paragraph at lines 14--46
+\T1/ptm/m/n/10 ESMF_LogErrMsg()/ESMC_LogErrMsg(), ESMF_LogWarn()/ESMC_LogWarn()
+, and ESMF_LogWarnErr()/ESMC_LogWarnErr(),
+ []
+
+(LogErr_fex.tex
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 22.
+ (/usr/share/texmf/tex/latex/psnfss/t1pcr.fd
+File: t1pcr.fd 2000/01/12 PSNFSS-v8.1 font definitions for T1/pcr.
+) [5])
+(LogErr_fapi.tex
+Overfull \hbox (23.29698pt too wide) in paragraph at lines 41--41
+[]\T1/ptm/b/n/12 Fortran: Mod-ule In-ter-face For-tran In-ter-face to Log class
+. (Source File: ESMF_LogErr.F90) 
+ []
+
+LaTeX Font Info:    Try loading font information for T1+phv on input line 59.
+(/usr/share/texmf/tex/latex/psnfss/t1phv.fd
+File: t1phv.fd 2000/01/12 PSNFSS-v8.1 scalable font definitions for T1/phv.
+)
+Underfull \hbox (badness 10000) in paragraph at lines 62--63
+
+ []
+
+
+Overfull \hbox (39.63153pt too wide) in paragraph at lines 65--67
+[]\T1/ptm/m/n/10 Calls c_esmf_logclosefile() (de-fined in ESMC_LogInterface.C),
+ the wraper for the method \T1/pcr/m/n/10 ESMC_LogCloseFileForWrite
+ []
+
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 91--92
+
+ []
+
+
+Overfull \hbox (34.33115pt too wide) in paragraph at lines 94--97
+[]\T1/ptm/m/n/10 This rou-tine finds the first space in the ar-ray name and in-
+serts a a null char-ac-ter. It then calls \T1/pcr/m/n/10 ESMC_LogOpenFileForWri
+te
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 127--128
+
+ []
+
+[7]
+Underfull \hbox (badness 10000) in paragraph at lines 165--166
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 216--217
+
+ []
+
+[8]
+Underfull \hbox (badness 10000) in paragraph at lines 276--277
+
+ []
+
+[9]
+Underfull \hbox (badness 10000) in paragraph at lines 325--326
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 371--372
+
+ []
+
+[10]
+Underfull \hbox (badness 10000) in paragraph at lines 411--412
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 447--448
+
+ []
+
+[11]
+Underfull \hbox (badness 10000) in paragraph at lines 474--475
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 504--505
+
+ []
+
+) (LogErr_cex.tex [12] [13]) (LogErr_chapi.tex
+Overfull \hbox (1.36122pt too wide) in paragraph at lines 40--40
+[]\T1/ptm/b/n/12 C++: Class In-ter-face ESMC_Log - C++ in-ter-face to Log (Sour
+ce File: ESMC_LogErr.h) 
+ []
+
+
+Overfull \hbox (16.24501pt too wide) in paragraph at lines 118--118
+[]                                 \T1/pcr/m/n/10 // this is set to true.  Othe
+rwise set to false.[] 
+ []
+
+[14]
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 118--118
+[]     \T1/pcr/m/n/10 int numFileFort;            // index into global array of
+ unit numbers for[] 
+ []
+
+[15]
+Overfull \hbox (40.24501pt too wide) in paragraph at lines 155--155
+[]     \T1/pcr/m/n/10 void ESMC_LogErrFortran(int errCode,int line,char file[],
+char dir[],char msg[]);[] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 173--174
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 195--196
+
+ []
+
+[16]
+Underfull \hbox (badness 10000) in paragraph at lines 217--218
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 240--241
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 261--262
+
+ []
+
+[17]
+Underfull \hbox (badness 10000) in paragraph at lines 283--284
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 306--307
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 329--330
+
+ []
+
+[18]
+Underfull \hbox (badness 10000) in paragraph at lines 353--354
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 376--377
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 400--401
+
+ []
+
+[19]
+Underfull \hbox (badness 10000) in paragraph at lines 425--426
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 448--449
+
+ []
+
+) (LogErr_ccapi.tex [20] [21]
+Overfull \hbox (22.24501pt too wide) in paragraph at lines 148--148
+[]      \T1/pcr/m/n/10 Checks to see if a file of the name name has been opened
+ by {\tt ESMC\_Log}.[] 
+ []
+
+
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 148--148
+[]  \T1/pcr/m/n/10 ------------------------------------------------------------
+-----------------[] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--155
+
+ []
+
+[22]
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 197--197
+[]      \T1/pcr/m/n/10 int intData[],        // array storing integer data to b
+e printed (input)[] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 198--199
+
+ []
+
+[23]
+Underfull \hbox (badness 10000) in paragraph at lines 246--247
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 267--268
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 286--287
+
+ []
+
+[24]
+Underfull \hbox (badness 10000) in paragraph at lines 309--310
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 336--337
+
+ []
+
+[25]
+Underfull \hbox (badness 10000) in paragraph at lines 400--401
+
+ []
+
+[26]
+Underfull \hbox (badness 10000) in paragraph at lines 423--424
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 448--449
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 468--469
+
+ []
+
+[27]
+Underfull \hbox (badness 10000) in paragraph at lines 490--491
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 510--511
+
+ []
+
+[28]
+Underfull \hbox (badness 10000) in paragraph at lines 535--536
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 563--564
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 592--593
+
+ []
+
+[29]
+Underfull \hbox (badness 10000) in paragraph at lines 611--612
+
+ []
+
+) (LogErr_ccwrapper.tex
+Underfull \hbox (badness 10000) in paragraph at lines 61--62
+
+ []
+
+[30]
+Underfull \hbox (badness 10000) in paragraph at lines 82--83
+
+ []
+
+
+Overfull \hbox (34.33115pt too wide) in paragraph at lines 85--89
+[]\T1/ptm/m/n/10 This rou-tine finds the first space in the ar-ray name and in-
+serts a a null char-ac-ter. It then calls \T1/pcr/m/n/10 ESMC_LogOpenFileForWri
+te
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 101--102
+
+ []
+
+[31]
+Underfull \hbox (badness 10000) in paragraph at lines 132--133
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 157--158
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 176--177
+
+ []
+
+[32]
+Underfull \hbox (badness 10000) in paragraph at lines 194--195
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 212--213
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 229--230
+
+ []
+
+[33]
+Underfull \hbox (badness 10000) in paragraph at lines 247--248
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 275--276
+
+ []
+
+[34]
+Underfull \hbox (badness 10000) in paragraph at lines 300--301
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 319--320
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 338--339
+
+ []
+
+[35]
+Underfull \hbox (badness 10000) in paragraph at lines 357--358
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 376--377
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 394--395
+
+ []
+
+[36]
+Underfull \hbox (badness 10000) in paragraph at lines 411--412
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 428--429
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 445--446
+
+ []
+
+) (LogErr_desrev.tex
+Underfull \hbox (badness 10000) in paragraph at lines 11--12
+
+ []
+
+) (LogErr_glos.tex [37]) (LogErr_desdoc.bbl
+
+LaTeX Warning: Empty `thebibliography' environment on input line 3.
+
+) [38] (LogErr_desdoc.aux) ) 
+Here is how much of TeX's memory you used:
+ 1307 strings out of 20887
+ 14778 string characters out of 196275
+ 61493 words of memory out of 350001
+ 4247 multiletter control sequences out of 10000+15000
+ 19905 words of font info for 25 fonts, out of 400000 for 1000
+ 14 hyphenation exceptions out of 10000
+ 23i,8n,19p,241b,332s stack positions out of 3000i,100n,1500p,50000b,4000s
+
+Output written on LogErr_desdoc.dvi (39 pages, 113928 bytes).

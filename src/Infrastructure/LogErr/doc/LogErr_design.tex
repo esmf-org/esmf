@@ -1,4 +1,4 @@
-% $Id: LogErr_design.tex,v 1.1 2003/03/28 21:33:08 shep_smith Exp $
+% $Id: LogErr_design.tex,v 1.2 2003/08/07 17:54:18 shep_smith Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,41 +10,23 @@
 
 %\subsection{Design/Implementation}
 
-There are two aspects to the design of the Log class.  The first is the actual class
-itself, and the second is Fortran interface to the Log class. The design of
-the Log class is pretty straightforward. 
-Although the class contains a large number of methods, the most important methods
-are ESMF\_LogInit, for initializing data; ESMF\_LogOpenFile and ESMF\_CloseFile,
-for opening and closing output files; and ESMF\_LogInfo, ESMF\_LogErr, and ESMF\_LWarn, for
-writing miscellaneous information, error, and warning information. In addition, there are
+Although the class contains a large number of methods, the most Fortran/C++ important methods
+are ESMF\_LogSet()/ESMC\_LogSet() and ESMF\_LogGet()/ESMC\_LogGet(),
+for setting and getting data; ESMF\_LogOpenFile()/ESMC\_LogOpenFile() and ESMF\_CloseFile()/ESMC\_LogCloseFile(),
+for opening and closing output files; and ESMF\_LogErr()/ESMC\_LogErr(), and ESMF\_LogWarn()/ESMC\_LogWarn(), for
+writing error and warning information. In addition, there are
 a variety of other methods that allow the user to control other behavior such whether
 or not to stop execution on encountering errors or warnings, whether output
 should be flushed from buffers to files automatically, or whether output should be verbose
-or not.
+or not. 
 
 The Log class was implemented in C/C++, but uses the Fortran I/O libraries when
-the class methods are called from the Fortran wrappers. We forced the C/C++ methods 
+the class methods are called from Fortran. We forced the C/C++ methods 
 to use the Fortran I/O library by creating 
-utility functions, written in Fortran, but callable from Log's C++ methods,
-which call the standard Fortran write, open and close functions.  We chose this 
-approach because we still wanted to allow users to write to the Log files using the
-standard Fortran write statements if they chose to.
-Since you could conceivably be writing to the same file using 
-both ESMF\_LogInfo, for example,  and the standard Fortran  write(),
-both approaches have to use the same I/O 
-libraries to avoid any collisions.  Since we can't force the Fortran write() to use the
-C I/O libraries, our only alternative was to force our routines to use Fortran I/O
-libraries.  Note: if you call the Log methods from C/C++ code, you bypass the wrappers
+utility functions that are written in Fortran, but callable from Log's C++ methods.
+These utility functions call the standard Fortran write, open and close functions.
+If you call the Log methods from C/C++ code, you bypass the utility functions
 and all I/O is done with the C I/O libraries.
-
-The design of the Fortran interface is relatively straightforward, but there are some
-inter-language operability issues here as well.
-Because the ESMF\_LogInfo routine needed to
-take a variable number of arguments, the Fortran wrapper needed to be implemented in C.
-To keep things as uniform as possible, all of the other wrapper functions were implemented
-in C as well, except for ESMF\_LogInit(). We wanted to overload this function, and since
-you can't overload functions in C, we needed to implement the code in another language.
-Fortran was the obvious choice.
 
 
 

@@ -1,4 +1,4 @@
-% $Id: LogErr_cex.tex,v 1.1 2003/03/28 21:33:07 shep_smith Exp $
+% $Id: LogErr_cex.tex,v 1.2 2003/08/07 17:54:18 shep_smith Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,78 +10,75 @@
 
 %\subsection{C++ Use and Examples}
 
-<Detailed examples of F90 usage of the class.>
+%<Detailed examples of F90 usage of the class.>
 \subsubsection{Example 1. Simple Example.}
 
-In this example we initialize a Log object (aLog) and write a simple message
-to standard out.
+In this example we use the default ESMF\_Log\_World object and illustrate
+the ESMF\_LogGetUnit()to write to the log file aLog.txt.
 
 {\tt
 \begin{verbatim}
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogMacros.inc"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogErr.C"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogConstants.inc"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_ErrConstants.inc"
-ESMC_Log aLog;
-int int_num=88;
-aLog.ESMC_LogInit();
-aLog.ESMC_LogInfo(aLog,"Hi there agent %d , int_num);
+#include "ESMC_LogErr.inc"
+ESMC_Log_World.ESMC_LogOpen(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"aLog.txt")
+fprintf(ESMC_Log_Wold.ESMC_GetFileHandle(),"This is a test");
+ESMC_Log_World.ESMC_LogClose();
 \end{verbatim}
-}\tt
+\tt}
 
 \subsubsection{Example 2. Simple Error Handling.}
 
-Here we illustrate simple error handling.  Error output goes to the file anErr.txt
+Here we illustrate simple error handling.  We define an error handler - anErr -
+and error output goes to the
+file anErr.txt.  There are four options that can be set with ESMF\_LogSet()
+and we set them all here: verbose (whether an
+error message should be written for anErr), flush (whether output should be
+flushed), haltOnErr and haltOnWarn (whether the code should halt on
+an error or warning).  While the values set here are the default
+values, so they need not be set with ESMC\_Set(), the example illustrates how
+to use ESMC\_SET().  Note that verbose, flush, haltOnErr, and haltOnWarn are symbolic
+constants defined in ESMC\_LogErr.inc.
 {\tt
 \begin{verbatim}
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogErr.C"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogMacros.inc"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogConstants.inc"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_ErrConstants.inc"
+#include "ESMC_LogErr.inc"
 ESMC_Log anErr;
-type(ESMF_Log) :: anErr
-int returnCode; 
-anErr.ESMC_LogInit();
-anErr.ESMC_LogOpenFile(anErr,ESMF_SINGLE_LOG_FILE,"anErr.txt");
+int returnCode;
+anErr.ESMC_LogSet(verbose,ESMF_TF_TRUE,flush,ESMF_TF_TRUE,haltOnErr,
+                  ESMF_TF_TRUE,haltOnWarn,ESMF_TF_FALSE);
+anErr.ESMC_LogOpenFile(ESMF_SINGLE_LOG_FILE,"anErr.txt");
 returnCode=foo();
-if (returnCode == ESMF_FATAL) anErr.ESMC_LogErr(anErr, ESMF_FATAL); 
+if (returnCode == ESMF_FATAL) anErr.ESMC_LogErr(ESMF_FATAL); 
 anErr.ESMC_LogCloseFile();
 \end{verbatim}
-}\tt
+\tt}
 
 \subsubsection{Example 3. More error handling. }
 
-Here's an example combining writing to the log file and error handling.
-All output to anErr.txt is flushed.  Initially, we halt execution on warnings, continue
-execution on errors.  Later in the code we reverse this.
-
+In this example, we illustrate more complex error handling.  We use
+ESMF\_LogGet() to get the value of verbose and if it's set to ESMF\_TF\_TRUE
+then turn off verbose midway through the code.  This allows you to put in lots
+of debugging code, and then if you want to turn them off, you can just call
+an ESMF\_LogSet() rather than commenting out all the error handling calls.
 {\tt
 \begin{verbatim}
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogErr.C"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogMacros.inc"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogConstants.inc"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_ErrConstants.inc"
-ESMC_Log anErr,aLog;
+#include "ESMC_LogErr.inc"
+
+\begin{verbatim}
+#include "ESMC_LogErr.inc" 
+ESMC_Log anErr;
+ESMC_Logical myVerbosity;
+char myMsg[32]="This will be written out.";
 int returnCode; 
-anErr.ESMC_LogInit(anErr,ESMF_LOG_FALSE,ESMF_TRUE,ESMF_LOG_TRUE)
-aLog.ESMC_LogInit()
+anErr.ESMC_LogSet(verbose,ESMF_TF_TRUE,flush,ESMF_TF_FALSE,
+                 haltOnErr,ESMF_TF_TRUE, haltOnWarn,ESMF_TF_FALSE)
 anErr.ESMC_LogOpenFile(ESMF_SINGLE_LOG_FILE,"anErr.txt")
-aLog.ESMC_LogInfo('We are about to execute foo.');
-returnCode=foo()
-if (returnCode == ESMF_FATAL)  {
-  anErr.ESMC_LogErrMsg(ESMF_FATAL,"Encountered an error, but keep going!");
-}
-returnCode=foo2()
-if(returnCode == ESMF_WARNING) {
-  anErr.ESMC_LogWarnMsg(ESMC_WARNING,"Encountered a warning, but we stop execution!");
-}
-anErr.ESMC_LogHaltOnErr();
-anErr.ESMC_LogNotHaltOnWarn();
 returnCode=foo();
-if (returnCode == ESMF_FATAL) anErr.ESMC_LogErr(ESMF_FATAL);
-returnCode=foo2();   //we never get here!
-if(returnCode == ESMF_WARNING) anErr.ESMC_LogWarn(ESMC_WARNING);
-anErr.ESMC_LogCloseFile(anErr);
+if (returnCode == ESMF_FATAL) anErr.ESMC_LogErrMsg(anErr, returnCode,myMsg) 
+anErr.ESMF_LogGet(verbose,myVerbosity)
+if (myVerbosity==ESMF_TF_TRUE) anErr.ESMF_LogSet(verbose=ESMF_TF_FALSE)
+myMsg="This will not be written out."
+returnCode=foo()
+if (returnCode == ESMF_FATAL) anErr.ESMF_LogErrMsg(anErr, returnCode,myMsg)
+anErr.ESMF_LogCloseFile()
 \end{verbatim}
-}\tt
+\tt}
 

@@ -1,4 +1,4 @@
-% $Id: LogErr_desdoc.ctex,v 1.3 2003/04/03 17:04:14 flanigan Exp $
+% $Id: LogErr_desdoc.ctex,v 1.4 2003/08/07 17:54:18 shep_smith Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@
 \input{../Infrastructure/LogErr/doc/LogErr_fex}
 #endif
 
-%#\subsection{Parameters and Definitions}
+%#\subsection{Parameters}
 #ifdef STANDALONE
 %#\input{class_fparam}
 #elif defined(CONSTITUENT)
@@ -118,11 +118,9 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMF_LogErr_fapi}
-\input{ESMC_LogErr_ccapi}
+\input{LogErr_fapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/LogErr/doc/ESMF_LogErr_fapi}
-\input{../Infrastructure/LogErr/doc/ESMC_LogErr_ccapi}
+\input{../Infrastructure/LogErr/doc/LogErr_fapi}
 #endif
 
 \section{LogErr C++ Interface}
@@ -134,18 +132,25 @@
 \input{../Infrastructure/LogErr/doc/LogErr_cex}
 #endif
 
-\subsection{Parameters, Definitions, and Some APIs}
+\subsection{Parameters}
 #ifdef STANDALONE
-\input{ESMC_LogErr_chapi}
+\input{LogErr_chapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/ESMC_logErr_chapi}
+\input{../Infrastructure/LogErr/doc/LogErr_chapi}
 #endif
 
-%\subsection{More Class API}
+\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_LogErr_ccapi}
+\input{LogErr_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/ESMC_LogErr_ccapi}
+\input{../Infrastructure/LogErr/doc/LogErr_ccapi}
+#endif
+
+\subsection{Wrapper Functions}
+#ifdef STANDALONE
+\input{LogErr_ccwrapper}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/LogErr/doc/LogErr_ccwrapper}
 #endif
 
 \section{LogErr Design}

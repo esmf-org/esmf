@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.1 2003/03/28 21:33:07 shep_smith Exp $
+% $Id: LogErr_desc.tex,v 1.2 2003/08/07 17:54:18 shep_smith Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,10 +10,8 @@
 
 %\subsection{Description}
 
-<Describe class function and relation to other classes.>
-The Log class consists of a variety of methods for writing error, warning, and other
-miscellaneous data to one or more files or to standard out. The class  allows the user
-to use printf style routines (which are callable from fortran code) and fortran style 
-write functions. The init method allows the user to set whether output should go to
-standard out or not, whether the code should halt on encountering errors or warnings 
-and other behavior.
+The Log class consists of a variety of methods for writing error, warning, and
+miscellaneous log data to files or to standard out. 
+The user may set
+the code to make the output verbose or not,  to halt on encountering errors or warnings, and to flush output buffers
+after every write.

@@ -1,4 +1,4 @@
-% $Id: LogErr_rest.tex,v 1.1 2003/03/28 21:33:09 shep_smith Exp $
+% $Id: LogErr_rest.tex,v 1.2 2003/08/07 17:54:18 shep_smith Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,13 +10,15 @@
 
 %\subsubsection{Restrictions}
 
-<List class restrictions due to design or implementation strategies.>
 
 There are a few restrictions to keep in mind.  First, the error handling and
-warning routines, ESMF\_LogErr(), ESMF\_LogErrMsg(), ESMF\_LogWarn(),
-and ESMF\_LogWarnErr(),
-are expanded using the standard fortran and C/C++ preprocessing  macro's the
-predefined symbolic constants \_\_LINE\_\_ and \_\_FILE\_\_.  If
+warning routines, ESMF\_LogErr()/ESMC\_LogErr(), ESMF\_LogErrMsg()/ESMC\_LogErrMsg(),
+ESMF\_LogWarn()/ESMC\_LogWarn(),
+and ESMF\_LogWarnErr()/ESMC\_LogWarnErr(),
+are expanded using a  macro's that adds the
+predefined symbolic constants \_\_LINE\_\_ and \_\_FILE\_\_ to the argument list of the above
+error handling routines. Using these constants, we can determine the line number and file that ther
+error occurred in.  If
 your preprocessor is not working properly, this expansion will not be done properly and
 the line and file names will not appear correctly when writing out error and warning
 information. We also rely on the C and the Fortran preprocessor

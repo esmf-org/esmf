@@ -1,0 +1,616 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: ESMC\_LogErr.C,  Date: Thu Aug  7 13:36:32 EDT 2003
+}
+
+ 
+%/////////////////////////////////////////////////////////////
+\subsubsection [ESMC\_LogOpenFile] {ESMC\_LogOpenFile - opens a Log object}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log::ESMC_LogOpenFile(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim} 
+      int numLogFile, //number of log files written (input). Set
+ 		     // to either ESMF_SINGLE_LOG_FILE or
+ 		     // ESMF_MULT_LOG_FILE .
+ 
+      char name[]     //string to form name of log file (input)
+ 
+    )
+   !DESCRIPTION
+   {\tt ESMC\_LogErrOpenFile} takes two
+   arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
+   ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
+   ESMF\_LogConstants.h, set whether one file should be written for all 
+   processes (ESMF_SINGLE\_LOG\_FILE), or whether one file per process should
+   be written (ESMF\_MULT\_LOG\_FILE).
+   The second argument is a string and is used to form the name of the
+   logfile.
+   This routine is called from native C or C++ code. C I/O libraries are used.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogOpenFortFile] {ESMC\_LogOpenFortFile - opens a Log object}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log::ESMC_LogOpenFortFile(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim} 
+      int numLogFile, //number of log files written (input). Set
+ 		     // to either ESMF_SINGLE_LOG_FILE or
+ 		     // ESMF_MULT_LOG_FILE .
+ 
+      char name[]     //string to form name of log file (input)
+ 
+    )
+   !DESCRIPTION
+   {\tt ESMC\_LogErrOpenFile} takes two
+   arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
+   ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
+   ESMF\_LogConstants.h, set whether one file should be written for all 
+   processes (ESMF_SINGLE\_LOG\_FILE), or whether one file per process should
+   be written (ESMF\_MULT\_LOG\_FILE).
+   The second argument is a string and is used to form the name of the
+   logfile.
+   This routine is called from native Fortran code. Fortran I/O libraries are
+   used.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogNameValid] {ESMC\_LogNameValid - checks to see if a name has been used before}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} bool ESMC_Log::ESMC_LogNameValid(
+   !RETURN VALUE
+      none
+   !ARGUMENTS
+       char name[],          // name of file
+       int FortIO            //are we doing FortIO?
+       )
+   !DESCRIPTION
+      Checks to see if a file of the name name has been opened by {\tt ESMC\_Log}.
+      If it has the function returns a false value.  Note: this function
+      use a global array that all {\tt ESMC\_Log} objects have access to.
+   EOP
+ {
+   int i;
+   if (FortIO == ESMF_TF_FALSE) {
+     for(i=0; i< numCFiles; i++)
+      if (strcmp(name,listOfCFileNames[i])  == 0) 
+ 	return false;
+     strcpy(listOfCFileNames[i-1],name);
+     return true;
+   } else {
+     for(i=0; i< numFortFiles;i++)
+       if (strcmp(name,listOfFortFileNames[i])  == 0)
+           return false;
+     strcpy(listOfFortFileNames[i-1],name);
+     return true;
+   }
+ }
+  ----------------------------------------------------------------------------- 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogInfo] {ESMC\_LogInfo - print contents of a Log}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log::ESMC_LogInfo(
+ \end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim} 
+      char* fmt, // c-style character format; subsequent arguments
+      ...
+     )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   {\tt ESMC\_Log\_Info} works similar to C's printf statement.
+   The first argument is a character string that can include text to be
+   written as well as a description of the number and kind of characters
+   to be printed out.
+   The format of this string follows the C format description convention,
+   though not every feature is supported.  The current conversion specifiers
+   are supported: d (signed decimal integer), f (double values),
+   and s (string).
+  
+   Any number of data items may be passed to {\tt ESMC\_Log\_Print}.
+   
+   The items are printed on a single line.  Widths, precision, and
+   escape sequences are not supported.  If you specify these, the code
+   ignores them.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogInfoFortran] {ESMC\_LogInfoFortran - print contents of a Log from Fortran}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log::ESMC_LogInfoFortran(
+ \end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      
+      char fmt[],           // array for c-style character format (input)
+ 
+      char charData[],      // holds character data
+      char strData[][32],   // two dimensional array for string data;
+                            // strDat[i][j] is the jth
+ 			   // character of string i. (input)
+ 
+      int intData[],        // array storing integer data to be printed (input)
+ 
+      double floatData[]    // array storing double data to be printed (input) 
+ 
+     )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   {\tt ESMC\_LogInfoFortran} is the version of {\tt ESMC\_LogInfo} used for the Fortran
+   interface.  Instead of printing the data from the stack as {\tt ESMC\_LogInfo} 
+   does, {\tt ESMC\_LogInfoFortran} prints the data stored in the "Data" arrays. 
+   The routine is called from {\tt ESMF\_LogPrint} which is  defined in
+   ESMF\_LogInterface.C.  {\tt ESMF\_LogPrint} is callable from the user's
+   from Fortran code.  It is this routine that takes the data
+   from the stack and stores it in the "Data" arrays.
+  
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogPrintHeader] {ESMC\_LogPrintHeader - prints header data}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}    void ESMC_Log::ESMC_LogPrintHeader(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      none \end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      int fortIO       //if set to ESMF_TF_TRUE, use fortran io libraries
+ 
+    )
+   !Description:
+   This is a private method, used by LogErr's various
+   print methods to print header
+   data to the log file.  This data consists of a time stamp, an ascii string 
+   holding the day, month, time, and year. If the code is running in parallel
+   with MPI, the header also consists of the PE number.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogGet] {ESMC\_LogGet - get value of verbose, flush, haltOnErr, and/or haltOnWarn}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}    void ESMC_LogGet(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}    An arbitrary number of "option, value" pairs
+ 
+    char* option, ESMC_Logical value,...)
+   \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+    This method returns the value of the argument option in the variable value.
+    Option may be set tot he string verbose, flush,haltOnErr or haltOnWarn 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogSet] {ESMC\_LogSet - sets the value of verbose, flush, haltOnWarn and/or haltOnErr}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}    void ESMC_LogSet(
+ 
+   !RETURN VALUE 
+     none
+   !ARGUMENTS
+    An arbitrary number of "option, value" pairs
+     char* option, ESMC_Logical value,...) \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This method returns the value of the argument option in the variable value.
+   Option may be set tot he string verbose, flush,haltOnErr or haltOnWarn 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_GetFileHandle] {ESMC\_GetFileHandle - used in conjunction with fprintf to write}
+
+
+   data to the log file.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}    FILE* ESMC_Log::ESMC_GetFileHandle(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}    none
+    )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This method is used in conjunction with fprintf 
+   to write data to the log file, eg. fprintf(aLog.ESMC\_GetUnit(),"Hi")
+   The routine writes header data, and
+   then returns a point to a file structure to fprintf
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogGetUnit] {ESMC\_LogGetUnit - used in conjunction with standard Fortran write}
+
+
+   to write data to log file. 
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} int ESMC_Log::ESMC_LogGetUnit(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      unit number \end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       none.
+ 
+    )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This is method is
+   used with the standard Fortran write function, eg.
+   write(ESMC\_LogGetUnitNumber(aLog),*) 'Hi '. 
+   The routine writes header data, and
+   then returns a unit number to the Fortran write function.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogFormName] {ESMC\_LogFormName - private method that forms}
+
+
+    the name of the LogErr file to be written when multiple LogErr
+    files are to be written.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log::ESMC_LogFormName(
+ \end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       none.
+ 
+    )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This routine forms the names the LogErr files by appending the
+   PE number to base name specified in the Open method.  This method
+   is used only when running in parallel on multiple PEs.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogCloseFortFile] {ESMC\_LogCloseFortFile - closes log file. }
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} void ESMC_Log::ESMC_LogCloseFortFile(
+   ! RETURN VALUE:
+      none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     none
+ 
+    )
+   ! DESCRIPTION:
+   This routine simply closes the log file(s).  It also removes
+   file from the global file array. The routine is called from native
+   Fortran code (File is closed with Fortran I/O libraries.)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogCloseFile] {ESMC\_LogCloseFile - closes log file. }
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} void ESMC_Log::ESMC_LogCloseFile(
+   ! RETURN VALUE:
+      none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     none
+ 
+    )
+   ! DESCRIPTION:
+   This routine simply closes the log file(s).  It also removes
+   file from the global file array. The routine is called from native
+   C/C++ code (File is closed with C I/O libraries.)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_Log] {ESMC\_Log - native C++ constructor for log class}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ ESMC_Log::ESMC_Log(
+ \end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}    none
+ 
+   )
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+     Native C++ constructor 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogErr] {ESMC\_LogErr - write error message to log file}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log::ESMC_LogErr_(
+ \end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim} 
+    int errCode,     // Error code
+    int line,        // Line number
+    char file[],     // Filename
+    char dir[]      // Directory
+   )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Prints error code, corresponding message, line number, file, directory
+   that error occurred at.  
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogErrMsg] {ESMC\_LogErrMsg - write error message to log file}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log::ESMC_LogErrMsg_(
+ \end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim} 
+    int errCode,     // Error code
+    int line,        // Line number
+    char file[],     // Filename
+    char dir[],     // Directory
+    char msg[]
+   )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Prints error code, corresponding message, line number, file, directory
+   that error occurred at.  Can also print a message. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogWarn] {ESMC\_LogWarn -- Print warning message}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       void ESMC_Log::ESMC_LogWarn_(\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       int errCode,     // Error code
+       int line,        // Line number
+       char file[],     // Filename
+       char dir[]      // Directory
+     )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+    Same as {\tt ESMC\_LogErr}, except execution is not stopped after
+    printing message, except when haltOnWarn set to true
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogWarnMsg] {ESMC\_LogWarnMsg -- Print warning message}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       void ESMC_Log::ESMC_LogWarnMsg_(\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       int errCode,     // Error code
+       int line,        // Line number
+       char file[],     // Filename
+       char dir[],      // Directory
+       char msg[]
+     )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+    Same as {\tt ESMC\_LogErr}, except execution is not stopped after
+    printing message, except when haltOnWarn set to true
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogExit()] {ESMC\_LogExit() - private routine uses by Log to stop program}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} void ESMC_Log::ESMC_LogExit(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}    none
+   )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Used by {\tt ESMC\_Log} to exit program.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogErrFortran] {ESMC\_LogErrFortran - called by fortran wrapper to write error msg}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log::ESMC_LogErrFortran(
+ \end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim} 
+     int errCode,         //error code
+     int line,            //line number
+     char file[],         //file error occurred in
+     char dir[],          //directory error occurred in
+     char msg[]           //msg
+   )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+  Similar to {\tt ESMC\_LogErr}, except called by the fortran wrapper
+  esmf\_logerr which is defined in
+  ESMC\_Interface.C.  The major difference between this routine
+  and {\tt ESMC\_LogErr} is that this
+  routine prints the printf style data from the Data arrays not the stack. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogWarnFortran] {ESMC\_LogWarnFortran - called by fortran wrapper to write warnings}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log::ESMC_LogWarnFortran(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim} 
+      int errCode,
+      int line,
+      char file[],
+      char dir[],
+      char msg[]
+ 
+ )\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Similar to {\tt ESMC\_LogWarn}, except called by the fortran
+   wrapper esmf\_logerr which is
+   defined in ESMC\_Interface.C 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogPrint] {ESMC\_LogPrint - prints to the log file}
+
+
+   
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void ESMC_Log:: ESMC_LogPrint(
+ \end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim} 
+    int fortIO,          //if set to ESMF_TF_TRUE use Fortran IO libraries
+    int errCode,
+    int line,            // see LogErr for a definition
+    char file[],         // of these variables
+    char dir[],           
+    char msg[]            // optional msg
+ 
+   )
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+This is a private routine, used by many methods of 
+   {\tt ESMC\_Log} to print data to the log file. If used from Fortran, then
+   Fortran I/O libraries are used.  Otherwise C I/O libraries are used. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMC\_LogGetErrMsg] {ESMC\_LogGetErrMsg -- Return error message for given error code.}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       void ESMC_Log::ESMC_LogGetErrMsg(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      int errCode,
+      char msg[]
+      ) const\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   {\tt ESMC\_GetErrMsg} returns a string corresponding to the error code
+  
+%...............................................................

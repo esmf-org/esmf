@@ -1,0 +1,450 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: ESMC\_LogErrInterface.C,  Date: Thu Aug  7 13:42:18 EDT 2003
+}
+
+ 
+%/////////////////////////////////////////////////////////////
+
+   These wrapper function are called by the FORTRAN routines defined in the file 
+   ESMF\_LogErr.F90.  The structure is:
+    
+      ESMF\_LogFoo(aLog) --->  C\_ESMF\_LogFoo(aLog)  ----> aLog.ESMC\_LogFoo()
+   In other words, these routines actually call the C++ methods.  You can't call
+   the C++ methods directly from FORTRAN.  You must go thru this intermediate step.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogCloseFile] {C\_ESMF\_LogCloseFile - closes a file from Fortran code}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ void FTN(c_esmf_logclosefile)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}   none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}         ESMC_Log* aLog)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Calls the method {\tt ESMC\_LogCloseFileForWrite} to close aLog's 
+   log file.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [C\_ESMF\_LogOpenFile] {C\_ESMF\_LogOpenFile - opens a log file}
+
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}    void FTN(c_esmf_logopenfile)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}         ESMC_Log *aLog, 
+         int *numFiles, 
+         char name[], 
+         int namelen)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This routine finds the first space in the array name and inserts a
+   a null character. It then calls {\tt ESMC\_LogOpenFileForWrite} 
+   an {\tt ESMC\_Log} method for opening files. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogInfo] {ESMF\_LogInfo - writes miscellaneous information to a log file}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}    void FTN(esmf_loginfo)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       ESMC_Log* aLog,
+       char* fmt,...)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+    This routine allows the user to write miscellaneous information the
+    {\tt ESMC\_Log} file. It uses a printf style character descriptor, e.g. 
+    {\tt ESMC\_LogInfo}(aLog,"Hi there, %s ", shep), where shep here would be
+    a character string. The routine takes a variable number of arguments,
+    so that any number of data items can be written to the {\tt ESMC\_Log} file.
+    Currently, only character, strings, integers, and reals are supported.
+    However, field widths, precisions, and flags are ignored.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogWarnMsg-] {C\_ESMF\_LogWarnMsg- writes warning messages}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      void FTN(c_esmf_logwarnmsg)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}   none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       ESMC_Log *aLog,
+       int *errCode,
+       int *line,
+       char file[],
+       char dir[],
+       char msg[],
+       int filelen,
+       int dirlen,
+       int msglen)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine is called by {\tt ESMF\_LogWarnMsg} (defined in ESMF\_LogErr.F90).  
+      {\tt C\_ESMF\_LogWarnMsg} calls the C++ method that actually writes the warning.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogWarn] {C\_ESMF\_LogWarn - writes warning messages}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       void FTN(c_esmf_logwarn)(
+   !RETURN VALUES:
+   none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}        ESMC_Log *aLog,
+        int *errCode,
+        int *line,
+        char file[],
+        char dir[],
+        int filelen,
+        int dirlen)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine is called by {\tt ESMC\_LogWarn} (defined in ESMF\_LogErr.F90).  
+      {\tt C\_ESMC\_LogWarn} calls the C++ method that actually writes the warning.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogSetFlush] {C\_ESMF\_LogSetFlush - flushes output}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}        void FTN(c_esmf_logsetflush)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}    
+       ESMC_Log* aLog)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+    This routine calls the {\tt ESMC\_Log} method that flushes output.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogSetNotFlush] {C\_ESMF\_LogSetNotFlush - prevents output from being flushed}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      void FTN(c_esmf_logsetnotflush)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       ESMC_Log* aLog)
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine calls the Log method {\tt ESMC\_LogNotFlush()} which sets a flag
+      that turns off flushing. By default, this flag is set.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogSetVerbose] {C\_ESMF\_LogSetVerbose - causes output to be written to the Log}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}     void FTN(c_esmf_logsetverbose)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      ESMC_Log* aLog)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine sets a flag that causes all output associated with
+      the aLog {\tt ESMC\_Log} handle to be written. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogNotVerbose] {C\_ESMF\_LogNotVerbose - causes output not to be written to the Log}
+
+
+                         
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      void FTN(c_esmf_logsetnotverbose)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      NONE\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     ESMC_Log* aLog) \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine sets a flag that forces all output associated with
+      the aLog {\tt ESMC\_Log} handle from being written. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [C\_ESMF\_LogGetUnit] {C\_ESMF\_LogGetUnit - Fortran style method to write to log file.}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      int  FTN(c_esmf_loggetunit)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      A Fortran Unit Number\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      ESMC_Log *aLog)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This function called from with a Fortran write statement, e.g.
+      write(LogWrite(aLog),*)"Hi".  The {\tt ESMC\_LogWrite} function
+      appends some
+      header information (time,date etc.) to what ever is printed out
+      from the write, e.g. Hi. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogErrMsg] {C\_ESMF\_LogErrMsg - writes warning messages}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}     void FTN(c_esmf_logerrmsg)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     ESMC_Log *aLog,
+     int *errCode,
+     int *line, 
+     char file[],
+     char dir[],
+     char msg[], 
+     int filelen,
+     int dirlen,
+     int msglen)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine is called by {\tt ESMF\_LogErrMsg} (defined in ESMF\_LogErr.F90).  
+      {\tt C\_ESMF\_LogErrMsg} calls the C++ method that actually writes
+      the warning.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogErr] {C\_ESMF\_LogErr - writes warning messages}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      void FTN(c_esmf_logerr)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      ESMC_Log *aLog,
+      int *errCode,
+      int *line, 
+      char file[],
+      char dir[],
+      int filelen,
+      int dirlen)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine is called by {\tt ESMF\_LogErr} (defined in ESMF\_LogErr.F90). 
+      {\tt C\_ESMC\_LogErr} calls the C++ method that actually writes the warning.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [C\_ESMF\_LogSetHaltOnErr] {C\_ESMF\_LogSetHaltOnErr - program halts on encountering an error}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}     void FTN(esmf_logsethaltonerr)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     ESMC_Log* aLog)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine calls a {\tt ESMC\_Log} method that sets
+      a flag to stop execution on
+      reaching an error. This is the default behavior of the {\tt ESMC\_Log} class. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [C\_ESMF\_LogSetNotHaltOnErr] {C\_ESMF\_LogSetNotHaltOnErr - program does not halt on an error}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}    void FTN(c_esmf_logsetnothaltonerr)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     ESMC_Log* aLog)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine calls a {\tt ESMC\_Log} method that sets a flag to 
+      prevent the program
+      from stopping reaching an error.  
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [C\_ESMF\_LogSetHaltOnWarn] {C\_ESMF\_LogSetHaltOnWarn - program halts on encountering a warning}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} void FTN(c_esmf_logsethaltonwarn)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     ESMC_Log* aLog)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine calls a {\tt ESMC\_Log} method that sets a flag to stop execution on
+      reaching a warning. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [C\_ESMF\_LogSetNotHaltOnWarn] {C\_ESMF\_LogSetNotHaltOnWarn - program does not halt on warning}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}     void FTN(c_esmf_logsetnothaltonwarn)( \end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       ESMC_Log* aLog)
+                        \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+ 
+    This routine calls a {\tt ESMC\_Log} method that sets a flag to
+    prevent the program
+    from stopping reaching an error.                             
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_GetVerbose] {C\_ESMF\_GetVerbose - gets verbose flag}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} void FTN(c_esmf_loggetverbose)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     ESMC_Log* aLog, ESMC_Logical* verbose)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+    This routine calls a {\tt ESMC\_Log} method that gets the verbose flag
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogGetFlush] {C\_ESMF\_LogGetFlush - gets flush flag}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} void FTN(c_esmf_loggetflush)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     ESMC_Log* aLog, ESMC_Logical* flush)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This routine calls a {\tt ESMC\_Log} method that gets the flush flag
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogGetHaltOnErr] {C\_ESMF\_LogGetHaltOnErr - gets HaltOnErr flag }
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} void FTN(c_esmf_loggethaltonerr)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     ESMC_Log* aLog,ESMC_Logical* haltOnErr)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This routine gets the HaltOnErr flag
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [C\_ESMF\_LogGetHaltOnWarn] {C\_ESMF\_LogGetHaltOnWarn - gets HaltOnErr flag}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} void FTN(c_esmf_loggethaltonwarn)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     ESMC_Log* aLog,ESMC_Logical* haltOnWarn)\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+    This routine calls a {\tt ESMC\_Log} method that gets the HaltOnWarn flag.
+  
+%...............................................................

@@ -1,0 +1,454 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: ESMC\_LogErr.h,  Date: Thu Aug  7 13:09:19 EDT 2003
+}
+
+ 
+%/////////////////////////////////////////////////////////////
+\subsection{C++:  Class Interface ESMC\_Log - C++ interface to Log (Source File: ESMC\_LogErr.h)}
+
+
+  
+  
+   The code in this file defines the C++ Log members and declares all class
+   data and methods.  All methods, except for the Set and Get methods, which
+   are inlined, are defined in the companion file ESMC\_LogErr.C
+  
+\bigskip{\em USES:}
+\begin{verbatim} 
+ 
+ #include <ESMC_Base.h>
+ #include <stdarg.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <mpi.h>
+ #include <time.h>
+ #include <ctype.h>
+ 
+ #include "ESMF_LogConstants.inc"
+ #include "ESMF_ErrConstants.inc"
+ #include "ESMC_UtilityFunctions.h"
+ 
+ class ESMC_Log {
+   private:
+   !PRIVATE MEMBER FUNCIONS:
+     void ESMC_LogFormName();
+     void ESMC_LogPrintHeader(int fortIO);
+     void ESMC_LogPrint(int fortIO, int errCode, int line, char file[],
+                        char dir[], char msg[]=NULL);
+     void ESMC_LogGetErrMsg(int errCode, char msg[]) const;
+     bool ESMC_LogNameValid(char name[], int FortIO);\end{verbatim}{\sf PRIVATE TYPES:}
+\begin{verbatim} 
+     ESMC_Logical oneLogErrFile;
+                                 // If log data written to one log file,
+                                 // this is set to true.  Otherwise set to false.
+                                 // ESMC_OpenFile can override
+                                 // this value
+ 
+     ESMC_Logical  standardOut;  // if log data written to standard out,
+                                 // this variable
+                                 // is set to true. Otherwise set to false.
+                                 // ESMC_OpenFile
+                                 // can over-ride this value.
+ 
+     ESMC_Logical fortIsOpen;    // used to to a file with Fortran
+                                 // I/O libraries 
+     
+     int unitNumber;             // fortran unit number for log/err file when
+                                 // ESMC\_LogGetUnit
+                                 // is used  Can be overwritten by
+                                 // ESMC_OpenFileFortran
+ 
+ 
+     int numFilePtr;             // index into global array of File pointers
+                                 // for C++ I/O.
+ 
+ 
+     int numFileFort;            // index into global array of unit numbers for 
+                                 // Fortran I/O
+ 
+     ESMC_Logical verbose;       // If set to ESMC_TF_TRUE, log
+                                 // messages written out.
+ 
+     ESMC_Logical flush;         // If true, all output is flushed
+ 
+     ESMC_Logical haltOnWarn;    // Code will stop executing on
+                                 // encountering a warning
+ 			    
+     ESMC_Logical haltOnErr;     // Code will stop executing on
+                                 // encountering an error
+ 
+ 
+     char nameLogErrFile[32];    // name of logfile.
+                                 // If multiple files are written out,
+                                 // PE rank is automatically
+                                 // appended to name.
+   public:\end{verbatim}{\sf PUBLIC MEMBER FUNCTIONS:}
+\begin{verbatim}   (see ESMC\_LogErr.C for a description of these methods)
+     void ESMC_LogInfo(char* fmt,...);   
+     void ESMC_LogInfoFortran(char fmt[],
+     char charData[],char strData[][32],int intData[], double floatData[]);
+     void ESMC_LogOpenFile(int numLogFile,char name[]);
+     void ESMC_LogOpenFortFile(int numLogFile, char name[]);
+     int ESMC_LogGetUnit();
+     void ESMC_LogCloseFile();
+     void ESMC_LogCloseFortFile();
+     void ESMC_LogSetFlush();
+     ESMC_Logical ESMC_LogGetFlush() const;
+     void ESMC_LogSetNotFlush();
+     void ESMC_LogSetVerbose();
+     ESMC_Logical ESMC_LogGetVerbose() const;
+     void ESMC_LogSetNotVerbose();
+     void ESMC_LogSetHaltOnErr();
+     ESMC_Logical ESMC_LogGetHaltOnErr() const;
+     void ESMC_LogSetNotHaltOnErr();
+     void ESMC_LogSetHaltOnWarn();
+     ESMC_Logical ESMC_LogGetHaltOnWarn() const;
+     void ESMC_LogSetNotHaltOnWarn();
+     void ESMC_LogWarnMsg_(int errCode, int line, char file[],
+                      char dir[], char msg[]);
+     void ESMC_LogWarn_(int errCode, int line, char file[],
+                      char dir[]);
+     void ESMC_LogWarnFortran(int errCode, int line, char file[],
+          char dir[], char msg[]);
+     void ESMC_LogErr_(int errCode, int line, char file[], char dir[]);
+     void ESMC_LogErrMsg_(int errCode, int line, char file[],
+                      char dir[], char msg[]);
+     void ESMC_LogErrFortran(int errCode,int line,char file[],char dir[],char msg[]);
+     void ESMC_LogExit();
+     void ESMC_LogSet(char* option, ESMC_Logical value, ...);
+     void ESMC_LogGet(char* option, ESMC_Logical value, ...);
+     FILE* ESMC_Log::ESMC_GetFileHandle();
+     ESMC_Log();
+ };\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_Log()] {ESMC\_Log() - constructor}
+
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ inline ESMC_Log::ESMC_Log(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}   none
+    
+   )
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This is the constructor.  Sets verbose, flush, haltOnErr and haltOnWarn
+   to their default values.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogSetFlush()] {ESMC\_LogSetFlush() - set the flushSet variable.}
+
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ inline void ESMC_Log::ESMC_LogSetFlush(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     none
+ 
+    ) 
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+ 
+   Causes output to be flushed.
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogGetFlush()] {ESMC\_LogGetFlush() - returns the flush variable }
+
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
+   !RETURN VALUE
+    Value of flush\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     none
+ 
+    ) const 
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+ 
+   Returns the flush variable 
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+                     \subsubsection [ESMC\_LogSetNotFlush()] {ESMC\_LogSetNotFlush() - output not flushed}
+
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 	     
+ inline void ESMC_Log::ESMC_LogSetNotFlush(
+   !RETUN VALUE:
+    none
+   !ARGUMENTS        
+     none   
+ 
+  )    
+ 	     \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Causes output not to be flushed. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogSetVerbose] {ESMC\_LogSetVerbose - make output verbose }
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ inline void ESMC_Log::ESMC_LogSetVerbose(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none
+   !ARGUMENTS
+     none
+   )
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   If theVerbosity is set to ESMF\_TF\_TRUE, messages are printed out. 
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogGetVerbose] {ESMC\_LogGetVerbose - return verbose }
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    value of verbose
+   !ARGUMENTS
+     none
+   ) const
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Returns  verbose value 
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogSetNotVerbose] {ESMC\_LogSetNotVerbose - output not verbose }
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ inline void ESMC_Log::ESMC_LogSetNotVerbose(
+   RETURN VALUE:
+    none
+   !ARGUMENTS
+     none
+   )
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   If theVerbosity is set to ESMC\_TF\_FALSE, no messages are printed out. 
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogSetHaltOnErr] {ESMC\_LogSetHaltOnErr - code will stop on encountering an error }
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ inline void ESMC_Log::ESMC_LogSetHaltOnErr(
+   RETURN VALUE:
+    none
+   !ARGUMENTS
+     none
+   )
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   If haltOnErr is set to ESMC\_TF\_TRUE, code will stop executing when
+   encountering an error.
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogGetHaltOnErr] {ESMC\_LogGetHaltOnErr - returns haltOnErr}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
+   !RETURN VALUE
+    haltOnErr
+   !ARGUMENTS
+     none
+   ) const
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Returns haltOnErr
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogSetNotHaltOnErr] {ESMC\_LogSetNotHaltOnErr - code will not stop on encountering}
+
+
+   an error  
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ inline void ESMC_Log::ESMC_LogSetNotHaltOnErr(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none
+   !ARGUMENTS
+     none
+   )
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   If haltOnErr is set to ESMC\_TF\_FALSE, code will not stop executing when
+   encountering an error.
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogSetHaltOnWarn] {ESMC\_LogSetHaltOnWarn - code will stop on encountering}
+
+
+   a warning
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ inline void ESMC_Log::ESMC_LogSetHaltOnWarn(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}   none
+   !ARGUMENTS
+     none
+   )
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   If haltOnWarn is set to ESMC\_TF\_TRUE, code will stop executing when
+   encountering an error.
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogGetHaltOnWarn] {ESMC\_LogGetHaltOnWarn - returns haltOnwarn value}
+
+
+   a warning
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
+   !RETURN VALUE
+    Value of HaltOnWarn
+   !ARGUMENTS
+     none
+   ) const
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Returns haltOnWarn
+    
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMC\_LogSetNotHaltOnWarn] {ESMC\_LogSetNotHaltOnWarn - code will not stop on encountering}
+
+
+   a warning
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ inline void ESMC_Log::ESMC_LogSetNotHaltOnWarn(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    none
+   !ARGUMENTS
+     none
+   )
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   If haltOnWarn is set to ESMC\_Tf\_FALSE, code will not stop executing when
+   encountering an error.
+   
+%...............................................................
