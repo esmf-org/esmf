@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.40 2004/04/27 23:08:51 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.41 2004/04/28 23:12:09 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod       ! ESMF base   class
-      use ESMF_newDELayoutMod
+      use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_DataMapMod
       use ESMF_ArrayMod      ! ESMF array  class
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.40 2004/04/27 23:08:51 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.41 2004/04/28 23:12:09 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -360,7 +360,7 @@
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DomainList), intent(inout) :: recvDomainList
-      type(ESMF_newDELayout), intent(in) :: parentDELayout
+      type(ESMF_DELayout), intent(in) :: parentDELayout
       type(ESMF_DataMap), intent(in) :: srcDatamap
       type(ESMF_Array), intent(in), optional :: srcArray
       type(ESMF_DataMap), intent(in), optional :: dstDatamap
@@ -392,7 +392,7 @@
       type(ESMF_AxisIndex), dimension(:), allocatable :: myAI, myArrayAI, &
                                                          myArrayLocalAI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI, allLocalAI
-      type(ESMF_newDELayout) :: srcDELayout
+      type(ESMF_DELayout) :: srcDELayout
       type(ESMF_DomainList) :: sendDomainList
       type(ESMF_RelLoc) :: horzRelLoc
       type(ESMF_Route) :: route
@@ -415,7 +415,7 @@
                  "returned failure"
         return
       endif
-      call ESMF_newDELayoutGet(srcDELayout, localDE=myDE, rc=status)
+      call ESMF_DELayoutGet(srcDELayout, localDE=myDE, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridRouteConstruct: DELayoutGet ", &
                  "returned failure"
@@ -507,7 +507,7 @@
         enddo
 
       ! recvDomainList next
-        call ESMF_newDELayoutGet(srcDELayout, deCount=nDEs, rc=status)
+        call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=status)
         allocate(allAI(nDEs,dimCount))
         allocate(allLocalAI(nDEs,dimCount))
         if (totalUse) then

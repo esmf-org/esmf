@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.91 2004/04/23 21:59:24 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.92 2004/04/28 23:12:10 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.91 2004/04/23 21:59:24 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.92 2004/04/28 23:12:10 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -59,7 +59,7 @@ static int maxroutes = 10;
 //     pointer to newly allocated ESMC_Route
 //
 // !ARGUMENTS:
-      ESMC_newDELayout *delayout,
+      ESMC_DELayout *delayout,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -128,7 +128,7 @@ static int maxroutes = 10;
 //    int error return code 
 //
 // !ARGUMENTS:
-      ESMC_newDELayout *delayout
+      ESMC_DELayout *delayout
       ) {          // in
 //
 // !DESCRIPTION:
@@ -147,7 +147,7 @@ static int maxroutes = 10;
     int decount;         // total number of DE/PEs in src + dst layouts
 
     this->delayout = delayout;
-    delayout->ESMC_newDELayoutGet(&decount, NULL, NULL, NULL, NULL, &myde,
+    delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, NULL, &myde,
       NULL, NULL, NULL, NULL);
         
     routeid = rseqnum++;
@@ -265,7 +265,7 @@ static int maxroutes = 10;
       int AI_rcv_count,            // in  - number of sets of AI's in the rcv
                                    //       array (should be the same as the 
                                    //       number of DE's in the rcv layout)
-      ESMC_newDELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
+      ESMC_DELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
       int my_DE_snd,               // in  - my DE identifier in the DELayout 
                                    //       where I'm the sending Field
       ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
@@ -277,7 +277,7 @@ static int maxroutes = 10;
       int AI_snd_count,            // in  - number of sets of AI's in the snd
                                    //       array (should be the same as the
                                    //       number of DE's in the snd layout)
-      ESMC_newDELayout *delayout_snd,   // in  - pointer to the snd DELayout 
+      ESMC_DELayout *delayout_snd,   // in  - pointer to the snd DELayout 
       ESMC_Logical *periodic) {    // in - if halo'ing, per/axis flag
 
 //
@@ -425,7 +425,7 @@ static int maxroutes = 10;
       int AI_rcv_count,            // in  - number of sets of AI's in the rcv
                                    //       array (should be the same as the 
                                    //       number of DE's in the rcv layout)
-      ESMC_newDELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
+      ESMC_DELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
       int my_DE_snd,               // in  - DE identifier in the DELayout of
                                    //       the sending Field
       ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
@@ -437,7 +437,7 @@ static int maxroutes = 10;
       int AI_snd_count,            // in  - number of sets of AI's in the snd
                                    //       array (should be the same as the
                                    //       number of DE's in the snd layout)
-      ESMC_newDELayout *delayout_snd,   // in  - pointer to the snd DELayout 
+      ESMC_DELayout *delayout_snd,   // in  - pointer to the snd DELayout 
       ESMC_Logical *periodic,      // in - if halo'ing, per/axis flag
       ESMC_Logical *hascachedroute,  // out - ESMF_TRUE, ESMF_FALSE
       ESMC_Route **route) {        // out - if true, cached route
@@ -680,7 +680,7 @@ static int maxroutes = 10;
     char *srcptr, *rcvptr;
     int nbytes;
 
-    rc = delayout->ESMC_newDELayoutGet(NULL, NULL, NULL, NULL, NULL, &mydeid,
+    rc = delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, NULL, &mydeid,
                                        NULL, NULL, NULL, NULL);
     rc = ct->ESMC_CommTableGetCount(&ccount);
     
@@ -821,7 +821,7 @@ static int maxroutes = 10;
            if(mydeid == theirdeid)
 	      rcvbuf = srcbufstart;
 	   else
-              delayout->ESMC_newDELayoutCopyCopy((void **)srcbufstart, NULL,
+              delayout->ESMC_DELayoutCopyCopy((void **)srcbufstart, NULL,
                 (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes, 
                  mydeid, theirdeid, ESMF_TRUE);
 
@@ -896,7 +896,7 @@ static int maxroutes = 10;
                                    //       DE's in the DELayout
       int *global_count,           // in  - array of global stride information
                                    //       in each dimension
-      ESMC_newDELayout *delayout,       // in  - pointer to the DELayout 
+      ESMC_DELayout *delayout,       // in  - pointer to the DELayout 
       ESMC_Logical *periodic) {    // in  - array of flags, one per dim
 //
 // !DESCRIPTION:
@@ -921,7 +921,7 @@ static int maxroutes = 10;
 
     // Calculate the sending table.  If this DE is not part of the sending
     // TODO: this assumes a 2D layout?  (certainly < 3D)
-        delayout->ESMC_newDELayoutGet(&decount, NULL, NULL, NULL, NULL, NULL,
+        delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, NULL, NULL,
                                       NULL, NULL, nde, ESMF_MAXGRIDDIM);
 
     // Calculate the sending table.
@@ -946,7 +946,7 @@ static int maxroutes = 10;
     // already obtained "decount" during last call
     for (k=0; k<decount; k++) {
       their_de = k;
-      delayout->ESMC_newDELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
+      delayout->ESMC_DELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
                                       NULL, NULL, NULL, NULL, NULL);
       // get "their" AI out of the AI_tot array
       for (j=0; j<rank; j++) {
@@ -1004,7 +1004,7 @@ static int maxroutes = 10;
     // loop over DE's from layout to calculate receive table
     for (k=0; k<decount; k++) {
       their_de = k;
-      delayout->ESMC_newDELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
+      delayout->ESMC_DELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
                                       NULL, NULL, NULL, NULL, NULL);
       // get "their" AI out of the AI_exc array
       for (j=0; j<rank; j++) {
@@ -1094,7 +1094,7 @@ static int maxroutes = 10;
                                   //       Field
       int *dstGlobalCount,        // in  - array of global strides for each
                                   //       direction for the receiving Field
-      ESMC_newDELayout *dstdeLayout,   // in  - pointer to the rcv DELayout
+      ESMC_DELayout *dstdeLayout,   // in  - pointer to the rcv DELayout
       int srcMyDE,                // in  - DE identifier in the DELayout of
                                   //       the source Field
       ESMC_AxisIndex *srcCompAI,  // in  - array of axis indices for all DE's
@@ -1113,7 +1113,7 @@ static int maxroutes = 10;
                                   //       Field
       int *srcGlobalCount,        // in  - array of global strides for each
                                   //       direction for the source Field
-      ESMC_newDELayout *srcdeLayout) { // in  - pointer to the src DELayout 
+      ESMC_DELayout *srcdeLayout) { // in  - pointer to the src DELayout 
 //
 // !DESCRIPTION:
 //      Initializes a Route with send and receive RouteTables.
@@ -1158,13 +1158,13 @@ static int maxroutes = 10;
                                      NULL, &myXP, &myXPCount);
 
       // loop over DE's from receiving layout to calculate send table
-      dstdeLayout->ESMC_newDELayoutGet(&theirDECount, NULL, NULL, NULL, NULL,
+      dstdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, NULL,
                                        NULL, NULL, NULL, NULL, NULL);
       for (i=0; i<theirDECount; i++) {
           theirDE = i;
 
           // get the parent DE identifier for this DE in the rcv layout
-          dstdeLayout->ESMC_newDELayoutGetDEMatch(theirDE, *delayout, NULL,
+          dstdeLayout->ESMC_DELayoutGetDEMatch(theirDE, *delayout, NULL,
                                                   &theirDEParent, 1);
   //        printf("Match1: %d, %d\n", theirDE, theirDEParent);
           //theirDEParent = theirDE;     // temporarily
@@ -1229,7 +1229,7 @@ static int maxroutes = 10;
           theirDE = i;
 
           // get the parent DE identifier for this DE in the src layout
-          dstdeLayout->ESMC_newDELayoutGetDEMatch(theirDE, *delayout, NULL,
+          dstdeLayout->ESMC_DELayoutGetDEMatch(theirDE, *delayout, NULL,
                                                   &theirDEParent, 1);
   //        printf("Match2: %d, %d\n", theirDE, theirDEParent);
           //theirDEParent = theirDE;     // temporarily
@@ -1313,7 +1313,7 @@ static int maxroutes = 10;
                                    //       Field
       int *global_count_rcv,       // in  - array of global strides for each
                                    //       direction for the receiving Field
-      ESMC_newDELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
+      ESMC_DELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
       int my_DE_snd,               // in  - DE identifier in the DELayout of
                                    //       the sending Field
       ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
@@ -1331,7 +1331,7 @@ static int maxroutes = 10;
                                    //       Field
       int *global_count_snd,       // in  - array of global strides for each
                                    //       direction for the sending Field
-      ESMC_newDELayout *delayout_snd) { // in  - pointer to the snd DELayout 
+      ESMC_DELayout *delayout_snd) { // in  - pointer to the snd DELayout 
 //
 // !DESCRIPTION:
 //      Initializes a Route with send and receive RouteTables.
@@ -1379,13 +1379,13 @@ static int maxroutes = 10;
                                      NULL, &my_XP, &my_XPcount);
 
       // loop over DE's from receiving layout to calculate send table
-      delayout_rcv->ESMC_newDELayoutGet(&their_decount, NULL, NULL, NULL, NULL,
+      delayout_rcv->ESMC_DELayoutGet(&their_decount, NULL, NULL, NULL, NULL,
                                         NULL, NULL, NULL, NULL, NULL);
       for (i=0; i<their_decount; i++) {
           their_de = i;
 
           // get the parent DE identifier for this DE in the rcv layout
-          delayout_rcv->ESMC_newDELayoutGetDEMatch(their_de, *delayout, NULL,
+          delayout_rcv->ESMC_DELayoutGetDEMatch(their_de, *delayout, NULL,
                                                    &their_de_parent, 1);
  //         printf("Match1: %d, %d\n", their_de, their_de_parent);
           //their_de_parent = their_de;     // temporarily
@@ -1451,7 +1451,7 @@ static int maxroutes = 10;
           their_de = i;
 
           // get the parent DE identifier for this DE in the snd layout
-          delayout_snd->ESMC_newDELayoutGetDEMatch(their_de, *delayout, NULL,
+          delayout_snd->ESMC_DELayoutGetDEMatch(their_de, *delayout, NULL,
                                                    &their_de_parent, 1);
   //        printf("Match2: %d, %d\n", their_de, their_de_parent);
           //their_de_parent = their_de;     // temporarily

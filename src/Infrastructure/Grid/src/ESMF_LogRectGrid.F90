@@ -40,7 +40,7 @@
       use ESMF_IOSpecMod      ! ESMF I/O class
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_DataMapMod     ! ESMF data map class
-      use ESMF_newDELayoutMod ! ESMF layout class
+      use ESMF_DELayoutMod ! ESMF layout class
       use ESMF_ArrayMod
       use ESMF_ArrayCreateMod
       use ESMF_ArrayGetMod
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.63 2004/04/27 23:10:37 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.64 2004/04/28 23:11:53 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -260,7 +260,7 @@
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
       type(ESMF_CoordIndex), intent(in), optional :: coordIndex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
-      type(ESMF_newDELayout), intent(in), optional :: delayout
+      type(ESMF_DELayout), intent(in), optional :: delayout
       integer, dimension(:), intent(in), optional :: decompIds
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
@@ -435,7 +435,7 @@
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
       type(ESMF_CoordIndex), intent(in), optional :: coordIndex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
-      type(ESMF_newDELayout), intent(in), optional :: delayout
+      type(ESMF_DELayout), intent(in), optional :: delayout
       integer, dimension(dimCount), intent(in), optional :: decompIds
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
@@ -1527,7 +1527,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
-      type(ESMF_newDELayout), intent(in) :: delayout
+      type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
       integer, dimension(:), intent(in), optional :: decompIds
@@ -1591,7 +1591,7 @@
       endif
 
       ! validate the layout before going any furthe
- !jw     call ESMF_newDELayoutValidate(delayout, rc=status)
+ !jw     call ESMF_DELayoutValidate(delayout, rc=status)
  !jw     if (status .ne. ESMF_SUCCESS) then
  !jw       print *, "ESMF_LogRectGridDistribute: bad delayout, cannot distribute grid"
  !jw       return
@@ -1661,7 +1661,7 @@
         enddo
       endif
 
-      call ESMF_newDELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
+      call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
                                logRectFlag=lrFlag, rc=status)
 
       ! Check layout attributes
@@ -1679,7 +1679,7 @@
       !   return
       ! endif
 
-      call ESMF_newDELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=status)
+      call ESMF_DELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=status)
       nDEs(0) = 1
 
       ! if there is an axis to decompose, either grab the specfied countsPerDE
@@ -2276,7 +2276,7 @@
       integer, intent(out) :: distGridId
       integer, intent(in) :: dimCount 
       integer, dimension(dimCount), intent(in) :: counts
-      type (ESMF_newDELayout), intent(in) :: delayout
+      type (ESMF_DELayout), intent(in) :: delayout
       integer, dimension(dimCount), intent(in), optional :: decompIds
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: periodic
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: &
@@ -2433,7 +2433,7 @@
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse1, coordUse2
       type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_CoordType), dimension(dimCount) :: coordType
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       type(ESMF_Grid) :: gridp
       type(ESMF_PhysGrid) :: physGrid
       type(ESMF_PhysCoord) :: tempCoord
@@ -2452,8 +2452,8 @@
       ! figure out the position of myDE to get local counts
       gridp%ptr => grid
       call ESMF_LRGridGet(gridp, delayout=delayout)
-      call ESMF_newDELayoutGet(delayout, localDE=localDE, rc=status)
-      call ESMF_newDELayoutGetDE(delayout, de=localDE, coord=myDEDecomp(1:2), &
+      call ESMF_DELayoutGet(delayout, localDE=localDE, rc=status)
+      call ESMF_DELayoutGetDE(delayout, de=localDE, coord=myDEDecomp(1:2), &
                                  rc=status)
       myDEDecomp(0) = 1
 
@@ -2704,7 +2704,7 @@
       real(ESMF_KIND_R8) :: localMinCoord, localMaxCoord
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse
       type(ESMF_CoordType) :: coordType
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       type(ESMF_PhysCoord) :: tempCoord
       type(ESMF_Grid) :: gridp
       type(ESMF_PhysGrid) :: physGrid
@@ -2730,7 +2730,7 @@
         print *, "ERROR in ESMF_LRGridAddPhysGrid: get delayout"
         return
       endif
-      call ESMF_newDELayoutGet(layout, deCountPerDim=myDE, status)
+      call ESMF_DELayoutGet(layout, deCountPerDim=myDE, status)
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridAddPhysGrid: delayout get position"
         return
@@ -3218,7 +3218,7 @@
       real(ESMF_KIND_R8), dimension(3) :: minLCPDUse, maxLCPDUse
       type(ESMF_AxisIndex), dimension(3) :: globalAIPerDimUse
       type(ESMF_PhysCoord) :: coord
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -3286,7 +3286,7 @@
       ! vs. 1-based issues.  note: layout the same for all distgrids, so use 1
       if (present(myDE)) then
         call ESMF_LRGridGet(grid, delayout=delayout)
-        call ESMF_newDELayoutGet(delayout, localDE=myDE, rc=status)
+        call ESMF_DELayoutGet(delayout, localDE=myDE, rc=status)
       endif
 
       ! make DistGrid calls first
@@ -4784,7 +4784,7 @@
       integer, intent(out), dimension(:), optional :: maxLocalCellCountPerDim
       integer, intent(out), dimension(:,:), optional :: cellCountPerDEPerDim
       type (ESMF_Logical), intent(out), optional :: periodic(:)
-      type(ESMF_newDELayout), intent(out), optional:: delayout
+      type(ESMF_DELayout), intent(out), optional:: delayout
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
 !

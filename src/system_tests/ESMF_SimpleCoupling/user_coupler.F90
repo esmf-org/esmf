@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.10 2004/04/27 15:57:50 nscollins Exp $
+! $Id: user_coupler.F90,v 1.11 2004/04/28 23:12:15 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -66,7 +66,7 @@
         ! Local variables
         type(ESMF_Field) :: humidity1, humidity2
         type(ESMF_VM) :: vm
-        type(ESMF_newDELayout) :: cpllayout
+        type(ESMF_DELayout) :: cpllayout
         integer :: status
 
         print *, "User Coupler Init starting"
@@ -83,7 +83,7 @@
         ! Get VM from coupler component and create a layout with all the PETs
         call ESMF_CplCompGet(comp, vm=vm, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
-        cpllayout = ESMF_newDELayoutCreate(vm, rc=status)
+        cpllayout = ESMF_DELayoutCreate(vm, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
 
         ! Precompute communication patterns

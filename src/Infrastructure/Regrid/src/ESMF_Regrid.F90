@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.70 2004/04/27 23:07:47 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.71 2004/04/28 23:11:53 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 ! !USES:
       use ESMF_BaseMod         ! ESMF base   class
       use ESMF_DataMapMod      ! ESMF datamap class
-      use ESMF_newDELayoutMod  ! ESMF DE layout class
+      use ESMF_DELayoutMod  ! ESMF DE layout class
       use ESMF_ArrayMod        ! ESMF array  class
       use ESMF_ArrayGetMod     ! ESMF array  class
       use ESMF_DistGridMod     ! ESMF distributed grid class
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.70 2004/04/27 23:07:47 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.71 2004/04/28 23:11:53 cdeluca Exp $'
 
 !==============================================================================
 
@@ -132,7 +132,7 @@
       type(ESMF_Array), intent(inout) :: dstarray
       type(ESMF_Grid), intent(inout) :: dstgrid
       type(ESMF_DataMap), intent(in) :: dstdatamap
-      type(ESMF_newDELayout), intent(in) :: parentDELayout
+      type(ESMF_DELayout), intent(in) :: parentDELayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(in), optional :: regridmethod
       type(ESMF_Mask), intent(in), optional :: srcmask
@@ -886,7 +886,7 @@
       type(ESMF_DataMap), intent(in) :: srcdatamap
       type(ESMF_Grid), intent(inout) :: dstgrid
       type(ESMF_DataMap), intent(in) :: dstdatamap
-      type(ESMF_newDELayout) :: parentDElayout
+      type(ESMF_DELayout) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(in), optional :: regridtype
       type(ESMF_Mask), intent(in), optional :: srcmask

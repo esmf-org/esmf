@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.25 2004/04/27 13:54:25 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.26 2004/04/28 23:12:13 cdeluca Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -212,7 +212,7 @@
       ! Local variables
       integer :: i, j
       type(ESMF_VM) :: vm
-      type(ESMF_newDELayout) :: delayout1 
+      type(ESMF_DELayout) :: delayout1 
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_Grid) :: grid1
       type(ESMF_Field) :: field1
@@ -244,7 +244,7 @@
       endif
 
       ! Create a DELayout for the Component
-      delayout1 = ESMF_newDELayoutCreate(vm, (/ 2, 2 /), rc=rc)
+      delayout1 = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! The user creates a simple horizontal Grid internally by passing all
@@ -274,7 +274,7 @@
       print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
-      call ESMF_newDELayoutGet(delayout1, localDE=de_id, rc=rc)
+      call ESMF_DELayoutGet(delayout1, localDE=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Create an arrayspec for a 2-D array 
@@ -403,7 +403,7 @@
       integer :: pattern(3,3), nDE(2), myDE(2)
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       type(ESMF_Field) :: field1
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
@@ -426,7 +426,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! get our local de number from the layout
-      call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=rc)
+      call ESMF_DELayoutGet(delayout, localDE=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get a pointer to the data Array in the Field
@@ -447,12 +447,12 @@
 
       ! get info about total number of DEs in each dim and which one
       ! we are.  then use them to compute the values in the halo.
-      call ESMF_newDELayoutGet(delayout, deCountPerDim=nDE, rc=rc)
+      call ESMF_DELayoutGet(delayout, deCountPerDim=nDE, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       nx = nDE(1)
       ny = nDE(2)
       write(*,*) 'nx, ny = ', nx, ny
-      call ESMF_newDELayoutGetDE(delayout, de_id, coord=myDE, rc=rc)
+      call ESMF_DELayoutGetDE(delayout, de_id, coord=myDE, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       xpos = myDE(1)
       ypos = myDE(2)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.8 2004/04/23 22:21:23 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.9 2004/04/28 23:12:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
       use ESMF_LogErrMod
       use ESMF_ConfigMod
       use ESMF_VMMod
-      use ESMF_newDELayoutMod
+      use ESMF_DELayoutMod
       use ESMF_CalendarMod
 
       implicit none

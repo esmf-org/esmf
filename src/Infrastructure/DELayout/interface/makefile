@@ -1,0 +1,55 @@
+# $Id: makefile,v 1.4 2004/04/28 23:11:49 cdeluca Exp $
+
+# leave alone.
+ALL: build_here
+
+# Don't set these unless absolutely necessary - they've got to be
+# architecture and compiler independent and should be inherited
+# from the upper level makefile if possible.
+CFLAGS    =
+FFLAGS    =
+
+# If you have C files in this directory, list them all on the line below.
+SOURCEC	  = ESMC_DELayout_F.C
+# If you have F90 files in this directory, list them all on the line below.
+SOURCEF	  = ESMF_DELayout.F90
+# If you have .h include files in this dir, list them all on the line below.
+SOURCEH	  = 
+# List all .h files which should be copied to common include dir
+STOREH	  = 
+
+# Leave these alone.
+OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
+OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
+TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
+
+MANSEC	  = DELayoutobj
+LIBBASE	  = libesmf
+
+# The following line must be set to the current subdir name relative
+# to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
+LOCDIR	  = src/Infrastructure/DELayout/interface
+
+# Leave these alone 
+CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+
+include ${ESMF_DIR}/makefile
+
+# Leave the following line blank.
+DIRS	  = 
+
+
+
+# If you have class files which need to be compiled in a particular
+# order, list the dependencies below, with no rules following.
+#
+# e.g.:
+#
+# ESMF_Field.o:   ESMF_DataArray.o
+#
+# ESMF_Bundle.o:  ESMF_Field.o
+#
+
+
+
+

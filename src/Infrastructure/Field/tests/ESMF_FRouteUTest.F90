@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.35 2004/04/27 20:36:24 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.36 2004/04/28 23:11:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.35 2004/04/27 20:36:24 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.36 2004/04/28 23:11:51 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,7 +57,7 @@
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
-      type(ESMF_newDELayout) :: layout0, layout1, layout2
+      type(ESMF_DELayout) :: layout0, layout1, layout2
       type(ESMF_VM) :: vm
       type(ESMF_RouteHandle) :: rh
       integer :: delist(64)
@@ -89,29 +89,29 @@
       call ESMF_VMGetGlobal(vm, rc)
 
       ! Make a default 1xN layout
-      layout0 = ESMF_newDELayoutCreate(vm, rc=rc)
-      call ESMF_newDELayoutGet(layout0, deCount=nDEs, rc=rc)
+      layout0 = ESMF_DELayoutCreate(vm, rc=rc)
+      call ESMF_DELayoutGet(layout0, deCount=nDEs, rc=rc)
 
       half = nDEs / 2
       quart = nDEs / 4
 
       ! Make a Nx4 and Nx2 layout
-      layout1 = ESMF_newDELayoutCreate(vm, (/ quart, 4 /), rc=rc)
+      layout1 = ESMF_DELayoutCreate(vm, (/ quart, 4 /), rc=rc)
       if (rc .eq. ESMF_FAILURE) then
         print *, "cannot create 1x4 layout"
         goto 10
       endif
       print *, "Layout 1:"
-      call ESMF_newDELayoutPrint(layout1, "", rc)
-      layout2 = ESMF_newDELayoutCreate(vm, (/ half, 2 /), rc=rc)
+      call ESMF_DELayoutPrint(layout1, "", rc)
+      layout2 = ESMF_DELayoutCreate(vm, (/ half, 2 /), rc=rc)
       if (rc .eq. ESMF_FAILURE) then
         print *, "cannot create 2x2 layout"
         goto 10
       endif
       print *, "Layout 2:"
-      call ESMF_newDELayoutPrint(layout2, "", rc)
+      call ESMF_DELayoutPrint(layout2, "", rc)
 
-      call ESMF_newDELayoutGet(layout1, localDE=myde, rc=rc)
+      call ESMF_DELayoutGet(layout1, localDE=myde, rc=rc)
 
       !------------------------------------------------------------------------
       counts(1) = 48

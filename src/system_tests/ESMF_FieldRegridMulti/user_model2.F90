@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.17 2004/04/27 15:16:38 nscollins Exp $
+! $Id: user_model2.F90,v 1.18 2004/04/28 23:12:14 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -84,7 +84,7 @@
 !   ! Local variables
       type(ESMF_Field) :: humidity
       type(ESMF_VM) :: vm
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       type(ESMF_DataMap) :: datamap
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
@@ -106,11 +106,11 @@
       if (status .ne. ESMF_SUCCESS) goto 10
       call ESMF_VMGet(vm, petCount=npets, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      delayout = ESMF_newDELayoutCreate(vm, (/ npets/2, 2 /), rc=status)
+      delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! and get our local de number
-      call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=status)
+      call ESMF_DELayoutGet(delayout, localDE=de_id, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.21 2004/04/27 14:16:22 nscollins Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.22 2004/04/28 23:12:13 cdeluca Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -52,7 +52,7 @@
     type(ESMF_Field) :: field1, field2, field3
     type(ESMF_RouteHandle) :: rh12, rh23
     type(ESMF_VM):: vm
-    type(ESMF_newDELayout) :: delayout1
+    type(ESMF_DELayout) :: delayout1
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -97,7 +97,7 @@
 !-------------------------------------------------------------------------
 !
     ! Create a 2D layout to be used by the Fields
-    delayout1 = ESMF_newDELayoutCreate(vm, (/ 2, npets/2 /), rc=rc)
+    delayout1 = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     !  Create the grids and corresponding Fields
@@ -239,7 +239,7 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_newDELayoutGet(delayout1, localDE=my_de, rc=rc)
+    call ESMF_DELayoutGet(delayout1, localDE=my_de, rc=rc)
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
@@ -296,7 +296,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_GridDestroy(grid2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_newDELayoutDestroy(delayout1, rc)
+    call ESMF_DELayoutDestroy(delayout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 

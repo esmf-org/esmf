@@ -1,4 +1,4 @@
-// $Id: ESMC_CompCreate.C,v 1.7 2004/04/26 15:29:29 nscollins Exp $
+// $Id: ESMC_CompCreate.C,v 1.8 2004/04/28 23:12:11 cdeluca Exp $
 //
 // Test code which creates a new Component.
 
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 //  Local variables
     int rc;
     char *cname;
-    ESMC_newDELayout *delayout;
+    ESMC_DELayout *delayout;
     ESMC_GridComp *comp1;
         
 //-------------------------------------------------------------------------

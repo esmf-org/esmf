@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.9 2004/04/27 16:06:12 nscollins Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.10 2004/04/28 23:12:12 cdeluca Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -35,7 +35,7 @@
     integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcptr, resptr
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
     character(len=ESMF_MAXSTR) :: sname, aname
-    type(ESMF_newDELayout) :: delayout1
+    type(ESMF_DELayout) :: delayout1
     type(ESMF_VM) :: vm
     type(ESMF_Array) :: array1, array1a, array2, array3
     type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
@@ -78,7 +78,7 @@
     ! Create a 2 x N layout
     nde(1) = 2
     nde(2) = npets/2
-    delayout1 = ESMF_newDELayoutCreate(vm, (/ nde(1), nde(2) /), rc=rc)
+    delayout1 = ESMF_DELayoutCreate(vm, (/ nde(1), nde(2) /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "DELayout Create finished, rc =", rc
 
@@ -118,7 +118,7 @@
     do i = 1,3
       de_pos(i) = 1
     enddo
-    call ESMF_newDELayoutGet(delayout1, deCountPerDim=de_pos, rc=rc)
+    call ESMF_DELayoutGet(delayout1, deCountPerDim=de_pos, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Calculate global_positions -- would otherwise come from a grid call
@@ -253,7 +253,7 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_newDELayoutGet(delayout1, localDE=de_id, rc=rc)
+    call ESMF_DELayoutGet(delayout1, localDE=de_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "-----------------------------------------------------------------"
@@ -305,7 +305,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_ArrayDestroy(array3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_newDELayoutDestroy(delayout1, rc)
+    call ESMF_DELayoutDestroy(delayout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 

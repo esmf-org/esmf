@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.10 2004/04/14 21:52:18 nscollins Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.11 2004/04/28 23:12:12 cdeluca Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -33,7 +33,7 @@
     ! Local variables
     integer :: i, de_id, ndes, mid, rc, delist(64), pid, cid
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
-    type(ESMF_newDELayout) :: layout1, layout2, layout3
+    type(ESMF_DELayout) :: layout1, layout2, layout3
     type(ESMF_VM) :: vm
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
@@ -75,9 +75,9 @@
 
     call ESMF_VMGetGlobal(vm, rc=rc)
     ! Query default layout
-    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
+    layout1 = ESMF_DELayoutCreate(vm, rc=rc)
 
-    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc=rc)
+    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc=rc)
     if (ndes .lt. 8) then
         print *, "This system test needs to run at least 8-way, current np = ", ndes
         goto 10
@@ -89,7 +89,7 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    layout2 = ESMF_newDELayoutCreate(layout1, (/ 2, ndes/4 /), rc=rc)
+    layout2 = ESMF_DELayoutCreate(layout1, (/ 2, ndes/4 /), rc=rc)
     !delist = (/ (i, i=0, mid-1) /)
     !layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, ndes/4 /), (/ 0, 0 /), &
     !                                                  de_indices=delist, rc=rc)
@@ -99,7 +99,7 @@
 
 
     cname2 = "user model 2"
-    layout3 = ESMF_newDELayoutCreate(layout1, (/ 1, ndes/2 /), rc=rc)
+    layout3 = ESMF_DELayoutCreate(layout1, (/ 1, ndes/2 /), rc=rc)
     !delist = (/ (i, i=mid, ndes-1) /)
     !layout3 = ESMF_DELayoutCreate(layout1, 2, (/ 1, ndes/2 /), (/ 0, 0 /), &
     !                                                  de_indices=delist, rc=rc)

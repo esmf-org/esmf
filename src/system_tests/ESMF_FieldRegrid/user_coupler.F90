@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.8 2004/04/27 14:49:41 nscollins Exp $
+! $Id: user_coupler.F90,v 1.9 2004/04/28 23:12:14 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -67,7 +67,7 @@
       integer :: itemcount
       type(ESMF_Field) :: humidity1, humidity2
       type(ESMF_VM) :: vm
-      type(ESMF_newDELayout) :: cplDElayout
+      type(ESMF_DELayout) :: cplDElayout
 
       print *, "User Coupler Init starting"
 
@@ -84,7 +84,7 @@
 
       ! Get VM from coupler component and create a layout with all the PETs
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-      cplDElayout = ESMF_newDELayoutCreate(vm, rc=rc)
+      cplDElayout = ESMF_DELayoutCreate(vm, rc=rc)
 
       ! These are fields on different Grids - call RegridStore to set
       ! up the Regrid structure

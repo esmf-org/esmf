@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
-      use ESMF_newDELayoutMod
+      use ESMF_DELayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -146,7 +146,7 @@
         type (ESMF_Base) :: base          ! standard ESMF base object
         integer :: dimCount               ! Number of dimensions
         integer :: gridBoundaryWidth      ! # of exterior cells/edge
-        type(ESMF_newDELayout) :: delayout    ! the delayout for this grid
+        type(ESMF_DELayout) :: delayout    ! the delayout for this grid
 
       ! 1 per dimension of the Grid
 
@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.113 2004/04/19 22:07:18 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.114 2004/04/28 23:11:50 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -373,7 +373,7 @@
 ! !ARGUMENTS:
       integer, intent(in) :: dimCount
       integer, dimension(dimCount), intent(in) :: counts
-      type(ESMF_newDELayout), intent(in), optional :: delayout
+      type(ESMF_DELayout), intent(in), optional :: delayout
       integer, dimension(dimCount), intent(in) :: decompIDs
       integer, dimension(:), intent(in) :: countsPerDEDim1
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
@@ -632,7 +632,7 @@
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
       integer, intent(in) :: dimCount
-      type(ESMF_newDELayout), intent(in) :: delayout
+      type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(dimCount), intent(in) :: decompIDs
       integer, dimension(dimCount), intent(in) :: counts
       integer, dimension(:), intent(in) :: countsPerDEDim1
@@ -716,7 +716,7 @@
       endif
 
       ! Allocate resources based on number of DE's
-      call ESMF_newDELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
+      call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
                                logRectFlag=lrFlag, rc=status)
 
       ! Check DELayout attributes
@@ -733,7 +733,7 @@
       !            "not a logically rectangular layout"
       !   return
       ! endif
-      call ESMF_newDELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=status)
+      call ESMF_DELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=status)
       nDEs(0) = 1
       nDE = nDEs(1) * nDEs(2)
       if((status .NE. ESMF_SUCCESS) .or. (nDE .le. 0)) then
@@ -902,7 +902,7 @@
       integer, dimension(:,:), intent(inout), optional :: globalStartPerDEPerDim
       integer, intent(inout), optional :: maxLocalCellCount
       integer, dimension(:), intent(inout), optional :: maxLocalCellCountPerDim
-      type(ESMF_newDELayout), intent(out), optional :: delayout
+      type(ESMF_DELayout), intent(out), optional :: delayout
       character (len = *), intent(out), optional :: name
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc              
@@ -979,7 +979,7 @@
       if(present(globalStartPerDEPerDim)) then
                  ! TODO: add check that globalStartPerDEPerDim is large enough
                  !       or use the size of the array for the loop limit
-        call ESMF_newDELayoutGet(dgtype%delayout, deCount=nndes, rc=rc)
+        call ESMF_DELayoutGet(dgtype%delayout, deCount=nndes, rc=rc)
         do i = 1, nndes
           do j = 1,dgtype%dimCount
             globalStartPerDEPerDim(i,j) = glob%globalStartPerDEPerDim(i,j)
@@ -1723,9 +1723,9 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_newDELayoutGet(dgtype%delayout, localDe=localDe, &
+      call ESMF_DELayoutGet(dgtype%delayout, localDe=localDe, &
                                deCountPerDim=deCountPerDim, rc=status)
-      call ESMF_newDELayoutGetDE(dgtype%delayout, de=localDe, coord=coord, &
+      call ESMF_DELayoutGetDE(dgtype%delayout, de=localDe, coord=coord, &
                                  rc=status)
       ! bring things into the form that the local code expects them in
       nDEx = deCountPerDim(1)
@@ -1894,7 +1894,7 @@
 
       ! Get information from distgrid derived type
       ! TODO:  add check for array size or use size for loop limit
-      call ESMF_newDELayoutGet(dgtype%delayout, deCount=nndes, rc=rc)
+      call ESMF_DELayoutGet(dgtype%delayout, deCount=nndes, rc=rc)
       do i = 1,nndes
         do j = 1,dgtype%dimCount
           cellCountPerDEPerDim(i,j) = glob%cellCountPerDEPerDim(i,j)
@@ -1914,7 +1914,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       integer, intent(out), optional :: rc            
 
 !

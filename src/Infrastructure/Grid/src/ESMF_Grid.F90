@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.162 2004/04/23 23:37:05 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.163 2004/04/28 23:11:52 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
       use ESMF_IOSpecMod      ! ESMF I/O class
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_DataMapMod     ! ESMF data map class
-      use ESMF_newDELayoutMod ! ESMF layout class
+      use ESMF_DELayoutMod ! ESMF layout class
       use ESMF_ArrayMod
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_PhysCoordMod   ! ESMF physical coord class
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.162 2004/04/23 23:37:05 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.163 2004/04/28 23:11:52 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -933,7 +933,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_newDELayout), intent(in) :: delayout
+      type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in), optional :: countsPerDEDim1
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
       integer, dimension(:), intent(in), optional :: decompIds
@@ -1065,7 +1065,7 @@
       integer, intent(out), dimension(:), optional :: maxLocalCellCountPerDim
       integer, intent(out), dimension(:,:), optional :: cellCountPerDEPerDim
       type(ESMF_Logical), intent(out), dimension(:), optional :: periodic
-      type(ESMF_newDELayout), intent(out), optional :: delayout
+      type(ESMF_DELayout), intent(out), optional :: delayout
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
 !

@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm_F.C,v 1.8 2004/04/23 21:52:59 nscollins Exp $
+// $Id: ESMC_ArrayComm_F.C,v 1.9 2004/04/28 23:11:47 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_Array.h"
-#include "ESMC_newDELayout.h"
+#include "ESMC_DELayout.h"
 #include "ESMC_Grid.h" 
 //------------------------------------------------------------------------------
 //BOP
@@ -37,7 +37,7 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-     void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_newDELayout **delayout,
+     void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_DELayout **delayout,
                                   int *global_start, int *global_dimlengths, 
                                   int *rank_trans, int *size_rank_trans, 
                                   int *olddecompids, int *decompids,  int *size_decomp,
@@ -48,7 +48,7 @@ extern "C" {
                                   *size_decomp, *RedistArray);
      }
 
-     void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_newDELayout **delayout,
+     void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_DELayout **delayout,
                                 ESMC_AxisIndex *ai_global, 
                                 int *global_dimlengths,
                                 int *decompids,  int *size_decomp, 
@@ -59,7 +59,7 @@ extern "C" {
      }
 
 
-     void FTN(c_esmc_arraygather)(ESMC_Array **ptr, ESMC_newDELayout **delayout,
+     void FTN(c_esmc_arraygather)(ESMC_Array **ptr, ESMC_DELayout **delayout,
                                   int *decompids,  int *size_decomp, int *deid,
                                   int *global_dimlengths, int *local_maxlengths, 
                                   ESMC_Array **Array_out, int *status) {
@@ -68,7 +68,7 @@ extern "C" {
                                              *deid, Array_out);
      }
 
-     void FTN(c_esmc_arrayscatter)(ESMC_Array **ptr, ESMC_newDELayout **delayout,
+     void FTN(c_esmc_arrayscatter)(ESMC_Array **ptr, ESMC_DELayout **delayout,
                                    int *decompids,  int *size_decomp, int *deid,
                                    ESMC_Array **Array_out, int *status) {
           *status = (*ptr)->ESMC_ArrayScatter(*delayout, decompids, *size_decomp,

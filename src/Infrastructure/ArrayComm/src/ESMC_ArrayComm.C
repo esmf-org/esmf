@@ -30,14 +30,14 @@
 #include <assert.h>
 // associated class definition file
 #include "ESMC_Array.h"
-#include "ESMC_newDELayout.h"
+#include "ESMC_DELayout.h"
 #include "ESMC_Grid.h"        // grid info
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.11 2004/04/20 18:59:03 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.12 2004/04/28 23:11:47 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -59,7 +59,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_newDELayout *delayout,     // in  - layout (temporarily)
+      ESMC_DELayout *delayout,     // in  - layout (temporarily)
       ESMC_AxisIndex *ai_global, // in  - do we need?  jw
       int global_dimlengths[],   // in
       int decompids[],           // in  - decomposition identifier for each
@@ -94,7 +94,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_newDELayout *delayout,     // in  - layout (temporarily)
+      ESMC_DELayout *delayout,     // in  - layout (temporarily)
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
@@ -127,7 +127,7 @@
       counts[i] = global_dimlengths[i];
     }
 
-    delayout->ESMC_newDELayoutGet(NULL, NULL, NULL, NULL, NULL, &thisde,
+    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, NULL, &thisde,
                                   NULL, NULL, NULL, NULL);
 
     // create array with global data buffer
@@ -135,7 +135,7 @@
         gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
 
         // call something which will do a receive
- //jw       delayout->ESMC_newDELayoutGatherArray(this->base_addr, global_dimlengths, 
+ //jw       delayout->ESMC_DELayoutGatherArray(this->base_addr, global_dimlengths, 
  //jw                                             decompids, size_decomp, 
  //jw                                             // FIXME: localAxisCounts should be an arg
  //jw                                             NULL, local_maxlength,
@@ -145,7 +145,7 @@
         //gathered->ESMC_ArrayPrint();
     } else {
         // call something which will do a send
- //jw       delayout->ESMC_newDELayoutGatherArray(this->base_addr, global_dimlengths, 
+ //jw       delayout->ESMC_DELayoutGatherArray(this->base_addr, global_dimlengths, 
  //jw                                             decompids, size_decomp, 
  //jw                                             // FIXME: localAxisCounts should be an arg
  //jw                                             NULL, local_maxlength,
@@ -177,7 +177,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_newDELayout *delayout,     // in  - layout (temporarily)
+      ESMC_DELayout *delayout,     // in  - layout (temporarily)
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
@@ -214,7 +214,7 @@
       counts[i] = ai_comp[i].max;
     }
 
-    delayout->ESMC_newDELayoutGet(NULL, NULL, NULL, NULL, NULL, &thisde,
+    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, NULL, &thisde,
                                   NULL, NULL, NULL, NULL);
 
     // switch based on datatype  TODO: this might be a good place to use templates
@@ -230,11 +230,11 @@
           fp0 = (float *)this->base_addr;
 
           // call something which will do a receive
-          delayout->ESMC_newDELayoutScatterArrayF(fp0, decompids, size_decomp, 
+          delayout->ESMC_DELayoutScatterArrayF(fp0, decompids, size_decomp, 
                                                   ai_comp, ai_total, fp);
         } else {
           // call something which will do a send
-          delayout->ESMC_newDELayoutScatterArrayF(fp0, decompids, size_decomp, 
+          delayout->ESMC_DELayoutScatterArrayF(fp0, decompids, size_decomp, 
                                                   ai_comp, ai_total, fp);
         } 
 
@@ -251,11 +251,11 @@
 
           // call something which will do a receive
           ip0 = (int *)this->base_addr;
-          delayout->ESMC_newDELayoutScatterArrayI(ip0, decompids, size_decomp, 
+          delayout->ESMC_DELayoutScatterArrayI(ip0, decompids, size_decomp, 
                                                   ai_comp, ai_total, ip);
         } else {
           // call something which will do a send
-          delayout->ESMC_newDELayoutScatterArrayI(ip0, decompids, size_decomp, 
+          delayout->ESMC_DELayoutScatterArrayI(ip0, decompids, size_decomp, 
                                                   ai_comp, ai_total, ip);
         }
       break;
@@ -289,7 +289,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_newDELayout *delayout,     // in  - layout (temporarily)
+      ESMC_DELayout *delayout,     // in  - layout (temporarily)
       int global_start[],        // in  - array of global starting positions
       int global_dimlengths[],   // in  - array of global dimensions
       int rank_trans[],          // in  - translation of old ranks to new
@@ -326,7 +326,7 @@
     vp = (void *)(new char[gsize * ESMC_DataKindSize(this->kind)]);
 
     // call layoutgather to fill this array
-//jw    delayout->ESMC_newDELayoutGatherArray(this->base_addr, global_dimlengths, 
+//jw    delayout->ESMC_DELayoutGatherArray(this->base_addr, global_dimlengths, 
 //jw                                          olddecompids, size_decomp, NULL, NULL,
 //jw                                          this->ai_comp, this->ai_comp, 
 //jw                                          this->kind, vp);

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.12 2004/04/27 22:59:24 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.13 2004/04/28 23:11:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.12 2004/04/27 22:59:24 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.13 2004/04/28 23:11:48 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -44,7 +44,7 @@
 !     ! Local variables
       integer :: i, x, y, rc, mycell, fieldcount
       type(ESMF_Grid) :: grid, grid2
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: arraya, arrayb
@@ -150,7 +150,7 @@
 
       !NEX_UTest
       ! Add a field to an empty Bundle
-      layout = ESMF_newDELayoutCreate(vm, rc=rc)
+      layout = ESMF_DELayoutCreate(vm, rc=rc)
       mincoord = (/ 0.0, 0.0 /)
       grid = ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), mincoord, &
                                            delayout=layout, rc=rc)

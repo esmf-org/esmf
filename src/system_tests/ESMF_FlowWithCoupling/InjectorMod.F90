@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.15 2004/04/27 17:22:20 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.16 2004/04/28 23:12:15 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -97,7 +97,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       integer :: npets
       type(ESMF_VM) :: vm
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
@@ -160,7 +160,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
 
       call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      layout = ESMF_newDELayoutCreate(vm, (/ npets/4, 4 /), rc=rc)
+      layout = ESMF_DELayoutCreate(vm, (/ npets/4, 4 /), rc=rc)
 
       !
       ! Create the Grid
@@ -422,7 +422,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       integer :: de_id
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
       !
       ! Set initial values
@@ -441,7 +441,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
       call ESMF_GridGet(grid, delayout=layout, rc=status)
-      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=status)
+      call ESMF_DELayoutGet(layout, localDe=de_id, rc=status)
       !
       ! Collect results on DE 0 and output to a file
       !

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.19 2004/04/19 21:55:32 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.20 2004/04/28 23:11:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
-      use ESMF_newDELayoutMod
+      use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayMod
       use ESMF_RHandleMod
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.19 2004/04/19 21:55:32 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.20 2004/04/28 23:11:48 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -408,7 +408,7 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType) :: btypep             ! bundle type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_newDELayout) :: delayout          ! layout
+      type(ESMF_DELayout) :: delayout          ! layout
       type(ESMF_Array) :: dstarray                ! Destination array
       integer :: i, datarank, thisdim, thislength, numDims
       integer :: dimorder(ESMF_MAXDIM)   
@@ -661,7 +661,7 @@
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcBundle
       type(ESMF_Bundle), intent(inout) :: dstBundle
-      type(ESMF_newDELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
@@ -780,7 +780,7 @@
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcBundle
       type(ESMF_Bundle), intent(inout) :: dstBundle
-      type(ESMF_newDELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
 !
@@ -882,7 +882,7 @@
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcbundle
       type(ESMF_Bundle), intent(inout) :: dstbundle
-      type(ESMF_newDELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc
@@ -989,7 +989,7 @@
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcbundle
       type(ESMF_Bundle), intent(inout) :: dstbundle
-      type(ESMF_newDELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDElayout
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:

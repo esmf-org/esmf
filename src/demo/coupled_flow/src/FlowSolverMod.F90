@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.13 2004/04/27 19:25:14 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.14 2004/04/28 23:12:12 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -162,7 +162,7 @@
 !
 ! Local variables
 !
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coord
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_max_coord
@@ -413,7 +413,7 @@
       integer, dimension(1,2) :: local, global
       real(ESMF_KIND_R8) :: s_
       type(ESMF_Grid) :: grid
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
 !
 ! Set initial values
 !
@@ -469,7 +469,7 @@
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
-      call ESMF_newDELayoutGet(layout, deCountPerDim=ncounts, localDE=de_id, &
+      call ESMF_DELayoutGet(layout, deCountPerDim=ncounts, localDE=de_id, &
                                rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
@@ -477,7 +477,7 @@
       endif
       nx = ncounts(1)
       ny = ncounts(2)
-      call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=status)
+      call ESMF_DELayoutGetDE(layout, de_id, coord=pos, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return
@@ -1594,7 +1594,7 @@
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
 !
 ! Set initial values
@@ -1613,7 +1613,7 @@
 !
       call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
       call ESMF_GridGet(grid, delayout=layout, rc=status)
-      call ESMF_newDELayoutGet(layout, localDE=de_id, rc=status)
+      call ESMF_DELayoutGet(layout, localDE=de_id, rc=status)
 !
 ! Frame number from computation
 !

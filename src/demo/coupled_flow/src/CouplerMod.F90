@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.9 2004/04/27 19:25:14 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.10 2004/04/28 23:12:12 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -114,14 +114,14 @@
     type(ESMF_State) :: toinject, frominject
     type(ESMF_Field) :: src_field, dst_field
     type(ESMF_VM) :: vm
-    type(ESMF_newDELayout) :: cpllayout
+    type(ESMF_DELayout) :: cpllayout
     character(ESMF_MAXSTR) :: statename
 
     print *, "Coupler Init starting"
 
     ! Get VM from coupler component and create default layout
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-    cpllayout = ESMF_newDELayoutCreate(vm, rc=rc)
+    cpllayout = ESMF_DELayoutCreate(vm, rc=rc)
 
     call ESMF_StateGet(importState, name=statename, rc=rc)
     call ESMF_StateGetField(importState, "SIE", src_field, rc=rc)

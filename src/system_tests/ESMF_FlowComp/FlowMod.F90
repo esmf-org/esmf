@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.10 2004/04/27 16:35:56 nscollins Exp $
+! $Id: FlowMod.F90,v 1.11 2004/04/28 23:12:14 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@
 ! Local variables
 !      
       type(ESMF_VM) :: vm
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
@@ -79,11 +79,11 @@
       if (rc .ne. ESMF_SUCCESS) return
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
-      layout = ESMF_newDELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
+      layout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
 
       ! and get our local de number
-      call ESMF_newDELayoutGet(layout, localDE=myde, rc=rc)
+      call ESMF_DELayoutGet(layout, localDE=myde, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
 
 !
@@ -143,7 +143,7 @@
       integer :: i, j, x, y, nx, ny, ncounts(2), pos(2), de_id
       double precision :: s_
       type(ESMF_Grid) :: grid
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
 !
 ! Set initial values
 !
@@ -205,14 +205,14 @@
         return
       endif
       !call ESMF_DELayoutGetSize(layout, nx, ny, rc)
-      call ESMF_newDELayoutGet(layout, localDE=de_id, deCountPerDim=ncounts, rc=rc)
+      call ESMF_DELayoutGet(layout, localDE=de_id, deCountPerDim=ncounts, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
         return
       endif
       nx = ncounts(1)
       ny = ncounts(2)
-      call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=rc)
+      call ESMF_DELayoutGetDE(layout, de_id, coord=pos, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return
@@ -913,7 +913,7 @@
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: array2
       type(ESMF_Grid) :: grid
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
 !
 ! Set initial values
@@ -928,7 +928,7 @@
       ! Collect results on DE 0 and output to a file
       call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
       call ESMF_GridGet(grid, delayout=layout, rc=rc)
-      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
+      call ESMF_DELayoutGet(layout, localDe=de_id, rc=rc)
 
       ! Frame number from computation
       call ESMF_ClockGet(clock, advanceCount=frame, rc=rc)

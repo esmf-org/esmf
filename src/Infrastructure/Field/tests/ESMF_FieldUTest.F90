@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.49 2004/04/27 20:26:12 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.50 2004/04/28 23:11:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.49 2004/04/27 20:26:12 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.50 2004/04/28 23:11:51 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,7 +51,7 @@
 
 !     !LOCAL VARIABLES:
       integer :: x, y, i, count
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
@@ -88,7 +88,7 @@
       !------------------------------------------------------------------------
       ! several calls to field need a valid grid.  these will be used in
       ! the grid create calls.
-      delayout = ESMF_newDELayoutCreate(vm, rc=rc)
+      delayout = ESMF_DELayoutCreate(vm, rc=rc)
       minCoord(:) = (/ 0.0, 0.0 /)
 
       !------------------------------------------------------------------------

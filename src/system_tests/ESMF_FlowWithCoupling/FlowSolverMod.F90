@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.13 2004/04/27 17:22:20 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.14 2004/04/28 23:12:15 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -107,7 +107,7 @@
 ! Local variables
 !
       integer :: status
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid
       real(kind=ESMF_KIND_R8) :: g_min(2), g_max(2)
@@ -155,7 +155,7 @@
 
       ! Set up the component layouts so they are different, so we can show
       !  we really are routing data between processors.
-      layout = ESMF_newDELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
+      layout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
 
 !
 ! Create the Grid
@@ -257,7 +257,7 @@
       integer, dimension(1,2) :: local, global
       double precision :: s_
       type(ESMF_Grid) :: grid
-      type(ESMF_newDElayout) :: layout
+      type(ESMF_DELayout) :: layout
 !
 ! Set initial values
 !
@@ -313,7 +313,7 @@
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
-      call ESMF_newDELayoutGet(layout, localDE=de_id, deCountPerDim=ncounts, &
+      call ESMF_DELayoutGet(layout, localDE=de_id, deCountPerDim=ncounts, &
                                rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
@@ -321,7 +321,7 @@
       endif
       nx = ncounts(1)
       ny = ncounts(2)
-      call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=status)
+      call ESMF_DELayoutGetDE(layout, de_id, coord=pos, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return
@@ -1348,7 +1348,7 @@
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
 !
 ! Set initial values
@@ -1367,7 +1367,7 @@
 !
       call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
       call ESMF_GridGet(grid, delayout=layout, rc=status)
-      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=status)
+      call ESMF_DELayoutGet(layout, localDe=de_id, rc=status)
 !
 ! Frame number from computation
 !

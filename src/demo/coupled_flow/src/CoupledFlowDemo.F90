@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.14 2004/04/27 19:25:14 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.15 2004/04/28 23:12:12 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -35,7 +35,7 @@
 
     ! States and Layouts for the Subcomponents
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
-    type(ESMF_newDELayout) :: layoutTop, layoutIN, layoutFS
+    type(ESMF_DELayout) :: layoutTop, layoutIN, layoutFS
     type(ESMF_State), save :: INimp, INexp, FSimp, FSexp
 
     ! Public entry point
@@ -189,13 +189,13 @@
 !   different connectivity.
 !\begin{verbatim}
     cnameIN = "Injector model"
-    !layoutIN = ESMF_newDELayoutCreate(vm, (/ mid, by2 /), rc=rc)
+    !layoutIN = ESMF_DELayoutCreate(vm, (/ mid, by2 /), rc=rc)
     INcomp = ESMF_GridCompCreate(vm, cnameIN, rc=rc)
 !\end{verbatim}
 !EOP
 
     cnameFS = "Flow Solver model"
-    !layoutFS = ESMF_newDELayoutCreate(vm, (/ quart, by4 /), rc=rc)
+    !layoutFS = ESMF_DELayoutCreate(vm, (/ quart, by4 /), rc=rc)
     FScomp = ESMF_GridCompCreate(vm, cnameFS, rc=rc)
 
     cplname = "Two-way coupler"
@@ -449,8 +449,8 @@ end subroutine coupledflow_run
       call ESMF_GridCompDestroy(FScomp, rc)
       call ESMF_CplCompDestroy(cpl, rc)
 
-      call ESMF_newDELayoutDestroy(layoutIN, rc)
-      call ESMF_newDELayoutDestroy(layoutFS, rc)
+      call ESMF_DELayoutDestroy(layoutIN, rc)
+      call ESMF_DELayoutDestroy(layoutFS, rc)
 
     end subroutine coupledflow_final
 

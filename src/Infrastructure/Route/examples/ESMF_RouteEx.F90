@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.13 2004/04/15 15:52:13 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.14 2004/04/28 23:12:09 cdeluca Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -32,7 +32,7 @@
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: arraya, arrayb
     type(ESMF_DataMap) :: datamap
-    type(ESMF_newDELayout) :: layout1, layout2
+    type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_VM) :: vm
     type(ESMF_RouteHandle) :: halo_rh, redist_rh, regrid_rh
     character (len = ESMF_MAXSTR) :: fname
@@ -56,9 +56,9 @@
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
-    call ESMF_newDELayoutGet(layout1, deCount=numdes, rc=rc)
-    layout2 = ESMF_newDELayoutCreate(vm, (/ numdes, 1 /), rc=rc)
+    layout1 = ESMF_DELayoutCreate(vm, rc=rc)
+    call ESMF_DELayoutGet(layout1, deCount=numdes, rc=rc)
+    layout2 = ESMF_DELayoutCreate(vm, (/ numdes, 1 /), rc=rc)
 
     mincoords = (/  0.0,  0.0 /)
     mincoords = (/ 20.0, 30.0 /)

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2004/04/27 15:57:50 nscollins Exp $
+! $Id: user_model1.F90,v 1.15 2004/04/28 23:12:15 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -92,7 +92,7 @@
 !     ! Local variables
         type(ESMF_Field) :: humidity
         type(ESMF_VM) :: vm
-        type(ESMF_newDELayout) :: layout
+        type(ESMF_DELayout) :: layout
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
@@ -112,11 +112,11 @@
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_VMGet(vm, petCount=npets, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
-        layout = ESMF_newDELayoutCreate(vm, (/ npets, 1 /), rc=status)
+        layout = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
         
         ! and get our local de number
-        call ESMF_newDELayoutGet(layout, localDE=de_id, rc=status)
+        call ESMF_DELayoutGet(layout, localDE=de_id, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Add a "humidity" field to the export state.

@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.22 2004/04/27 16:16:24 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.23 2004/04/28 23:12:15 cdeluca Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -37,7 +37,7 @@
     integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
     type(ESMF_AxisIndex), dimension(2) :: index
     character(len=ESMF_MAXSTR) :: cname, gname, fname
-    type(ESMF_newDELayout) :: delayout1 
+    type(ESMF_DELayout) :: delayout1 
     type(ESMF_Grid) :: grid1
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
@@ -75,7 +75,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Create a default 1 x N DELayout 
-    delayout1 = ESMF_newDELayoutCreate(vm, rc=rc)
+    delayout1 = ESMF_DELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test DELayoutRowReduce"
@@ -214,7 +214,7 @@
     print *, "row data = ", rowdata
 
     ! Call the Reduce code
-    call ESMF_newDELayoutAllGlobalReduce(delayout1, rowdata, result, rowlen, &
+    call ESMF_DELayoutAllGlobalReduce(delayout1, rowdata, result, rowlen, &
                                          ESMF_newSUM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Row Reduction operation called"
@@ -253,7 +253,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayDestroy(array1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutDestroy(delayout1, rc)
+    call ESMF_DELayoutDestroy(delayout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "All Destroy routines done"
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.51 2004/04/20 22:53:25 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.52 2004/04/28 23:12:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
-      use ESMF_newDELayoutMod    ! ESMF layout class
+      use ESMF_DELayoutMod    ! ESMF layout class
       use ESMF_LocalArrayMod
       use ESMF_XPacketMod
       implicit none
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.51 2004/04/20 22:53:25 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.52 2004/04/28 23:12:10 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -138,7 +138,7 @@
       type(ESMF_Route) :: ESMF_RouteCreate
 !
 ! !ARGUMENTS:
-      type(ESMF_newDELayout), intent(in) :: delayout
+      type(ESMF_DELayout), intent(in) :: delayout
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -560,12 +560,12 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
       integer, intent(in) :: AI_dst_count
-      type(ESMF_newDELayout), intent(in) :: dstDElayout
+      type(ESMF_DELayout), intent(in) :: dstDElayout
       integer, intent(in) :: my_DE_src
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
-      type(ESMF_newDELayout), intent(in) :: srcDElayout
+      type(ESMF_DELayout), intent(in) :: srcDElayout
       type(ESMF_Logical), dimension(:), intent(in) :: periodic
       logical, intent(out) :: hascachedroute
       type(ESMF_Route), intent(out) :: route
@@ -1042,7 +1042,7 @@
       integer, intent(in) :: AI_count
       integer, dimension(:,:), intent(in) :: global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: global_count
-      type(ESMF_newDELayout), intent(in) :: delayout
+      type(ESMF_DELayout), intent(in) :: delayout
       type(ESMF_Logical), intent(in) :: periodic(:)
       integer, intent(out), optional :: rc
 
@@ -1130,13 +1130,13 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstTotalAI
       integer, dimension(:,:), intent(in) :: dstGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
-      type(ESMF_newDELayout), intent(in) :: dstDElayout
+      type(ESMF_DELayout), intent(in) :: dstDElayout
       integer, intent(in) :: srcMyDE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcCompAI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcTotalAI
       integer, dimension(:,:), intent(in) :: srcGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
-      type(ESMF_newDELayout), intent(in) :: srcDElayout
+      type(ESMF_DELayout), intent(in) :: srcDElayout
       integer, intent(out), optional :: rc
 
 !
@@ -1245,14 +1245,14 @@
       integer, intent(in) :: AI_dst_count
       integer, dimension(:,:), intent(in) :: dst_global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_count
-      type(ESMF_newDELayout), intent(in) :: dstDElayout
+      type(ESMF_DELayout), intent(in) :: dstDElayout
       integer, intent(in) :: my_DE_src
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
       integer, dimension(:,:), intent(in) :: src_global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
-      type(ESMF_newDELayout), intent(in) :: srcDElayout
+      type(ESMF_DELayout), intent(in) :: srcDElayout
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:

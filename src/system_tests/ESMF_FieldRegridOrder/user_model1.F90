@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.7 2004/04/27 15:25:44 nscollins Exp $
+! $Id: user_model1.F90,v 1.8 2004/04/28 23:12:14 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -91,7 +91,7 @@
        ! Local variables
         type(ESMF_Field) :: humidity
         type(ESMF_VM) :: vm
-        type(ESMF_newDELayout) :: delayout
+        type(ESMF_DELayout) :: delayout
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
@@ -109,7 +109,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_VMGet(vm, petCount=npets, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        delayout = ESMF_newDELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
+        delayout = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         print *, de_id, "User Comp 1 Init starting"

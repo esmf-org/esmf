@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.23 2004/04/13 22:57:54 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.24 2004/04/28 23:11:53 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
       use ESMF_IOSpecMod      ! ESMF I/O class
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_DataMapMod     ! ESMF data map class
-      use ESMF_newDELayoutMod ! ESMF layout class
+      use ESMF_DELayoutMod ! ESMF layout class
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_PhysCoordMod   ! ESMF physical coord class
       use ESMF_PhysGridMod    ! ESMF physical grid class
@@ -430,7 +430,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.23 2004/04/13 22:57:54 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.24 2004/04/28 23:11:53 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -571,7 +571,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.10 2004/04/27 17:22:19 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.11 2004/04/28 23:12:14 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -68,7 +68,7 @@
       character (len=ESMF_MAXSTR) :: statename
       type(ESMF_Field) :: srcfield, dstfield
       type(ESMF_VM) :: vm
-      type(ESMF_newDELayout) :: cpllayout
+      type(ESMF_DELayout) :: cpllayout
 
       print *, "Coupler Init starting"
 
@@ -81,7 +81,7 @@
      
       ! Get VM info from coupler component and create default layout
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-      cpllayout = ESMF_newDELayoutCreate(vm, rc=rc)
+      cpllayout = ESMF_DELayoutCreate(vm, rc=rc)
 
       ! Now see which way we're going so we set the correct fields needed
       ! and compute the right routehandle

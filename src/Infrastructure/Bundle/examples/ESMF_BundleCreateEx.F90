@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.16 2004/04/15 19:00:52 nscollins Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.17 2004/04/28 23:11:47 cdeluca Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -27,7 +27,7 @@
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DataMap) :: datamap
-    type(ESMF_newDELayout) :: delayout
+    type(ESMF_DELayout) :: delayout
     type(ESMF_VM) :: vm
     character (len = ESMF_MAXSTR) :: bname1, bname2, fname1, fname2
     type(ESMF_IOSpec) :: iospec
@@ -52,7 +52,7 @@
     counts = (/ 100, 200 /)
     min_coord = (/  0.0,  0.0 /)
     max_coord = (/ 50.0, 60.0 /)
-    delayout = ESMF_newDELayoutCreate(vm, rc=rc)
+    delayout = ESMF_DELayoutCreate(vm, rc=rc)
     grid = ESMF_GridCreateLogRectUniform(2, counts, min_coord, max_coord, &
                 horzGridType=ESMF_GridType_XY, &
                 horzStagger=ESMF_GridStagger_A, &

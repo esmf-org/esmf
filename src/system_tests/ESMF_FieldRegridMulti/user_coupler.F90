@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.6 2004/04/27 15:16:38 nscollins Exp $
+! $Id: user_coupler.F90,v 1.7 2004/04/28 23:12:14 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -67,7 +67,7 @@
       integer :: itemcount
       type(ESMF_Field) :: humidity1, humidity2
       type(ESMF_VM) :: vm
-      type(ESMF_newDELayout) :: cpllayout
+      type(ESMF_DELayout) :: cpllayout
 
 
       print *, "User Coupler Init starting"
@@ -88,7 +88,7 @@
       ! Query component for VM and create a layout 
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      cpllayout = ESMF_newDELayoutCreate(vm, rc=rc)
+      cpllayout = ESMF_DELayoutCreate(vm, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! These are fields on different Grids - call RegridStore to set

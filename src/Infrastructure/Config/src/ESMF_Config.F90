@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.8 2004/04/19 22:22:52 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.9 2004/04/28 23:11:48 cdeluca Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -182,7 +182,7 @@
 !       1may2003 Leonid Zaslavsky Corrected version 
 ! !USES:
 
-      use ESMF_newDELayoutMod
+      use ESMF_DELayoutMod
       !use ESMF_LogErrMod    ! seems unneeded, at least for now.
 
       implicit none
@@ -1043,7 +1043,7 @@
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout) :: cf     
       character(len=*), intent(in)     :: fname 
-      type(ESMF_newDELayout), intent(in), optional  :: delayout 
+      type(ESMF_DELayout), intent(in), optional  :: delayout 
       logical, intent(in), optional    :: unique 
       integer, intent(out), optional :: rc         
 !

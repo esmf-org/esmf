@@ -31,7 +31,7 @@
       integer, dimension(2) :: counts
       real(ESMF_KIND_R8), dimension(2) :: min, max
       type(ESMF_CoordSystem) :: horz_coord_system
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_VM) :: vm
       character (len = ESMF_MAXSTR) :: name
@@ -70,8 +70,8 @@
  
       ! Create a 2 x 2 layout for the Grid
       !delist = (/ 0, 1, 2, 3 /)
-      !layout = ESMF_newDELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc=status)
-      layout = ESMF_newDELayoutCreate(vm, (/ 2, 2 /), rc=rc)
+      !layout = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc=status)
+      layout = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=rc)
 !EOC
  
       if (status.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.14 2004/04/27 19:25:14 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.15 2004/04/28 23:12:12 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -31,7 +31,7 @@
     ! State, Virtual Machine, and DELayout
     type(ESMF_VM) :: vm
     type(ESMF_State) :: flowstate
-    type(ESMF_newDELayout) :: layoutTop
+    type(ESMF_DELayout) :: layoutTop
     integer :: pet_id
 
     ! A common grid
@@ -188,7 +188,7 @@
       !
 
       ! Create a default layout for the grid based on the global VM
-      layoutTop = ESMF_newDELayoutCreate(vm, rc=rc)
+      layoutTop = ESMF_DELayoutCreate(vm, rc=rc)
 !BOP
 !
 ! !DESCRIPTION:
@@ -268,7 +268,7 @@
 
       call ESMF_GridCompDestroy(compGridded, rc)
 
-      call ESMF_newDELayoutDestroy(layoutTop, rc)
+      call ESMF_DELayoutDestroy(layoutTop, rc)
 
 
 !------------------------------------------------------------------------------

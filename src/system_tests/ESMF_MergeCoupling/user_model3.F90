@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.8 2004/04/15 22:05:13 nscollins Exp $
+! $Id: user_model3.F90,v 1.9 2004/04/28 23:12:15 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -85,7 +85,7 @@
 
 !     ! Local variables
         type(ESMF_Field) :: humidity
-        type(ESMF_newDELayout) :: layout
+        type(ESMF_DELayout) :: layout
         integer :: i, x, y
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
@@ -126,7 +126,7 @@
                                 name="source grid", rc=status)
 
         ! Figure out our local processor id
-        call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
+        call ESMF_DELayoutGet(layout, localDe=de_id, rc=rc)
 
         ! Set up a 2D integer array
         call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &

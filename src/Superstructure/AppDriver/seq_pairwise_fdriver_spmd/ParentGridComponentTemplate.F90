@@ -1,4 +1,4 @@
-! $Id: ParentGridComponentTemplate.F90,v 1.6 2004/04/13 17:30:30 nscollins Exp $
+! $Id: ParentGridComponentTemplate.F90,v 1.7 2004/04/28 23:12:10 cdeluca Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -62,7 +62,7 @@
       type(ESMF_Clock) :: parentclock
       integer :: rc
      
-      type(ESMF_newDELayout) :: parentlayout
+      type(ESMF_DELayout) :: parentlayout
       type(ESMF_Grid) :: parentgrid
 
       ! call ESMF_LogErrMsg("Parent Gridded Component Initialize routine called")

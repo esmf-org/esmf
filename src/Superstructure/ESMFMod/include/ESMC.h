@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.3 2004/04/23 21:45:09 nscollins Exp $
+// $Id: ESMC.h,v 1.4 2004/04/28 23:12:11 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 // vm and layout
 #include "vmachine.h"
 #include "ESMC_VM.h"
-#include "ESMC_newDELayout.h"
+#include "ESMC_DELayout.h"
 // #include "ESMC_Machine.h"
 // #include "ESMC_PE.h"
 // #include "ESMC_PEList.h"

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.41 2004/04/22 22:27:06 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.42 2004/04/28 23:11:47 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
       use ESMF_IOSpecMod
       use ESMF_LocalArrayMod
       use ESMF_DataMapMod
-      use ESMF_newDELayoutMod    ! ESMF layout class
+      use ESMF_DELayoutMod    ! ESMF layout class
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
       use ESMF_GridTypesMod
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.41 2004/04/22 22:27:06 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.42 2004/04/28 23:11:47 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -163,7 +163,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
-      type(ESMF_newDELayout), intent(in) :: delayout
+      type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
       integer, dimension(:,:), intent(in) :: localAxisLengths
       integer, dimension(:), intent(in) :: globalDimLengths
@@ -218,7 +218,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
-      type(ESMF_newDELayout), intent(in) :: delayout
+      type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: local_maxlengths
@@ -287,7 +287,7 @@
       logical :: rcpresent      ! did user specify rc?
       integer :: gridrank, datarank
       integer :: i, j, nDEs
-      type(ESMF_newDElayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
       integer, dimension(ESMF_MAXDIM) :: decompids
       integer, dimension(:,:), pointer :: localAxisLengths, tempCCPDEPD
@@ -306,7 +306,7 @@
  
 ! extract necessary information from the grid
       call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
-      call ESMF_newDELayoutGet(delayout, deCount=nDEs, rc=status)
+      call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
       allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
       allocate( tempMLCCPD(     gridrank), stat=status)
       allocate(  tempGCCPD(     gridrank), stat=status)
@@ -418,14 +418,14 @@
       integer, dimension(:), allocatable :: dimOrder
       type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
-      type (ESMF_newDELayout) :: delayout
+      type (ESMF_DELayout) :: delayout
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
       ! get layout from the grid in order to get the number of DEs
       call ESMF_ArrayGet(array, rank=datarank, rc=status)
       call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
       call ESMF_GridGet(grid, delayout=delayout, rc=status)
-      call ESMF_newDELayoutGet(delayout, nDEs, rc=status)
+      call ESMF_DELayoutGet(delayout, nDEs, rc=status)
 
       ! allocate dimOrder array and get from datamap
       allocate(dimOrder(datarank), stat=status)
@@ -520,7 +520,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_global
       integer, dimension(:), intent(in) :: global_dimlens
       integer, dimension(:), intent(in) :: decompids
@@ -707,7 +707,7 @@
 ! !REQUIREMENTS:
       integer :: status         ! local error status
       logical :: rcpresent      ! did user specify rc?
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
@@ -739,7 +739,7 @@
       call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
-      call ESMF_newDELayoutGet(delayout, deCount=nDEs, localDE=my_DE, rc=status)
+      call ESMF_DELayoutGet(delayout, deCount=nDEs, localDE=my_DE, rc=status)
 
       ! Allocate temporary arrays
       allocate(              periodic(      gridrank), stat=status)
@@ -853,7 +853,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       integer, dimension(:), intent(in) :: globalStart
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: rank_trans
@@ -1019,7 +1019,7 @@
       type(ESMF_Array), intent(inout) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DataMap), intent(in) :: dstDataMap
-      type(ESMF_newDELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
 !
@@ -1055,7 +1055,7 @@
 ! !REQUIREMENTS:
       integer :: status         ! local error status
       logical :: rcpresent      ! did user specify rc?
-      type(ESMF_newDELayout) :: dstDElayout, srcDElayout
+      type(ESMF_DELayout) :: dstDElayout, srcDElayout
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI, srcCompAI, &
                                                      dstTotalAI, srcTotalAI, &
@@ -1090,9 +1090,9 @@
       call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
-      call ESMF_newDELayoutGet(dstDElayout, deCount=nDEs, localDe=dstMyDE, &
+      call ESMF_DELayoutGet(dstDElayout, deCount=nDEs, localDe=dstMyDE, &
                                rc=status)
-      call ESMF_newDELayoutGet(srcDElayout, localDE=srcMyDE, rc=status)
+      call ESMF_DELayoutGet(srcDElayout, localDE=srcMyDE, rc=status)
 
       ! Allocate temporary arrays
       allocate(           periodic(      gridrank), stat=status)
@@ -1256,7 +1256,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
-      type(ESMF_newDELayout), intent(in) :: delayout
+      type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
       integer, intent(in) :: deid
       type(ESMF_Array), intent(out) :: array_out

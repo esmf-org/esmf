@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.22 2004/04/15 17:30:23 nscollins Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.23 2004/04/28 23:11:50 cdeluca Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -27,7 +27,7 @@
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: arraya, arrayb
     type(ESMF_DataMap) :: datamap
-    type(ESMF_newDELayout) :: layout
+    type(ESMF_DELayout) :: layout
     type(ESMF_VM) :: vm
     type(ESMF_RelLoc) :: relativelocation
     character (len = ESMF_MAXSTR) :: fname
@@ -51,7 +51,7 @@
 !   !  by default.  The DataMap is created with defaults.
  
     call ESMF_VMGetGlobal(vm, rc)
-    layout = ESMF_newDELayoutCreate(vm, rc=rc)
+    layout = ESMF_DELayoutCreate(vm, rc=rc)
     origin = (/ 0.0, 0.0 /)
     grid = ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), origin, &
                                          delayout=layout, name="atmgrid", rc=rc)

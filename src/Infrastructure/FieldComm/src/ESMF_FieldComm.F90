@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.30 2004/04/27 23:10:03 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.31 2004/04/28 23:11:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
-      use ESMF_newDELayoutMod    ! ESMF layout class
+      use ESMF_DELayoutMod    ! ESMF layout class
       use ESMF_LocalArrayMod
       use ESMF_ArrayMod
       use ESMF_RHandleMod
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.30 2004/04/27 23:10:03 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.31 2004/04/28 23:11:51 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -671,7 +671,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
-      type(ESMF_newDELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc               
 !
@@ -775,7 +775,7 @@
       type(ESMF_Field), intent(in) :: srcField
       integer, dimension(:), intent(in) :: decompIds
       type(ESMF_Field), intent(out) :: dstField
-      type(ESMF_newDELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(out), optional :: rc               
 !
@@ -930,8 +930,8 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_newDELayout) :: srcDElayout, dstDElayout
-      !type(ESMF_newDELayout) :: parentDElayout
+      type(ESMF_DELayout) :: srcDElayout, dstDElayout
+      !type(ESMF_DELayout) :: parentDElayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
@@ -952,7 +952,7 @@
 
 
       ! Our DE number in the parent layout
-      ! call ESMF_newDELayoutGet(parentDElayout, localDe=my_DE, status)
+      ! call ESMF_DELayoutGet(parentDElayout, localDe=my_DE, status)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -971,7 +971,7 @@
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_newDELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
+          call ESMF_DELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
           call ESMF_FieldGetArray(srcfield, src_array, rc=status)
           call ESMF_FieldGet(srcfield, datamap=src_datamap, rc=status)
       endif
@@ -984,7 +984,7 @@
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_newDELayoutGet(dstDElayout, localDE=my_dst_DE, rc=status)
+          call ESMF_DELayoutGet(dstDElayout, localDE=my_dst_DE, rc=status)
           call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
           call ESMF_FieldGet(dstfield, datamap=dst_datamap, rc=status)
       endif
@@ -1067,7 +1067,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcfield                 
       type(ESMF_Field), intent(inout) :: dstfield                 
-      type(ESMF_newDELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(in), optional :: regridtype 
       type(ESMF_Mask), intent(in), optional :: srcmask                 
@@ -1114,7 +1114,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_newDELayout) :: srcDElayout, dstDElayout
+      type(ESMF_DELayout) :: srcDElayout, dstDElayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
@@ -1133,7 +1133,7 @@
       endif     
 
       ! Our DE number in the parent layout
-      call ESMF_newDELayoutGet(parentDElayout, localDE=my_DE, rc=status)
+      call ESMF_DELayoutGet(parentDElayout, localDE=my_DE, rc=status)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -1152,7 +1152,7 @@
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_newDELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
+          call ESMF_DELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
           call ESMF_FieldGetArray(srcfield, src_array, rc=status)
           call ESMF_FieldGet(srcfield, datamap=src_datamap, rc=status)
       endif
@@ -1165,7 +1165,7 @@
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_newDELayoutGet(dstDElayout, localDE=my_dst_DE, rc=status)
+          call ESMF_DELayoutGet(dstDElayout, localDE=my_dst_DE, rc=status)
           call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
           call ESMF_FieldGet(dstfield, datamap=dst_datamap, rc=status)
       endif
@@ -1248,7 +1248,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType) :: ftypep              ! field type info
-      type(ESMF_newDELayout) :: delayout          ! layout
+      type(ESMF_DELayout) :: delayout          ! layout
       type(ESMF_Array) :: dstarray                ! Destination array
       integer :: i, datarank, numDims
       integer :: dimorder(ESMF_MAXDIM)   
@@ -1367,7 +1367,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType) :: ftypep              ! field type info
-      type(ESMF_newDELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
       integer :: datarank, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
@@ -1398,7 +1398,7 @@
       call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
 
       ! Our DE number in the layout
-      call ESMF_newDELayoutGet(delayout, localDE=my_DE, rc=status)
+      call ESMF_DELayoutGet(delayout, localDE=my_DE, rc=status)
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
@@ -1419,7 +1419,7 @@
       endif 
 
       ! Get global starting counts and global counts
-      call ESMF_newDElayoutGet(delayout, deCount=nDEs, rc=status)
+      call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
       call ESMF_GridGet(ftypep%grid, dimCount=numDims, rc=status)
       AI_count = nDEs
       allocate(global_count(numDims), stat=status)

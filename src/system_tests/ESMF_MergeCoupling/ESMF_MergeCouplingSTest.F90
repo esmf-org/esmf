@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.8 2004/04/15 22:05:13 nscollins Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.9 2004/04/28 23:12:15 cdeluca Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -33,7 +33,7 @@
     ! Local variables
     integer :: de_id, ndes, rc, delist(4)
     character(len=ESMF_MAXSTR) :: cname1, cname2, cname3, cplname
-    type(ESMF_newDELayout) :: layout1, layout2, layout3
+    type(ESMF_DELayout) :: layout1, layout2, layout3
     type(ESMF_VM) :: vm
     type(ESMF_State) :: c1exp, c2exp, c3imp, bothexp
     type(ESMF_GridComp) :: comp1, comp2, comp3
@@ -78,12 +78,12 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Query for the default layout
-    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
+    layout1 = ESMF_DELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutPrint(layout1, rc=rc)
+    call ESMF_DELayoutPrint(layout1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc)
+    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     if (ndes .lt. 4) then
         print *, "This system test needs to run at least 4-way, current np = ", ndes
@@ -95,30 +95,30 @@
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     !delist = (/ 0, 1, 2, 3 /)
-    layout2 = ESMF_newDELayoutCreate(vm, (/ 4, 1 /), rc=rc)
+    layout2 = ESMF_DELayoutCreate(vm, (/ 4, 1 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc
-    call ESMF_newDELayoutPrint(layout2, rc=rc)
+    call ESMF_DELayoutPrint(layout2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname2 = "user model 2"
-    layout3 = ESMF_newDELayoutCreate(vm, (/ 2, 2 /), rc=rc)
+    layout3 = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname2), "rc =", rc
-    call ESMF_newDELayoutPrint(layout3, rc=rc)
+    call ESMF_DELayoutPrint(layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname3 = "user model 3"
-    layout3 = ESMF_newDELayoutCreate(vm, (/ 1, 4 /), rc=rc)
+    layout3 = ESMF_DELayoutCreate(vm, (/ 1, 4 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp3 = ESMF_GridCompCreate(cname3, delayout=layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname3), "rc =", rc
-    call ESMF_newDELayoutPrint(layout3, rc=rc)
+    call ESMF_DELayoutPrint(layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cplname = "user one-way coupler"
@@ -268,7 +268,7 @@
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_newDELayoutGet(layout1, localDe=de_id, rc=rc)
+      call ESMF_DELayoutGet(layout1, localDe=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 
@@ -311,9 +311,9 @@
       call ESMF_CplCompDestroy(cpl, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_newDELayoutDestroy(layout2, rc)
+      call ESMF_DELayoutDestroy(layout2, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_newDELayoutDestroy(layout3, rc)
+      call ESMF_DELayoutDestroy(layout3, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------
