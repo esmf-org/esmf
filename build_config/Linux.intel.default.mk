@@ -1,4 +1,4 @@
-# $Id: Linux.intel.default.mk,v 1.1 2003/09/25 21:21:53 flanigan Exp $
+# $Id: Linux.intel.default.mk,v 1.2 2003/10/15 23:38:31 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -10,6 +10,10 @@ ifndef ESMF_COMM
 export ESMF_COMM := mpiuni
 endif
 
+# if using PBS system, export this for run time
+ifdef PBS_NODEFILE
+export ESMF_NODES := -machinefile $(PBS_NODEFILE)
+endif
 
 # Location of MPI (Message Passing Interface) software
 
@@ -23,12 +27,11 @@ MPIRUN         =  mpirun
 endif
 
 ifeq ($(ESMF_COMM),mpich)
-# this section is set up for MPICH
 #ESMC_MPIRUN   = 
-MPI_HOME       = /soft/apps/packages/mpich-gm-1.2.5..9-pre6-gm-1.6.3-intel-7.0
-MPI_LIB        = -L$(MPI_HOME)/lib -lmpi 
-MPI_INCLUDE    = -I$(MPI_HOME)/include
-MPIRUN         =  mpirun
+MPI_HOME       = 
+MPI_LIB        = -lmpich 
+MPI_INCLUDE    = -DESMF_MPICH=1
+MPIRUN         =  mpirun $(ESMF_NODES)
 endif
 
 ifeq ($(ESMF_COMM),mpiuni)
@@ -82,6 +85,34 @@ CXX_FLINKER	   = icc
 C_F90CXXLD         = ifc -mp
 C_CXXF90LD         = icc 
 C_CXXSO            = icc -shared 
+endif
+ifeq ($(ESMF_COMM),mpich)
+ifeq ($(ESMF_PREC),64)
+C_CC		   = mpiCC -size_lp64
+C_FC		   = mpif90 -size_lp64
+C_CLINKER	   = mpiCC -size_lp64
+C_FLINKER	   = mpif90 -size_lp64
+CXX_CC		   = mpiCC  -size_lp64
+CXX_FC		   = mpif90 -mp  -size_lp64
+CXX_CLINKER	   = mpiCC -size_lp64
+CXX_FLINKER	   = mpiCC -size_lp64
+C_F90CXXLD         = mpif90 -mp -size_lp64
+C_CXXF90LD         = mpiCC  -size_lp64
+C_CXXSO            = mpiCC -shared -size_lp64
+endif
+ifeq ($(ESMF_PREC),32)
+C_CC		   = mpiCC
+C_FC		   = mpif90
+C_CLINKER	   = mpiCC
+C_FLINKER	   = mpif90
+CXX_CC		   = mpiCC
+CXX_FC		   = mpif90 -mp
+CXX_CLINKER	   = mpiCC
+CXX_FLINKER	   = mpiCC
+C_F90CXXLD         = mpif90 -mp
+C_CXXF90LD         = mpiCC 
+C_CXXSO            = mpiCC -shared 
+endif
 endif
 # ######################### C and Fortran compiler flags ####################
 C_FC_MOD           = -I
