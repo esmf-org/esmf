@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2005/03/14 23:54:07 nscollins Exp $ 
+# $Id: makefile,v 1.27 2005/03/15 17:22:37 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -28,7 +28,7 @@ TESTS_RUN     =	RUN_ESMF_ComponentUTest \
 		RUN_ESMF_CompRun \
 		RUN_ESMC_CompRun
 
-TESTS_RUN_UNI =	RUN_ESMF_ComponentUTest \
+TESTS_RUN_UNI =	RUN_ESMF_ComponentUTestUNI \
 		RUN_ESMF_GridCompCreateUTestUNI \
 		RUN_ESMF_CplCompCreateUTestUNI \
 		RUN_ESMC_CompCreateUNI \
@@ -50,7 +50,7 @@ CLOBBERDIRS =
 RUN_ESMF_ComponentUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ComponentUTest > $(ESMC_TESTDIR)/ESMF_ComponentUTest.stdout
 
-RUN_ESMF_ComponentUTest:
+RUN_ESMF_ComponentUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ComponentUTest > $(ESMC_TESTDIR)/ESMF_ComponentUTest.stdout
 
 
