@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.120 2004/12/08 18:30:27 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.121 2004/12/09 17:18:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,13 @@
 ! !PRIVATE TYPES:
       private
 
-      integer, parameter :: domainOption = 0
+      !integer, parameter :: domainOption = 1
+      ! TODO: temporary fix - the new Reconcile code is not compatible (yet)
+      !  with the fast domainOption.  so make it public and have Reconcile
+      !  turn it off the first time it is called.
+      integer :: domainOption = 1
+      public domainOption
+
       real(ESMF_KIND_R8), parameter :: fake = -999999.99d0
 
 !------------------------------------------------------------------------------
@@ -121,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.120 2004/12/08 18:30:27 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.121 2004/12/09 17:18:20 nscollins Exp $'
 
 !==============================================================================
 !
