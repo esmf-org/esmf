@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.31 2003/04/02 00:09:22 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.32 2003/04/02 15:52:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.31 2003/04/02 00:09:22 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.32 2003/04/02 15:52:55 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -465,7 +465,7 @@
                 rc = layout->ESMC_DELayoutSendRecv(srcmem, rcvmem,
                                                    srccount, rcvcount, 
                                                    theirdeid, theirdeid
-#if 0 
+#if 1 
 // NEW_SEND_RECV_INTERFACE
                                                    , ESMC_FLOAT);
 #else 
