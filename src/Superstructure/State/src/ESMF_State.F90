@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.79 2004/12/10 18:18:20 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.80 2004/12/10 20:58:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.79 2004/12/10 18:18:20 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.80 2004/12/10 20:58:44 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -5201,7 +5201,7 @@ end interface
 !
 !EOPI
 
-      integer :: localrc, status                     ! Error status
+      integer :: localrc                             ! Error status
       integer :: i
       type(ESMF_StateClass), pointer :: sp           ! state type
       type(ESMF_StateItem), pointer :: sip           ! state item
@@ -5273,10 +5273,11 @@ end interface
 ! !IROUTINE: ESMF_StateDeserialize - Deserialize a byte stream into a State
 !
 ! !INTERFACE:
-      recursive function ESMF_StateDeserialize(vm, buffer, offset, rc) 
+    recursive function ESMF_StateDeserialize(vm, buffer, offset, rc) &
+              result (substate)
 !
 ! !RETURN VALUE:
-      type(ESMF_State) :: ESMF_StateDeserialize   
+      type(ESMF_State) :: substate   
 !
 ! !ARGUMENTS:
       type(ESMF_VM), intent(in) :: vm
@@ -5311,15 +5312,12 @@ end interface
       integer :: i
       type(ESMF_StateClass), pointer :: sp           ! state type
       type(ESMF_StateItem), pointer :: sip           ! state item
-      type(ESMF_State) :: substate
-      type(ESMF_Bundle) :: bundle
-      type(ESMF_Field) :: field
-      type(ESMF_Array) :: array
-      character(len=ESMF_MAXSTR) :: thisname
+      type(ESMF_State) :: subsubstate
 
 
       ! in case of error, make sure this is invalid.
-      nullify(ESMF_StateDeserialize%statep)
+      !nullify(ESMF_StateDeserialize%statep)
+      nullify(substate%statep)
 
       allocate(sp, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, &
@@ -5364,8 +5362,8 @@ end interface
                                                  offset, localrc)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_STATE%ot)
-              substate = ESMF_StateDeserialize(vm, buffer, offset, localrc)
-              sip%datap%spp => substate%statep
+              subsubstate = ESMF_StateDeserialize(vm, buffer, offset, localrc)
+              sip%datap%spp => subsubstate%statep
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_NAME%ot)
               call c_ESMC_StringDeserialize(sip%namep, buffer(1), offset, localrc)
@@ -5379,8 +5377,8 @@ end interface
 
       enddo
 
-
-      ESMF_StateDeserialize%statep => sp
+      !ESMF_StateDeserialize%statep => sp
+      substate%statep => sp
       if  (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_StateDeserialize
