@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.106 2004/11/01 22:05:00 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.107 2004/11/01 22:43:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.106 2004/11/01 22:05:00 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.107 2004/11/01 22:43:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -6081,7 +6081,7 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, j, hWidth
+      integer :: i, j, i1, j1, hWidth
       integer, dimension(:), allocatable :: cornerCounts
       logical :: dummy
       real(ESMF_KIND_R8) :: centerUse1, centerUse2
@@ -6112,9 +6112,9 @@
         cornerCounts(i+1) = counts(i)
       enddo
 
-     ! create ESMF_Arrays
-      hWidth  = 0
-      if (total) hWidth  = gridBoundWidth
+      ! create ESMF_Arrays
+      hWidth = 0
+      if (total) hWidth = gridBoundWidth
       kind = ESMF_R8
       type = ESMF_DATA_REAL
       do i = 1,dimCount
@@ -6177,21 +6177,23 @@
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
+          if (total) then
+          do i = 1+hWidth,counts(1)-2*hWidth
+            i1 = i - hWidth
             cornerUse11 = coord1(i  )
             cornerUse12 = coord1(i+1)
-            do j = 1,counts(2)
+            do j = 1+hWidth,counts(2)-2*hWidth
+              j1 = j - hWidth
               cornerUse21 = coord2(j  )
               cornerUse22 = coord2(j+1)
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+              corner1(1,i1,j1) = cornerUse11
+              corner1(2,i1,j1) = cornerUse12
+              corner1(3,i1,j1) = cornerUse12
+              corner1(4,i1,j1) = cornerUse11
+              corner2(1,i1,j1) = cornerUse21
+              corner2(2,i1,j1) = cornerUse21
+              corner2(3,i1,j1) = cornerUse22
+              corner2(4,i1,j1) = cornerUse22
             enddo
           enddo
           endif
@@ -6205,21 +6207,23 @@
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
+          if (total) then
+          do i = 1+hWidth,counts(1)-2*hWidth
+            i1 = i - hWidth
             cornerUse11 = coord1(i  )
             cornerUse12 = coord1(i+1)
-            do j = 1,counts(2)
+            do j = 1+hWidth,counts(2)-2*hWidth
+              j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
               cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+              corner1(1,i1,j1) = cornerUse11
+              corner1(2,i1,j1) = cornerUse12
+              corner1(3,i1,j1) = cornerUse12
+              corner1(4,i1,j1) = cornerUse11
+              corner2(1,i1,j1) = cornerUse21
+              corner2(2,i1,j1) = cornerUse21
+              corner2(3,i1,j1) = cornerUse22
+              corner2(4,i1,j1) = cornerUse22
             enddo
           enddo
           endif
@@ -6233,21 +6237,23 @@
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
+          if (total) then
+          do i = 1+hWidth,counts(1)-2*hWidth
+            i1 = i - hWidth
             cornerUse11 = coord1(i  )
             cornerUse12 = coord1(i+1)
-            do j = 1,counts(2)
+            do j = 1+hWidth,counts(2)-2*hWidth
+              j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
               cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+              corner1(1,i1,j1) = cornerUse11
+              corner1(2,i1,j1) = cornerUse12
+              corner1(3,i1,j1) = cornerUse12
+              corner1(4,i1,j1) = cornerUse11
+              corner2(1,i1,j1) = cornerUse21
+              corner2(2,i1,j1) = cornerUse21
+              corner2(3,i1,j1) = cornerUse22
+              corner2(4,i1,j1) = cornerUse22
             enddo
           enddo
           endif
@@ -6261,21 +6267,23 @@
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
+          if (total) then
+          do i = 1+hWidth,counts(1)-2*hWidth
+            i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
             cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
-            do j = 1,counts(2)
+            do j = 1+hWidth,counts(2)-2*hWidth
+              j1 = j - hWidth
               cornerUse21 = coord2(j  )
               cornerUse22 = coord2(j+1)
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+              corner1(1,i1,j1) = cornerUse11
+              corner1(2,i1,j1) = cornerUse12
+              corner1(3,i1,j1) = cornerUse12
+              corner1(4,i1,j1) = cornerUse11
+              corner2(1,i1,j1) = cornerUse21
+              corner2(2,i1,j1) = cornerUse21
+              corner2(3,i1,j1) = cornerUse22
+              corner2(4,i1,j1) = cornerUse22
             enddo
           enddo
           endif
@@ -6289,21 +6297,23 @@
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
+          if (total) then
+          do i = 1+hWidth,counts(1)-2*hWidth
+            i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
             cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
-            do j = 1,counts(2)
+            do j = 1+hWidth,counts(2)-2*hWidth
+              j1 = j - hWidth
               cornerUse21 = coord2(j  )
               cornerUse22 = coord2(j+1)
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+              corner1(1,i1,j1) = cornerUse11
+              corner1(2,i1,j1) = cornerUse12
+              corner1(3,i1,j1) = cornerUse12
+              corner1(4,i1,j1) = cornerUse11
+              corner2(1,i1,j1) = cornerUse21
+              corner2(2,i1,j1) = cornerUse21
+              corner2(3,i1,j1) = cornerUse22
+              corner2(4,i1,j1) = cornerUse22
             enddo
           enddo
           endif
@@ -6317,21 +6327,23 @@
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
+          if (total) then
+          do i = 1+hWidth,counts(1)-2*hWidth
+            i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
             cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
-            do j = 1,counts(2)
+            do j = 1+hWidth,counts(2)-2*hWidth
+              j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
               cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+              corner1(1,i1,j1) = cornerUse11
+              corner1(2,i1,j1) = cornerUse12
+              corner1(3,i1,j1) = cornerUse12
+              corner1(4,i1,j1) = cornerUse11
+              corner2(1,i1,j1) = cornerUse21
+              corner2(2,i1,j1) = cornerUse21
+              corner2(3,i1,j1) = cornerUse22
+              corner2(4,i1,j1) = cornerUse22
             enddo
           enddo
           endif
@@ -6345,21 +6357,23 @@
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
+          if (total) then
+          do i = 1+hWidth,counts(1)-2*hWidth
+            i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
             cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
-            do j = 1,counts(2)
+            do j = 1+hWidth,counts(2)-2*hWidth
+              j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
               cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+              corner1(1,i1,j1) = cornerUse11
+              corner1(2,i1,j1) = cornerUse12
+              corner1(3,i1,j1) = cornerUse12
+              corner1(4,i1,j1) = cornerUse11
+              corner2(1,i1,j1) = cornerUse21
+              corner2(2,i1,j1) = cornerUse21
+              corner2(3,i1,j1) = cornerUse22
+              corner2(4,i1,j1) = cornerUse22
             enddo
           enddo
           endif
@@ -6373,21 +6387,23 @@
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
+          if (total) then
+          do i = 1+hWidth,counts(1)-2*hWidth
+            i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
             cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
-            do j = 1,counts(2)
+            do j = 1+hWidth,counts(2)-2*hWidth
+              j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
               cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+              corner1(1,i1,j1) = cornerUse11
+              corner1(2,i1,j1) = cornerUse12
+              corner1(3,i1,j1) = cornerUse12
+              corner1(4,i1,j1) = cornerUse11
+              corner2(1,i1,j1) = cornerUse21
+              corner2(2,i1,j1) = cornerUse21
+              corner2(3,i1,j1) = cornerUse22
+              corner2(4,i1,j1) = cornerUse22
             enddo
           enddo
           endif
@@ -6401,21 +6417,23 @@
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
+          if (total) then
+          do i = 1+hWidth,counts(1)-2*hWidth
+            i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
             cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
-            do j = 1,counts(2)
+            do j = 1+hWidth,counts(2)-2*hWidth
+              j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
               cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+              corner1(1,i1,j1) = cornerUse11
+              corner1(2,i1,j1) = cornerUse12
+              corner1(3,i1,j1) = cornerUse12
+              corner1(4,i1,j1) = cornerUse11
+              corner2(1,i1,j1) = cornerUse21
+              corner2(2,i1,j1) = cornerUse21
+              corner2(3,i1,j1) = cornerUse22
+              corner2(4,i1,j1) = cornerUse22
             enddo
           enddo
           endif
@@ -6444,7 +6462,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! set the region array in PhysGrid
-      if (.not.total) then
+      if (total) then
         call ESMF_PhysGridSetRegions(grid%physGrids(physGridId), &
                                      regionType=ESMF_REGION_TYPE_POLYGON, &
                                      vertexArray=cornerArray, &
