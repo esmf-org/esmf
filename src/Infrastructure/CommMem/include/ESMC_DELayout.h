@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.13 2003/04/04 23:22:51 jwolfe Exp $
+// $Id: ESMC_DELayout.h,v 1.14 2003/04/05 00:00:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -70,8 +70,8 @@
 enum ESMC_CommHint {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 
 typedef int ESMC_CommType;  
-#define ESMC_COMMTYPE_MP=0
-#define ESMC_COMMTYPE_SHR=2
+#define ESMC_COMMTYPE_MP 0
+#define ESMC_COMMTYPE_SHR 2
 
  // class definitions
  class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
