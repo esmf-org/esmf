@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.7 2004/04/14 21:52:19 nscollins Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.8 2004/04/15 21:43:19 nscollins Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -85,12 +85,12 @@
     call ESMF_Initialize(rc=rc)
 
     ! Get default VM
-    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGetGlobal(vm, rc)
 
     ! Query for default layout.
     layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
 
-    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc=rc)
+    call ESMF_newDELayoutGet(layout1, deCount=ndes, rc=rc)
     if (ndes .lt. 6) then
       print *, "This system test needs to run at least 6-way, current np = ", ndes
       goto 10
@@ -103,7 +103,7 @@
     !delist = (/ (i, i=0, ndes-1) /)
     !layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, mid /), (/ 0, 0 /), &
     !                              de_indices=delist, rc=rc)
-    layout2 = ESMF_newDELayoutCreate(layout1, (/ 2, mid /), rc=rc)
+    layout2 = ESMF_newDELayoutCreate(vm, (/ 2, mid /), rc=rc)
     comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
   !  call ESMF_GridCompPrint(comp1, "", rc)
@@ -113,7 +113,7 @@
     !delist = (/ (i, i=0, ndes-1) /)
     !layout3 = ESMF_DELayoutCreate(layout1, 2, (/ mid, 2 /), (/ 0, 0 /), &
     !                              de_indices=delist, rc=rc)
-    layout3 = ESMF_newDELayoutCreate(layout1, (/ mid, 2 /), rc=rc)
+    layout3 = ESMF_newDELayoutCreate(vm, (/ mid, 2 /), rc=rc)
 
     comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
@@ -221,7 +221,7 @@
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_newDELayoutGetDEID(layout1, de_id, rc)
+      call ESMF_newDELayoutGetDE(layout1, de=de_id, rc=rc)
 
 
       print *, "------------------------------------------------------------"

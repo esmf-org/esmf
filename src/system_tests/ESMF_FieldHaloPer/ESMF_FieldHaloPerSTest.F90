@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.16 2004/04/14 21:52:18 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.17 2004/04/15 21:38:49 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -93,10 +93,10 @@
 
     deflayout = ESMF_newDELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutGetNumDEs(deflayout, ndes, rc)
+    call ESMF_newDELayoutGet(deflayout, deCount=ndes, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_newDELayoutGetDEId(deflayout, de_id, rc) 
+    call ESMF_newDELayoutGetDE(deflayout, de=de_id, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
     
 !   Create a DELayout for the Component
@@ -128,7 +128,7 @@
            shape(1) = ndes
            shape(2) = 1
     end select
-    layout1 = ESMF_newDELayoutCreate(delist, shape, rc=rc)
+    layout1 = ESMF_newDELayoutCreate(vm, shape, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! print out shape of DELayout
@@ -317,7 +317,7 @@
       grid(1) = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
-                                layout=layout1, &
+                                delayout=layout1, &
                                 horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
@@ -336,7 +336,7 @@
       grid(2) = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
-                                layout=layout1, &
+                                delayout=layout1, &
                                 horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
@@ -355,7 +355,7 @@
       grid(3) = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
-                                layout=layout1, &
+                                delayout=layout1, &
                                 horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
@@ -374,7 +374,7 @@
       grid(4) = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
-                                layout=layout1, &
+                                delayout=layout1, &
                                 horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
@@ -385,7 +385,7 @@
       if (verbose) print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
-      call ESMF_newDELayoutGetDEID(layout1, de_id, rc=rc)
+      call ESMF_newDELayoutGetDE(layout1, de=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Create an arrayspec for a 2-D array 
@@ -658,7 +658,7 @@
 
 
       ! Local variables
-      integer :: i, j, ni, nj, xpos, ypos, nx, ny
+      integer :: i, j, ni, nj, xpos, ypos, pos(2), nx, ny, ncount(2)
       integer :: de_id, target
       integer :: mismatch
       integer :: pattern(3,3)
@@ -679,7 +679,7 @@
 
       call ESMF_FieldGet(thisfield, grid=grid1, rc=rc)
       if (verbose) print *, "grid back from field"
-      call ESMF_GridGetDELayout(grid1, layout=layout, rc=rc)
+      call ESMF_GridGetDELayout(grid1, delayout=layout, rc=rc)
       call ESMF_GridGet(grid1, periodic=pflags, rc=rc)
       if (verbose) print *, "layout, periodic flags back from grid"
 
@@ -688,7 +688,7 @@
       if (verbose) print *, "name back from field"
 
       ! Get our de_id from layout
-      call ESMF_newDELayoutGetDEID(layout, de_id, rc=rc)
+      call ESMF_newDELayoutGetDE(layout, de=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
 
       ! Get a pointer to the start of the data
@@ -705,9 +705,15 @@
 
       ! get info about total number of DEs in each dim and which one
       ! we are.  then use them to compute the values in the halo.
-      call ESMF_newDELayoutGetSize(layout, nx, ny, rc)
+      !call ESMF_newDELayoutGetSize(layout, nx, ny, rc)
+      call ESMF_newDELayoutGet(layout, deCountPerDim=ncount, rc=rc)
+      nx = ncount(1)
+      ny = ncount(2)
       if (rc .ne. ESMF_SUCCESS) goto 40
-      call ESMF_newDELayoutGetDEPosition(layout, xpos, ypos, rc)
+      !call ESMF_newDELayoutGetDEPosition(layout, xpos, ypos, rc)
+      call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=rc)
+      xpos = pos(1)
+      ypos = pos(2)
       if (rc .ne. ESMF_SUCCESS) goto 40
      
       ! for the calculations below we need the first xpos=0, not 1

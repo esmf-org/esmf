@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.12 2004/03/24 14:54:50 nscollins Exp $
+! $Id: user_model2.F90,v 1.13 2004/04/15 21:43:20 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,7 +83,7 @@
 
 !   ! Local variables
       type(ESMF_Field) :: humidity
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       type(ESMF_DataMap) :: datamap
       integer :: i, x, y
       type(ESMF_Grid) :: grid1
@@ -129,14 +129,14 @@
                               countsPerDEDecomp2=countsPerDE2, &
                               minGlobalCoordPerDim=min, &
                               delta1=delta1, delta2=delta2, &
-                              layout=layout, &
+                              delayout=layout, &
                               horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
                               name="source grid", rc=status)
 
       ! Figure out our local processor id
-      call ESMF_DELayoutGetDEID(layout, de_id, rc)
+      call ESMF_newDELayoutGetDE(layout, de=de_id, rc=rc)
 
       ! Set up a 3D real array
       call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &

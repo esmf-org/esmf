@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.12 2004/03/24 14:54:50 nscollins Exp $
+! $Id: user_model1.F90,v 1.13 2004/04/15 21:43:20 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -90,7 +90,7 @@
 
        ! Local variables
         type(ESMF_Field) :: humidity
-        type(ESMF_DELayout) :: layout
+        type(ESMF_newDELayout) :: layout
         type(ESMF_DataMap) :: datamap
         integer :: i, x, y, n
         type(ESMF_Grid) :: grid1
@@ -127,7 +127,7 @@
         grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts(2:3), &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
-                                layout=layout, &
+                                delayout=layout, &
                                 horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
