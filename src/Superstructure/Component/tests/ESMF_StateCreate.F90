@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.6 2003/02/12 18:57:52 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.7 2003/02/12 21:34:21 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -33,7 +33,7 @@
     integer, dimension(2) :: delist
     character(ESMF_MAXSTR) :: cname, sname, bname, fname
     type(ESMF_Array) :: array1
-    type(ESMF_Field) :: field1
+    type(ESMF_Field) :: field1, field2
     type(ESMF_Bundle) :: bundle1, bundle2, bundle3, qbundle
     type(ESMF_State) :: state1, state2, state3, state4
         
@@ -172,7 +172,91 @@
     call ESMF_StateDestroy(state3, rc=rc)
     print *, "State Destroy returned", rc
 
+    call ESMF_BundleDestroy(bundle2, rc=rc)
+    print *, "Bundle Destroy returned", rc
+
+    call ESMF_FieldDestroy(field1, rc=rc)
+    print *, "Field Destroy returned", rc
+
     print *, "State Test 4 finished"
+    print *, " "
+
+
+
+!-------------------------------------------------------------------------
+!   ! Test 5:
+!   !
+!   !  Longer Test - Overwriting existing placeholders, especially
+!   !    handling fields inside bundles.
+ 
+    print *, "State Test 5: State with Multiple Placeholders"
+
+    cname = "Sea Ice"
+    state4 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
+    print *, "State Create returned, name = ", trim(cname)
+
+    sname = "Surface pressure"
+    call ESMF_StateAddData(state4, sname, rc=rc)
+    print *, "StateAddData (name only) returned", rc, "for", trim(sname)
+    
+    call ESMF_StateSetNeeded(state4, sname, ESMF_STATEDATAISNEEDED, rc=rc)
+    print *, "StateSetNeeded returned", rc
+    
+    sname = "Energy Flux"
+    call ESMF_StateAddData(state4, sname, rc=rc)
+    print *, "StateAddData (name only) returned", rc, "for", trim(sname)
+    
+    call ESMF_StateSetNeeded(state4, sname, ESMF_STATEDATAISNEEDED, rc=rc)
+    print *, "StateSetNeeded returned", rc
+    
+    sname = "Humidity"
+    call ESMF_StateAddData(state4, sname, rc=rc)
+    print *, "StateAddData (name only) returned", rc, "for", trim(sname)
+    
+    call ESMF_StateSetNeeded(state4, sname, ESMF_STATEDATAISNEEDED, rc=rc)
+    print *, "StateSetNeeded returned", rc
+    
+    call ESMF_StatePrint(state4, rc=rc)
+    print *, "State Print returned", rc
+
+    bname = "Collected quantities"
+    bundle2 = ESMF_BundleCreate(bname, rc=rc)
+    print *, "Bundle Create returned", rc, "name =", trim(bname)
+      
+    fname = "Surface pressure"
+    field1 = ESMF_FieldCreateNoData(fname, rc=rc)
+    print *, "Field Create returned", rc, "name =", trim(fname)
+
+    call ESMF_BundleAddFields(bundle2, field1, rc=rc) 
+    print *, "Bundle AddField returned", rc
+
+    fname = "Energy Flux"
+    field2 = ESMF_FieldCreateNoData(fname, rc=rc)
+    print *, "Field Create returned", rc, "name =", trim(fname)
+
+    call ESMF_BundleAddFields(bundle2, field2, rc=rc) 
+    print *, "Bundle AddField returned", rc
+
+
+    call ESMF_StateAddData(state4, bundle2, rc=rc)
+    print *, "StateAddData returned", rc
+
+    call ESMF_StatePrint(state4, rc=rc)
+    print *, "State Print returned", rc
+    
+    call ESMF_StateDestroy(state4, rc=rc)
+    print *, "State Destroy returned", rc
+
+    call ESMF_BundleDestroy(bundle2, rc=rc)
+    print *, "Bundle Destroy returned", rc
+
+    call ESMF_FieldDestroy(field1, rc=rc)
+    print *, "Field Destroy returned", rc
+
+    call ESMF_FieldDestroy(field2, rc=rc)
+    print *, "Field Destroy returned", rc
+
+    print *, "State Test 5 finished"
     print *, " "
 
 
