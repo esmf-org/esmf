@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.36 2003/10/17 22:46:17 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.37 2003/10/20 15:00:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.36 2003/10/17 22:46:17 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.37 2003/10/20 15:00:00 jwolfe Exp $'
 
 !==============================================================================
 
@@ -470,9 +470,6 @@
       call ESMF_LocalArrayDestroy(srcLocalMaskArray, status)
       deallocate(dstLocalCoordArray)
       deallocate(srcLocalCoordArray)
-      deallocate(srcGatheredCoordX)
-      deallocate(srcGatheredCoordY)
-      deallocate(srcGatheredMask)
       deallocate(found)
       deallocate(foundCount)
       deallocate(dstUserMask)
