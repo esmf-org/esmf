@@ -1,4 +1,4 @@
-% $Id: CplComp_desc.tex,v 1.1 2004/03/23 22:50:11 cdeluca Exp $
+% $Id: CplComp_desc.tex,v 1.2 2004/04/20 19:20:05 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,13 +9,35 @@
 % Licensed under the GPL.
 
 %\subsection{Description}
+\label{sec:CplComp}
 
-A Coupler Component is user-written code which executes or
-arranges the execution of the necessary data transformations between one
-or more Gridded Components.
+In a large, multi-component application such as a forecasting or 
+climate prediction system running within ESMF, physical domains 
+and major system functions are represented as Gridded Components 
+(see Section \ref{sec:GridComp}).  A Coupler Component, or 
+{\tt ESMF\_CplComp}, arranges and executes the data 
+transformations between one or more Gridded Components.  Since
+Coupler Components contain all the information about the way
+Gridded Components relate to each other, within ESMF Gridded 
+Components can be designed so that they can be used in multiple 
+coupled configurations without changes to their source code. 
 
+Like Gridded Components, Coupler Components have two parts, one
+that is provided by the user and another that is part of the 
+framework.  The user-written portion of the software is the coupling
+code necessary for the particular exchange.  The term ``user-written'' 
+is somewhat misleading here, since the user can leverage 
+ESMF infrastructure software for regridding, redistribution,
+lower-level communications, calendar management, and other functions 
+within the coupler.  However, ESMF does not currently offer tools for
+unit tranformations or time averaging operations, so users must 
+manage those operations themseves.
 
-A Coupler operates on a list of State objects.  Couplers can be written
-to transform data between single pairs of Gridded Components, or
-a single Coupler can couple between multiple Gridded Components.
+The user-written coupler code must be divided into separately callable 
+initialize, run, and finalize methods.  The interfaces for these 
+methods are prescribed by ESMF.
+
+Couplers can be written to transform data between single pairs of 
+Gridded Components, or a single Coupler can couple between multiple 
+Gridded Components.
 

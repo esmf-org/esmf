@@ -1,4 +1,4 @@
-% $Id: CplComp_rest.tex,v 1.1 2004/03/23 22:50:11 cdeluca Exp $
+% $Id: CplComp_rest.tex,v 1.2 2004/04/20 19:20:05 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,7 +10,14 @@
 
 %\subsubsection{Restrictions and Future Work}
 
-Couplers are user-written code and need to be
-customized for each combination of Components
-which they are interacting with.
+\begin{enumerate}
 
+\item {\bf No automatic unit conversions.}  The ESMF framework does not currently 
+contain tools for performing unit conversions, operations that are fairly 
+standard within Coupler Components.
+
+\item {\bf No accumulator.}  The ESMF does not have an accumulator tool, to
+perform time averaging of fields for coupling.  This is likely to be developed
+in the near term.
+
+\end{enumerate}
