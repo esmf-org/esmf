@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.78 2004/06/18 13:33:58 atrayanov Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.78.2.1 2004/07/22 21:05:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -321,7 +321,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.78 2004/06/18 13:33:58 atrayanov Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.78.2.1 2004/07/22 21:05:38 nscollins Exp $'
 
 !==============================================================================
 !
@@ -590,7 +590,7 @@
 ! !REQUIREMENTS: 
 
       ! local variables
-      integer :: localrc                             ! Error status
+      !integer :: localrc                             ! Error status
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1795,7 +1795,7 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ! local variables
-      integer :: localrc                             ! Error status
+      !integer :: localrc                             ! Error status
       integer :: i
       
       ! Initialize return code; assume failure until success is certain
@@ -2345,7 +2345,7 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ! local variables
-      integer :: localrc                             ! Error status
+      !integer :: localrc                             ! Error status
       integer :: ncorn, next_n   ! corner index
       integer :: num_corners     ! number of corners in each grid cell
 
@@ -2357,7 +2357,7 @@
       real(kind=ESMF_KIND_R8) :: test_product
       real(kind=ESMF_KIND_R8) :: ref_product   ! the cross product for first
                                                ! non-zero value
-      real(kind=ESMF_KIND_R8) :: sign_test     ! test to see if cross products
+      !real(kind=ESMF_KIND_R8) :: sign_test     ! test to see if cross products
                                                ! are same sign
       real(kind=ESMF_KIND_R8) :: zero, one
       real(kind=ESMF_KIND_R8) :: minX, maxX, minY, maxY
@@ -2488,7 +2488,7 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ! local variables
-      integer :: localrc                             ! Error status
+      !integer :: localrc                             ! Error status
       real(kind=ESMF_KIND_R8) :: rlon1, rlat1, rlon2, rlat2  ! lon/lat in radians
       real(kind=ESMF_KIND_R8) :: pi
       
@@ -2557,7 +2557,7 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ! local variables
-      integer :: localrc                             ! Error status
+      !integer :: localrc                             ! Error status
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
