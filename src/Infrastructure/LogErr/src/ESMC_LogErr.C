@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.48 2004/05/14 09:34:28 nscollins Exp $
+// $Id: ESMC_LogErr.C,v 1.49 2004/05/14 16:45:00 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.48 2004/05/14 09:34:28 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.49 2004/05/14 16:45:00 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -456,7 +456,7 @@ int ESMC_Log::ESMC_LogAllocError(
 //EOP
 {
 	int result=ESMF_FALSE;
-	ESMC_LogWrite("Memory allocation error",ESMC_LOG_ERROR,LINE,FILE,method);
+	ESMC_LogWrite(ESMF_ERR_MEM,ESMC_LOG_ERROR,LINE,FILE,method);
 	result=ESMF_TRUE;
 	return result;
 }

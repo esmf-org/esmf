@@ -396,7 +396,7 @@ end function ESMF_LogFoundError
 	
 	ESMF_LogFoundAllocError=.FALSE.
 	if (rc .NE. 0) then
-		logrc = ESMF_LogWrite("Alloc error:"//msg,ESMF_LOG_ERROR,line,file,method)
+		logrc = ESMF_LogWrite(ESMF_ERR_MEM//":"//msg,ESMF_LOG_ERROR,line,file,method)
 		ESMF_LogFoundAllocError=.TRUE.
 	endif	
        
