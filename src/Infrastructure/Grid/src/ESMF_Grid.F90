@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.154 2004/03/24 15:59:59 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.155 2004/03/25 23:27:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.154 2004/03/24 15:59:59 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.155 2004/03/25 23:27:20 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1062,8 +1062,7 @@
       integer, intent(out), dimension(:), optional :: globalCellCountPerDim
       integer, intent(out), dimension(:,:), optional :: globalStartPerDEPerDim
       integer, intent(out), dimension(:), optional :: maxLocalCellCountPerDim
-      integer,              dimension(:,:), pointer, &
-                            optional :: cellCountPerDEPerDim
+      integer, intent(out), dimension(:,:), optional :: cellCountPerDEPerDim
       type(ESMF_Logical), intent(out), dimension(:), optional :: periodic
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
@@ -1411,9 +1410,9 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      type(ESMF_Array), dimension(:), pointer, optional :: centerCoord
-      type(ESMF_Array), dimension(:,:), pointer, optional :: cornerCoord
-      type(ESMF_Array), optional :: faceCoord
+      type(ESMF_Array), intent(out), dimension(:), optional :: centerCoord
+      type(ESMF_Array), intent(out), dimension(:,:), optional :: cornerCoord
+      type(ESMF_Array), intent(out), optional :: faceCoord
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc

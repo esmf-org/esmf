@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.53 2004/03/25 17:52:09 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.54 2004/03/25 23:27:21 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2866,8 +2866,8 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      type(ESMF_Array), dimension(:), pointer, optional :: centerCoord
-      type(ESMF_Array), dimension(:,:), pointer, optional :: cornerCoord
+      type(ESMF_Array), intent(out), dimension(:), optional :: centerCoord
+      type(ESMF_Array), intent(out), dimension(:,:), optional :: cornerCoord
       type(ESMF_Array), optional :: faceCoord
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
@@ -4520,8 +4520,7 @@
       integer, intent(out), dimension(:), optional :: globalCellCountPerDim
       integer, intent(out), dimension(:,:), optional :: globalStartPerDEPerDim
       integer, intent(out), dimension(:), optional :: maxLocalCellCountPerDim
-      integer, dimension(:,:), pointer, &
-                            optional :: cellCountPerDEPerDim
+      integer, intent(out), dimension(:,:), optional :: cellCountPerDEPerDim
       type (ESMF_Logical), intent(out), optional :: periodic(:)
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
