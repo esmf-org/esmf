@@ -49,7 +49,7 @@ process.
 Depending on the hardware system, ESMF threads will be to a limited 
 extent compatible with user-defined threads.  The user will have 
 the option to enable ESMF threading or not.  In the latter case, the
-{tt DE} again degenerates to a process.
+{\tt DE} again degenerates to a process.
 
 {\tt DE}s are organized into topologies, such as a 2D grid, by the 
 {\tt Layout} 
@@ -70,10 +70,11 @@ $N_{m}$ = number of {\tt DE}s \\
 $C_{m}$ = connectivity \\
 $P$ = periodic boundary \\
 
-Default values for connectivity are: \\
+Default values for connectivity may be: \\
 0 = remote processes \\
 1 = adjacent processes, e.g. processes running on the same node\\
 2 = threads with access to the same address space \\
+Connectivities may be customized by the advanced user.
 
 Figure \ref{fig:layouts} shows number of examples of {\tt Layout} objects,
 together with their {\tt Ltuple} description.
@@ -114,17 +115,17 @@ decomposition.
 
 \subsubsection{PE List (ESMF\_PEList)}
 \label{sec:pelist} 
-A PE List is a list of physical processor IDs.  It includes a 
-unique identifier for each PE which may differ from the hardware 
+A {\tt PE List} is a list of physical processor IDs.  It includes a 
+unique identifier for each {\tt PE} which may differ from the hardware 
 processor ID.  
 
 \subsubsection{Machine (ESMF\_Machine)} 
 \label{sec:machine} 
-The Machine class provides a general representation of 
+The {\tt Machine} class provides a general representation of 
 key features of computer hardware and system software.  
 This information is used by the framework to 
 perform resource allocation, data distribution, and dynamic load balancing.  
-The Machine can be queried for information such as
+The {\tt Machine} can be queried for information such as
 platform type(s), number of processors per node, number of nodes, 
 memory attributes and configuration, processor type and speed,
 communication semantics and performance, 
@@ -157,10 +158,10 @@ time instants and intervals as they are returned.
 
 \subsubsection{Registry (ESMF\_Registry)}
 \label{sec:registry} 
-A Registry maintains a list of (name, ID) pairs per 
+A {\tt Registry} maintains a list of (name, ID) pairs per 
 namespace.  It supports the many classes in the system which are
 required to have unique names, either per address space or over the entire
-application.  The Registry class provides methods to
+application.  The {\tt Registry} class provides methods to
 create, query, and list namespaces and define their scope.  
 Within a namespace it provides methods to
 verify a name exists, add a (name, ID) pair,
@@ -200,5 +201,11 @@ and assistance with bit-level comparisons for debugging strategies which
 involve running a simulation under differing conditions and
 comparing intermediate results.  These routines use methods from
 the {\tt Log} class to collect and output results.
+
+
+
+
+
+
 
 

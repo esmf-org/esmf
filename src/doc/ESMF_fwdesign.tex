@@ -1,31 +1,19 @@
 \section{Framework-Wide Design Elements}
 \label{sec:fwdesign}
 
-The following sections describes design choices that apply across the 
+The following sections describe design choices that apply across the 
 entire body of ESMF software.
 
-\subsection{ESMF Base Object}
+\subsection{ESMF Base Object (ESMF\_Base)}
 \label{sec:esmfbase}
 
-All ESMF objects are based on the object below.  Attributes
-can be handled by generic routines, but it is expected that 
-higher level objects will supply their own class specific
-methods of the ones listed below.
-
-\scalebox{0.70}{\includegraphics{ESMF_Base.eps}}
-
-\subsubsection{Base (ESMF\_Base)}
 \label{sec:Base} 
-\begin{description}
-\item [Description] The ESMF Base class is an abstraction of the private data and
-methods common to all other object in the system.  Some methods and data can be
-inherited direcly from the Base class; others are expected to be overloaded by
-higher level objects.
-\item [Function] The Base class methods which are expected to be overloaded by
-more specialized objects include: Print, Validate, Read/Write, Checkpoint/Restart.
-Methods which are inherited by all other classes include those which 
-set and query object Attributes.
-\end{description}
+All ESMF objects inherit from an ESMF {\tt Base} class.  
+The {\tt Base} class is an abstraction of the data and behavior common to all
+classes in the framework.  Some methods and data can be
+inherited directly; others are expected to be overloaded by
+higher level objects.  {\tt Base} class methods include setting and querying attributes,
+print, validate, read/write, and restart. 
 
 
 
