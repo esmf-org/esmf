@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.14 2004/02/12 17:51:32 svasquez Exp $
+#  $Id: protex,v 1.15 2004/06/03 23:49:46 eschwab Exp $
 #
 #BOP
 #
@@ -203,6 +203,8 @@ ARG:
         $eopi_string = '!EOPI';
         $boc_string = '!BOC';
         $eoc_string = '!EOC';
+        $boe_string = '!BOE';
+        $eoe_string = '!EOE';
 #}#   end if
 
      if ( $opt_A ) {            # ADA
@@ -215,6 +217,8 @@ ARG:
         $eopi_string = '--EOPI';
         $boc_string = '--BOC';
         $eoc_string = '--EOC';
+        $boe_string = '--BOE';
+        $eoe_string = '--EOE';
 }#   end if
 
      if ( $opt_C ) {
@@ -227,6 +231,8 @@ ARG:
         $eopi_string = '//EOPI';
         $boc_string = '//BOC';
         $eoc_string = '//EOC';
+        $boe_string = '//BOE';
+        $eoe_string = '//EOE';
 }#   end if
 
      if ( $opt_S ) {            # Script
@@ -239,6 +245,8 @@ ARG:
 	$eopi_string = '#EOPI';
         $boc_string = '#BOC';
         $eoc_string = '#EOC';
+        $boe_string = '#BOE';
+        $eoe_string = '#EOE';
 }#   end if
 
 #    Set file name parameters
@@ -646,6 +654,33 @@ KEY:       foreach $key ( @keys ) {
               $prologue = 0;
               next LINE;
 }#         end if
+
+#          Beginning of example prologue
+#          -----------------------------
+           if ($Fld[1] eq $boe_string) {
+              if ( $source ) { &do_eoc(); }
+              print ' ';
+              print '%/////////////////////////////////////////////////////////////'; 
+              $first = 0;
+              $prologue = 1;
+              $verb = 0;
+              $source = 0;
+              next LINE;
+}#        end if
+
+#       End of example prologue
+#       -----------------------
+        if ($Fld[1] eq $eoe_string) {
+           if ($verb) {
+              print "\\end{verbatim}";
+              $verb = 0;
+}#         end if
+           $prologue = 0;
+           if ( $opt_l ) {
+              $Fld[1] = $boc_string;}
+           else { next LINE; }
+}#      end if
+
 }#      end unless
    
 #   Prologue or Introduction, print regular line (except for !)
