@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.53 2004/07/28 17:47:05 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.54 2004/07/29 22:58:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.53 2004/07/28 17:47:05 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.54 2004/07/29 22:58:46 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -388,7 +388,7 @@
       call ESMF_RouteHandleValidate(routehandle, rc=status)
       
       ! if valid, check the routehandle type
-      if (rc.eq.ESMF_SUCCESS) then
+      if (status.eq.ESMF_SUCCESS) then
         call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
@@ -638,7 +638,7 @@
       call ESMF_RouteHandleValidate(routehandle, rc=status)
 
       ! if valid, check the routehandle type
-      if (rc.eq.ESMF_SUCCESS) then
+      if (status.eq.ESMF_SUCCESS) then
         call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
@@ -1119,7 +1119,7 @@
       call ESMF_RouteHandleValidate(routehandle, rc=status)
 
       ! if valid, check the routehandle type
-      if (rc.eq.ESMF_SUCCESS) then
+      if (status.eq.ESMF_SUCCESS) then
         call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
