@@ -1,56 +1,157 @@
-% $Id: PerfProf_req.tex,v 1.1 2002/03/14 05:11:12 cnh Exp $
+% $Id: PerfProf_req.tex,v 1.2 2002/03/27 20:48:03 dneckels Exp $
 
-%===============================================================================
-% Requirements may be itemized under a main topic:
-%===============================================================================
-%===============================================================================
-\req{<Requirement>}
-%-------------------------------------------------------------------------------
+\req{Code Section Timing}
 
-<Description>
-
-\sreq{<Subrequirement>}
-
-<Description>
+The profiler will have a means to time individual code sections.  An API will be 
+provided so that a user may insert calls to the profiler at the beginning and
+end of a passage of interest.
 
 \begin{reqlist}
-{\bf Priority:} <Priority 1-3> \\
-{\bf Source:} <JMC Code (required, desired)> \\
-{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
-{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
-{\bf Notes:} <Background, comments on design, implementation, etc.> 
+{\bf Priority:} \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
 \end{reqlist}
 
-%===============================================================================
-% Or requirements may be itemized under a subtopic:
-%===============================================================================
-%===============================================================================
-\req{<Requirement>}
-%-------------------------------------------------------------------------------
+\sreq{Named Timers}
 
-<Description>
-
-\sreq{<Subrequirement>}
-
-<Description>
-
-\ssreq{Subsubrequirement} 
-
-<Description>
+Calls for recording time may be placed around numerous different code sections, 
+and the library shall provide a means for distinguishing these separate calls.  When
+the results of the timing are reported, each timer will be associated with its name.
 
 \begin{reqlist}
-{\bf Priority:} <Priority 1-3> \\
-{\bf Source:} <JMC Code (required, desired)> \\
-{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
-{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
-{\bf Notes:} <Background, comments on design, implementation, etc.> 
+{\bf Priority:} \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
+\sreq{Types of Time}
+
+In the context of the profiler the word ``time'' is not well defined.  There are
+a number of different types of ``time'' that may be of interest to a profiler.
+These various types of time can be recorded.  Each will be recorded separately and reported
+as such.  The various types are enumerated below:
+
+\ssreq{User Time}
+
+Process user time can be recorded.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
+\ssreq{System Time}
+
+System time can be recorded.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
 \end{reqlist}
 
 
+\ssreq{Wall Time}
 
+Wall clock time can be recorded.
 
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
 
+\req{Process Granularity}
 
+The profiler will be able to operate within a nested structure of processes (e.g.
+from MPI process 3, thread 6).
 
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
 
+\sreq{Process Level}
 
+The profiler can be called safely from any process (MPI or other).  It will 
+identify and report which process it was called from.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
+\sreq{Thread Level}
+
+The profiler can be called safely from any thread.  It will 
+identify and report which thread it was called from.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
+\req{Call Deactivation}
+
+Calling profiling routines typically has a performance impact and should not
+be done during production runs.  Therefore there will be some mechanisms to 
+disable the profiling calls.
+
+\sreq{Compile Deactivation}
+
+The library can be turned into stub calls at compile time.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
+\sreq{Runtime Deactivation}
+
+A flag may be set so that calls to the profiling library do no more than check
+this flag and return.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
+\req{Hardware Counter}
+
+Most computers have special registers which keep track of information such
+as floating point operations, cycles, and cache hits/misses.  The profiler will
+provide a high level interface for accessing these registers.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
