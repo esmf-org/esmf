@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.12 2003/04/28 23:15:23 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.13 2003/04/30 07:45:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -18,6 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMC.h"
+#include "ESMC_TimeInterval.h"
 #include "ESMC_Time.h"
 //------------------------------------------------------------------------------
 //BOP
@@ -99,8 +100,19 @@ extern "C" {
            *status = (ptr)->ESMC_TimeGetString(timestring);
        }
 
-       void FTN(c_esmc_timegetdayofyear)(ESMC_Time *ptr,
-                                         double *dayofyear, int *status) {
+       void FTN(c_esmc_timegetdayofyeardouble)(ESMC_Time *ptr,
+                                               double *dayofyear, int *status) {
+           *status = (ptr)->ESMC_TimeGetDayOfYear(dayofyear);
+       }
+
+       void FTN(c_esmc_timegetdayofyearinteger)(ESMC_Time *ptr,
+                                                int *dayofyear, int *status) {
+           *status = (ptr)->ESMC_TimeGetDayOfYear(dayofyear);
+       }
+
+       void FTN(c_esmc_timegetdayofyeartimeint)(ESMC_Time *ptr,
+                                                ESMC_TimeInterval *dayofyear,
+                                                int *status) {
            *status = (ptr)->ESMC_TimeGetDayOfYear(dayofyear);
        }
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.23 2003/04/28 23:17:03 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.24 2003/04/30 07:45:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -95,6 +95,10 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 
+      private ESMF_TimeGetDayOfYearDouble
+      private ESMF_TimeGetDayOfYearInteger
+      private ESMF_TimeGetDayOfYearTimeInt
+
 ! Inherited and overloaded from ESMF_BaseTime
 
       public operator(+)
@@ -126,13 +130,29 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.23 2003/04/28 23:17:03 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.24 2003/04/30 07:45:14 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOP
+! !INTERFACE:
+      interface ESMF_TimeGetDayOfYear
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeGetDayOfYearDouble
+      module procedure ESMF_TimeGetDayOfYearInteger
+      module procedure ESMF_TimeGetDayOfYearTimeInt
+
+! !DESCRIPTION:
+!     This interface overloads the ESMF_GetDayOfYear for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
       interface operator(+)
@@ -764,10 +784,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGetDayOfYear - Get time instant's day of the year
+! !IROUTINE: ESMF_TimeGetDayOfYearDouble - Get time instant's day of the year as a floating point value
 !
 ! !INTERFACE:
-      subroutine ESMF_TimeGetDayOfYear(time, DayOfYear, rc)
+      subroutine ESMF_TimeGetDayOfYearDouble(time, DayOfYear, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Time), intent(in) :: time
@@ -775,7 +795,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the day of the year the given {\tt Time} instant falls on (0.x-364.x)
+!     Get the day of the year the given {\tt Time} instant falls on (1.x-365.x)
 !     Returned as floating point value; fractional part represents the
 !     time of day. 
 !
@@ -784,7 +804,7 @@
 !     \item[time]
 !          The object instance to query
 !     \item[DayOfYear]
-!          The {\tt Time} instant's day of the year (0.x-364.x)
+!          The {\tt Time} instant's day of the year (1-365)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -793,9 +813,76 @@
 !     TMG2.5.2
 !EOP
 
-      call c_ESMC_TimeGetDayOfYear(time, DayOfYear, rc)
+      call c_ESMC_TimeGetDayOfYearDouble(time, DayOfYear, rc)
 
-      end subroutine ESMF_TimeGetDayOfYear
+      end subroutine ESMF_TimeGetDayOfYearDouble
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeGetDayOfYearInteger - Get time instant's day of the year as an integer value
+!
+! !INTERFACE:
+      subroutine ESMF_TimeGetDayOfYearInteger(time, DayOfYear, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time
+      integer, intent(out) :: DayOfYear
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Get the day of the year the given {\tt Time} instant falls on (1-365)
+!     Returned as an integer value
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          The object instance to query
+!     \item[DayOfYear]
+!          The {\tt Time} instant's day of the year (1-365)
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOP
+
+      call c_ESMC_TimeGetDayOfYearInteger(time, DayOfYear, rc)
+
+      end subroutine ESMF_TimeGetDayOfYearInteger
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeGetDayOfYearTimeInt - Get time instant's day of the year as a Time Interval
+!
+! !INTERFACE:
+      subroutine ESMF_TimeGetDayOfYearTimeInt(time, DayOfYear, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time
+      type(ESMF_TimeInterval), intent(out) :: DayOfYear
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Get the day of the year the given {\tt Time} instant falls on (1-365)
+!     Returned as a Time Interval
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          The object instance to query
+!     \item[DayOfYear]
+!          The {\tt Time} instant's day of the year as a
+!            {\tt ESMC_TimeInterval}
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOP
+
+      call c_ESMC_TimeGetDayOfYearTimeInt(time, DayOfYear, rc)
+
+      end subroutine ESMF_TimeGetDayOfYearTimeInt
 
 !------------------------------------------------------------------------------
 !BOP
@@ -810,7 +897,8 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the day of the week the given time instant falls on (1-7)
+!     Get the day of the week the given time instant falls on.
+!     ISO 8601 standard:  Monday = 1 through Sunday = 7
 !
 !     The arguments are:
 !     \begin{description}
