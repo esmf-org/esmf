@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.34 2004/05/24 22:57:22 jwolfe Exp $
+!n $Id: ESMF_FieldComm.F90,v 1.35 2004/05/27 14:53:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,8 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+!
+#define ESMF_FILENAME "ESMF_FieldComm.F90"
 !
 !     ESMF Field Communications module
       module ESMF_FieldCommMod
@@ -76,17 +78,17 @@
    public ESMF_FieldRegridStore, ESMF_FieldRegrid, ESMF_FieldRegridRelease 
 
    public ESMF_FieldGather   ! Combine 1 decomposed field into 1 on 1 DE
-   !public ESMF_FieldAllGather! Combine 1 decomposed field into N copies on N DEs
+  !public ESMF_FieldAllGather! Combine 1 decomposed field into N copies on N DEs
 
    public ESMF_FieldScatter  ! Split 1 field into a decomposed one over N DEs
-   !public ESMF_FieldBroadcast! Send 1 field to all DEs, none decomposed
-   !public ESMF_FieldAlltoAll ! might make sense with bundles; each DE could
+  !public ESMF_FieldBroadcast! Send 1 field to all DEs, none decomposed
+  !public ESMF_FieldAlltoAll ! might make sense with bundles; each DE could
                               ! call with a different non-decomposed field
                               ! and the result would be a packed bundle of
                               ! data with decomposed fields on each DE.
 
    public ESMF_FieldReduce     ! Global reduction operation, return on 1 DE
-   !public ESMF_FieldAllReduce  ! Global reduction operation, return on each DE
+  !public ESMF_FieldAllReduce  ! Global reduction operation, return on each DE
 
 !
 !EOPI
@@ -94,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.34 2004/05/24 22:57:22 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.35 2004/05/27 14:53:19 nscollins Exp $'
 
 !==============================================================================
 !
@@ -136,7 +138,9 @@
 !
 !------------------------------------------------------------------------------
 #if 0
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAllGather"
 !BOP
 ! !IROUTINE: ESMF_FieldAllGather - Data allgather operation on a Field
 
@@ -152,10 +156,10 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a {\tt ESMF\_AllGather} operation
-!     over the data in a {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is
-!     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
-!     entire collected data {\tt ESMF\_Array} on each of the N {\tt ESMF\_DE}s.
+!     Perform an allgather operation
+!     over the data in an {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is
+!     decomposed over N DEs, this routine returns a copy of the
+!     entire collected data {\tt ESMF\_Array} on each of the N DEs.
 !
 !     The arguments are:
 !     \begin{description}
@@ -167,7 +171,7 @@
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
+!           as the communication between DEs has been scheduled.
 !           If not present, default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
@@ -213,6 +217,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGather"
 !BOP
 ! !IROUTINE: ESMF_FieldGather - Data gather operation on a Field
 
@@ -230,28 +236,28 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt ESMF\_Grid} routines to perform a gather operation
-!     over the data in a {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is
-!     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
-!     entire collected data {\tt ESMF\_Array} on the specified destination
-!     {\tt ESMF\_DE} number.  On all other {\tt ESMF\_DE}s, there is no return
-!     {\tt ESMF\_Array}.
+!     Perform a gather operation
+!     over the data in an {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is
+!     decomposed over N DEs, this routine returns a copy of the
+!     entire collected data as an {\tt ESMF\_Array} 
+!     on the specified destination
+!     DE number.  On all other DEs there is no return {\tt array} value.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be gathered.
 !     \item [destinationDE] 
-!           Destination {\tt ESMF\_DE} number where the Gathered Array is to be returned.
+!           Destination DE number where the gathered data is to be returned.
 !     \item [array] 
-!           Newly created array containing the collected data on the
-!           specified {\tt ESMF\_DE}.  It is the size of the entire undecomposed grid.
-!           On all other {\tt ESMF\_DE}s this return is an invalid object.
+!           Newly created {\tt ESMF\_Array} containing the collected data on the
+!           specified DE.  It is the size of the entire undecomposed grid.
+!           On all other DEs this argument returns an invalid object.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
+!           as the communication between DEs has been scheduled.
+!           If not present, the default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
@@ -295,6 +301,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldHaloRun"
 !BOP
 ! !IROUTINE: ESMF_FieldHalo - Execute a Halo operation on a Field
 
@@ -318,14 +326,16 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field] 
-!           {\tt ESMF\_Field} containing data to be halo'd.
+!           {\tt ESMF\_Field} containing data to be haloed.
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} containing index of precomputed information
-!           about this Halo.
+!           {\tt ESMF\_RouteHandle} which was returned by the corresponding
+!           {\tt ESMF\_FieldHaloStore()} call. It is associated with 
+!           the precomputed data movement and communication needed to 
+!           perform the halo operation.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
+!           as the communication between DEs has been scheduled.
 !           If not present, default is what was specified at Store time.
 !           If {\tt both} was specified at Store time, this defaults to  
 !           blocking.
@@ -369,6 +379,8 @@
       end subroutine ESMF_FieldHaloRun
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldHaloRelease"
 !BOP
 ! !IROUTINE: ESMF_FieldHaloRelease - Release resources associated w/ handle
 
@@ -381,13 +393,13 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Release all stored information about the Halo associated
+!     Release all stored information about the halo operation associated
 !     with this {\tt ESMF\_RouteHandle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} associated with this Field Halo.
+!           {\tt ESMF\_RouteHandle} associated with this halo operation.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -399,6 +411,8 @@
       end subroutine ESMF_FieldHaloRelease
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldHaloStore"
 !BOP
 ! !IROUTINE: ESMF_FieldHaloStore - Precompute a Data Halo operation on a Field
 
@@ -413,22 +427,33 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a halo operation over the data
-!     in an {\tt ESMF\_Field}.  This routine updates the data 
-!     inside the {\tt ESMF\_Field} in place.
-!
+!     Precompute the data movement or communication operations needed
+!     to perform a halo operation over the data in an {\tt ESMF\_Field}.
+!     The list of operations will be associated internally to the
+!     framework with the 
+!     {\tt ESMF\_RouteHandle} object.  
+!     To perform the actual halo operation
+!     the {\tt ESMF\_FieldHalo()} routine must be called with the
+!     {\tt ESMF\_Field} containing the data to be updated and the
+!     {\tt ESMF\_RouteHandle} computed during this store call.
+!     If more than one {\tt ESMF\_Field} has identical
+!     {\tt ESMF\_Grid}s and {\tt ESMF\_FieldDataMap}s, then
+!     the same {\tt ESMF\_RouteHandle} can be computed once and used
+!     in multiple executions of the halo operation.
+
 !     The arguments are:
 !     \begin{description}
 !     \item [field] 
-!           {\tt ESMF\_Field} containing data to be halo'd.
+!           {\tt ESMF\_Field} containing data to be haloed.
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} containing index to precomputed 
-!           information for the Halo operation on this {\tt ESMF\_Field}.
-!           This handle must be supplied at run time to execute the Halo.
+!           {\tt ESMF\_RouteHandle} which will be returned after being
+!           associated with the precomputed
+!           information for a halo operation on this {\tt ESMF\_Field}.
+!           This handle must be supplied at run time to execute the halo.
 !     \item [{[halodirection]}]
 !           Optional argument to restrict halo direction to a subset of the
 !           possible halo directions.  If not specified, the halo is executed
-!           along all boundaries.
+!           along all boundaries. (This feature is not yet supported.)
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -478,79 +503,8 @@
       end subroutine ESMF_FieldHaloStore
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldReduce - Reduction operation on a Field
-
-! !INTERFACE:
-      subroutine ESMF_FieldReduce(field, rtype, result, blocking, &
-                                  commhandle, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Field) :: field                 
-      integer :: rtype
-      integer :: result
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-!     Perform a reduction operation over the data in a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field] 
-!           Field containing data to be reduced.
-!     \item [rtype]
-!           Type of reduction operation to perform.  Options include: ...
-!     \item [result] 
-!           Numeric result (may be single number, may be array)
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
-!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
-!           {\tt ESMF\_NONBLOCKING}.
-!     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!           argument is required.  Information about the pending operation
-!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!           or waited for later.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-   
-!     Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-!     Call Grid method to perform actual work
-      !call ESMF_GridReduce(field%ftypep%grid, &
-      !                     field%ftypep%localfield%localdata, &
-      !                     rtype, result, status)
-      !if(status .NE. ESMF_SUCCESS) then 
-      !  print *, "ERROR in FieldReduce: Grid reduce"
-      !  return
-      !endif 
-
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldReduce
-
-
-!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRedist"
 !BOP
 ! !IROUTINE: ESMF_FieldRedist - Data Redistribution operation on a Field
 
@@ -568,8 +522,10 @@
 !
 ! !DESCRIPTION:
 !     Perform a redistribution operation over the data
-!     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves 
-!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_FieldDataMap}
+!     in an {\tt ESMF\_Field}.  
+!     This routine reads the source field and leaves 
+!     the data untouched.  It reads the {\t ESMF\_Grid} 
+!     and {\tt ESMF\_FieldDataMap}
 !     from the destination field and updates the array data in the destination.
 !     The {\tt ESMF\_Grid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
@@ -583,10 +539,15 @@
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField]
 !           {\tt ESMF\_Field} containing destination grid.
+!     \item [routehandle]          
+!           {\tt ESMF\_RouteHandle} which was returned by the corresponding
+!           {\tt ESMF\_FieldRedistStore()} call. It is associated with
+!           the precomputed data movement and communication needed to
+!           perform the redistribution operation.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
+!           as the communication between DEs has been scheduled.
 !           If not present, default is to do synchronous communication.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
@@ -631,6 +592,8 @@
       end subroutine ESMF_FieldRedist
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRedistRelease"
 !BOP
 ! !IROUTINE: ESMF_FieldRedistRelease - Release resources associated w/ handle
 
@@ -649,7 +612,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} associated with this Field Redist.
+!           {\tt ESMF\_RouteHandle} associated with this redistribution.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -662,6 +625,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRedistStore"
 !BOP
 ! !IROUTINE: ESMF_FieldRedistStore - Data Redistribution operation on a Field
 
@@ -678,16 +643,17 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Precompute a redistribution operation over the data
-!     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves 
-!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_FieldDataMap}
-!     from the destination field and updates the array data in the destination.
-!     The {\tt ESMF\_Grid}s may have different decompositions (different
-!     {\tt ESMF\_DELayout}s) or different data maps, but the source and
-!     destination grids must describe the same set of coordinates.
-!     Unlike {\tt ESMF\_FieldRegrid} this routine does not do interpolation,
-!     only data movement.
-!
+!     Precompute the data movement or communications operations needed to
+!     accomplish a data redistribution operation over the data
+!     in an {\tt ESMF\_Field}.  Data redistribution differs from regridding
+!     in that redistribution does no interpolation, only a 1-for-1 movement
+!     of data from one location to another.
+!     Therefore, while
+!     the {\tt ESMF\_Grid}s for the source and destination may have
+!     different decompositions (different {\tt ESMF\_DELayout}s)
+!     or different data maps, the source and destination grids
+!     must describe the same set of coordinates.
+
 !     The arguments are:
 !     \begin{description}
 !     \item [srcField] 
@@ -765,6 +731,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRedistStoreNew"
 !BOP
 ! !IROUTINE: ESMF_FieldRedistStore - Data Redistribution operation on a Field
 
@@ -871,6 +839,84 @@
       end subroutine ESMF_FieldRedistStoreNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldReduce"
+!BOP
+! !IROUTINE: ESMF_FieldReduce - Reduction operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldReduce(field, rtype, result, blocking, &
+                                  commhandle, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field) :: field                 
+      integer :: rtype
+      integer :: result
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a reduction operation over the data in a {\tt ESMF\_Field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field] 
+!           {\tt ESMF\_Field} containing data to be reduced.
+!     \item [rtype]
+!           Type of reduction operation to perform.  Options include: ...
+!           (Not yet implemented).
+!     \item [result] 
+!           Numeric result (may be single number, may be array)
+!     \item [{[blocking]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between DEs has been scheduled.
+!           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+   
+!     Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+!     Call Grid method to perform actual work
+      !call ESMF_GridReduce(field%ftypep%grid, &
+      !                     field%ftypep%localfield%localdata, &
+      !                     rtype, result, status)
+      !if(status .NE. ESMF_SUCCESS) then 
+      !  print *, "ERROR in FieldReduce: Grid reduce"
+      !  return
+      !endif 
+
+!     Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldReduce
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRegrid"
 !BOP
 ! !IROUTINE: ESMF_FieldRegrid - Data Regrid operation on a Field
 
@@ -891,7 +937,7 @@
 !
 ! !DESCRIPTION:
 !     Perform a regrid operation over the data
-!     in a {\tt ESMF\_Field}.  This routine reads the source field and 
+!     in an {\tt ESMF\_Field}.  This routine reads the source field and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
 !     {\tt ESMF\_FieldDataMap} information in the destination field to
 !     control the transformation of data.  The array data in the 
@@ -904,17 +950,20 @@
 !     \item [dstfield] 
 !           {\tt ESMF\_Field} containing destination grid and data map.
 !     \item [routehandle]
-!           Created by a call to {\tt ESMF\_FieldRegridStore}.
-!           Identifies the precomputed work which
-!           will be executed when {\tt ESMF\_FieldRegrid} is called.
+!           {\tt ESMF\_RouteHandle} which will be returned after being
+!           associated with the precomputed
+!           information for a regrid operation on this {\tt ESMF\_Field}.
+!           This handle must be supplied at run time to execute the regrid.
 !     \item [{[srcmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
+!           (Not yet implemented.)
 !     \item [{[dstmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!           (Not yet implemented.)
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
+!           as the communication between DEs has been scheduled.
 !           If not present, default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
@@ -1026,6 +1075,8 @@
       end subroutine ESMF_FieldRegrid
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRegridRelease"
 !BOP
 ! !IROUTINE: ESMF_FieldRegridRelease - Release information for this handle
 
@@ -1044,7 +1095,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} associated with this Field regridding.
+!           {\tt ESMF\_RouteHandle} associated with this regrid operation.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1057,6 +1108,8 @@
       end subroutine ESMF_FieldRegridRelease
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRegridStore"
 !BOP
 ! !IROUTINE: ESMF_FieldRegridStore - Data Regrid operation on a Field
 
@@ -1078,13 +1131,13 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Precompute a regrid operation over the data
-!     in an {\tt ESMF\_Field}.  This routine reads the source field and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
-!     {\tt ESMF\_FieldDataMap} information in the destination field to
-!     control the transformation of data.  The {\tt routehandle} is
-!     returned to identify the stored information, and must be supplied
-!     to the execution call to actually move the data.
+!     Precompute the data movement or communications operations plus the
+!     interpolation information needed to execute
+!     a regrid operation which will move and transform data
+!     from the source field to the destination field.
+!     This information is associated with the {\tt ESMF\_RouteHandle}
+!     which must then be supplied during the actual execution of the
+!     regrid operation.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1194,6 +1247,8 @@
       end subroutine ESMF_FieldRegridStore
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldScatter"
 !BOP
 ! !IROUTINE: ESMF_FieldScatter - Data Scatter operation on a Field
 
@@ -1212,10 +1267,10 @@
 !
 ! !DESCRIPTION:
 !     Perform a scatter operation over the data in an {\tt ESMF\_Array}, 
-!     returning it as the data array in a {\tt ESMF\_Field}.  
-!     If the Field is decomposed over N {\tt ESMF\_DE}s, this routine
-!     takes a single array on the specified {\tt ESMF\_DE} and returns 
-!     a decomposed copy on each of the N {\tt ESMF\_DE}s, as the 
+!     returning it as the data array in an {\tt ESMF\_Field}.  
+!     If the Field is decomposed over N DEs, this routine
+!     takes a single array on the specified DE and returns 
+!     a decomposed copy on each of the N DEs, as the 
 !     {\tt ESMF\_Array} associated with the given empty {\tt ESMF\_Field}.
 !
 !     The arguments are:
@@ -1224,8 +1279,8 @@
 !      Input {\tt ESMF\_Array} containing the collected data.
 !      It must be the size of the entire undecomposed grid.
 !     \item [sourceDE]
-!      Integer {\tt ESMF\_DE} number where the data to be Scattered is located.
-!      The {\tt ESMF\_Array} input is ignored on all other {\tt ESMF\_DE}s.
+!      Integer DE number where the data to be Scattered is located.
+!      The {\tt ESMF\_Array} input is ignored on all other DEs.
 !     \item [field] 
 !      Empty Field containing {\tt ESMF\_Grid} which will correspond to the 
 !      data in the array which will be scattered.  When this routine returns
@@ -1234,15 +1289,15 @@
 !     \item [{[blocking]}]
 !      Optional argument which specifies whether the operation should
 !      wait until complete before returning or return as soon
-!      as the communication between {\tt DE}s has been scheduled.
+!      as the communication between DEs has been scheduled.
 !      If not present, default is to do synchronous communications.
-!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
-!           {\tt ESMF\_NONBLOCKING}.
+!      Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!      {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!           argument is required.  Information about the pending operation
-!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!           or waited for later.
+!      If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!      argument is required.  Information about the pending operation
+!      will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!      or waited for later.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1322,6 +1377,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldHaloDeprecated"
 !BOPI
 ! !IROUTINE: ESMF_FieldHaloDeprecated - Data Halo operation on a Field
 
@@ -1337,9 +1394,9 @@
 !
 ! !DESCRIPTION:
 !  {\tt DEPRECATED!} - these args are for the previous version of Halo
-!   which did internal caching.  The next version of the software will
-!    have a Precompute/Store call and then FieldHalo will take a 
-!    handle and do the execution of a precomputed route.  This routine
+!   which did internal caching.  The current version of the software 
+!    has a Precompute/Store call, and FieldHalo takes this
+!    handle and does the execution of a precomputed route.  This routine
 !    remains only until the new interfaces are working.
 !
 !     Perform a {\tt Halo} operation over the data
@@ -1353,7 +1410,7 @@
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
+!           as the communication between DEs has been scheduled.
 !           If not present, default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.24 2004/05/25 04:48:32 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.25 2004/05/27 14:52:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.24 2004/05/25 04:48:32 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.25 2004/05/27 14:52:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -140,9 +140,9 @@
 !
 ! !DESCRIPTION:
 !     Perform an allgather operation
-!     over the data in a {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} is
-!     decomposed over N {\tt DE}s, this routine returns a copy of the
-!     entire collected data {\tt ESMF\_Array} on each of the N {\tt DE}s.
+!     over the data in an {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} is
+!     decomposed over N DEs, this routine returns a copy of the
+!     entire collected data {\tt ESMF\_Array} on each of the N DEs.
 !
 !     The arguments are:
 !     \begin{description}
@@ -154,7 +154,7 @@
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
+!           as the communication between DEs has been scheduled.
 !           If not present, default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
@@ -222,26 +222,26 @@
 ! !DESCRIPTION:
 !     Perform a gather operation
 !     over the data in an {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} is
-!     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
-!     entire collected data {\tt ESMF\_Array} on the specified destination
-!     {\tt ESMF\_DE} number.  On all other {\tt ESMF\_DE}s, there is no return
-!     {\tt ESMF\_Array}.
+!     decomposed over N DEs, this routine returns a copy of the
+!     entire collected data as an {\tt ESMF\_Array} 
+!     on the specified destination
+!     DE number.  On all other DEs there is no return {\tt array} value.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
 !           {\tt ESMF\_Bundle} containing data to be gathered.
 !     \item [destinationDE] 
-!           Destination {\tt ESMF\_DE} number where the Gathered Array is to be returned.
+!           Destination DE number where the gathered data is to be returned.
 !     \item [array] 
-!           Newly created array containing the collected data on the
-!           specified {\tt ESMF\_DE}.  It is the size of the entire undecomposed grid.
-!           On all other {\tt ESMF\_DE}s this return is an invalid object.
+!           Newly created {\tt ESMF\_Array} containing the collected data on the
+!           specified DE.  It is the size of the entire undecomposed grid.
+!           On all other DEs this argument returns an invalid object.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
+!           as the communication between DEs has been scheduled.
+!           If not present, the default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
@@ -287,212 +287,6 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleReduce"
-!BOP
-! !IROUTINE: ESMF_BundleReduce - Reduction operation on a Bundle
-
-! !INTERFACE:
-      subroutine ESMF_BundleReduce(bundle, rtype, result, blocking, commhandle, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle) :: bundle                 
-      integer :: rtype
-      integer :: result
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-!     Perform a reduction operation over the data in an {\tt ESMF\_Bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle] 
-!           Bundle containing data to be reduced.
-!     \item [rtype]
-!           Type of reduction operation to perform.  Options include: ...
-!     \item [result] 
-!           Numeric result (may be single number, may be array)
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
-!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
-!           {\tt ESMF\_NONBLOCKING}.
-!     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!           argument is required.  Information about the pending operation
-!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!           or waited for later.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-   
-!     Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-!     Call Grid method to perform actual work
-      !call ESMF_GridReduce(field%btypep%grid, &
-      !                     field%btypep%flist(1)%ftypep%localfield%localdata, &
-      !                     rtype, result, status)
-      !if(status .NE. ESMF_SUCCESS) then 
-      !  print *, "ERROR in BundleReduce: Grid reduce"
-      !  return
-      !endif 
-
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleReduce
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleScatter"
-!BOP
-! !IROUTINE: ESMF_BundleScatter - Data Scatter operation on a Bundle
-
-! !INTERFACE:
-      subroutine ESMF_BundleScatter(array, sourceDE, bundle, blocking, commhandle, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
-      integer, intent(in) :: sourceDE
-      type(ESMF_Bundle), intent(inout) :: bundle                 
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-!   Perform a scatter operation over the data
-!   in an {\tt ESMF\_Array}, returning it as the data array 
-!   in a {\tt ESMF\_Bundle}.  
-!   If the Bundle is decomposed over N {\tt ESMF\_DE}s, this routine
-!   takes a single array on the specified {\tt ESMF\_DE} and 
-!   returns a decomposed copy
-!   on each of the N {\tt ESMF\_DE}s, as the {\tt ESMF\_Array} 
-!   associated with the given empty {\tt ESMF\_Bundle}.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item [array] 
-!         Input {\tt ESMF\_Array} containing the collected data.
-!         It must be the size of the entire undecomposed grid.
-!   \item [sourceDE]
-!         Integer {\tt ESMF\_DE} number where the data to be scattered 
-!         is located.  The
-!         {\tt ESMF\_Array} input is ignored on all other {\tt ESMF\_DE}s.
-!   \item [bundle] 
-!         Empty Bundle containing {\tt ESMF\_Grid} which will correspond to 
-!         the data 
-!         in the array which will be scattered.  When this routine returns
-!         each {\tt ESMF\_Bundle} will contain a valid data array containing 
-!         the subset of the decomposed data.
-!   \item [{[blocking]}]
-!         Optional argument which specifies whether the operation should
-!         wait until complete before returning or return as soon
-!         as the communication between {\tt DE}s has been scheduled.
-!         If not present, default is to do synchronous communications.
-!         Valid values for this flag are {\tt ESMF\_BLOCKING} and 
-!         {\tt ESMF\_NONBLOCKING}.
-!   \item [{[commhandle]}]
-!         If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!         argument is required.  Information about the pending operation
-!         will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!         or waited for later.
-!   \item [{[rc]}] 
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: btypep             ! bundle type info
-      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_DELayout) :: delayout          ! layout
-      type(ESMF_Array) :: dstarray                ! Destination array
-      integer :: i, datarank, thisdim, thislength, numDims
-      integer :: dimorder(ESMF_MAXDIM)   
-      integer :: dimlengths(ESMF_MAXDIM)   
-      integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
-   
-      ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-      btypep = bundle%btypep
-
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indices and the grid indices.
-      call ESMF_FieldDataMapGet(btypep%flist(1)%ftypep%mapping, &
-                           dataIndices=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleScatter: FieldDataMapGet returned failure"
-        return
-      endif 
-!     call ESMF_GridGet(btypep%grid, decomps, rc=status)   !TODO
-!     if(status .NE. ESMF_SUCCESS) then 
-!       print *, "ERROR in BundleScatter: GridGet returned failure"
-!       return
-!     endif 
-      decomps(1) = 1    ! TODO: remove this once the grid call is created
-      decomps(2) = 2
-
-      ! And get the Array sizes
-      call ESMF_ArrayGet(btypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
-                         counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: ArrayGet returned failure"
-        return
-      endif 
-
-      do i=1, datarank
-        decompids(i) = dimorder(i)
-        if(dimorder(i).ne.0) decompids(i) = decomps(dimorder(i))
-      enddo
-
-      ! Call Array method to perform actual work
-      call ESMF_GridGet(btypep%grid, delayout=delayout, rc=status)
-      call ESMF_ArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
-                             status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleScatter: Array Scatter returned failure"
-        return
-      endif 
-
-      ! TODO: do we need to set dimorder here?  should datamap be an input
-      !  to this routine, or specified at create time?   or should this be
-      !  a bundle create method?
-      btypep%flist(1)%ftypep%localfield%localdata = dstarray
-
-      ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleScatter
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHalo"
 !BOP
 ! !IROUTINE: ESMF_BundleHalo - Execute a Data Halo operation on a Bundle
@@ -518,12 +312,14 @@
 !     \item [bundle] 
 !           {\tt ESMF\_Bundle} containing data to be haloed.
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} containing index of precomputed information
-!           about this Halo.
+!           {\tt ESMF\_RouteHandle} which was returned by the corresponding
+!           {\tt ESMF\_BundleHaloStore()} call. It is associated with 
+!           the precomputed data movement and communication needed to 
+!           perform the halo operation.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
+!           as the communication between DEs has been scheduled.
 !           If not present, default is what was specified at Store time.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -633,7 +429,7 @@
 !     \item [{[halodirection]}]
 !           Optional argument to restrict halo direction to a subset of the
 !           possible halo directions.  If not specified, the halo is executed
-!           along all boundaries.
+!           along all boundaries. (This feature is not yet supported.)
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -689,14 +485,13 @@
 ! !IROUTINE: ESMF_BundleRedist - Data Redistribution operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedist(srcBundle, dstBundle, parentDElayout, &
+      subroutine ESMF_BundleRedist(srcBundle, dstBundle, &
                                    routehandle, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcBundle
       type(ESMF_Bundle), intent(inout) :: dstBundle
-      type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
@@ -712,7 +507,7 @@
 !     The {\tt ESMF\_Grid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
 !     destination grids must describe the same set of coordinates.
-!     Unlike {\tt ESMF\_Regrid} this routine does not do interpolation,
+!     Unlike {\tt ESMF\_BundleRegrid} this routine does not do interpolation,
 !     only data movement.
 !
 !     The arguments are:
@@ -721,16 +516,15 @@
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstbundle] 
 !           {\tt ESMF\_Bundle} containing destination grid.
-!     \item [parentDElayout]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Bundle}s, 
-!           most commonly the layout
-!           of the Coupler if the redistribution is inter-component, 
-!           but could also be the individual layout for a component if the 
-!           redistribution is intra-component.  
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} which was returned by the corresponding
+!           {\tt ESMF\_BundleRedistStore()} call. It is associated with
+!           the precomputed data movement and communication needed to
+!           perform the redistribution operation.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
+!           as the communication between DEs has been scheduled.
 !           If not present, default is to do synchronous communication.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
@@ -790,13 +584,13 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Release all stored information about the redist operation associated
-!     with this {\tt ESMF\_RouteHandle}.
+!  Release all stored information about the redistribution operation associated
+!  with this {\tt ESMF\_RouteHandle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} associated with this Bundle Redist.
+!           {\tt ESMF\_RouteHandle} associated with this redistribution.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -914,19 +708,96 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleReduce"
+!BOP
+! !IROUTINE: ESMF_BundleReduce - Reduction operation on a Bundle
+
+! !INTERFACE:
+      subroutine ESMF_BundleReduce(bundle, rtype, result, blocking, commhandle, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle) :: bundle                 
+      integer :: rtype
+      integer :: result
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a reduction operation over the data in an {\tt ESMF\_Bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle] 
+!           {\tt ESMF\_Bundle} containing data to be reduced.
+!     \item [rtype]
+!           Type of reduction operation to perform.  Options include: ...
+!           (Not yet implemented).
+!     \item [result] 
+!           Numeric result (may be single number, may be array)
+!     \item [{[blocking]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between DEs has been scheduled.
+!           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+   
+!     Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+!     Call Grid method to perform actual work
+      !call ESMF_GridReduce(field%btypep%grid, &
+      !                     field%btypep%flist(1)%ftypep%localfield%localdata, &
+      !                     rtype, result, status)
+      !if(status .NE. ESMF_SUCCESS) then 
+      !  print *, "ERROR in BundleReduce: Grid reduce"
+      !  return
+      !endif 
+
+!     Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleReduce
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRegrid"
 !BOP
 ! !IROUTINE: ESMF_BundleRegrid - Execute a Regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegrid(srcbundle, dstbundle, parentDElayout, &
-                                   blocking, commhandle, rc)
+      subroutine ESMF_BundleRegrid(srcbundle, dstbundle, routehandle, &
+                                   srcmask, dstmask, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcbundle
       type(ESMF_Bundle), intent(inout) :: dstbundle
-      type(ESMF_DELayout), intent(in) :: parentDElayout
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Mask), intent(in), optional :: srcmask
+      type(ESMF_Mask), intent(in), optional :: dstmask
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc
@@ -945,16 +816,21 @@
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstbundle] 
 !           {\tt ESMF\_Bundle} containing destination grid and data map.
-!     \item [parentDElayout]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Bundle}s, 
-!           most commonly the layout
-!           of the Coupler if the regridding is inter-component, but could 
-!           also be the individual layout for a component if the 
-!           regridding is intra-component.  
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} which will be returned after being
+!           associated with the precomputed
+!           information for a regrid operation on this {\tt ESMF\_Field}.
+!           This handle must be supplied at run time to execute the regrid.
+!     \item [{[srcmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid source data.
+!           (Not yet implemented.)
+!     \item [{[dstmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!           (Not yet implemented.)
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
+!           as the communication between DEs has been scheduled.
 !           If not present, default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
@@ -1064,9 +940,9 @@
 !           of the Coupler if the regridding is inter-component, but could 
 !           also be the individual layout for a component if the 
 !           regridding is intra-component.  
-!     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} containing precomputed information
-!           about this regrid operation.
+!     \item [routehandle]
+!           Output from this call, identifies the precomputed work which
+!           will be executed when {\tt ESMF\_FieldRegrid} is called.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1093,6 +969,139 @@
       !if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRegridStore
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleScatter"
+!BOP
+! !IROUTINE: ESMF_BundleScatter - Data Scatter operation on a Bundle
+
+! !INTERFACE:
+      subroutine ESMF_BundleScatter(array, sourceDE, bundle, blocking, commhandle, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array
+      integer, intent(in) :: sourceDE
+      type(ESMF_Bundle), intent(inout) :: bundle                 
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!   Perform a scatter operation over the data
+!   in an {\tt ESMF\_Array}, returning it as the data array 
+!   in an {\tt ESMF\_Bundle}.  
+!   If the Bundle is decomposed over N DEs, this routine
+!   takes a single array on the specified DE and 
+!   returns a decomposed copy
+!   on each of the N DEs, as the {\tt ESMF\_Array} 
+!   associated with the given empty {\tt ESMF\_Bundle}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [array] 
+!         Input {\tt ESMF\_Array} containing the collected data.
+!         It must be the size of the entire undecomposed grid.
+!   \item [sourceDE]
+!         Integer DE number where the data to be scattered 
+!         is located.  The
+!         {\tt ESMF\_Array} input is ignored on all other DEs.
+!   \item [bundle] 
+!         Empty Bundle containing {\tt ESMF\_Grid} which will correspond to 
+!         the data 
+!         in the array which will be scattered.  When this routine returns
+!         each {\tt ESMF\_Bundle} will contain a valid data array containing 
+!         the subset of the decomposed data.
+!   \item [{[blocking]}]
+!         Optional argument which specifies whether the operation should
+!         wait until complete before returning or return as soon
+!         as the communication between DEs has been scheduled.
+!         If not present, default is to do synchronous communications.
+!         Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!         {\tt ESMF\_NONBLOCKING}.
+!   \item [{[commhandle]}]
+!         If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!         argument is required.  Information about the pending operation
+!         will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!         or waited for later.
+!   \item [{[rc]}] 
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_BundleType) :: btypep             ! bundle type info
+      !type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
+      type(ESMF_DELayout) :: delayout          ! layout
+      type(ESMF_Array) :: dstarray                ! Destination array
+      integer :: i, datarank
+      !integer :: thisdim, thislength, numDims
+      integer :: dimorder(ESMF_MAXDIM)   
+      integer :: dimlengths(ESMF_MAXDIM)   
+      integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      btypep = bundle%btypep
+
+      ! Query the datamap and set info for grid so it knows how to
+      !  match up the array indices and the grid indices.
+      call ESMF_FieldDataMapGet(btypep%flist(1)%ftypep%mapping, &
+                           dataIndices=dimorder, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in BundleScatter: FieldDataMapGet returned failure"
+        return
+      endif 
+!     call ESMF_GridGet(btypep%grid, decomps, rc=status)   !TODO
+!     if(status .NE. ESMF_SUCCESS) then 
+!       print *, "ERROR in BundleScatter: GridGet returned failure"
+!       return
+!     endif 
+      decomps(1) = 1    ! TODO: remove this once the grid call is created
+      decomps(2) = 2
+
+      ! And get the Array sizes
+      call ESMF_ArrayGet(btypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
+                         counts=dimlengths, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in BundleGather: ArrayGet returned failure"
+        return
+      endif 
+
+      do i=1, datarank
+        decompids(i) = dimorder(i)
+        if(dimorder(i).ne.0) decompids(i) = decomps(dimorder(i))
+      enddo
+
+      ! Call Array method to perform actual work
+      call ESMF_GridGet(btypep%grid, delayout=delayout, rc=status)
+      call ESMF_ArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
+                             status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in BundleScatter: Array Scatter returned failure"
+        return
+      endif 
+
+      ! TODO: do we need to set dimorder here?  should datamap be an input
+      !  to this routine, or specified at create time?   or should this be
+      !  a bundle create method?
+      btypep%flist(1)%ftypep%localfield%localdata = dstarray
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleScatter
 
 
 !------------------------------------------------------------------------------
