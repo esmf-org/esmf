@@ -1,4 +1,78 @@
-\subsection{Gridded Components}
+\section{Gridded Components}
+
+\subsection{Introduction}
+
+Purpose: Uniform access to data, regardless of platform, memory
+hierarchy, data decomposition.
+
+Methods to get global information about a dataset, get coordinate
+and topology information, and methods
+to get a pointer to the start of a data subset for local processing. 
+
+Grid carries coordinate and decomposition information, Data Array carries actual
+data values, Field ties them together.  Bundles allow multiple
+fields on the same grid to be manipulated as a single unit.
+
+\subsection{Overview}
+
+Fields are the basic data carrying object in the ESMF library.
+
+The Field object connects computational Data objects, the underlying
+physical and distributed Grid objects, and metadata Attribute objects.  
+It provides methods
+for setting, retrieving, configuring, and querying these subobjects,
+as well as methods for manipulating the relationship between the
+data and the grid, and for doing data I/O. 
+
+The Bundle object collects multiple Field objects which share a
+common or compatible Grid object.  In addition to the basic methods for
+setting, retrieving, and querying the constituent Fields, it provides
+methods for configuring and querying memory layouts for the Data objects
+and some limited collective operations on all Fields in a Bundle.
+
+A Grid object is responsible for
+maintaining all information about the global coordinates and about how
+the decomposition of the whole problem is spread across multiple
+processing elements.  
+See Section~\ref{??} for more information about Grid objects.  
+The Field object uses information from the Grid object to provide
+two different types of views of the field to the calling code.
+One is a unified logical view of the entire Field as a whole,
+regardless of the current decomposition.  The other view allows code
+running on a single processing element to query and retrieve a pointer 
+to the subset of the Field which is local to that processing element,
+and to make requests that result in data being updated among neigboring
+subsets (e.g. Halo updates).
+% and to request updates of Halo regions when synchronizing with
+% processing elements handling neighboring subsets.
+
+A Field must contain a Grid object to be valid even if the data does not
+have any spatial location.  This is to allow subsetting across multiple
+processors and to ensure that Validation routines can distinguish between
+Fields with no coordinate information and invalid Field objects.
+
+A Data object is responsible for maintaining
+information about the individual value type (e.g. float, integer), 
+the physical representation (e.g. Cray format float vs IEEE), the 
+individual data item length (e.g. scalar, vector, vector length), 
+data count, and memory ordering information such as Fortran vs C order 
+for multidimensional arrays.  
+The Data objects utilize an Ordering subobject to store the
+memory layout information and to manage memory reordering requests.
+Data methods include returning a pointer to the start of the data
+array, and methods for reordering and subsetting the data.
+
+The Attribute object can be associated with any object in the system,
+and maintains a list of (name,value) pairs.  Fields are required to
+have at least a unique name, so all Field objects will have an associated
+Attribute object.
+
+
+\subsection{Examples}
+
+<< to be written >>
+
+\subsection{Object Model}
 
 Gridded Components encapsulate the computational data and the
 grid on which it is located.  A Gridded Component contains
@@ -25,13 +99,20 @@ reordering of that packed data, and detaching and attaching the data.
 \label{sec:packeddataarray} 
 \begin{description}
 \item [Description] A Packed Data Array contains data from one or more Fields, where the
-data items are interleaved in memory. The application may use a packed array to maintain
+data items are interleaved in memory. The application may use a packed array to increase
 locality of reference while iterating the array, or for ease in subsetting multiple
 data values in one operation.
 \item [Function] The PackedData class provides methods for packing and querying arrays,
 subsetting the data, and repacking the data in a different order.  The PackedData object
-contains an Ordering object to maintain the information about the structure of the packing.
-It is contained by a Bundle object.  Application access is through Bundle methods.
+contains one or more Data Array objects which maintain information about the 
+types, format, etc.\ of individual data items, but they do not contain
+pointers to the data buffer; the PackedData object contains this pointer.
+An Ordering object contains information about the structure of the packing.
+A PackedData object is contained by a Bundle object.  
+Application access is through Bundle methods.
+
+Packed Data Arrays differ from simpler Data Arrays in that the data
+items are no longer homogeneous; each individual item is a composite type.
 \end{description}
 
 \subsubsection{Field (ESMF\_Field)}
@@ -72,15 +153,23 @@ integer), the machine type (e.g. IEEE float, Cray float), data count, data dimen
 returning a pointer to the memory location of the start of the data, and conversion routines
 for altering the characteristics of the data.  Information about how the data array is laid
 out in memory is contained in an Ordering class.
+
+Data Arrays can be associated with a Field object or with a PackedData object.
+Data associated with a Field object contains only a single variable.  Data associated
+with a PackedData object can have data from multiple Fields packed into a single
+buffer.  The information about the multi-field packing is contained in an
+Ordering object.
 \end{description}
 
 \subsubsection{Ordering (ESMF\_Ordering)}
 \label{sec:ordering} 
 \begin{description}
 \item [Description] A Ordering is the description of how multidimentional data have been
-linearized in memory.  This includes both multidimensional array index information (e.g. C-order
-vs Fortran-order) as well as vector or tensor data item information (e.g. all Xs then all
-Ys vs [X,Y], [X,Y] tuples).
+linearized in memory.  This includes multidimensional array index information (e.g. C-order
+vs Fortran-order), vector or tensor data item ordering information (e.g. all Xs then all
+Ys vs [X,Y], [X,Y] tuples), and for Arrays associated with a Bundle object which contain
+data for multiple fields, interleave information about how multiple field data is 
+packed into a single buffer.
 \item [Function] An Ordering object is associated with a single Data object.  It provides
 methods to query the current memory organization and methods to reorder the Data object.
 \end{description}
