@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.134 2005/03/10 17:46:05 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.135 2005/03/14 18:14:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.134 2005/03/10 17:46:05 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.135 2005/03/14 18:14:46 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1104,8 +1104,14 @@
       if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
         madeSendBufList = new bool[maxReqCount];
         madeRecvBufList = new bool[maxReqCount];
+      } else if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
+        // these might not be used, but in the case where we change packing
+        // strategies on the fly, allocate enough to cover that case.
+        madeSendBufList = new bool[commCount];
+        madeRecvBufList = new bool[commCount];
+      } else {
+        madeSendBufList = madeRecvBufList = NULL;
       }
-
 // -----------------------------------------------------------------------
 // For asynchronous communications we have separate loops to send and recv
 // Send loop first, which includes the packing:
@@ -1664,7 +1670,8 @@
           delete [] recvBufferList;
       }
       // free any necessary arrays for specific options
-      if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
+      if ((useOptions & ESMC_ROUTE_OPTION_PACK_XP) ||
+          (useOptions & ESMC_ROUTE_OPTION_PACK_PET)) {
         delete [] madeSendBufList;
         delete [] madeRecvBufList;
       }
