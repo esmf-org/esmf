@@ -75,7 +75,7 @@
       end if
 
 !BOC
-      grid = ESMF_GridCreateLogRectUniform(numDims=2, counts=counts, &
+      grid = ESMF_GridCreateLogRectUniform(dimCount=2, counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               layout=layout, &
