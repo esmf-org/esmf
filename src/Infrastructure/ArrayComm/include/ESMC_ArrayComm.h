@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm.h,v 1.2 2003/12/08 18:29:09 jwolfe Exp $
+// $Id: ESMC_ArrayComm.h,v 1.3 2003/12/08 18:53:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,9 +61,10 @@
     int ESMC_ArrayAllGather(ESMC_DELayout *layout, int decompids[],
                             int size_decomp, int localAxisLengths[],
                             int size_axislengths, int global_dimlengths[],
-                            ESMC_Array **Array_out);
+                            int local_maxlengths[], ESMC_Array **Array_out);
     int ESMC_ArrayGather(ESMC_DELayout *layout, int decompids[], 
                             int size_decomp, int global_dimlengths[],
+                            int local_maxlengths[], 
                             int deid, ESMC_Array **Array_out);
     int ESMC_ArrayScatter(ESMC_DELayout *layout,
                             int decompids[], int size_decomp,

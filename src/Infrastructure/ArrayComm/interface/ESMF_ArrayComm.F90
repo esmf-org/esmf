@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.4 2003/12/08 18:32:13 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.5 2003/12/08 18:53:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.4 2003/12/08 18:32:13 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.5 2003/12/08 18:53:30 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -856,7 +856,7 @@
 ! !INTERFACE:
       subroutine ESMF_ArrayAllGatherList(array, layout, decompids, &
                                          localAxisLengths, globalDimLengths, &
-                                         array_out, rc)
+                                         local_maxlengths, array_out, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
@@ -864,6 +864,7 @@
       integer, dimension(:), intent(in) :: decompids
       integer, dimension(:,:), intent(in) :: localAxisLengths
       integer, dimension(:), intent(in) :: globalDimLengths
+      integer, dimension(:), intent(in) :: local_maxlengths
       type(ESMF_Array), intent(out) :: array_out
       integer, intent(out), optional :: rc
 !
@@ -890,7 +891,8 @@
         size_axislengths = size(localAxisLengths,1) * size(localAxisLengths,2)
         call c_ESMC_ArrayAllGather(array, layout, decompids, size_decomp, &
                                    localAxisLengths, size_axislengths, &
-                                   globalDimLengths, array_out, status)
+                                   globalDimLengths, local_maxlengths, &
+                                   array_out, status)
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "c_ESMC_ArrayAllGather returned error"
@@ -906,13 +908,15 @@
 !BOP
 ! !INTERFACE:
       subroutine ESMF_ArrayGather(array, layout, decompids, &
-                                  global_dimlengths, deid, array_out, rc)
+                                  global_dimlengths, local_maxlengths, deid, &
+                                  array_out, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
       type(ESMF_DELayout), intent(in) :: layout
       integer, dimension(:), intent(in) :: decompids
       integer, dimension(:), intent(in) :: global_dimlengths
+      integer, dimension(:), intent(in) :: local_maxlengths
       integer, intent(in) :: deid
       type(ESMF_Array), intent(out) :: array_out
       integer, intent(out), optional :: rc
@@ -939,7 +943,8 @@
 ! call c routine to allgather
         size_decomp = size(decompids)
         call c_ESMC_ArrayGather(array, layout, decompids, size_decomp, &
-                                global_dimlengths, deid, array_out, status)
+                                global_dimlengths, local_maxlengths, deid, &
+                                array_out, status)
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "c_ESMC_ArrayGather returned error"

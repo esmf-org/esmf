@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.2 2003/12/08 18:32:43 jwolfe Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.3 2003/12/08 18:53:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -97,7 +97,8 @@
         // call layoutgather to fill this array
         fp0 = (float *)this->base_addr;
         layout->ESMC_DELayoutGatherArrayF(fp0, global_dimlengths, decompids, 
-                                          size_decomp, ai_comp, ai_total, fp);
+                                          size_decomp, local_maxlengths, 
+                                          local_axis_length, ai_comp, ai_total, fp);
 
         // switch based on array rank
         switch (this->rank) {
@@ -222,7 +223,8 @@
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
         layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, decompids,
-                                          size_decomp, ai_comp, ai_total, ip);
+                                          size_decomp, local_maxlengths, 
+                                          local_axis_length, ai_comp, ai_total, ip);
 
         // switch based on array rank
         switch (this->rank) {
@@ -368,6 +370,7 @@
       int localAxisLengths[],    // in  - length of each axis for each DE
       int size_axislengths,      // in  - size of axislengths array
       int global_dimlengths[],   // in  - array of global dimensions
+      int local_maxlengths[],    // in  - array of maximum counts on any DE per dim
       ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
 // !DESCRIPTION:
@@ -381,6 +384,7 @@
     int i, j, k, l, m;     // general counter vars
     int i_exc, j_exc;
     float *fp, *fp0;
+    double *dp, *dp0;
     int *ip, *ip0;
     int counts[ESMF_MAXDIM];
     ESMC_Array *gathered;
@@ -398,17 +402,35 @@
     // switch based on datatype  TODO: this might be a good place to use templates
     switch (this->type) {
       case ESMF_DATA_REAL:
-        // create array with global data buffer
-        gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
-        // allocate global array from this size
-        fp = (float *)(gathered->base_addr);
-
-        // call layoutgather to fill this array
-        fp0 = (float *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayF(fp0, global_dimlengths, decompids,
-                                          size_decomp, ai_comp, ai_total, fp);
-
-      break;
+        switch (this->kind) {
+          case ESMF_R4:
+            // create array with global data buffer
+            gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+            // allocate global array from this size
+            fp = (float *)(gathered->base_addr);
+    
+            // call layoutgather to fill this array
+            fp0 = (float *)this->base_addr;
+            layout->ESMC_DELayoutGatherArrayF(fp0, global_dimlengths, decompids,
+                                             size_decomp, local_maxlengths,
+                                             local_axis_length, ai_comp, ai_total, fp);
+    
+          break;
+          case ESMF_R8:
+            // create array with global data buffer
+            gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+            // allocate global array from this size
+            dp = (double *)(gathered->base_addr);
+    
+            // call layoutgather to fill this array
+            dp0 = (double *)this->base_addr;
+            layout->ESMC_DELayoutGatherArrayD(dp0, global_dimlengths, decompids,
+                                             size_decomp, local_maxlengths,
+                                             local_axis_length, ai_comp, ai_total, dp);
+    
+          break;
+        }
+        break;
 
       case ESMF_DATA_INTEGER:
         // create array with global data
@@ -419,7 +441,8 @@
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
         layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, decompids,
-                                          size_decomp, ai_comp, ai_total, ip);
+                                          size_decomp, local_maxlengths,
+                                          local_axis_lengths, ai_comp, ai_total, ip);
 
       break;
       default:
@@ -453,6 +476,7 @@
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
       int global_dimlengths[],   // in  - array of global dimensions
+      int local_maxlengths[],    // in  - array of maximum counts on any DE per dim
       int deid,                  // in  - the DE to collect the data on
       ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
@@ -498,11 +522,13 @@
 
           // call something which will do a receive
           layout->ESMC_DELayoutGatherArrayF(fp0, global_dimlengths, decompids,
-                                            size_decomp, ai_comp, ai_total, fp);
+                                            size_decomp, local_maxlengths,
+                                            local_axis_lengths, ai_comp, ai_total, fp);
         } else {
           // call something which will do a send
           layout->ESMC_DELayoutGatherArrayF(fp0, global_dimlengths, decompids,
-                                            size_decomp, ai_comp, ai_total, fp);
+                                            size_decomp, local_maxlengths,
+                                            local_axis_lengths, ai_comp, ai_total, fp);
         } 
 
       break;
@@ -519,11 +545,13 @@
           // call something which will do a receive
           ip0 = (int *)this->base_addr;
           layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, decompids,
-                                            size_decomp, ai_comp, ai_total, ip);
+                                            size_decomp, local_maxlengths,
+                                            local_axis_lengths, ai_comp, ai_total, ip);
         } else {
           // call something which will do a send
           layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, decompids,
-                                            size_decomp, ai_comp, ai_total, ip);
+                                            size_decomp, local_maxlengths,
+                                            local_axis_lengths, ai_comp, ai_total, ip);
         }
       break;
       default:
@@ -714,8 +742,9 @@
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
         layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, olddecompids,
-                                          size_decomp, this->ai_comp,
-                                          this->ai_comp, ip);
+                                          size_decomp, local_maxlengths,
+                                          local_axis_length,  
+                                          this->ai_comp, this->ai_comp, ip);
 
         // switch based on array rank
         switch (this->rank) {
