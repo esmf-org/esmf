@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.5 2003/03/25 00:17:42 flanigan Exp $ 
+# $Id: makefile,v 1.6 2003/05/02 22:17:29 nscollins Exp $ 
 
 
 LOCDIR   = src
 
 include $(ESMF_DIR)/makefile
 
-DIRS        = Infrastructure Superstructure doc SystemTests
+DIRS        = Infrastructure Superstructure doc SystemTests Demo
 
 CLEANDIRS   = 
 CLOBBERDIRS = 
