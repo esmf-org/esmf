@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.17 2003/10/10 16:26:21 shep_smith Exp $
+// $Id: ESMC_LogErr.C,v 1.18 2003/10/16 23:33:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.17 2003/10/10 16:26:21 shep_smith Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.18 2003/10/16 23:33:54 nscollins Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
@@ -1162,3 +1162,297 @@ void ESMC_Log:: ESMC_LogPrint(
            exit(EXIT_FAILURE);
  }     
 } // end ESMC_GetErrMsg
+
+ 
+//---------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogSetFlush() - set the flushSet variable.
+// !INTERFACE:
+
+inline void ESMC_Log::ESMC_LogSetFlush(
+//
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS:
+//   none
+
+   ) 
+
+// !DESCRIPTION: 
+// Causes output to be flushed.
+// 
+//EOP
+{
+      flush=ESMF_TRUE;
+}
+
+
+//---------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogGetFlush() - returns the flush variable 
+// !INTERFACE:
+
+ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
+//
+// !RETURN VALUE
+//  Value of flush
+// !ARGUMENTS:
+//   none
+
+   ) const 
+
+// !DESCRIPTION: 
+// Returns the flush variable 
+// 
+//EOP
+{
+      return flush;
+}
+
+
+
+
+//---------------------------------------------------------------------------
+//BOP                
+//                   
+// !IROUTINE: ESMC_LogSetNotFlush() - output not flushed
+// !INTERFACE:       
+	     
+inline void ESMC_Log::ESMC_LogSetNotFlush(
+//
+// !RETUN VALUE:
+//  none
+// !ARGUMENTS        
+//   none   
+
+ )    
+	     
+// !DESCRIPTION:
+// Causes output not to be flushed.
+//EOP
+{                    
+   flush=ESMF_FALSE;
+}               
+									
+
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogSetVerbose - make output verbose 
+//
+// !INTERFACE:
+
+inline void ESMC_Log::ESMC_LogSetVerbose(
+//
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS
+//   none
+  )
+
+// !DESCRIPTION:
+// If theVerbosity is set to ESMF\_TF\_TRUE, messages are printed out. 
+// 
+//EOP
+{
+     verbose=ESMF_TRUE;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogGetVerbose - return verbose 
+//
+// !INTERFACE:
+
+ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
+//
+// !RETURN VALUE:
+//  value of verbose
+// !ARGUMENTS
+//   none
+  ) const
+
+// !DESCRIPTION:
+// Returns  verbose value 
+// 
+//EOP
+{
+     return verbose;
+}
+
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogSetNotVerbose - output not verbose 
+//
+// !INTERFACE:
+
+inline void ESMC_Log::ESMC_LogSetNotVerbose(
+// RETURN VALUE:
+//  none
+// !ARGUMENTS
+//   none
+  )
+
+// !DESCRIPTION:
+// If theVerbosity is set to ESMC\_TF\_FALSE, no messages are printed out. 
+// 
+//EOP
+{
+     verbose=ESMF_FALSE;
+}
+
+
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogSetHaltOnErr - code will stop on encountering an error  
+//
+// !INTERFACE:
+
+inline void ESMC_Log::ESMC_LogSetHaltOnErr(
+// RETURN VALUE:
+//  none
+// !ARGUMENTS
+//   none
+  )
+
+// !DESCRIPTION:
+// If haltOnErr is set to ESMC\_TF\_TRUE, code will stop executing when
+// encountering an error.
+// 
+//EOP
+{
+     haltOnErr=ESMF_TRUE;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogGetHaltOnErr - returns haltOnErr
+//
+// !INTERFACE:
+
+ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
+//
+// !RETURN VALUE
+//  haltOnErr
+// !ARGUMENTS
+//   none
+  ) const
+
+// !DESCRIPTION:
+// Returns haltOnErr
+// 
+//EOP
+{
+     return haltOnErr;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogSetNotHaltOnErr - code will not stop on encountering
+// an error  
+//
+// !INTERFACE:
+
+inline void ESMC_Log::ESMC_LogSetNotHaltOnErr(
+//
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS
+//   none
+  )
+
+// !DESCRIPTION:
+// If haltOnErr is set to ESMC\_TF\_FALSE, code will not stop executing when
+// encountering an error.
+// 
+//EOP
+{
+     haltOnErr=ESMF_FALSE;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogSetHaltOnWarn - code will stop on encountering
+// a warning
+//
+// !INTERFACE:
+
+inline void ESMC_Log::ESMC_LogSetHaltOnWarn(
+//
+// !RETURN VALUE:
+// none
+// !ARGUMENTS
+//   none
+  )
+
+// !DESCRIPTION:
+// If haltOnWarn is set to ESMC\_TF\_TRUE, code will stop executing when
+// encountering an error.
+// 
+//EOP
+{
+     haltOnWarn=ESMF_TRUE;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogGetHaltOnWarn - returns haltOnwarn value
+// a warning
+//
+// !INTERFACE:
+
+ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
+//
+// !RETURN VALUE
+//  Value of HaltOnWarn
+// !ARGUMENTS
+//   none
+  ) const
+
+// !DESCRIPTION:
+// Returns haltOnWarn
+// 
+//EOP
+{
+     return haltOnWarn;
+}
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogSetNotHaltOnWarn - code will not stop on encountering
+// a warning
+//
+// !INTERFACE:
+
+inline void ESMC_Log::ESMC_LogSetNotHaltOnWarn(
+//
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS
+//   none
+  )
+
+// !DESCRIPTION:
+// If haltOnWarn is set to ESMC\_Tf\_FALSE, code will not stop executing when
+// encountering an error.
+// 
+//EOP
+{
+     haltOnWarn=ESMF_FALSE;
+}
+
+
