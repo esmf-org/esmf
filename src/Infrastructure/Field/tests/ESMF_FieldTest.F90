@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldTest.F90,v 1.2 2003/03/10 23:28:39 svasquez Exp $
+! $Id: ESMF_FieldTest.F90,v 1.3 2003/03/11 23:18:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldTest.F90,v 1.2 2003/03/10 23:28:39 svasquez Exp $'
+      '$Id: ESMF_FieldTest.F90,v 1.3 2003/03/11 23:18:10 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -216,79 +216,5 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f2)
 
-      ! test internal dynamic allocation within statically allocated
-      !   ESMF_Field
-      !call ESMF_FieldConstruct(fields, args, rc)
-      !write(failMsg, *) "rc =", rc, ", args =", args
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !failMsg, result, ESMF_SRCLINE)
-
-      ! test initialization of members of statically allocated ESMF_Field
-      !   may want to read back values via Get methods for comparison
-      !call ESMF_FieldInit(fields, args, rc)
-      !write(failMsg, *) "rc =", rc, ", args =", args
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !failMsg, result, ESMF_SRCLINE)
-
-      ! test setting of configuration values
-      !type(ESMF_FieldConfig) config_set
-      !call ESMF_FieldSetConfig(fields, config_set, rc)
-      !write(failMsg, *) "rc =", rc, ", config_set =", config_set
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS),  &
-                      !failMsg, result, ESMF_SRCLINE)
-
-      ! test getting of configuration values,
-      !  compare to values set previously
-      !type(ESMF_FieldConfig) :: config_get
-      !call ESMF_FieldGetConfig(fields, config_get, rc)
-      !write(failMsg, *) "rc =", rc, ", config_get =", config_get
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS .and. config_get .eq. config_set), &
-                      !failMsg, result, ESMF_SRCLINE)
-
-      ! test setting of ESMF_Field members values
-      !<value type> :: value_set
-      !call ESMF_FieldSet<Value>(fields, value_set, rc)
-      !write(failMsg, *) "rc =", rc, ", value_set =", value_set
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !failMsg, result, ESMF_SRCLINE)
-
-      ! test getting of ESMF_Field members values,
-      !   compare to values set previously
-      !<value type> :: value_get
-      !call ESMF_FieldGet<Value>(fields, value_get, rc)
-      !write(failMsg, *) "rc =", rc, ", value_get =", value_get
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
-                      !failMsg, result, ESMF_SRCLINE)
-    
-      ! test validate method via option string
-      !character(ESMF_MAXSTR) :: validate_options
-      !call ESMF_FieldValidate(fields, validate_options, rc)
-      !write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !failMsg, result, ESMF_SRCLINE)
-
-      ! test print method via option string
-      !character(ESMF_MAXSTR) :: print_options
-      !call ESMF_FieldPrint(fields, print_options, rc)
-      !write(failMsg, *) "rc =", rc, ", print_options =", print_options
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !failMsg, result, ESMF_SRCLINE)
-
-      ! test internal dynamic deallocation within statically allocated 
-      !   ESMF_Field
-      !call ESMF_FieldDestruct(fields, rc)
-      !write(failMsg, *) "rc =", rc
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !failMsg, result, ESMF_SRCLINE)
-
-      ! test dynamic deallocation of ESMF_Field
-      !   also tests destructor
-      !call ESMF_FieldDestroy(fields, rc)
-      !write(failMsg, *) "rc =", rc
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !failMsg, result, ESMF_SRCLINE)
-
-      ! return number of failures to environment; 0 = success (all pass)
-      ! return result  ! TODO: no way to do this in F90 ?
   
       end program ESMF_FieldTest
