@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.16 2003/06/06 20:24:14 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.17 2003/06/06 22:32:06 nscollins Exp $
 !
 ! System test code #70385
 
@@ -60,32 +60,41 @@
 !-------------------------------------------------------------------------
 !
     app = ESMF_AppCompCreate(name="Application #70385", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_AppCompGet(app, layout=deflayout, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_DELayoutGetNumDEs(deflayout, ndes, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     if (ndes .ne. 12) then
         print *, "This system test needs to run 12-way, current np = ", ndes
         goto 10
     endif
 
     call ESMF_DELayoutGetDEId(deflayout, de_id, rc) 
+    if (rc .ne. ESMF_SUCCESS) goto 10
     
 !   Create a DELayout for the Component
     delist = (/ (i, i=0, 11) /)
     layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test #70385"
     comp1 = ESMF_GridCompCreate(name=cname, layout=layout1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Create finished, name = ", trim(cname)
 
     call ESMF_GridCompSetServices(comp1, setserv, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
 !
 !-------------------------------------------------------------------------
 !  Init section
 !
     import = ESMF_StateCreate("gridded comp import", ESMF_STATEIMPORT, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Init returned"
 
@@ -95,6 +104,7 @@
 !
 
     call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Run returned"
 
@@ -103,8 +113,9 @@
 !     Finalize section
 
     call ESMF_GridCompFinalize(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
-    print *, "Comp Finalize returned"
+    print *, "Comp Finalize returned without error"
 
 !
 !-------------------------------------------------------------------------
@@ -112,15 +123,18 @@
 ! 
 
     call ESMF_DELayoutDestroy(layout1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompDestroy(comp1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_StateDestroy(import, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_AppCompDestroy(app, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 10    print *, "System Test #70385 complete!"
-
 
     write(failMsg, *) "System Test failure"
     write(testname, *) "System Test 70385: Field Halo Test"
@@ -149,10 +163,13 @@
        
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, &
                                                           ESMF_SINGLEPHASE, rc)
+      if (rc .ne. ESMF_SUCCESS) return
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, &
                                                           ESMF_SINGLEPHASE, rc)
+      if (rc .ne. ESMF_SUCCESS) return
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, &
                                                           ESMF_SINGLEPHASE, rc)
+      if (rc .ne. ESMF_SUCCESS) return
   
     end subroutine setserv
 
@@ -184,13 +201,13 @@
       real :: x_min, x_max, y_min, y_max
       type(ESMF_Array) :: array1
       character(len=ESMF_MAXSTR) :: gname, fname
-      integer :: status
 
       print *, "Entering Initialization routine"
 
       ! Query component for layout
-      call ESMF_GridCompGet(comp, layout=layout1, rc=status)
-      print *, "myinit: getting layout, rc = ", status
+      call ESMF_GridCompGet(comp, layout=layout1, rc=rc)
+      print *, "myinit: getting layout, rc = ", rc
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! The user creates a simple horizontal Grid internally by passing all
       ! necessary information through the CreateInternal argument list.
@@ -215,15 +232,18 @@
                              horz_stagger=horz_stagger, &
                              horz_coord_system=horz_coord_system, &
                              halo_width=halo_width, &
-                             name=gname, rc=status)
+                             name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
       print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
-      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+      call ESMF_DELayoutGetDEID(layout1, de_id, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Allocate arrays.
       call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       ni = index(1)%r - index(1)%l + 1
       nj = index(2)%r - index(2)%l + 1
       print *, "allocating", ni, " by ",nj," cells on DE", de_id
@@ -238,6 +258,7 @@
 
       ! Set initial data values over exclusive domain to the de identifier
       call ESMF_GridGetDE(grid1, lcellexc_index=index, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       do j=index(2)%l,index(2)%r
         do i=index(1)%l,index(1)%r
           ldata(i,j) =de_id
@@ -247,6 +268,7 @@
       ! Create Array based on an existing, allocated F90 pointer.
       ! Data is type Integer, 2D.
       array1 = ESMF_ArrayCreate(ldata, ESMF_DATA_REF, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "Array Create returned"
 
       ! No deallocate() is needed for idata, it will be freed when the
@@ -255,17 +277,27 @@
       ! Create a Field using the Grid and Arrays created above
       fname = "DE id"
       field1 = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
-                                                           name=fname, rc=rc)
+                                                        name=fname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
       call ESMF_FieldPrint(field1, "", rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldValidate(field1, "", rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "Field Create returned"
 
       ! Add the field to the import state.
       call ESMF_StateAddData(importstate, field1, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_StatePrint(importstate, "", rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
       print *, "Exiting Initialization routine"
+
+30    continue
+      ! you come directly here on errors.  you also fall into this code
+      ! if all is well.  rc already has the error code (if any) so you
+      ! have nothing else to do but return at this point.
 
     end subroutine myinit
 
@@ -290,20 +322,29 @@
       print *, "Entering Run routine"
 
       call ESMF_StatePrint(importstate, "", rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get the field from the import state
       print *, "About to get field from import state"
       call ESMF_StateGetData(importstate, "DE id", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "Returned from getting field from import state"
       call ESMF_FieldPrint(field1, "", rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
 
       ! Call Field method to halo data.  This updates the data in place.
       print *, "about to call Field Halo"
       call ESMF_FieldHalo(field1, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "returned from Field Halo call"
 
       print *, "Exiting Run routine"
+
+30    continue
+      ! you come directly here on errors.  you also fall into this code
+      ! if all is well.  rc already contains the return code, so there's
+      ! nothing to do here but return.
 
       end subroutine myrun
 
@@ -323,9 +364,9 @@
       integer :: rc
 
       ! Local variables
-      integer :: i, j, ni, nj
-      integer :: de_id
-      integer :: status
+      integer :: i, j, ni, nj, xpos, ypos, nx, ny
+      integer :: de_id, mismatch, target
+      integer :: pattern(3,3), halo_width
       integer(ESMF_IKIND_I4), dimension(:,:), pointer :: ldata
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_DELayout) :: layout
@@ -334,36 +375,205 @@
       type(ESMF_Array) :: array1
 
       print *, "Entering Finalize routine"
+      ! this must match halo width in original program!!
+      halo_width = 2
 
       ! Get layout from component
       call ESMF_GridCompGet(comp, layout=layout, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_DELayoutGetDEID(layout, de_id, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get Field from import state
       call ESMF_StateGetData(importstate, "DE id", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldGetGrid(field1, grid=grid1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get a pointer to the data Array in the Field
       call ESMF_FieldGetData(field1, array1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "data back from field"
 
       ! Get a pointer to the start of the data
       call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      print *, "data back from array"
 
       ! Get size of local array
       call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
       ni = index(1)%r - index(1)%l + 1
       nj = index(2)%r - index(2)%l + 1
 
-      ! Print results
+      ! Validity check for results - return error if results do not match
+
+      ! get info about total number of DEs in each dim and which one
+      ! we are.  then use them to compute the values in the halo.
+      call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_DELayoutGetDEPosition(layout, xpos, ypos, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      mismatch = 0
+
+      ! check interior points
+      target = de_id
+      pattern(2,2) = target
+      do j=1+halo_width,nj-halo_width
+        do i=1+halo_width,ni-halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! now edges minus corners
+
+      ! bottom middle
+      if (ypos .eq. 0) then
+        target = -1
+      else
+        target = de_id - nx 
+      endif
+      pattern(2, 1) = target
+      do j=1,halo_width
+        do i=1+halo_width,nx-halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+      ! top middle
+      if (ypos .eq. ny-1) then
+        target = -1
+      else
+        target = de_id + nx 
+      endif
+      pattern(2, 3) = target
+      do j=nj-halo_width+1,nj
+        do i=1+halo_width, ni-halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+      ! left side middle
+      if (xpos .eq. 0) then
+        target = -1
+      else
+        target = de_id - 1
+      endif
+      pattern(1, 2) = target
+      do j=1+halo_width,nj-halo_width
+        do i=1, halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+      ! right side middle
+      if (xpos .eq. nx-1) then
+        target = -1
+      else
+        target = de_id + 1
+      endif
+      pattern(3, 2) = target
+      do j=1+halo_width,nj-halo_width
+        do i=ni-halo_width+1,ni
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! and finally corners
+      ! lower left
+      if ((xpos .eq. 0) .or. (ypos .eq. 0)) then
+        target = -1
+      else
+        target = de_id - nx - 1
+      endif
+      pattern(1, 1) = target
+      do j=1,halo_width
+        do i=1,halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+      ! lower right
+      if ((xpos .eq. nx-1) .or. (ypos .eq. 0)) then
+        target = -1
+      else
+        target = de_id - nx + 1
+      endif
+      pattern(3, 1) = target
+      do j=1,halo_width
+        do i=ni-halo_width+1, ni
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+      ! upper left
+      if ((xpos .eq. 0) .or. (ypos .eq. ny-1)) then
+        target = -1
+      else
+        target = de_id + nx - 1
+      endif
+      pattern(1, 3) = target
+      do j=nj-halo_width+1,nj
+        do i=1, halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+      ! upper right
+      if ((xpos .eq. nx-1) .or. (ypos .eq. ny-1)) then
+        target = -1
+      else
+        target = de_id + nx + 1
+      endif
+      pattern(3, 3) = target
+      do j=nj-halo_width+1,nj
+        do i=ni-halo_width+1,ni
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! Print what the results should look like
       print *, "------------------------------------------------------"
-      write(*,*) 'de_id = ',de_id
+      print *, "pattern should look like:"
+      print *, pattern(1, 3), pattern(2, 3), pattern(3, 3)
+      print *, pattern(1, 2), pattern(2, 2), pattern(3, 2)
+      print *, pattern(1, 1), pattern(2, 1), pattern(3, 1)
+      print *, "------------------------------------------------------"
+      print *, ""
+      ! Print results so we can see either way what was computed.
+      print *, "------------------------------------------------------"
+      write(*,*) 'actual results from de_id = ',de_id
       do j = nj,1,-1
         write(*,10) (ldata(i,j), i=1,ni)
  10     format(20(1x,i2))
       enddo
       print *, "------------------------------------------------------"
     
+      ! if any numbers are not what we expected, error out
+      if (mismatch .gt. 0) then
+        print *, "FAILURE: found ", mismatch, "mismatching values, returning error code"
+        rc = ESMF_FAILURE
+        return
+      endif
+
+30    continue
+      ! you come directly here on errors.  you also fall into this code
+      ! if all is well.  rc already contains the return code, so there's
+      ! nothing to do here but return.
+
       print *, "Exiting Finalize routine"
 
     end subroutine myfinal
