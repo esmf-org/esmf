@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2004/02/09 17:51:49 nscollins Exp $ 
+# $Id: makefile,v 1.25 2004/03/17 22:11:37 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -55,10 +55,13 @@ RUN_ESMF_FRouteUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest4.stdout
 	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest8.stdout
-	-${MPIRUN} -np 12 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest12.stdout
-	-${MPIRUN} -np 16 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest16.stdout
-	-${MPIRUN} -np 20 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest20.stdout
-	-${MPIRUN} -np 24 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest24.stdout
+	# for now comment out the larger tests.  as far as i know, these
+	# run, but can cause problems for the automatic overnight builds.
+	#-${MPIRUN} -np 12 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest12.stdout
+	#-${MPIRUN} -np 16 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest16.stdout
+	#-${MPIRUN} -np 20 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest20.stdout
+	#-${MPIRUN} -np 24 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest24.stdout
+	#-${MPIRUN} -np 32 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest24.stdout
 
 RUN_ESMF_FRouteUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
