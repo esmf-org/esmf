@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.71 2004/05/26 18:04:57 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.72 2004/05/26 23:15:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1341,11 +1341,11 @@
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
       integer, intent(in) :: dimCount
-      integer, dimension(dimCount), intent(in) :: counts
-      real(ESMF_KIND_R8), dimension(dimCount), intent(in) :: minGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(dimCount), intent(in), optional :: &
+      integer, dimension(:), intent(in) :: counts
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
                                                             maxGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(dimCount), intent(in), optional :: &
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
                                                             deltaPerDim
       type(ESMF_GridType), intent(in), optional :: horzGridType
       type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
