@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.56 2003/06/19 15:48:56 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.57 2003/06/19 16:12:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.56 2003/06/19 15:48:56 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.57 2003/06/19 16:12:18 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2031,7 +2031,7 @@
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
                               coord_order, global_min_coords, &
-                              global_max_coords, global_nmax, rc)
+                              global_max_coords, global_nmax, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -2045,6 +2045,7 @@
       real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_min_coords
       real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_max_coords
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_nmax
+      character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2075,6 +2076,8 @@
 !          Maximum global physical coordinates.
 !     \item[{[global\_nmax]}]
 !          Numbers of global grid increments.
+!     \item[{[name]}]
+!          Grid name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2100,7 +2103,7 @@
 
       gridp => grid%ptr
 
-!     if present, gets information from the grid derived type
+      ! if present, gets information from the grid derived type
       if(present(horz_gridtype)) horz_gridtype = gridp%horz_gridtype
       if(present(vert_gridtype)) vert_gridtype = gridp%vert_gridtype
       if(present(horz_stagger)) horz_stagger = gridp%horz_stagger
@@ -2108,8 +2111,8 @@
       if(present(horz_coord_system)) horz_coord_system = gridp%horz_coord_system
       if(present(vert_coord_system)) vert_coord_system = gridp%vert_coord_system
       if(present(coord_order)) coord_order = gridp%coord_order
-
-!     Get physgrid info with global coordinate extents
+    
+      ! Get physgrid info with global coordinate extents
       if(present(global_min_coords) .or. present(global_max_coords)) then
         physgrid_id = gridp%num_physgrids  ! TODO: fix so passed in?
         call ESMF_PhysGridGet(gridp%physgrids(physgrid_id)%ptr, &
@@ -2121,13 +2124,22 @@
         endif
       endif
 
-!     Get distgrid info with global coordinate counts
+      ! Get distgrid info with global coordinate counts
       if(present(global_nmax)) then
         call ESMF_DistGridGet(gridp%distgrid%ptr, gcell_dim=global_nmax, &
                               rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridGet: DistGrid get"
           return
+        endif
+      endif
+
+      ! get name from base obj
+      if (present(name)) then
+        call ESMF_GetName(gridp%base, name, status)
+        if(status .ne. ESMF_SUCCESS) then
+           print *, "ERROR in ESMF_GridGetName"
+           return
         endif
       endif
 
