@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.60 2004/07/21 21:15:41 jwolfe Exp $
+! $Id: ESMF_Bundle.F90,v 1.61 2004/07/21 22:31:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2543,7 +2543,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetInt4Attr"
 !BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Add a 4-byte integer attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleSetAttribute()
@@ -2565,9 +2565,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2620,11 +2620,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2659,7 +2659,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetInt8Attr"
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Add an 8-byte integer attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleSetAttribute()
@@ -2681,9 +2681,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2736,11 +2736,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2797,9 +2797,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2849,9 +2849,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2904,11 +2904,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2968,11 +2968,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3029,9 +3029,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [value]
-!           The logical true/false value of the attribute to add.
+!           The logical true/false value of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3084,11 +3084,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of logicals in the {\tt valueList}.
 !     \item [valueList]
-!           The logical values of the attribute to add.
+!           The logical values of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3145,9 +3145,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the attribute to set.
 !     \item [value]
-!           The character value of the attribute to add.
+!           The character value of the attribute to set.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
