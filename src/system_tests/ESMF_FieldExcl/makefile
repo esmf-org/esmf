@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/08/23 16:23:44 nscollins Exp $ 
+# $Id: makefile,v 1.2 2004/10/05 23:04:46 jwolfe Exp $ 
 
 ALL: build_system_tests
 
@@ -40,7 +40,7 @@ CLOBBERDIRS =
 
 RUN_FieldExcl:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldExclSTest.tmps
-	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldExclSTest >$(ESMC_TESTDIR)/ESMF_FieldExclSTest.stdout
+	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_FieldExclSTest >$(ESMC_TESTDIR)/ESMF_FieldExclSTest.stdout
 
 RUN_FieldExclUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldExclSTest.tmps
