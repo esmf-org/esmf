@@ -113,9 +113,10 @@ complete.
 The coupler component produces a specification of the sequence of 
 transforms that are necessary to effect communication between components, 
 both scientific and computational, generic and user-defined.  The coupler 
-returns these transforms to the application in the form of an array of 
-function pointers along with a description of any associated restrictions 
-on how the transforms should take place.
+returns these transforms to the application in the form of a Transform
+object, which contains the needed methods and data to perform the
+required tranformations along with descriptions of any
+associated restrictions on how the transforms must take place.
 
 The application or parent component initiates the coupling and manages 
 its scheduling.  It is responsible for instantiating the gridded components
@@ -126,11 +127,17 @@ transforms
 for execution among the gridded components and the coupler, so that, for 
 example, a data send or coupling transformation can occur while a gridded 
 component is executing, without a need for the component to return to the
-application level.  The gridded component call that executes the transform
-is a generic {\tt ESMF\_StateTransform} call, which takes as arguments the
-function pointer and the component's import or export state.  To
-disable or rearrange the coupling sequence, a different set of function
+application level.  
+To disable or rearrange the coupling sequence, a different set of function
 pointers can be passed in.  
+The gridded component call that executes the transform
+is a generic {\tt ESMF\_StateTransform} call, which takes as arguments the
+function pointer and the component's import or export state. The
+call {\tt ESMF\_StateValidate} ensures that all required transforms
+have been performed by the data supplier and data is now available
+for use.  For sequencing purposes, a {\tt ESMF\_StateComplete} call
+will return when the state data has been transformed and the data
+buffers are available to be reused.
 
 \subsection{Flow of Data}
 
