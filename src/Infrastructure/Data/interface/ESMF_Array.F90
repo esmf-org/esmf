@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.12 2002/12/16 17:41:53 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.13 2002/12/16 17:45:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.12 2002/12/16 17:41:53 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.13 2002/12/16 17:45:23 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -157,7 +157,7 @@
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_ArrayCreate} functions.   
 !
-!  \p There are 4 options for 
+!  There are 4 options for 
 !  specifying the type/kind/rank of the {\tt ESMF\_Array}:
 !  \begin{description}
 !  \item{List}
@@ -174,7 +174,7 @@
 !    (Only available from the Fortran interface.)
 !  \end{description}
 !  
-!  \p There are 4 options for setting the contents of the {\tt ESMF\_Array}
+!  There are 4 options for setting the contents of the {\tt ESMF\_Array}
 !  at creation time:
 !  \begin{description}
 !  \item{No Data}
