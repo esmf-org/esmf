@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.13 2003/04/25 16:07:08 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.14 2003/04/28 20:09:13 nscollins Exp $
 !
 ! System test code #70385
 
@@ -101,6 +101,8 @@
     call ESMF_GridCompDestroy(comp1, rc)
     call ESMF_StateDestroy(import, rc)
     call ESMF_DELayoutDestroy(layout1, rc)
+    call ESMF_GridCompDestroy(comp1, rc)
+    call ESMF_AppCompDestroy(app, rc)
     print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
@@ -142,9 +144,9 @@
       use ESMF_Mod
 
       type(ESMF_GridComp) :: comp
-      type(ESMF_State), optional :: importstate, exportstate
-      type(ESMF_Clock), optional :: clock
-      integer, optional :: rc
+      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_Clock) :: clock
+      integer :: rc
 
       ! Local variables
       integer :: i, j, ni, nj
@@ -166,7 +168,8 @@
       print *, "Entering Initialization routine"
 
       ! Query component for layout
-      call ESMF_GridCompGet(comp, layout=layout1, rc=rc)
+      call ESMF_GridCompGet(comp, layout=layout1, rc=status)
+      print *, "myinit: getting layout, rc = ", status
 
       ! The user creates a simple horizontal Grid internally by passing all
       ! necessary information through the CreateInternal argument list.
@@ -256,9 +259,9 @@
       use ESMF_Mod
 
       type(ESMF_GridComp) :: comp
-      type(ESMF_State), optional :: importstate, exportstate
-      type(ESMF_Clock), optional :: clock
-      integer, optional :: rc
+      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_Clock) :: clock
+      integer :: rc
 
       ! Local variables
       type(ESMF_Field) :: field1
@@ -294,9 +297,9 @@
       use ESMF_Mod
 
       type(ESMF_GridComp) :: comp
-      type(ESMF_State), optional :: importstate, exportstate
-      type(ESMF_Clock), optional :: clock
-      integer, optional :: rc
+      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_Clock) :: clock
+      integer :: rc
 
       ! Local variables
       integer :: i, j, ni, nj
