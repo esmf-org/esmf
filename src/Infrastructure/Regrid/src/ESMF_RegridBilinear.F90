@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.35 2003/10/16 23:15:27 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.36 2003/10/17 22:46:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.35 2003/10/16 23:15:27 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.36 2003/10/17 22:46:17 jwolfe Exp $'
 
 !==============================================================================
 
@@ -128,7 +128,7 @@
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       integer :: start, stop, startComp, stopComp, my_DE, indexMod(2)
-      integer :: srcSizeX, srcSizeY, size
+      integer :: srcSizeX, srcSizeY, srcSizeXComp, srcSizeYComp, size
       integer :: i, j, num_domains, dstCounts(3), srcCounts(3), ij
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:,:), pointer :: found
@@ -433,11 +433,11 @@
       start = 1
       startComp = 1
       do i = 1,num_domains
-        srcSizeX = recvDomainList%domains(i)%ai(1)%max &
-                 - recvDomainList%domains(i)%ai(1)%min + 1
-        srcSizeY = recvDomainList%domains(i)%ai(2)%max &
-                 - recvDomainList%domains(i)%ai(2)%min + 1
-        stopComp  = startComp + srcSizeX*srcSizeY - 1
+        srcSizeXComp = recvDomainList%domains(i)%ai(1)%max &
+                     - recvDomainList%domains(i)%ai(1)%min + 1
+        srcSizeYComp = recvDomainList%domains(i)%ai(2)%max &
+                     - recvDomainList%domains(i)%ai(2)%min + 1
+        stopComp  = startComp + srcSizeXComp*srcSizeYComp - 1
         srcSizeX = recvDomainListTot%domains(i)%ai(1)%max &
                  - recvDomainListTot%domains(i)%ai(1)%min + 1
         srcSizeY = recvDomainListTot%domains(i)%ai(2)%max &
@@ -445,7 +445,8 @@
         stop  = start + srcSizeX*srcSizeY - 1
         call ESMF_RegridBilinearSearch(tv, recvDomainListTot%domains(i), &
                                        coordSystem, &
-                                       srcSizeX, srcSizeY, startComp-1, &
+                                       srcSizeX, srcSizeY, &
+                                       startComp-1, srcSizeXComp, &
                                        dstCounts(1), dstCounts(2), &
                                        indexMod, found, foundCount, &
                                        srcGatheredCoordX(start:stop), &
@@ -459,12 +460,23 @@
 
       call ESMF_RouteHandleSet(rh, tdata=tv, rc=status)
 
-      call ESMF_LocalArrayDestroy(srcLocalCoordXArray, status)
-      call ESMF_LocalArrayDestroy(srcLocalCoordYArray, status)
+      ! clean up
+      call ESMF_RouteDestroy(tempRoute, status)
       call ESMF_LocalArrayDestroy(srcGatheredCoordXArray, status)
       call ESMF_LocalArrayDestroy(srcGatheredCoordYArray, status)
-      ! deallocate(dstLocalCoordArray, status)
-      ! deallocate(srcLocalCoordArray, status)
+      call ESMF_LocalArrayDestroy(srcGatheredMaskArray, status)
+      call ESMF_LocalArrayDestroy(srcLocalCoordXArray, status)
+      call ESMF_LocalArrayDestroy(srcLocalCoordYArray, status)
+      call ESMF_LocalArrayDestroy(srcLocalMaskArray, status)
+      deallocate(dstLocalCoordArray)
+      deallocate(srcLocalCoordArray)
+      deallocate(srcGatheredCoordX)
+      deallocate(srcGatheredCoordY)
+      deallocate(srcGatheredMask)
+      deallocate(found)
+      deallocate(foundCount)
+      deallocate(dstUserMask)
+      deallocate(srcUserMask)
       
       ESMF_RegridConstructBilinear = rh
 
@@ -478,7 +490,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_RegridBilinearSearch(tv, domain, coordSystem, &
-                                           srcSizeX, srcSizeY, srcStart, &
+                                           srcSizeX, srcSizeY, &
+                                           srcStart, srcICount, &
                                            dstSizeX, dstSizeY, indexMod, &
                                            found, foundCount, &
                                            srcCenterX, srcCenterY, &
@@ -493,6 +506,7 @@
       integer, intent(in) :: srcSizeX  ! apparently these have to be first
       integer, intent(in) :: srcSizeY  ! so the compiler knows they're ints
       integer, intent(in) :: srcStart  ! when it goes to use them as dims
+      integer, intent(in) :: srcICount
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
       integer, dimension(:), intent(in) :: indexMod
@@ -546,7 +560,6 @@
          jbDst, jeDst,     &! beg, end of exclusive domain in j-dir of dest grid
          ibSrc, ieSrc,     &! beg, end of exclusive domain in i-dir of source grid
          jbSrc, jeSrc,     &! beg, end of exclusive domain in j-dir of source grid
-         dstICount, srcICount, &
          my_DE, srcCount, srcValidCount
 
       integer :: srcAdd,   &! address in gathered source grid
@@ -608,9 +621,6 @@
       ieSrc = domain%ai(1)%max - 1
       jbSrc = domain%ai(2)%min
       jeSrc = domain%ai(2)%max - 1
-
-      dstICount = ieDst - ibDst + 1
-      srcICount = ieSrc - ibSrc + 1
 
       do j=jbDst,jeDst
       do i=ibDst,ieDst
@@ -758,7 +768,7 @@
               endif
 
             ! if not all four points in box are valid (unmasked) default to a
-            ! distance-weighted average
+            ! inversely distance-weighted average
             else if (srcCount > 0 .and. srcCount < 4) then
 
               sumWts = zero
@@ -766,25 +776,44 @@
                 weights(1) = ESMF_GridComputeDistance(srcX(1),srcY(1), &
                                                       dstX, dstY,      &
                                                       coordSystem, status)
+                if (weights(1).eq.0.0) then
+                  weights(1) = 1.0e20   ! TODO: exit loop instead
+                else
+                  weights(1) = 1./weights(1)
+                endif
                 sumWts = sumWts + weights(1)
               endif
               if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).ne.1)) then
                 weights(2) = ESMF_GridComputeDistance(srcX(2),srcY(2), &
                                                       dstX, dstY,      &
                                                       coordSystem, status)
+                if (weights(2).eq.0.0) then
+                  weights(2) = 1.0e20   ! TODO: exit loop instead
+                else
+                  weights(2) = 1./weights(2)
+                endif
                 sumWts = sumWts + weights(2)
               endif
               if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).ne.1)) then
                 weights(3) = ESMF_GridComputeDistance(srcX(3),srcY(3), &
                                                       dstX, dstY,      &
                                                       coordSystem, status)
+                if (weights(3).eq.0.0) then
+                  weights(3) = 1.0e20   ! TODO: exit loop instead
+                else
+                  weights(3) = 1./weights(3)
+                endif
                 sumWts = sumWts + weights(3)
               endif
               if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).ne.1)) then
-                srcCount   = srcCount + 1
                 weights(4) = ESMF_GridComputeDistance(srcX(4),srcY(4), &
                                                       dstX, dstY,      &
                                                       coordSystem, status)
+                if (weights(4).eq.0.0) then
+                  weights(4) = 1.0e20   ! TODO: exit loop instead
+                else
+                  weights(4) = 1./weights(4)
+                endif
                 sumWts = sumWts + weights(4)
               endif
               weights(:) = weights(:)/sumWts
