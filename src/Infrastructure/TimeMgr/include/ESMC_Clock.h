@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.35 2004/02/18 21:28:50 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.36 2004/03/18 22:38:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,8 +64,8 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
- #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
- #include <ESMC_IO.h>    // IOSpec class for ReadRestart()/WriteRestart()
+ #include <ESMC_Base.h>    // all classes inherit from the ESMC Base class.
+ #include <ESMC_IOSpec.h>  // IOSpec class for ReadRestart()/WriteRestart()
  #include <ESMC_TimeInterval.h>
  #include <ESMC_Time.h>
  #include <ESMC_Alarm.h>
