@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.4 2005/02/03 17:50:09 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.3.2.1 2005/02/08 23:55:13 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,7 +12,7 @@ Licensed under the GPL.
 
 #if 0
 in theory absoft supports initializers, but in practice with the number
-of modules we include, it seems to cause problems when enabled.
+of modules we include it seems to cause problems when enabled.
 #endif
 
 #define ESMF_NO_INITIALIZERS 1
