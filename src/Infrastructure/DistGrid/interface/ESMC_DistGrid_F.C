@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.1 2004/12/04 00:26:47 jwolfe Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.2 2004/12/04 00:33:54 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_DistGrid_F.C,v 1.1 2004/12/04 00:26:47 jwolfe Exp $";
+             "$Id: ESMC_DistGrid_F.C,v 1.2 2004/12/04 00:33:54 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -79,7 +79,7 @@ void FTN(c_esmc_distgriddeserialize)(int *decompIDs,
     ip = (int *)((char *)(buffer) + *offset);
     dimCount = *ip++;
     ndes     = *ip++;
-    for (i=0; i<*dimCount; i++)
+    for (i=0; i<dimCount; i++)
       decompIDs[i]            = *ip++; 
     for (i=0; i<dimCount * ndes; i++)
       cellCountPerDEPerDim[i] = *ip++; 
