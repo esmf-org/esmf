@@ -271,22 +271,34 @@ developed concurrently.
 {\bf Source:} Required for interoperability Milestones I and J. \\
 {\bf Status:} Approved-1. \\
 {\bf Verification:} Interoperability experiments and incremental
-adoption demonstrations by deployment teams.
+adoption demonstrations by deployment teams.\\
+{\bf Notes:} Good encapsulation, modular design and clean interfaces are critical to the
+maintenance of models built with the framework. Framework classes, modules and algorithms must be
+easy to adapt to take advantage of new techniques that are developed
+by the Earth science community and added to the framework.
 \end{reqlist}
 
-\sreq{Extensibility} The ESMF framework will allow extensions both
+\sreq{Extensibility} The ESMF framework must allow extensions both
 for core suppport capabilities and through plug-in components.
+Framework classes, modules and algorithms must be easily extensible
+to allow additional functionality to be added for supporting new components
+like atmospheric chemistry, carbon cycle, etc...
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} All codes\\
 {\bf Status:} Approved-2. \\
 {\bf Verification:} Milestone demonstrations of migration
-of more than twelve major applications and six styles of gridding.
+of more than twelve major applications and six styles of gridding.\\
+{\bf Notes:} It is important that appropriate abstract interfaces and polymorphic 
+methods are used to ensure adding new methods, grids, algorithms and data structures
+can be easily done. This will facilitate building new types of models that are not
+currently available.
 \end{reqlist}
 
 \sreq{Flexibility} The ESMF framework will be flexible and will
 be suited to a wide range of Earth science applications and a broad span
-of target hardware.
+of target hardware. Framework classes, modules and algorithms must be flexible and
+provide options to support both efficiency and accuracy.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} All codes\\
@@ -298,7 +310,8 @@ that span research to operational forecasting.
 \end{reqlist}
 
 \sreq{Documentation} An exhaustive collection of documentation
-to support ongoing evolution of ESMF is required.
+to support ongoing evolution of ESMF is required. The framework must be 
+fully documented, easily understandable and well supported.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} All codes\\
@@ -310,6 +323,8 @@ that will be produced.
 
 \sreq{Systematic build, test, packaging} A systematic scheme for disseminating
 stable, versioned software and for gathering and tracking defects is required.
+The framework should be delivered to developers using the standard packaging
+utility for the supported platforms.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} All codes\\

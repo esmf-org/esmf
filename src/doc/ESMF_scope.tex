@@ -51,6 +51,13 @@ interfaces, the RDF provides a layer on which
 such vocabularies may be expressed, and allowed to evolve. ESMF
 component interfaces likewise will provide the bedrock on which specific
 component interfaces (e.g an atmospheric model interface) may be expressed.
+For example the ESMF interface specification will allow an ocean dynamics component
+to indicate that it can provide sea-surface temperature as an output
+and will provide a naming mechanism to identify the entities that contain this information. 
+Using the ESMF interface specification atmospheric physics and dynamics components 
+could then indicate that they require a lower-boundary temperature as an input and 
+{\it attach} their lower-boundary temperature inputs to the ocean model sea-surface 
+temperature output.
 }
 ; 
 \item a complete, portable, high-quality reference implementation
@@ -59,7 +66,9 @@ A reference implementation is a widely used approach in deploying open
 standards like ESMF. A reference implementation is a product (in this
 case a piece of software) that implements a standard. The ESMF reference 
 implementation will be fully functional and optimized and will be designed and
-tested for use in real applications. However, it will also serve to
+tested for use in real applications. The reference implementation for ESMF
+will thus be the core framework surce code.
+However, it will also serve to
 provide other implementors with a standard code to use for validation 
 and to use in bootstrapping development of specialized implementations.
 Examples of reference implementations of other standards can be found
@@ -89,7 +98,7 @@ Each compliant component will provide a specified set of methods that
 will enable it to interoperate with other components \footnote{
 Extensible, self-describing method interfaces will be used that draw
 {\bf conceptually} on the ideas employed by systems for internet
-wide interoperability such as RDF - see http://www.w3.org/RDF and HTTP)
+wide interoperability such as RDF - ( see http://www.w3.org/RDF and HTTP)
 }
 .  For the most
 part, we expect components to be able to provide the required
