@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.23 2003/07/24 22:46:37 jwolfe Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.24 2003/08/01 14:42:31 nscollins Exp $
 !
 ! System test code #70385
 
@@ -340,7 +340,7 @@
 
       ! Call Field method to halo data.  This updates the data in place.
       print *, "about to call Field Halo"
-      call ESMF_FieldHalo(field1, rc)
+      call ESMF_FieldHalo(field1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "returned from Field Halo call"
 
