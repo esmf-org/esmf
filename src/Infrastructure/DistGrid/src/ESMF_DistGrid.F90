@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.9 2002/12/13 18:54:27 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.10 2002/12/20 19:22:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -178,7 +178,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.9 2002/12/13 18:54:27 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.10 2002/12/20 19:22:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -383,7 +383,7 @@
 !     If error write message and return.
 !     Formal error handling will be added asap.
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridCreateEmpty: Allocate"
+        print *, "ERROR in ESMF_DistGridCreateInternal: Allocate"
         return
       endif
 
@@ -538,7 +538,7 @@
         rc = ESMF_FAILURE
       endif
 
-!     Set distgrid attributes from input or default
+!     Fill in distgrid derived type with input or default
 !     TODO:  temporary fix, also add defaults to objects
       distgrid%gsize_dir1 = i_max
       distgrid%gsize_dir2 = j_max
@@ -546,19 +546,17 @@
       distgrid%covers_domain_dir1 = .true.
       distgrid%covers_domain_dir2 = .true.
 
-!     Set decomposition attributes based on input numbers of processors
-      call ESMF_DistGridSetDecomp(distgrid, nDE_i, nDE_j, status)
-
-!     Query layout for number of DE's available and check with decomposition
-!     nDE_avail = ESMF_LayoutGetSize(distgrid%layout(1), status)
-      nDE_avail = 1
+!     Create layout with specified decomposition (assume 1 in 3rd direction)
+      call ESMF_LayoutCreate(nDE_i, nDE_j, 1, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructInternal: Layout getsize"
+        print *, "ERROR in ESMF_DistGridConstructInternal: Layout create"
         return
       endif
-      if(nDE_avail .NE. nDE_i*nDE_j) then
-        status = ESMF_FAILURE
-        print *, "ERROR in ESMF_DistGridConstructInternal: bad number of DEs"
+
+!     Set decomposition based on input numbers of processors
+      call ESMF_DistGridSetDecomp(distgrid, nDE_i, nDE_j, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: Layout create"
         return
       endif
 
@@ -566,14 +564,14 @@
       call ESMF_DistGridSetCounts(distgrid, nDE_i, nDE_j, i_max, j_max, &
                                   status)
         
-!     Set DE attributes
-!     call ESMF_DistGridSetDE(distgrid, status)
+!     Fill in DE derived type
+      call ESMF_DistGridSetDE(distgrid, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: Set de"
         return
       endif
 
-!     Calculate other distgrid attributes from DE information
+!     Calculate other distgrid values from DE information
 !     distgrid%maxsize_dir1 = GlobalCommMax()
 !     distgrid%maxsize_dir2 = GlobalCommMax()
 
@@ -817,6 +815,9 @@
 
 !     Set extent counts for each axis from the number of pe's and number
 !     of cells
+!     TODO:  this is not quite the correct algorithm to distribute over a
+!            large number of DE's along an axis -- it loads up the residual
+!            to the last one instead of spreading it around.  But OK for now.
       ni = i_max/nDE_i
       global_s = 1
       global_e = 0
@@ -841,6 +842,45 @@
       enddo
 
       end subroutine ESMF_DistGridSetCountsInternal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridSetDEInternal - Set DE information for a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridSetDEInternal(distgrid, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Set a DistGrid attribute with the given value.
+!     May be multiple routines, one per attribute.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be modified.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      end subroutine ESMF_DistGridSetDEInternal
 
 !------------------------------------------------------------------------------
 !BOP

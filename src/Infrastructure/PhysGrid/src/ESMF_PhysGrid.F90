@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.10 2002/12/13 18:52:27 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.11 2002/12/20 19:18:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,6 +38,7 @@
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
       use ESMF_ArrayMod
+      use ESMF_DistGridMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -75,9 +76,9 @@
         integer :: global_max_j          ! cell count extents in 2nd coord
                                          ! direction
         real :: global_min_coord1        ! coordinate extents in 1st coord
-        real :: global_max_coord1        !    direction
+        real :: global_max_coord1        ! direction
         real :: global_min_coord2        ! coordinate extents in 2nd coord
-        real :: global_max_coord2        !    direction
+        real :: global_max_coord2        ! direction
         type (ESMF_Array) :: center_coord1   ! coord of center of
                                              ! each cell in 1st direction
         type (ESMF_Array) :: center_coord2   ! coord of center of
@@ -156,12 +157,21 @@
       ESMF_GridMetric_WFaceDist        = 14, &! cell center to west  face distance
       ESMF_GridMetric_SFaceDist        = 15   ! cell center to south face distance
 
+   integer, parameter ::                     &! internally-recognized cell locations
+      ESMF_CellLoc_Unknown             =  0, &! unknown or undefined metric
+      ESMF_CellLoc_Center_X            =  1, &! cell center, x-coordinate  
+      ESMF_CellLoc_Center_Y            =  2, &! cell center, y-coordinate  
+      ESMF_CellLoc_Corner_X            =  3, &! cell vertex, x-coordinate  
+      ESMF_CellLoc_Corner_Y            =  4, &! cell vertex, y-coordinate  
+      ESMF_CellLoc_Face_X              =  5, &! cell face center, x-coordinate  
+      ESMF_CellLoc_Face_Y              =  6   ! cell face center, y-coordinate  
+
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.10 2002/12/13 18:52:27 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.11 2002/12/20 19:18:24 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -233,6 +243,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_PhysGridConstructNew
+         module procedure ESMF_PhysGridConstructInternal
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct
@@ -306,7 +317,7 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_PhysGridConstructNew(physgrid, name, status)
+      call ESMF_PhysGridConstruct(physgrid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridCreateNew: PhysGrid construct"
         return
@@ -324,7 +335,7 @@
 !     ESMF_PhysGridCreateInternal - Create a new PhysGrid internally
 
 ! !INTERFACE:
-      function ESMF_PhysGridCreateInternal(name, global_max_i, global_max_j, &
+      function ESMF_PhysGridCreateInternal(name, distgrid, &
                                            global_min_coord1, &
                                            global_max_coord1, &
                                            global_min_coord2, &
@@ -335,8 +346,7 @@
 !
 ! !ARGUMENTS:
       character (len = *), intent(in), optional :: name  
-      integer, intent(in) :: global_max_i
-      integer, intent(in) :: global_max_j
+      type (ESMF_DistGrid) :: distgrid
       real, intent(in) :: global_min_coord1
       real, intent(in) :: global_max_coord1
       real, intent(in) :: global_min_coord2
@@ -352,8 +362,9 @@
 !     \begin{description}
 !     \item[[name]]
 !          {\tt PhysGrid} name.
-!     \item[[global\_max\_i]]
-!          Number of grid increments in the 1st coordinate direction.
+!     \item[[distgrid]]
+!          {\tt DistGrid} for global information necessary to internally
+!          create a {\tt PhysGrid}.
 !     \item[[global\_max\_j]]
 !          Number of grid increments in the 2nd coordinate direction.
 !     \item[[global\_min\_coord1]]
@@ -394,19 +405,13 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_PhysGridConstructNew(physgrid, name, status)
+      call ESMF_PhysGridConstruct(physgrid, name, distgrid, global_min_coord1, &
+                                  global_max_coord1, global_min_coord2, &
+                                  global_max_coord2, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridCreateInternal: PhysGrid construct"
         return
       endif
-
-!     Set physgrid attributes from function arguments
-      physgrid%global_max_i = global_max_i
-      physgrid%global_max_j = global_max_j
-      physgrid%global_min_coord1 = global_min_coord1
-      physgrid%global_max_coord1 = global_max_coord1
-      physgrid%global_min_coord2 = global_min_coord2
-      physgrid%global_max_coord2 = global_max_coord2
 
 !     Set return values.
       ESMF_PhysGridCreateInternal%ptr => physgrid
@@ -502,6 +507,87 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridConstructNew
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_PhysGridConstructInternal - Construct the internals of an allocated
+!                                      PhysGrid
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridConstructInternal(physgrid, name, distgrid, &
+                                                global_min_coord1, &
+                                                global_max_coord1, &
+                                                global_min_coord2, &
+                                                global_max_coord2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_PhysGridType) :: physgrid  
+      character (len = *), intent(in), optional :: name  ! name
+      type (ESMF_DistGrid) :: distgrid
+      real, intent(in) :: global_min_coord1
+      real, intent(in) :: global_max_coord1
+      real, intent(in) :: global_min_coord2
+      real, intent(in) :: global_max_coord2
+      integer, intent(out), optional :: rc               ! return code
+!
+! !DESCRIPTION:
+!     ESMF routine which fills in the contents of an already
+!     allocated {\tt PhysGrid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding ESMF_PhysGridDestruct
+!     routine to free the additional memory.  Intended for internal
+!     ESMF use only; end-users use {\tt ESMF\_PhysGridCreate}, which calls
+!     {\tt ESMF\_PhysGridConstruct}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid] 
+!          Pointer to a {\tt PhysGrid}.
+!     \item[[name]]
+!          {\tt PhysGrid} name.
+!     \item[[distgrid]]
+!          {\tt DistGrid} for global information necessary to internally
+!          create a {\tt PhysGrid}.
+!     \item[[global\_max\_j]]
+!          Number of grid increments in the 2nd coordinate direction.
+!     \item[[global\_min\_coord1]]
+!          Minimum physical coordinate in the 1st coordinate direction.
+!     \item[[global\_max\_coord1]]
+!          Maximum physical coordinate in the 1st coordinate direction.
+!     \item[[global\_min\_coord2]]
+!          Minimum physical coordinate in the 2nd coordinate direction.
+!     \item[[global\_max\_coord2]]
+!          Maximum physical coordinate in the 2nd coordinate direction.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Fill in physgrid derived type with function arguments
+      physgrid%global_min_coord1 = global_min_coord1
+      physgrid%global_max_coord1 = global_max_coord1
+      physgrid%global_min_coord2 = global_min_coord2
+      physgrid%global_max_coord2 = global_max_coord2
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_PhysGridConstructInternal: PhysGrid construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridConstructInternal
 
 !------------------------------------------------------------------------------
 !BOP
@@ -685,11 +771,10 @@
 !     ESMF_PhysGridSetCoordInternal - Set Coords for a PhysGrid internally
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridSetCoordInternal(physgrid, coord_id, rc)
+      subroutine ESMF_PhysGridSetCoordInternal(physgrid, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid) :: physgrid
-      integer, intent(in) :: coord_id
       integer, intent(out), optional :: rc            
 
 !
@@ -701,14 +786,6 @@
 !     \begin{description}
 !     \item[physgrid]
 !          Class to be modified.
-!     \item[[coord_id]]
-!          Identifier for which set of coordinates are being set:
-!             1  center\_x
-!             2  center\_y
-!             3  corner\_x
-!             4  corner\_y
-!             5  face\_x
-!             6  face\_y
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -730,9 +807,8 @@
 !     call LayoutGetDEPosition(PE_id)
 !     PE_id = 1
 
-
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridConstructNew: PhysGrid construct"
+        print *, "ERROR in ESMF_PhysGridSetCoordInternal: TODO"
         return
       endif
 

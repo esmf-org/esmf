@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.15 2002/12/13 18:51:24 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.16 2002/12/20 19:18:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -183,7 +183,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.15 2002/12/13 18:51:24 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.16 2002/12/20 19:18:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -217,6 +217,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridConstructNew
+         module procedure ESMF_GridConstructInternal
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct a
@@ -480,11 +481,6 @@
 !EOP
 
       type(ESMF_GridType), pointer :: grid    ! Pointer to new grid
-      character(len=4) :: physgrid_name       !
-      integer :: coord_id                     ! integer identifier for coordinate
-      integer :: physgrid_id                  ! integer identifier for physgrid
-      integer :: nDE_i                        ! Number of DE's in 1st dir
-      integer :: nDE_j                        ! Number of DE's in 2nd dir
       integer :: status=ESMF_FAILURE          ! Error status
       logical :: rcpresent=.FALSE.            ! Return code present
 
@@ -507,54 +503,15 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstructNew(grid, name, status)
+      call ESMF_GridConstruct(grid, name, horz_gridtype, vert_gridtype, &
+                              horz_stagger, vert_stagger, &
+                              horz_coord_system, vert_coord_system, &
+                              x_min, x_max, y_min, y_max, i_max, &
+                              j_max, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
         return
       endif
-
-!     Set grid attributes from subroutine arguments
-!     grid%base%name = name    ! TODO  base doesn't have name yet
-      grid%horz_gridtype = horz_gridtype
-      grid%vert_gridtype = vert_gridtype
-      grid%horz_stagger = horz_stagger
-      grid%vert_stagger = vert_stagger
-      grid%horz_coord_system = horz_coord_system
-      grid%vert_coord_system = vert_coord_system
-
-!     For time being, just set the number of DE
-      nDE_i = 1
-      nDE_j = 1
-      grid%distgrid = ESMF_DistGridCreate(nDE_i=nDE_i, nDE_j=nDE_j, &
-                                          i_max=i_max, j_max=j_max, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateInternal: Distgrid create"
-        return
-      endif
-
-!     Create main physgrid
-      grid%num_physgrids = 1
-      physgrid_name = 'base'
-      physgrid_id = 1
-      grid%physgrids(1) = ESMF_PhysGridCreate(physgrid_name, i_max, j_max, &
-                                              x_min, x_max, y_min, y_max, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateInternal: Physgrid create"
-        return
-      endif
-!     Call SetCoordCompute to create physical coordinates of subgrid
-      do coord_id = 1,6
-         call ESMF_GridSetCoordCompute(grid, physgrid_id, coord_id, &
-                                       status)
-      enddo
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateInternal: Grid set coord compute"
-        return
-      endif
-
-!     Create any necessary physgrids to support staggering  TODO
-
-!     Create vertical physgrid if requested
 
 !     Set return values.
       ESMF_GridCreateInternal%ptr => grid
@@ -964,6 +921,159 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_GridConstructInternal - Construct the internals of an allocated Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridConstructInternal(grid, name, &
+                                            horz_gridtype, vert_gridtype, &
+                                            horz_stagger, vert_stagger, &
+                                            horz_coord_system, vert_coord_system, &
+                                            x_min, x_max, y_min, y_max, i_max, &
+                                            j_max, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType) :: grid
+      character (len = *), intent(in), optional :: name
+      integer, intent(in), optional :: horz_gridtype
+      integer, intent(in), optional :: vert_gridtype
+      integer, intent(in), optional :: horz_stagger
+      integer, intent(in), optional :: vert_stagger
+      integer, intent(in), optional :: horz_coord_system
+      integer, intent(in), optional :: vert_coord_system
+      real, intent(in), optional :: x_min
+      real, intent(in), optional :: x_max
+      real, intent(in), optional :: y_min
+      real, intent(in), optional :: y_max
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_max
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which fills in the contents of an already
+!     allocated {\tt Grid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding ESMF\_GridDestruct
+!     routine to free the additional memory.  Intended for internal
+!     ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
+!     {\tt ESMF\_GridConstruct}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt Grid}
+!     \item[[horz\_gridtype]]
+!          Integer specifier to denote horizontal gridtype:
+!             horz\_gridtype=1   equally-spaced lat/lon grid
+!             TODO:  fill out
+!     \item[[vert\_gridtype]]
+!          Integer specifier to denote vertical gridtype:
+!             vert\_gridtype=0   no vertical grid
+!             TODO:  fill out
+!     \item[[horz\_stagger]]
+!          Integer specifier to denote horizontal grid stagger:
+!             horz\_stagger=1   Arakawa A (centered velocity)
+!             horz\_stagger=2   Arakawa B (velocities at grid corners)
+!             horz\_stagger=3   Arakawa C (velocities at cell faces)
+!             TODO:  fill out
+!     \item[[vert\_stagger]]
+!          Integer specifier to denote vertical grid stagger:
+!             vert\_stagger=1   Arakawa A (centered velocity)
+!             vert\_stagger=2   Arakawa B (velocities at grid corners)
+!             vert\_stagger=3   Arakawa C (velocities at cell faces)
+!             TODO:  fill out
+!     \item[[horz\_coord\_system]]
+!          Integer specifier to denote horizontal coordinate system:
+!             horz\_coord\_system=1   spherical
+!             horz\_coord\_system=2   Cartesian
+!             horz\_coord\_system=3   cylindrical
+!     \item[[vert\_coord\_system]]
+!          Integer specifier to denote vertical coordinate system:
+!             vert\_coord\_system=1   spherical
+!             vert\_coord\_system=2   Cartesian
+!             vert\_coord\_system=3   cylindrical
+!     \item[[x\_min]]
+!          Minimum physical coordinate in the x-direction.
+!     \item[[x\_max]]
+!          Maximum physical coordinate in the x-direction.
+!     \item[[y\_min]]
+!          Minimum physical coordinate in the y-direction.
+!     \item[[y\_max]]
+!          Maximum physical coordinate in the y-direction.
+!     \item[[i\_max]]
+!          Number of grid increments in the i-direction.
+!     \item[[j\_max]]
+!          Number of grid increments in the j-direction.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS: TODO
+!EOP
+
+      character(len=4) :: physgrid_name       !
+      integer :: physgrid_id                  ! integer identifier for physgrid
+      integer :: nDE_i                        ! Number of DE's in 1st dir
+      integer :: nDE_j                        ! Number of DE's in 2nd dir
+      integer :: status=ESMF_SUCCESS          ! Error status
+      logical :: rcpresent=.FALSE.            ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Fill in grid derived type with subroutine arguments
+!     grid%base%name = name    ! TODO  base doesn't have name yet
+      grid%horz_gridtype = horz_gridtype
+      grid%vert_gridtype = vert_gridtype
+      grid%horz_stagger = horz_stagger
+      grid%vert_stagger = vert_stagger
+      grid%horz_coord_system = horz_coord_system
+      grid%vert_coord_system = vert_coord_system
+
+!     For time being, just set the number of DE
+      nDE_i = 1
+      nDE_j = 1
+      grid%distgrid = ESMF_DistGridCreate(nDE_i=nDE_i, nDE_j=nDE_j, &
+                                          i_max=i_max, j_max=j_max, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
+        return
+      endif
+
+!     Create main physgrid
+      grid%num_physgrids = 1
+      physgrid_name = 'base'
+      physgrid_id = 1
+      grid%physgrids(1) = ESMF_PhysGridCreate(physgrid_name, grid%distgrid, &
+                                              x_min, x_max, y_min, y_max, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternal: Physgrid create"
+        return
+      endif
+
+!     Call SetCoord to create physical coordinates of subgrid
+      call ESMF_GridSetCoord(grid, physgrid_id, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
+        return
+      endif
+
+!     Create any necessary physgrids to support staggering  TODO
+
+!     Create vertical physgrid if requested
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternal: Grid construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridConstructInternal
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_GridConstructNew - Construct the internals of an allocated Grid
 
 ! !INTERFACE:
@@ -1244,12 +1354,11 @@
 ! !IROUTINE: ESMF_GridSetCoordCompute - Compute coordinates for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetCoordCompute(Grid, physgrid_id, coord_id, rc)
+      subroutine ESMF_GridSetCoordCompute(Grid, physgrid_id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
       integer, intent(in) :: physgrid_id
-      integer, intent(in) :: coord_id
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1262,14 +1371,6 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[[physgrid_id]]
 !          Identifier of the {\tt PhysGrid} to be modified.
-!     \item[[coord_id]]
-!          Identifier for which set of coordinates are being set:
-!             1  center\_x
-!             2  center\_y
-!             3  corner\_x
-!             4  corner\_y
-!             5  face\_x
-!             6  face\_y 
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1288,10 +1389,10 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id), coord_id, status)
+      call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id), status)
 
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridConstructNew: PhysGrid construct"
+        print *, "ERROR in ESMF_GridSetCoordCompute: PhysGrid construct"
         return
       endif
 
