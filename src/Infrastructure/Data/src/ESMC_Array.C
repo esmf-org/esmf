@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.50 2003/07/09 17:25:50 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.51 2003/07/09 22:52:29 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -308,18 +308,18 @@
 
     base_addr = base;
     for (i=0; i<rank; i++) {
-        counts[i] = icounts ? icounts[i] : 1;        
-        lbound[i] = lbounds ? lbounds[i] : 1;
-        ubound[i] = ubounds ? ubounds[i] : counts[i];
-        stride[i] = strides ? strides[i] : 1;
-        offset[i] = offsets ? offsets[i] : 0;
+        counts[i]     = icounts ? icounts[i] : 1;        
+//        lbound[i] = lbounds ? lbounds[i] : 1;
+//        ubound[i] = ubounds ? ubounds[i] : counts[i];
+        bytestride[i] = strides ? strides[i] : 1;
+        offset[i]     = offsets ? offsets[i] : 0;
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
-        counts[i] = 1;
-        lbound[i] = 1;
-        ubound[i] = 1;
-        stride[i] = 1;
-        offset[i] = 0;
+        counts[i]     = 1;
+//        lbound[i] = 1;
+//        ubound[i] = 1;
+        bytestride[i] = 1;
+        offset[i]     = 0;
     }
 
     origin = oflag;
@@ -539,18 +539,18 @@
 
     base_addr = base;
     for (i=0; i<rank; i++) {
-        counts[i] = icounts ? icounts[i] : 0;
-        offset[i] = offsets ? offsets[i] : 0;
-        stride[i] = strides ? strides[i] : 0;
-        lbound[i] = lbounds ? lbounds[i] : 0;
-        ubound[i] = ubounds ? ubounds[i] : counts[i];
+        counts[i]     = icounts ? icounts[i] : 0;
+        offset[i]     = offsets ? offsets[i] : 0;
+        bytestride[i] = strides ? strides[i] : 0;
+//        lbound[i] = lbounds ? lbounds[i] : 0;
+//        ubound[i] = ubounds ? ubounds[i] : counts[i];
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
-        counts[i] = 1;
-        offset[i] = 0;
-        stride[i] = 1;
-        lbound[i] = 1;
-        ubound[i] = 1;
+        counts[i]     = 1;
+        offset[i]     = 0;
+        bytestride[i] = 1;
+//        lbound[i] = 1;
+//        ubound[i] = 1;
     }
     iscontig = contig;
     needs_dealloc = dealloc;
@@ -640,6 +640,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
+      ESMC_DomainType dt,                     // in - domain type, C or F90
       struct ESMC_AxisIndex *indexlist) {     // in - values to set
 //
 // !DESCRIPTION:
@@ -654,7 +655,7 @@
      int i;
 
      for (i=0; i<this->rank; i++) {
-         this->ai[i] = indexlist[i];
+         this->ai_comp[i] = indexlist[i];  // TODO: set all?
      }
 
      return ESMF_SUCCESS;
@@ -672,7 +673,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      struct ESMC_AxisIndex *indexlist) const {     // out - values to get
+      ESMC_DomainType dt,                        // out - domain type, C or F90
+      struct ESMC_AxisIndex *indexlist) const {  // out - values to get
 //
 // !DESCRIPTION:
 //     Gets the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} with the given value.
@@ -686,7 +688,7 @@
      int i;
 
      for (i=0; i<this->rank; i++) {
-         indexlist[i] = this->ai[i];
+         indexlist[i] = this->ai_comp[i];   // TODO: interface to get any ai
      }
 
      return ESMF_SUCCESS;
@@ -707,7 +709,7 @@
       ESMC_DELayout *layout,     // in  - layout (temporarily)
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
-      int size_decomp {          // in  - size of decomp array
+      int size_decomp) {         // in  - size of decomp array
 //
 // !DESCRIPTION:
 //      
@@ -1293,7 +1295,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DELayout *layout,       // in  - layout (temporarily)
+      ESMC_DELayout *layout,     // in  - layout (temporarily)
       int rank_trans[],          // in  - translation of old ranks to new
                                  //       Array
       int size_rank_trans,       // in  - size of rank_trans array
@@ -1321,8 +1323,8 @@
     int gsize=1;
     int lsize=1;
     for (i=0; i<rank; i++) {
-      gsize = gsize * ai[i].max;
-      lsize = lsize * (ai[i].r - ai[i].l+1);
+      gsize = gsize * ai_global[i].stride;  // jw?  needs to be size of global array
+      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);  // jw?
     }
 
     // switch based on datatype
@@ -1338,8 +1340,8 @@
 
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayI(ip0, olddecompids, 
-                                        size_decomp, this->ai, this->ai, ip);
+        layout->ESMC_DELayoutGatherArrayI(ip0, olddecompids, size_decomp, 
+                                          this->ai_comp, this->ai_comp, ip);
 
         // switch based on array rank
         switch (this->rank) {
@@ -1355,11 +1357,13 @@
               gmax[rank_trans[0]-1] = 1;
               for (i=1; i<this->rank; i++) {
                 int i_new = rank_trans[i]-1;
-                gmax[i_new] = ai[i-1].max;
+                gmax[i_new] = ai_comp[i-1].max;  // jw?
               }
               for (i=0; i<this->rank; i++) {
-                lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
-                lstart[i] = RedistArray->ai[i].gstart + RedistArray->ai[i].l;
+                lmax[i] = RedistArray->ai_comp[i].max 
+                        - RedistArray->ai_comp[i].min + 1;
+                lstart[i] = RedistArray->ai_comp[i].gstart  // jw nasty
+                          + RedistArray->ai_comp[i].min;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
@@ -1382,11 +1386,13 @@
               gmax[rank_trans[0]-1] = 1;
               for (i=1; i<this->rank; i++) {
                 int i_new = rank_trans[i]-1;
-                gmax[i_new] = ai[i-1].max;
+                gmax[i_new] = ai_local[i-1].max;  // jw?
               }
               for (i=0; i<this->rank; i++) {
-                lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
-                lstart[i] = RedistArray->ai[i].gstart + RedistArray->ai[i].l;
+                lmax[i] = RedistArray->ai_local[i].max
+                        - RedistArray->ai_local[i].min + 1;
+                lstart[i] = RedistArray->ai_local[i].gstart
+                          + RedistArray->ai_local[i].min;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
@@ -1415,11 +1421,13 @@
               gmax[rank_trans[0]] = 1;
               for (i=1; i<this->rank; i++) {
                 int i_new = rank_trans[i];
-                gmax[i_new] = ai[i-1].max;
+                gmax[i_new] = ai_local[i-1].max;
               }
               for (i=0; i<this->rank; i++) {
-                lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
-                lstart[i] = RedistArray->ai[i].gstart + RedistArray->ai[i].l;
+                lmax[i] = RedistArray->ai_local[i].max
+                        - RedistArray->ai_local[i].min + 1;
+                lstart[i] = RedistArray->ai_local[i].gstart
+                          + RedistArray->ai_local[i].min;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
