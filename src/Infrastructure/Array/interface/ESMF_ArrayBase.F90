@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.13 2003/08/04 20:21:40 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.14 2003/08/05 18:04:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.13 2003/08/04 20:21:40 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.14 2003/08/05 18:04:56 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -307,9 +307,6 @@
 
       integer :: status, nDEs, i, j
       type(ESMF_AxisIndex), dimension(:,:), pointer :: globalindex
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: tindex
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: cindex
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: eindex
       type(ESMF_DELayout) :: layout
 
       ! get layout from the grid in order to get the number of DEs
@@ -321,56 +318,51 @@
       call ESMF_GridGetAllAxisIndex(grid, globalindex, status)
 
       if (present(totalindex)) then
-         tindex => totalindex
-      else
-         nullify(tindex)
+          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_TOTAL, &
+                                           globalindex, nDEs, &
+                                           totalindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          ! translate from C++ to F90
+          do j=1,size(totalindex, 2)
+            do i=1, nDEs
+              totalindex(i,j)%min = totalindex(i,j)%min + 1
+              totalindex(i,j)%max = totalindex(i,j)%max + 1
+            enddo
+          enddo
       endif
 
       if (present(compindex)) then
-         cindex => compindex
-      else
-         nullify(cindex)
-      endif
-
-      if (present(exclindex)) then
-         eindex => exclindex
-      else
-         nullify(eindex)
-      endif
-
-      ! call c routine to get indices
-      call c_ESMC_ArrayGetAllAxisIndices(array, globalindex, nDEs, &
-                                   tindex, cindex, eindex, status)
-
-      ! translate from C++ to F90
-      if (present(totalindex)) then
-        do j = 1,ESMF_MAXGRIDDIM
-          do i = 1,nDEs
-            totalindex(i,j)%min = totalindex(i,j)%min + 1
-            totalindex(i,j)%max = totalindex(i,j)%max + 1
+          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+                                           globalindex, nDEs, &
+                                           compindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          ! translate from C++ to F90
+          do j=1,size(compindex, 2)
+            do i=1, nDEs
+              compindex(i,j)%min = compindex(i,j)%min + 1
+              compindex(i,j)%max = compindex(i,j)%max + 1
+            enddo
           enddo
-        enddo
-      endif
-          
-      if (present(compindex)) then
-        do j = 1,ESMF_MAXGRIDDIM
-          do i = 1,nDEs
-            compindex(i,j)%min = compindex(i,j)%min + 1
-            compindex(i,j)%max = compindex(i,j)%max + 1
-          enddo
-        enddo
       endif
           
       if (present(exclindex)) then
-        do j = 1,ESMF_MAXGRIDDIM
-          do i = 1,nDEs
-            exclindex(i,j)%min = exclindex(i,j)%min + 1
-            exclindex(i,j)%max = exclindex(i,j)%max + 1
+          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
+                                           globalindex, nDEs, &
+                                           exclindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          ! translate from C++ to F90
+          do j=1,size(exclindex, 2)
+            do i=1, nDEs
+              exclindex(i,j)%min = exclindex(i,j)%min + 1
+              exclindex(i,j)%max = exclindex(i,j)%max + 1
+            enddo
           enddo
-        enddo
       endif
           
       status = ESMF_SUCCESS
+
+ 10   continue
+        if (present(rc)) rc = status
 
       if (present(rc)) rc = status
 
