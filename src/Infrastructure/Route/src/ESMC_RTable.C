@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.14 2003/05/01 16:44:57 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.15 2003/06/27 21:20:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.14 2003/05/01 16:44:57 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.15 2003/06/27 21:20:10 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -272,7 +272,7 @@
 // !REQUIREMENTS:  
 
     if (ndeid < 0 || ndeid > entrycount) {
-        printf("ndeid out of range, %d must be between 0 and %n\n", 
+        printf("ndeid out of range, %d must be between 0 and %d\n", 
 		                                	ndeid, entrycount);
         return ESMF_FAILURE;
     }
