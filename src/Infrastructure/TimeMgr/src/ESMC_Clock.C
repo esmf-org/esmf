@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.11 2003/04/02 20:15:20 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.12 2003/04/02 22:48:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.11 2003/04/02 20:15:20 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.12 2003/04/02 22:48:49 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -156,11 +156,329 @@
 //EOP
 // !REQUIREMENTS: TMG 3.5.1
 
-    if (advanceCount != ESMC_NULL_POINTER) *advanceCount = AdvanceCount;
-
-    return(ESMF_SUCCESS);
+    if (advanceCount != ESMC_NULL_POINTER) {
+      *advanceCount = AdvanceCount;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockGetAdvanceCount(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
 
  } // end ESMC_ClockGetAdvanceCount
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetTimeStep - get clock's time step interval
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetTimeStep(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *timeStep) {      // out - time step
+//
+// !DESCRIPTION:
+//     Get the clock's time step
+//
+//EOP
+// !REQUIREMENTS: TMG 3.5.2
+
+    if (timeStep != ESMC_NULL_POINTER) {
+      *timeStep = TimeStep;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockGetTimeStep(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockGetTimeStep
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockSetTimeStep - set clock's time step interval
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockSetTimeStep(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *timeStep) {      // in - time step
+//
+// !DESCRIPTION:
+//     Set the clock's time step
+//
+//EOP
+// !REQUIREMENTS: TMG 3.4.2
+
+    if (timeStep != ESMC_NULL_POINTER) {
+      TimeStep = *timeStep;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockSetTimeStep(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockSetTimeStep
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetCurrTime - get clock's current time
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetCurrTime(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time *currTime) {      // out - current time
+//
+// !DESCRIPTION:
+//     Get the clock's current time
+//
+//EOP
+// !REQUIREMENTS: TMG 3.5.4
+
+    if (currTime != ESMC_NULL_POINTER) {
+      *currTime = CurrTime;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockGetCurrTime(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockGetCurrTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockSetCurrTime - set clock's current time
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockSetCurrTime(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time *currTime) {      // in - current time
+//
+// !DESCRIPTION:
+//     Set the clock's current time
+//
+//EOP
+// !REQUIREMENTS: TMG 3.4.3
+
+    if (currTime != ESMC_NULL_POINTER) {
+      CurrTime = *currTime;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockSetCurrTime(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockSetCurrTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetStartTime - get clock's starting time
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetStartTime(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time *startTime) {      // out - start time
+//
+// !DESCRIPTION:
+//     Get the clock's start time
+//
+//EOP
+// !REQUIREMENTS: TMG 3.5.3
+
+    if (startTime != ESMC_NULL_POINTER) {
+      *startTime = StartTime;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockGetStartTime(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockGetStartTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetStopTime - get clock's stopping time
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetStopTime(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time *stopTime) {      // out - stop time
+//
+// !DESCRIPTION:
+//     Get the clock's stop time
+//
+//EOP
+// !REQUIREMENTS: TMG 3.5.3
+
+    if (stopTime != ESMC_NULL_POINTER) {
+      *stopTime = StopTime;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockGetStopTime(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockGetStopTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetRefTime - get clock's reference (base) time
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetRefTime(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time *refTime) {      // out - reference time
+//
+// !DESCRIPTION:
+//     Get the clock's reference (base) time
+//
+//EOP
+// !REQUIREMENTS: TMG 3.5.3
+
+    if (refTime != ESMC_NULL_POINTER) {
+      *refTime = RefTime;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockGetRefTime(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockGetRefTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetPrevTime - get clock's previous time
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetPrevTime(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time *prevTime) {      // out - previous time
+//
+// !DESCRIPTION:
+//     Get the clock's previous time
+//
+//EOP
+// !REQUIREMENTS: TMG 3.5.4
+
+    if (prevTime != ESMC_NULL_POINTER) {
+      *prevTime = PrevTime;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockGetPrevTime(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockGetPrevTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetCurrSimTime - get clock's current simulation time
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetCurrSimTime(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *currSimTime) {      // out - current simulation time
+//
+// !DESCRIPTION:
+//     Get the clock's current simulation time
+//
+//EOP
+// !REQUIREMENTS: TMG 3.5.5
+
+    if (currSimTime != ESMC_NULL_POINTER) {
+      // TODO: (make ESMC_TimeInterval::operator=)
+      // *currSimTime = (CurrTime - RefTime);
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockGetCurrSimTime(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockGetCurrSimTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetPrevSimTime - get clock's previous simulation time
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetPrevSimTime(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *prevSimTime) {      // out - previous simulation time
+//
+// !DESCRIPTION:
+//     Get the clock's previous simulation time
+//
+//EOP
+// !REQUIREMENTS: TMG 3.5.5
+
+    if (prevSimTime != ESMC_NULL_POINTER) {
+      // TODO: (make ESMC_TimeInterval::operator=)
+      // *prevSimTime = (PrevTime - RefTime);
+      return(ESMF_SUCCESS);
+    }
+    else {
+      cout << "ESMC_Clock::ESMC_ClockGetPrevSimTime(): null pointer passed in"
+           << endl;
+      return(ESMF_FAILURE);
+    }
+
+ } // end ESMC_ClockGetPrevSimTime
 
 //-------------------------------------------------------------------------
 //BOP

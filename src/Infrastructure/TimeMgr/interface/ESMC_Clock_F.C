@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.7 2003/04/02 17:24:54 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.8 2003/04/02 22:48:50 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -60,17 +60,65 @@ extern "C" {
            *status = (ptr)->ESMC_ClockGetAdvanceCount(advanceCount);
        }
 
-#if 0
-       void FTN(c_esmc_clockget)(ESMC_Clock *ptr, 
-                                         <value> *value, int *status} {
-           *status = (ptr)->ESMC_ClockGet(&value);
+       void FTN(c_esmc_clockgettimestep)(ESMC_Clock *ptr, 
+                                         ESMC_TimeInterval *timeStep,
+                                         int *status) {
+           *status = (ptr)->ESMC_ClockGetTimeStep(timeStep);
        }
 
-       void FTN(c_esmc_clockset)(ESMC_Clock *ptr, 
-                                         <value> *value, int *status} {
-           *status = (ptr)->ESMC_ClockSet(value);
+       void FTN(c_esmc_clocksettimestep)(ESMC_Clock *ptr, 
+                                         ESMC_TimeInterval *timeStep,
+                                         int *status) {
+           *status = (ptr)->ESMC_ClockSetTimeStep(timeStep);
        }
-#endif
+
+       void FTN(c_esmc_clockgetcurrtime)(ESMC_Clock *ptr, 
+                                         ESMC_Time *currTime,
+                                         int *status) {
+           *status = (ptr)->ESMC_ClockGetCurrTime(currTime);
+       }
+
+       void FTN(c_esmc_clocksetcurrtime)(ESMC_Clock *ptr, 
+                                         ESMC_Time *currTime,
+                                         int *status) {
+           *status = (ptr)->ESMC_ClockSetCurrTime(currTime);
+       }
+
+       void FTN(c_esmc_clockgetstarttime)(ESMC_Clock *ptr, 
+                                          ESMC_Time *startTime,
+                                          int *status) {
+           *status = (ptr)->ESMC_ClockGetStartTime(startTime);
+       }
+
+       void FTN(c_esmc_clockgetstoptime)(ESMC_Clock *ptr, 
+                                         ESMC_Time *stopTime,
+                                         int *status) {
+           *status = (ptr)->ESMC_ClockGetStopTime(stopTime);
+       }
+
+       void FTN(c_esmc_clockgetreftime)(ESMC_Clock *ptr, 
+                                        ESMC_Time *refTime,
+                                        int *status) {
+           *status = (ptr)->ESMC_ClockGetRefTime(refTime);
+       }
+
+       void FTN(c_esmc_clockgetprevtime)(ESMC_Clock *ptr, 
+                                         ESMC_Time *prevTime,
+                                         int *status) {
+           *status = (ptr)->ESMC_ClockGetPrevTime(prevTime);
+       }
+
+       void FTN(c_esmc_clockgetcurrsimtime)(ESMC_Clock *ptr, 
+                                            ESMC_TimeInterval *currSimTime,
+                                            int *status) {
+           *status = (ptr)->ESMC_ClockGetCurrSimTime(currSimTime);
+       }
+
+       void FTN(c_esmc_clockgetprevsimtime)(ESMC_Clock *ptr, 
+                                            ESMC_TimeInterval *prevSimTime,
+                                            int *status) {
+           *status = (ptr)->ESMC_ClockGetPrevSimTime(prevSimTime);
+       }
 
        void FTN(c_esmc_clockread)(ESMC_Clock *ptr, 
                                   ESMC_TimeInterval *timeStep,

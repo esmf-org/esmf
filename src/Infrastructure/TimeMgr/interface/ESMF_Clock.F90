@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.10 2003/04/02 17:24:55 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.11 2003/04/02 22:48:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
       public ESMF_ClockIsStopTime
       public ESMF_ClockGetAdvanceCount
       public ESMF_ClockGetTimeStep
-      public ESMF_ClockSetTimeInterval
+      public ESMF_ClockSetTimeStep
       public ESMF_ClockGetCurrTime
       public ESMF_ClockSetCurrTime
       public ESMF_ClockGetStartTime
@@ -102,7 +102,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.10 2003/04/02 17:24:55 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.11 2003/04/02 22:48:51 eschwab Exp $'
 
 !==============================================================================
 
@@ -419,30 +419,30 @@
 !     TMG3.5.2
 !EOP
 
-!      call c_ESMC_ClockGetTimeStep(clock, TimeStep, rc)
+      call c_ESMC_ClockGetTimeStep(clock, TimeStep, rc)
     
       end subroutine ESMF_ClockGetTimeStep
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockSetTimeInterval - Set a clock's time interval (timestep)
+! !IROUTINE: ESMF_ClockSetTimeStep - Set a clock's timestep interval
 
 ! !INTERFACE:
-      subroutine ESMF_ClockSetTimeInterval(clock, TimeInterval, rc)
+      subroutine ESMF_ClockSetTimeStep(clock, TimeStep, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(inout) :: clock
-      type(ESMF_TimeInterval), intent(in) :: TimeInterval
+      type(ESMF_TimeInterval), intent(in) :: TimeStep
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set a {\tt Clock}'s time interval (time step)
+!     Set a {\tt Clock}'s timestep interval
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          The object instance to set the time step
-!     \item[TimeInterval]
+!     \item[TimeStep]
 !          The time step
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -452,9 +452,9 @@
 !     TMG3.4.2
 !EOP
 
-!      call c_ESMC_ClockSetTimeInterval(clock, TimeInterval, rc)
+      call c_ESMC_ClockSetTimeStep(clock, TimeStep, rc)
 
-      end subroutine ESMF_ClockSetTimeInterval
+      end subroutine ESMF_ClockSetTimeStep
 
 !------------------------------------------------------------------------------
 !BOP
@@ -485,7 +485,7 @@
 !     TMG3.5.4
 !EOP
 
-!      call c_ESMC_ClockGetCurrTime(clock, CurrTime, rc)
+      call c_ESMC_ClockGetCurrTime(clock, CurrTime, rc)
     
       end subroutine ESMF_ClockGetCurrTime
 
@@ -518,7 +518,7 @@
 !     TMG3.4.3
 !EOP
 
-!      call c_ESMC_ClockSetCurrTime(clock, CurrTime, rc)
+      call c_ESMC_ClockSetCurrTime(clock, CurrTime, rc)
     
       end subroutine ESMF_ClockSetCurrTime
 
@@ -551,7 +551,7 @@
 !     TMG3.5.3
 !EOP
 
-!      call c_ESMC_ClockGetStartTime(clock, StartTime, rc)
+      call c_ESMC_ClockGetStartTime(clock, StartTime, rc)
     
       end subroutine ESMF_ClockGetStartTime
 
@@ -584,7 +584,7 @@
 !     TMG3.5.3
 !EOP
 
-!      call c_ESMC_ClockGetStopTime(clock, StopTime, rc)
+      call c_ESMC_ClockGetStopTime(clock, StopTime, rc)
     
       end subroutine ESMF_ClockGetStopTime
 
@@ -617,7 +617,7 @@
 !     TMG3.5.3
 !EOP
 
-!      call c_ESMC_ClockGetRefTime(clock, RefTime, rc)
+      call c_ESMC_ClockGetRefTime(clock, RefTime, rc)
     
       end subroutine ESMF_ClockGetRefTime
 
@@ -650,7 +650,7 @@
 !     TMG3.5.4
 !EOP
 
-!      call c_ESMC_ClockGetPrevTime(clock, PrevTime, rc)
+      call c_ESMC_ClockGetPrevTime(clock, PrevTime, rc)
     
       end subroutine ESMF_ClockGetPrevTime
 
@@ -683,7 +683,7 @@
 !     TMG3.5.5
 !EOP
 
-!      call c_ESMC_ClockGetCurrSimTime(clock, CurrSimTime, rc)
+      call c_ESMC_ClockGetCurrSimTime(clock, CurrSimTime, rc)
     
       end subroutine ESMF_ClockGetCurrSimTime
 
@@ -716,7 +716,7 @@
 !     TMG3.5.5
 !EOP
 
-!      call c_ESMC_ClockGetPrevSimTime(clock, PrevSimTime, rc)
+      call c_ESMC_ClockGetPrevSimTime(clock, PrevSimTime, rc)
    
       end subroutine ESMF_ClockGetPrevSimTime
 
