@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.30 2004/10/26 23:26:52 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.31 2004/11/08 22:00:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.30 2004/10/26 23:26:52 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.31 2004/11/08 22:00:10 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -74,6 +74,7 @@
       call ESMF_Initialize(vm=vm, rc=rc)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       call ESMF_TestStart(npets, ESMF_SRCLINE)
+      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
       
       !------------------------------------------------------------------------
       
