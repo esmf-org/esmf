@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.5 2003/04/02 17:32:03 shep_smith Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.6 2003/04/03 20:05:12 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,7 +8,6 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
-// #include <ESMC.h>
 //---------------------------------------------------------------------------
 // This Fortran interface to the ESMC_Log class is written in both C and
 // Fortran.  This file contains the interface code written in C.
@@ -18,6 +17,10 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <string.h>
+
+#include <ESMC.h>
+#include "ESMC_LogErr.h"
+
 //Global Variables
 extern FILE* logErrFilePtr[10];
 extern int numFileGlobal;
@@ -25,7 +28,6 @@ extern int logErrFileFortran[10];
 extern int numFileFortGlobal;
 extern char listOfFileNames[20][32];
 extern char listOfFortFileNames[20][32];
-#include "../include/ESMC_LogErr.h"
 
 extern "C" {
 //------------------------------------------------------------------------

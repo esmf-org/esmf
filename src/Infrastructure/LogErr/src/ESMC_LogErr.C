@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.5 2003/04/03 17:04:17 flanigan Exp $
+// $Id: ESMC_LogErr.C,v 1.6 2003/04/03 20:05:15 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 // the companion file ESMC_LogErr.h) provides the user a way to write Log data.
 //
 // insert any higher level, 3rd party or system includes here
-// #include <ESMC.h>
+
 #include <stdio.h>        
 #include <stdlib.h>
 #include <stdarg.h>
@@ -27,7 +27,9 @@
 #include <time.h>
 
 // associated class definition file
-#include "../include/ESMC_LogErr.h"
+#include <ESMC.h>
+#include "ESMC_LogErr.h"
+
 //Global Variables
 FILE* logErrFilePtr[10];
 int numFileGlobal=0;
@@ -39,7 +41,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.5 2003/04/03 17:04:17 flanigan Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.6 2003/04/03 20:05:15 nscollins Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
@@ -200,7 +202,8 @@ bool ESMC_Log::ESMC_LogNameValid(
 //    If it has the function returns a false value.  Note: this function
 //    use a global array that all ESMC\_Log objects have access to.
 {
-  for(int i=0; i< numFileGlobal+numFileFortGlobal; i++)
+  int i;
+  for(i=0; i< numFileGlobal+numFileFortGlobal; i++)
     if (strcmp(name,listOfFileNames[i])  == 0) 
 	return false;
   strcpy(listOfFileNames[i-1],name);

@@ -1,4 +1,18 @@
-#include "../include/ESMF_LogConstants.inc"
+! $Id: ESMF_LogErr.F90,v 1.5 2003/04/03 20:05:14 nscollins Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+!
+
+#include "ESMF.h"
+#include "ESMF_LogConstants.inc"
 
 module ESMF_LogErr
 implicit none
