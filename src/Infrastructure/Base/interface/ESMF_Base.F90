@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.106 2004/06/08 09:27:15 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.107 2004/06/08 09:31:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -153,7 +153,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.106 2004/06/08 09:27:15 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.107 2004/06/08 09:31:13 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -861,11 +861,6 @@
       endif
 
       if (base%this .eq. ESMF_NULL_POINTER) then
-          !print *, "Uninitialized Base Object"
-          !if (present(rc)) rc = ESMF_RC_OBJ_BAD
-          !return
-          ! TODO: how can we include logerr if we haven't compiled it yet?
-          ! need an interface block for it here, i guess.
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized Base object", &
                                  ESMF_CONTEXT, rc)) return
