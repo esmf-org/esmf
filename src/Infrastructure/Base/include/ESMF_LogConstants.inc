@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogConstants.inc,v 1.1 2004/05/20 11:40:30 nscollins Exp $
+ $Id: ESMF_LogConstants.inc,v 1.2 2004/06/11 17:27:58 cpboulder Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -66,5 +66,12 @@ ESMF\_LOG\_UPPER: upper bound for fortran unit number
 !EOP
 #endif
 #define ESMF_LOG_UPPER 100
+
+#if 0
+!BOP
+ESMF\_LOG\_MAXTRYOPEN: maximum tries to determine fortran unit number
+!EOP
+#endif
+#define ESMF_LOG_MAXTRYOPEN 10000
 
 #endif

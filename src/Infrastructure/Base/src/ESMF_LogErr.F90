@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.6 2004/06/10 22:08:01 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.7 2004/06/11 17:27:58 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,13 +94,9 @@ type ESMF_Log
 !If standardout not unit 6, must be changed here.
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_Logical)                      ::  fileIO=ESMF_FALSE
-    integer                                 ::  maxTryOpen=100000
-    integer                                 ::  stdOutUnitNumber=6
     
 #else
     type(ESMF_Logical)                      ::  fileIO
-    integer                                 ::  maxTryOpen
-    integer                                 ::  stdOutUnitNumber
 #endif
 end type ESMF_Log
 !------------------------------------------------------------------------------
@@ -435,9 +431,8 @@ end subroutine ESMF_LogGet
 	
     if (present(rc)) rc=ESMF_FAILURE
     ESMF_LogDefault%FileIsOpen=ESMF_FALSE
-    if (ESMF_LogDefault%stdOutUnitNumber .gt. ESMF_LOG_UPPER) return
     ESMF_LogDefault%nameLogErrFile=filename
-    ESMF_LogDefault%unitnumber=ESMF_LogDefault%stdOutUnitNumber
+    ESMF_LogDefault%unitnumber=ESMF_LOG_FORT_STDOUT   
     do i=ESMF_LogDefault%unitnumber, ESMF_LOG_UPPER
         inquire(unit=i,iostat=status)
         if (status .eq. 0) then
@@ -611,9 +606,8 @@ end function ESMF_LogMsgFoundError
 	
 	if (present(rc)) rc=ESMF_FAILURE
 	aLog%FileIsOpen=ESMF_FALSE
-	if (aLog%stdOutUnitNumber .gt. ESMF_LOG_UPPER) return
 	aLog%nameLogErrFile=filename
-	aLog%unitnumber=aLog%stdOutUnitNumber
+	aLog%unitnumber=ESMF_LOG_FORT_STDOUT
 	do i=aLog%unitnumber, ESMF_LOG_UPPER
         inquire(unit=i,iostat=status)
         if (status .eq. 0) then
@@ -755,7 +749,7 @@ end subroutine ESMF_LogSet
     	    lt="ERROR"
    	end select				
     	ok=0
-    	do i=1, 100000
+    	do i=1, ESMF_LOG_MAXTRYOPEN
     	    OPEN(UNIT=ESMF_LogDefault%unitnumber, &
                 File=ESMF_LogDefault%nameLogErrFile, POSITION="APPEND", &
     		ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
