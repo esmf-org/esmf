@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.70 2004/12/14 15:38:18 theurich Exp $
+! $Id: ESMF_Bundle.F90,v 1.71 2004/12/15 18:47:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -169,6 +169,7 @@
        public ESMF_BundleDestroy      ! Destroy a Bundle
 
        public ESMF_BundleGet          ! Get Bundle information
+       public ESMF_BundleGetFieldNames
 
        public ESMF_BundleSetAttribute       ! Set and Get attributes
        public ESMF_BundleGetAttribute       !   interface to Base class
@@ -2058,7 +2059,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetFieldNames"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleGetFieldNames - Return all Field names in a Bundle
 
 ! !INTERFACE:
@@ -2066,8 +2067,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle 
-      character (len = *), intent(inout) :: nameList(:) ! TODO: change to out 
-                                                        ! after adding code
+      character (len = *), intent(out) :: nameList(:)
       integer, intent(out), optional :: nameCount     
       integer, intent(out), optional :: rc     
 !
@@ -2080,7 +2080,7 @@ end function
 !           An {\tt ESMF\_Bundle} object.
 !     \item [nameList]
 !           An array of character strings where each {\tt ESMF\_Field} name
-!           is returned. 
+!           is returned.  Must be at least as long as {\tt nameCount}.
 !     \item [{[nameCount]}]
 !           A count of how many {\tt ESMF\_Field} names were returned.  Same as
 !           the number of {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.
@@ -2088,12 +2088,31 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
+      integer :: i, status
+      type(ESMF_BundleType), pointer :: bp
 
-!
-!  TODO: code goes here.  comment protex doc back in when implemented.
-!
+      bp => bundle%btypep
+
+      if (present(nameCount)) nameCount = bp%field_count
+
+      if (size(nameList) .lt. bp%field_count) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                  "nameList too short for number of fields", &
+                                  ESMF_CONTEXT, rc)
+          return
+      endif
+
+      do i=1, bp%field_count
+          call ESMF_FieldGet(bp%flist(i), name=nameList(i), rc=status)      
+          if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      enddo 
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleGetFieldNames
 
 
