@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.18 2004/05/10 15:42:09 nscollins Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.19 2004/05/25 12:21:19 nscollins Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -46,6 +46,11 @@
     ! Initialize framework
     call ESMF_Initialize(rc=rc)
     call ESMF_VMGetGlobal(vm, rc)
+!EOC
+    
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
 
 !   !  Create several Fields and add them to a new Bundle.
  
@@ -53,11 +58,14 @@
     min_coord = (/  0.0,  0.0 /)
     max_coord = (/ 50.0, 60.0 /)
     delayout = ESMF_DELayoutCreate(vm, rc=rc)
-    grid = ESMF_GridCreateLogRectUniform(2, counts, min_coord, max_coord, &
-                horzGridType=ESMF_GridType_XY, &
-                horzStagger=ESMF_GridStagger_A, &
-                horzCoordSystem=ESMF_CoordSystem_Cartesian, &
-                delayout=delayout, rc=rc)
+    grid = ESMF_GridCreateHorz_XYUni(counts, min_coord, max_coord, &
+                horzStagger=ESMF_GRID_HORZ_STAGGER_A, rc=rc)
+    call ESMF_GridDistribute(grid, delayout=delayout, rc=rc)
+!EOC
+    
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
 
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
     field(1) = ESMF_FieldCreate(grid, arrayspec, &
