@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.14 2005/02/15 21:00:05 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.15 2005/02/15 21:49:35 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -280,7 +280,7 @@ getopts("d:b:", \%options);
 	print "\n\nThe stdout files for the unit tests can be found at:\n";
 	print "$TEST_DIR\n\n";
 
-        print "\n\nThere are a total of $total_test_count ";
+        print "\n\n$total_test_count ";
         if ($exhaustive == 0) {
                 print "non-exhaustive ";
         }       
@@ -293,19 +293,7 @@ getopts("d:b:", \%options);
         else {
                 print "multi processor unit tests, ";
         }
-	if ( $total_pass_count == 1) {
-		print "$total_pass_count passes and ";
-	}
-	else {
-		print "$total_pass_count pass and ";
-	}
-	if ( $total_fail_count == 1) {
-		print "$total_fail_count fails.\n\n";
-	}
-	else {
-		print "$total_fail_count fail.\n\n";
-	}
-	# Delete ./ from all lists
+	print "$total_pass_count pass and $total_fail_count fail.\n\n";
 
 
 exit 0;
