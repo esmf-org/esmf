@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.5 2003/04/14 17:58:21 nscollins Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.6 2003/04/17 20:51:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.5 2003/04/14 17:58:21 nscollins Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.6 2003/04/17 20:51:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -79,20 +79,20 @@
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
 
       ! print out initialized variables
-      call ESMF_CalendarPrint(gregorianCalendar, "", rc)
-      call ESMF_TimeIntervalPrint(timeStep, "", rc)
-      call ESMF_TimePrint(startTime, "", rc)
-      call ESMF_TimePrint(stopTime, "", rc)
-      call ESMF_ClockPrint(clock, "", rc)
+      call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalPrint(timeStep, rc=rc)
+      call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_TimePrint(stopTime, rc=rc)
+      call ESMF_ClockPrint(clock, rc=rc)
 
       ! time step from start time to stop time
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
         call ESMF_ClockAdvance(clock, rc=rc)
-        call ESMF_ClockPrint(clock, "", rc)
+        call ESMF_ClockPrint(clock, rc=rc)
       end do
 
       ! print out ending clock state
-      call ESMF_ClockPrint(clock, "", rc)
+      call ESMF_ClockPrint(clock, rc=rc)
 
 
 #if 0
@@ -155,20 +155,20 @@
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
 
       ! print out initialized variables
-      call ESMF_CalendarPrint(gregorianCalendar, "", rc)
-      call ESMF_TimeIntervalPrint(timeStep, "", rc)
-      call ESMF_TimePrint(startTime, "", rc)
-      call ESMF_TimePrint(stopTime, "", rc)
-      call ESMF_ClockPrint(clock, "", rc)
+      call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalPrint(timeStep, rc=rc)
+      call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_TimePrint(stopTime, rc=rc)
+      call ESMF_ClockPrint(clock, rc=rc)
 
       ! time step from start time to stop time
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
         call ESMF_ClockAdvance(clock, rc=rc)
-        call ESMF_ClockPrint(clock, "", rc)
+        call ESMF_ClockPrint(clock, rc=rc)
       end do
 
       ! print out ending clock state
-      call ESMF_ClockPrint(clock, "", rc)
+      call ESMF_ClockPrint(clock, rc=rc)
 
 
 #if 0
