@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.6 2003/08/27 23:09:54 flanigan Exp $
+% $Id: user_arch.tex,v 1.7 2003/11/12 22:02:02 svasquez Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -7,12 +7,15 @@ The following table lists the environment variable settings used by
 the ESMF build system for supported platforms. \vspace{1ex}
 
 \begin{tabular}{lccc}
-  &{\bfseries ESMF\_ARCH}  & {\bfseries ESMF\_SITE } & {\bfseries ESMF\_PREC} \\
+  &{\bfseries ESMF\_ARCH} & ESMF_COMPILER & {\bfseries ESMF\_SITE } & {\bfseries ESMF\_PREC} \\
 
-Alpha       &  OSF1    &  default &  64 \\
-SGI         &  IRIX64  &  default &  64 \\
-IBM RS6000  &  AIX     &  default &  64 \\
-IBM RS6000  &  AIX     &  default &  32 
+Alpha       &  OSF1    &  default &  default &  64 \\
+SGI         &  IRIX64  &  default &  default &  64 \\
+SGI         &  IRIX64  &  default &  default &  32 \\
+IBM RS6000  &  AIX     &  default &  default &  64 \\
+IBM RS6000  &  AIX     &  default &  default &  32 \\ 
+Linux 	    &  Linux   &  intel   &  default &  64 \\
+Linux 	    &  Linux   &  intel   &  default &  32 
 
 \end{tabular}
 
