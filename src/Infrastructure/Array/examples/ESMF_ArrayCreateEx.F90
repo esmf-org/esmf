@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.7 2004/01/07 21:15:53 svasquez Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.8 2004/01/09 23:55:10 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -33,7 +33,7 @@
 !\end{verbatim}
 !EOP
 
-    integer :: nx, ny, arank, rc, finalrc 
+    integer :: finalrc 
     finalrc = ESMF_SUCCESS
 
 !BOP
