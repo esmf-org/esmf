@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.8 2003/03/11 20:26:36 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.9 2003/03/11 20:28:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
    private:
      // name in base class
      int routeid;           // unique id, used later for cacheing
-     ESMC_Layout *layout;   // layout which includes all src + dst pe's
+     ESMC_DELayout *layout;   // layout which includes all src + dst pe's
      ESMC_RTable *sendRT;   // send route table
      ESMC_RTable *recvRT;   // receive route table
      ESMC_CommTable *ct;    // communication scheduling table
@@ -68,7 +68,7 @@
   public:
  // ESMC_RouteCreate and ESMC_RouteDestroy are declared below,
  // outside the ESMC_Route declaration
-    int ESMC_RouteConstruct(ESMC_Layout *layout);
+    int ESMC_RouteConstruct(ESMC_DELayout *layout);
     int ESMC_RouteDestruct(void);
 
  // accessor methods for class members
@@ -100,7 +100,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Route object.
 
- ESMC_Route *ESMC_RouteCreate(ESMC_Layout *layout, int *rc);
+ ESMC_Route *ESMC_RouteCreate(ESMC_DELayout *layout, int *rc);
  int ESMC_RouteDestroy(ESMC_Route *route);
 
  #endif  // ESMC_Route_H
