@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.26.4.1 2005/02/09 21:48:37 nscollins Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.26.4.2 2005/03/03 22:15:36 nscollins Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -80,6 +80,8 @@
     ! Get the PET count and our PET number
     call ESMF_VMGet(vm, localPet=my_pet, petCount=npets, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
+
+    miscount = 0
 
     if (npets .eq. 1) then
        print *, "This test must run with > 1 processor"
