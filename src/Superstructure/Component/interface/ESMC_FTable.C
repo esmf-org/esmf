@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.2 2003/02/26 02:32:23 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.3 2003/02/27 21:28:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.2 2003/02/26 02:32:23 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.3 2003/02/27 21:28:26 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -77,17 +77,19 @@
 // !REQUIREMENTS:  developer's guide for classes
 
     // TODO: allocate space for N items, rounded up?
-    if (nfuncp > this->funcalloc) {
-        this->funcs = (struct funcinfo *)realloc((void *)this->funcs, nfuncp * sizeof(funcinfo));
-        this->funcalloc = nfuncp; 
+    if (nfuncp > funcalloc) {
+        funcs = (struct funcinfo *)realloc((void *)funcs, 
+                                                  nfuncp * sizeof(funcinfo));
+        funcalloc = nfuncp; 
     }
-    if (ndatap > this->dataalloc) {
-        this->data = (struct datainfo *)realloc((void *)this->data, ndatap * sizeof(datainfo));
-        this->dataalloc = ndatap;
+    if (ndatap > dataalloc) {
+        data = (struct datainfo *)realloc((void *)data, 
+                                                 ndatap * sizeof(datainfo));
+        dataalloc = ndatap;
     }
 
     printf("TableExtend method called \n");
-    return ESMF_FAILURE;
+    return ESMF_SUCCESS;
 
  } // end ESMC_FTableExtend
 
@@ -111,8 +113,8 @@
 // !REQUIREMENTS:  developer's guide for classes
 
     // fill in values
-    *nfuncp = this->funccount;
-    *ndatap = this->datacount;
+    *nfuncp = funccount;
+    *ndatap = datacount;
 
     //printf("TableQuery method called \n");
     return ESMF_SUCCESS;
@@ -122,7 +124,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer
+// !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, no extra args
 //
 // !INTERFACE:
       int ESMC_FTable::ESMC_FTableSetFuncPtr(
@@ -131,8 +133,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      void *func,            // in, function address
       char *name,            // in, function name
+      void *func,            // in, function address
       enum ftype ftype) {    // in, function type
 //
 // !DESCRIPTION:
@@ -141,19 +143,60 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    int funccount = this->funccount;
 
  // TODO: test this code
-    if (funccount >= this->funcalloc) {
- 	this->funcs = (struct funcinfo *)realloc((void *)this->funcs, (funccount+1) * sizeof(struct funcinfo));
-        this->funcalloc = funccount+1;
+    if (funccount >= funcalloc) {
+ 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+1) * sizeof(struct funcinfo));
+        funcalloc = funccount+1;
     }
-    this->funcs[funccount].funcptr = func;
-    this->funcs[funccount].funcname = new char[sizeof(name)+1];
-    strcpy(this->funcs[funccount].funcname, name);
-    this->funcs[funccount].ftype = ftype;
+    funcs[funccount].funcptr = func;
+    funcs[funccount].funcname = new char[sizeof(name)+1];
+    strcpy(funcs[funccount].funcname, name);
+    funcs[funccount].ftype = ftype;
    
-    this->funccount++;
+    funccount++;
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_FTableSetFuncPtr
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, two extra args
+//
+// !INTERFACE:
+      int ESMC_FTable::ESMC_FTableSetFuncPtr(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      char *name,            // in, function name
+      void *func,            // in, function address
+      enum ftype ftype,      // in, function type
+      void *arg1,            // in, address of arg 1
+      void *arg2) {          // in, address of arg 2
+//
+// !DESCRIPTION:
+//    Sets the named function pointer
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+
+ // TODO: test this code
+    if (funccount >= funcalloc) {
+ 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+1) * sizeof(struct funcinfo));
+        funcalloc = funccount+1;
+    }
+    funcs[funccount].funcptr = func;
+    funcs[funccount].funcname = new char[sizeof(name)+1];
+    strcpy(funcs[funccount].funcname, name);
+    funcs[funccount].ftype = ftype;
+    funcs[funccount].funcarg1 = arg1;
+    funcs[funccount].funcarg2 = arg2;
+   
+    funccount++;
 
     return ESMF_SUCCESS;
 
@@ -170,8 +213,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      void *data,            // in, data address
-      char *name,            // in, data name
+      char *namep,           // in, data name
+      void *datap,           // in, data address
       enum dtype dtype) {    // in, data type
 //
 // !DESCRIPTION:
@@ -180,19 +223,17 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    int datacount = this->datacount;
-
  // TODO: test this code
-    if (datacount >= this->dataalloc) {
- 	this->data = (struct datainfo *)realloc((void *)this->data, (datacount+1) * sizeof(struct datainfo));
-        this->dataalloc = datacount+1;
+    if (datacount >= dataalloc) {
+ 	data = (struct datainfo *)realloc((void *)data, (datacount+1) * sizeof(struct datainfo));
+        dataalloc = datacount+1;
     }
-    this->data[datacount].dataptr = data;
-    this->data[datacount].dataname = new char[sizeof(name)+1];
-    strcpy(this->data[datacount].dataname, name);
-    this->data[datacount].dtype = dtype;
+    data[datacount].dataptr = datap;
+    data[datacount].dataname = new char[sizeof(namep)+1];
+    strcpy(data[datacount].dataname, namep);
+    data[datacount].dtype = dtype;
    
-    this->datacount++;
+    datacount++;
 
     return ESMF_SUCCESS;
 
@@ -204,13 +245,15 @@
 // !IROUTINE:  ESMC_FTableGetFuncPtr - get function pointer from name
 //
 // !INTERFACE:
-      void * ESMC_FTable::ESMC_FTableGetFuncPtr(
+      int ESMC_FTable::ESMC_FTableGetFuncPtr(
 //
 // !RETURN VALUE:
-//    function pointer
+//    integer return code
 //
 // !ARGUMENTS:
-      char *name) {    // in, function name
+      char *name,            // in, function name
+      void **func,           // out, function address
+      enum ftype *ftype) {   // out, function type
 //
 // !DESCRIPTION:
 //    Returns the named function pointer
@@ -218,19 +261,19 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-//
-//  TODO: add type information also to be returned
-//
     int i;
 
-    for (i=0; i<this->funccount; i++) {
-        if (strcmp(name, this->funcs[i].funcname))
+    for (i=0; i<funccount; i++) {
+        if (strcmp(name, funcs[i].funcname))
 	   continue;
+   
+        *func = funcs[i].funcptr;
+        *ftype = funcs[i].ftype;
 
-        return this->funcs[i].funcptr;
+        return ESMF_SUCCESS;
     }
 
-    return 0;
+    return ESMF_FAILURE;
 
  } // end ESMC_FTableGetFuncPtr
 
@@ -239,13 +282,15 @@
 // !IROUTINE:  ESMC_FTableGetDataPtr - get data pointer from name
 //
 // !INTERFACE:
-      void * ESMC_FTable::ESMC_FTableGetDataPtr(
+      int ESMC_FTable::ESMC_FTableGetDataPtr(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      char *name) {    // in, data name
+      char *namep,           // in, data name
+      void **datap,          // out, data address
+      enum dtype *dtype) {   // out, data type
 //
 // !DESCRIPTION:
 //    Returns the named data pointer
@@ -253,22 +298,98 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-//
-//  TODO: add type information also to be returned
-//
     int i;
 
-    for (i=0; i<this->datacount; i++) {
-        if (strcmp(name, this->data[i].dataname))
+    for (i=0; i<datacount; i++) {
+        if (strcmp(namep, data[i].dataname))
 	   continue;
 
-        return this->data[i].dataptr;
+        *datap =  data[i].dataptr;
+        *dtype = data[i].dtype;
+
+        return ESMF_SUCCESS;
     }
 
-    return 0;
+    return ESMF_FAILURE;
 
  } // end ESMC_FTableGetDataPtr
 
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FTableCallVFuncPtr - call a function w/ proper args
+//
+// !INTERFACE:
+      int ESMC_FTable::ESMC_FTableCallVFuncPtr(
+//
+// !RETURN VALUE:
+//    integer return code
+//
+// !ARGUMENTS:
+      char *name,         // in, function name 
+      int *rc) {          // out, function return
+//
+// !DESCRIPTION:
+//    Calls the named function pointer
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    int i;
+
+    for (i=0; i<funccount; i++) {
+        if (strcmp(name, funcs[i].funcname))
+	   continue;
+   
+        switch (funcs[i].ftype) {
+          case FT_VOID: {
+            VoidFunc vf;
+            vf = (VoidFunc)funcs[i].funcptr;
+            *rc = (*vf)();
+            break;
+          }
+          case FT_INT: {
+            IntFunc vf;
+            vf = (IntFunc)funcs[i].funcptr;
+            *rc = (*vf)(*(int *)funcs[i].funcarg1);
+            break;
+          }
+          case FT_2INT: {
+            Int2Func vf;
+            vf = (Int2Func)funcs[i].funcptr;
+            *rc = (*vf)(*(int *)funcs[i].funcarg1, *(int *)funcs[i].funcarg2);
+            break;
+          }
+          case FT_INTP: {
+            IntPtrFunc vf;
+            vf = (IntPtrFunc)funcs[i].funcptr;
+            *rc = (*vf)((int *)funcs[i].funcarg1);
+            break;
+          }
+          case FT_VOIDP: {
+            VoidPtrFunc vf;
+            vf = (VoidPtrFunc)funcs[i].funcptr;
+            *rc = (*vf)(funcs[i].funcarg1);
+            break;
+          }
+          case FT_VOIDPINTP: {
+            VoidPtrIntPtrFunc vf;
+            vf = (VoidPtrIntPtrFunc)funcs[i].funcptr;
+            *rc = (*vf)((void *)funcs[i].funcarg1, (int *)funcs[i].funcarg2);
+            break;
+          }
+          default:
+            fprintf(stderr, "unknown function type\n");
+            return ESMF_FAILURE;
+        }
+
+        return ESMF_SUCCESS;
+    }
+
+    return ESMF_FAILURE;
+
+ } // end ESMC_FTableCallVFuncPtr
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -325,32 +446,6 @@
 
  } // end ESMC_FTablePrint
 
-#if 0
- enum ftype { FVOID=1, FINT=2, F2INT=3 };
- struct funcinfo {
-    char *funcname;
-    void *funcptr;
-    enum ftype ftype;
- };
-
- enum dtype { FVOIDPTR=1 };
- struct datainfo {
-    char *dataname;
-    void *dataptr;
-    enum dtype dtype;
- };
-
- // class declaration type
- class ESMC_FTable {
-
-   private:
-    int funccount;       
-    int funcalloc;
-    struct funcinfo *funcs;
-    int datacount;
-    int dataalloc;
-    struct datainfo *data;
-#endif
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -374,12 +469,13 @@
 //
 //  code goes here
 //
-    this->funccount = 0;
-    this->funcalloc = 0;
-    this->funcs = 0;
-    this->datacount = 0;
-    this->dataalloc = 0; 
-    this->data = 0;
+    printf("in ftable constructor\n");
+    funccount = 0;
+    funcalloc = 0;
+    funcs = 0;
+    datacount = 0;
+    dataalloc = 0; 
+    data = 0;
 
  } // end ESMC_FTable
 
@@ -405,17 +501,18 @@
 //
 //  code goes here
 //
-    if (this->funcs)
-        delete this->funcs;
+    printf("in ftable destructor\n");
+    if (funcs)
+        delete funcs;
 
-    if (this->data)
-	delete this->data;
+    if (data)
+	delete data;
 
-    this->funccount = 0;
-    this->funcalloc = 0;
-    this->funcs = 0;
-    this->datacount = 0;
-    this->dataalloc = 0; 
-    this->data = 0;
+    funccount = 0;
+    funcalloc = 0;
+    funcs = 0;
+    datacount = 0;
+    dataalloc = 0; 
+    data = 0;
 
  } // end ~ESMC_FTable

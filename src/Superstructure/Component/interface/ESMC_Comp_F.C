@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.7 2003/02/26 01:17:14 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.8 2003/02/27 21:28:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include "ESMC.h"
 #include "ESMC_Base.h"
 #include "ESMC_Comp.h"
+#include "ESMC_FTable.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -41,51 +42,97 @@
 // these interface subroutine names MUST be in lower case
 extern "C" {
 
-     // these first two have no leading c_ and are ESMF and not ESMC because 
+     // these functions have no leading c_ and are ESMF and not ESMC because 
      // they're to be called directly by F90 user code.  making them different
      // seems like an invitation to errors; also if they don't have the
      // leading c_ then we may run into naming conflicts with the real
-     // C++ code which does the work (which was why the prefix was added 
+     // C++ code which does the work (which was why that prefix was added 
      // in the first place).
      //
      // also note they CANNOT have prototypes in fortran because the routine 
      // types and data types are private/different for each call so there
      // is no correct prototype syntax which will work.
+     //
+     // and finally, note that they have an extra level of indirection,
+     // because the first arg is actually being called with a component
+     // pointer - and after one dereference we are at the component derived
+     // type.  the second dereference finds the ftable pointer which must
+     // be the first entry in the comp derived type.
 
-     void FTN(esmf_compregister)(ESMC_Comp **ptr, void (func)(), int *status) {
-         //*status = (*ptr)->ESMC_CompRegister(func);
+     void FTN(esmf_compregister)(void *ptr, int (*func)(), int *status) {
+         int rc, funcrc;
+         int *tablerc = new int;
+         void *f90comp = ptr;
+         ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
+         
+         rc = (tabptr)->ESMC_FTableExtend(8, 0); // room for 8 funcs, 0 data
+         if (rc != ESMF_SUCCESS) {
+             *status = rc;
+             return;
+         }
+
+         rc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
+                              FT_VOIDPINTP, (void *)f90comp, (void *)tablerc);
+         if (rc != ESMF_SUCCESS) {
+             *status = rc;
+             return;
+         }
+
+         rc = (tabptr)->ESMC_FTableCallVFuncPtr("register", &funcrc);
+         if (rc != ESMF_SUCCESS) {
+             *status = rc;
+             return;
+         }
+
+         if (funcrc != ESMF_SUCCESS) {
+             *status = funcrc;
+             return;
+         }
+         *status = ESMF_SUCCESS;
+         return;
+      
+         // TODO:  is it possible to make this simpler and call it directly:
+         // rc = (*func)(comp, func_rc);
+         // *status = ESMF_SUCCESS;
+         // return; 
      }
 
-     void FTN(esmf_compsetroutine)(ESMC_Comp **ptr, int type, void (func)(), 
-                                   int *status) {
-         //*status = (*ptr)->ESMC_CompSetRoutine(type, func);
+     // TODO: type used to be a string, which is more general, but i'm having
+     // problems passing strings between F90 routines directly to C w/o
+     // prototypes (which is necessary since func can't be a typed variable)
+     void FTN(esmf_compsetroutine)(void *ptr, int *type,
+                                     int *phase, void *func, int *status) {
+         char *name;
+         int *tablerc = new int;
+         void *f90comp = ptr;
+         ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
+
+         switch(*type) {
+           case ESMF_INIT:   name = "init";  break;
+           case ESMF_RUN:    name = "run";   break;
+           case ESMF_FINAL:  name = "final"; break;
+           default:
+             printf("compsetroutine: unrecognized routine type %d\n", *type);
+             *status = ESMF_FAILURE;
+             return;
+         }
+         //printf("SetRoutine: setting function name = '%s'\n", name);
+         if (*phase == 1)
+             *status = (tabptr)->ESMC_FTableSetFuncPtr(name, func, 
+                              FT_VOIDPINTP, (void *)f90comp, (void *)tablerc);
+         else {
+             char *tbuf = new char[strlen(name) + 4];
+             sprintf(tbuf, "%s%02d", name, *phase);
+             *status = (tabptr)->ESMC_FTableSetFuncPtr(tbuf, func, 
+                              FT_VOIDPINTP, (void *)f90comp, (void *)tablerc);
+         }
      }
 
-     void FTN(esmf_compsetdataptr)(ESMC_Comp **ptr, int type, void (func)(), 
-                                   int *status) {
-         //*status = (*ptr)->ESMC_CompSetDataPtr(type, func);
-     }
-
-     // the rest of these routines follow the normal naming conventions and
-     // are called from the framework internals.
-  
-     void FTN(c_esmc_comptablecreate)(ESMC_Comp **ptr, void *table, int *status) {
-         *status = (*ptr)->ESMC_CompTableCreate(table);
-     }
-  
-     void FTN(c_esmc_compcallroutine)(ESMC_Comp **ptr, int type, int *status) {
-         //*status = (*ptr)->ESMC_CompCallRoutine(type, func);
-         *status = ESMF_FAILURE;
-     }
-
-     void FTN(c_esmc_compgetroutine)(ESMC_Comp **ptr, int type, int *status) {
-         //*status = (*ptr)->ESMC_CompGetRoutine(type, func);
-         *status = ESMF_FAILURE;
-     }
-
-     void FTN(c_esmc_compgetdataptr)(ESMC_Comp **ptr, int type, int *status) {
-         //*status = (*ptr)->ESMC_CompGetDataPtr(type, func);
-         *status = ESMF_FAILURE;
+     // TODO: ditto as above
+     void FTN(esmf_compsetdataptr)(ESMC_FTable ***ptr, int *type,
+                                                 void *datap, int *status) {
+         char *name = "localdata";
+         *status = (**ptr)->ESMC_FTableSetDataPtr(name, datap, DT_VOIDP);
      }
 
 };

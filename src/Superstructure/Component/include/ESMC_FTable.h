@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.3 2003/02/26 01:17:14 nscollins Exp $
+// $Id: ESMC_FTable.h,v 1.4 2003/02/27 21:28:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,14 +47,23 @@
 
 // !PRIVATE TYPES:
 
- enum ftype { FVOID=1, FINT=2, F2INT=3 };
+ enum ftype { FT_VOID=1, FT_INT, FT_2INT, FT_INTP, FT_VOIDP, FT_VOIDPINTP };
+ typedef int (*VoidFunc)(void);
+ typedef int (*IntFunc)(int);
+ typedef int (*Int2Func)(int, int);
+ typedef int (*IntPtrFunc)(int *);
+ typedef int (*VoidPtrFunc)(void *);
+ typedef int (*VoidPtrIntPtrFunc)(void *, int *);
  struct funcinfo {
     char *funcname;
     void *funcptr;
+    void *funcarg1;
+    void *funcarg2;
+    char funcblock[16];    // TODO: make this extensible
     enum ftype ftype;
  };
 
- enum dtype { FVOIDPTR=1 };
+ enum dtype { DT_VOIDP=1 };
  struct datainfo {
     char *dataname;
     void *dataptr;
@@ -74,11 +83,16 @@
 
   public:
 
-    int ESMC_FTableSetFuncPtr(void *, char *name, enum ftype ftype);
-    int ESMC_FTableSetDataPtr(void *, char *name, enum dtype dtype);
+    int ESMC_FTableSetFuncPtr(char *name, void *func, enum ftype ftype);
+    int ESMC_FTableSetFuncPtr(char *name, void *func, enum ftype ftype, 
+                                                      void *arg1, void *arg2);
+    int ESMC_FTableSetDataPtr(char *name, void *data, enum dtype dtype);
 
-    void *ESMC_FTableGetFuncPtr(char *name);
-    void *ESMC_FTableGetDataPtr(char *name);
+    int ESMC_FTableGetFuncPtr(char *name, void **func, enum ftype *ftype);
+    int ESMC_FTableGetDataPtr(char *name, void **data, enum dtype *dtype);
+
+    int ESMC_FTableExtend(int nfuncp, int ndatap);
+    int ESMC_FTableCallVFuncPtr(char *name, int *funcrc);
 
     int ESMC_FTableValidate(const char*) const;
     int ESMC_FTablePrint(const char*) const;
@@ -92,7 +106,7 @@
 //
   private: 
 //
-   int ESMC_FTableExtend(int nfuncp, int ndatap);
+   //int ESMC_FTableExtend(int nfuncp, int ndatap);
    int ESMC_FTableQuery(int *nfuncp, int *ndatap);
 
 //
@@ -101,14 +115,5 @@
 
  };   // end class ESMC_FTable
 
-// Create and Destroy are declared as class helper functions (not methods)
-// since they create and destroy an ESMC_FTable object itself. E.g. if Create
-// were a method, the ESMC_FTable object on whose behalf it was being invoked
-// would need to already exist!  These functions are supersets of C++ new
-// and delete; they perform allocation/deallocation specialized to
-// an ESMC_FTable object.
-
- //ESMC_FTable *ESMC_FTableCreate(int nfunc, int ndata, int *rc);
- int ESMC_FTableDestroy(ESMC_FTable *comp);
 
  #endif  // ESMC_FTable_H

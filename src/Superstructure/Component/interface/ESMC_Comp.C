@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.6 2003/02/25 18:27:09 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.7 2003/02/27 21:28:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.6 2003/02/25 18:27:09 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.7 2003/02/27 21:28:26 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -311,33 +311,6 @@
 
  //} // end ESMC_CompSet<Value>
 
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CompTableCreate - Set up the function jump table
-//
-// !INTERFACE:
-      int ESMC_Comp::ESMC_CompTableCreate(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void *table) {   // newly created table space
-//
-// !DESCRIPTION:
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-    ESMC_FTable *ftable = new ESMC_FTable;
-
-    printf("ComponentTableCreate method called \n");
-   
-    table = (void *)ftable;
-    return ESMF_SUCCESS;
-
- } // end ESMC_CompTableCreate
 
 //-----------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.26 2003/02/26 01:46:41 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.27 2003/02/27 21:28:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,6 +81,11 @@
                   ESMF_OTHER = ESMF_ModelType(6)
 
 !------------------------------------------------------------------------------
+!     ! Callback types, simple integers
+!
+      integer, parameter :: ESMF_CALLINIT=1, ESMF_CALLRUN=2, ESMF_CALLFINAL=3
+
+!------------------------------------------------------------------------------
 !     ! ESMF_CompClass
 !
 !     ! Component class data.   (Unlike other internal names, this one is
@@ -89,6 +94,7 @@
       type ESMF_CompClass
       sequence
       private
+         type(ESMF_Pointer) :: this      ! C++ ftable pointer - MUST BE FIRST
          type(ESMF_Base) :: base                       ! base class
          type(ESMF_CompType) :: ctype                  ! component type
          type(ESMF_ModelType) :: mtype                 ! model type
@@ -99,10 +105,9 @@
          type(ESMF_Clock) :: clock                     ! component clock
          character(len=ESMF_MAXSTR) :: filepath        ! resource filepath
          integer :: instance_id                        ! for ensembles
-         type(ESMF_Pointer) :: this   ! C++ data for function & data pointers
       end type
 
-!------------------------------------------------------------------------------
+
 !     ! ESMF_Comp
 !
 !     ! Component wrapper
@@ -119,6 +124,7 @@
       public ESMF_CompType, ESMF_APPCOMP, ESMF_GRIDCOMP, ESMF_CPLCOMP
       public ESMF_ModelType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
                              ESMF_SEAICE, ESMF_RIVER, ESMF_OTHER
+      public ESMF_CALLINIT, ESMF_CALLRUN, ESMF_CALLFINAL
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -151,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.26 2003/02/26 01:46:41 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.27 2003/02/27 21:28:27 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -467,13 +473,13 @@ end interface
         nullify(compp%statelist)
 
         compp%instance_id = 1
-        ! Call C++ entry point to initialize the function and data pointer
-        ! tables.   TODO: add this code
-        ! call c_ESMC_CompTableCreate(compp%this, status) 
-        !if (status .ne. ESMF_SUCCESS) then
-        !  print *, "CompConstruct: Table create error"
-        !  return
-        !endif
+
+        ! Create an empty table.
+        call c_ESMC_FTableCreate(compp%this, status) 
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "CompConstruct: Table create error"
+          return
+        endif
    
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
@@ -532,12 +538,11 @@ end interface
         endif
         
         ! call C++ to release function and data pointer tables.
-        ! TODO: add this code
-        ! call c_ESMC_CompTableDelete(compp%this, status)
-        !if (status .ne. ESMF_SUCCESS) then
-        !  print *, "Component contents destruction error"
-        !  return
-        !endif
+        call c_ESMC_FTableDestroy(compp%this, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component contents destruction error"
+          return
+        endif
 
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -556,11 +561,12 @@ end interface
 ! !IROUTINE: ESMF_CompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompInitialize(component, rc)
+      subroutine ESMF_CompInitialize(component, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_Comp) :: component
+      integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -573,11 +579,7 @@ end interface
 !   \item[component]
 !    Component to call Initialization routine for.
 !
-!   \item[{[clock]}]  Start time, total model time, etc.
-!
-!   \item[{[layout]}]  Number of processors for this component.
-!
-!   \item[{[filepath]}]  Where to find component-specific files.
+!   \item[{[phase]}]  If multiple-phase init, which phase this is.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -613,8 +615,9 @@ end interface
         ! TODO: handle optional args, do framework setup for this comp.
         ! Call user-supplied init routine.
 
-        ! TODO: add code here
-        !call c_ESMC_CompDispatch(component%funclist(INIT))(component, status)
+        ! TODO: add stringcat for phase
+        ! TODO: test this
+        call c_ESMC_FTableCallRoutine(component%compp%this, ESMF_CALLINIT, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
           return
@@ -631,15 +634,16 @@ end interface
 ! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompRun(component, rc)
+      subroutine ESMF_CompRun(component, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_Comp) :: component 
+      integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user initialization code for a component.
+!  Call the associated user run code for a component.
 !
 !    
 !  The arguments are:
@@ -648,8 +652,7 @@ end interface
 !   \item[component]
 !    Component for which to call Run routine.
 !
-!   %\item[clock]
-!   % Clock time - used for stop time
+!   \item[{[phase]}]  If multiple-phase run, which phase this is.
 !
 !   %\item[timesteps]
 !   % How long the Run interval is.
@@ -688,8 +691,10 @@ end interface
         ! TODO: handle optional args, do framework setup for this comp.
         ! Call user-supplied init routine.
 
-        ! TODO: add code here
-        !call c_ESMC_CompDispatch(component%funclist(RUN))(component, timesteps, status)
+        ! TODO: add code to handle phases
+       
+        ! TODO: test this
+        call c_ESMC_FTableCallRoutine(component%compp%this, ESMF_CALLRUN, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component run error"
           return
@@ -706,11 +711,12 @@ end interface
 ! !IROUTINE: ESMF_CompFinalize -- Call the Component's finalization routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompFinalize(component, rc)
+      subroutine ESMF_CompFinalize(component, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_Comp) :: component 
+      integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -722,6 +728,8 @@ end interface
 !
 !   \item[component]
 !    Component to call finalization routine for.
+!
+!   \item[{[phase]}]  If multiple-phase finalize, which phase this is.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -757,8 +765,9 @@ end interface
         ! TODO: handle optional args, do framework setup for this comp.
         ! Call user-supplied init routine.
 
-        ! TODO: add code here
-        !call c_ESMC_CompDispatch(component%funclist(FINAL))(component, status)
+        ! TODO: add code to handle multiphase here
+
+        call c_ESMC_FTableCallRoutine(component%compp%this, ESMF_CALLFINAL, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component finalization error"
           return
@@ -772,55 +781,6 @@ end interface
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!
-! Set up callbacks for functions and local data.
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CompSetRoutine -- Associate Routine with a Component
-!
-! !INTERFACE:
-      subroutine ESMF_CompSetRoutine(component, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Comp) :: component 
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!    Set up functions to be called later.
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_CompSetRoutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CompSetData -- Associate Data with a Component
-!
-! !INTERFACE:
-      subroutine ESMF_CompSetData(component, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Comp) :: component 
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Set up a local private data block to be used as a callback argument.
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_CompSetData
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
 ! 
 ! Query/Set information from/in the component.
 !
@@ -829,7 +789,8 @@ end interface
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(comp, import, export, layout, clock, rc)
+      subroutine ESMF_CompGet(comp, import, export, layout, clock, &
+                                instanceid, statelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Comp), intent(in) :: comp
@@ -837,6 +798,8 @@ end interface
       type(ESMF_State), intent(out), optional :: export
       type(ESMF_Layout), intent(out), optional :: layout
       type(ESMF_Clock), intent(out), optional :: clock
+      integer, intent(out), optional :: instanceid
+      type(ESMF_State), intent(out), optional :: statelist(:)
       integer, intent(out), optional :: rc             
 
 !
@@ -877,6 +840,15 @@ end interface
           clock = comp%compp%clock
         endif
 
+        if (present(instanceid)) then
+          instanceid = comp%compp%instance_id
+        endif
+
+        ! TODO: does this need to be allocated before copy?
+        !if (present(statelist)) then
+        !  statelist = comp%compp%statelist
+        !endif
+
         ! TODO: add rest of comp contents here
 
         ! Set return code if user specified it
@@ -889,7 +861,8 @@ end interface
 ! !IROUTINE: ESMF_CompSet -- Set various information in a Component
 !
 ! !INTERFACE:
-      subroutine ESMF_CompSet(comp, import, export, layout, clock, rc)
+      subroutine ESMF_CompSet(comp, import, export, layout, clock, &
+                                instanceid, statelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Comp), intent(inout) :: comp
@@ -897,6 +870,8 @@ end interface
       type(ESMF_State), intent(in), optional :: export
       type(ESMF_Layout), intent(in), optional :: layout
       type(ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: instanceid
+      type(ESMF_State), intent(in), optional :: statelist(:)
       integer, intent(out), optional :: rc             
 
 !
@@ -937,6 +912,14 @@ end interface
           comp%compp%clock = clock
         endif
 
+        if (present(instanceid)) then
+          comp%compp%instance_id = instanceid
+        endif
+
+        ! TODO: does this need to be allocated before copy?
+        !if (present(statelist)) then
+        !  comp%compp%statelist = statelist
+        !endif
 
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
