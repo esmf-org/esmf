@@ -27,17 +27,18 @@ and running them.  This document describes the interplay between ESMF
 infrastructure and superstructure, and how they relate to user-provided components.
 
 We provide in the remainder of this introductory section a summary of the 
-scope of the ESMF.  The scope and motivating requirements are explained in more detail in the {\it ESMF Requirements Document}.  The three sections that follow are the core of the {\it Architecture Document.} The first of these is 
+scope of the ESMF.  The scope and motivating requirements are explained in more detail in the {\it ESMF Requirements Document}.  Section~\ref{sec:strategies} is 
 a {\it Design Overview}.  It includes 
 a description of the basic structure of an ESMF application and a discussion of 
 the design strategies
-used in ESMF.  The second, {\it ESMF Classes}, is  a description of the 
+used in ESMF.  Sections~\ref{sec:superclasses},~\ref{sec:fieldclasses}, and
+\ref{sec:utilclasses} contain descriptions of the 
 major classes in the framework, their structure, their relationships to each other, 
-and the sequence of events for key interactions.  The third, {\it 
+and the sequence of events for key interactions.  Section~\ref{sec:fwdesign}, {\it 
 Framework-Wide Design Elements}, describes in detail the conventions and behavior
 that we wish to apply across the ESMF software.  It
 includes a description of function naming conventions and a base class whose behavior all 
-framework classes will share.  At the very end is a glossary of terms.
+framework classes will share.  Section~\ref{sec:glos} is a glossary of terms.
 
 
 
