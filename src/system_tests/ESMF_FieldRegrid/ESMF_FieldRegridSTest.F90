@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.7 2003/11/07 18:38:57 jwolfe Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.8 2003/11/07 22:07:25 nscollins Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -40,10 +40,9 @@
     
     ! Local variables
     integer :: i, de_id, ndes, mid, rc, delist(64), pid, cid
-    character(len=ESMF_MAXSTR) :: aname, cname1, cname2, cplname
+    character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_DELayout) :: layout1, layout2, layout3
     type(ESMF_State) :: c1exp, c2imp, cplstate
-    type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
 
@@ -78,15 +77,12 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
+    ! Initialize framework
+    call ESMF_Initialize(rc)
 
-    ! Create the top level application component.
-    aname = "System Test FieldRegrid"
-    app = ESMF_AppCompCreate(aname, rc=rc)
-    print *, "Created component ", trim(aname), ",  rc =", rc
-  !  call ESMF_AppCompPrint(app, "", rc)
+    ! Query for default layout.
+    layout1 = ESMF_DELayoutCreate(rc)
 
-    ! Query application for layout.
-    call ESMF_AppCompGet(app, layout=layout1, rc=rc)
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc=rc)
     if (ndes .lt. 6) then
       print *, "This system test needs to run at least 6-way, current np = ", ndes
@@ -279,8 +275,7 @@
   
       endif
     
-      call ESMF_AppCompDestroy(app, rc)
-      ! call ESMF_Finalize(rc)   ! when apps go away
+      call ESMF_Finalize(rc) 
 
       end program FieldRegrid
     

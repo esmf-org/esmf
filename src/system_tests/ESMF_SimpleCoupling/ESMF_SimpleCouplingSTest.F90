@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.3 2003/10/22 05:01:29 eschwab Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.4 2003/11/07 22:07:26 nscollins Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -31,10 +31,9 @@
     
     ! Local variables
     integer :: de_id, ndes, rc, delist(4)
-    character(len=ESMF_MAXSTR) :: aname, cname1, cname2, cplname
+    character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_DELayout) :: layout1, layout2, layout3
     type(ESMF_State) :: c1exp, c2imp, cplstate
-    type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
 
@@ -68,14 +67,12 @@
 !-------------------------------------------------------------------------
 !
 
-    ! Create the top level application component.
-    aname = "System Test SimpleCoupling"
-    app = ESMF_AppCompCreate(aname, rc=rc)
+    ! Initialize framework
+    call ESMF_Initialize(rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    print *, "Created component ", trim(aname), ",  rc =", rc
 
-    ! Query application for layout.
-    call ESMF_AppCompGet(app, layout=layout1, rc=rc)
+    ! Query for the default layout
+    layout1 = ESMF_DELayoutCreate(rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_DELayoutPrint(layout1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -309,8 +306,7 @@
   
       endif
     
-      call ESMF_AppCompDestroy(app, rc)
-      ! call ESMF_Finalize(rc)   ! when apps go away
+      call ESMF_Finalize(rc) 
 
       end program SimpleCoupling
     

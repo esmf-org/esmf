@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.3 2003/10/22 05:01:28 eschwab Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.4 2003/11/07 22:07:25 nscollins Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -32,10 +32,9 @@
     
     ! Local variables
     integer :: i, de_id, ndes, mid, rc, delist(64), pid, cid
-    character(len=ESMF_MAXSTR) :: aname, cname1, cname2, cplname
+    character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_DELayout) :: layout1, layout2, layout3
     type(ESMF_State) :: c1exp, c2imp, cplstate
-    type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
 
@@ -70,15 +69,12 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
+    ! Initialize the ESMF Framework
+    call ESMF_Initialize(rc)
 
-    ! Create the top level application component.
-    aname = "System Test CouplingOnExclDEs"
-    app = ESMF_AppCompCreate(aname, rc=rc)
-    print *, "Created component ", trim(aname), ",  rc =", rc
-    call ESMF_AppCompPrint(app, "", rc)
+    ! Query default layout
+    layout1 = ESMF_DELayoutCreate(rc=rc)
 
-    ! Query application for layout.
-    call ESMF_AppCompGet(app, layout=layout1, rc=rc)
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc=rc)
     if (ndes .lt. 8) then
         print *, "This system test needs to run at least 8-way, current np = ", ndes
@@ -278,8 +274,7 @@
   
       endif
     
-      call ESMF_AppCompDestroy(app, rc)
-      ! call ESMF_Finalize(rc)   ! when apps go away
+      call ESMF_Finalize(rc) 
 
       end program CouplingOnExclDEs
     

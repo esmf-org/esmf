@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.3 2003/10/22 05:01:29 eschwab Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.4 2003/11/07 22:07:26 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -35,13 +35,12 @@
     ! Local variables
 
     ! Components
-    type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: INcomp, FScomp
     type(ESMF_CplComp) :: cpl
 
     ! States and Layouts
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
-    type(ESMF_DELayout) :: layoutApp, layoutIN, layoutFS
+    type(ESMF_DELayout) :: layoutDef, layoutIN, layoutFS
     type(ESMF_State) :: INimp, INexp, FSimp, FSexp
     type(ESMF_State) :: cplstateF2I, cplstateI2F, cplbothlists
 
@@ -77,21 +76,19 @@
 !------------------------------------------------------------------------------
 !
 
-    ! Create the top level application component.  This initializes the
-    ! ESMF Framework as well.
-    app = ESMF_AppCompCreate("Coupled Flow Demo", rc=rc)
+    ! Initialize framework
+    call ESMF_Initialize(rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! Query application for layout.
-    call ESMF_AppCompGet(app, layout=layoutApp, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    ! Query for the default layout
+    layoutDef = ESMF_DELayoutCreate(rc)
 
     ! Get our DE number for later
-    call ESMF_DELayoutGetDEId(layoutApp, de_id, rc)
+    call ESMF_DELayoutGetDEId(layoutDef, de_id, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Sanity check the number of DEs we were started on.
-    call ESMF_DELayoutGetNumDEs(layoutApp, ndes, rc)
+    call ESMF_DELayoutGetNumDEs(layoutDef, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
         print *, "This test needs to run at least 4-way and no more than 16-way."
@@ -128,7 +125,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cplname = "Two-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, layout=layoutApp, rc=rc)
+    cpl = ESMF_CplCompCreate(cplname, layout=layoutDef, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
 
@@ -354,8 +351,7 @@
 
       endif
     
-      call ESMF_AppCompDestroy(app, rc)
-      ! call ESMF_Finalize(rc)   ! when apps go away
+      call ESMF_Finalize(rc)
 
       end program ESMF_CoupledFlowDemo
     

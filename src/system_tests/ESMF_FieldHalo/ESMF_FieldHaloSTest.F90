@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.4 2003/10/20 21:51:31 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.5 2003/11/07 22:07:25 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -28,7 +28,6 @@
     external setserv
 
     ! Local variables
-    type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1
     type(ESMF_DELayout) :: layout1, deflayout
     !integer, dimension(12) :: delist
@@ -61,9 +60,10 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    app = ESMF_AppCompCreate(name="Application FieldHalo", rc=rc)
+    call ESMF_Initialize(rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_AppCompGet(app, layout=deflayout, rc=rc)
+
+    deflayout = ESMF_DELayoutCreate(rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_DELayoutGetNumDEs(deflayout, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -163,8 +163,7 @@
 
     endif
     
-    call ESMF_AppCompDestroy(app, rc)
-    ! call ESMF_Finalize(rc)   ! when apps go away
+    call ESMF_Finalize(rc)  
     
     end program FieldHalo
     
