@@ -431,7 +431,7 @@ end function ESMF_LogFoundAllocError
 !            Log object.
 !      \item [verbose]
 !            Verbose flag.
-!      \item [root_only]
+!      \item [root\_only]
 !	     Root only flag
 !      \item [halt]
 !	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
@@ -439,7 +439,7 @@ end function ESMF_LogFoundAllocError
 !            The type of file (singlelog(0), multilog(1)).
 !      \item [stream]
 !            The type of stream (free(0), preordered(1))
-!      \item [max_elements]
+!      \item [max\_elements]
 !            Maximum number of elements in the log.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -482,12 +482,12 @@ end subroutine ESMF_LogSet
 !
 !      The arguments are:
 !      \begin{description}
-! 	
+!
 !      \item [aLog]
 !            Log object.
 !      \item [verbose]
 !            Verbose flag.
-!      \item [root_only]
+!      \item [root\_only]
 !	     Root only flag
 !      \item [halt]
 !	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
@@ -495,7 +495,7 @@ end subroutine ESMF_LogSet
 !             The type of file (singlelog(0), multilog(1)).
 !      \item [stream]
 !            The type of stream (free(0), preordered(1))
-!      \item [max_elements]
+!      \item [max\_elements]
 !            Maximum number of elements in the log.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
