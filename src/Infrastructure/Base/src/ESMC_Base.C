@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.31 2004/02/10 23:42:07 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.32 2004/02/13 21:16:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.31 2004/02/10 23:42:07 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.32 2004/02/13 21:16:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -874,7 +874,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
     }
 
     // count back from end of string to last non-blank character.
-    for (clen=slen, cp = &src[slen-1]; *cp == ' '; cp--, clen--)
+    for (clen=slen, cp = &src[slen-1]; (*cp == ' ') && (clen > 0); cp--, clen--)
         ;
 
     // make new space and leave room for a null terminator
@@ -914,7 +914,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
     }
 
     // count back from end of string to last non-blank character.
-    for (clen=slen, cp = &src[slen-1]; *cp == ' '; cp--, clen--)
+    for (clen=slen, cp = &src[slen-1]; (*cp == ' ') && (clen > 0); cp--, clen--)
         ;
 
     // make sure dst space is long enough 
@@ -1008,7 +1008,7 @@ extern "C" {
     }
 
     // count back from end of string to last non-blank character.
-    for (clen= *slen, cp = &src[*slen-1]; *cp == ' '; cp--, clen--)
+    for (clen= *slen, cp = &src[*slen-1]; (*cp == ' ') && (clen > 0); cp--, clen--)
         ;
 
     // make sure dst space is long enough 
