@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.91 2005/01/12 06:04:45 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.92 2005/02/01 00:25:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.91 2005/01/12 06:04:45 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.92 2005/02/01 00:25:16 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -46,6 +46,7 @@
       ! individual test result code
       integer :: rc, H, M, MM, DD, YY, days, totalDays, secs, testResults
       integer :: checkSec
+      integer :: hr, min, sec, ms, julday, julyr
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -74,7 +75,8 @@
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep
       type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime2, stopTime3
-      type(ESMF_Time) :: currentTime, previousTime, syncTime, stopTime4
+      type(ESMF_Time) :: currentTime, current_time, &
+                         previousTime, syncTime, stopTime4
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       integer(ESMF_KIND_I8) :: advanceCounts, year, day2, minute, second
       integer(ESMF_KIND_I4) :: day, hour
@@ -366,7 +368,6 @@
 
       ! ----------------------------------------------------------------------------
 
-
       !EX_UTest
       ! Verify the seconds are set correctly within the year
       write(name, *) "Get StartTime seconds Within the Year Test"
@@ -380,7 +381,6 @@
 
       ! ----------------------------------------------------------------------------
 
-
       !EX_UTest
       ! Verify the hours, minutes and seconds are set correctly within the year
       write(name, *) "Get StartTime in hours, minutes & seconds Within the Year Test"
@@ -391,7 +391,6 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-
 
       !EX_UTest
       ! Verify the hours and seconds are set correctly within the year
@@ -404,7 +403,6 @@
 
       ! ----------------------------------------------------------------------------
 
-
       !EX_UTest
       ! Verify the minutes and seconds are set correctly within the year
       write(name, *) "Get StartTime in minutes, & seconds Within the Year Test"
@@ -414,6 +412,23 @@
                       .and.(M.eq.103365).and.(YY.eq.2003), &
                       name, failMsg, result, ESMF_SRCLINE)
       ! Minutes = (59+12) X 1440 + 18 X 60 + 45 = 103365
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test fix for bug #1113438 "getting dayOfYear should impose day
+      !   boundary for getting hrs"  From Tom Henderson/WRF
+      write(name, *) "Get current_time in dayOfYear, hours, minutes, seconds, & milliseconds Within the Year Test"
+      call ESMF_TimeSet(current_time, YY=2000, MM=1, DD=24, &
+                        H=12, M=0, S=0, MS=0, rc=rc)
+      call ESMF_TimeGet(current_time, YY=julyr, dayOfYear=julday, &
+                        H=hr, M=min, S=sec, MS=ms, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or year, dayOfYear, hours, minutes, seconds, milliseconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(ms.eq.0).and.(sec.eq.0) &
+                      .and.(min.eq.0).and.(hr.eq.12).and.(julday.eq.24) &
+                      .and.(julyr.eq.2000), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "julyr,hr,min,sec,ms,julday = ", julyr,hr,min,sec,ms,julday
 
       ! ----------------------------------------------------------------------------
       ! end of hours, minutes, seconds within the year tests
