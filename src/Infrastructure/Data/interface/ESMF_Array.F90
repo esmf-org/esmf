@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.52 2003/04/24 16:45:37 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.53 2003/04/24 20:57:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -270,7 +270,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.52 2003/04/24 16:45:37 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.53 2003/04/24 20:57:08 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -10097,6 +10097,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI21D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I2), dimension(:), pointer :: newp 
@@ -10115,18 +10116,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -10156,7 +10161,7 @@ end function
  wrap%I21Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -10228,6 +10233,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI41D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I4), dimension(:), pointer :: newp 
@@ -10246,18 +10252,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -10287,7 +10297,7 @@ end function
  wrap%I41Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -10359,6 +10369,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI81D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I8), dimension(:), pointer :: newp 
@@ -10377,18 +10388,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -10418,7 +10433,7 @@ end function
  wrap%I81Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -10490,6 +10505,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI22D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I2), dimension(:,:), pointer :: newp 
@@ -10508,18 +10524,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -10549,7 +10569,7 @@ end function
  wrap%I22Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -10621,6 +10641,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI42D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I4), dimension(:,:), pointer :: newp 
@@ -10639,18 +10660,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -10680,7 +10705,7 @@ end function
  wrap%I42Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -10752,6 +10777,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI82D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I8), dimension(:,:), pointer :: newp 
@@ -10770,18 +10796,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -10811,7 +10841,7 @@ end function
  wrap%I82Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -10883,6 +10913,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI23D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I2), dimension(:,:,:), pointer :: newp 
@@ -10901,18 +10932,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -10942,7 +10977,7 @@ end function
  wrap%I23Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -11014,6 +11049,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI43D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I4), dimension(:,:,:), pointer :: newp 
@@ -11032,18 +11068,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -11073,7 +11113,7 @@ end function
  wrap%I43Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -11145,6 +11185,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI83D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I8), dimension(:,:,:), pointer :: newp 
@@ -11163,18 +11204,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -11204,7 +11249,7 @@ end function
  wrap%I83Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -11276,6 +11321,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI24D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), pointer :: newp 
@@ -11294,18 +11340,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -11335,7 +11385,7 @@ end function
  wrap%I24Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -11407,6 +11457,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI44D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), pointer :: newp 
@@ -11425,18 +11476,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -11466,7 +11521,7 @@ end function
  wrap%I44Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -11538,6 +11593,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI84D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), pointer :: newp 
@@ -11556,18 +11612,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -11597,7 +11657,7 @@ end function
  wrap%I84Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -11669,6 +11729,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI25D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), pointer :: newp 
@@ -11687,18 +11748,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -11728,7 +11793,7 @@ end function
  wrap%I25Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -11800,6 +11865,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI45D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), pointer :: newp 
@@ -11818,18 +11884,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -11859,7 +11929,7 @@ end function
  wrap%I45Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -11931,6 +12001,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI85D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), pointer :: newp 
@@ -11949,18 +12020,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -11990,7 +12065,7 @@ end function
  wrap%I85Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -12062,6 +12137,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR41D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R4), dimension(:), pointer :: newp 
@@ -12080,18 +12156,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -12121,7 +12201,7 @@ end function
  wrap%R41Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -12193,6 +12273,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR81D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R8), dimension(:), pointer :: newp 
@@ -12211,18 +12292,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -12252,7 +12337,7 @@ end function
  wrap%R81Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -12324,6 +12409,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR42D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R4), dimension(:,:), pointer :: newp 
@@ -12342,18 +12428,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -12383,7 +12473,7 @@ end function
  wrap%R42Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -12455,6 +12545,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR82D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R8), dimension(:,:), pointer :: newp 
@@ -12473,18 +12564,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -12514,7 +12609,7 @@ end function
  wrap%R82Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -12586,6 +12681,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR43D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R4), dimension(:,:,:), pointer :: newp 
@@ -12604,18 +12700,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -12645,7 +12745,7 @@ end function
  wrap%R43Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -12717,6 +12817,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR83D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R8), dimension(:,:,:), pointer :: newp 
@@ -12735,18 +12836,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -12776,7 +12881,7 @@ end function
  wrap%R83Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -12848,6 +12953,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR44D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R4), dimension(:,:,:,:), pointer :: newp 
@@ -12866,18 +12972,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -12907,7 +13017,7 @@ end function
  wrap%R44Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -12979,6 +13089,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR84D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R8), dimension(:,:,:,:), pointer :: newp 
@@ -12997,18 +13108,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -13038,7 +13153,7 @@ end function
  wrap%R84Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -13110,6 +13225,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR45D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), pointer :: newp 
@@ -13128,18 +13244,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -13169,7 +13289,7 @@ end function
  wrap%R45Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
@@ -13241,6 +13361,7 @@ end function
  logical :: rcpresent ! did user specify rc? 
  logical :: willalloc ! do we need to alloc/dealloc? 
  logical :: willcopy ! do we need to copy data? 
+ type(ESMF_Logical) :: do_dealloc ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR85D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), pointer :: newp 
@@ -13259,18 +13380,22 @@ end function
  if (.not. present(f90ptr)) then 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .true. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  willalloc = .true. 
  willcopy = .true. 
+ do_dealloc = ESMF_TF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
  willalloc = .false. 
  willcopy = .false. 
+ do_dealloc = ESMF_TF_FALSE 
  endif 
  endif 
  
@@ -13300,7 +13425,7 @@ end function
  wrap%R85Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE, status) 
+ ESMF_TF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array internal set info error" 
