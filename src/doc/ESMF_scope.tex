@@ -4,54 +4,77 @@ This section describes the scope of the ESMF software. Specific
 requirements will be derived from the functionality described here,
 and presented in more detail in other requirements documents.
 
-The ESMF provides two primary services: to facilitate 
-coupling of Earth system model (ESM) components, and to support 
-lower-level tasks widely used in Earth Science modeling on 
-high performance computer platforms.  We refer to the first of these 
-services as the ESMF coupling {\it superstructure} and the second 
+\begin{figure}
+  \begin{center}
+    
+  \begin{picture}(14,5)
+    \thicklines
+    \put(0,0.25){\framebox(6,1.25){Machine layer}}
+    \put(0,1.5 ){\framebox(6,1.25){Field and grid layer}}
+    \put(0,2.75){\framebox(6,1.25){Model layer}}
+    \put(0,4   ){\framebox(6,1.25){Coupler layer}}
+    \put(8,0.25){\framebox(6,2.5){ESMF Infrastructure}}
+    \put(9,2.75){\framebox(4,1.25){User code}}
+    \put(8,4  ){\framebox(6,1.25){ESMF Superstructure}}
+    \put(8.5,4){\vector(0,-1){1.25}}
+    \put(13.5,4){\vector(0,-1){1.25}}
+  \end{picture}
+    \caption{Schematic diagram of ESMF layered architecture.}
+    \label{fig:schematic}
+  \end{center}
+\end{figure}
+The ESMF provides two primary services: to facilitate coupling of
+Earth system model components, and to support lower-level tasks widely
+used in Earth Science modeling on high performance computer platforms.
+We refer to the first of these services as the ESMF coupling {\it
+  superstructure} and the second
 as the ESMF utility {\it infrastructure}.\\
 
 \noindent The ESMF consists of:
 \begin{itemize}
-\item an interface specification for coupling ESM components; 
-\item a reference implementation accompanied by extensive documentation; 
-\item a suite of application examples demonstrating how the 
-ESMF software is used in practice.
+\item an interface specification for coupling components; 
+\item a complete, portable, high-quality reference implementation
+  accompanied by extensive developer and user documentation;
+\item a suite of application examples demonstrating how the ESMF
+  software is used in practice.
 \end{itemize}
 
-Initially the model components that the ESMF will support will be atmosphere, 
-ocean, land and sea ice models, and data assimilation systems.  Other 
-well-defined high-level functions, such as I/O, may also be represented 
-as components in the ESMF superstructure.  It is at the leve of these large-scale
-components that the ESMF interface specification applies.  Each compliant
-component will provide a specified set of methods that will enable it to 
-interoperate with other components.  For the most part, we expect components
-to be able to provide the desired interface functionality through wrapping
-of internal data structures and methods, not through massive reconfiguration
-of model code.
+The model components that the ESMF supports include atmosphere, ocean,
+land and sea ice models, and data assimilation systems. Other
+well-defined high-level functions may also be represented as
+components in the ESMF superstructure.  It is at the level of these
+large-scale components that the ESMF interface specification applies.
+Each compliant component will provide a specified set of methods that
+will enable it to interoperate with other components.  For the most
+part, we expect components to be able to provide the required
+interface functionality through wrapping of internal data structures
+and methods.
 
-\subsection{Coupling Superstructure}
+\section{ESMF Superstructure}
 
 All inter-component communication in the framework occurs through 
 component calls to the superstructure. \\
 
 \noindent The main functions of the ESMF coupling superstructure are:
+
 \begin{itemize}
 \item to perform any merging, interpolation, or regridding 
-of data necessary for communication between ESM components;
-\item to transfer data between ESM components;
-\item to coordinate execution of ESM components. 
+of data necessary for communication between components;
+\item to transfer data between components;
+\item sharing attribute information between components;
+\item to coordinate execution, checkpointing and restarting of
+  components.
 \end{itemize}
 
 The superstructure provides a high-level interface that enables 
 applications to be assembled from multiple components.  It coordinates
-the transfer of gridded, distributed field data and ungridded 
+the transfer of distributed grid data and ungridded 
 observational data between components.  The superstructure will be able 
 to merge data originating from multiple source grids, and will 
 provide spatial and temporal averaging of data.
 
 The ESMF will be capable of operating in multiple modes of execution.
-ESM components may exist within the same executable, within multiple 
+components may exist within the same executable, within multiple 
 executables, and in mixed modes.  Components may execute sequentially, 
 concurrently, and in mixed modes.  
 
@@ -61,7 +84,7 @@ interface.  It is provided by a parallel support layer, described next.
 This support layer can be used within applications 
 to perform efficient parallel grid operations.
 
-\subsection{Parallel Support Layer}
+\section{ESMF Infrastructure}
 
 The ESMF contains the software necessary to support the data
 decomposition and communication requirements of the superstructure and
@@ -70,6 +93,8 @@ data discretized on a wide variety of distributed grids.  The ESMF
 supports distributed data operations in a distributed-memory environment, 
 in a shared memory environment, and in a hybrid computational environment 
 where the platform is a cluster of shared-memory multiprocessors.
+
+\section{Fields and grids}
 
 \subsubsection{Fields}
 The ESMF supports representation, regridding, and other high-level
@@ -83,31 +108,35 @@ The ESMF supports regridding, interpolation, redistribution,
 transfer, and merging of data discretized on the following types of grids:
 
 \begin{itemize}
-\item logically rectangular grids;
-\item reduced (cut-out) and regional grids;
+\item logically rectilinear grids: physical co-ordinates may be
+  curvilinear. Logically rectilinear grids include such grids as the
+  tripolar and the cubed sphere;
+\item reduced and regional grids;
 \item unstructured grids (e.g., land grids);
 \item phase space grids (e.g., spectral, Fourier);
 \item nested grids;
-\item masked regions and halo regions;
-\item non-gridded data sets that are changing in time;
-\item cubed sphere and icosahedral grids.
+\item observational data streams (temporal sequences of ungridded data);
+\item other grids (e.g icosahedral).
 \end{itemize}
+
+The supplied implementation will include highly-optimized versions of
+these operations for the most commonly-used grid types.
 
 \subsubsection{Grid Operations}
 
-The ESMF provides interpolation algorithms for supported grids.
-All interpolation algorithms included in ESMF are {\it linear} 
-and independent of data. Adaptive procedures are not planned to be 
-part the ESMF at this stage. Thus, reconstruction of gridded data from 
-observations (analysis) will not be a part of framework and will be 
-rather provided by data assimilation components.
+The ESMF provides interpolation algorithms for supported grids.  All
+interpolation algorithms included in ESMF are {\it linear} in the data
+and will be accompanied by the associated adjoint.  Adaptive
+procedures are not planned at this stage. Thus, reconstruction of
+gridded data from observations (analysis) will not be a part of
+framework and will rather be provided by data assimilation components.
 
 The ESMF provides first-order and higher-order interpolation 
 methods.  The ESMF supports conservative remapping/interpolation 
 between any two grids. Non-conservative methods will also 
 be supported.
 
-Dynamic load balancing will be provided for default decompositions, 
+Dynamic load balancing will be provided for standard decompositions, 
 and general dynamic load-balancing tools for specialized decompositions.
 
 \subsection{Utility Infrastructure}
@@ -116,31 +145,41 @@ The ESMF includes general purpose utility routines for use by both
 the ESMF coupler and application codes.  These utilities include 
 but are not limited to:
 \begin{itemize}
+\item Communication primitives;
+\item A generic machine interface;
 \item I/O utilities;
+\item general message logging;
+\item mechanisms for publishing and querying component attributes;
 \item performance profiling;
 \item time management; and
 \item error handling.
 \end{itemize}
 
+\subsubsection{Communication primitives}
+
+ESMF will offer a standard interface covering inter-processor
+communication and shared address space primitives, covering
+point-to-point communication, global reduction operations, etc. An
+implementation in MPI will be provided.
+
+\subsubsection{Generic machine interface}
+
+ESMF will offer a generic interface to hardware, O/S and system
+library primitives.
+
 \subsubsection{I/O}
 
-The ESMF I/O utilities will have generic interfaces to enable greater
-component interoperability, flexibility, and ease of use, and will be 
-high-performance.  As much as possible, the utilities will offer scalable 
-parallel I/O.
-
-The ESMF will support I/O of self-describing data the following formats:
-netCDF, HDF, binary, GRIB, and BUFR.  Others such as the EOS HDF and ODF 
-data formats are desired as well but may be lower priority.
+The ESMF I/O utilities will include generic interfaces providing I/O
+in a variety of data formats including netCDF, HDF, binary, GRIB, and
+BUFR. As much as possible, the utilities will offer scalable
+performance.
 
 \subsubsection{Performance Profiling}
 
 A performance profiling utility will enable application developers to 
-instrument code segments with timers for both CPU and wallclock 
-times.  The profiling utility will also offer access to harware statistics 
-by offering an interface to a package such as PAPI or PCL.  Profiling
-utilities will be integrated into a general logging service that will 
-provide timing, informational and debugging output in several useful formats.
+instrument code segments with timers. The profiling utility will also
+offer access to hardware statistics by offering an interface to a
+package such as PAPI or PCL.
 
 \subsubsection{Time Management}
 
@@ -150,29 +189,32 @@ time management, the ESMF will include clocks for advancing and
 reporting model time and retaining model integration information, 
 and alarms for initiating both unique and periodic events.
 
-\subsubsection{Fault Tolerance}
+\subsubsection{Error handling}
 
-The ESMF will offer comprehensive and integrated error handling services.  
-A mechanism to detect component failure and shut down the entire 
-application will be provided.
+The ESMF will offer comprehensive and integrated error handling
+services.  A mechanism to announce and query component failure will be
+provided.
 
 \subsection{Future Plans}
 
-The following are capabilities that might conceivably be included in ESMF, but will not be 
-developed under CAN 00-OES-01 funding:
+The following are capabilities that might conceivably have been
+included in ESMF, but will not be developed under CAN 00-OES-01
+funding:
 \begin{itemize}
 \item a Graphical User Interface;
-\item mathematical libraries for operations other than regridding and interpolation;
-\item standard scientific modules, such as a library for calculating orbital parameters;
+\item mathematical libraries for operations other than regridding and
+  interpolation;
+\item standard scientific modules, such as a library for calculating
+  orbital parameters;
 \item a database of intra-model components, such as convection schemes;
 \item a database for storing experiments and related information;
-\item a mechanism for job submission;
-\item support for advanced data assimilation algorithms;
-\item optimized support for additional model grids.
+\item a mechanism for job submission (e.g Globus);
+\item optimization for additional model grids.
 \end{itemize}
 
-If additional resources are made available, the ESMF project foresees extending the 
-initial framework.  Each of the features listed above is a possible addition. 
+If additional resources are made available, the ESMF project foresees
+extending the initial framework.  Each of the features listed above is
+a possible addition.
 
 
 

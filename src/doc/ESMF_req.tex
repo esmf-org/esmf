@@ -18,32 +18,16 @@ ESMF software shall support the following language bindings:
 {\bf Verification:} Interface inspection. 
 \end{reqlist}
 
-\ssreq{C Interface} 
-\begin{reqlist}
-{\bf Priority:} 2. \\
-{\bf Source:} GFDL-HIM. \\
-{\bf Status:} Proposed. \\
-{\bf Verification:} Interface inspection. 
-\end{reqlist}
-
 \ssreq{C++ Interface}
 \begin{reqlist}
-{\bf Priority:} 3. \\
-{\bf Source:} None of our codes currently require this. \\
+{\bf Priority:} 1. \\
+{\bf Source:} GFDL-HIM. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Interface inspection.
 \end{reqlist}
 
 \sreq{Platforms}
 The ESMF shall operate on the following platforms:
-
-\ssreq{Cray T3E}
-\begin{reqlist}
-{\bf Priority:} 2. \\
-{\bf Source:} NSIPP. \\
-{\bf Status:} Proposed. \\
-{\bf Verification:} Unit test and system test.
-\end{reqlist}
 
 \ssreq{IBM SP}
 \begin{reqlist}
@@ -53,18 +37,18 @@ The ESMF shall operate on the following platforms:
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-\ssreq{SGI Origin 3000}
+\ssreq{SGI Origin}
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} GFDL, LANL, NCAR.  May be part of ESMF testbed system. \\
+{\bf Source:} GFDL, LANL, NCAR, DAO.  May be part of ESMF testbed system. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-\ssreq{Compaq ES45}
+\ssreq{Compaq ES}
 \begin{reqlist}
-{\bf Priority:} TBD. \\
-{\bf Source:} NASA Ames.  May be part of ESMF testbed system. \\
+{\bf Priority:} 1. \\
+{\bf Source:} NSIPP, DAO.  May be part of ESMF testbed system. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
@@ -77,18 +61,23 @@ The ESMF shall operate on the following platforms:
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-\ssreq{Sun}
+\ssreq{Sun-Solaris}
 \begin{reqlist}
-{\bf Priority:} TBD. \\
+{\bf Priority:} 1. \\
 {\bf Source:} NCAR. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
+\ssreq{Vector machines running Unix}
+\begin{reqlist}
+  {\bf Priority:} 3.
+\end{reqlist}
+
 \sreq{Performance}
 The framework shall not increase the execution time of an existing code 
 written without the framework by more than 10\% on scalar 
-architectures with moderate numbers of processors (100-1000).
+architectures within their scalable range.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} Required for Milestone G. \\
@@ -96,14 +85,14 @@ architectures with moderate numbers of processors (100-1000).
 {\bf Verification:} Demonstrate with NCEP analysis and MITgcm ocean.
 \end{reqlist}
 
-\sreq{Runtime Configurability}
-The ESMF shall allow the user to set certain application parameters at runtime.
+\sreq{Runtime Configurability} The ESMF shall allow the user to set
+certain application parameters at runtime.
 
-\ssreq{Configurable Decomposition}
-ESMF shall allow domain decomposition and the number of processors, 
-nodes, and/or threads to be configurable at runtime.  The choice of
-parallelization mechanism (message passing/multithreading/combination)
-must be configurable at runtime.
+\ssreq{Configurable Decomposition} ESMF shall allow domain
+decomposition and assignment of domains to processors, nodes, and/or
+threads to be configurable at runtime.  The choice of parallelization
+mechanism (message passing/multithreading/combination) must be
+configurable at runtime.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} CAM-EUL. \\
@@ -114,24 +103,67 @@ must be configurable at runtime.
 \ssreq{Configurable Resolution}
 ESMF shall allow model resolution to be configurable at runtime.
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} \\
+{\bf Priority:} 1. \\
+{\bf Source:} all codes. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} System test.
 \end{reqlist}
 
-\sreq{Bit Reproducibility}
-It is desirable to be able to provide, in a special execution 
-mode, bit-to-bit reproducibility of the same executable on different 
-platforms and/or with different parallelization techniques applied.
+\sreq{Bit-reproducibility}
+
+Bitwise identical results between two runs is an important feature for
+debugging and maintenance. This is not possible to ensure across
+platforms, at different levels of compiler optimization, or even
+different versions of the same compiler. Within these constraints,
+ESMF shall provide varied levels of bit-reproducibility:
+
+\ssreq{Parallel bit-reproducibility}
+
+An execution mode will be provided which allows an ESMF-based model to
+return bitwise identical results from the same executable at different
+processor counts, or different parallelism options.
+
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} \\
+{\bf Priority:} 1 \\
+{\bf Source:} all JMC codes. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} System test.
 \end{reqlist}
 
-\sreq{Fault Tolerance}
+\ssreq{Bit-reproducibility on identical configurations}
+
+The \emph{default} execution mode will allow an
+ESMF-based model to return bitwise identical results from the same
+executable at the same processor count, with the same parallelism
+options.
+
+ESMF must provide an optional execution mode where the same
+executable, run on a different number of processors under the same
+parallelization mode, produces bitwise-reproducible results. This mode
+is not subject to the performance requirements above.
+\begin{reqlist}
+{\bf Priority:} 1.\\
+{\bf Source:} all codes. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test.
+\end{reqlist}
+
+\ssreq{Non bit-reproducing fast option}
+
+If a performance enhancement may be had by waiving the default
+requirement above, this will be made available in a special execution
+mode. In this mode, even two runs at the same processor count, with
+the same parallelism options, may not return bitwise identical
+results.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:} NCEP? \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test.
+\end{reqlist}
+
+\sreq{Error handling}
 The ESMF shall be instrumented for error handling consistly across the
 framework.  The user shall receive ample information on errors.
 \begin{reqlist}
@@ -160,7 +192,7 @@ need to modify no more than 2\% of their source code to utilize the coupling
 features of ESMF.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} GFDL codes. \\
+{\bf Source:} GFDL, NSIPP. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Line count!
 \end{reqlist}
