@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.91 2004/02/03 21:20:21 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.92 2004/02/05 18:45:17 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1738,6 +1738,7 @@
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
+      integer :: i, i2, j, j2
       type(ESMF_DistGridGlobal), pointer :: glob
 
       ! Initialize return code
@@ -1756,7 +1757,16 @@
       endif
 
       ! Get information from distgrid derived type
-      AI => glob%AIPerDEPerDim
+      i2 = size(AI, 1)
+      j2 = size(AI, 2)
+      ! TODO: add size checking for i2, j2
+      do j   = 1,j2
+        do i = 1,i2
+          AI(i,j)%min    = glob%AIPerDEPerDim(i,j)%min
+          AI(i,j)%max    = glob%AIPerDEPerDim(i,j)%max
+          AI(i,j)%stride = glob%AIPerDEPerDim(i,j)%stride
+        enddo
+      enddo
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -2468,8 +2478,6 @@
       else
       print *, 'AIPerDEPerDim array not associated'
       endif
-
-
 
       end subroutine ESMF_DistGridPrint
 
