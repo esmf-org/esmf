@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.36 2004/05/25 11:37:30 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.37 2004/05/25 11:54:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.36 2004/05/25 11:37:30 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.37 2004/05/25 11:54:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -166,15 +166,17 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[name]
-!    Name of the newly-created component.  This name can be altered 
-!    by the new component once the initialize routine is called. 
+!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    from within the {\tt ESMF\_CplComp} code once the initialization routine
+!    is called.
 !   \item[config]
 !    An already-created {\tt ESMF\_Config} configuration object 
-!    from which the new component
+!    from which the new {\tt ESMF\_CplComp}
 !    can read in namelist-type information to set parameters for this run.
 !   \item[clock]
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!    queried and updated by the new component as it chooses.  This should
+!    queried and updated by the new {\tt ESMF\_CplComp} as it chooses.  
+!    This should
 !    not be the parent component clock, which should be maintained and passed
 !    down to the initialize/run/finalize routines separately.
 !   \item[{[rc]}]
@@ -241,8 +243,9 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[{[name]}]
-!    Name of the newly-created component.  This name can be altered 
-!    by the new component once the initialize routine is called. 
+!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    from within the {\tt ESMF\_CplComp} code once the initialization routine
+!    is called.
 !   \item[{[config]}]
 !    An already-created {\tt ESMF\_Config} configuration object 
 !    from which the new component
@@ -251,14 +254,16 @@
 !   \item[{[configFile]}]
 !    The filename of an {\tt ESMF\_Config} format file.  
 !    If specified, this file is opened, an {\tt ESMF\_Config} configuration
-!    object is created for the file, and attached to the new component.  
-!    The component
-!    can then use {\tt ESMF\_CplCompGet()} to get and use the object.
+!    object is created for the file 
+!    and attached to the new {\tt ESMF\_CplComp}.  
+!    The user can call
+!    {\tt ESMF\_CplCompGet()} to get and use the object.
 !    If both are specified, the {\tt config} object takes priority 
 !    over this one.
 !   \item[{[clock]}]
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!    queried and updated by the new component as it chooses.  This should
+!    queried and updated by the new {\tt ESMF\_CplComp} as it chooses.  
+!    This should
 !    not be the parent component clock, which should be maintained and passed
 !    down to the initialize/run/finalize routines separately.
 !   \item[{[rc]}]
@@ -331,10 +336,12 @@
 !   \item[vm]
 !    {\tt ESMF\_VM} object for the parent component out of which 
 !    this {\tt ESMF\_CplCompCreate()} call is issued.
-!    This will become the parent VM of the newly created Coupler Component.
+!    This will become the parent {\tt ESMF\_VM} 
+!    of the newly created {\tt ESMF\_CplComp}.
 !   \item[{[name]}]
-!    Name of the newly-created component.  This name can be altered 
-!    by the new component once the initialize routine is called. 
+!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    from within the {\tt ESMF\_CplComp} code once the initialization routine
+!    is called.
 !   \item[{[config]}]
 !    An already-created {\tt ESMF\_Config} configuration object 
 !    from which the new component
@@ -344,13 +351,13 @@
 !    The filename of an {\tt ESMF\_Config} format file.  
 !    If specified, this file is opened, an {\tt ESMF\_Config} configuration
 !    object is created for the file, and attached to the new component.  
-!    The component
-!    can then use {\tt ESMF\_CplCompGet()} to get and use the object.
+!    The user can call {\tt ESMF\_CplCompGet()} to get and use the object.
 !    If both are specified, the {\tt config} object takes priority 
 !    over this one.
 !   \item[{[clock]}]
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!    queried and updated by the new component as it chooses.  This should
+!    queried and updated by the new {\tt ESMF\_CplComp} as it chooses.  
+!    This should
 !    not be the parent component clock, which should be maintained and passed
 !    down to the initialize/run/finalize routines separately.
 !   \item[{[petList]}]
@@ -427,11 +434,12 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[{[parent]}]
-!    The Parent component object.  The child component will inherit all
-!    the {\tt PET}s from the parent.
+!    The parent component object.  The child {\tt ESMF_CplComp} 
+!    will inherit all the {\tt PET}s from the parent.
 !   \item[{[name]}]
-!    Name of the newly-created component.  This name can be altered 
-!    by the new component once the initialize routine is called. 
+!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    from within the {\tt ESMF\_CplComp} code once the initialization routine
+!    is called.
 !   \item[{[config]}]
 !    An already-created {\tt ESMF\_Config} configuration object 
 !    from which the new component
@@ -441,18 +449,18 @@
 !    The filename of an {\tt ESMF\_Config} format file.  
 !    If specified, this file is opened, an {\tt ESMF\_Config} configuration
 !    object is created for the file, and attached to the new component.  
-!    The component
-!    can then use {\tt ESMF\_CplCompGet()} to get and use the object.
+!    The user can call {\tt ESMF\_CplCompGet()} to get and use the object.
 !    If both are specified, the {\tt config} object takes priority 
 !    over this one.
 !   \item[{[clock]}]
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!    queried and updated by the new component as it chooses.  This should
+!    queried and updated by the new {\tt ESMF\_CplComp} as it chooses.  
+!    This should
 !    not be the parent component clock, which should be maintained and passed
 !    down to the initialize/run/finalize routines separately.
 !   \item[{[vm]}]
 !    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
-!    inherit parents {\tt VM}.
+!    inherit parents' {\tt ESMF\_VM}.
 !   \item[{[petlist]}]
 !    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
 !    component is giving to the created child 
@@ -528,11 +536,12 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[{[parent]}]
-!    The parent component object.  The child component will inherit all
-!    the {\tt PET}s from the parent.
+!    The parent component object.  The child {\tt ESFM\_CplComp} 
+!    will inherit all the {\tt PET}s from the parent.
 !   \item[{[name]}]
-!    Name of the newly-created component.  This name can be altered 
-!    by the new component once the initialize routine is called. 
+!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    from within the {\tt ESMF\_CplComp} code once the initialization routine
+!    is called.
 !   \item[{[config]}]
 !    An already-created {\tt ESMF\_Config} configuration object 
 !    from which the new component
@@ -542,18 +551,18 @@
 !    The filename of an {\tt ESMF\_Config} format file.  
 !    If specified, this file is opened, an {\tt ESMF\_Config} configuration
 !    object is created for the file, and attached to the new component.  
-!    The component
-!    can then use {\tt ESMF\_CplCompGet()} to get and use the object.
+!    The user can call {\tt ESMF\_CplCompGet()} to get and use the object.
 !    If both are specified, the {\tt config} object takes priority 
 !    over this one.
 !   \item[{[clock]}]
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!    queried and updated by the new component as it chooses.  This should
+!    queried and updated by the new {\tt ESMF\_CplComp} as it chooses.  
+!    This should
 !    not be the parent component clock, which should be maintained and passed
 !    down to the initialize/run/finalize routines separately.
 !   \item[{[vm]}]
 !    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
-!    inherit parents {\tt VM}.
+!    inherit parents' {\tt ESMF\_VM}.
 !   \item[{[petlist]}]
 !    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
 !    component is giving to the created child 
@@ -618,7 +627,7 @@
 !     \item[cplcomp]
 !       Release all resources associated with this {\tt ESMF\_CplComp}
 !       and mark the object as invalid.  It is an error to pass this
-!       object into any other component routines after being destroyed.
+!       object into any other routines after being destroyed.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -675,8 +684,8 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user-supplied finalization routine for a child 
-!  coupler component.
+!  Call the associated user-supplied finalization routine for 
+!  an {\tt ESMF\_CplComp}.
 !    
 !  The arguments are: 
 !  \begin{description} 
@@ -688,7 +697,7 @@
 !    {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[clock]}]  
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent components clock, and will be treated
+!    This is generally the parent component's clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}]  
@@ -798,7 +807,7 @@
 !    {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[clock]}]
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent components clock, and will be treated
+!    This is generally the parent component's clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}] 
@@ -889,7 +898,7 @@
 !    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent components clock, and will be treated
+!    This is generally the parent component's clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !    {\tt ESMF\_State} containing export data for coupling.
@@ -949,7 +958,7 @@
 !    {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[clock]}]  
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent components clock, and will be treated
+!    This is generally the parent component's clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}]  
@@ -1091,7 +1100,7 @@
 !    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent components clock, and will be treated
+!    This is generally the parent component's clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}]  
@@ -1303,8 +1312,7 @@
     integer,            intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     When components are executing asychronously, 
-!     wait for an {\tt ESMF\_CplComp} to return.
+!     When executing asychronously, wait for an {\tt ESMF\_CplComp} to return.
 !
 !     The arguments are:
 !     \begin{description}
