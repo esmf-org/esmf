@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.36 2004/04/20 14:59:33 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.37 2004/04/23 13:43:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.36 2004/04/20 14:59:33 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.37 2004/04/23 13:43:33 theurich Exp $'
 
 !==============================================================================
 !
@@ -747,8 +747,8 @@
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: configFile
-      type(ESMF_VM), intent(out), optional :: vm
       type(ESMF_Config), intent(out), optional :: config
+      type(ESMF_VM), intent(out), optional :: vm
       integer, intent(out), optional :: rc             
 
 !
@@ -787,12 +787,9 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompGet(gridcomp%compp, name, delayout, &
+        call ESMF_CompGet(gridcomp%compp, name, delayout, vm=vm, &
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
-        if (present(vm)) then
-          vm = gridcomp%vm
-        endif
 
         end subroutine ESMF_GridCompGet
 
