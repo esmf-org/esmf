@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.17 2003/04/25 15:42:16 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.18 2003/04/29 15:55:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.17 2003/04/25 15:42:16 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.18 2003/04/29 15:55:44 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -250,10 +250,10 @@
 !     {\tt ESMF\_COMMTYPE\_MP}, and {\tt ESMF\_COMMTYPE\_SHR}+
 !     {\tt ESMF\_COMMTYPE\_MP}.
 !
-!   \item[{[parent_offsets]}]
+!   \item[{[parent\_offsets]}]
 !     Offset in each parent {\tt DELayout} dimension.
 ! 
-!   \item[{[de_indices]}]
+!   \item[{[de\_indices]}]
 !     Selection of {\tt DE} indices to use.
 !     
 !   \item[{[rc]}]
