@@ -1,4 +1,4 @@
-% $Id: TimeMgr_implnotes.tex,v 1.4 2003/08/15 17:37:26 cdeluca Exp $
+% $Id: TimeMgr_implnotes.tex,v 1.5 2003/09/03 21:12:24 cdeluca Exp $
 
 \subsection{Implementation Notes}
 \begin{enumerate}
@@ -31,19 +31,19 @@ a numerator and a denominator.  Both the whole seconds and fractional
 numerator are signed to handle negative time intervals and instants.
 For arithmetic consistency both must carry the same sign (both positve
 or both negative), except, of course, for zero values.  The fractional
-seconds element (numerator) is \htmlref{normalized}{glos:Normalized}
-(bounded) with respect to whole seconds. If the absolute value of the
-numerator becomes greater than or equal to the denominator, the whole
-seconds is incremented or decremented accordingly and the numerator is
+seconds element (numerator) is bounded with respect to whole seconds. 
+If the absolute value of the
+numerator becomes greater than or equal to the denominator, whole
+seconds are incremented or decremented accordingly and the numerator is
 reset to the remainder.  Conversions are performed upon demand by
 interface methods within the TimeInterval and
-Time.  This is done because different applications require different
+Time classes.  This is done because different applications require different
 representations of time intervals and time instances.
 
 The BaseTime class defines increment and decrement methods for basic
-time interval calculations between time instants.  It is done here rather
+TimeInterval calculations between Time instants.  It is done here rather
 than in the Calendar class because it can be done with simple 
-day-based arithmetic that is Calendar independent.  
+day-based arithmetic that is calendar independent.  
 
 Comparison methods can also be defined in the BaseTime class.  These
 perform equality/inequality, less than, and greater than comparisons
