@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.23 2004/09/02 15:58:12 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.24 2004/09/03 16:23:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -868,22 +868,33 @@ end subroutine ESMF_LogSet
 	        do j=1, log%findex
     		    if (log%LOG_ENTRY(j)%lineflag .eq. .TRUE.) then								
     		        if (log%LOG_ENTRY(j)%methodflag .eq. .TRUE.) then
-    			    WRITE(log%unitnumber,122) log%LOG_ENTRY(j)%d," ",log%LOG_ENTRY(j)%h,&
-                                log%LOG_ENTRY(j)%m,log%LOG_ENTRY(j)%s,".",log%LOG_ENTRY(j)%ms," ",trim(log%LOG_ENTRY(j)%lt)," ",trim(log%LOG_ENTRY(j)%file)," ",&
-    				log%LOG_ENTRY(j)%line," ",trim(log%LOG_ENTRY(j)%method)," ",trim(log%LOG_ENTRY(j)%msg)
+    			    WRITE(log%unitnumber,122) &
+                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h   , &
+                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s   , ".", &
+                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt  , " ", &
+                                  log%LOG_ENTRY(j)%file  , " ", log%LOG_ENTRY(j)%line, " ", &
+                                  log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
     		        else
-    			    WRITE(log%unitnumber,123) log%LOG_ENTRY(j)%d," ",log%LOG_ENTRY(j)%h,&
-                                log%LOG_ENTRY(j)%m,log%LOG_ENTRY(j)%s,".",log%LOG_ENTRY(j)%ms," ",trim(log%LOG_ENTRY(j)%lt)," ",trim(log%LOG_ENTRY(j)%file)," ",&
-    				log%LOG_ENTRY(j)%line," ",trim(log%LOG_ENTRY(j)%msg)
+    			    WRITE(log%unitnumber,123) &
+                                  log%LOG_ENTRY(j)%d   , " ", log%LOG_ENTRY(j)%h   , &
+                                  log%LOG_ENTRY(j)%m   ,      log%LOG_ENTRY(j)%s   , ".", &
+                                  log%LOG_ENTRY(j)%ms  , " ", log%LOG_ENTRY(j)%lt  , " ", &
+                                  log%LOG_ENTRY(j)%file, " ", log%LOG_ENTRY(j)%line, " ", &
+                                  log%LOG_ENTRY(j)%msg
     		        endif	
                     else
     		        if (log%LOG_ENTRY(j)%methodflag .eq. .TRUE.) then
-    		            WRITE(log%unitnumber,132) log%LOG_ENTRY(j)%d," ",log%LOG_ENTRY(j)%h,&
-                                log%LOG_ENTRY(j)%m,log%LOG_ENTRY(j)%s,".",log%LOG_ENTRY(j)%ms," ",trim(log%LOG_ENTRY(j)%lt)," ",&
-    			        " ",trim(log%LOG_ENTRY(j)%method)," ",trim(log%LOG_ENTRY(j)%msg)
+    		            WRITE(log%unitnumber,132) &
+                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h  , &
+                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s  , ".", &
+                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt , "  ", &
+    			          log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
     		        else
-    		            WRITE(log%unitnumber,133) log%LOG_ENTRY(j)%d," ",log%LOG_ENTRY(j)%h,&
-                                log%LOG_ENTRY(j)%m,log%LOG_ENTRY(j)%s,".",log%LOG_ENTRY(j)%ms," ",trim(log%LOG_ENTRY(j)%lt)," "," ",trim(log%LOG_ENTRY(j)%msg)
+    		            WRITE(log%unitnumber,133) &
+                                  log%LOG_ENTRY(j)%d  , " ", log%LOG_ENTRY(j)%h , &
+                                  log%LOG_ENTRY(j)%m  ,      log%LOG_ENTRY(j)%s , ".", &
+                                  log%LOG_ENTRY(j)%ms , " ", log%LOG_ENTRY(j)%lt, "  ", &
+                                  log%LOG_ENTRY(j)%msg
     		        endif	
     	            endif
 		enddo    
