@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.14 2004/12/14 15:31:17 theurich Exp $
+#  $Id: build_rules.mk,v 1.15 2004/12/14 17:57:34 theurich Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -55,7 +55,7 @@ MPIRUN           = ${ESMF_TOP_DIR}/scripts/mpirun.alpha
 MPI64_LIB        = 
 
 # For pthreads (or omp)
-THREAD_LIB        = -lpthread -lrt
+THREAD_LIB        = -pthread -lrt
 
 
 ############################################################
@@ -103,10 +103,10 @@ C_FCV			= $(C_FC) -version
 C_SYS_LIB		= -lutil -lFutil -lots
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS		= -g -assume gfullpath -pthread
-G_FOPTFLAGS		= -g -assume gfullpath 
+G_FOPTFLAGS		= -g -assume gfullpath -pthread -reentrancy threaded -omp
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS		= -O3 -w -pthread
-O_FOPTFLAGS		= -O3 -w -omp
+O_FOPTFLAGS		= -O3 -w -pthread -reentrancy threaded -omp
 #
 # C++ compiler 
 #
