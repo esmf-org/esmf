@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.17 2004/10/26 21:31:14 theurich Exp $
+// $Id: ESMC_VM.C,v 1.18 2004/12/02 23:23:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.17 2004/10/26 21:31:14 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.18 2004/12/02 23:23:11 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -188,7 +188,10 @@ ESMC_VM *ESMC_VMInitialize(
 //-----------------------------------------------------------------------------
   GlobalVM = new ESMC_VM;
   GlobalVM->vmk_init();      // set up default ESMC_VMK (all MPI)
-  *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
+  *rc = ESMF_SUCCESS;        // TODO: Do some real error handling here...
+                             // totalview cannot handle events during the init
+                             // call - it freezes or crashes or ignores input.
+  GlobalVM->vmk_barrier();   // so for now, wait for everyone to init.
   return GlobalVM;
 }
 //-----------------------------------------------------------------------------
