@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.14 2004/03/09 20:52:36 svasquez Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.15 2004/03/11 16:16:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,9 +63,9 @@
 
 #define ArrayTypeMacro(mname, mtypekind, mrank, mdim) \
 ! <Created by macro - do not edit directly > @\
-      type ESMF_ArrWrap##mtypekind##mrank##D @\
-        mname (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr @\
-      end type ESMF_ArrWrap##mtypekind##mrank##D @\
+      type ESMF_ArrWrap##mrank##D##mtypekind @\
+        mname (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: ptr##mrank##D##mtypekind @\
+      end type ESMF_ArrWrap##mrank##D##mtypekind @\
 
 #define ArrayAllTypeMacro() \
  @\
@@ -107,7 +107,7 @@
  @\
 
 #define ArrayPointerMacro(mname, mtypekind, mrank, mdim) \
-        mname (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr
+        mname (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: ptr##mrank##D##mtypekind
 
 #define ArrayAllPointerMacro() \
 ! <Created by macro - do not edit directly > @\
@@ -152,7 +152,7 @@
  @\
 
 #define ArrayLocalVarMacro(mname, mtypekind, mrank, mdim) \
-        type(ESMF_ArrWrap##mtypekind##mrank##D) :: local##mtypekind##mrank##D
+        type(ESMF_ArrWrap##mrank##D##mtypekind) :: local##mrank##D##mtypekind
 
 #define ArrayAllLocalVarMacro() \
 ! <Created by macro - do not edit directly > @\
@@ -201,31 +201,31 @@
 #define ArrayInterfaceMacro(funcname) \
 !------------------------------------------------------------------------------ @\
 ! <This section created by macro - do not edit directly> @\
-    module procedure ESMF_##funcname##I21D @\
-    module procedure ESMF_##funcname##I41D @\
-    module procedure ESMF_##funcname##I81D @\
-    module procedure ESMF_##funcname##I22D @\
-    module procedure ESMF_##funcname##I42D @\
-    module procedure ESMF_##funcname##I82D @\
-    module procedure ESMF_##funcname##I23D @\
-    module procedure ESMF_##funcname##I43D @\
-    module procedure ESMF_##funcname##I83D @\
-    module procedure ESMF_##funcname##I24D @\
-    module procedure ESMF_##funcname##I44D @\
-    module procedure ESMF_##funcname##I84D @\
-    module procedure ESMF_##funcname##I25D @\
-    module procedure ESMF_##funcname##I45D @\
-    module procedure ESMF_##funcname##I85D @\
-    module procedure ESMF_##funcname##R41D @\
-    module procedure ESMF_##funcname##R81D @\
-    module procedure ESMF_##funcname##R42D @\
-    module procedure ESMF_##funcname##R82D @\
-    module procedure ESMF_##funcname##R43D @\
-    module procedure ESMF_##funcname##R83D @\
-    module procedure ESMF_##funcname##R44D @\
-    module procedure ESMF_##funcname##R84D @\
-    module procedure ESMF_##funcname##R45D @\
-    module procedure ESMF_##funcname##R85D @\
+    module procedure ESMF_##funcname##1DI2 @\
+    module procedure ESMF_##funcname##1DI4 @\
+    module procedure ESMF_##funcname##1DI8 @\
+    module procedure ESMF_##funcname##2DI2 @\
+    module procedure ESMF_##funcname##2DI4 @\
+    module procedure ESMF_##funcname##2DI8 @\
+    module procedure ESMF_##funcname##3DI2 @\
+    module procedure ESMF_##funcname##3DI4 @\
+    module procedure ESMF_##funcname##3DI8 @\
+    module procedure ESMF_##funcname##4DI2 @\
+    module procedure ESMF_##funcname##4DI4 @\
+    module procedure ESMF_##funcname##4DI8 @\
+    module procedure ESMF_##funcname##5DI2 @\
+    module procedure ESMF_##funcname##5DI4 @\
+    module procedure ESMF_##funcname##5DI8 @\
+    module procedure ESMF_##funcname##1DR4 @\
+    module procedure ESMF_##funcname##1DR8 @\
+    module procedure ESMF_##funcname##2DR4 @\
+    module procedure ESMF_##funcname##2DR8 @\
+    module procedure ESMF_##funcname##3DR4 @\
+    module procedure ESMF_##funcname##3DR8 @\
+    module procedure ESMF_##funcname##4DR4 @\
+    module procedure ESMF_##funcname##4DR8 @\
+    module procedure ESMF_##funcname##5DR4 @\
+    module procedure ESMF_##funcname##5DR8 @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
 
@@ -239,19 +239,19 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreateByMTArr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 array @\
+! !IROUTINE: ESMF_ArrayCreateByMTArr##mrank##D##mtypekind - make an ESMF array from an unallocated Fortran array @\
  @\
 ! !INTERFACE: @\
-      function ESMF_ArrayCreateByMTArr##mtypekind##mrank##D(f90arr, counts, halo_width, lbounds, ubounds, rc) @\
+      function ESMF_ArrayCreateByMTArr##mrank##D##mtypekind(f90arr, counts, haloWidth, lbounds, ubounds, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_Array) :: ESMF_ArrayCreateByMTArr##mtypekind##mrank##D @\
+      type(ESMF_Array) :: ESMF_ArrayCreateByMTArr##mrank##D##mtypekind @\
 ! @\
 ! !ARGUMENTS: @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: f90arr @\
       !mname (ESMF_KIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
       integer, dimension(:), intent(in) :: counts @\
-      integer, intent(in), optional :: halo_width @\
+      integer, intent(in), optional :: haloWidth @\
       integer, dimension(:), intent(in), optional :: lbounds @\
       integer, dimension(:), intent(in), optional :: ubounds @\
       integer, intent(out), optional :: rc   @\
@@ -270,7 +270,7 @@
 !   An allocatable (but currently unallocated) Fortran 90 array.  @\
 !  \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
-!  \item[{[halo_width]}] @\
+!  \item[{[haloWidth]}] @\
 !   An integer count of the width of the halo region on all sides of @\
 !   the array. The default is 0, no halo region. @\
 !  \item[{[lbounds]}] @\
@@ -311,8 +311,8 @@
         !endif @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
-        if (present(halo_width)) then @\
-          hwidth = halo_width @\
+        if (present(haloWidth)) then @\
+          hwidth = haloWidth @\
         else @\
           hwidth = 0 @\
         endif @\
@@ -326,15 +326,15 @@
         endif @\
  @\
         newp => f90arr    ! must be ptr assignment, => @\
-        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth, & @\
+        call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth, & @\
                                   newp, ESMF_DATA_SPACE, lbounds, ubounds, status) @\
  @\
  @\
 !       ! return value set by c_ESMC func above @\
-        ESMF_ArrayCreateByMTArr##mtypekind##mrank##D = array @\
+        ESMF_ArrayCreateByMTArr##mrank##D##mtypekind = array @\
         if (rcpresent) rc = status @\
  @\
-        end function ESMF_ArrayCreateByMTArr##mtypekind##mrank##D   @\
+        end function ESMF_ArrayCreateByMTArr##mrank##D##mtypekind   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -349,19 +349,19 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreateByFullArr##mtypekind##mrank##D - make an ESMF array from an Allocated F90 array @\
+! !IROUTINE: ESMF_ArrayCreateByFullArr##mrank##D##mtypekind - make an ESMF array from an Allocated Fortran array @\
  @\
 ! !INTERFACE: @\
-      function ESMF_ArrayCreateByFullArr##mtypekind##mrank##D(f90arr, docopy, halo_width, rc) @\
+      function ESMF_ArrayCreateByFullArr##mrank##D##mtypekind(f90arr, docopy, haloWidth, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_Array) :: ESMF_ArrayCreateByFullArr##mtypekind##mrank##D @\
+      type(ESMF_Array) :: ESMF_ArrayCreateByFullArr##mrank##D##mtypekind @\
 ! @\
 ! !ARGUMENTS: @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: f90arr @\
       !mname (ESMF_KIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
-      integer, intent(in), optional :: halo_width @\
+      integer, intent(in), optional :: haloWidth @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -380,7 +380,7 @@
 !   the existing data array.  If set to {\tt ESMF\_DATA\_COPY} this routine @\
 !   allocates new space and copies the data from the pointer into the @\
 !   new array. @\
-!  \item[{[halo_width]}] @\
+!  \item[{[haloWidth]}] @\
 !   Set the maximum width of the halo region on all edges. Defaults to 0. @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -435,8 +435,8 @@
         ubounds = ubound(f90arr) @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
-        if (present(halo_width)) then @\
-          hwidth = halo_width @\
+        if (present(haloWidth)) then @\
+          hwidth = haloWidth @\
         else @\
           hwidth = 0 @\
         endif @\
@@ -450,15 +450,15 @@
         endif @\
  @\
         newp => f90arr    ! must be ptr assignment, => @\
-        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth,& @\
+        call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth,& @\
                                   newp, copy, lbounds, ubounds, status) @\
  @\
  @\
 !       ! return value set by c_ESMC func above @\
-        ESMF_ArrayCreateByFullArr##mtypekind##mrank##D = array @\
+        ESMF_ArrayCreateByFullArr##mrank##D##mtypekind = array @\
         if (rcpresent) rc = status @\
  @\
-        end function ESMF_ArrayCreateByFullArr##mtypekind##mrank##D   @\
+        end function ESMF_ArrayCreateByFullArr##mrank##D##mtypekind   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -473,19 +473,19 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 pointer @\
+! !IROUTINE: ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind - make an ESMF array from an unallocated Fortran pointer @\
  @\
 ! !INTERFACE: @\
-      function ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D(f90ptr, counts, halo_width, & @\
+      function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind(f90ptr, counts, haloWidth, & @\
                                                      lbounds, ubounds, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_Array) :: ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D @\
+      type(ESMF_Array) :: ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind @\
 ! @\
 ! !ARGUMENTS: @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
       integer, dimension(:), intent(in) :: counts @\
-      integer, intent(in), optional :: halo_width @\
+      integer, intent(in), optional :: haloWidth @\
       integer, dimension(:), intent(in), optional :: lbounds @\
       integer, dimension(:), intent(in), optional :: ubounds @\
       integer, intent(out), optional :: rc   @\
@@ -503,7 +503,7 @@
 !   An unassociated Fortran 90 array pointer.  @\
 !  \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
-!  \item[{[halo_width]}] @\
+!  \item[{[haloWidth]}] @\
 !   Set the maximum width of the halo region on all edges. Defaults to 0. @\
 !  \item[{[lbounds]}] @\
 !  An integer array of lower index values.  Must be the same length as the rank. @\
@@ -541,8 +541,8 @@
         endif @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
-        if (present(halo_width)) then @\
-          hwidth = halo_width @\
+        if (present(haloWidth)) then @\
+          hwidth = haloWidth @\
         else @\
           hwidth = 0 @\
         endif @\
@@ -555,15 +555,15 @@
           return @\
         endif @\
  @\
-        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth,& @\
+        call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth,& @\
                                  f90ptr, ESMF_DATA_SPACE, lbounds, ubounds, status) @\
  @\
  @\
 !       ! return value set by c_ESMC func above @\
-        ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D = array @\
+        ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind = array @\
         if (rcpresent) rc = status @\
  @\
-        end function ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D   @\
+        end function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -578,18 +578,18 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D - make an ESMF array from an Allocated F90 pointer @\
+! !IROUTINE: ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind - make an ESMF array from an Allocated Fortran pointer @\
  @\
 ! !INTERFACE: @\
-      function ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D(f90ptr, docopy, halo_width, rc) @\
+      function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind(f90ptr, docopy, haloWidth, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_Array) :: ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D @\
+      type(ESMF_Array) :: ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind @\
 ! @\
 ! !ARGUMENTS: @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
-      integer, intent(in), optional :: halo_width @\
+      integer, intent(in), optional :: haloWidth @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -608,7 +608,7 @@
 !   the existing data array.  If set to {\tt ESMF\_DATA\_COPY} this routine @\
 !   allocates new space and copies the data from the pointer into the @\
 !   new array. @\
-!  \item[{[halo_width]}] @\
+!  \item[{[haloWidth]}] @\
 !   Set the maximum width of the halo region on all edges. Defaults to 0. @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -661,8 +661,8 @@
         ubounds = ubound(f90ptr) @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
-        if (present(halo_width)) then @\
-          hwidth = halo_width @\
+        if (present(haloWidth)) then @\
+          hwidth = haloWidth @\
         else @\
           hwidth = 0 @\
         endif @\
@@ -675,15 +675,15 @@
           return @\
         endif @\
  @\
-        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth,& @\
+        call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth,& @\
                                   f90ptr, copy, lbounds, ubounds, status) @\
  @\
  @\
 !       ! return value set by c_ESMC func above @\
-        ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D = array @\
+        ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind = array @\
         if (rcpresent) rc = status @\
  @\
-        end function ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D   @\
+        end function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -699,10 +699,10 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOPI @\
-! !IROUTINE: ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D - Create an F90 Ptr of the proper T/K/R @\
+! !IROUTINE: ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind - Create a Fortran Pointer of the proper T/K/R @\
  @\
 ! !INTERFACE: @\
-      subroutine ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth, f90ptr, & @\
+      subroutine ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth, f90ptr, & @\
                                                    docopy, lbounds, ubounds, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -716,13 +716,13 @@
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-!  Creates an F90 Pointer of the requested T/K/R.  After creating the @\
+!  Creates a Fortran pointer of the requested T/K/R.  After creating the @\
 !  pointer and doing the allocation based on counts, also goes ahead and @\
 !  calls into the C++ interfaces to set values on the {\tt ESMF\_Array} @\
 !  object. (This is to save on the total number of nested crossings of the @\
-!  F90/C++ boundary.) @\
+!  Fortran/C++ boundary.) @\
 ! @\
-!  Optional args are an existing F90 pointer which if given is used @\
+!  Optional args are an existing Fortran pointer which if given is used @\
 !  instead of a new one, and a docopy flag which if set to copy will @\
 !  do a contents copy or reference. @\
 ! The arguments are: @\
@@ -734,11 +734,11 @@
 !  \item[hwidth] @\
 !   An integer halo width. Width on each edge. @\
 !  \item[{[f90ptr]}] @\
-!   An optional existing F90 pointer.  Will be used instead of an @\
-!   internally generated F90 pointer if given.  Must be given if the @\
+!   An optional existing Fortran pointer.  Will be used instead of an @\
+!   internally generated Fortran pointer if given.  Must be given if the @\
 !   {\tt docopy} is specified. @\
 !  \item[{[docopy]}] @\
-!   An optional copy flag which can be specified if an F90 pointer is also @\
+!   An optional copy flag which can be specified if an Fortran pointer is also @\
 !   given.  Can either make a new copy of the data or ref existing data. @\
 !  \item[{[lbounds]}] @\
 !  An integer array of lower index values.  Must be the same length as the rank. @\
@@ -761,7 +761,7 @@
         logical :: willcopy                 ! do we need to copy data? @\
         type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call @\
  @\
-        type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap ! to pass f90 ptr to C++ @\
+        type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap ! to pass f90 ptr to C++ @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
         integer, dimension(ESMF_MAXDIM) :: lb, ub @\
         integer, dimension(ESMF_MAXDIM) :: offsets @\
@@ -832,7 +832,7 @@
 	! Until we need to use byte offsets, leave them 0. @\
         offsets = 0 @\
  @\
-        wrap % ##mtypekind##mrank##Dptr => newp @\
+        wrap % ptr##mrank##D##mtypekind => newp @\
         call c_ESMC_ArraySetInfo(array, wrap, & @\
                                  ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
                                  lb, ub, offsets, & @\
@@ -845,7 +845,7 @@
  @\
         if (rcpresent) rc = status @\
  @\
-        end subroutine ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D  @\
+        end subroutine ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind  @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -861,7 +861,7 @@
 ! <Created by macro - do not edit directly >  @\
 !BOP @\
 ! !INTERFACE: @\
-      subroutine ESMF_ArrayGetData##mtypekind##mrank##D(array, f90ptr, docopy, rc) @\
+      subroutine ESMF_ArrayGetData##mrank##D##mtypekind(array, f90ptr, docopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_Array) :: array @\
@@ -870,8 +870,8 @@
       integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-!      Return an F90 pointer to the data buffer, or return an F90 pointer @\
-!      to a new copy of the data. @\
+!      Return a Fortran pointer to the existing data buffer, @\
+!      or return a Fortran pointer to a new copy of the data. @\
 ! @\
 !EOP @\
 ! !REQUIREMENTS: @\
@@ -880,7 +880,7 @@
         logical :: rcpresent                ! did user specify rc? @\
         logical :: copyreq                  ! did user specify copy? @\
  @\
-        type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
+        type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
         integer :: rank, lb(mrank), ub(mrank)  ! size info for the array @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
@@ -924,15 +924,15 @@
             return @\
           endif @\
           ! this must do a contents assignment @\
-          localp = wrap % ##mtypekind##mrank##Dptr @\
+          localp = wrap % ptr##mrank##D##mtypekind @\
           f90ptr => localp  @\
         else @\
-          f90ptr => wrap % ##mtypekind##mrank##Dptr @\
+          f90ptr => wrap % ptr##mrank##D##mtypekind @\
         endif @\
  @\
         if (rcpresent) rc = ESMF_SUCCESS @\
  @\
-        end subroutine ESMF_ArrayGetData##mtypekind##mrank##D @\
+        end subroutine ESMF_ArrayGetData##mrank##D##mtypekind @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -948,13 +948,13 @@
 ! <Created by macro - do not edit directly >  @\
 !BOP @\
 ! !INTERFACE: @\
-      subroutine ESMF_ArrayDeallocate##mtypekind##mrank##D(array, wrap, rc) @\
+      subroutine ESMF_ArrayDeallocate##mrank##D##mtypekind(array, wrap, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_Array) :: array @\
-      type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap @\
+      type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap @\
       integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -968,11 +968,11 @@
         status = ESMF_FAILURE  @\
  @\
         call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
-        deallocate(wrap % ##mtypekind##mrank##Dptr) @\
+        deallocate(wrap % ptr##mrank##D##mtypekind) @\
  @\
         if (present(rc)) rc = status @\
  @\
-        end subroutine ESMF_ArrayDeallocate##mtypekind##mrank##D @\
+        end subroutine ESMF_ArrayDeallocate##mrank##D##mtypekind @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\

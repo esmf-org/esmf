@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.10 2004/03/09 20:52:36 svasquez Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.11 2004/03/11 16:16:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.10 2004/03/09 20:52:36 svasquez Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.11 2004/03/11 16:16:36 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -171,7 +171,7 @@ end interface
 !------------------------------------------------------------------------------
 
 !BOP
-! !IROUTINE: ESMF_ArrayGetData -- Get an F90 pointer to the data contents
+! !IROUTINE: ESMF_ArrayGetData -- Get a Fortran pointer to the data contents
 !
 ! !INTERFACE:
      interface ESMF_ArrayGetData
@@ -381,7 +381,7 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayConstructF90Ptr - Create and add F90 ptr to array
+! !IROUTINE: ESMF_ArrayConstructF90Ptr - Create and add a Fortran ptr to array
 !
 ! !INTERFACE:
      subroutine ESMF_ArrayConstructF90Ptr(array, counts, hwidth, &
@@ -463,13 +463,13 @@ end interface
               case (1)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI21D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr1DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI41D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr1DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI81D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr1DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
@@ -478,13 +478,13 @@ end interface
               case (2)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI22D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr2DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI42D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr2DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI82D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr2DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
@@ -493,13 +493,13 @@ end interface
               case (3)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI23D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr3DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI43D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr3DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI83D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr3DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
@@ -508,13 +508,13 @@ end interface
               case (4)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI24D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr4DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI44D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr4DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI84D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr4DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
@@ -523,13 +523,13 @@ end interface
               case (5)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI25D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr5DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI45D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr5DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI85D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr5DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
@@ -543,10 +543,10 @@ end interface
               case (1)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR41D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr1DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR81D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr1DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
@@ -555,10 +555,10 @@ end interface
               case (2)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR42D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr2DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR82D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr2DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
@@ -567,10 +567,10 @@ end interface
               case (3)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR43D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr3DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR83D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr3DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
@@ -579,10 +579,10 @@ end interface
               case (4)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR44D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr4DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR84D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr4DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
@@ -591,10 +591,10 @@ end interface
               case (5)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR45D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr5DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR85D(array, counts, hwidth, &
+                    call ESMF_ArrayConstructF90Ptr5DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
