@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/04/09 23:48:43 flanigan Exp $ 
+# $Id: makefile,v 1.4 2003/04/15 20:30:36 svasquez Exp $ 
 
 ALL:  tests
 
@@ -39,11 +39,11 @@ $(ESMC_TESTDIR)/ESMF_GridUTest: ESMF_GridUTest.o
 
 RUN_ESMF_GridUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_GridUTest > $(ESMC_TESTDIR)/ESMF_GridUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_GridUTest > $(ESMC_TESTDIR)/ESMF_GridUTest.stdout
 
 RUN_ESMF_GridUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_GridUTest > $(ESMC_TESTDIR)/ESMF_GridUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_GridUTest > $(ESMC_TESTDIR)/ESMF_GridUTest.stdout
 
 ESMF_GridUTest.rm:
 	echo "ESMF_GridUTest.rm target called here."
