@@ -1,4 +1,4 @@
-// $Id: ESMC_Types.h,v 1.2 2002/10/28 23:32:44 nscollins Exp $
+// $Id: ESMC_Types.h,v 1.3 2002/11/07 22:19:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,6 +26,7 @@
 //
 //-------------------------------------------------------------------------
 
+
 // 32-bit machines/compilers
 #if ESMF_IS_32BIT_MACHINE
 
@@ -43,6 +44,15 @@
    #define UINT32 unsigned int
 
 #endif // machine word length
+
+
+// wrappers for how fortran calls into C code
+#ifdef ESMC_HAVE_FORTRAN_UNDERSCORE
+#define FTN(func) func##_
+#else
+#define FTN(func) func
+#endif
+
 
 #endif // ESMF_TYPE_H
 
