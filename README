@@ -1,3 +1,13 @@
+ $Id: README,v 1.50 2004/06/23 16:08:12 cdeluca Exp $
+
+Earth System Modeling Framework
+Copyright 2002-2004, University Corporation for Atmospheric Research,
+Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+Laboratory, University of Michigan, National Centers for Environmental
+Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+NASA Goddard Space Flight Center.
+Licensed under the GPL.
+
 ================================================================================
                                    README
 
@@ -27,7 +37,7 @@ Follow the directions on that webpage to access the ESMF CVS repository.
 
 QuickStart information for the impatient.
 
- - set environment variable (see below).
+ - set environment variable(s) (see below).
  - Type 'gmake' (the GNU make program) to build the ESMF library.
  - Type 'gmake tests' to make and run the unit tests
     (or 'gmake tests_uni' for non-mpi machines).
@@ -37,7 +47,7 @@ QuickStart information for the impatient.
     (or 'gmake examples_uni' for non-mpi machines).
  - Type 'gmake ESMF_COUPLED_FLOW' to compile and run a coupled fluid flow 
    demo program.  It will run in parallel, 4-way, compute 3600 time steps, and
-   produce 10 data dumps.
+   produce 10 data outputs.
 
 
 ================================================================================
@@ -77,7 +87,7 @@ System Information
 The following platforms are fully supported: Alpha, IRIX64 32-bit and 64-bit
 addressing, IBM 32-bit and 64-bit addressing, and Linux with any of the
 following compilers: Intel 32-bit and 64-bit addressing, NAG, Absoft, Lahey,
-and PGI.  ESMF is built and debugged in other platforms on a regular basis.
+and PGI.  ESMF is built and debugged on other platforms on a regular basis.
 Check the build_config directory for more information.
 
 
@@ -110,7 +120,11 @@ make commands to determine which is GNU make.
 
 Build the library with the command:
  
-  gmake 
+  gmake
+
+or 
+
+  gmake ESMF_BOPT=O
 
 for an optimized version or
 
@@ -186,7 +200,6 @@ platform, please see the link_rules files in the platform directories
 in build_config.
  
 ================================================================================
-
 The latest documentation for the project can be found at:
 http://www.esmf.ucar.edu -> Downloads & Documentation
 
@@ -195,16 +208,5 @@ the documentation that exactly matches this version, follow the
 documentation build procedures outlined above.
 
 Please contact esmf_support@ucar.edu with any questions or problems.
-
-================================================================================
- $Id: README,v 1.49 2004/06/21 15:26:57 nscollins Exp $
-
-Earth System Modeling Framework
-Copyright 2002-2004, University Corporation for Atmospheric Research,
-Massachusetts Institute of Technology, Geophysical Fluid Dynamics
-Laboratory, University of Michigan, National Centers for Environmental
-Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
-NASA Goddard Space Flight Center.
-Licensed under the GPL.
 
 ================================================================================
