@@ -1,5 +1,3 @@
- $Id: README,v 1.15 2003/11/13 21:14:19 svasquez Exp $
-
 ================================================================================
 
          README file for ESMF build_config directory.
@@ -57,15 +55,18 @@ Current build files for supported platforms:
 
       build_config/AIX.default.default
                    IRIX64.default.default
-                   OSF1.default.default
+                   Linux.absoft.default
                    Linux.intel.default
+                   Linux.lahey.default
+                   Linux.nag.default
+                   Linux.pgi.default
+                   OSF1.default.default
+
 
 Current build files for unsupported platforms:
 
-      build_config/Linux.lahey.default
-                   Linux.pgi.default
-                   Linux.absoft.default
-                   Darwin.absoft.default
+      build_config/Darwin.absoft.default
+                   Darwin.nag.default
                    SunOS.default.default
 
 Notice that there is no default compiler value for Linux or Darwin
@@ -77,15 +78,15 @@ Customizing the ESMF Build
 --------------------------
 
 The build system can be ported to other Unix platforms by adding new
-makefile fragments and conf.h files.  The new fragment has to follow the 
-naming convention used by the existing fragments and be created in
-build_config.  The new fragment also has to define the same
+makefile fragments and configuration include files.  The new fragment 
+has to follow the naming convention used by the existing fragments and 
+be created in build_config.  The new fragment also has to define the same
 makefile variables as the existing files.
 
-The conf.h files are used to define machine attributes within C and
-C++ source code.  Like fragment files, new conf.h files have to define 
-the same machine attributes as existing conf.h files.  If a machine 
-supports both 32 and 64 bit precision, then the conf.h file must have
+The ESMC_Conf.h and ESMF_Conf.inc include files are used to define machine 
+attributes within C/C++ and Fortran source code.  Like fragment files, 
+new files have to define the same machine attributes as existing files.  
+If a machine supports both 32 and 64 bit precision, then the files must have
 a conditional section for any values which are dependent on the precision.
 
 
@@ -109,9 +110,13 @@ Environment Variables
                    value will be 64, otherwise it will be 32.
 
  ESMF_SITE         If ESMF_SITE is not set or has the value of
-                   default,  default build settings for the
-                   current machine architecture and compiler will 
-                   be used.  Values are created from a machine's name.
+                   default, default build settings for the current machine
+                   architecture and compiler will be used. Otherwise the 
+                   setting will be used to select site-specific build files 
+                   which have been configured for a particular location.   
+                   See the CVS repository: 
+                       http://sourceforge.net/projects/esmfcontrib/
+                   for existing site files or to contribute new ones.
 
  ESMF_COMM         Defines which MPI communications library to use.  
                    Many times a machine will come with its own MPI 
@@ -155,6 +160,19 @@ allocation pool.  Usually this will be a value of 1.
 Usage
 -----
 
-To link your application to the ESMF shared libraries refer to the link_rules file
-in the makefile fragment directories. The link_rules are provided only for the 
-supported platforms. 
+To link your application to the ESMF shared libraries refer to the 
+link_rules file in the makefile fragment directories. The link_rules are 
+provided only for the supported platforms. 
+
+
+================================================================================
+ $Id: README,v 1.16 2004/06/21 15:38:30 nscollins Exp $
+Earth System Modeling Framework
+Copyright 2002-2003, University Corporation for Atmospheric Research,
+Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+Laboratory, University of Michigan, National Centers for Environmental
+Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+NASA Goddard Space Flight Center.
+Licensed under the GPL.
+================================================================================
+
