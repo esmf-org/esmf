@@ -1,4 +1,4 @@
-% $Id: ESMF_buildinstall.tex,v 1.1 2003/08/27 23:09:55 flanigan Exp $
+% $Id: ESMF_buildinstall.tex,v 1.2 2003/11/12 18:12:19 svasquez Exp $
 
 
 \subsection{Install Options}
@@ -7,14 +7,14 @@
 There is an install target which will copy the library and *.mod files to
 specified directories.  To invoke this target use:
 \begin{verbatim}
-  gmake BOPT=[O,g] ESMF_LIB_INSTALL=<path for library>
+  gmake ESMF_BOPT=[O,g] ESMF_LIB_INSTALL=<path for library>
                    ESMF_MOD_INSTALL=<path for *.mod files> install 
 \end{verbatim}
 
 Some users may wish for the library to be built in a directory different from 
 where the source code resides.  To do this, build using:
 \begin{verbatim}
-   gmake ESMF_BUILD=<path> BOPT=[O,g]
+   gmake ESMF_BUILD=<path> ESMF_BOPT=[O,g]
 \end{verbatim}
 
 The {\tt ESMF\_BUILD} variable gives an alternate path in which to
