@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2003/07/22 21:12:21 nscollins Exp $
+! $Id: user_model1.F90,v 1.2 2003/07/29 20:08:18 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -31,7 +31,6 @@
     type wrapper
       type(mylocaldata), pointer :: ptr
     end type
-
    
     public userm1_register
         
@@ -96,7 +95,7 @@
         integer, dimension(:,:), pointer :: idata
         integer :: nDE_i, nDE_j
         real :: x_min, x_max, y_min, y_max
-        integer :: i_max, j_max
+        integer :: counts(ESMF_MAXGRIDDIM)
         integer :: ni, nj, de_id
         integer :: horz_gridtype, vert_gridtype
         integer :: horz_stagger, vert_stagger
@@ -118,52 +117,42 @@
         call ESMF_GridCompGet(comp, layout=layout, rc=status)
 
         ! Add a "humidity" field to the export state.
-        i_max = 40
-        j_max = 20
+        counts(1) = 60
+        counts(2) = 40
         x_min = 0.0
-        x_max = 20.0
+        x_max = 60.0
         y_min = 0.0
-        y_max = 5.0
+        y_max = 60.0
         horz_gridtype = ESMF_GridType_XY
-        vert_gridtype = ESMF_GridType_Unknown
         horz_stagger = ESMF_GridStagger_A
-        vert_stagger = ESMF_GridStagger_Unknown
         horz_coord_system = ESMF_CoordSystem_Cartesian
-        vert_coord_system = ESMF_CoordSystem_Unknown
 
-        grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+        grid1 = ESMF_GridCreate(counts=counts, &
                                 x_min=x_min, x_max=x_max, &
                                 y_min=y_min, y_max=y_max, &
                                 layout=layout, &
                                 horz_gridtype=horz_gridtype, &
-                                vert_gridtype=vert_gridtype, &
                                 horz_stagger=horz_stagger, &
-                                vert_stagger=vert_stagger, &
                                 horz_coord_system=horz_coord_system, &
-                                vert_coord_system=vert_coord_system, &
                                 name="source grid", rc=status)
 
         ! Figure out our local processor id
         call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
-        ! Set initial data values over exclusive domain to the de identifier
-        call ESMF_GridGetDE(grid1, lcellexc_index=index, rc=rc)
-        ni = index(1)%r - index(1)%l + 1
-        nj = index(2)%r - index(2)%l + 1
-        print *, "allocating", ni, " by ",nj," cells on DE", de_id
-        allocate(idata(ni,nj))
+        ! Set up a 2D integer array
+        call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
+                                kind=ESMF_KIND_I4)
+
+        ! Create the field and have it create the array internally
+        humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
+                                         name="humidity", rc=rc)
+
+        ! Get the allocated array back and get an F90 array pointer
+        call ESMF_FieldGetData(humidity, array1, rc)
+        call ESMF_ArrayGetData(array1, idata, rc=rc)
 
         ! Set initial data values over whole array to our de id
         idata = de_id
-
-        ! Create Array based on an existing, allocated F90 pointer.
-        ! Data is type Integer, 1D.
-        array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
-        print *, "Array Create returned"
-
-        humidity = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
-                                         name="humidity", rc=rc)
-
 
         call ESMF_StateAddData(exportstate, humidity, rc)
         call ESMF_StatePrint(exportstate, rc=rc)

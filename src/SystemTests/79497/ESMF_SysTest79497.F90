@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.1 2003/07/22 21:12:21 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.2 2003/07/29 20:08:08 jwolfe Exp $
 !
 ! System test code #79497
 
@@ -80,19 +80,17 @@
     call ESMF_AppCompGet(app, layout=layout1, rc=rc)
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc=rc)
     if (ndes .lt. 8) then
-        print *, "This system test needs to run at least 8-way, current np = ", ndes
-        goto 10
+      print *, "This system test needs to run at least 8-way, current np = ", ndes
+      goto 10
     endif
 
-
     mid = ndes / 2
-
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     delist = (/ (i, i=0, mid-1) /)
     layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, ndes/4 /), (/ 0, 0 /), &
-                                                      de_indices=delist, rc=rc)
+                                  de_indices=delist, rc=rc)
     comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
     call ESMF_GridCompPrint(comp1, "", rc)
@@ -101,8 +99,7 @@
     cname2 = "user model 2"
     delist = (/ (i, i=mid, ndes-1) /)
     layout3 = ESMF_DELayoutCreate(layout1, 2, (/ 1, ndes/2 /), (/ 0, 0 /), &
-                                                      de_indices=delist, rc=rc)
-
+                                  de_indices=delist, rc=rc)
 
     comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
@@ -113,9 +110,7 @@
     print *, "Created component ", trim(cplname), ", rc =", rc
     call ESMF_CplCompPrint(cpl, "", rc)
 
-
     print *, "Comp Creates finished"
-
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -140,21 +135,19 @@
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time interval to 6 hours
-      call ESMF_TimeIntervalSet(timeStep, H=6, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, h_i4=6, rc=rc)
 
-      ! initialize start time to 3/28/2003
-      call ESMF_TimeSet(startTime, YR=2003, MM=5, DD=1, &
-                        cal=gregorianCalendar, rc=rc)
+      ! initialize start time to 5/01/2003
+      call ESMF_TimeSet(startTime, yr_i4=2003, mm_i4=5, dd_i4=1, &
+                        calendar=gregorianCalendar, rc=rc)
 
-      ! initialize stop time to 3/29/2003
-      call ESMF_TimeSet(stopTime, YR=2003, MM=5, DD=2, &
+      ! initialize stop time to 5/02/2003
+      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=5, dd_i4=2, &
                         cal=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
       call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
 
-
- 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !  Init section

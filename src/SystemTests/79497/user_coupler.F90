@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2003/07/22 21:12:21 nscollins Exp $
+! $Id: user_coupler.F90,v 1.2 2003/07/29 20:08:41 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -30,55 +30,59 @@
 !   !   private to the module.
  
     subroutine usercpl_register(comp, rc)
-        type(ESMF_CplComp) :: comp
-        integer :: rc
+      type(ESMF_CplComp) :: comp
+      integer :: rc
 
-        print *, "in user setservices routine"
+      print *, "in user setservices routine"
 
-        ! Register the callback routines.
+      ! Register the callback routines.
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
+                                     ESMF_SINGLEPHASE, rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
+                                     ESMF_SINGLEPHASE, rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
+                                     ESMF_SINGLEPHASE, rc)
 
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
-                                                  ESMF_SINGLEPHASE, rc)
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
-                                                  ESMF_SINGLEPHASE, rc)
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
-                                                  ESMF_SINGLEPHASE, rc)
-
-        print *, "Registered Initialize, Run, and Finalize routines"
+      print *, "Registered Initialize, Run, and Finalize routines"
 
     end subroutine
 
 !-------------------------------------------------------------------------
-!   !  User Comp Component created by higher level calls, here is the
-!   !   Initialization routine.
+!   !User Comp Component created by higher level calls, here is the
+!   ! Initialization routine.
  
     
-    subroutine user_init(comp, statelist, clock, rc)
-        type(ESMF_CplComp) :: comp
-        type(ESMF_State), optional :: statelist
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+    subroutine user_init(comp, regrid, statelist, clock, rc)
+      type(ESMF_CplComp) :: comp
+      type(ESMF_Regrid) :: regrid
+      type(ESMF_State), optional :: statelist
+      type(ESMF_Clock), optional :: clock
+      integer, optional :: rc
 
-        ! Local variables
-        integer :: itemcount
-        type(ESMF_State) :: state1, state2
-        type(ESMF_Field) :: humidity
+      ! Local variables
+      integer :: itemcount
+      type(ESMF_State) :: state1, state2
+      type(ESMF_Field) :: humidity
 
-        print *, "User Coupler Init starting"
+      print *, "User Coupler Init starting"
 
-        call ESMF_StateGetInfo(statelist, itemcount=itemcount, rc=rc)
-        print *, "Statelist contains ", itemcount, " items."
+      call ESMF_StateGetInfo(statelist, itemcount=itemcount, rc=rc)
+      print *, "Statelist contains ", itemcount, " items."
        
-        call ESMF_StateGetData(statelist, "comp1 export", state1, rc)
-        call ESMF_StatePrint(state1, rc=rc)
+      call ESMF_StateGetData(statelist, "comp1 export", state1, rc)
+      call ESMF_StatePrint(state1, rc=rc)
 
-        call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
-        call ESMF_StatePrint(state2, rc=rc)
+      call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
+      call ESMF_StatePrint(state2, rc=rc)
 
+      ! These are fields on different Grids - call RegridCreate to set
+      ! up the Regrid structure
+      regrid = ESMF_RegridCreateFromField(humidity1, humidity2, &
+                                          method=ESMF_RegridMethod_Bilinear, &
+                                          name="humidity1_to_2", rc=status)
+! TODO:  send cpllayout to Regrid?  not in argument list
 
-        ! This is where the model specific setup code goes.  
-
-        print *, "User Coupler Init returning"
+      print *, "User Coupler Init returning"
    
     end subroutine user_init
 
@@ -87,49 +91,48 @@
 !   !  The Run routine where data is coupled.
 !   !
  
-    subroutine user_run(comp, statelist, clock, rc)
-        type(ESMF_CplComp) :: comp
-        type(ESMF_State), optional :: statelist
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+    subroutine user_run(comp, regrid, statelist, clock, rc)
+      type(ESMF_CplComp) :: comp
+      type(ESMF_Regrid) :: regrid
+      type(ESMF_State), optional :: statelist
+      type(ESMF_Clock), optional :: clock
+      integer, optional :: rc
 
-        ! Local variables
-        type(ESMF_State) :: mysource, mydest
-        type(ESMF_Field) :: humidity1, humidity2
-        type(ESMF_DELayout) :: cpllayout
-        integer :: status
+      ! Local variables
+      type(ESMF_State) :: mysource, mydest
+      type(ESMF_Field) :: humidity1, humidity2
+      type(ESMF_DELayout) :: cpllayout
+      integer :: status
 
-        print *, "User Coupler Run starting"
+      print *, "User Coupler Run starting"
 
-        ! Get input data
-        call ESMF_StateGetData(statelist, "comp1 export", mysource, rc)
-        call ESMF_StatePrint(mysource, rc=status)
-        call ESMF_StateGetData(mysource, "humidity", humidity1, rc=status)
-        call ESMF_FieldPrint(humidity1, rc=status)
+      ! Get input data
+      call ESMF_StateGetData(statelist, "comp1 export", mysource, rc)
+      call ESMF_StatePrint(mysource, rc=status)
+      call ESMF_StateGetData(mysource, "humidity", humidity1, rc=status)
+      call ESMF_FieldPrint(humidity1, rc=status)
 
-        ! Get location of output data
-        call ESMF_StateGetData(statelist, "comp2 import", mydest, rc)
-        call ESMF_StatePrint(mydest, rc=status)
-        call ESMF_StateGetData(mydest, "humidity", humidity2, rc=status)
-        call ESMF_FieldPrint(humidity1, rc=status)
+      ! Get location of output data
+      call ESMF_StateGetData(statelist, "comp2 import", mydest, rc)
+      call ESMF_StatePrint(mydest, rc=status)
+      call ESMF_StateGetData(mydest, "humidity", humidity2, rc=status)
+      call ESMF_FieldPrint(humidity1, rc=status)
 
-        ! Get layout from coupler component
-        call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
+      ! Get layout from coupler component
+      call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
 
+      ! These are fields on different Grids - call Regrid to rearrange
+      !  the data
+      call ESMF_RegridRunField(humidity1, humidity2, regrid, status)
+! TODO:  send cpllayout to Regrid?  not in argument list
 
-        ! These are fields on different layouts - call Redist to rearrange
-        !  the data using the Comm routines.
-        call ESMF_FieldRedist(humidity1, humidity2, cpllayout, status)
-
-
-        ! Set output data
-        call ESMF_StateAddData(mydest, humidity2, rc=status)
-        call ESMF_StatePrint(mydest, rc=status)
-
+      ! Set output data
+      call ESMF_StateAddData(mydest, humidity2, rc=status)
+      call ESMF_StatePrint(mydest, rc=status)
  
-        print *, "User Coupler Run returning"
+      print *, "User Coupler Run returning"
 
-        rc = status
+      rc = status
 
     end subroutine user_run
 
@@ -138,23 +141,26 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, statelist, clock, rc)
-        type(ESMF_CplComp) :: comp
-        type(ESMF_State), optional :: statelist
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+    subroutine user_final(comp, regrid, statelist, clock, rc)
+      type(ESMF_CplComp) :: comp
+      type(ESMF_Regrid) :: regrid
+      type(ESMF_State), optional :: statelist
+      type(ESMF_Clock), optional :: clock
+      integer, optional :: rc
 
-        ! Local variables
-        type(ESMF_State) :: state1, state2
+      ! Local variables
+      type(ESMF_State) :: state1, state2
 
-        print *, "User Coupler Final starting"
-        call ESMF_StateGetData(statelist, "comp1 export", state1, rc)
-        call ESMF_StatePrint(state1, rc=rc)
+      print *, "User Coupler Final starting"
+      call ESMF_StateGetData(statelist, "comp1 export", state1, rc)
+      call ESMF_StatePrint(state1, rc=rc)
 
-        call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
-        call ESMF_StatePrint(state2, rc=rc)
-    
-        print *, "User Coupler Final returning"
+      call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
+      call ESMF_StatePrint(state2, rc=rc)
+   
+      call ESMF_RegridDestroy(regrid, rc)
+
+      print *, "User Coupler Final returning"
    
     end subroutine user_final
 

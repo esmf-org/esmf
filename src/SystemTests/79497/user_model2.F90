@@ -1,9 +1,9 @@
-! $Id: user_model2.F90,v 1.1 2003/07/22 21:12:21 nscollins Exp $
+! $Id: user_model2.F90,v 1.2 2003/07/29 20:08:30 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
 
 !BOP
 !
@@ -32,7 +32,7 @@
 
     contains
 
-!-------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
@@ -50,14 +50,13 @@
         ! Register the callback routines.
 
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
-                                            user_init, ESMF_SINGLEPHASE, rc)
+                                        user_init, ESMF_SINGLEPHASE, rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
-                                            user_run, ESMF_SINGLEPHASE, rc)
+                                        user_run, ESMF_SINGLEPHASE, rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
-                                            user_final, ESMF_SINGLEPHASE, rc)
+                                        user_final, ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
-
 
         allocate(mydatablock)
 
@@ -70,158 +69,152 @@
 
     end subroutine
 
-!-------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
 !   !  User Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
  
-    
     subroutine user_init(comp, importstate, exportstate, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout), optional :: importstate, exportstate
-        type(ESMF_Clock), intent(in), optional :: clock
-        integer, intent(out), optional :: rc
+      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_State), intent(inout), optional :: importstate, exportstate
+      type(ESMF_Clock), intent(in), optional :: clock
+      integer, intent(out), optional :: rc
 
-!     ! Local variables
-        type(ESMF_Field) :: humidity
-        type(ESMF_DELayout) :: layout
+!   ! Local variables
+      type(ESMF_Field) :: humidity
+      type(ESMF_DELayout) :: layout
+      integer :: i, x, y
+      type(ESMF_Grid) :: grid1
+      type(ESMF_Array) :: array1
+      integer, dimension(:,:), pointer :: idata
+      real :: xMin, yMin
+      real :: dx(40), dy(50)
+      integer :: countsPerDE1(3), countsPerDE2(2)
+      integer :: de_id
+      integer :: horz_gridtype, horz_stagger, horz_coord_system
+      integer :: status, myde
 
-        integer :: i, x, y
-        type(ESMF_Grid) :: grid1
-        type(ESMF_Array) :: array1
-        type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-        integer, dimension(:,:), pointer :: idata
-        integer :: nDE_i, nDE_j
-        real :: x_min, x_max, y_min, y_max
-        integer :: i_max, j_max
-        integer :: ni, nj, de_id
-        integer :: horz_gridtype, vert_gridtype
-        integer :: horz_stagger, vert_stagger
-        integer :: horz_coord_system, vert_coord_system
-        integer :: status, myde
+      print *, "User Comp Init starting"
 
-        print *, "User Comp Init starting"
+      ! Initially import state contains a field with a grid but no data.
+      call ESMF_GridCompGet(comp, layout=layout, rc=status)
 
-        ! Initially import state contains a field with a grid but no data.
-        call ESMF_GridCompGet(comp, layout=layout, rc=status)
+      ! Add a "humidity" field to the import state.
+      countsPerDE1 = (/ 10, 18, 12 /)
+      countsPerDE2 = (/ 22, 28 /)
+      xMin = 0.0
+      dx = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
+              1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
+              1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
+              2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
+      yMin = 0.0
+      dy = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
+              0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
+              1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
+              1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
+              1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
+      horz_gridtype = ESMF_GridType_XY
+      horz_stagger = ESMF_GridStagger_D
+      horz_coord_system = ESMF_CoordSystem_Cartesian
 
-        ! Add a "humidity" field to the import state.
-        i_max = 40
-        j_max = 20
-        x_min = 0.0
-        x_max = 20.0
-        y_min = 0.0
-        y_max = 5.0
-        horz_gridtype = ESMF_GridType_XY
-        vert_gridtype = ESMF_GridType_Unknown
-        horz_stagger = ESMF_GridStagger_A
-        vert_stagger = ESMF_GridStagger_Unknown
-        horz_coord_system = ESMF_CoordSystem_Cartesian
-        vert_coord_system = ESMF_CoordSystem_Unknown
+      grid1 = ESMF_GridCreate(countsPerDE1=countsPerDE1, &
+                              countsPerDE2=countsPerDE2, &
+                              xMin=xMin, dx=dx, yMin=yMin, dy=dy, &
+                              layout=layout, &
+                              horz_gridtype=horz_gridtype, &
+                              horz_stagger=horz_stagger, &
+                              horz_coord_system=horz_coord_system, &
+                              name="source grid", rc=status)
 
-        grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                                x_min=x_min, x_max=x_max, &
-                                y_min=y_min, y_max=y_max, &
-                                layout=layout, &
-                                horz_gridtype=horz_gridtype, &
-                                vert_gridtype=vert_gridtype, &
-                                horz_stagger=horz_stagger, &
-                                vert_stagger=vert_stagger, &
-                                horz_coord_system=horz_coord_system, &
-                                vert_coord_system=vert_coord_system, &
-                                name="source grid", rc=status)
+      ! Figure out our local processor id
+      call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
-        ! Set initial data values over exclusive domain to the de identifier
-        call ESMF_GridGetDE(grid1, lcellexc_index=index, rc=rc)
-        ni = index(1)%r - index(1)%l + 1
-        nj = index(2)%r - index(2)%l + 1
-        print *, "allocating", ni, " by ",nj," cells on DE", de_id
+      ! Set up a 2D integer array
+      call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
+                              kind=ESMF_KIND_I4)
 
-        allocate(idata(ni,nj))
+      ! Create the field and have it create the array internally
+      humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
+                                  name="humidity", rc=rc)
 
-        ! Create Array based on an existing, allocated F90 pointer.
-        ! Data is type Integer, 1D, but uninitialized.
-        array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
-        print *, "Array Create returned"
+      ! Get the allocated array back and get an F90 array pointer
+      call ESMF_FieldGetData(humidity, array1, rc)
+      call ESMF_ArrayGetData(array1, idata, rc=rc)
 
-        humidity = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
-                                         name="humidity", rc=rc)
+      ! Set initial data values over exclusive domain to the de identifier
+      idata = de_id
 
+      call ESMF_StateAddData(importstate, humidity, rc)
+      call ESMF_StatePrint(importstate, rc=rc)
 
-        call ESMF_StateAddData(importstate, humidity, rc)
-        call ESMF_StatePrint(importstate, rc=rc)
-
-        print *, "User Comp Init returning"
+      print *, "User Comp Init returning"
    
     end subroutine user_init
 
 
-!-------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
 !   !
  
     subroutine user_run(comp, importstate, exportstate, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout), optional :: importstate, exportstate
-        type(ESMF_Clock), intent(in), optional :: clock
-        integer, intent(out), optional :: rc
+      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_State), intent(inout), optional :: importstate, exportstate
+      type(ESMF_Clock), intent(in), optional :: clock
+      integer, intent(out), optional :: rc
 
-!     ! Local variables
-        type(ESMF_Field) :: humidity
-        type(ESMF_Array) :: array1
-        integer :: status
+!   ! Local variables
+      type(ESMF_Field) :: humidity
+      type(ESMF_Array) :: array1
+      integer :: status
 
-        print *, "User Comp Run starting"
+      print *, "User Comp Run starting"
 
-        ! Get information from the component.
-        call ESMF_StatePrint(importstate, rc=status)
-        call ESMF_StateGetData(importstate, "humidity", humidity, rc=status)
-        call ESMF_FieldPrint(humidity, "", rc=status)
+      ! Get information from the component.
+      call ESMF_StatePrint(importstate, rc=status)
+      call ESMF_StateGetData(importstate, "humidity", humidity, rc=status)
+      call ESMF_FieldPrint(humidity, "", rc=status)
     
+      ! This is where the model specific computation goes.
+      call ESMF_FieldGetData(humidity, array1, rc=status)
+      print *, "Imported Array in user model 2:"
+      call ESMF_ArrayPrint(array1, "", rc)
 
-        ! This is where the model specific computation goes.
-        call ESMF_FieldGetData(humidity, array1, rc=status)
-        print *, "Imported Array in user model 2:"
-        call ESMF_ArrayPrint(array1, "", rc)
+      print *, "User Comp Run returning"
 
- 
-        print *, "User Comp Run returning"
-
-        rc = status
+      rc = status
 
     end subroutine user_run
 
 
-!-------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
     subroutine user_final(comp, importstate, exportstate, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout), optional :: importstate, exportstate
-        type(ESMF_Clock), intent(in), optional :: clock
-        integer, intent(out), optional :: rc
+      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_State), intent(inout), optional :: importstate, exportstate
+      type(ESMF_Clock), intent(in), optional :: clock
+      integer, intent(out), optional :: rc
 
-        ! Local variables
-        integer :: status
-        type(mylocaldata), pointer :: mydatablock
-        type(wrapper) :: wrap
+      ! Local variables
+      integer :: status
+      type(mylocaldata), pointer :: mydatablock
+      type(wrapper) :: wrap
 
-        print *, "User Comp Final starting"  
+      print *, "User Comp Final starting"  
 
-        ! Get our local info
-        nullify(wrap%ptr)
-        mydatablock => wrap%ptr
+      ! Get our local info
+      nullify(wrap%ptr)
+      mydatablock => wrap%ptr
         
-        call ESMF_GridCompGetInternalState(comp, wrap, status)
+      call ESMF_GridCompGetInternalState(comp, wrap, status)
 
-        mydatablock => wrap%ptr
-        print *, "before deallocate, dataoffset = ", mydatablock%dataoffset
-        deallocate(mydatablock, stat=status)
-        print *, "deallocate returned ", status
-        nullify(wrap%ptr)
+      mydatablock => wrap%ptr
+      print *, "before deallocate, dataoffset = ", mydatablock%dataoffset
+      deallocate(mydatablock, stat=status)
+      print *, "deallocate returned ", status
+      nullify(wrap%ptr)
 
-
-        print *, "User Comp Final returning"
+      print *, "User Comp Final returning"
    
     end subroutine user_final
 
