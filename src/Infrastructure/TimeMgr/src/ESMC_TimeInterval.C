@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.50 2004/04/09 20:13:57 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.51 2004/04/14 00:11:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.50 2004/04/09 20:13:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.51 2004/04/14 00:11:37 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1241,8 +1241,14 @@
 
     ESMC_TimeInterval product;
 
-    // TODO: fractional & calendar interval parts
+    // TODO: fractional interval parts
 
+    // multiply relative yy, mm, d parts
+    product.yy = this->yy * multiplier;
+    product.mm = this->mm * multiplier;
+    product.d  = this->d  * multiplier;
+
+    // multiply absolute s part
     product.s = this->s * multiplier;
 
     return(product);
@@ -1272,8 +1278,14 @@
 
     ESMC_TimeInterval product;
 
-    // TODO: fractional & calendar interval parts
+    // TODO: fractional interval parts
 
+    // multiply relative yy, mm, d parts
+    product.yy = multiplier * ti.yy;
+    product.mm = multiplier * ti.mm;
+    product.d  = multiplier * ti.d;
+
+    // multiply absolute s part
     product.s = multiplier * ti.s;
 
     return(product);
@@ -1299,8 +1311,14 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: fractional & calendar interval parts
+    // TODO: fractional interval parts
 
+    // multiply relative yy, mm, d parts
+    this->yy *= multiplier;
+    this->mm *= multiplier;
+    this->d  *= multiplier;
+
+    // multiply absolute s part
     this->s *= multiplier;
 
     return(*this);
@@ -1501,9 +1519,14 @@
 
     ESMC_TimeInterval sum;
 
-    // TODO: fractional & calendar interval parts
+    // TODO: fractional interval parts
 
-    // then perform the addition using ESMC_BaseTime operator
+    // add relative yy, mm, d parts
+    sum.yy = this->yy + timeInterval.yy;
+    sum.mm = this->mm + timeInterval.mm;
+    sum.d  = this->d  + timeInterval.d;
+
+    // add absolute seconds part using ESMC_BaseTime operator
     sum = ESMC_BaseTime::operator+(timeInterval);
 
     return(sum);
@@ -1533,9 +1556,14 @@
 
     ESMC_TimeInterval diff;
 
-    // TODO: fractional & calendar interval parts
+    // TODO: fractional interval parts
 
-    // then perform the subtraction using ESMC_BaseTime operator
+    // subtract relative yy, mm, d parts
+    diff.yy = this->yy - timeInterval.yy;
+    diff.mm = this->mm - timeInterval.mm;
+    diff.d  = this->d  - timeInterval.d;
+
+    // subtract absolute seconds part using ESMC_BaseTime operator
     diff = ESMC_BaseTime::operator-(timeInterval);
 
     return(diff);
