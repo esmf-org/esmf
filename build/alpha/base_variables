@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.15 2003/05/27 22:42:24 flanigan Exp $ 
+# $Id: base_variables,v 1.16 2003/06/06 21:03:03 jwolfe Exp $ 
 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
@@ -79,6 +79,7 @@ SL_LIBOPTS  = -shared -rpath .:$(ESMF_LIBDIR)  ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB
 SL_LINKOPTS = 
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
+SL_LIB_LINKER = $(CXXF90LD)
 SL_LIBS_TO_MAKE = libesmf liboldworld
 
 
