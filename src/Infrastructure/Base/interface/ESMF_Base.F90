@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.111 2004/06/10 23:39:47 cdeluca Exp $
+! $Id: ESMF_Base.F90,v 1.112 2004/06/14 13:57:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -153,7 +153,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.111 2004/06/10 23:39:47 cdeluca Exp $'
+               '$Id: ESMF_Base.F90,v 1.112 2004/06/14 13:57:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -853,6 +853,7 @@
 !EOPI
       integer :: status
       character(len=ESMF_MAXSTR) :: opts
+      logical :: dummy
 
       if (present(options)) then
           opts = options
@@ -861,9 +862,8 @@
       endif
 
       if (base%this .eq. ESMF_NULL_POINTER) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized Base object", &
-                                 ESMF_CONTEXT, rc)) return
+        dummy=ESMF_LogWrite("Uninitialized Base object", &
+                             ESMF_LOG_INFO)) return
       endif
 
       call c_ESMC_BasePrint(base, opts, status)
