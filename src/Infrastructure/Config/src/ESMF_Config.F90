@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.13 2004/06/13 23:53:12 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.14 2004/06/18 08:01:59 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -731,9 +731,9 @@
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: config    
-      real(ESMF_KIND_R4), intent(inout)      :: valueList(*) 
-      character(len=*), intent(in), optional :: label 
+      real(ESMF_KIND_R4), intent(inout)      :: valueList(:) 
       integer, intent(in)                    :: count 
+      character(len=*), intent(in), optional :: label 
       real, intent(in), optional             :: default
       integer, intent(out), optional         :: rc    
 !
@@ -819,9 +819,9 @@
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: config    
-      real(ESMF_KIND_R8), intent(inout)      :: valueList(*) 
-      character(len=*), intent(in), optional :: label 
+      real(ESMF_KIND_R8), intent(inout)      :: valueList(:) 
       integer, intent(in)                    :: count 
+      character(len=*), intent(in), optional :: label 
       real, intent(in), optional             :: default
       integer, intent(out), optional         :: rc    
 !
@@ -1073,9 +1073,9 @@
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: config      
-      integer(ESMF_KIND_I4), intent(inout)   :: valueList(*)  
-      character(len=*), intent(in), optional :: label 
+      integer(ESMF_KIND_I4), intent(inout)   :: valueList(:)  
       integer, intent(in)                    :: count  
+      character(len=*), intent(in), optional :: label 
       integer, intent(in), optional          :: default
       integer, intent(out), optional         :: rc    
 !
@@ -1161,9 +1161,9 @@
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: config      
-      integer(ESMF_KIND_I8), intent(inout)   :: valueList(*)  
-      character(len=*), intent(in), optional :: label 
+      integer(ESMF_KIND_I8), intent(inout)   :: valueList(:)  
       integer, intent(in)                    :: count  
+      character(len=*), intent(in), optional :: label 
       integer, intent(in), optional          :: default
       integer, intent(out), optional         :: rc    
 !
