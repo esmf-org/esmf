@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.6 2003/02/21 15:47:24 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.7 2003/02/28 23:40:55 jwolfe Exp $
 !
 ! System test code #70384
 
@@ -132,16 +132,16 @@
     call ESMF_ArraySetAxisIndex(array2, indexlist2, rc)
     call ESMF_ArraySetAxisIndex(array3, indexlist3, rc)
 
-    ! Generate global cell numbers, each DE has a contiguous 
-    ! chunk of numbers.
+    ! Generate global cell numbers, where cell numbering scheme goes
+    ! across the global mesh, rows first
     i_max = indexlist1(1)%max
     j_max = indexlist1(2)%max
     do k=1,indexlist1(3)%r-indexlist1(3)%l+1
-      kk = k+indexlist1(3)%l
+      kk = k+indexlist1(3)%gstart
       do j=1,indexlist1(2)%r-indexlist1(2)%l+1
-        jj = j+indexlist1(2)%l
+        jj = j+indexlist1(2)%gstart
         do i=1,indexlist1(1)%r-indexlist1(1)%l+1
-          ii = i+indexlist1(1)%l
+          ii = i+indexlist1(1)%gstart
           srcdata(i, j, k) = i_max*j_max*(kk-1) + i_max*(jj-1) + ii
         enddo
       enddo
