@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.7 2004/02/27 00:04:04 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.8 2004/02/27 20:48:37 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the GPL.
 
-\section{Overview of Superstructure Classes}
+\section{Overview of Superstructure}
 
 The ESMF superstructure classes define an architecture for assembling
 Earth system applications from modeling components.  Earth system research 
@@ -41,10 +41,12 @@ maximum portability and reconfigurability.\\[.03in] \hline
 \end{tabular}
 \end{center}
 
+\subsection{Superstructure Classes}
+
 There are a small number of classes in the ESMF superstructure:
 
 \begin{itemize}
-\item{Component}  An ESMF component has two parts, one that is 
+\item [Component]  An ESMF component has two parts, one that is 
 supplied by the ESMF and one that is supplied by the user.  The
 part that is supplied by the framework is an ESMF derived type that
 is either a Gridded Component {\bf GridComp} or a Coupler 
@@ -64,7 +66,7 @@ software there are calls to ESMF methods that associate a
 standard ESMF operation, such as Initialize, with the name of 
 the corresponding Fortran subroutine in user code.  
 
-\item{State}  ESMF components exchange information with other 
+\item [State]  ESMF components exchange information with other 
 components only through States.  A State is an ESMF derived
 type that may contains Fields, Bundles, Arrays, and nested
 States.  A Gridded Component  is associated with two States, an 
@@ -73,15 +75,15 @@ holds the data that it receives from other Gridded Components.
 Its Export State contains data that it can make available to 
 other Gridded Components. 
 
-\item{AppDriver} The AppDriver is a small, generic 
-driver program that contains the ``main'' routine for an ESMF
-application.  
+\item [Application Driver] The Application Driver ({\bf AppDriver}) 
+is a small, generic driver program that contains the ``main'' 
+routine for an ESMF application.
 
 \end{itemize}
 
 An ESMF coupled application typically involves an AppDriver, a parent 
-Gridded Component, two or more child Gridded Components that require an 
-inter-component data exchange, and one or more Coupler 
+Gridded Component, two or more child Gridded Components that require 
+an inter-component data exchange, and one or more Coupler 
 Components. 
 
 The parent Gridded Component is responsible for creating the child 
