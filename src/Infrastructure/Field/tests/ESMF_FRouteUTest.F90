@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.11 2003/04/25 22:13:07 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.12 2003/04/29 21:32:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.11 2003/04/25 22:13:07 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.12 2003/04/29 21:32:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,6 +52,7 @@
       integer :: i, x, y
       type(ESMF_Grid) :: grid1, grid2, grid3, grid4
       type(ESMF_Array) :: arr1, arr2
+      type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: g1_ai, g2_ai
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
@@ -102,8 +103,8 @@
       call ESMF_DELayoutGetDEid(layout1, myde, rc)
 
       !------------------------------------------------------------------------
-      i_max = 40
-      j_max = 20
+      i_max = 48
+      j_max = 24
       x_min = 0.0
       x_max = 20.0
       y_min = 0.0
@@ -126,6 +127,7 @@
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
+                             halo_width=1, &
                              name=gname, rc=status)
 
       write(failMsg, *) ""
@@ -145,6 +147,7 @@
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
+                             halo_width=1, &
                              name=gname, rc=status)
 
       write(failMsg, *) ""
@@ -153,7 +156,8 @@
       !------------------------------------------------------------------------
 
       ! Verifing that an Array can be created
-      allocate(f90ptr1(10,20))
+      call ESMF_GridGetDE(grid1, lcelltot_index=g1_ai)
+      allocate(f90ptr1(g1_ai(1)%r, g1_ai(2)%r))
       f90ptr1 = 10+myde
       arr1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
@@ -163,8 +167,9 @@
       !------------------------------------------------------------------------
 
       ! second array
-      allocate(f90ptr2(20,10))
-      f90ptr2 = 100+myde
+      call ESMF_GridGetDE(grid2, lcelltot_index=g2_ai)
+      allocate(f90ptr2(g2_ai(1)%r, g2_ai(2)%r))
+      f90ptr2 = -1
       arr2 = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a dst Test Array"
