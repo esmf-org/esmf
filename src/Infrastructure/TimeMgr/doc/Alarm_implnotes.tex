@@ -1,31 +1,22 @@
-% $Id: Alarm_implnotes.tex,v 1.1 2003/09/02 18:42:25 eschwab Exp $
+% $Id: Alarm_implnotes.tex,v 1.2 2003/11/12 17:19:20 eschwab Exp $
 
 \subsection{Implementation Notes}
 
-The Alarm class API is overloaded for objects or pointers.  The Alarm
-class API can take either an ESMF\_Alarm object or a reference to it via an
-ESMF\_Pointer.  The direct object API can be used to initially create and setup
-Alarms statically on the stack.  Then Alarms can be added one-at-a-time to a
-Clock via a Clock method.  During a model run, the Clock will be time-stepped
-via its advance method.  After performing the timestep, the Clock's advance
-method will iterate over the Alarm list and return the number of ringing Alarms.
-The user would then query the Clock one-at-a-time for each ringing Alarm.  The
-Clock returns a reference (ESMF\_Pointer) to the ringing Alarm so the user can
-manipulate the actual Alarm object, not just a copy of it.  For example, if a
-user wants to turn off an Alarm contained by the Clock, the pointer to it must
-be passed to the Alarm method.  Otherwise, only the user's local copy would be
-affected, not the Clock's.  This then necessitates the overloaded Alarm API,
-one set of methods for direct object manipulation, and one for indirect
-manipulation via pointer.
+The ESMF\_Alarm class is designed as a deep, dynamically allocatable class,
+based on a pointer type.  This allows for both indirect and direct
+manipulation of alarms.  Indirect alarm manipulation is where ESMF\_Alarm API
+methods, such as ESMF\_AlarmRingerOff(), are invoked on alarm references
+(pointers) returned from ESMF\_Clock queries such as "return ringing alarms."
+Since the method is performed on an alarm reference, the actual alarm held
+by the clock is affected, not just a user's local copy.  Direct alarm
+manipulation is the more common case where alarm API methods are invoked on
+the original alarm objects created by the user.
 
-If Time Manager's requirement for shallow-only classes were relaxed, then the
-Alarm API could be simplified to a single set of methods which only take an
-ESMF\_Pointer to an Alarm.  The Alarm class would then become a deep class;
-Alarms would need to be allocated and destroyed since only an ESMF\_Pointer
-would be used to represent them.  For consistency, Clocks could also become
-deep objects.  An additional benefit from this approach would be that Clocks
-and Alarms could be created and used from anywhere in a user's code without
-regard to the scope in which they were created.  In other words, statically
-created Alarms or Clocks would disappear if created within a user's routine
-that returns, whereas dynamically allocated Alarms or Clocks will persist
-until destroyed by the user.
+For consistency, the ESMF\_Clock class is also designed as a deep class. 
+
+An additional benefit from this approach is that Clocks and Alarms can be
+created and used from anywhere in a user's code without regard to the scope
+in which they were created.  In constrast, statically created Alarms or
+Clocks would disappear if created within a user's routine that returns,
+whereas dynamically allocated Alarms or Clocks will persist until destroyed
+by the user.

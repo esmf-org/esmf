@@ -1,4 +1,4 @@
-% $Id: Clock_usage.tex,v 1.5 2003/08/18 15:05:28 cdeluca Exp $
+% $Id: Clock_usage.tex,v 1.6 2003/11/12 17:19:20 eschwab Exp $
 
 The following is a typical sequence for using a Clock in a 
 geophysical model.
@@ -8,7 +8,7 @@ geophysical model.
 \item Set a Calendar.
 \item Set start time, stop time and time step as Times and 
 Time Intervals.
-\item Set a Clock using the start time, stop time and time
+\item Create and Initialize a Clock using the start time, stop time and time
 step to initialize it.
 \item Define Times and Time Intervals associated with special
 events, and use these to set Alarms.
@@ -22,8 +22,9 @@ events, and use these to set Alarms.
 
 \noindent {\bf At finalize:}
 \begin{itemize}
-\item Since Clocks, Alarms, Times and TimeIntervals are all lightweight
-classes, they don't need to be explicitly destroyed at finalization.
+\item Since Clocks and Alarms are deep classes, they need to be explicitly
+destroyed at finalization.  Times and TimeIntervals are lightweight classes,
+so they don't need explicit destruction.
 \end{itemize}
 
 The following code example illustrates Clock usage.
