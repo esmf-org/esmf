@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.65 2005/01/10 22:15:36 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.66 2005/01/10 23:47:33 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,8 +231,8 @@ end function
     subroutine ESMF_LogClose(log, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log)	                :: log
-    integer, intent(out),optional   :: rc
+    type(ESMF_Log)	                                        :: log
+    integer, intent(out),optional                               :: rc
 
 ! !DESCRIPTION:
 !      This routine closes the file(s) associated with the {\tt log}.
@@ -268,7 +268,7 @@ end subroutine ESMF_LogClose
 	subroutine ESMF_LogFinalize(rc)
 !
 ! !ARGUMENTS:
-    integer, intent(out),optional	:: rc
+    integer, intent(out),optional	                        :: rc
 
 ! !DESCRIPTION:
 !      This routine finalizes the global log.  The default log will be flushed
@@ -301,8 +301,8 @@ end subroutine ESMF_LogFinalize
 !
 !
 ! !ARGUMENTS:
-	type(ESMF_LOG)				:: log
-	integer, intent(out),optional		:: rc
+	type(ESMF_LOG)				                :: log
+	integer, intent(out),optional		                :: rc
 
 ! !DESCRIPTION:
 !      This subroutine flushes th {\tt log}.
@@ -393,14 +393,14 @@ end subroutine ESMF_LogFlush
                                          method, rcToReturn,log)
 !
 ! !RETURN VALUE:
-	logical                                 ::ESMF_LogFoundAllocError
+	logical                                     ::ESMF_LogFoundAllocError
 ! !ARGUMENTS:
 !	
-	integer, intent(in)                     :: statusToCheck
-	integer, intent(in), optional           :: line
-	character(len=*), intent(in), optional  :: file
-	character(len=*), intent(in), optional  :: method
-	integer, intent(out),optional           :: rcToReturn
+	integer, intent(in)                         :: statusToCheck
+	integer, intent(in), optional               :: line
+	character(len=*), intent(in), optional      :: file
+	character(len=*), intent(in), optional      :: method
+	integer, intent(out),optional               :: rcToReturn
 	type(ESMF_LOG),intent(in),optional	    :: log
 
 ! !DESCRIPTION:
@@ -468,7 +468,7 @@ end function ESMF_LogFoundAllocError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out), optional                  :: rcToReturn
-	type(ESMF_LOG),intent(in),optional		        :: log
+	type(ESMF_LOG),intent(in),optional		:: log
 	
 ! !DESCRIPTION:
 !      This function returns a logical true for ESMF return codes that indicate 
@@ -525,8 +525,8 @@ end function ESMF_LogFoundError
 	type(ESMF_Logical), intent(out),optional		:: verbose
 	type(ESMF_Logical), intent(out),optional		:: flush
 	type(ESMF_Logical), intent(out),optional		:: rootOnly
-	type(ESMF_HaltType), intent(out),optional       :: halt
-	type(ESMF_LogType), intent(out),optional	    :: logtype
+	type(ESMF_HaltType), intent(out),optional               :: halt
+	type(ESMF_LogType), intent(out),optional	        :: logtype
 	integer, intent(out),optional			        :: stream  
 	integer, intent(out),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -578,10 +578,10 @@ end subroutine ESMF_LogGet
       subroutine ESMF_LogInitialize(filename, lognone, logtype, rc)
 !
 ! !ARGUMENTS:
-      character(len=*)                          :: filename
+      character(len=*)                                  :: filename
       integer, intent(in),optional		        :: lognone  
-      type(ESMF_LogType), intent(in),optional   :: logtype  
-      integer, intent(out),optional	            :: rc
+      type(ESMF_LogType), intent(in),optional           :: logtype  
+      integer, intent(out),optional	                :: rc
 
 ! !DESCRIPTION:
 !      This routine initializes the global default {\tt ESMF\_Log}.  
@@ -605,10 +605,10 @@ end subroutine ESMF_LogGet
 ! 
 !EOPI
 	
-    integer 				       :: status, i,j, rc2	
-    type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
-    character(len=32)                          :: fname
-    character(len=4)                           :: fnum	
+    integer 				                :: status, i,j, rc2	
+    type(ESMF_LOGENTRY), dimension(:), pointer          :: localbuf
+    character(len=32)                                   :: fname
+    character(len=4)                                    :: fnum	
     
     if (present(rc)) rc=ESMF_FAILURE
     ESMF_LogDefault%logNone = ESMF_FALSE !default is to log
@@ -686,7 +686,8 @@ end subroutine ESMF_LogInitialize
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogMsgFoundAllocError - Check Fortran status for allocation error and write message
+! !IROUTINE: ESMF_LogMsgFoundAllocError - Check Fortran status for allocation 
+!            error and write message
 
 ! !INTERFACE: 
 	function ESMF_LogMsgFoundAllocError(statusToCheck,msg,line,file, &
@@ -701,8 +702,8 @@ end subroutine ESMF_LogInitialize
 	integer, intent(in), optional               :: line
 	character(len=*), intent(in), optional      :: file
 	character(len=*), intent(in), optional	    :: method
-    integer, intent(out),optional               :: rcToReturn	
-    type(ESMF_LOG), intent(in), optional	    :: log
+        integer, intent(out),optional               :: rcToReturn	
+        type(ESMF_LOG), intent(in), optional	    :: log
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
@@ -773,7 +774,7 @@ end function ESMF_LogMsgFoundAllocError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out),optional                   :: rcToReturn
-	type(ESMF_LOG), intent(in), optional		    :: log
+	type(ESMF_LOG), intent(in), optional		:: log
 	
 
 ! !DESCRIPTION:
@@ -835,7 +836,7 @@ end function ESMF_LogMsgFoundError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out),optional                   :: rcToReturn
-	type(ESMF_LOG), intent(in), optional		    :: log
+	type(ESMF_LOG), intent(in), optional		:: log
 	
 
 ! !DESCRIPTION:
@@ -888,10 +889,10 @@ end subroutine ESMF_LogMsgSetError
 !
 ! !ARGUMENTS:
     type(ESMF_Log)			                :: log
-    character(len=*)			            :: filename
-    integer, intent(in),optional            :: lognone  
-    type(ESMF_LogType), intent(in),optional :: logtype  
-    integer, intent(out),optional	        :: rc
+    character(len=*)			                :: filename
+    integer, intent(in),optional                        :: lognone  
+    type(ESMF_LogType), intent(in),optional             :: logtype  
+    integer, intent(out),optional	                :: rc
 
 ! !DESCRIPTION:
 !      This routine opens a file with {\tt filename} and associates
@@ -915,9 +916,9 @@ end subroutine ESMF_LogMsgSetError
 ! 
 !EOP
     integer 				                   :: status, j, rc2	
-    type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
-    character(len=32)                          :: fname
-    character(len=4)                           :: fnum
+    type(ESMF_LOGENTRY), dimension(:), pointer             :: localbuf
+    character(len=32)                                      :: fname
+    character(len=4)                                       :: fnum
 
     if (present(rc)) rc=ESMF_FAILURE
     log%logNone = ESMF_FALSE !default is to log
@@ -1004,11 +1005,11 @@ end subroutine ESMF_LogOpen
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log) 				   		            :: log
+	type(ESMF_Log) 				   		:: log
 	type(ESMF_Logical), intent(in),optional			:: verbose
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
-	type(ESMF_HaltType), intent(in),optional        :: halt
+	type(ESMF_HaltType), intent(in),optional                :: halt
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -1066,11 +1067,11 @@ end subroutine ESMF_LogSet
 !
 !
 ! !ARGUMENTS:
-	character(len=*), intent(in)            :: msg
-	type(ESMF_MsgType), intent(in)          :: msgtype
-	integer, intent(in), optional           :: line
-	character(len=*), intent(in), optional  :: file
-	character(len=*), intent(in), optional	:: method
+	character(len=*), intent(in)                :: msg
+	type(ESMF_MsgType), intent(in)              :: msgtype
+	integer, intent(in), optional               :: line
+	character(len=*), intent(in), optional      :: file
+	character(len=*), intent(in), optional	    :: method
 	type(ESMF_LOG),target,optional   	    :: log
 	integer, intent(out),optional		    :: rc
 
