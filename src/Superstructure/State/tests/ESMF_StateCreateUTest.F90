@@ -1,0 +1,467 @@
+! $Id: ESMF_StateCreateUTest.F90,v 1.1 2005/02/24 22:21:46 nscollins Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+!
+      program ESMF_StateCreateUTest
+
+!==============================================================================
+!
+#include <ESMF.h>
+!
+!BOP
+! !PROGRAM: ESMF_StateCreateUTest - Test code which creates new States.  
+!
+! !DESCRIPTION:
+!
+! The code in this file drives F90 State Create unit tests.
+!
+!-----------------------------------------------------------------------------
+! !USES:
+      use ESMF_TestMod     ! test methods
+      use ESMF_Mod 
+      implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter :: version = &
+      '$Id: ESMF_StateCreateUTest.F90,v 1.1 2005/02/24 22:21:46 nscollins Exp $'
+!------------------------------------------------------------------------------
+
+!   ! Local variables
+    integer :: x, rc, num, number
+    character(ESMF_MAXSTR) :: sname, bname, fname
+    type(ESMF_Array) :: array1, array2
+    type(ESMF_Field) :: field1, field2
+    type(ESMF_Bundle) :: bundle1, bundle2, qbundle
+    type(ESMF_State) :: state1, state2, state3, state4, state5
+    logical :: IsNeeded
+
+    ! individual test failure messages
+    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: name
+
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: result = 0
+
+    ! local variables needed to pass into function/subroutine calls
+    !character(ESMF_MAXSTR) :: validate_options
+    !character(ESMF_MAXSTR) :: print_options
+
+
+!-------------------------------------------------------------------------------
+!   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!   always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!   the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!   to OFF, then only the sanity unit tests.
+!   Special strings (Non-exhaustive and exhaustive) have been
+!   added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
+
+
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+      
+      !------------------------------------------------------------------------
+      !NEX_UTest   
+      ! Create/Destroy an Empty State.
+      sname = "Atmosphere Import"
+      state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !NEX_UTest      
+      ! Test printing an Empty State
+      call ESMF_StatePrint(state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing an empty State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !NEX_UTest      
+      ! Test Destruction of an empty import State 
+      call ESMF_StateDestroy(state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying an empty State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      
+#ifdef ESMF_EXHAUSTIVE
+
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test Creation of an empty export State 
+      sname = "Ocean Export"
+      state2 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)  
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty export State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Create a bundle to use in the subsequent tests
+      bname="Surface pressure"
+      bundle1 = ESMF_BundleCreate(name=bname, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty bundle for State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test adding a bundle to a state
+      call ESMF_StateAddBundle(state2, bundle1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding a Bundle to a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test printing a State with 1 Bundle
+      call ESMF_StatePrint(state2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing a State with 1 Bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Create a second bundle to use in the subsequent tests
+      bname="Temperature"
+      bundle2 = ESMF_BundleCreate(name=bname, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty bundle for State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test adding a second bundle to a state
+      call ESMF_StateAddBundle(state2, bundle2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding a second Bundle to a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test printing a State with 2 Bundles
+      call ESMF_StatePrint(state2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing a State with 2 Bundles"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test getting a Bundle by name
+      call ESMF_StateGetBundle(state2, "Surface pressure", qbundle, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a Bundle from a State by name"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying a State
+      call ESMF_StateDestroy(state2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying a Bundle
+      call ESMF_BundleDestroy(bundle1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a Bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying the other Bundle
+      call ESMF_BundleDestroy(bundle2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a Bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Creating a State
+      sname = "Ocean Export"
+      state3 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Adding a name only
+      sname = "Downward wind"
+      call ESMF_StateAddNameOnly(state3, sname, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding a name only"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Marking an item needed
+      sname = "Downward wind"
+      call ESMF_StateSetNeeded(state3, sname, ESMF_NEEDED, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Marking an item needed"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Querying if an item is needed, using sname from above
+      isNeeded =  ESMF_StateIsNeeded(state3, sname, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Querying if an item is needed"
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .or. (isNeeded .eq. .FALSE.)), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Creating a Bundle to add to a State
+      bundle2 = ESMF_BundleCreate(name=sname, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Replacing a name placeholder with a real item, using bundle from above
+      call ESMF_StateAddBundle(state3, bundle2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Replacing a name placeholder with a bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying a State
+      call ESMF_StateDestroy(state3, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying a Bundle
+      call ESMF_BundleDestroy(bundle2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a Bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Create a State which will contain other nested States
+      sname = "Coupler Statelist"
+      state5 = ESMF_StateCreate(sname, ESMF_STATE_UNSPECIFIED, rc=rc)  
+      write(failMsg, *) ""
+      write(name, *) "Creating a State for nested State test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Create a State which will be put into the other
+      sname = "Atmosphere Import"
+      state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
+      write(failMsg, *) ""
+      write(name, *) "Creating a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Add a nested State to another
+      call ESMF_StateAddState(state5, state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Add a nested State into another State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Create another State which will be put into a State
+      sname = "Ocean Export"
+      state2 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)  
+      write(failMsg, *) ""
+      write(name, *) "Creating a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Add another nested State to the first
+      call ESMF_StateAddState(state5, state2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Add a second nested State into another State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying a State
+      call ESMF_StateDestroy(state5, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying a State
+      call ESMF_StateDestroy(state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying a State
+      call ESMF_StateDestroy(state2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Create an Array for use below
+      array1 = ESMF_ArrayCreate(rank=3, kind=ESMF_I4, type=ESMF_DATA_INTEGER, &
+                                counts=(/ 3,4,5 /), rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create an Array"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Create another Array for use below
+      array2 = ESMF_ArrayCreate(rank=2, kind=ESMF_R8, type=ESMF_DATA_REAL, &
+                                counts=(/ 5,6 /), rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create an Array"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Create an empty State
+      sname = "Atmosphere Import"
+      state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
+      write(failMsg, *) ""
+      write(name, *) "Create a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Add an Array to a State
+      call ESMF_StateAddArray(state1, array1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Add an Array to a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Add a second Array to a State
+      call ESMF_StateAddArray(state1, array2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Add a second Array to a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying a State
+      call ESMF_StateDestroy(state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying an Array
+      call ESMF_ArrayDestroy(array1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying an Array"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Destroying an Array
+      call ESMF_ArrayDestroy(array2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying an Array"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      ! End of Exhaustive tests
+#endif
+
+      ! return number of failures to environment; 0 = success (all pass)
+      ! return result  ! TODO: no way to do this in F90 ?
+
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
+ 
+  
+      end program ESMF_StateCreateUTest
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+
+#if 0
+! older tests which have not yet been convereted to the normal template form.
+    sname = "Sea Ice Export"
+    state4 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)
+
+    sname = "Surface pressure"
+    call ESMF_StateAddNameOnly(state4, sname, rc=rc)
+    
+    call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
+    
+    sname = "Energy Flux"
+    call ESMF_StateAddNameOnly(state4, sname, rc=rc)
+    
+    call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
+    
+    sname = "Humidity"
+    call ESMF_StateAddNameOnly(state4, sname, rc=rc)
+    
+    call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
+    
+    call ESMF_StatePrint(state4, rc=rc)
+
+    bname = "Collected quantities"
+    bundle2 = ESMF_BundleCreate(name=bname, rc=rc)
+      
+    fname = "Surface pressure"
+    field1 = ESMF_FieldCreateNoData(fname, rc=rc)
+
+    call ESMF_BundleAddField(bundle2, field1, rc=rc) 
+
+    fname = "Energy Flux"
+    field2 = ESMF_FieldCreateNoData(fname, rc=rc)
+
+    call ESMF_BundleAddField(bundle2, field2, rc=rc) 
+
+    call ESMF_BundlePrint(bundle2, "", rc=rc)
+
+
+    call ESMF_StateAddBundle(state4, bundle2, rc=rc)
+
+    call ESMF_StatePrint(state4, rc=rc)
+    
+    call ESMF_StateDestroy(state4, rc=rc)
+
+    call ESMF_BundleDestroy(bundle2, rc=rc)
+
+    call ESMF_FieldDestroy(field1, rc=rc)
+
+    call ESMF_FieldDestroy(field2, rc=rc)
+#endif
+    

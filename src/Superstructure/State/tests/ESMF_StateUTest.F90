@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.33 2004/12/09 00:25:27 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.34 2005/02/24 22:21:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.33 2004/12/09 00:25:27 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.34 2005/02/24 22:21:46 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -53,7 +53,7 @@
       integer :: result = 0
 
       ! individual test failure messages
-      character(ESMF_MAXSTR*2) :: failMsg
+      character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
 
       ! local variables needed to pass into function/subroutine calls
@@ -105,6 +105,7 @@
       call ESMF_ArrayDestroy(noarray, rc=rc)
 
 
+      !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Creation of an empty import State 
       statename = "Atmosphere In"
