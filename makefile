@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2003/08/26 17:40:15 flanigan Exp $
+# $Id: makefile,v 1.33 2003/08/26 17:57:22 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -70,7 +70,7 @@ info:
 	-@echo "Using ESMF flags: ${PCONF}"
 	-@echo "-----------------------------------------"
 	-@echo "Using configuration flags:"
-	-@grep "define " ${ESMF_BUILD_DIR}/${ESMF_ARCH}/conf.h
+	-@grep "define " ${ESMF_BUILD_DIR}/build_config/conf/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)/conf.h
 	-@echo "-----------------------------------------"
 	-@echo "Using include paths: ${ESMC_INCLUDE}"
 	-@echo "-----------------------------------------"
@@ -83,7 +83,7 @@ info:
 	-@echo "=========================================="
 #
 #
-MINFO = ${ESMF_DIR}/build/${ESMF_ARCH}/machineinfo.h
+MINFO = ${ESMF_DIR}/build_config/conf/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)/machineinfo.h
 info_h:
 	-@$(RM) -f MINFO ${MINFO}
 	-@echo  "static char *machineinfo = \"  " >> MINFO
