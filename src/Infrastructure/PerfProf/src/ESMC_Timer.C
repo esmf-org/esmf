@@ -1,4 +1,4 @@
-// $Id: ESMC_Timer.C,v 1.5 2003/04/02 19:51:51 flanigan Exp $
+// $Id: ESMC_Timer.C,v 1.6 2003/07/07 18:01:21 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Timer methods declared
+// The code in this file implements the C++ {\tt ESMC\_Timer} methods declared
 // in the companion file ESMC\_Timer.h
 //
 // 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Timer.C,v 1.5 2003/04/02 19:51:51 flanigan Exp $";
+ static const char *const version = "$Id: ESMC_Timer.C,v 1.6 2003/07/07 18:01:21 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -58,10 +58,10 @@
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//      Create a new Timer from ... Allocates memory for a new Timer
-//      object and uses the internal routine ESMC\_TimerConstruct to
+//      Create a new {\tt ESMC\_Timer} from ... Allocates memory for a new {\tt ESMC\_Timer}
+//      object and uses the internal routine {\tt ESMC\_TimerConstruct} to
 //      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC\_TimerInit.
+//      define and use {\tt ESMC\_TimerInit}.
 //      There can be multiple overloaded methods with the same name, but
 //      different argument lists.
 //
@@ -91,8 +91,8 @@
       ESMC_Timer *<class>) {    // in - <class> object to destroy
 //
 // !DESCRIPTION:
-//      ESMF routine which destroys a Timer object previously allocated
-//      via an ESMC\_TimerCreate routine.  Define for deep classes only.
+//      ESMF routine which destroys a {\tt ESMC\_Timer} object previously allocated
+//      via an {\tt ESMC\_TimerCreate} routine.  Define for deep classes only.
 //
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC\_Timer.h)
@@ -123,11 +123,11 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
-//      allocated Timer object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_TimerDestruct
+//      allocated {\tt ESMC\_Timer} object.  May need to do additional allocations
+//      as needed.  Must call the corresponding {\tt ESMC\_TimerDestruct}
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_TimerCreate, which calls
-//      ESMC\_TimerConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use {\tt ESMC\_TimerCreate}, which calls
+//      {\tt ESMC\_TimerConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -153,10 +153,10 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      ESMF\_TimerConstruct, does any additional cleanup before the
-//      original Timer object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC\_TimerDestroy, which calls
-//      ESMC\_TimerDestruct.  Define for deep classes only.
+//      {\tt ESMF\_TimerConstruct}, does any additional cleanup before the
+//      original {\tt ESMC\_Timer} object is freed.  Intended for internal ESMF
+//      use only; end-users use {\tt ESMC\_TimerDestroy}, which calls
+//      {\tt ESMC\_TimerDestruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -181,7 +181,7 @@
       ESMC_TimerConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the Timer object was configured with.
+//    Returns the set of resources the {\tt ESMC\_Timer} object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -206,7 +206,7 @@
       const ESMC_TimerConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the Timer object with set of resources given.
+//    Configures the {\tt ESMC\_Timer} object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -231,8 +231,8 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a Timer is internally consistent.
-//      Returns error code if problems are found.  ESMC\_Base class method.
+//      Validates that a {\tt ESMC\_Timer} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -257,7 +257,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Start a timer for a code segment.
+//      Start a {\tt ESMC\_Timer} for a code segment.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -286,8 +286,8 @@
       const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a Timer.  The options control the
-//      type of information and level of detail.  ESMC\_Base class method.
+//      Print information about a {\tt ESMC\_Timer}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
