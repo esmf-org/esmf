@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.11 2002/12/30 21:30:41 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.12 2003/01/07 21:50:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,13 +33,9 @@
 //EOP
 
  // dummy structure which is the right size for an F90 pointer on
- //  the alpha architcture (halem)
- // TODO : find pointer size exactly for each system and put it into
- // build/*/conf.h for each arch.
+ //  each architcture
 struct c_F90ptr {
-                   // specific_machine_name/esmf_arch_setting
-   //char pad[88];   // halem/alpha
-   char pad[44];   // blackforest/rs6000_sp
+   char pad[ESMF_F90_PTR_SIZE];  
 };
 
 // the interface subroutine names MUST be in lower case
