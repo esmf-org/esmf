@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.19 2004/06/16 15:11:28 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.20 2004/06/18 21:54:00 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.19 2004/06/16 15:11:28 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.20 2004/06/18 21:54:00 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -610,7 +610,7 @@ int ESMC_DELayout::ESMC_DELayoutValidate(){
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int rc;
+  int rc = ESMF_SUCCESS;
 
   // validate info about the vmachine object
   //printf("--- ESMC_DELayoutValidate start ---\n");
@@ -637,7 +637,12 @@ int ESMC_DELayout::ESMC_DELayoutValidate(){
   // printf("--- ESMC_DELayoutValidate end ---\n");
  
   // for now, validate at least the base object
-  rc = this->ESMC_Validate();
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+  // rc = this->ESMC_Validate();
 
   return rc;
 }
