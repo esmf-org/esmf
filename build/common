@@ -1,4 +1,4 @@
-# $Id: common,v 1.44 2003/05/02 19:46:39 flanigan Exp $ 
+# $Id: common,v 1.45 2003/05/22 21:15:13 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -56,7 +56,8 @@ storeh: chkdir_include
 
 # Builds library.
 build_libs: chk_dir
-	@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
+	cd $(ESMF_DIR) ;\
+	${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
 
 # Builds library
 vpathlib:
@@ -245,42 +246,68 @@ tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
 ########################################
 #
-#  tests
+#  unit tests
 #
-tree_tests: tree_build_tests tree_run_tests
 
-tree_tests_uni: tree_build_tests tree_run_tests_uni
-
-tree_build_tests: $(TESTS_BUILD) 
-
-tree_run_tests: $(TESTS_RUN) 
-
-tree_run_tests_uni: $(TESTS_RUN_UNI)
-
+#
+# tests
+#
 tests: chkopts chkdir_tests build_libs
 	-$(MAKE) BOPT=$(BOPT) ACTION=tree_tests tree
 	$(DO_UT_RESULTS)
 
+tree_tests: tree_build_tests tree_run_tests
+
+#
+# tests_uni
+#
 tests_uni: chkopts chkdir_tests
 	-$(MAKE) BOPT=$(BOPT) ACTION=tree_tests_uni tree
 	$(DO_UT_RESULTS)
 
+tree_tests_uni: tree_build_tests tree_run_tests_uni
+
+#
+# build_tests
+#
 build_tests: chkopts chkdir_tests
 	-$(MAKE) BOPT=$(BOPT) ACTION=tree_build_tests tree
 
+tree_build_tests: $(TESTS_BUILD) 
+
+$(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o 
+	-$(SL_F_LINKER) -o $@  $(UTEST_$(*)_OBJS) $^ -lesmf  ${F90CXXLIBS} \
+	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+	$(SL_LINKOPTS)
+	${RM} -f *.o *.mod
+	@echo ""
+	@echo "****************************************"
+	@echo ""
+
+
+#
+# run_tests
+#
 run_tests:  chkopts chkdir_tests
 	-$(MAKE) BOPT=$(BOPT) ACTION=tree_run_tests tree
 	$(DO_UT_RESULTS)
 
+tree_run_tests: $(TESTS_RUN) 
+
+#
+# run_tests_uni
+#
 run_tests_uni:  chkopts chkdir_tests
 	-$(MAKE) BOPT=$(BOPT) ACTION=tree_run_tests_uni tree 
 	$(DO_UT_RESULTS)
+
+tree_run_tests_uni: $(TESTS_RUN_UNI)
+
 
 ########################################
 #
 #  demo
 #
-
 demo: chkopts build_libs chkdir_tests
 	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
 	$(MAKE) BOPT=$(BOPT) ACTION=tree_demo tree
