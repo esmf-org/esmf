@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.212 2005/01/03 23:32:29 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.213 2005/01/04 00:49:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.212 2005/01/03 23:32:29 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.213 2005/01/04 00:49:02 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -345,7 +345,7 @@
 ! !DESCRIPTION:
 !     This routine adds a vertical subGrid to an already 
 !     allocated {\tt grid}.
-!     The ESMF_GridAddVertHeight interface only creates vertical subGrids
+!     The {\tt ESMF\_GridAddVertHeight} interface only creates vertical subGrids
 !     with coordinate systems where the zero point is defined at the bottom.
 !     Only one vertical grid is allowed for any {\tt ESMF\_Grid}, though
 !     the vertical grid may have more than one related subGrid due to the
