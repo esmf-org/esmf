@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.14 2005/02/03 17:53:51 nscollins Exp $
+#  $Id: build_rules.mk,v 1.15 2005/02/11 21:01:46 nscollins Exp $
 #
 #  Linux.absoft.default makefile fragment
 #
@@ -125,7 +125,11 @@ C_FLINKER_SLFLAG   = -Wl,-rpath,
 C_CLINKER	   = ${C_CC}
 C_FLINKER	   = ${C_FC}
 C_CCV		   = ${C_CC} --version
-C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
+# on absoft 8 and before, docs say f95 -V should work, but it causes an error.
+# f90fe -V prints good version info.   absoft 9 and later, however, fixes this
+# and now f90 -V prints good info, and f90fe gives license errors.  so try
+# doing both - you will get an error but will at least get some version info.
+C_FCV              = f90 -V && f90fe -V
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
