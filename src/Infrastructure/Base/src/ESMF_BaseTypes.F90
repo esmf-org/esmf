@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.9 2004/11/02 21:33:51 nscollins Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.10 2004/11/16 16:08:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -406,6 +406,8 @@
       public ESMF_Domain, ESMF_DomainList
       public ESMF_AxisIndex
 
+      public ESMF_PointerPrint
+      
 !  Overloaded = operator functions
       public operator(.eq.), operator(.ne.), assignment(=)
 !
@@ -433,6 +435,7 @@ interface operator (.ne.)
  module procedure ESMF_ptne
  module procedure ESMF_tfne
  module procedure ESMF_aine
+ module procedure ESMF_bfne
 end interface
 
 interface assignment (=)
@@ -519,7 +522,19 @@ function ESMF_bfeq(bf1, bf2)
  logical ESMF_bfeq
  type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
 
+! if (bf1%value .eq. bf2%value) then
+!   ESMF_bfeq = .true.
+! else 
+!   ESMF_bfeq = .false.
+! endif
  ESMF_bfeq = (bf1%value .eq. bf2%value)
+end function
+
+function ESMF_bfne(bf1, bf2)
+ logical ESMF_bfne
+ type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
+
+ ESMF_bfne = (bf1%value .ne. bf2%value)
 end function
 
 !------------------------------------------------------------------------------
@@ -593,5 +608,15 @@ function ESMF_aine(ai1, ai2)
               (ai1%stride .ne. ai2%stride))
 
 end function
+
+!------------------------------------------------------------------------------
+! subroutine to print the corresponding C pointer of ESMF_Pointer object
+
+subroutine ESMF_PointerPrint(ptr)
+ type(ESMF_Pointer), intent(in) :: ptr
+
+  call c_pointerprint(ptr)
+end subroutine
+
 
       end module ESMF_BaseTypesMod
