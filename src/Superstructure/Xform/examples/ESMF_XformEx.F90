@@ -1,9 +1,10 @@
-! $Id: ESMF_XformEx.F90,v 1.4 2005/01/06 20:43:59 jwolfe Exp $
+! $Id: ESMF_XformEx.F90,v 1.5 2005/01/09 03:52:41 nscollins Exp $
 !
 ! Example code for creating Xforms.
 
 !-------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!E.X.A.M.P.L.E        String used by test script to count examples.
+! (remove the periods above when this example is enabled)
 !-------------------------------------------------------------------------
 
 !BOP
