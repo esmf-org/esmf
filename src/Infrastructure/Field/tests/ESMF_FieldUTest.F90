@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.37 2004/02/09 17:51:49 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.38 2004/02/10 23:59:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.37 2004/02/09 17:51:49 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.38 2004/02/10 23:59:40 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -55,6 +55,7 @@
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr1, f90ptr2
+      real(ESMF_KIND_R8) :: minCoord(2)
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
       character (len = 20) :: fname, fname1, fname2
@@ -268,7 +269,9 @@
 
       !NEX_UTest
       ! Verifing that recreating a created Grid is allowed.
-      grid =  ESMF_GridCreate(name="landgrid", rc=rc)
+      minCoord(:) = (/ 0.0, 0.0 /)
+      grid =  ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), minCoord, &
+                                     name="landgrid", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreating a created Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
