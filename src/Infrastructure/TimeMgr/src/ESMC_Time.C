@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.52 2004/01/29 04:44:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.53 2004/02/04 02:13:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -472,7 +472,7 @@
         time->calendar != ESMC_NULL_POINTER)
     {
       *rc = ESMF_SUCCESS;
-      return(this->calendar->type == time->calendar->type);
+      return(this->calendar->calendarType == time->calendar->calendarType);
     }
     else {
       *rc = ESMF_FAILURE;
@@ -502,8 +502,10 @@
 
     // validate for calendar type
     if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar->type == ESMC_CAL_JULIANDAY ||
-        this->calendar->type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+        return (ESMF_FAILURE);
+    }
 
     time_t tm;
     struct tm wallClock;
@@ -751,7 +753,7 @@
 
     // earliest Gregorian date representable by the Fliegel algorithm
     //  is -4800/3/1 == -32044 Julian days == -2,768,601,600 core seconds
-    if (calendar->type == ESMC_CAL_GREGORIAN && s < -2768601600LL)
+    if (calendar->calendarType == ESMC_CAL_GREGORIAN && s < -2768601600LL)
         return(ESMF_FAILURE);
 
     // TODO: other calendar ranges ?
@@ -910,8 +912,10 @@
     // validate inputs
     if (timeString == ESMC_NULL_POINTER) return (ESMF_FAILURE);
     if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar->type == ESMC_CAL_JULIANDAY ||
-        this->calendar->type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+        return (ESMF_FAILURE);
+    }
 
     ESMF_KIND_I8 yy_i8, s_i8;
     int mm, dd;
@@ -962,7 +966,7 @@
     //  The reference date is any known Monday (day of the week = 1)
     //  This method is valid for any calendar which uses 7-day weeks.
 
-    switch (this->calendar->type)
+    switch (this->calendar->calendarType)
     {
         case ESMC_CAL_GREGORIAN:
         case ESMC_CAL_NOLEAP:    // TODO: ?
@@ -1042,8 +1046,10 @@
     // validate inputs
     if (midMonth == ESMC_NULL_POINTER) return (ESMF_FAILURE);
     if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar->type == ESMC_CAL_JULIANDAY ||
-        this->calendar->type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+        return (ESMF_FAILURE);
+    }
 
     // TODO: use table lookup per calendar type (14, 14.5, 15, 15.5 days) ?
 
@@ -1129,8 +1135,10 @@
     // validate inputs
     if (dayOfYear == ESMC_NULL_POINTER) return (ESMF_FAILURE);
     if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar->type == ESMC_CAL_JULIANDAY ||
-        this->calendar->type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+        return (ESMF_FAILURE);
+    }
     
     // get day of year as time interval between now and 1/1/yy
     ESMC_TimeInterval yearDay;
@@ -1176,8 +1184,10 @@
     // validate inputs
     if (dayOfYear == ESMC_NULL_POINTER) return (ESMF_FAILURE);
     if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar->type == ESMC_CAL_JULIANDAY ||
-        this->calendar->type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+        return (ESMF_FAILURE);
+    }
 
     // get day of year as time interval between now and 1/1/yy
     ESMC_TimeInterval yearDay;
@@ -1224,8 +1234,10 @@
     // validate inputs
     if (dayOfYear == ESMC_NULL_POINTER) return (ESMF_FAILURE);
     if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar->type == ESMC_CAL_JULIANDAY ||
-        this->calendar->type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+        return (ESMF_FAILURE);
+    }
 
     // get year of our (this) time
     ESMF_KIND_I8 yy_i8;
