@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.1 2004/08/27 16:49:11 nscollins Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.2 2004/08/27 16:59:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.1 2004/08/27 16:49:11 nscollins Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.2 2004/08/27 16:59:47 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -69,7 +69,7 @@
       real (ESMF_KIND_R8):: min(2), max(2)
       integer :: counts(ESMF_MAXGRIDDIM)
       type(ESMF_GridHorzStagger) :: horz_stagger
-      integer :: status, myde
+      integer :: status, myde, npets
 
 !------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -83,8 +83,9 @@
       print *, "*************FIELD ROUTE UNIT TESTS***************************"
       print *
 
-      call ESMF_Initialize(rc=rc)
-      call ESMF_VMGetGlobal(vm, rc)
+      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      print *, "NUMBER_OF_PROCESSORS ", npets
 
       ! Make a default 1xN layout
       layout0 = ESMF_DELayoutCreate(vm, rc=rc)
