@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.172 2004/06/13 23:53:12 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.173 2004/06/14 22:35:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -70,7 +70,7 @@
     public ESMF_GridDistribute
     public ESMF_GridGet
     public ESMF_GridGetCoord
-    public ESMF_GridGetDE
+    public ESMF_GridGetDELocalInfo
     !public ESMF_GridGetMask
     !public ESMF_GridGetMetric
     public ESMF_GridGlobalToLocalIndex
@@ -86,6 +86,8 @@
     public ESMF_GridComputeDistance
     public ESMF_GridGetAllAxisIndex
     public ESMF_GridGetCellMask
+    public ESMF_GridGlobalToLocalAI
+    public ESMF_GridLocalToGlobalAI
     !public ESMF_GridSearch
 
 !------------------------------------------------------------------------------
@@ -97,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.172 2004/06/13 23:53:12 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.173 2004/06/14 22:35:01 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1415,12 +1417,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetDE"
+#define ESMF_METHOD "ESMF_GridGetDELocalInfo"
 !BOP
-! !IROUTINE: ESMF_GridGetDE - Get local DE information for a Grid
+! !IROUTINE: ESMF_GridGetDELocalInfo - Get local DE information for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDE(grid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_GridGetDELocalInfo(grid, horzRelLoc, vertRelLoc, &
                                 myDE, localCellCount, localCellCountPerDim, &
                                 minLocalCoordPerDim, maxLocalCoordPerDim, &
                                 globalStartPerDim, globalAIPerDim, reorder, &
@@ -1496,7 +1498,7 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Call GridGetDE routines based on GridStructure
+      ! Call GridGetDELocalInfo routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
@@ -1510,7 +1512,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGetDE(grid, horzRelLoc, vertRelLoc, &
+        call ESMF_LRGridGetDELocalInfo(grid, horzRelLoc, vertRelLoc, &
                               myDE, localCellCount, localCellCountPerDim, &
                               minLocalCoordPerDim, maxLocalCoordPerDim, &
                               globalStartPerDim, globalAIPerDim, reorder, &
@@ -1550,7 +1552,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridGetDE
+      end subroutine ESMF_GridGetDELocalInfo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1562,8 +1564,6 @@
       subroutine ESMF_GridGlobalToLocalIndex(grid, horzRelLoc, vertRelLoc, &
                                              global1D, local1D, &
                                              global2D, local2D, &
-                                             globalAI1D, localAI1D, &
-                                             globalAI2D, localAI2D, &
                                              dimOrder, rc)
 !
 ! !ARGUMENTS:
@@ -1574,10 +1574,6 @@
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: local1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: global2D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(out) :: local2D
-      type(ESMF_AxisIndex), dimension(:), optional, intent(in) :: globalAI1D
-      type(ESMF_AxisIndex), dimension(:), optional, intent(out) ::  localAI1D
-      type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) :: globalAI2D
-      type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) ::  localAI2D
       integer, dimension(:), optional, intent(in) :: dimOrder
       integer, intent(out), optional :: rc
 
@@ -1601,14 +1597,6 @@
 !     \item[{[local2D]}]
 !          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers
 !          corresponding to global identifiers.
-!     \item[{[globalAI1D]}]
-!          One-dimensional array of global AxisIndices to be translated.
-!     \item[{[localAI1D]}]
-!          One-dimensional array of local AxisIndices corresponding to global AIs.
-!     \item[{[globalAI2D]}]
-!          Two-dimensional array of global AxisIndices to be translated.
-!     \item[{[localAI2D]}]
-!          Two-dimensional array of local AxisIndices corresponding to global AIs.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1628,9 +1616,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -1638,36 +1626,34 @@
         call ESMF_LRGridGlobalToLocalIndex(grid, horzRelLoc, vertRelLoc, &
                                            global1D, local1D, &
                                            global2D, local2D, &
-                                           globalAI1D, localAI1D, &
-                                           globalAI2D, localAI2D, &
                                            dimOrder, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1687,9 +1673,7 @@
 ! !INTERFACE:
       subroutine ESMF_GridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
                                              local1D, global1D, &
-                                             local2D, global2D, &
-                                             localAI1D, globalAI1D, &
-                                             localAI2D, globalAI2D, rc)
+                                             local2D, global2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -1699,10 +1683,6 @@
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: global1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) ::  local2D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(out) :: global2D
-      type(ESMF_AxisIndex), dimension(:), optional, intent(in) ::  localAI1D
-      type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: globalAI1D
-      type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  localAI2D
-      type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) :: globalAI2D
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1725,14 +1705,6 @@
 !     \item[{[global2D]}]
 !          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers
 !          corresponding to local identifiers.
-!     \item[{[localAI1D]}]
-!          One-dimensional array of local AxisIndices to be translated.
-!     \item[{[globalAI1D]}]
-!          One-dimensional array of global AxisIndices corresponding to local AIs.
-!     \item[{[localAI2D]}]
-!          Two-dimensional array of local AxisIndices to be translated.
-!     \item[{[globalAI2D]}]
-!          Two-dimensional array of global AxisIndices corresponding to local AIs.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1752,45 +1724,43 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
                                            local1D, global1D, &
-                                           local2D, global2D, &
-                                           localAI1D, globalAI1D, &
-                                           localAI2D, globalAI2D, localrc)
+                                           local2D, global2D, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3053,6 +3023,215 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGlobalToLocalAI"
+!BOPI
+! !IROUTINE: ESMF_GridGlobalToLocalAI - Translate global axis index to DE local
+
+! !INTERFACE:
+      subroutine ESMF_GridGlobalToLocalAI(grid, horzRelLoc, vertRelLoc, &
+                                          globalAI1D, localAI1D, &
+                                          globalAI2D, localAI2D, &
+                                          dimOrder, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_AxisIndex), dimension(:), optional, intent(in) :: globalAI1D
+      type(ESMF_AxisIndex), dimension(:), optional, intent(out) ::  localAI1D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) :: globalAI2D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) ::  localAI2D
+      integer, dimension(:), optional, intent(in) :: dimOrder
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     integer cell identifiers from global indexing to local indexing
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be used.
+!     \item[{[globalAI1D]}]
+!          One-dimensional array of global AxisIndices to be translated.
+!     \item[{[localAI1D]}]
+!          One-dimensional array of local AxisIndices corresponding to global AIs.
+!     \item[{[globalAI2D]}]
+!          Two-dimensional array of global AxisIndices to be translated.
+!     \item[{[localAI2D]}]
+!          Two-dimensional array of local AxisIndices corresponding to global AIs.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOPI
+
+      integer :: localrc                          ! local error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Call GridGlobalToLocalAI routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridGlobalToLocalAI(grid, horzRelLoc, vertRelLoc, &
+                                        globalAI1D, localAI1D, &
+                                        globalAI2D, localAI2D, &
+                                        dimOrder, localrc)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      case default
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+      end select
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGlobalToLocalAI
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalToGlobalAI"
+!BOPI
+! !IROUTINE: ESMF_GridLocalToGlobalAI - Translate DE local axis index to global
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalToGlobalAI(grid, horzRelLoc, vertRelLoc, &
+                                          localAI1D, globalAI1D, &
+                                          localAI2D, globalAI2D, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_AxisIndex), dimension(:), optional, intent(in) ::  localAI1D
+      type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: globalAI1D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  localAI2D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) :: globalAI2D
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     axis indices from global indexing to local indexing
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be used.
+!     \item[{[localAI1D]}]
+!          One-dimensional array of local AxisIndices to be translated.
+!     \item[{[globalAI1D]}]
+!          One-dimensional array of global AxisIndices corresponding to local AIs.
+!     \item[{[localAI2D]}]
+!          Two-dimensional array of local AxisIndices to be translated.
+!     \item[{[globalAI2D]}]
+!          Two-dimensional array of global AxisIndices corresponding to local AIs.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOPI
+
+      integer :: localrc                          ! local error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Call GridLocalToGlobalAI routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridLocalToGlobalAI(grid, horzRelLoc, vertRelLoc, &
+                                        localAI1D, globalAI1D, &
+                                        localAI2D, globalAI2D, localrc)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      case default
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+      end select
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridLocalToGlobalAI
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSearchPoint"
 !!BOPI
 !! !IROUTINE: ESMF_GridSearchPoint - Search the grid for a cell containing point
@@ -3169,20 +3348,4 @@
 !------------------------------------------------------------------------------
 
       end module ESMF_GridMod
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

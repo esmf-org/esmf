@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.79 2004/06/14 16:01:18 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.80 2004/06/14 22:35:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -79,10 +79,12 @@
     public ESMF_LRGridAddPhysGrid
     public ESMF_LRGridGetCoord
     public ESMF_LRGridSetCoord
-    public ESMF_LRGridGetDE            ! access DistGrid from above
+    public ESMF_LRGridGetDELocalInfo   ! access DistGrid from above
     public ESMF_LRGridGetAllAxisIndex  ! access DistGrid from above
     public ESMF_LRGridGlobalToLocalIndex
     public ESMF_LRGridLocalToGlobalIndex
+    public ESMF_LRGridGlobalToLocalAI
+    public ESMF_LRGridLocalToGlobalAI
     public ESMF_LRGridGet
     public ESMF_LRGridSet
     public ESMF_LRGridGetCellMask
@@ -107,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.79 2004/06/14 16:01:18 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.80 2004/06/14 22:35:46 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3461,12 +3463,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridGetDE"
+#define ESMF_METHOD "ESMF_LRGridGetDELocalInfo"
 !BOPI
-! !IROUTINE: ESMF_LRGridGetDE - Get DE (local) information for a Grid
+! !IROUTINE: ESMF_LRGridGetDELocalInfo - Get DE (local) information for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridGetDE(grid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_LRGridGetDELocalInfo(grid, horzRelLoc, vertRelLoc, &
                                   myDE, localCellCount, localCellCountPerDim, &
                                   minLocalCoordPerDim, maxLocalCoordPerDim, &
                                   globalStartPerDim, globalAIPerDim, reorder, &
@@ -3769,7 +3771,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridGetDE
+      end subroutine ESMF_LRGridGetDELocalInfo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3944,8 +3946,6 @@
       subroutine ESMF_LRGridGlobalToLocalIndex(grid, horzRelLoc, vertRelLoc, &
                                                global1D, local1D, &
                                                global2D, local2D, &
-                                               globalAI1D, localAI1D, &
-                                               globalAI2D, localAI2D, &
                                                dimOrder, rc)
 !
 ! !ARGUMENTS:
@@ -3956,10 +3956,6 @@
       integer(ESMF_KIND_I4), dimension(:), intent(out), optional :: local1D
       integer(ESMF_KIND_I4), dimension(:,:), intent(in),  optional :: global2D
       integer(ESMF_KIND_I4), dimension(:,:), intent(out), optional :: local2D
-      type(ESMF_AxisIndex), dimension(:), intent(in),  optional :: globalAI1D
-      type(ESMF_AxisIndex), dimension(:), intent(out), optional :: localAI1D
-      type(ESMF_AxisIndex), dimension(:,:), intent(in),  optional :: globalAI2D
-      type(ESMF_AxisIndex), dimension(:,:), intent(out), optional :: localAI2D
       integer, dimension(:), intent(in), optional :: dimOrder
       integer, intent(out), optional :: rc
 
@@ -3989,14 +3985,6 @@
 !     \item[{[local2D]}]
 !          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers
 !          corresponding to global identifiers.
-!     \item[{[globalAI1D]}]
-!          One-dimensional array of global AxisIndices to be translated.
-!     \item[{[localAI1D]}]
-!          One-dimensional array of local AxisIndices corresponding to global AIs.
-!     \item[{[globalAI2D]}]
-!          Two-dimensional array of global AxisIndices to be translated.
-!     \item[{[localAI2D]}]
-!          Two-dimensional array of local AxisIndices corresponding to global AIs.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4013,7 +4001,6 @@
       integer, dimension(:), allocatable :: dimOrderUse
       integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
       logical :: dummy
-      type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
       type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code; assume failure until success is certain
@@ -4052,23 +4039,6 @@
         order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           gtemp2D(:,i) = global2D(:,order(i))
-        enddo
-      endif
-      if (present(globalAI1D)) then
-        tempSize = size(globalAI1D)
-        aSize = max(aSize, tempSize)
-      endif
-      if (present(globalAI2D)) then
-        tempSize  = size(globalAI2D,1)
-        tempSize2 = size(globalAI2D,2)
-        aSize = max(aSize, tempSize)
-        allocate(gtempAI2D(tempSize,tempSize2), &
-                 ltempAI2D(tempSize,tempSize2), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "tempAI2D arrays", &
-                                       ESMF_CONTEXT, rc)) return
-        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
-        do i = 1,tempSize2
-          gtempAI2D(:,i) = globalAI2D(:,order(i))
         enddo
       endif
       aSize = min(gridRank, aSize)
@@ -4176,6 +4146,362 @@
                                        ESMF_CONTEXT, rc)) return
       endif
 
+      deallocate(dimOrderUse, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating dimOrderUse", &
+                                     ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LRGridGlobalToLocalIndex
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LRGridLocalToGlobalIndex"
+!BOPI
+! !IROUTINE: ESMF_LRGridLocalToGlobalIndex - translate global indexing to local
+
+! !INTERFACE:
+      subroutine ESMF_LRGridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
+                                               local1D, global1D, &
+                                               local2D, global2D, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      integer(ESMF_KIND_I4), dimension(:), optional, intent(in) ::  local1D
+      integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: global1D
+      integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) ::  local2D
+      integer(ESMF_KIND_I4), dimension(:,:), optional, intent(out) :: global2D
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     integer cell identifiers from global indexing to local indexing
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be used.
+!     \item[horzRelLoc]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[{[vertRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
+!     \item[{[local1D]}]
+!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
+!          translated.  Infers translating between positions in memory.
+!     \item[{[global1D]}]
+!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers
+!          corresponding to local identifiers.
+!     \item[{[local2D]}]
+!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
+!          translated.  Infers translating between indices in ij space.
+!     \item[{[global2D]}]
+!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers
+!          corresponding to local identifiers.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOPI
+
+      integer :: localrc                          ! Error status
+      integer :: i
+      integer :: order(3)
+      integer :: gridRank, aSize, tempSize, tempSize2
+      integer :: horzDistIdUse, vertDistIdUse
+      integer :: horzPhysIdUse, vertPhysIdUse
+      integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
+      logical :: dummy
+      type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! some basic error checking    TODO: more
+      if (.not.associated(grid%ptr)) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Invalid Grid object", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Initialize other variables
+      horzDistIdUse = -1
+      vertDistIdUse = -1
+      horzPhysIdUse = -1
+      vertPhysIdUse = -1
+
+      ! Get the grid rank -- to check if there is a vertical grid available
+      gridRank = grid%ptr%dimCount
+
+      ! determine the largest input array size and allocate temp arrays
+      aSize = 0
+      if (present(local1D)) then
+        tempSize = size(local1D)
+        aSize = max(aSize, tempSize)
+      endif
+      if (present(local2D)) then
+        tempSize  = size(local2D,1)
+        tempSize2 = size(local2D,2)
+        aSize = max(aSize, tempSize)
+        allocate(gtemp2D(tempSize,tempSize2), &
+                 ltemp2D(tempSize,tempSize2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "temp2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
+        do i = 1,tempSize2
+          ltemp2D(:,i) = local2D(:,order(i))
+        enddo
+      endif
+      aSize = min(gridRank, aSize)
+
+      ! get distgrid identifiers from relative locations
+      if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
+        call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+      else
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                     "undefined horizontal relloc", &
+                     ESMF_CONTEXT, rc)
+        return
+      endif
+
+      if (present(vertRelLoc)) then
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+        endif
+      endif
+
+      hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
+      if (vertDistIdUse.ne.-1) then
+        vdgtype => grid%ptr%distgrids(vertDistIdUse)%ptr
+      else
+        if (aSize.ge.3 .and. gridRank.eq.3) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                     "valid vertical relloc required", &
+                                     ESMF_CONTEXT, rc)) return
+        endif
+      endif
+
+      ! call DistGrid method to retrieve information otherwise not available
+      ! to the application level
+      ! can't send parts of optional arguments, so for now break out  TODO: fix
+      if (present(local1D)) then
+        if (gridRank.le.2) then
+          call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+                                               local1D=local1D, &
+                                               global1D=global1D, &
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        else
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                       "1D operation not yet defined for 3d grids", &
+                       ESMF_CONTEXT, rc)
+          return
+        endif
+      endif
+
+      if (present(local2D)) then
+        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+                                             local2D=lTemp2D(:,1:2), &
+                                             global2D=gTemp2D(:,1:2), &
+                                             rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        if (vertDistIdUse.ne.-1) then
+          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
+                                               local2D=lTemp2D(:,3:3), &
+                                               global2D=gTemp2D(:,3:3), &
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        endif
+        tempSize2 = size(local2D,2)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
+        do i = 1,tempSize2
+          global2D(:,order(i)) = gtemp2D(:,i)
+        enddo
+        deallocate(gtemp2D, &
+                   ltemp2D, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating temp2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LRGridLocalToGlobalIndex
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LRGridGlobalToLocalAI"
+!BOPI
+! !IROUTINE: ESMF_LRGridGlobalToLocalAI - translate global axis index to local
+
+! !INTERFACE:
+      subroutine ESMF_LRGridGlobalToLocalAI(grid, horzRelLoc, vertRelLoc, &
+                                            globalAI1D, localAI1D, &
+                                            globalAI2D, localAI2D, &
+                                            dimOrder, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_AxisIndex), dimension(:), intent(in),  optional :: globalAI1D
+      type(ESMF_AxisIndex), dimension(:), intent(out), optional :: localAI1D
+      type(ESMF_AxisIndex), dimension(:,:), intent(in),  optional :: globalAI2D
+      type(ESMF_AxisIndex), dimension(:,:), intent(out), optional :: localAI2D
+      integer, dimension(:), intent(in), optional :: dimOrder
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     integer cell identifiers from global indexing to local indexing
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be used.
+!     \item[horzRelLoc]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[{[vertRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
+!     \item[{[globalAI1D]}]
+!          One-dimensional array of global AxisIndices to be translated.
+!     \item[{[localAI1D]}]
+!          One-dimensional array of local AxisIndices corresponding to global AIs.
+!     \item[{[globalAI2D]}]
+!          Two-dimensional array of global AxisIndices to be translated.
+!     \item[{[localAI2D]}]
+!          Two-dimensional array of local AxisIndices corresponding to global AIs.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOPI
+
+      integer :: localrc                          ! Error status
+      integer :: i
+      integer :: order(3)
+      integer :: gridRank, aSize, tempSize, tempSize2
+      integer :: horzDistIdUse, vertDistIdUse
+      integer :: horzPhysIdUse, vertPhysIdUse
+      integer, dimension(:), allocatable :: dimOrderUse
+      logical :: dummy
+      type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
+      type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! some basic error checking    TODO: more
+      if (.not.associated(grid%ptr)) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "Invalid Grid object", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Initialize other variables
+      horzDistIdUse = -1
+      vertDistIdUse = -1
+      horzPhysIdUse = -1
+      vertPhysIdUse = -1
+
+      ! Get the grid rank -- to check if there is a vertical grid available
+      gridRank = grid%ptr%dimCount
+
+      ! determine the largest input array size and allocate temp arrays
+      aSize = 0
+      if (present(globalAI1D)) then
+        tempSize = size(globalAI1D)
+        aSize = max(aSize, tempSize)
+      endif
+      if (present(globalAI2D)) then
+        tempSize  = size(globalAI2D,1)
+        tempSize2 = size(globalAI2D,2)
+        aSize = max(aSize, tempSize)
+        allocate(gtempAI2D(tempSize,tempSize2), &
+                 ltempAI2D(tempSize,tempSize2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "tempAI2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
+        do i = 1,tempSize2
+          gtempAI2D(:,i) = globalAI2D(:,order(i))
+        enddo
+      endif
+      aSize = min(gridRank, aSize)
+
+      ! calculate default if dimOrder is not present
+      allocate(dimOrderUse(aSize), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dimOrderUse", &
+                                     ESMF_CONTEXT, rc)) return
+      if (present(dimOrder)) then
+        dimOrderUse(:) = dimOrder(:)
+      else
+        do i = 1,size(dimOrderUse)
+          dimOrderUse(i) = i
+        enddo
+      endif
+
+      ! get distgrid identifier from relative locations
+      if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
+        call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+      else
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "undefined horizontal relloc", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(vertRelLoc)) then
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+        endif
+ !    else
+ !      dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+ !                                    "undefined vertical relloc", &
+ !                                    ESMF_CONTEXT, rc)) return
+      endif
+
+      hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
+      if (vertDistIdUse.ne.-1) then
+        vdgtype => grid%ptr%distgrids(vertDistIdUse)%ptr
+      else
+        if (aSize.ge.3 .and. gridRank.eq.3) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                 "valid vertical relloc required", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+      endif
+
+      ! call DistGrid method to retrieve information otherwise not available
+      ! to the application level
+      ! can't send parts of optional arguments, so for now break out
       if (present(globalAI1D)) then
         if (gridRank.le.2) then
           call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
@@ -4231,29 +4557,23 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridGlobalToLocalIndex
+      end subroutine ESMF_LRGridGlobalToLocalAI
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridLocalToGlobalIndex"
+#define ESMF_METHOD "ESMF_LRGridLocalToGlobalAI"
 !BOPI
-! !IROUTINE: ESMF_LRGridLocalToGlobalIndex - translate global indexing to local
+! !IROUTINE: ESMF_LRGridLocalToGlobalAI - translate global axis indices to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
-                                               local1D, global1D, &
-                                               local2D, global2D, &
-                                               localAI1D, globalAI1D, &
-                                               localAI2D, globalAI2D, rc)
+      subroutine ESMF_LRGridLocalToGlobalAI(grid, horzRelLoc, vertRelLoc, &
+                                            localAI1D, globalAI1D, &
+                                            localAI2D, globalAI2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       type(ESMF_RelLoc), intent(in) :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      integer(ESMF_KIND_I4), dimension(:), optional, intent(in) ::  local1D
-      integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: global1D
-      integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) ::  local2D
-      integer(ESMF_KIND_I4), dimension(:,:), optional, intent(out) :: global2D
       type(ESMF_AxisIndex), dimension(:), optional, intent(in) ::  localAI1D
       type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: globalAI1D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  localAI2D
@@ -4274,18 +4594,6 @@
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
-!     \item[{[local1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
-!          translated.  Infers translating between positions in memory.
-!     \item[{[global1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers
-!          corresponding to local identifiers.
-!     \item[{[local2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
-!          translated.  Infers translating between indices in ij space.
-!     \item[{[global2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers
-!          corresponding to local identifiers.
 !     \item[{[localAI1D]}]
 !          One-dimensional array of local AxisIndices to be translated.
 !     \item[{[globalAI1D]}]
@@ -4307,7 +4615,6 @@
       integer :: gridRank, aSize, tempSize, tempSize2
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
-      integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
       logical :: dummy
       type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
       type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
@@ -4333,23 +4640,6 @@
 
       ! determine the largest input array size and allocate temp arrays
       aSize = 0
-      if (present(local1D)) then
-        tempSize = size(local1D)
-        aSize = max(aSize, tempSize)
-      endif
-      if (present(local2D)) then
-        tempSize  = size(local2D,1)
-        tempSize2 = size(local2D,2)
-        aSize = max(aSize, tempSize)
-        allocate(gtemp2D(tempSize,tempSize2), &
-                 ltemp2D(tempSize,tempSize2), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "temp2D arrays", &
-                                       ESMF_CONTEXT, rc)) return
-        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
-        do i = 1,tempSize2
-          ltemp2D(:,i) = local2D(:,order(i))
-        enddo
-      endif
       if (present(localAI1D)) then
         tempSize = size(localAI1D)
         aSize = max(aSize, tempSize)
@@ -4407,52 +4697,6 @@
       ! call DistGrid method to retrieve information otherwise not available
       ! to the application level
       ! can't send parts of optional arguments, so for now break out  TODO: fix
-      if (present(local1D)) then
-        if (gridRank.le.2) then
-          call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
-                                               local1D=local1D, &
-                                               global1D=global1D, &
-                                               rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
-        else
-          dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                       "1D operation not yet defined for 3d grids", &
-                       ESMF_CONTEXT, rc)
-          return
-        endif
-      endif
-
-      if (present(local2D)) then
-        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
-                                             local2D=lTemp2D(:,1:2), &
-                                             global2D=gTemp2D(:,1:2), &
-                                             rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        if (vertDistIdUse.ne.-1) then
-          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
-                                               local2D=lTemp2D(:,3:3), &
-                                               global2D=gTemp2D(:,3:3), &
-                                               rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
-        endif
-        tempSize2 = size(local2D,2)
-        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
-        do i = 1,tempSize2
-          global2D(:,order(i)) = gtemp2D(:,i)
-        enddo
-        deallocate(gtemp2D, &
-                   ltemp2D, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating temp2D arrays", &
-                                       ESMF_CONTEXT, rc)) return
-      endif
-
       if (present(localAI1D)) then
         if (gridRank.le.2) then
           call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
@@ -4501,7 +4745,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridLocalToGlobalIndex
+      end subroutine ESMF_LRGridLocalToGlobalAI
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -6295,9 +6539,9 @@
                                       rc=localrc)
 
       ! translate the AIs from global to local
-      call ESMF_LRGridGlobalToLocalIndex(grid, horzRelLoc=ESMF_CELL_CENTER, &
-                                         globalAI2D=grid_ai, &
-                                         localAI2D=localAI, rc=localrc)
+      call ESMF_LRGridGlobalToLocalAI(grid, horzRelLoc=ESMF_CELL_CENTER, &
+                                      globalAI2D=grid_ai, &
+                                      localAI2D=localAI, rc=localrc)
 
       ! loop through bounding boxes, looking for overlap with our "box"
       ! TODO: a better algorithm
@@ -6466,9 +6710,9 @@
                                      ESMF_CONTEXT, rc)) return
 
       ! translate myAI to local index
-      call ESMF_LRGridGlobalToLocalIndex(srcGrid, horzRelLoc=ESMF_CELL_CENTER, &
-                                         globalAI1D=myAI, localAI1D=myLocalAI, &
-                                         rc=localrc)
+      call ESMF_LRGridGlobalToLocalAI(srcGrid, horzRelLoc=ESMF_CELL_CENTER, &
+                                      globalAI1D=myAI, localAI1D=myLocalAI, &
+                                      rc=localrc)
 
       ! get pointer to the actual bounding boxes data
       call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
