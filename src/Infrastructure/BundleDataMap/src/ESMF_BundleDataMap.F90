@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.7 2004/06/01 20:18:26 cdeluca Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.8 2004/06/02 07:35:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,12 +21,11 @@
 !  This type is implemented in Fortran 90 and a corresponding
 !  C++ interface is provided for access.
 !
-! BundleDataMaps are used to store the mapping of the array index orders
-!   compared to the grid specifications; to indicate where data 
-!   values are located relative to an individual cell/element,
-!   store interleave information for larger than scalar data,
-!   field interleave information for packed bundles, and any
-!   other information needed to relate the data array to the grid.  
+! BundleDataMaps are used to store the mapping of multiple field data arrays
+!   into a single packed array.  Other DataMaps exist at the Field and
+!   Array level to indicate mappings of array to grid indices, data location
+!   within a cell, vector interleave information, and any other items needed
+!   to define how data is mapped between ESMF objects.
 !
 !------------------------------------------------------------------------------
 !
@@ -39,12 +38,10 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section contains the basic derived type for encapsulating the
-!  various mappings between grids, arrays, and interleaved arrays, including
-!  the internal subroutines and functions which operate on them.
+! This section contains the basic derived types for encapsulating the
+!  mapping information needed to identify which data items in a packed
+!  array corresponds to individual field data.
 !
-!
-
 !------------------------------------------------------------------------------
 !BOPI
 ! !MODULE: ESMF_BundleDataMapMod
@@ -81,16 +78,13 @@
       type ESMF_BundleDataMap
       sequence
       private
-#ifndef ESMF_NO_INITIALIZERS
-        type(ESMF_Status) :: status = ESMF_STATE_UNINIT
-#else
-        type(ESMF_Status) :: status 
-#endif
         ! only the bundle interleave needed here because each field contains
         ! its own private data map.   
 #ifndef ESMF_NO_INITIALIZERS
+        type(ESMF_Status) :: status = ESMF_STATE_UNINIT
         type(ESMF_BundleInterleave) :: bil = ESMF_BIL_BYFIELD
 #else
+        type(ESMF_Status) :: status 
         type(ESMF_BundleInterleave) :: bil
 #endif
       end type
@@ -129,7 +123,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.7 2004/06/01 20:18:26 cdeluca Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.8 2004/06/02 07:35:14 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
