@@ -1,4 +1,4 @@
-% $Id: cpl_desc.tex,v 1.2 2003/02/03 17:08:23 nscollins Exp $
+% $Id: cpl_desc.tex,v 1.3 2003/02/20 17:31:23 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,10 +10,12 @@
 
 %\subsection{Description}
 
-< a specialization of the generic Component object.  what's different...>
+A Coupler Component is user-written code which executes or
+arranges the execution of the necessary data transformations between one
+or more Gridded Components.
 
-< a coupler takes a list of states, either moves them to the
-destination components, or arranges for the supplier to send
-them to the destination.  it can be 1-to-1, or it can be
-many-to-many.  lots of styles possible here.  define and
-describe exchange packets here? >
+
+A Coupler operates on a list of State objects.  Couplers can be written
+to transform data between single pairs of Gridded Components, or
+a single Coupler can couple between multiple Gridded Components.
+

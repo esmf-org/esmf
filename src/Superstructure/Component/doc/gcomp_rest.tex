@@ -1,4 +1,4 @@
-% $Id: gcomp_rest.tex,v 1.1 2003/01/07 21:35:16 nscollins Exp $
+% $Id: gcomp_rest.tex,v 1.2 2003/02/20 17:31:25 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,4 +10,11 @@
 
 %\subsubsection{Restrictions}
 
-<List class restrictions due to design or implementation strategies.>
+Gridded Components must only communicate with other
+Components via data in State objects.  They must 
+not make direct references to data in other states.
+
+If possible, Components should attempt to make all
+data private, so public names do not interfere with data in
+other components.
+

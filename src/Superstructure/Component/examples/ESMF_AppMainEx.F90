@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.4 2003/02/19 19:54:05 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.5 2003/02/20 17:31:25 nscollins Exp $
 !
 ! Example code for a main program Application.  See ESMF_AppCompEx.F90
 !   for an example of an embeddable Application.
@@ -27,8 +27,13 @@
     use ESMF_IOMod
     use ESMF_LayoutMod
     use ESMF_ClockMod
+    use ESMF_StateMod
     use ESMF_CompMod
     
+    ! User supplied modules
+    use PHYS_Mod, only: PHYS_Register
+    use DYNM_Mod, only: DYNM_Register
+    use CPLR_Mod, only: CPLR_Register
     implicit none
     
 !   ! Local variables
@@ -39,6 +44,7 @@
     integer :: delistall(18), delist1(8), delist2(8), delist3(2)
     character(ESMF_MAXSTR) :: cname
     type(ESMF_Layout) :: layoutall, layout1, layout2, layout3
+    type(ESMF_State) :: statelist(2)
     type(ESMF_Comp) :: app, comp1, comp2, cpl
         
 !-------------------------------------------------------------------------
@@ -48,7 +54,7 @@
     print *, "Application Example 1:"
 
     ! Create the top level application component.  Create a Layout and
-    !  Clock to pass in.  
+    !  a Clock to pass in.  
 
     delistall = (/ (i, i=0,17) /)
     layoutall = ESMF_LayoutCreate(1, 20, delistall, rc)
@@ -57,19 +63,19 @@
     clock = ESMF_ClockInit()
 
     cname = "Top Level Application"
-    app = ESMF_CompCreate(cname, layoutall, ESMF_APPCOMP, clock, &
-                                       "/home/myname/model1/setup", rc=rc)  
+    app = ESMF_CompCreate(cname, layoutall, ESMF_APPCOMP, ESMF_GENERAL, &
+                            clock, "/home/myname/model1/setup", rc=rc)  
 
     delist1 = (/ (i, i=0,7) /)
     layout1 = ESMF_LayoutCreate(2, 4, delist1, ESMF_XFAST, rc)
 
     cname = "Atmosphere Physics"
     comp1 = ESMF_CompCreate(cname, layout1, ESMF_GRIDCOMP, ESMF_ATM, &
-                                  "/home/myname/model1/setup", rc=rc)  
+                             clock, "/home/myname/model1/setup", rc=rc)  
 
     ! This single user-supplied subroutine must be a public entry point,
     !  and unique amongst all components in this application.
-    call PHYS_Setup(comp1, rc=rc)
+    call PHYS_Register(comp1, rc=rc)
 
     ! The setup routine will make the following 3 calls internally
     ! (so PHYS_Init(), etc can be private methods inside the module).
@@ -87,16 +93,16 @@
 
     cname = "Atmosphere Dynamics"
     comp2 = ESMF_CompCreate(cname, layout2, ESMF_GRIDCOMP, ESMF_ATM, &
-                                  "/home/myname/model1/setup", rc=rc)  
+                             clock, "/home/myname/model1/setup", rc=rc)  
 
     ! This single user-supplied subroutine must be a public entry point,
     !  and unique amongst all components in this application.
-    call DYN_Setup(comp2, rc=rc)
+    call DYNM_Register(comp2, rc=rc)
 
     ! The setup routine will make the following 3 calls internally:
-    !! call ESMF_CompSetRoutine(comp2, "init", 1, DYN_Init)
-    !! call ESMF_CompSetRoutine(comp2, "run", 1, DYN_Run)
-    !! call ESMF_CompSetRoutine(comp2, "final", 1, DYN_Final)
+    !! call ESMF_CompSetRoutine(comp2, "init", 1, DYNM_Init)
+    !! call ESMF_CompSetRoutine(comp2, "run", 1, DYNM_Run)
+    !! call ESMF_CompSetRoutine(comp2, "final", 1, DYNM_Final)
 
     print *, "Comp Create returned, name = ", trim(cname)
 
@@ -104,21 +110,28 @@
     layout3 = ESMF_LayoutCreate(2, 1, delist3, ESMF_XFAST, rc)
 
     cname = "Atmosphere Coupler"
-    cpl = ESMF_CompCreate(cname, layout3, ESMF_CPLCOMP, &
+    comps(1) = comp1
+    comps(2) = comp2
+    cpl = ESMF_CompCreate(cname, layout3, ESMF_CPLCOMP, comps, &
                            filepath="/home/myname/model1/setup", rc=rc)  
 
     ! This single user-supplied subroutine must be a public entry point,
     !  and unique amongst all components in this application.
-    call CPL_Setup(cpl, rc=rc)
+    call CPLR_Register(cpl, rc=rc)
 
     ! The setup routine will make the following 3 calls internally:
-    !! call ESMF_CompSetRoutine(cpl, "init", 1, CPL_Init)
-    !! call ESMF_CompSetRoutine(cpl, "run", 1, CPL_Run)
-    !! call ESMF_CompSetRoutine(cpl, "final", 1, CPL_Final)
+    !! call ESMF_CompSetRoutine(cpl, "init", 1, CPLR_Init)
+    !! call ESMF_CompSetRoutine(cpl, "run", 1, CPLR_Run)
+    !! call ESMF_CompSetRoutine(cpl, "final", 1, CPLR_Final)
 
     print *, "Comp Create returned, name = ", trim(cname)
 
-
+    ! Query the components for their import and export states, and
+    ! set them in the coupler state list.
+    call ESMF_CompGetState(comp1, ESMF_IMPORTSTATE, localstates(1), rc=rc)
+    call ESMF_CompGetState(comp2, ESMF_EXPORTSTATE, localstates(2), rc=rc)
+    call ESMF_CompSetState(cpl, statelist=localstates, rc=rc)
+     
     ! Call each Init routine in turn.  There is an optional index number
     !  for those components which have multiple entry points.
     call ESMF_CompInit(comp1, rc=rc)

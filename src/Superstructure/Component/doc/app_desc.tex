@@ -1,4 +1,4 @@
-% $Id: app_desc.tex,v 1.2 2003/02/03 17:08:22 nscollins Exp $
+% $Id: app_desc.tex,v 1.3 2003/02/20 17:31:22 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,8 +10,12 @@
 
 %\subsection{Description}
 
-< a specialization of the generic Component object.  what's different...>
+An Application Component contains other Components which
+cooperate in a computation. An Application Component can 
+either be a main (top level) program, or it can be a
+Component nested in a higher level Application. 
 
-< include description here about main programs vs applications which
-are themselves a component, and the minimal driver layer needed if
-the higher level program isn't wanted >
+An Application written to follow the Component interface
+can be run standalone with a generic driver program which creates
+the Component and calls the Init, Run, and Finalize methods.
+

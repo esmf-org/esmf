@@ -1,4 +1,4 @@
-% $Id: gcomp_desc.tex,v 1.2 2003/02/03 17:08:24 nscollins Exp $
+% $Id: gcomp_desc.tex,v 1.3 2003/02/20 17:31:24 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,11 +10,22 @@
 
 %\subsection{Description}
 
-< a specialization of the generic Component object.  what's different...>
+A Gridded Component does the actual model computation.
+Gridded Components can run sequentially or concurrently, on all
+processors or a subset of processors. 
 
-< conceptually simplest is a sequential component, which 
-takes an import state, runs the requested time, and produces
-an export state.  also possible are concurrent components
-which take a transform as input, and then run until the stop
-time.  when communication is needed, the transform routine
-is called. all data goes thru states. >
+Conceptually simplest is a sequential Component which is called
+once per time step, receives 
+gridded data from the Input State, computes new values, runs
+until the requested stop time, and returns the output 
+gridded data in the Output State.  
+
+A concurrent Component takes a Transform as input, and runs
+until the stop time.  When data communication is needed, the
+Transform routine is called.  In both cases, all data being
+communiated between Gridded Components goes thru a State object.
+
+Combinations of sequential and concurrent behavior are possible,
+for example a sequential component which contains concurrent
+subcomponents.
+

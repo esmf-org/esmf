@@ -1,4 +1,4 @@
-! $Id: ESMF_CompEx.F90,v 1.3 2003/02/04 21:11:16 nscollins Exp $
+! $Id: ESMF_CompEx.F90,v 1.4 2003/02/20 17:31:25 nscollins Exp $
 !
 ! Example/test code which creates a new Component
 
@@ -52,6 +52,11 @@
                                        ESMF_ATM, "/usr/local", rc=rc)  
 
     print *, "Comp Create returned, name = ", trim(cname)
+
+    ! This sets which internal subroutines will be called
+    !  for Init, Run, and Finalize.
+    call ATM_Register(comp1, rc)
+
 
     call ESMF_CompInit(comp1, rc)
     print *, "Comp Init returned"

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.21 2003/02/19 19:54:59 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.22 2003/02/20 17:31:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,17 +80,6 @@
                   ESMF_OTHER = ESMF_ModelType(6)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_CompPrivateData
-!
-!     ! Private data and internal state for this component
-!
-      type ESMF_CompPrivateData
-      sequence
-      private
-        type(ESMF_Pointer) :: opaque
-      end type
-
-!------------------------------------------------------------------------------
 !     ! ESMF_CompClass
 !
 !     ! Component class data.   (Unlike other internal names, this one is
@@ -109,7 +98,7 @@
          type(ESMF_Clock) :: clock                     ! component clock
          character(len=ESMF_MAXSTR) :: filepath        ! resource filepath
          integer :: instance_id                        ! for ensembles
-	 type(ESMF_Pointer) :: this   ! C++ data for function & data pointers
+         type(ESMF_Pointer) :: this   ! C++ data for function & data pointers
       end type
 
 !------------------------------------------------------------------------------
@@ -144,7 +133,8 @@
       public ESMF_CompValidate
       public ESMF_CompPrint
  
-      ! These call the user-provided routines.
+      ! These do argument processing, layout checking, and then
+      !  call the user-provided routines.
       public ESMF_CompInit      
       public ESMF_CompRun      
       public ESMF_CompFinalize 
@@ -159,7 +149,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.21 2003/02/19 19:54:59 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.22 2003/02/20 17:31:25 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -205,7 +195,8 @@ end interface
 ! !IROUTINE: ESMF_CompCreateNew -- Create a new Component.
 
 ! !INTERFACE:
-      function ESMF_CompCreateNew(name, layout, ctype, mtype, clock, filepath, rc)
+      function ESMF_CompCreateNew(name, layout, ctype, mtype, clock, &
+                                                                 filepath, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Comp) :: ESMF_CompCreateNew
@@ -214,7 +205,7 @@ end interface
       character(len=*), intent(in) :: name
       type(ESMF_Layout), intent(in) :: layout
       type(ESMF_CompType), intent(in) :: ctype
-      type(ESMF_ModelType), intent(in) :: mtype 
+      type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: filepath
       integer, intent(out), optional :: rc 
@@ -238,7 +229,7 @@ end interface
 !    and ESMF\_CPLCOMP for Applications, Gridded Components, and Couplers,
 !    respectively.
 !
-!   \item[mtype]
+!   \item[{[mtype]}]
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
 !
@@ -617,11 +608,12 @@ end interface
 ! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompRun(component, timesteps, rc)
+      subroutine ESMF_CompRun(component, clock, timesteps, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_Comp) :: component 
+      type (ESMF_Clock) :: clock
       integer, intent(in) :: timesteps
       integer, intent(out), optional :: rc 
 !
@@ -636,7 +628,7 @@ end interface
 !    Component for which to call Run routine.
 !
 !   \item[clock]
-!    Clock time - !! TODO: fix this
+!    Clock time - used for stop time
 !
 !   \item[timesteps]
 !    How long the Run interval is.

@@ -1,4 +1,4 @@
-% $Id: cpl_design.tex,v 1.1 2003/01/07 21:34:53 nscollins Exp $
+% $Id: cpl_design.tex,v 1.2 2003/02/20 17:31:23 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,7 +10,8 @@
 
 %\subsection{Design}
 
-<Describe strategy for overall class design.>
-
-
+A Coupler Component manages the transformation of data between Components.
+It contains a list of State objects and the operations needed to
+make them compatible, including such things as regridding, unit
+conversion, etc.
 
