@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.40 2004/02/18 23:32:10 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.41 2004/02/18 23:48:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.40 2004/02/18 23:32:10 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.41 2004/02/18 23:48:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -426,47 +426,56 @@
           xps[nextxp].stride[1] = indexlist[1].stride;
           xps[nextxp].rep_count[1] = indexlist[2].max - indexlist[2].min + 1;
 
-// TODO: done to here.  does *NOT* handle periodic yet
 
-          // if periodic along the first axis and this piece along boundary:
+          // if periodic and this piece along boundary:
           for (i=0; i<size_axisindex; i++) {
             if (boundary && (boundary[i][0] == ESMF_TRUE)) {
  
               nextxp++;
 
-              xps[nextxp].rank = 2;
+              xps[nextxp].rank = 3;
 
               boundary_l[0] = indexlist[0].min;
               boundary_l[1] = indexlist[1].min;
+              boundary_l[2] = indexlist[2].min;
               boundary_r[0] = indexlist[0].max;
               boundary_r[1] = indexlist[1].max;
-              boundary_l[i] = boundary_l[i] + global_count[i];
-              boundary_r[i] = boundary_r[i] + global_count[i];
+              boundary_r[2] = indexlist[2].max;
+              boundary_l[i] = boundary_l[i] + global_count[i];  // ??
+              boundary_r[i] = boundary_r[i] + global_count[i];  // ??
     
-              xps[nextxp].offset  = boundary_l[1]*indexlist[0].stride 
+              xps[nextxp].offset  = boundary_l[2]*indexlist[1].stride 
+                                  + boundary_l[1]*indexlist[0].stride 
                                   + boundary_l[0];
               xps[nextxp].contig_length = boundary_r[0] - boundary_l[0] + 1;
               xps[nextxp].stride[0] = indexlist[0].stride;
               xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+              xps[nextxp].stride[1] = indexlist[1].stride;
+              xps[nextxp].rep_count[1] = indexlist[2].max - indexlist[2].min + 1;
             }
             if (boundary && (boundary[i][1] == ESMF_TRUE)) {
  
               nextxp++;
 
-              xps[nextxp].rank = 2;
+              xps[nextxp].rank = 3;
 
               boundary_l[0] = indexlist[0].min;
               boundary_l[1] = indexlist[1].min;
+              boundary_l[2] = indexlist[2].min;
               boundary_r[0] = indexlist[0].max;
               boundary_r[1] = indexlist[1].max;
+              boundary_r[2] = indexlist[2].max;
               boundary_l[i] = boundary_l[i] - global_count[i];
               boundary_r[i] = boundary_r[i] - global_count[i];
     
-              xps[nextxp].offset  = boundary_l[1]*indexlist[0].stride
+              xps[nextxp].offset  = boundary_l[2]*indexlist[1].stride 
+                                  + boundary_l[1]*indexlist[0].stride 
                                   + boundary_l[0];
               xps[nextxp].contig_length = boundary_r[0] - boundary_l[0] + 1;
               xps[nextxp].stride[0] = indexlist[0].stride;
               xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+              xps[nextxp].stride[1] = indexlist[1].stride;
+              xps[nextxp].rep_count[1] = indexlist[2].max - indexlist[2].min + 1;
             }
           }
         }
