@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.14 2003/09/25 21:22:05 flanigan Exp $
+#  $Id: common.mk,v 1.15 2003/09/29 21:28:49 flanigan Exp $
 #
 #  common.mk
 #
@@ -12,8 +12,32 @@ ifndef ESMF_ARCH
 export ESMF_ARCH := $(shell uname -s)
 endif
 
+
+#
+# Default value for ESMF_COMPILER is default 
+# in most cases.  Except ...
+# 
+# When ESMF_ARCH is Darwin, then default value 
+# for ESMF_COMPILER is absoft.
+# 
+# and...
+#
+# When ESMF_ARCH is Linux, then default value 
+# for ESMF_COMPILER is lehay.
+# 
+
 ifndef ESMF_COMPILER
+
 export ESMF_COMPILER := default
+
+ifeq ($(ESMF_ARCH),Darwin)
+export ESMF_COMPILER := absoft
+endif
+
+ifeq ($(ESMF_ARCH),Linux)
+export ESMF_COMPILER := lahey
+endif
+
 endif
 
 ifndef ESMF_PREC
