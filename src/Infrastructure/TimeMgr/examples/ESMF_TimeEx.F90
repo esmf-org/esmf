@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.18 2004/01/06 16:53:58 svasquez Exp $
+! $Id: ESMF_TimeEx.F90,v 1.19 2004/01/07 18:54:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,6 +13,7 @@
       program ESMF_TimeEx
 
 !------------------------------------------------------------------------------
+!EXAMPLE	String used by test script to count examples.
 !==============================================================================
 !BOP
 !\begin{verbatim}
