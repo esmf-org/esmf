@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.6 2004/09/17 22:16:33 nscollins Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.7 2004/09/22 20:18:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -180,7 +180,7 @@
 !   !  Get Internal State
     !EX_UTest
 
-    wrap2%p=>data2
+    !wrap2%p=>data2
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State Test"
     call ESMF_CplCompGetInternalState(cpl, wrap2, rc)
@@ -190,6 +190,7 @@
 !   !
 !   !  Verify Internal State
     !EX_UTest
+    data2 = wrap2%p
     write(failMsg, *) "Did not return correct data"
     write(name, *) "Verify Internal State Test"
     call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
