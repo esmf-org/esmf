@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.61 2004/05/25 21:11:37 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.62 2004/06/08 00:28:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.61 2004/05/25 21:11:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.62 2004/06/08 00:28:55 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -1102,14 +1102,14 @@ int ESMC_Clock::count=0;
 // TODO: uncomment this section when LogErr implemented (ESMF_WARNING defined)
 //       and users approve.
 //  will fix bugs 801366, 801409, & 806784
-#if 0
+#if 1
 
 // TODO: put into ESMF_Base.F90 & ESMC_Macros.h, share with LogErr ?
-#define ESMF_WARNING 1
+//#define ESMF_WARNING 1
 
       // startTime and stopTime calendars should generally be the same.
       //   (Conceptually could be different, if based on same zero-point).
-      //   So only produce ESMF_WARNING if different.
+      //   So only produce ESMC_LOG_WARN if different.
       //   (TODO: check only if stopTime set)
       // TODO: use native C++ Get, not F90 entry point, when ready
       ESMC_Calendar *startCal, *stopCal;
@@ -1127,7 +1127,7 @@ int ESMC_Clock::count=0;
                           ESMC_NULL_POINTER, &startCal);
 
       if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
-         "startTime.ESMC_TimeGet(...startCal) failed.", &rc) {
+         "startTime.ESMC_TimeGet(...startCal) failed.", &rc)) {
         return(rc);   
       }
 
@@ -1145,7 +1145,7 @@ int ESMC_Clock::count=0;
                           ESMC_NULL_POINTER, &stopCal);
 
       if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
-         "stopTime.ESMC_TimeGet(...stopCal) failed.", &rc) {
+         "stopTime.ESMC_TimeGet(...stopCal) failed.", &rc)) {
         return(rc);   
       }
 
@@ -1158,11 +1158,11 @@ int ESMC_Clock::count=0;
       if (*startCal != *stopCal) {
         ESMC_LogDefault.ESMC_LogWrite("startCal not equal to stopCal.",
                                       ESMC_LOG_WARN);
-        return(ESMF_WARNING); 
+        return(ESMC_RC_OBJ_BAD); 
       }
 
-      // The following checks only produce ESMF_WARNING because the user
-      // may want or need to do these things.
+      // The following checks only produce ESMC_LOG_WARN because
+      // the user may want or need to do these things.
 
       // check if current time is now out-of-range or will be out-of-range
       //   upon the next time step (positive or negative)
@@ -1172,7 +1172,7 @@ int ESMC_Clock::count=0;
 
           ESMC_LogDefault.ESMC_LogWrite("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOG_WARN);
-          return(ESMF_WARNING);
+          return(ESMC_RC_OBJ_WRONGSTATE);
         }
       } else if (stopTime < startTime) {
         if (currTime > startTime || (currTime + timeStep) > startTime ||
@@ -1180,19 +1180,19 @@ int ESMC_Clock::count=0;
 
           ESMC_LogDefault.ESMC_LogWrite("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOG_WARN);
-          return(ESMF_WARNING);
+          return(ESMC_RC_OBJ_WRONGSTATE);
         }
       } else { // stopTime == startTime
         ESMC_LogDefault.ESMC_LogWrite("stopTime equals startTime.",
                                       ESMC_LOG_WARN);
-        return(ESMF_WARNING);
+        return(ESMC_RC_OBJ_WRONGSTATE);
       }
 
       // check for zero time step
       ESMC_TimeInterval zeroTimeStep(0,0,1,0,0,0);
       if(timeStep == zeroTimeStep) {
         ESMC_LogDefault.ESMC_LogWrite("timeStep equals zero.", ESMC_LOG_WARN);
-        return(ESMF_WARNING);
+        return(ESMC_RC_OBJ_WRONGSTATE);
       }
 
       // note:  don't check prevTime relative to currTime, as user could
