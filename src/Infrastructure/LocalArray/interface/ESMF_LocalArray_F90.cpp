@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.10 2004/02/11 22:11:29 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.11 2004/02/12 21:49:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.10 2004/02/11 22:11:29 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.11 2004/02/12 21:49:47 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -395,8 +395,10 @@ end function
         integer, dimension(1) :: lb, ub
 
         countlist(1) = counts
-        lb(1) = lbounds
-        ub(1) = ubounds
+        lb(1) = 1
+        if (present(lbounds)) lb(1) = lbounds
+        ub(1) = counts
+        if (present(ubounds)) ub(1) = ubounds
         
         ESMF_LocalArrayCreateByLst1D = ESMF_LocalArrayCreateByList(rank, &
                                              type, kind, countlist, lb, ub, rc)
