@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.70 2004/06/15 21:31:11 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.71 2004/06/15 23:31:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.70 2004/06/15 21:31:11 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.71 2004/06/15 23:31:19 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -736,17 +736,9 @@ int ESMC_Calendar::count=0;
     this->calendarType = ESMC_CAL_CUSTOM;
 
     // TODO: replace MONTHS_PER_YEAR with dynamic daysPerMonth[monthsPerYear]
-    if (monthsPerYear <= MONTHS_PER_YEAR) {
+    if (monthsPerYear <= MONTHS_PER_YEAR && monthsPerYear >= 0) {
       this->monthsPerYear = monthsPerYear;
-    } else {
-      // error, restore previous state and return ESMF_FAILURE
-      *this = saveCalendar;
-      char logMsg[ESMF_MAXSTR];
-      sprintf(logMsg, "; monthsPerYear %d > MONTHS_PER_YEAR %d.",
-                      monthsPerYear, MONTHS_PER_YEAR);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, logMsg, &rc);
-      return(rc);
-    }
+    } 
 
     this->daysPerYear.d = 0;
     if (daysPerMonth != ESMC_NULL_POINTER) {
@@ -754,38 +746,14 @@ int ESMC_Calendar::count=0;
       { 
         this->daysPerMonth[i] = daysPerMonth[i];
         this->daysPerYear.d += daysPerMonth[i];
-        if (daysPerMonth[i] < 0) {
-          // error, restore previous state and return ESMF_FAILURE
-          *this = saveCalendar;
-          char logMsg[ESMF_MAXSTR];
-          sprintf(logMsg, "; daysPerMonth[%d] %d < 0", i, daysPerMonth[i]);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, logMsg, &rc);
-          return(rc);
-        }
       }
     }
 
     if (secondsPerDay != ESMC_NULL_POINTER) {
       this->secondsPerDay = *secondsPerDay;
-      if (this->secondsPerDay < 0) {
-        // error, restore previous state and return ESMF_FAILURE
-        *this = saveCalendar;
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "; secondsPerDay %d < 0", *secondsPerDay);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, logMsg, &rc);
-        return(rc);
-      }
     }
     if (daysPerYear != ESMC_NULL_POINTER) {
-      if (*daysPerYear != this->daysPerYear.d) {
-        // error, restore previous state and return ESMF_FAILURE
-        *this = saveCalendar;
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "; daysPerYear %d != sum of daysPerMonth[].",
-                        this->daysPerYear.d);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, logMsg, &rc);
-        return(rc);
-      }
+      this->daysPerYear.d = *daysPerYear;
     }
     if (daysPerYeardN != ESMC_NULL_POINTER) {
       this->daysPerYear.dN = *daysPerYeardN;
@@ -796,7 +764,7 @@ int ESMC_Calendar::count=0;
 
     this->secondsPerYear = this->secondsPerDay * this->daysPerYear.d;
 
-    return(ESMF_SUCCESS);
+    return(ESMC_CalendarValidate());
 
 }  // end ESMC_CalendarSet (custom)
 
@@ -1899,10 +1867,22 @@ int ESMC_Calendar::count=0;
                                             logMsg, &rc);
     }
 
+    if (this->monthsPerYear > MONTHS_PER_YEAR || this->monthsPerYear < 0) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "; monthsPerYear %d negative or > MONTHS_PER_YEAR %d.",
+                      this->daysPerYear.d, MONTHS_PER_YEAR);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+    }
+
     int daysPerYear = 0;
     for(int i=0; i<this->monthsPerYear; i++)
     {
-      daysPerYear += daysPerMonth[i];
+      daysPerYear += this->daysPerMonth[i];
+      if (this->daysPerMonth[i] < 0) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "; daysPerMonth[%d] %d < 0", i, this->daysPerMonth[i]);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+      }
     }
 
     if (daysPerYear != this->daysPerYear.d) {
@@ -1912,7 +1892,22 @@ int ESMC_Calendar::count=0;
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
     }
 
-    // TODO:  copy/share validattions from Set() methods
+    if (this->secondsPerDay < 0) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "; secondsPerDay %d < 0", this->secondsPerDay);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+    }
+
+    if (this->daysPerYear.dN < 0) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "; daysPerYear.dN %d < 0", this->daysPerYear.dN);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+    }
+    if (this->daysPerYear.dD <= 0) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "; daysPerYear.dD %d <= 0", this->daysPerYear.dD);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+    }
 
     return(rc);
 
