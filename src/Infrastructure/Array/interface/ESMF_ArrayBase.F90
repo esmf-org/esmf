@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.16 2003/08/15 22:56:01 jwolfe Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.17 2003/08/21 19:57:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,6 +44,7 @@
       use ESMF_GridMod
       use ESMF_DataMapMod
       use ESMF_LocalArrayMod
+      use ESMF_RHandleMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -77,8 +78,7 @@
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
       public ESMF_ArrayGetAllAxisIndices
 
-      public ESMF_ArrayHaloPrecompute
-      public ESMF_ArrayHaloRun
+      public ESMF_ArrayHaloStore,  ESMF_ArrayHaloRelease
       public ESMF_ArrayRedist, ESMF_ArrayRegrid, ESMF_ArrayHalo
 
       public ESMF_ArrayAllGather, ESMF_ArrayGather, ESMF_ArrayScatter
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.16 2003/08/15 22:56:01 jwolfe Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.17 2003/08/21 19:57:51 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -113,7 +113,7 @@
       interface ESMF_ArrayHalo
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          !module procedure ESMF_ArrayHaloNew
+          module procedure ESMF_ArrayHaloNew
           module procedure ESMF_ArrayHaloDeprecated
 
 ! !DESCRIPTION:
@@ -615,12 +615,12 @@ end subroutine
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayHaloRun(array, route, async, rc)
+      subroutine ESMF_ArrayHaloNew(array, routehandle, blocking, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
-      type(ESMF_Route), intent(in) :: route
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_RouteHandle), intent(in) :: routehandle
+      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -633,8 +633,8 @@ end subroutine
 !     \item [array]
 !           {\tt ESMF\_Array} containing data to be halo'd.
 !     \item [route]
-!           {\tt ESMF\_Route} has been precomputed.
-!     \item [{[async]}]
+!           {\tt ESMF\_RouteHandle} has been precomputed.
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
@@ -650,6 +650,7 @@ end subroutine
       integer :: status         ! local error status
       logical :: rcpresent      ! did user specify rc?
       type(ESMF_LocalArray) :: local_array
+      type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -659,30 +660,33 @@ end subroutine
         rc = ESMF_FAILURE
       endif
  
+      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+
       ! Execute the communications call.
       local_array = array
       call ESMF_RouteRun(route, local_array, local_array, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayHaloRun: RouteRun returned failure"
+        print *, "ERROR in ArrayHalo: RouteRun returned failure"
         return
       endif
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayHaloRun
+        end subroutine ESMF_ArrayHaloNew
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayHaloPrecompute(array, grid, route, datamap, async, rc)
+      subroutine ESMF_ArrayHaloStore(array, grid, datamap, routehandle, &
+                                     blocking, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Route), intent(out) :: route
-      type(ESMF_DataMap), intent(in), optional :: datamap
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_DataMap), intent(in) :: datamap
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -700,7 +704,10 @@ end subroutine
 !     \item [datamap]
 !           {\tt ESMF\_DataMap} which matches how this array relates to the
 !           given grid.
-!     \item [{[async]}]
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} is returned to be used during the
+!           execution of the Halo.
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
@@ -720,6 +727,7 @@ end subroutine
       type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
+      type(ESMF_Route) :: route
       integer, dimension(ESMF_MAXGRIDDIM) :: global_count, decompids
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
       integer, dimension(:,:), allocatable :: global_start
@@ -815,6 +823,9 @@ end subroutine
                                         global_count, layout, periodic, status)
       endif
 
+      ! and set route into routehandle object
+      call ESMF_RouteHandleSet(routehandle, route1=route, rc=status)
+
       ! get rid of temporary arrays
       if (allocated(global_start)) deallocate(global_start, stat=status)
       if (associated(     src_AI)) deallocate(src_AI, stat=status)
@@ -825,7 +836,36 @@ end subroutine
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayHaloPrecompute
+        end subroutine ESMF_ArrayHaloStore
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayHaloRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Release the information stored about this Halo operation.
+!
+!     \begin{description}
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} associated with Halo that is no longer
+!           needed.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!
+!EOP
+
+      call ESMF_RouteHandleDestroy(routehandle, rc=rc)
+
+      end subroutine ESMF_ArrayHaloRelease
 
 !------------------------------------------------------------------------------
 !BOP
