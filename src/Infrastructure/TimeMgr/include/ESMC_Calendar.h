@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.45 2004/12/03 00:58:00 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.46 2005/01/07 00:13:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -177,11 +177,11 @@ class ESMC_Calendar {
     //  (TMG 2.4.5, 2.5.6)
     int ESMC_CalendarConvertToTime(ESMF_KIND_I8 yy, int mm, int dd,
                                    ESMF_KIND_I8 d, ESMC_BaseTime *t) const;
-    int ESMC_CalendarConvertToDate(const ESMC_BaseTime *t,
-                             ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
-                             int *mm=0, int *dd=0,
-                             ESMF_KIND_I4 *d=0, ESMF_KIND_I8 *d_i8=0,
-                             ESMF_KIND_R8 *d_r8=0) const;
+    int ESMC_CalendarConvertToDate(ESMC_BaseTime *t,
+                                   ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
+                                   int *mm=0, int *dd=0,
+                                   ESMF_KIND_I4 *d=0, ESMF_KIND_I8 *d_i8=0,
+                                   ESMF_KIND_R8 *d_r8=0) const;
 
     ESMC_Time ESMC_CalendarIncrement(const ESMC_Time *time,
                                      const ESMC_TimeInterval &timeinterval)

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.79 2004/12/10 22:49:04 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.80 2005/01/07 00:13:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.79 2004/12/10 22:49:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.80 2005/01/07 00:13:11 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -1117,7 +1117,7 @@ int ESMC_Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      const ESMC_BaseTime *t,                                          // in
+      ESMC_BaseTime *t,                                                // in/out
       ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8, int *mm, int *dd,         // out
       ESMF_KIND_I4 *d, ESMF_KIND_I8 *d_i8, ESMF_KIND_R8 *d_r8) const { // out
 //
@@ -1194,23 +1194,30 @@ int ESMC_Calendar::count=0;
 
             // convert Julian days to Gregorian date
             // Julian days (jdays) => Gregorian date (yy, mm, dd)
-            if (dd != ESMC_NULL_POINTER || mm != ESMC_NULL_POINTER ||
+
+            int day, month; 
+            ESMF_KIND_I8 year;
+            if (dd != ESMC_NULL_POINTER || mm    != ESMC_NULL_POINTER ||
                 yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
+
               ESMF_KIND_I8 templ = jdays + 68569;
               ESMF_KIND_I8 tempn = (4 * templ) / 146097;
-                            templ = templ - (146097 * tempn + 3) / 4;
+                           templ = templ - (146097 * tempn + 3) / 4;
               ESMF_KIND_I8 tempi = (4000 * (templ + 1)) / 1461001;
-                            templ = templ - (1461 * tempi) / 4 + 31;
+                           templ = templ - (1461 * tempi) / 4 + 31;
               ESMF_KIND_I8 tempj = (80 * templ) / 2447;
-              if (dd != ESMC_NULL_POINTER) {
-                *dd = templ - (2447 * tempj) / 80;
-              }
-              templ = tempj / 11;
-              if (mm != ESMC_NULL_POINTER) {
-                *mm = tempj + 2 - (12 * templ);
-              }
 
-              ESMF_KIND_I8 year = 100 * (tempn - 49) + tempi + templ;
+              day   = templ - (2447 * tempj) / 80;
+              templ = tempj / 11;
+              month = tempj + 2 - (12 * templ);
+              year  = 100 * (tempn - 49) + tempi + templ;
+
+              if (dd != ESMC_NULL_POINTER) {
+                *dd = day;
+              }
+              if (mm != ESMC_NULL_POINTER) {
+                *mm = month;
+              }
               if (yy != ESMC_NULL_POINTER) {
                 if (year >= INT_MIN && year <= INT_MAX) {
                   *yy = (ESMF_KIND_I4) year;  // >= 32-bit
@@ -1226,6 +1233,47 @@ int ESMC_Calendar::count=0;
               if (yy_i8 != ESMC_NULL_POINTER) {
                 *yy_i8 = year;    // >= 64-bit
               }
+            }
+
+            // remove smallest requested date unit from given time for
+            // subsequent getting of remaining hours, minutes, seconds units
+            if (dd   != ESMC_NULL_POINTER || d    != ESMC_NULL_POINTER ||
+                d_i8 != ESMC_NULL_POINTER || d_r8 != ESMC_NULL_POINTER) {
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() % secondsPerDay);
+            } else if (mm != ESMC_NULL_POINTER) {
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() % secondsPerDay
+                                   + ((day-1) * secondsPerDay));
+            } else if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
+              // TODO: use native C++ Set(), not F90 entry point
+              ESMC_CalendarType calType = ESMC_CAL_GREGORIAN;
+              ESMC_Time begnningOfYear; 
+              begnningOfYear.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                                           &year, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           &calType);
+              ESMC_TimeInterval secondsOfTheYear;
+              secondsOfTheYear = *t - begnningOfYear;
+              ESMF_KIND_I8 seconds;
+              secondsOfTheYear.ESMC_TimeIntervalGet(ESMC_NULL_POINTER,
+                                                    ESMC_NULL_POINTER,
+                                                    ESMC_NULL_POINTER,
+                                                    ESMC_NULL_POINTER,
+                                                    ESMC_NULL_POINTER,
+                                                    ESMC_NULL_POINTER,
+                                                    ESMC_NULL_POINTER,
+                                                    ESMC_NULL_POINTER,
+                                                    ESMC_NULL_POINTER,
+                                                    &seconds);
+              t->ESMC_FractionSetw(seconds);
             }
 
             break;
@@ -1299,6 +1347,18 @@ int ESMC_Calendar::count=0;
               *d_r8 = (ESMF_KIND_R8) tmpS / (ESMF_KIND_R8) secondsPerDay;
             }
 
+            // remove smallest requested date unit from given time for
+            // subsequent getting of remaining hours, minutes, seconds units
+            if (dd   != ESMC_NULL_POINTER || d    != ESMC_NULL_POINTER ||
+                d_i8 != ESMC_NULL_POINTER || d_r8 != ESMC_NULL_POINTER) {
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() % secondsPerDay);
+            } else if (mm != ESMC_NULL_POINTER) {
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() % secondsPerDay
+                                   + ((day-1) * secondsPerDay));
+            } else if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() % secondsPerYear);
+            }
+
             break;
         }
         // convert Time => 360 Day Date
@@ -1366,6 +1426,18 @@ int ESMC_Calendar::count=0;
               *d_r8 = (ESMF_KIND_R8) tmpS / (ESMF_KIND_R8) secondsPerDay;
             }
 
+            // remove smallest requested date unit from given time for
+            // subsequent getting of remaining hours, minutes, seconds units
+            if (dd   != ESMC_NULL_POINTER || d    != ESMC_NULL_POINTER ||
+                d_i8 != ESMC_NULL_POINTER || d_r8 != ESMC_NULL_POINTER) {
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() % secondsPerDay);
+            } else if (mm != ESMC_NULL_POINTER) {
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() % secondsPerDay
+                                   + (((dayOfYear-1) % 30) * secondsPerDay));
+            } else if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() % secondsPerYear);
+            }
+
             break;
         }
         // convert Time => Julian Date
@@ -1396,6 +1468,14 @@ int ESMC_Calendar::count=0;
               *d_r8 = (ESMF_KIND_R8) t->ESMC_FractionGetw() /
                                      (ESMF_KIND_R8) secondsPerDay;
             }
+
+            // if days specified, remove them from given time for
+            // subsequent getting of remaining hours, minutes, seconds units
+            if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER ||
+                d_r8 != ESMC_NULL_POINTER) {
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() % secondsPerDay);
+            }
+
             break;
         }
         case ESMC_CAL_CUSTOM:
