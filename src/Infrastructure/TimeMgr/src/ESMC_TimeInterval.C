@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.35 2003/09/04 18:57:57 cdeluca Exp $
+// $Id: ESMC_TimeInterval.C,v 1.36 2003/09/10 03:39:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.35 2003/09/04 18:57:57 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.36 2003/09/10 03:39:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -97,6 +97,10 @@
     // TODO: ensure initialization if called via F90 interface;
     //       cannot call constructor, because destructor is subsequently
     //       called automatically, returning initialized values to garbage.
+
+    // save current value to restore in case of failure
+    ESMC_TimeInterval saveTimeInterval = *this;
+
     this->s  = 0;
     this->sN = 0;
     this->sD = 1;
@@ -144,7 +148,12 @@
     ESMC_BaseTimeSet(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
                      ms_r8, us_r8, ns_r8, sN, sD);
 
-    return(ESMC_TimeIntervalValidate());
+    if (ESMC_TimeIntervalValidate() == ESMF_SUCCESS) return(ESMF_SUCCESS);
+    else {
+      // restore previous value
+      *this = saveTimeInterval;
+      return(ESMF_FAILURE);
+    }
 
  }  // end ESMC_TimeIntervalSet
 
@@ -1147,9 +1156,10 @@
     if (timeString == ESMC_NULL_POINTER) return (ESMF_FAILURE);
 
     ESMF_KIND_I8 d_i8, s_i8;
-    int h, m;
+    ESMF_KIND_I4 h, m;
+
     // TODO: use native C++ Get, not F90 entry point, when ready
-    ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+    ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                          ESMC_NULL_POINTER, &d_i8, &h, &m,
                          ESMC_NULL_POINTER, &s_i8);
