@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.28 2003/03/02 19:02:21 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.29 2003/03/04 14:59:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@
       use ESMF_LayoutMod
       use ESMF_ClockMod
       use ESMF_StateMod
+      use ESMF_XPacketMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -102,6 +103,7 @@
          type(ESMF_State) :: exportstate               ! export state
          type(ESMF_State), dimension(:), pointer :: statelist  ! coupling list
          integer :: statecount                         ! length of statelist
+         type(ESMF_XPacket) :: xpacket                 ! exchange packets
          type(ESMF_Layout) :: layout                   ! component layout
          type(ESMF_Clock) :: clock                     ! component clock
          character(len=ESMF_MAXSTR) :: filepath        ! resource filepath
@@ -158,7 +160,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.28 2003/03/02 19:02:21 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.29 2003/03/04 14:59:50 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -205,7 +207,7 @@ end interface
 
 ! !INTERFACE:
       function ESMF_CompCreateNew(name, layout, ctype, mtype, clock, &
-                                                                 filepath, rc)
+                                                            filepath, parent, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Comp) :: ESMF_CompCreateNew
@@ -217,6 +219,7 @@ end interface
       type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: filepath
+      type(ESMF_Comp), intent(in), optional :: parent
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -248,6 +251,9 @@ end interface
 !   \item[{[filepath]}]
 !    Directory where component-specfic configuration or data files
 !    are located.
+!
+!   \item[{[parent]}]
+!    Parent component if nested components.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -284,7 +290,7 @@ end interface
 
         ! Call construction method to initialize component internals
         call ESMF_CompConstruct(compclass, name, layout, ctype, mtype, &
-                                                     clock, filepath, status)
+                                                     clock, filepath, parent, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
@@ -363,7 +369,7 @@ end interface
 
 ! !INTERFACE:
       subroutine ESMF_CompConstruct(compp, name, layout, ctype, mtype, &
-                                                          clock, filepath, rc)
+                                                      clock, filepath, parent, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -373,6 +379,7 @@ end interface
       type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: filepath
+      type(ESMF_Comp), intent(in), optional :: parent
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -405,6 +412,9 @@ end interface
 !   \item[{[filepath]}]
 !    Directory where component-specfic configuration or data files
 !    are located.
+!
+!   \item[{[parent]}]
+!    Parent component if nested.
 !
 !   \item[{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1148,14 +1158,12 @@ end interface
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-       character (len=6) :: defaultopts
        integer :: status                       ! local error status
        logical :: rcpresent                    ! did user specify rc?
+       character (len=6) :: defaultopts
+       character (len=ESMF_MAXSTR) :: cname
 
-!      Initialize return code; assume failure until success is certain
+       ! Initialize return code; assume failure until success is certain
        status = ESMF_FAILURE
        rcpresent = .FALSE.
        if (present(rc)) then
@@ -1165,19 +1173,18 @@ end interface
 
        defaultopts = "brief"
 
-!      ! Interface to call the C++ print code
+       ! Parse options and decide what to print
        if(present(options)) then
-           !call c_ESMC_CompPrint(component, options, status) 
-       else
-           !call c_ESMC_CompPrint(component, defaultopts, status) 
+           ! TODO:  decide what to print
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "Component print error"
-         return
-       endif
+       call ESMF_GetName(component%compp%base, cname, status)
+       print *, "Component print:"
+       print *, "  name = ", trim(cname)
+       
+       ! TODO: add more info here
 
-!      set return values
+       ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
 
        end subroutine ESMF_CompPrint
