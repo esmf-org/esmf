@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2003/03/24 22:56:24 nscollins Exp $
+! $Id: user_coupler.F90,v 1.5 2003/04/01 23:49:00 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -38,22 +38,21 @@
 !   !   private to the module.
  
     subroutine usercpl_register(comp, rc)
-        type(ESMF_Comp) :: comp
+        type(ESMF_CplComp) :: comp
         integer :: rc
 
-        print *, "in user register routine"
+        print *, "in user setservices routine"
 
         ! Register the callback routines.
 
-        call ESMF_CompSetRoutine(comp, ESMF_CALLINIT, 1, user_init, rc)
-        call ESMF_CompSetRoutine(comp, ESMF_CALLRUN, 1, user_run, rc)
-        call ESMF_CompSetRoutine(comp, ESMF_CALLFINAL, 1, user_final, rc)
+        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
+                                                  ESMF_SINGLEPHASE, rc)
+        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
+                                                  ESMF_SINGLEPHASE, rc)
+        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
+                                                  ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
-
-        ! If desired, this routine can register a private data block
-        ! to be passed in to the routines above:
-        ! call ESMF_CompSetData(comp, mydatablock, rc)
 
     end subroutine
 
@@ -62,24 +61,22 @@
 !   !   Initialization routine.
  
     
-    subroutine user_init(comp, rc)
-        type(ESMF_Comp) :: comp
-        integer :: rc
+    subroutine user_init(comp, statelist, clock, rc)
+        type(ESMF_CplComp) :: comp
+        type(ESMF_State), optional :: statelist(*)
+        type(ESMF_Clock), optional :: clock
+        integer, optional :: rc
 
 !     ! Local variables
-        type(ESMF_State) :: mystatelist(2)
         type(ESMF_Field) :: humidity
 
         print *, "User Coupler Init starting"
+        call ESMF_StatePrint(statelist(1), "", rc)
+        call ESMF_StatePrint(statelist(2), rc=rc)
+
+        !print *, "statelist size is ", size(statelist, 1)
 
         ! This is where the model specific setup code goes.  
-
-        ! Query component for information.
-        call ESMF_CompGet(comp, statelist=mystatelist, rc=rc)
- 
-        ! Print initial states
-        call ESMF_StatePrint(mystatelist(1), rc=rc)
-        call ESMF_StatePrint(mystatelist(2), rc=rc)
 
         print *, "User Coupler Init returning"
    
@@ -90,12 +87,14 @@
 !   !  The Run routine where data is coupled.
 !   !
  
-    subroutine user_run(comp, rc)
-        type(ESMF_Comp) :: comp
-        integer :: rc
+    subroutine user_run(comp, statelist, clock, rc)
+        type(ESMF_CplComp) :: comp
+        type(ESMF_State), optional :: statelist(*)
+        type(ESMF_Clock), optional :: clock
+        integer, optional :: rc
 
 !     ! Local variables
-        type(ESMF_State) :: mystatelist(2), mysource, mydest
+        type(ESMF_State) :: mysource, mydest
         type(ESMF_Field) :: humidity1, humidity2
         type(ESMF_DELayout) :: cpllayout
 
@@ -103,12 +102,15 @@
         integer :: status
 
         print *, "User Coupler Run starting"
+        call ESMF_StatePrint(statelist(1), "", rc)
+        call ESMF_StatePrint(statelist(2), "", rc)
 
-        ! Get information from the component.
-        call ESMF_CompGet(comp, statelist=mystatelist, layout=cpllayout, &
-                                                                  rc=status)
-        mysource = mystatelist(1)
-        mydest = mystatelist(2)
+        ! Get layout from coupler component
+        call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
+
+        ! Make some aliases so it's easier to see what direction data is going.
+        mysource = statelist(1)
+        mydest = statelist(2)
 
         ! Get input data
         call ESMF_StatePrint(mysource, rc=status)
@@ -140,13 +142,17 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, rc)
-        type(ESMF_Comp) :: comp
-        integer :: rc
+    subroutine user_final(comp, statelist, clock, rc)
+        type(ESMF_CplComp) :: comp
+        type(ESMF_State), optional :: statelist(*)
+        type(ESMF_Clock), optional :: clock
+        integer, optional :: rc
 
 !     ! Local variables
 
         print *, "User Coupler Final starting"
+        call ESMF_StatePrint(statelist(1), "", rc)
+        call ESMF_StatePrint(statelist(2), "", rc)
     
         print *, "User Coupler Final returning"
    

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.6 2003/03/10 05:40:49 cdeluca Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.7 2003/04/01 23:49:00 nscollins Exp $
 !
 ! System test code #63029
 
@@ -26,6 +26,7 @@
     use ESMF_GridMod
     use ESMF_DataMapMod
     use ESMF_FieldMod
+    use ESMF_StateMod
     use ESMF_CompMod
     
     use user_model
@@ -37,7 +38,8 @@
     integer :: de_id, rc
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_DELayout) :: layout1 
-    type(ESMF_Comp) :: comp1
+    type(ESMF_GridComp) :: comp1
+    type(ESMF_State) :: imp, exp
         
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -56,13 +58,12 @@
     layout1 = ESMF_DELayoutCreate(2, 2, delist, ESMF_XFAST, rc)
 
     cname = "System Test #63029"
-    comp1 = ESMF_CompCreate(cname, layout=layout1, ctype=ESMF_GRIDCOMP, &
-                      mtype=ESMF_ATM, filepath="/usr/local", rc=rc)
+    comp1 = ESMF_GridCompCreate(cname, layout=layout1, mtype=ESMF_ATM, rc=rc)
 
 !   Figure out our local processor id
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
-    call ESMF_CompPrint(comp1)
+    call ESMF_GridCompPrint(comp1)
 
     print *, "Comp Create finished, name = ", trim(cname)
 
@@ -72,7 +73,7 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      call ESMF_CompRegister(comp1, user_register, rc)
+      call ESMF_GridCompSetServices(comp1, user_register, rc)
       print *, "Comp Register finished, rc= ", rc
 
 !-------------------------------------------------------------------------
@@ -81,7 +82,10 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-      call ESMF_CompInitialize(comp1, rc)
+      imp = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc)
+      exp = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc)
+
+      call ESMF_GridCompInitialize(comp1, imp, exp, rc=rc)
       print *, "Comp Initialize finished"
  
 !-------------------------------------------------------------------------
@@ -90,14 +94,15 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-      call ESMF_CompRun(comp1, rc)
+      call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
       print *, "Comp Run returned first time"
 
-      call ESMF_CompRun(comp1, rc)
+      call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
       print *, "Comp Run returned second time"
  
-      call ESMF_CompRun(comp1, rc)
+      call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
       print *, "Comp Run returned third time"
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Finalize section
@@ -105,7 +110,8 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_CompFinalize(comp1, rc)
+      call ESMF_GridCompFinalize(comp1, imp, exp, rc=rc)
+
 
       print *, "-----------------------------------------------------------------"
       print *, "-----------------------------------------------------------------"
@@ -123,7 +129,7 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_CompDestroy(comp1, rc)
+      call ESMF_GridCompDestroy(comp1, rc)
       call ESMF_DELayoutDestroy(layout1, rc)
       print *, "All Destroy routines done"
 

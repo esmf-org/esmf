@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2003/03/24 22:56:25 nscollins Exp $
+! $Id: user_model2.F90,v 1.5 2003/04/01 23:49:00 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -34,6 +34,14 @@
     
     public userm2_register
         
+    type mylocaldata
+      integer :: dataoffset
+    end type
+
+    type wrapper
+      type(mylocaldata), pointer :: ptr
+    end type
+
     contains
 
 !-------------------------------------------------------------------------
@@ -42,22 +50,35 @@
 !   !   private to the module.
  
     subroutine userm2_register(comp, rc)
-        type(ESMF_Comp) :: comp
+        type(ESMF_GridComp) :: comp
         integer :: rc
+
+        ! local variables
+        type(mylocaldata), pointer :: mydatablock
+        type(wrapper) :: wrap
 
         print *, "In user register routine"
 
         ! Register the callback routines.
 
-        call ESMF_CompSetRoutine(comp, ESMF_CALLINIT, 1, user_init, rc)
-        call ESMF_CompSetRoutine(comp, ESMF_CALLRUN, 1, user_run, rc)
-        call ESMF_CompSetRoutine(comp, ESMF_CALLFINAL, 1, user_final, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+                                            user_init, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+                                            user_run, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+                                            user_final, ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
 
-        ! If desired, this routine can register a private data block
-        ! to be passed in to the routines above:
-        ! call ESMF_CompSetData(comp, mydatablock, rc)
+
+        allocate(mydatablock)
+
+        mydatablock%dataoffset = 52
+
+        wrap%ptr => mydatablock
+        call ESMF_GridCompSetInternalState(comp, wrap, rc)
+
+        print *, "Registered Private Data block for Internal State"
 
     end subroutine
 
@@ -66,12 +87,13 @@
 !   !   Initialization routine.
  
     
-    subroutine user_init(comp, rc)
-        type(ESMF_Comp) :: comp
-        integer :: rc
+    subroutine user_init(comp, importstate, exportstate, clock, rc)
+        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_State), intent(inout), optional :: importstate, exportstate
+        type(ESMF_Clock), intent(in), optional :: clock
+        integer, intent(out), optional :: rc
 
 !     ! Local variables
-        type(ESMF_State) :: myimport
         type(ESMF_Field) :: humidity
         type(ESMF_DELayout) :: layout
 
@@ -91,12 +113,9 @@
 
         print *, "User Comp Init starting"
 
-        ! This is where the model specific setup code goes.  
-
         ! Initially import state contains a field with a grid but no data.
-        call ESMF_CompGet(comp, import=myimport, rc=rc)
 
-        ! Add a "humidity" field to the export state.
+        ! Add a "humidity" field to the import state.
         i_max = 40
         j_max = 20
         horz_gridtype = ESMF_GridType_XY
@@ -139,8 +158,8 @@
                                          name="humidity", rc=rc)
 
 
-        call ESMF_StateAddData(myimport, humidity, rc)
-        call ESMF_StatePrint(myimport, rc=rc)
+        call ESMF_StateAddData(importstate, humidity, rc)
+        call ESMF_StatePrint(importstate, rc=rc)
 
         print *, "User Comp Init returning"
    
@@ -151,24 +170,22 @@
 !   !  The Run routine where data is computed.
 !   !
  
-    subroutine user_run(comp, rc)
-        type(ESMF_Comp) :: comp
-        integer :: rc
+    subroutine user_run(comp, importstate, exportstate, clock, rc)
+        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_State), intent(inout), optional :: importstate, exportstate
+        type(ESMF_Clock), intent(in), optional :: clock
+        integer, intent(out), optional :: rc
 
 !     ! Local variables
-        type(ESMF_State) :: myimport
         type(ESMF_Field) :: humidity
         type(ESMF_Array) :: array1
         integer :: status
 
         print *, "User Comp Run starting"
 
-        ! Something to show we are running on different procs
-        call ESMF_CompGet(comp, import=myimport, rc=status)
-
         ! Get information from the component.
-        call ESMF_StatePrint(myimport, rc=status)
-        call ESMF_StateGetData(myimport, "humidity", humidity, rc=status)
+        call ESMF_StatePrint(importstate, rc=status)
+        call ESMF_StateGetData(importstate, "humidity", humidity, rc=status)
         call ESMF_FieldPrint(humidity, "", rc=status)
     
 
@@ -189,14 +206,31 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, rc)
-        type(ESMF_Comp) :: comp
-        integer :: rc
+    subroutine user_final(comp, importstate, exportstate, clock, rc)
+        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_State), intent(inout), optional :: importstate, exportstate
+        type(ESMF_Clock), intent(in), optional :: clock
+        integer, intent(out), optional :: rc
 
-!     ! Local variables
+        ! Local variables
+        integer :: status
+        type(mylocaldata), pointer :: mydatablock
+        type(wrapper) :: wrap
 
-        print *, "User Comp Final starting"
-    
+        print *, "User Comp Final starting"  
+
+        ! Get our local info
+        nullify(wrap%ptr)
+        mydatablock => wrap%ptr
+        
+        call ESMF_GridCompGetInternalState(comp, wrap, status)
+
+        mydatablock => wrap%ptr
+        print *, "before deallocate, dataoffset = ", mydatablock%dataoffset
+        deallocate(mydatablock, stat=status)
+        print *, "deallocate returned ", status
+        nullify(wrap%ptr)
+
 
         print *, "User Comp Final returning"
    
