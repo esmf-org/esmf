@@ -1,4 +1,4 @@
-# $Id: makefile.tests,v 1.1 2003/02/28 01:05:04 eschwab Exp $
+# $Id: makefile.tests,v 1.2 2003/03/04 17:39:51 flanigan Exp $
 
 ALL:  tests
 
@@ -12,7 +12,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/<Comp>/tests
 
 TESTEXAMPLES_3  = \
@@ -26,7 +25,9 @@ TESTEXAMPLES_9  = \
 EXAMPLESF       = ESMF_<Class>Test.F90
 EXAMPLESC       = ESMC_<Class>Test.C
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include ${ESMF_DIR}/makefile
+
+DIRS	  = 
 
 tests test: ESMF_<Class>Test ESMC_<Class>Test
 

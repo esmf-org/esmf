@@ -1,16 +1,19 @@
-# $Id: makefile.comp,v 1.1 2002/10/08 23:06:38 eschwab Exp $
+# $Id: makefile.comp,v 1.2 2003/03/04 17:39:50 flanigan Exp $
 
-# the DIRS line needs to contain all subdirectories which exist 
-#  directly below this directory, and have either library,
-#  example/test code, or documents which need to be generated.
-DIRS	  = src interface examples doc
 
 # this needs to be the path of this directory relative to the
 # top level esmf directory.
 LOCDIR	  = src/Infrastructure/<Comp>/
 
 # leave this line alone.
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include ${ESMF_DIR}/makefile
+
+
+# the DIRS line needs to contain all subdirectories which exist 
+#  directly below this directory, and have either library,
+#  example/test code, or documents which need to be generated.
+DIRS	  = src interface examples doc
+
 
 
 
