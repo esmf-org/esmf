@@ -138,6 +138,19 @@ application may itself be composed of other coupled systems.}
 \scalebox{0.7}{\includegraphics{CouplerScaling.eps}}
 \end{figure}
 
+\subsubsection{System startup}
+
+The basic startup procedure for an ESMF application is shown in figure \ref{fig:ESMFApplicationMain}. This system boot phase 
+begins by creating the top-level in figure \ref{fig:couplerscaling}. Becasue any ESMF component could reside at the top-level
+all ESMF components are created to be consistent with the boot sequence shown in figure \ref{fig:ESMFApplicationMain}.
+
+\begin{figure}
+\caption[{ESMF Boot Up Stage}]{The basic startup procedure for
+all ESMF applications.}
+\label{fig:ESMFApplicationMain}
+\scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
+\end{figure}
+
 \subsection{Flow of Control}
 \label{sec:controlflow}
 {\tt Gridded components} have few responsibilities with respect to coupling
