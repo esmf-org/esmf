@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.7 2003/03/11 17:12:45 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.8 2003/03/11 22:57:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,19 +47,12 @@
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
 
 // !PUBLIC TYPES:
- class ESMC_XPacketConfig;
  class ESMC_XPacket;
 
 // !PRIVATE TYPES:
 
- // class configuration type
- class ESMC_XPacketConfig {
-   private:
- //   < insert resource items here >
- };
-
  // class declaration type
- class ESMC_XPacket : public ESMC_Base {    // inherits from ESMC_Base class
+ class ESMC_XPacket {    // does *not* inherit from base.
 
    private:
      // one of these per memory transfer
@@ -74,49 +67,26 @@
 //
 
   public:
- // the following methods apply to deep classes only
- // ESMC_XPacketCreate and ESMC_XPacketDestroy are declared below,
- // outside the ESMC_XPacket declaration
-    int ESMC_XPacketConstruct(int arg1);      // internal only, deep class
-    int ESMC_XPacketDestruct(void);           // internal only, deep class
-
- // optional configuration methods
-    int ESMC_XPacketGetConfig(ESMC_XPacketConfig *config) const;
-    int ESMC_XPacketSetConfig(const ESMC_XPacketConfig *config);
+    int ESMC_XPacketInit(int rank, int left, int right, int *strides, int *num);
 
  // accessor methods for class members
     //int ESMC_XPacketGet(<value type> *value) const;
     //int ESMC_XPacketSet(<value type>  value);
-    
- // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_XPacketValidate(const char *options) const;
-    int ESMC_XPacketPrint(const char *options) const;
 
  // native C++ constructors/destructors
 	ESMC_XPacket(void);
 	~ESMC_XPacket(void);
   
- // < declare the rest of the public interface methods here >
   
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private: 
 //
- // < declare private interface methods here >
 //
 //EOP
 //-----------------------------------------------------------------------------
 
  };   // end class ESMC_XPacket
 
-// Create and Destroy are declared as class helper functions (not methods)
-// since they create and destroy an ESMC_XPacket object itself. E.g. if Create
-// were a method, the ESMC_XPacket object on whose behalf it was being invoked
-// would need to already exist!  These functions are supersets of C++ new
-// and delete; they perform allocation/deallocation specialized to
-// an ESMC_XPacket object.
-
- ESMC_XPacket *ESMC_XPacketCreate(int arg1, int *rc);// interface only, deep class
- int ESMC_XPacketDestroy(ESMC_XPacket *xpacket); // interface only, deep class
 
  #endif  // ESMC_XPacket_H

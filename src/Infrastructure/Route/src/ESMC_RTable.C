@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.4 2003/03/11 20:21:00 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.5 2003/03/11 22:59:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.4 2003/03/11 20:21:00 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.5 2003/03/11 22:59:42 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -52,8 +52,8 @@
 //     pointer to newly allocated ESMC_RTable
 //
 // !ARGUMENTS:
-      int mype,
-      int pecount, 
+      int myde,
+      int decount, 
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -116,8 +116,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int mype,
-      int pecount) { 
+      int myde,
+      int decount) { 
 // 
 // !DESCRIPTION: 
 //      ESMF routine which fills in the contents of an already
@@ -132,8 +132,8 @@
 
     int i;
 
-    entrycount = pecount;
-    my_peid = mype;
+    entrycount = decount;
+    my_deid = myde;
 
     // TODO: this is a fully instantiated table, one slot per possible
     // destination processor.  if this table size gets too large, it can
@@ -142,7 +142,7 @@
     // implemented to get feedback about how well it works.
 
     for (i=0; i<entrycount; i++) {
-        entry[i].dest_peid = i;
+        entry[i].dest_deid = i;
         entry[i].xpcount = 0;
         entry[i].base_addr = NULL;
         entry[i].xp = NULL;
@@ -181,55 +181,6 @@
 
  } // end ESMC_RTableDestruct
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_RTableGetConfig - get configuration info from a RTable
-//
-// !INTERFACE:
-      int ESMC_RTable::ESMC_RTableGetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_RTableConfig *config) const {  // out - resources
-//
-// !DESCRIPTION:
-//    Returns the set of resources the RTable object was configured with.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_RTableGetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_RTableSetConfig - set configuration info for a RTable
-//
-// !INTERFACE:
-      int ESMC_RTable::ESMC_RTableSetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const ESMC_RTableConfig *config) {     // in - resources
-//
-// !DESCRIPTION:
-//    Configures the RTable object with set of resources given.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_RTableSetConfig
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -347,7 +298,7 @@
 //    none
 //
 // !ARGUMENTS:
-      int pecount) {
+      int decount) {
 //
 // !DESCRIPTION:
 //

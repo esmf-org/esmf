@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.5 2003/03/11 03:01:03 cdeluca Exp $
+// $Id: ESMC_XPacket.C,v 1.6 2003/03/11 23:02:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.5 2003/03/11 03:01:03 cdeluca Exp $";
+              "$Id: ESMC_XPacket.C,v 1.6 2003/03/11 23:02:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -44,24 +44,22 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_XPacketCreate - Create a new XPacket
+// !IROUTINE:  ESMC_XPacketInit - Initialize an XPacket
 //
 // !INTERFACE:
-      ESMC_XPacket *ESMC_XPacketCreate(
+      int ESMC_XPacket :: ESMC_XPacketInit(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_XPacket
+//     integer return code
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int *rc) {           // out - return code
+      int rank,
+      int left,
+      int right,
+      int *strides,
+      int *num) {
 //
 // !DESCRIPTION:
-//      Create a new XPacket from ... Allocates memory for a new XPacket
-//      object and uses the internal routine ESMC_XPacketConstruct to
-//      initialize it. 
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
 //
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_XPacket.h)
@@ -69,161 +67,18 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-//
-//  code goes here
-//
+    this->rank = rank;
+    this->left = left;
+    this->right = right;
+    for (int i=0; i<rank; i++) {
+      this->strides[i] = strides[i];
+      this->num[i] = num[i];
+    }
 
-    return new ESMC_XPacket;
+    return ESMF_SUCCESS;
 
- } // end ESMC_XPacketCreate
+ } // end ESMC_XPacketInit
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XPacketDestroy - free a XPacket created with Create
-//
-// !INTERFACE:
-      int ESMC_XPacketDestroy(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_XPacket *xpacket) {    // in - xpacket object to destroy
-//
-// !DESCRIPTION:
-//      ESMF routine which destroys a XPacket object previously allocated
-//      via an ESMC_XPacketCreate routine. 
-//
-//      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC_XPacket.h)
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
-    return ESMF_FAILURE;
-
- } // end ESMC_XPacketDestroy
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XPacketConstruct - fill in an already allocated XPacket
-//
-// !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketConstruct(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int arg1) {          // in
-//
-// !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already
-//      allocated XPacket object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC_XPacketDestruct
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC_XPacketCreate, which calls
-//      ESMC_XPacketConstruct.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
-    return ESMF_FAILURE;
-
- } // end ESMC_XPacketConstruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XPacketDestruct - release resources associated w/a XPacket
-//
-// !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketDestruct(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMF routine which deallocates any space allocated by
-//      ESMF_XPacketConstruct, does any additional cleanup before the
-//      original XPacket object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC_XPacketDestroy, which calls
-//      ESMC_XPacketDestruct.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
-    return ESMF_FAILURE;
-
- } // end ESMC_XPacketDestruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XPacketGetConfig - get configuration info from a XPacket
-//
-// !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketGetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_XPacketConfig *config) const {  // out - resources
-//
-// !DESCRIPTION:
-//    Returns the set of resources the XPacket object was configured with.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
-    return ESMF_FAILURE;
-
- } // end ESMC_XPacketGetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XPacketSetConfig - set configuration info for a XPacket
-//
-// !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketSetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const ESMC_XPacketConfig *config) {     // in - resources
-//
-// !DESCRIPTION:
-//    Configures the XPacket object with set of resources given.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
-    return ESMF_FAILURE;
-
- } // end ESMC_XPacketSetConfig
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -280,63 +135,6 @@
     //return ESMF_FAILURE;
 
  //} // end ESMC_XPacketSet
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XPacketValidate - internal consistency check for a XPacket
-//
-// !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketValidate(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const char *options) const {    // in - validate options
-//
-// !DESCRIPTION:
-//      Validates that a XPacket is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-//
-//  code goes here
-//
-
-    return ESMF_FAILURE;
-
- } // end ESMC_XPacketValidate
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XPacketPrint - print contents of a XPacket
-//
-// !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketPrint(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const char *options) const {     //  in - print options
-//
-// !DESCRIPTION:
-//      Print information about a XPacket.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here
-//
-
-    return ESMF_FAILURE;
-
- } // end ESMC_XPacketPrint
 
 //-----------------------------------------------------------------------------
 //BOP

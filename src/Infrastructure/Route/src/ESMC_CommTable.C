@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.4 2003/03/11 20:20:59 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.5 2003/03/11 22:59:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_CommTable.C,v 1.4 2003/03/11 20:20:59 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_CommTable.C,v 1.5 2003/03/11 22:59:42 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -54,7 +54,7 @@
 //     pointer to newly allocated ESMC_CommTable
 //
 // !ARGUMENTS:
-      int mypeid,               // in
+      int mydeid,               // in
       int partnercount,         // in
       int *rc) {                // out - return code
 //
@@ -69,7 +69,7 @@
 //EOP
 // !REQUIREMENTS: 
 
-    ESMC_CommTable *newc = new ESMC_CommTable(mypeid, partnercount, rc);
+    ESMC_CommTable *newc = new ESMC_CommTable(mydeid, partnercount, rc);
 
     return newc;
 
@@ -115,7 +115,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int mypeid) {
+      int mydeid) {
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -128,7 +128,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    myid = mypeid;
+    myid = mydeid;
 
     return ESMF_SUCCESS;
 
@@ -283,7 +283,7 @@
 //    none
 //
 // !ARGUMENTS:
-      int mypeid,
+      int mydeid,
       int paircount,
       int *rc) {
 //
@@ -292,7 +292,7 @@
 //EOP
 // !REQUIREMENTS:
  
-    myid = mypeid;
+    myid = mydeid;
     commcount = paircount;
     commpartner = new int[commcount];
     commneeded = new int[commcount];

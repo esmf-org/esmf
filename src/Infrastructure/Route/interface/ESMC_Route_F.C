@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.1 2003/03/05 17:04:53 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.2 2003/03/11 22:57:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,6 +21,8 @@
 #include <string.h>
 #include "ESMC.h"
 #include "ESMC_Base.h"
+#include "ESMC_DELayout.h"
+#include "ESMC_Array.h"
 #include "ESMC_Route.h"
 //------------------------------------------------------------------------------
 //BOP
@@ -36,40 +38,34 @@
 extern "C" {
 
        // keep these for deep classes, or see init below for shallow
-       void FTN(c_esmc_routecreate)(ESMC_Route **ptr, int *arg1, int *arg2,
-                                                   int *arg3, int *status) {
-           *ptr = ESMC_RouteCreate(*arg1, *arg2, *arg3, status);
+       void FTN(c_esmc_routecreate)(ESMC_Route **ptr, ESMC_DELayout **layout, 
+                                                   int *status) {
+           *ptr = ESMC_RouteCreate(*layout, status);
        }
 
        void FTN(c_esmc_routedestroy)(ESMC_Route **ptr, int *status) {
            *status = ESMC_RouteDestroy(*ptr);
        }
 
-       // keep this for shallow classes, get rid of create/destroy above
-       void FTN(c_esmc_routeinit)(ESMC_Route **ptr, int *arg1, int *arg2,
-                                                   int *arg3, int *status) {
-           *status = (*ptr)->ESMC_RouteInit(*arg1, *arg2, *arg3);
+       //void FTN(c_esmc_routeget)(ESMC_Route **ptr, 
+       //                                  <value> *value, int *status) {
+       //    *status = (*ptr)->ESMC_RouteGet(&value);
+       //}
+
+       void FTN(c_esmc_routesetsend)(ESMC_Route **ptr, int *dest_de, 
+                             ESMC_Array **ap, ESMC_XPacket *xp, int *status) {
+           void *base_addr;
+
+           (*ap)->ESMC_ArrayGetBaseAddr(&base_addr);
+           *status = (*ptr)->ESMC_RouteSetSend(*dest_de, base_addr, xp);
        }
 
-       // for either shallow or deep classes, the following are needed. 
-       void FTN(c_esmc_routegetconfig)(ESMC_Route **ptr, 
-                                         ESMC_RouteConfig *config, int *status} {
-           *status = (*ptr)->ESMC_RouteGetConfig(&config);
-       }
+       void FTN(c_esmc_routesetrecv)(ESMC_Route **ptr, int *src_de, 
+                            ESMC_Array **ap, ESMC_XPacket *xp, int *status) {
+           void *base_addr;
 
-       void FTN(c_esmc_routesetconfig)(ESMC_Route **ptr, 
-                                         ESMC_RouteConfig *config, int *status} {
-           *status = (*ptr)->ESMC_RouteSetConfig(config);
-       }
-
-       void FTN(c_esmc_routeget)(ESMC_Route **ptr, 
-                                         <value> *value, int *status} {
-           *status = (*ptr)->ESMC_RouteGet(&value);
-       }
-
-       void FTN(c_esmc_routeset)(ESMC_Route **ptr, 
-                                         <value> *value, int *status} {
-           *status = (*ptr)->ESMC_RouteSet(value);
+           (*ap)->ESMC_ArrayGetBaseAddr(&base_addr);
+           *status = (*ptr)->ESMC_RouteSetRecv(*src_de, base_addr, xp);
        }
 
        void FTN(c_esmc_routevalidate)(ESMC_Route **ptr, char *opts, int *status) {

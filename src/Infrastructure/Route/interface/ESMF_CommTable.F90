@@ -1,4 +1,4 @@
-! $Id: ESMF_CommTable.F90,v 1.1 2003/03/10 23:20:24 nscollins Exp $
+! $Id: ESMF_CommTable.F90,v 1.2 2003/03/11 22:57:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,8 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF_Route.h>
+#include "ESMF.h"
+#include "ESMF_Route.h"
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_CommTableMod - One line general statement about this class
@@ -41,19 +42,7 @@
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
-!------------------------------------------------------------------------------
-!     ! ESMF_CommTableConfig
 !
-!     ! Description of ESMF_CommTableConfig
-
-      type ESMF_CommTableConfig
-      sequence
-      private
-        integer :: dummy
-!       < insert other class members here >
-      end type
-
-!------------------------------------------------------------------------------
 !     !  ESMF_CommTable
 !
 !     ! Description of ESMF_CommTable. 
@@ -61,21 +50,11 @@
       type ESMF_CommTable
       sequence
       private
-!       ! Pick 1 of the following 2 choices:
-!       ! If this is a shallow class, this must match exactly the C++
-!       ! class definition in size and order.
-        integer :: dummy1
-        integer :: dummy2
-!       < insert other class members here >
-
-!       ! If this is a deep class, the derived type contains only a 
-!       ! place to hold the C++ 'this' pointer
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
       end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_CommTableConfig
       public ESMF_CommTable
 !------------------------------------------------------------------------------
 !
@@ -91,11 +70,6 @@
       public ESMF_CommTableCreate                 ! interface only, deep class
       public ESMF_CommTableDestroy                ! interface only, deep class
 
-! the following routine applies to a shallow class
-      public ESMF_CommTableInit                   ! shallow class
-
-      public ESMF_CommTableGetConfig
-      public ESMF_CommTableSetConfig
       public ESMF_CommTableGet                    ! get and set values
       public ESMF_CommTableSet
  
@@ -110,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CommTable.F90,v 1.1 2003/03/10 23:20:24 nscollins Exp $'
+      '$Id: ESMF_CommTable.F90,v 1.2 2003/03/11 22:57:20 nscollins Exp $'
 
 !==============================================================================
 !
@@ -216,7 +190,7 @@
       subroutine ESMF_CommTableDestroy(commtable, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CommTable), intent(in) :: commtable   
+      type(ESMF_CommTable), intent(inout) :: commtable   
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
@@ -235,7 +209,6 @@
 ! !REQUIREMENTS: 
 
         ! local variables
-        type (ESMF_CommTable) :: commtable     ! new C++ CommTable
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
 
@@ -257,182 +230,12 @@
         endif
 
         ! nullify pointer
-        <class%this = ESMF_NULL_POINTER
+        commtable%this = ESMF_NULL_POINTER
 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CommTableDestroy
 
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CommTableInit - Initialize a CommTable 
-
-! !INTERFACE:
-      subroutine ESMF_CommTableInit(commtable, arg1, arg2, arg3, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CommTable), intent(in) :: commtable   
-      integer, intent(in) :: arg1                       
-      integer, intent(in) :: arg2                       
-      character (len = *), intent(in), optional :: arg3 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     ESMF routine which only initializes {\tt CommTable} values; it does not
-!     allocate any resources.  Define for shallow classes only, 
-!     for deep classes define and use routines Create/Destroy.
-!     Can be overloaded like ESMF_CommTableCreate via interface blocks.
-!
-!  The arguments are:
-!     \begin{description}
-!     \item[commtable]
-!          Class to be initialized.
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Call C++ Init code
-        call c_ESMC_CommTableInit(commtable, arg1, arg2, arg3, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable init error"
-          return  
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_CommTableInit
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CommTableGetConfig - Get configuration information from a CommTable
-
-! !INTERFACE:
-      subroutine ESMF_CommTableGetConfig(commtable, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CommTable), intent(in) :: commtable
-      integer, intent(out) :: config   
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     Returns the set of resources the CommTable object was configured with.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[commtable] 
-!          Class to be queried.
-!     \item[config]
-!          Configuration information.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Call C++  code
-        call c_ESMC_CommTableGetConfig(commtable, config, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable GetConfig error"
-          return  
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_CommTableGetConfig
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CommTableSetConfig - Set configuration information for a CommTable
-
-! !INTERFACE:
-      subroutine ESMF_CommTableSetConfig(commtable, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CommTable), intent(in) :: commtable
-      integer, intent(in) :: config   
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!     Configures the CommTable object with set of resources given.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[commtable] 
-!          Class to be configured.
-!     \item[config]
-!          Configuration information.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Call C++  code
-        call c_ESMC_CommTableSetConfig(commtable, config, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable SetConfig error"
-          return  
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_CommTableSetConfig
 
 !------------------------------------------------------------------------------
 !BOP
@@ -504,11 +307,12 @@
 ! !IROUTINE: ESMF_CommTableSet - Set values in a CommTable
 
 ! !INTERFACE:
-      subroutine ESMF_CommTableSet(CommTable, value, rc)
+      subroutine ESMF_CommTableSet(CommTable, value1, value2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CommTable), intent(in) :: commtable
-      integer, intent(in) :: value
+      integer, intent(in), optional :: value1
+      integer, intent(in), optional :: value2
       integer, intent(out), optional :: rc            
 
 !
@@ -569,11 +373,11 @@
 ! !IROUTINE: ESMF_CommTableValidate - Check internal consistency of a CommTable
 
 ! !INTERFACE:
-      subroutine ESMF_CommTableValidate(commtable, opt, rc)
+      subroutine ESMF_CommTableValidate(commtable, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CommTable), intent(in) :: commtable       
-      character (len=*), intent(in), optional :: opt    
+      character (len=*), intent(in), optional :: options    
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -583,7 +387,7 @@
 !     \begin{description}
 !     \item[commtable] 
 !          Class to be queried.
-!     \item[{[opt]}]
+!     \item[{[options]}]
 !          Validation options.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -627,11 +431,11 @@
 ! !IROUTINE: ESMF_CommTablePrint - Print the contents of a CommTable
 
 ! !INTERFACE:
-      subroutine ESMF_CommTablePrint(commtable, opt, rc)
+      subroutine ESMF_CommTablePrint(commtable, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CommTable), intent(in) :: commtable      
-      character (len=*), intent(in) :: opt      
+      character (len=*), intent(in), optional :: options      
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -641,7 +445,7 @@
 !     \begin{description}
 !     \item[commtable] 
 !          Class to be queried.
-!     \item[{[opt]}]
+!     \item[{[options]}]
 !          Print ptions that control the type of information and level of 
 !          detail.
 !     \item[{[rc]}] 

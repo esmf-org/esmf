@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.h,v 1.5 2003/03/11 20:20:56 nscollins Exp $
+// $Id: ESMC_CommTable.h,v 1.6 2003/03/11 22:57:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@
    // no need to distinguish between sender and receiver in this table.
 
    private:
-      int myid;            // this pe's id number
+      int myid;            // this de's id number
       int commcount;       // number of pairwise send/recvs
       int *commpartner;    // array of comm ids for communication partners
       int *commneeded;     // array of flags set if comm needed between partners
@@ -66,7 +66,7 @@
  // the following methods apply to deep classes only
  // ESMC_CommTableCreate and ESMC_CommTableDestroy are declared below,
  // outside the ESMC_CommTable declaration
-    int ESMC_CommTableConstruct(int mypeid);
+    int ESMC_CommTableConstruct(int mydeid);
     int ESMC_CommTableDestruct(void); 
 
  // accessor methods for class members
@@ -81,7 +81,7 @@
     int ESMC_CommTablePrint(const char *options) const;
 
  // native C++ constructors/destructors
-	ESMC_CommTable(int mypeid, int paircount, int *rc);
+	ESMC_CommTable(int mydeid, int paircount, int *rc);
 	ESMC_CommTable();
 	~ESMC_CommTable(void);
   

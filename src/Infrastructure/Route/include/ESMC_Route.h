@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.9 2003/03/11 20:28:31 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.10 2003/03/11 22:57:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
    private:
      // name in base class
      int routeid;           // unique id, used later for cacheing
-     ESMC_DELayout *layout;   // layout which includes all src + dst pe's
+     ESMC_DELayout *layout;   // layout which includes all src + dst de's
      ESMC_RTable *sendRT;   // send route table
      ESMC_RTable *recvRT;   // receive route table
      ESMC_CommTable *ct;    // communication scheduling table
@@ -73,8 +73,8 @@
 
  // accessor methods for class members
     //int ESMC_RouteGet(<value type> *value) const;
-    int ESMC_RouteSetSend(int dst_pe, void *base_addr, ESMC_XPacket *xp);
-    int ESMC_RouteSetRecv(int src_pe, void *base_addr, ESMC_XPacket *xp);
+    int ESMC_RouteSetSend(int dst_de, void *base_addr, ESMC_XPacket *xp);
+    int ESMC_RouteSetRecv(int src_de, void *base_addr, ESMC_XPacket *xp);
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RouteValidate(const char *options) const;

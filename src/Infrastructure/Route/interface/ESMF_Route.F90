@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.1 2003/03/05 17:04:53 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.2 2003/03/11 22:57:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,8 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF_Route.h>
+#include "ESMF.h"
+#include "ESMF_Route.h"
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_RouteMod - One line general statement about this class
@@ -28,30 +29,18 @@
 ! !DESCRIPTION:
 !
 ! The code in this file implements the F90 wrapper code for the C++
-!  implementation of the {\tt Route} class ...
-!
-! < Insert a paragraph or two explaining the function of this class. >
+!  implementation of the {\tt Route} class.
 !
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
-!     use ESMF_<XXX>Mod   ! any other dependencies
+      use ESMF_DELayoutMod
+      use ESMF_ArrayMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
-!------------------------------------------------------------------------------
-!     ! ESMF_RouteConfig
-!
-!     ! Description of ESMF_RouteConfig
-
-      type ESMF_RouteConfig
-      sequence
-      private
-        integer :: dummy
-!       < insert other class members here >
-      end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_Route
@@ -61,48 +50,27 @@
       type ESMF_Route
       sequence
       private
-!       ! Pick 1 of the following 2 choices:
-!       ! If this is a shallow class, this must match exactly the C++
-!       ! class definition in size and order.
-        integer :: dummy1
-        integer :: dummy2
-!       < insert other class members here >
-
-!       ! If this is a deep class, the derived type contains only a 
-!       ! place to hold the C++ 'this' pointer
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
       end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_RouteConfig
       public ESMF_Route
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-!  Pick one or the other of the init/create sections depending on
-!  whether this is a deep class (the class/derived type has pointers to
-!  other memory which must be allocated/deallocated) or a shallow class
-!  (the class/derived type is self-contained) and needs no destroy methods
-!  other than deleting the memory for the object/derived type itself.
-
 ! the following routines apply to deep classes only
       public ESMF_RouteCreate                 ! interface only, deep class
       public ESMF_RouteDestroy                ! interface only, deep class
 
-! the following routine applies to a shallow class
-      public ESMF_RouteInit                   ! shallow class
-
-      public ESMF_RouteGetConfig
-      public ESMF_RouteSetConfig
-      public ESMF_RouteGet                    ! get and set values
-      public ESMF_RouteSet
+      !public ESMF_RouteGet                    ! get and set values
+      public ESMF_RouteSetSend
+      public ESMF_RouteSetRecv
  
       public ESMF_RouteValidate
       public ESMF_RoutePrint
  
-! < list the rest of the public interfaces here >
 !
 !
 !EOP
@@ -110,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.1 2003/03/05 17:04:53 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.2 2003/03/11 22:57:20 nscollins Exp $'
 
 !==============================================================================
 !
@@ -119,17 +87,17 @@
 !==============================================================================
 !BOP
 ! !INTERFACE:
-      interface ESMF_RouteCreate 
+!      interface ESMF_RouteCreate 
 
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_RouteCreateNew
+!      module procedure ESMF_RouteCreateNew
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for Route create
 !     methods.
 !
 !EOP
-      end interface 
+!      end interface 
 !
 !------------------------------------------------------------------------------
 
@@ -145,18 +113,16 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RouteCreateNew - Create a new Route
+! !IROUTINE: ESMF_RouteCreate - Create a new Route
 
 ! !INTERFACE:
-      function ESMF_RouteCreateNew(arg1, arg2, arg3, rc)
+      function ESMF_RouteCreate(layout, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Route) :: ESMF_RouteCreateNew
+      type(ESMF_Route) :: ESMF_RouteCreate
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        
-      integer, intent(in) :: arg2                        
-      character (len = *), intent(in), optional :: arg3  
+      type(ESMF_DELayout), intent(in) :: layout
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -165,12 +131,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
+!     \item[layout] 
+!          A Layout object which encompasses all DEs involved in the
+!          route operation.  This is the union of the layouts
+!          for the source and destination Fields.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -179,7 +143,7 @@
 ! !REQUIREMENTS:  AAAn.n.n
 
         ! local variables
-        type (ESMF_Route) :: route     ! new C++ Route
+        type (ESMF_Route) :: route         ! new C++ Route
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
 
@@ -195,18 +159,18 @@
         endif
 
         ! Call C++ create code
-        call c_ESMC_RouteCreate(arg1, arg2, arg3, status)
+        call c_ESMC_RouteCreate(layout, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route create error"
           return  
         endif
 
         ! Set return values
-        ESMF_RouteCreateNew = route
+        ESMF_RouteCreate = route
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_RouteCreateNew
+        end function ESMF_RouteCreate
 
 !------------------------------------------------------------------------------
 !BOP
@@ -216,7 +180,7 @@
       subroutine ESMF_RouteDestroy(route, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route   
+      type(ESMF_Route), intent(inout) :: route   
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
@@ -235,7 +199,6 @@
 ! !REQUIREMENTS: 
 
         ! local variables
-        type (ESMF_Route) :: route     ! new C++ Route
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
 
@@ -257,182 +220,12 @@
         endif
 
         ! nullify pointer
-        <class%this = ESMF_NULL_POINTER
+        route%this = ESMF_NULL_POINTER
 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_RouteDestroy
 
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RouteInit - Initialize a Route 
-
-! !INTERFACE:
-      subroutine ESMF_RouteInit(route, arg1, arg2, arg3, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route   
-      integer, intent(in) :: arg1                       
-      integer, intent(in) :: arg2                       
-      character (len = *), intent(in), optional :: arg3 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     ESMF routine which only initializes {\tt Route} values; it does not
-!     allocate any resources.  Define for shallow classes only, 
-!     for deep classes define and use routines Create/Destroy.
-!     Can be overloaded like ESMF_RouteCreate via interface blocks.
-!
-!  The arguments are:
-!     \begin{description}
-!     \item[route]
-!          Class to be initialized.
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Call C++ Init code
-        call c_ESMC_RouteInit(route, arg1, arg2, arg3, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route init error"
-          return  
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_RouteInit
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RouteGetConfig - Get configuration information from a Route
-
-! !INTERFACE:
-      subroutine ESMF_RouteGetConfig(route, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
-      integer, intent(out) :: config   
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     Returns the set of resources the Route object was configured with.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[route] 
-!          Class to be queried.
-!     \item[config]
-!          Configuration information.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Call C++  code
-        call c_ESMC_RouteGetConfig(route, config, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route GetConfig error"
-          return  
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_RouteGetConfig
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RouteSetConfig - Set configuration information for a Route
-
-! !INTERFACE:
-      subroutine ESMF_RouteSetConfig(route, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
-      integer, intent(in) :: config   
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!     Configures the Route object with set of resources given.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[route] 
-!          Class to be configured.
-!     \item[config]
-!          Configuration information.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Call C++  code
-        call c_ESMC_RouteSetConfig(route, config, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route SetConfig error"
-          return  
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_RouteSetConfig
 
 !------------------------------------------------------------------------------
 !BOP
@@ -499,31 +292,32 @@
 
         end subroutine ESMF_RouteGet
 
+
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RouteSet - Set values in a Route
+! !IROUTINE: ESMF_RouteSetRecv - Set recv values in a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteSet(Route, value, rc)
+      subroutine ESMF_RouteSetRecv(Route, src_de, array, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
-      integer, intent(in) :: value
+      integer, intent(in) :: src_de
+      type(ESMF_Array), intent(in) :: array
       integer, intent(out), optional :: rc            
 
 !
 ! !DESCRIPTION:
 !     Set a Route attribute with the given value.
-!     May be multiple routines, one per attribute.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[route] 
-!          Class to be modified.
-!     \item[{[value1]}]
-!          Value to be set.         
-!     \item[{[value2]}]
-!          Value to be set.         
+!          Route to be modified.
+!     \item[src_de]
+!          Source DE id.
+!     \item[array]
+!          Array containing data to be received.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -545,16 +339,8 @@
           rc = ESMF_FAILURE
         endif
 
-        if (present(value1)) then
-          ! code to be added here
-        endif
-
-        if (present(value2)) then
-          ! code to be added here
-        endif
-
         ! Call C++  code
-        call c_ESMC_RouteSet(route, value1, value2, status)
+        call c_ESMC_RouteSetRecv(route, src_de, array, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Set error"
           return  
@@ -562,18 +348,76 @@
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_RouteSet
+        end subroutine ESMF_RouteSetRecv
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RouteSetSend - Set send values in a Route
+
+! !INTERFACE:
+      subroutine ESMF_RouteSetSend(route, dest_de, array, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer, intent(in) :: dest_de
+      type(ESMF_Array), intent(in) :: array
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Set a Route attribute with the given value.
+!     May be multiple routines, one per attribute.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be modified.
+!     \item[dest_de]
+!          Destination DE id.
+!     \item[array]
+!          Array containing data to be send.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code
+        call c_ESMC_RouteSetSend(route, dest_de, array, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Set error"
+          return  
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RouteSetSend
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_RouteValidate - Check internal consistency of a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteValidate(route, opt, rc)
+      subroutine ESMF_RouteValidate(route, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route       
-      character (len=*), intent(in), optional :: opt    
+      character (len=*), intent(in), optional :: options    
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -583,7 +427,7 @@
 !     \begin{description}
 !     \item[route] 
 !          Class to be queried.
-!     \item[{[opt]}]
+!     \item[{[options]}]
 !          Validation options.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -627,11 +471,11 @@
 ! !IROUTINE: ESMF_RoutePrint - Print the contents of a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrint(route, opt, rc)
+      subroutine ESMF_RoutePrint(route, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route      
-      character (len=*), intent(in) :: opt      
+      character (len=*), intent(in), optional :: options      
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -641,7 +485,7 @@
 !     \begin{description}
 !     \item[route] 
 !          Class to be queried.
-!     \item[{[opt]}]
+!     \item[{[options]}]
 !          Print ptions that control the type of information and level of 
 !          detail.
 !     \item[{[rc]}] 

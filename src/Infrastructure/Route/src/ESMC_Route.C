@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.7 2003/03/11 20:28:31 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.8 2003/03/11 22:59:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.7 2003/03/11 20:28:31 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.8 2003/03/11 22:59:42 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -118,7 +118,7 @@
       int ESMC_Route::ESMC_RouteConstruct(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int error return code 
 //
 // !ARGUMENTS:
       ESMC_DELayout *layout) {          // in
@@ -135,26 +135,26 @@
 // !REQUIREMENTS:  
 
     static int rseqnum = 1;
-    int mype, rc;
-    int pecount;         // total number of PEs in src + dst layouts
+    int nx, ny;
+    int myde, rc;
+    int decount;         // total number of PEs in src + dst layouts
 
-    //pecount = layout->ESMC_DELayoutGetPECount();
-    //mype = layout->ESMC_DELayoutGetPECount();
-    //TODO: what are these funcs?
-    pecount = 4;
-    mype = 1;
+    // TODO: make this rank independent
+    rc = layout->ESMC_DELayoutGetSize(&nx, &ny);
+    decount = nx * ny;
+    rc = layout->ESMC_DELayoutGetDEid(&myde);
 
     
     routeid = rseqnum++;
-    sendRT = ESMC_RTableCreate(mype, pecount, &rc);
+    sendRT = ESMC_RTableCreate(myde, decount, &rc);
     if (rc == ESMF_FAILURE)
        return rc;
 
-    recvRT = ESMC_RTableCreate(mype, pecount, &rc);
+    recvRT = ESMC_RTableCreate(myde, decount, &rc);
     if (rc == ESMF_FAILURE)
        return rc;
 
-    ct = ESMC_CommTableCreate(mype, pecount, &rc);
+    ct = ESMC_CommTableCreate(myde, decount, &rc);
     if (rc == ESMF_FAILURE)
        return rc;
 
@@ -231,12 +231,12 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int dest_pe,         // in - destination pe id
+      int dest_de,         // in - destination de id
       void *base_addr,     // in - local source address
       ESMC_XPacket *xp) {  // in - exchange packet
 //
 // !DESCRIPTION:
-//     Adds an exchange packet, base address, and destination pe to the
+//     Adds an exchange packet, base address, and destination de to the
 //     route table.
 //
 //EOP
@@ -244,7 +244,7 @@
     
     int rc;
 
-    rc = sendRT->ESMC_RTableSetEntry(dest_pe, base_addr, xp);
+    rc = sendRT->ESMC_RTableSetEntry(dest_de, base_addr, xp);
 
     return rc;
 
@@ -261,12 +261,12 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int source_pe,       // in - sending pe id
+      int source_de,       // in - sending de id
       void *base_addr,     // in - local source address
       ESMC_XPacket *xp) {  // in - exchange packet
 //
 // !DESCRIPTION:
-//     Adds an exchange packet, base address, and destination pe to the
+//     Adds an exchange packet, base address, and destination de to the
 //     route table.
 //
 //EOP
@@ -274,7 +274,7 @@
     
     int rc;
 
-    rc = recvRT->ESMC_RTableSetEntry(source_pe, base_addr, xp);
+    rc = recvRT->ESMC_RTableSetEntry(source_de, base_addr, xp);
 
     return rc;
 

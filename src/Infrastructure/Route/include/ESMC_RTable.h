@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.h,v 1.5 2003/03/11 20:20:57 nscollins Exp $
+// $Id: ESMC_RTable.h,v 1.6 2003/03/11 22:57:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,25 +46,19 @@
  #include <ESMC_XPacket.h> 
 
 // !PUBLIC TYPES:
- class ESMC_RTableConfig;
  class ESMC_RTable;
 
 // !PRIVATE TYPES:
 
- // class configuration type
- class ESMC_RTableConfig {
-   private:
- //   < insert resource items here >
- };
 
  // class declaration type
  class ESMC_RTable : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
      int entrycount;
-     int my_peid;
+     int my_deid;
      struct rtableentry {
-        int dest_peid;
+        int dest_deid;
         int xpcount;
         void* base_addr;
         ESMC_XPacket *xp;
@@ -77,24 +71,20 @@
  // the following methods apply to deep classes only
  // ESMC_RTableCreate and ESMC_RTableDestroy are declared below,
  // outside the ESMC_RTable declaration
-    int ESMC_RTableConstruct(int mypeid, int pecount);
+    int ESMC_RTableConstruct(int mydeid, int decount);
     int ESMC_RTableDestruct(void);    
-
- // optional configuration methods
-    int ESMC_RTableGetConfig(ESMC_RTableConfig *config) const;
-    int ESMC_RTableSetConfig(const ESMC_RTableConfig *config);
 
  // accessor methods for class members
     //int ESMC_RTableGet<Value>(<value type> *value) const;
     //int ESMC_RTableSet<Value>(<value type>  value);
-    int ESMC_RTableSetEntry(int dst_pe, void *base_addr, ESMC_XPacket *xp); 
+    int ESMC_RTableSetEntry(int dst_de, void *base_addr, ESMC_XPacket *xp); 
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RTableValidate(const char *options) const;
     int ESMC_RTablePrint(const char *options) const;
 
  // native C++ constructors/destructors
-	ESMC_RTable(int pecount);
+	ESMC_RTable(int decount);
 	~ESMC_RTable(void);
   
   
@@ -116,7 +106,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_RTable object.
 
- ESMC_RTable *ESMC_RTableCreate(int mypeid, int pecount, int *rc);
+ ESMC_RTable *ESMC_RTableCreate(int mydeid, int decount, int *rc);
  int ESMC_RTableDestroy(ESMC_RTable *rtable);
 
  #endif  // ESMC_RTable_H

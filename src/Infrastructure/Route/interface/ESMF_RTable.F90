@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.1 2003/03/10 23:20:28 nscollins Exp $
+! $Id: ESMF_RTable.F90,v 1.2 2003/03/11 22:57:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,8 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF_Route.h>
+#include "ESMF.h"
+#include "ESMF_Route.h"
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_RTableMod - One line general statement about this class
@@ -41,17 +42,6 @@
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
-!------------------------------------------------------------------------------
-!     ! ESMF_RTableConfig
-!
-!     ! Description of ESMF_RTableConfig
-
-      type ESMF_RTableConfig
-      sequence
-      private
-        integer :: dummy
-!       < insert other class members here >
-      end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_RTable
@@ -61,21 +51,11 @@
       type ESMF_RTable
       sequence
       private
-!       ! Pick 1 of the following 2 choices:
-!       ! If this is a shallow class, this must match exactly the C++
-!       ! class definition in size and order.
-        integer :: dummy1
-        integer :: dummy2
-!       < insert other class members here >
-
-!       ! If this is a deep class, the derived type contains only a 
-!       ! place to hold the C++ 'this' pointer
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
       end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_RTableConfig
       public ESMF_RTable
 !------------------------------------------------------------------------------
 !
@@ -91,11 +71,6 @@
       public ESMF_RTableCreate                 ! interface only, deep class
       public ESMF_RTableDestroy                ! interface only, deep class
 
-! the following routine applies to a shallow class
-      public ESMF_RTableInit                   ! shallow class
-
-      public ESMF_RTableGetConfig
-      public ESMF_RTableSetConfig
       public ESMF_RTableGet                    ! get and set values
       public ESMF_RTableSet
  
@@ -110,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.1 2003/03/10 23:20:28 nscollins Exp $'
+      '$Id: ESMF_RTable.F90,v 1.2 2003/03/11 22:57:20 nscollins Exp $'
 
 !==============================================================================
 !
@@ -148,15 +123,14 @@
 ! !IROUTINE: ESMF_RTableCreateNew - Create a new RTable
 
 ! !INTERFACE:
-      function ESMF_RTableCreateNew(arg1, arg2, arg3, rc)
+      function ESMF_RTableCreateNew(mydeid, decount, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_RTable) :: ESMF_RTableCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        
-      integer, intent(in) :: arg2                        
-      character (len = *), intent(in), optional :: arg3  
+      integer, intent(in) :: mydeid
+      integer, intent(in) :: decount
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -195,7 +169,7 @@
         endif
 
         ! Call C++ create code
-        call c_ESMC_RTableCreate(arg1, arg2, arg3, status)
+        call c_ESMC_RTableCreate(mydeid, decount, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "RTable create error"
           return  
@@ -216,7 +190,7 @@
       subroutine ESMF_RTableDestroy(rtable, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RTable), intent(in) :: rtable   
+      type(ESMF_RTable), intent(inout) :: rtable   
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
@@ -235,7 +209,6 @@
 ! !REQUIREMENTS: 
 
         ! local variables
-        type (ESMF_RTable) :: rtable     ! new C++ RTable
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
 
@@ -257,182 +230,12 @@
         endif
 
         ! nullify pointer
-        <class%this = ESMF_NULL_POINTER
+        rtable%this = ESMF_NULL_POINTER
 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_RTableDestroy
 
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RTableInit - Initialize a RTable 
-
-! !INTERFACE:
-      subroutine ESMF_RTableInit(rtable, arg1, arg2, arg3, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_RTable), intent(in) :: rtable   
-      integer, intent(in) :: arg1                       
-      integer, intent(in) :: arg2                       
-      character (len = *), intent(in), optional :: arg3 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     ESMF routine which only initializes {\tt RTable} values; it does not
-!     allocate any resources.  Define for shallow classes only, 
-!     for deep classes define and use routines Create/Destroy.
-!     Can be overloaded like ESMF_RTableCreate via interface blocks.
-!
-!  The arguments are:
-!     \begin{description}
-!     \item[rtable]
-!          Class to be initialized.
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Call C++ Init code
-        call c_ESMC_RTableInit(rtable, arg1, arg2, arg3, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RTable init error"
-          return  
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_RTableInit
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RTableGetConfig - Get configuration information from a RTable
-
-! !INTERFACE:
-      subroutine ESMF_RTableGetConfig(rtable, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_RTable), intent(in) :: rtable
-      integer, intent(out) :: config   
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     Returns the set of resources the RTable object was configured with.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[rtable] 
-!          Class to be queried.
-!     \item[config]
-!          Configuration information.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Call C++  code
-        call c_ESMC_RTableGetConfig(rtable, config, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RTable GetConfig error"
-          return  
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_RTableGetConfig
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RTableSetConfig - Set configuration information for a RTable
-
-! !INTERFACE:
-      subroutine ESMF_RTableSetConfig(rtable, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_RTable), intent(in) :: rtable
-      integer, intent(in) :: config   
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!     Configures the RTable object with set of resources given.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[rtable] 
-!          Class to be configured.
-!     \item[config]
-!          Configuration information.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Call C++  code
-        call c_ESMC_RTableSetConfig(rtable, config, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RTable SetConfig error"
-          return  
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_RTableSetConfig
 
 !------------------------------------------------------------------------------
 !BOP
@@ -504,11 +307,12 @@
 ! !IROUTINE: ESMF_RTableSet - Set values in a RTable
 
 ! !INTERFACE:
-      subroutine ESMF_RTableSet(RTable, value, rc)
+      subroutine ESMF_RTableSet(RTable, value1, value2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RTable), intent(in) :: rtable
-      integer, intent(in) :: value
+      integer, intent(out), optional :: value1
+      integer, intent(out), optional :: value2
       integer, intent(out), optional :: rc            
 
 !
@@ -569,11 +373,11 @@
 ! !IROUTINE: ESMF_RTableValidate - Check internal consistency of a RTable
 
 ! !INTERFACE:
-      subroutine ESMF_RTableValidate(rtable, opt, rc)
+      subroutine ESMF_RTableValidate(rtable, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RTable), intent(in) :: rtable       
-      character (len=*), intent(in), optional :: opt    
+      character (len=*), intent(in), optional :: options    
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -583,7 +387,7 @@
 !     \begin{description}
 !     \item[rtable] 
 !          Class to be queried.
-!     \item[{[opt]}]
+!     \item[{[options]}]
 !          Validation options.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -627,11 +431,11 @@
 ! !IROUTINE: ESMF_RTablePrint - Print the contents of a RTable
 
 ! !INTERFACE:
-      subroutine ESMF_RTablePrint(rtable, opt, rc)
+      subroutine ESMF_RTablePrint(rtable, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RTable), intent(in) :: rtable      
-      character (len=*), intent(in) :: opt      
+      character (len=*), intent(in), optional :: options      
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -641,8 +445,8 @@
 !     \begin{description}
 !     \item[rtable] 
 !          Class to be queried.
-!     \item[{[opt]}]
-!          Print ptions that control the type of information and level of 
+!     \item[{[options]}]
+!          Print options that control the type of information and level of 
 !          detail.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
