@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.14 2004/12/22 01:16:28 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.15 2004/12/22 05:04:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.14 2004/12/22 01:16:28 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.15 2004/12/22 05:04:05 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -120,7 +120,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateReconcile"
 !BOP
-! !IROUTINE: ESMF_StateReconcile -- Reconcile the internal data from a State
+! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
 !
 ! !INTERFACE:
       subroutine ESMF_StateReconcile(state, vm, options, rc)
@@ -148,7 +148,7 @@
 !       {\tt ESMF\_State} to reconcile.
 !     \item[vm]
 !       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.
-!     \item[options]
+!     \item[{[options]}]
 !       Currently unused.  Here for possible future expansion in the
 !       options for the reconciliation process.
 !     \item[{[rc]}]
