@@ -1,4 +1,4 @@
-$Id: PhysGrid_req.tex,v 1.11 2002/05/11 01:39:01 mjsuarez Exp $
+$Id: PhysGrid_req.tex,v 1.12 2002/05/12 00:58:43 tcraig Exp $
 %cnh m%titude
 %cnh ===============================================================================
 %cnh \req{Initialization of a Physical Grids}
@@ -1556,7 +1556,7 @@ A mechanism shall be provided for describing physical locations in space in 1,
 2, or 3 dimensions, including both specification of points and of ranges.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:} 
@@ -1573,7 +1573,7 @@ and degrees for the radius and angle in cylindrical coordinates.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection\\
 {\bf Notes:}  This suggestion follows common practice, but is an explicit
@@ -1677,7 +1677,7 @@ discussion of options for vertical coordinates at
 http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection\\
 {\bf Notes:} 
@@ -1686,7 +1686,7 @@ http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
 \ssreq{Vertical locations may be points}
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2092,7 +2092,7 @@ cells, but the relative indices of neighbors are unpredictable.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:}
@@ -2104,7 +2104,7 @@ global PhysGrid. If no DistGrid is provided, the entire global physical grid wil
 be read in.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2114,7 +2114,7 @@ be read in.
 PhysGrids can be output to standard files.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2137,7 +2137,7 @@ It shall be possible to create any data objects associated with a PhysGrid witho
 providing the data that a PhysGrid will contain.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2147,7 +2147,7 @@ providing the data that a PhysGrid will contain.
 Methods shall be provided to query a PhysGrid for all information in contains.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} \\
+{\bf Source:} CAM-EUL, CLM, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2235,7 +2235,7 @@ DistGrid, and both PhysGrids share the same DistGrid.  The new dimension be in a
 order with respect to existing dimensions.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} ? \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Valuable for separating generation of vertical and horizontal
@@ -2249,7 +2249,7 @@ DistGrid, an appropriately reduced must also be provided.  Otherwise the new Phy
 is based on the same DistGrid as the original PhysGrid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} ? \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2271,7 +2271,7 @@ PhysGrids may have up to 3 dimensions, but must have at least as many dimensions
 underlying DistGrid. 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} General Req. 1.5.2 \\
+{\bf Source:} General Req. 1.5.2, CAM-EUL, CLM, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} If supported, this facility would dramatically complicate implementation,
@@ -2285,7 +2285,8 @@ also be possible (if not efficient) to extract PhysGrid information in any index
 order.
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} Please list required orders in Fortran notation. \\
+{\bf Source:} Please list required orders in Fortran notation. CCSM-CPL(XY), C
+AM-EUL (XYZ, XZY, ZXY) \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Necessary for support of transposes.
@@ -2315,7 +2316,7 @@ range of the global PhysGrid.  The index locations should be floating point numb
 facilitate interpolation.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} ? \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -2367,7 +2368,7 @@ grid-spacing in degrees) latitude-longitude PhysGrid, given the extent of the do
 in latitude and longitude.                                                           
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2409,7 +2410,7 @@ a PhysGrid are consistent with the topology of the underlying DistGrid.  An
 exception shall be generated in case of inconsistency.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}
@@ -2471,7 +2472,7 @@ A spectral horizontal description may be used.  More generally, the horizontal
 structure of information may be given by specifying functional decompositions.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}
@@ -2494,7 +2495,7 @@ wavenumbers (nondimensional m,n) of each of the elements on the grid.  At a
 minimum, rhomboidal and triangular truncations will be supported.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, CCSM-CPL, CAM-EUL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}
@@ -2545,7 +2546,7 @@ inverse transform, and the adjoint transform.
 A method shall be provided to check that PhysGrid cells do not overlap. 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} GFDL, NCAR (required) \\
+{\bf Source:} GFDL, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Standard self-consistency test.
@@ -2559,7 +2560,7 @@ Each PhysGrid has a unique name by which it can be referred.  If no name is
 specified, one will automatically be generated.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -2571,7 +2572,7 @@ set at the time of its creation.  Corresponding local and global PhysGrids have
 the same number of dimensions.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -2582,7 +2583,7 @@ Each dimension has a name, which may be set and queried.  If no name is specifie
 for a dimension, a name will be automatically generated.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -2592,7 +2593,7 @@ for a dimension, a name will be automatically generated.
 A PhysGrid may be queried for the local or global lengths of each of its dimensions.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -2603,7 +2604,7 @@ A PhysGrid contains the units of each dimension, which may be set and queried.
 Dimensions may also have additional named attributes.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -2617,7 +2618,7 @@ attribute names.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -2903,7 +2904,7 @@ It shall be possible for a user to specify additional metric terms to be associa
 with a PhysGrid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} ? \\
+{\bf Source:} CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} This is basic to the extensibility of ESMF. 
