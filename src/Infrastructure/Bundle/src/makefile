@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/17 21:26:29 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/09/19 22:13:43 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -8,6 +8,7 @@ SOURCEF	  = ESMF_Bundle.F90
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
+
 MANSEC	  = Bundleobj
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/Bundle/src

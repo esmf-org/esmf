@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/04/24 14:13:20 nscollins Exp $
+# $Id: makefile,v 1.2 2003/09/19 22:13:45 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -23,7 +23,6 @@ STOREH	  = ESMC_Machine.h
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-# is MANSEC something about documentation?
 MANSEC	  = Machobj
 LIBBASE	  = libesmf
 

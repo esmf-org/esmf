@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/07/17 22:27:36 nscollins Exp $
+# $Id: makefile,v 1.9 2003/09/19 22:13:45 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -20,8 +20,6 @@ STOREH	  = ESMC_Grid.h
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-
-# is MANSEC something about documentation?
 MANSEC	  = Gridobj
 LIBBASE	  = libesmf
 

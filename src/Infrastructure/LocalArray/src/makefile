@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/18 15:57:07 cdeluca Exp $
+# $Id: makefile,v 1.2 2003/09/19 22:13:45 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -13,7 +13,6 @@ STOREH	  = ESMC_LocalArray.h
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-
 
 MANSEC	  = Dataobj
 LIBBASE	  = libesmf

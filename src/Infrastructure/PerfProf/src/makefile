@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/04/03 22:43:57 nscollins Exp $
+# $Id: makefile,v 1.6 2003/09/19 22:13:45 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -22,7 +22,6 @@ STOREH    =
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-# is MANSEC something about documentation?
 MANSEC	  = PerfProfobj
 LIBBASE	  = libesmf
 

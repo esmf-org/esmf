@@ -232,7 +232,7 @@
 \input{../Infrastructure/PerfProf/doc/ESMC_Timer_ccapi}
 #endif
 
-\section{Perf F90 Interface}
+\section{Perf Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

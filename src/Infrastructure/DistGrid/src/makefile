@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/03/25 00:18:04 flanigan Exp $
+# $Id: makefile,v 1.7 2003/09/19 22:13:44 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -20,7 +20,6 @@ SOURCEH	  =
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-# is MANSEC something about documentation?
 MANSEC	  = DistGridobj
 LIBBASE	  = libesmf
 

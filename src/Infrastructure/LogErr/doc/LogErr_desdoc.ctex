@@ -1,4 +1,4 @@
-% $Id: LogErr_desdoc.ctex,v 1.4 2003/08/07 17:54:18 shep_smith Exp $
+% $Id: LogErr_desdoc.ctex,v 1.5 2003/09/19 22:13:45 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 \input{../Infrastructure/LogErr/doc/LogErr_rest}
 #endif
 
-\section{LogErr F90 Interface}
+\section{LogErr Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

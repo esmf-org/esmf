@@ -1,4 +1,4 @@
-% $Id: Bundle_desdoc.ctex,v 1.3 2003/09/18 17:31:54 cdeluca Exp $
+% $Id: Bundle_desdoc.ctex,v 1.4 2003/09/19 22:13:43 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -91,7 +91,7 @@
 %\input{../Infrastructure/Bundle/doc/Bundle_rest}
 #endif
 
-\section{Bundle F90 Interface}
+\section{Bundle Fortran Interface}
 
 \subsection{Use and Examples}
 % #ifdef STANDALONE

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/09/17 21:48:25 cdeluca Exp $ 
+# $Id: makefile,v 1.8 2003/09/19 22:13:44 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -8,6 +8,7 @@ SOURCEF	  = ESMF_Field.F90
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
+
 MANSEC	  = Fieldobj
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/Field/src

@@ -1,4 +1,4 @@
-% $Id: PerfProf_desdoc.ctex,v 1.8 2003/04/02 19:51:45 flanigan Exp $
+% $Id: PerfProf_desdoc.ctex,v 1.9 2003/09/19 22:13:45 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -232,7 +232,7 @@
 \input{../src/Infrastructure/PerfProf/doc/ESMC_Timer_ccapi}
 #endif
 
-\section{Perf F90 Interface}
+\section{Perf Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

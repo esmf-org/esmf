@@ -1,48 +1,47 @@
-# $Id: makefile,v 1.5 2003/06/12 17:44:57 nscollins Exp $
+# $Id: makefile,v 1.6 2003/09/19 22:13:46 cdeluca Exp $
 
-# leave alone.
+# Leave alone.
 ALL: lib 
 
-# don't set these unless absolutely necessary - they've got to be
-#  architecture and compiler independent and should be inherited
-#  from the upper level makefile if possible.
+# Don't set these unless absolutely necessary - they've got to be
+# architecture and compiler independent and should be inherited
+# from the upper level makefile if possible.
 CFLAGS    =
 FFLAGS    =
 
-# if you have C files in this directory, list them all on the line below.
+# If you have C files in this directory, list them all on the line below.
 SOURCEC	  = 
-# if you have F90 files in this directory, list them all on the line below.
+# If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = ESMF_RegridTypes.F90 ESMF_RegridBilinear.F90 \
             ESMF_RegridConserv.F90 ESMF_RegridNearNbr.F90 \
             ESMF_Regrid.F90
 
-# if you have .h include files in this dir, list them all on the line below.
+# If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 
-# leave these alone.
+# Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-# is MANSEC something about documentation?
 MANSEC	  = Regridobj
 LIBBASE	  = libesmf
 
 
 
-# the following line must be set to the current subdir name relative
+# The following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/Regrid/src
 
 include $(ESMF_DIR)/makefile
 
-# leave the following line blank.
+# Leave the following line blank.
 DIRS	  = 
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
 
-# if you have class files which need to be compiled in a particular
+# If you have class files which need to be compiled in a particular
 # order, list the dependencies below, with no rules following.
 #
 # e.g.:

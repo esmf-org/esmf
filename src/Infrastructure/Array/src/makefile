@@ -1,45 +1,44 @@
-# $Id: makefile,v 1.2 2003/07/30 17:10:56 nscollins Exp $
+# $Id: makefile,v 1.3 2003/09/19 22:13:43 cdeluca Exp $
 
-# leave alone.
+# Leave alone.
 ALL: lib 
 
-# don't set these unless absolutely necessary - they've got to be
-#  architecture and compiler independent and should be inherited
-#  from the upper level makefile if possible.
+# Don't set these unless absolutely necessary - they've got to be
+# architecture and compiler independent and should be inherited
+# from the upper level makefile if possible.
 CFLAGS    = ${MPI_INCLUDE}
 FFLAGS    =
 
-# if you have C files in this directory, list them all on the line below.
+# If you have C files in this directory, list them all on the line below.
 SOURCEC	  =  ESMC_Array.C 
-# if you have F90 files in this directory, list them all on the line below.
+# If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  =  
-# if you have .h include files in this dir, list them all on the line below.
+# If you have .h include files in this dir, list them all on the line below.
 STOREH	  = ESMC_Array.h
 
-# leave these alone.
+# Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-# is MANSEC something about documentation?
 MANSEC	  = Arrayobj
 LIBBASE	  = libesmf
 
 
 
-# the following line must be set to the current subdir name relative
+# The following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/Array/src
 
 include $(ESMF_DIR)/makefile
 
-# leave the following line blank.
+# Leave the following line blank.
 DIRS	  = 
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
 
-# if you have class files which need to be compiled in a particular
+# If you have class files which need to be compiled in a particular
 # order, list the dependencies below, with no rules following.
 #
 # e.g.:

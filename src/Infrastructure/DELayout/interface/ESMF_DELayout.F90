@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.1 2003/09/19 17:00:03 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.2 2003/09/19 22:13:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 #include <ESMF.h>
 !------------------------------------------------------------------------------
 !BOPI
-! !MODULE: ESMF_DELayoutMod - F90 Interface to C++ ESMC_DELayout class
+! !MODULE: ESMF_DELayoutMod - Fortran Interface to C++ ESMC_DELayout class
 !
 ! !DESCRIPTION: !
 ! The code in this file implements the Fortran interfaces to the
@@ -131,7 +131,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.1 2003/09/19 17:00:03 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.2 2003/09/19 22:13:44 cdeluca Exp $'
 
 !==============================================================================
 ! 

@@ -96,7 +96,7 @@
 \input{../Infrastructure/TimeMgr/doc/BaseTime_rest}
 #endif
 
-%\section{BaseTime Class F90 Interface}
+%\section{BaseTime Class Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
@@ -178,7 +178,7 @@
 %\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
 #endif
 
-%\section{Time Interval Class F90 Interface}
+%\section{Time Interval Class Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
@@ -260,7 +260,7 @@
 %\input{../Infrastructure/TimeMgr/doc/Time_rest}
 #endif
 
-%\section{Time Class F90 Interface}
+%\section{Time Class Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
@@ -342,7 +342,7 @@
 \input{../Infrastructure/TimeMgr/doc/Calendar_rest}
 #endif
 
-%\section{Calendar Class F90 Interface}
+%\section{Calendar Class Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
@@ -424,7 +424,7 @@
 \input{../Infrastructure/TimeMgr/doc/Clock_rest}
 #endif
 
-%\section{Clock Class F90 Interface}
+%\section{Clock Class Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
@@ -506,7 +506,7 @@
 %\input{../Infrastructure/TimeMgr/doc/Alarm_rest}
 #endif
 
-%\section{Alarm Class F90 Interface}
+%\section{Alarm Class Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/18 13:34:38 cdeluca Exp $
+# $Id: makefile,v 1.2 2003/09/19 22:13:44 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -16,7 +16,6 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 MANSEC	  = DataMapobj
 LIBBASE	  = libesmf
-
 
 
 # the following line must be set to the current subdir name relative

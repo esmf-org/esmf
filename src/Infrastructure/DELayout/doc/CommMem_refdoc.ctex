@@ -1,4 +1,4 @@
-% $Id: CommMem_refdoc.ctex,v 1.1 2003/09/19 17:00:02 cdeluca Exp $
+% $Id: CommMem_refdoc.ctex,v 1.2 2003/09/19 22:13:44 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_Machine_rest}
 #endif
 
-%\section{Machine Class F90 Interface}
+%\section{Machine Class Fortran Interface}
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE
@@ -151,7 +151,7 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_PE_rest}
 #endif
 
-%\section{PE Class F90 Interface}
+%\section{PE Class Fortran Interface}
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE
@@ -229,7 +229,7 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_DE_rest}
 #endif
 
-%\section{DE Class F90 Interface}
+%\section{DE Class Fortran Interface}
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE
@@ -307,7 +307,7 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_PEList_rest}
 #endif
 
-%\section{PEList Class F90 Interface}
+%\section{PEList Class Fortran Interface}
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE
@@ -436,7 +436,7 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_Comm_rest}
 #endif
 
-%\section{Comm Class F90 Interface}
+%\section{Comm Class Fortran Interface}
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE

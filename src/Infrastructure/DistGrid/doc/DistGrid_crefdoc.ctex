@@ -98,7 +98,7 @@
 \input{../Infrastructure/DistGrid/doc/DistGrid_rest}
 #endif
 
-\section{DistGrid F90 Interface}
+\section{DistGrid Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

@@ -1,4 +1,4 @@
-! $Id: ESMF_Mach.F90,v 1.1 2003/04/24 14:13:20 nscollins Exp $
+! $Id: ESMF_Mach.F90,v 1.2 2003/09/19 22:13:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
-! !MODULE: ESMF_MachineMod - F90 Interface to C++ ESMC_Machine class
+! !MODULE: ESMF_MachineMod - Fortran Interface to C++ ESMC_Machine class
 !
 ! !DESCRIPTION:
 !
@@ -80,7 +80,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Mach.F90,v 1.1 2003/04/24 14:13:20 nscollins Exp $'
+      '$Id: ESMF_Mach.F90,v 1.2 2003/09/19 22:13:45 cdeluca Exp $'
 
 !==============================================================================
 

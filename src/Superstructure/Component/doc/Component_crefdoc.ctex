@@ -1,4 +1,4 @@
-% $Id: Component_crefdoc.ctex,v 1.1 2003/05/07 04:34:31 cdeluca Exp $
+% $Id: Component_crefdoc.ctex,v 1.2 2003/09/19 22:13:46 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -280,7 +280,7 @@
 \input{../Superstructure/Component/doc/state_rest}
 #endif
 
-%\section{State F90 Interface}
+%\section{State Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
@@ -338,7 +338,7 @@
 %\input{../Superstructure/Component/doc/xform_rest}
 %#endif
 
-%\section{Transform F90 Interface}
+%\section{Transform Fortran Interface}
 
 %\subsection{Use and Examples}
 %#ifdef STANDALONE

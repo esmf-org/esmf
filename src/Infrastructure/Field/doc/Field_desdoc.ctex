@@ -1,4 +1,4 @@
-% $Id: Field_desdoc.ctex,v 1.6 2003/09/18 16:19:27 cdeluca Exp $
+% $Id: Field_desdoc.ctex,v 1.7 2003/09/19 22:13:44 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -91,7 +91,7 @@
 %\input{../Infrastructure/Field/doc/Field_rest}
 #endif
 
-\section{Field F90 Interface}
+\section{Field Fortran Interface}
 
 \subsection{Use and Examples}
 % #ifdef STANDALONE

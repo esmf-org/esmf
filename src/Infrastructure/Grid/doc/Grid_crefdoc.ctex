@@ -1,4 +1,4 @@
-% $Id: Grid_crefdoc.ctex,v 1.1 2003/05/07 06:58:56 cdeluca Exp $
+% $Id: Grid_crefdoc.ctex,v 1.2 2003/09/19 22:13:45 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 \input{../Infrastructure/Grid/doc/Grid_rest}
 #endif
 
-%\section{Grid F90 Interface}
+%\section{Grid Fortran Interface}
 
 %\subsection{Use and Examples}
 %#ifdef STANDALONE
