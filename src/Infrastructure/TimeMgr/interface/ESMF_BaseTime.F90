@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTime.F90,v 1.2 2003/04/10 22:23:51 eschwab Exp $
+! $Id: ESMF_BaseTime.F90,v 1.3 2003/04/10 22:59:27 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,7 +20,10 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <conf.h>   ! TODO: remove when padding in type ESMF_BaseTime removed
+
+! TODO: remove when padding in type ESMF_BaseTime removed
+#include <conf.h>
+
 #include <ESMF_TimeMgr.inc>
 !
 !===============================================================================
@@ -74,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BaseTime.F90,v 1.2 2003/04/10 22:23:51 eschwab Exp $'
+      '$Id: ESMF_BaseTime.F90,v 1.3 2003/04/10 22:59:27 eschwab Exp $'
 
 !------------------------------------------------------------------------------
 
