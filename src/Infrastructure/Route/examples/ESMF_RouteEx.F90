@@ -1,8 +1,9 @@
-! $Id: ESMF_RouteEx.F90,v 1.5 2003/12/02 18:20:17 svasquez Exp $
+! $Id: ESMF_RouteEx.F90,v 1.6 2004/01/07 21:53:42 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
 !-------------------------------------------------------------------------
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP
