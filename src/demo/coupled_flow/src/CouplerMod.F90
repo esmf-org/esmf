@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.1 2003/09/18 18:33:09 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.2 2004/02/17 21:57:38 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -73,11 +73,11 @@
 ! !IROUTINE: coupler_init - coupler init routine
 
 ! !INTERFACE:
-      subroutine coupler_init(comp, statelist, clock, rc)
+      subroutine coupler_init(comp, importstate, exportstate, clock, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout) :: statelist
+      type(ESMF_State), intent(inout) :: importstate, exportstate
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
@@ -88,8 +88,10 @@
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[statelist]
-!          Nested state object.
+!     \item[importstate]
+!          Nested state object containing import data.
+!     \item[exportstate]
+!          Nested state object containing export data.
 !     \item[clock] 
 !          External clock.
 !     \item[rc] 
@@ -99,32 +101,31 @@
 !
 !EOPI
 
-!     ! Local variables
-        type(ESMF_State) :: flowstates, injectstates
-        type(ESMF_State) :: toflow, fromflow
-        type(ESMF_State) :: toinject, frominject
+!   ! Local variables
+    type(ESMF_State) :: flowstates, injectstates
+    type(ESMF_State) :: toflow, fromflow
+    type(ESMF_State) :: toinject, frominject
+    character(ESMF_MAXSTR) :: statename
 
-        print *, "Coupler Init starting"
+    print *, "Coupler Init starting"
 
-        call ESMF_StateGetData(statelist, &
-                     "Coupler States FlowSolver to Injector", flowstates, rc)
+    call ESMF_StateGetName(importstate, statename, rc=rc)
 
-        call ESMF_StateGetData(flowstates, "FlowSolver Feedback", fromflow, rc)
-        call ESMF_StateSetNeeded(fromflow, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(fromflow, "V", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(fromflow, "RHO", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(fromflow, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+    if (trim(statename) .eq. "FlowSolver Feedback") then
+      call ESMF_StateSetNeeded(importstate, "SIE", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+    endif
 
-        call ESMF_StateGetData(statelist, &
-                       "Coupler States Injector to FlowSolver", injectstates, rc)
+    if (trim(statename) .eq. "Injection Feedback") then
+      call ESMF_StateSetNeeded(importstate, "SIE", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+    endif
 
-        call ESMF_StateGetData(injectstates, "Injection Feedback", frominject, rc)
-        call ESMF_StateSetNeeded(frominject, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(frominject, "V", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(frominject, "RHO", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(frominject, "FLAG", ESMF_STATEDATAISNEEDED, rc)
-
-        print *, "Coupler Init returning"
+    print *, "Coupler Init returning"
    
     end subroutine coupler_init
 
@@ -134,11 +135,11 @@
 ! !IROUTINE: coupler_run - coupler run routine
 
 ! !INTERFACE:
-      subroutine coupler_run(comp, statelist, clock, rc)
+      subroutine coupler_run(comp, importstate, exportstate, clock, rc)
 !
 ! !ARGUMENTS:
      type(ESMF_CplComp), intent(inout) :: comp
-     type(ESMF_State), intent(inout) :: statelist
+     type(ESMF_State), intent(inout) :: importstate, exportstate
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
@@ -149,8 +150,10 @@
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[statelist]
-!          Nested state object.
+!     \item[importstate]
+!          Nested state object containing import data.
+!     \item[exportstate]
+!          Nested state object containing export data.
 !     \item[clock] 
 !          External clock.
 !     \item[rc] 
@@ -161,8 +164,6 @@
 !EOPI
 
       ! Local variables
-        type(ESMF_State) :: toflow, toinjector
-        type(ESMF_State) :: mysource, mydest
         type(ESMF_Field) :: srcfield, dstfield
         type(ESMF_Array) :: srcarray, dstarray
         real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: srcptr, dstptr
@@ -183,26 +184,8 @@
         datanames(6) = "Q"
         datanames(7) = "FLAG"
 
-        ! Find which direction we are coupling based on the name of the state we have.
-        call ESMF_StateGetName(statelist, statename, rc)
-        if (trim(statename) .eq. "Coupler States Injector to FlowSolver") then
-
-            ! Injector to FlowSolver
-            call ESMF_StateGetData(statelist, "Injection Feedback", mysource, rc)
-            call ESMF_StateGetData(statelist, "FlowSolver Input", mydest, rc)
-
-        else if (trim(statename) .eq. "Coupler States FlowSolver to Injector") then
-
-            ! FlowSolver to Injector
-            call ESMF_StateGetData(statelist, "FlowSolver Feedback", mysource, rc)
-            call ESMF_StateGetData(statelist, "Injection Input", mydest, rc)
-
-        else
-
-           print *, "Unexpected Statelist in Coupler Run routine, named ", trim(statename)
-           rc = ESMF_FAILURE
-           return
-        endif
+        ! In this case, the coupling is symmetric - you call Redist either
+        ! way - so we don't care which direction we're coupling.
 
         ! Get layout from coupler component
         call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
@@ -210,7 +193,7 @@
         do i=1, datacount
 
            ! check isneeded flag here
-           if (.not. ESMF_StateIsNeeded(mysource, datanames(i), rc)) then 
+           if (.not. ESMF_StateIsNeeded(importstate, datanames(i), rc)) then 
                !print *, "skipping field ", trim(datanames(i)), " not needed"
                cycle
            endif
@@ -229,8 +212,8 @@
 !   an Export State and the other is an Import State.
 !
 !\begin{verbatim}
-           call ESMF_StateGetData(mysource, datanames(i), srcfield, rc=status)
-           call ESMF_StateGetData(mydest, datanames(i), dstfield, rc=status)
+           call ESMF_StateGetData(importstate, datanames(i), srcfield, rc=status)
+           call ESMF_StateGetData(exportstate, datanames(i), dstfield, rc=status)
 !\end{verbatim}
 !
 !   The Route routine uses information contained in the Fields and the
@@ -257,11 +240,11 @@
 ! !IROUTINE:  coupler_final - finalization routine
 
 ! !INTERFACE:
-      subroutine coupler_final(comp, statelist, clock, rc)
+      subroutine coupler_final(comp, importstate, exportstate, clock, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp) :: comp
-      type(ESMF_State), intent(inout) :: statelist
+      type(ESMF_State), intent(inout) :: importstate, exportstate
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
@@ -272,8 +255,10 @@
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[statelist]
-!          Nested state object.
+!     \item[importstate]
+!          Nested state object containing import data.
+!     \item[exportstate]
+!          Nested state object containing export data.
 !     \item[clock] 
 !          External clock.
 !     \item[rc] 
@@ -282,9 +267,6 @@
 !     \end{description}
 !
 !EOPI
-        ! Local variables
-        type(ESMF_State) :: state1, state2
-
         print *, "Coupler Final starting"
   
         ! Nothing to do here.
