@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2004/03/16 23:28:17 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.3 2004/03/18 18:19:21 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -22,8 +22,8 @@
     
     public usercpl_register
         
-    type(ESMF_RouteHandle), save :: routehandle
-    type(ESMF_Field), save :: humidityM
+    type(ESMF_RouteHandle), save :: routehandle1, routehandle2
+    type(ESMF_Field), save :: h1a, h2a, humidityM
 
     contains
 
@@ -65,7 +65,7 @@
         integer :: rc
 
         ! Local variables
-        type(ESMF_Field) :: humidity1, humidity3
+        type(ESMF_Field) :: humidity1, humidity2, humidity3
         type(ESMF_DELayout) :: cpllayout
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
@@ -81,7 +81,10 @@
                                 "comp1 export", rc)
         call ESMF_FieldPrint(humidity1, rc=rc)
   
-        ! assumes humidity2 field is identical to humidity1
+        call ESMF_StateGetField(importstate, "humidity", humidity2, &
+                                "comp1 export", rc)
+
+        ! one route from h1, one from h2
 
         call ESMF_StateGetField(exportstate, "humidity", humidity3, rc=rc)
         call ESMF_FieldPrint(humidity3, rc=rc)
@@ -91,7 +94,10 @@
 
         ! Precompute communication patterns
         call ESMF_FieldRedistStore(humidity1, humidity3, cpllayout, &
-                                   routehandle, rc=rc)
+                                   routehandle1, rc=rc)
+
+        call ESMF_FieldRedistStore(humidity2, humidity3, cpllayout, &
+                                   routehandle2, rc=rc)
 
         ! TODO: make this work: field create from field
         !humidityM = ESMF_FieldCreateFromField(humidity1, rc=rc)
@@ -101,6 +107,12 @@
         call ESMF_ArrayGet(array1, rank=rank1, type=dt1, kind=dk1, rc=rc)
         call ESMF_ArraySpecSet(arrayspec1, rank1, dt1, dk1, rc)
  
+        h1a = ESMF_FieldCreate(grid=grid1, arrayspec=arrayspec1, &
+                                     datamap=datamap1, rc=rc)
+
+        h2a = ESMF_FieldCreate(grid=grid1, arrayspec=arrayspec1, &
+                                     datamap=datamap1, rc=rc)
+
         humidityM = ESMF_FieldCreate(grid=grid1, arrayspec=arrayspec1, &
                                      datamap=datamap1, rc=rc)
 
@@ -142,16 +154,17 @@
         call ESMF_StateGetField(exportstate, "humidity", humidity3, rc=rc)
         call ESMF_FieldPrint(humidity3, "", rc=rc)
 
+        ! These are fields on different layouts - call Redist to rearrange
+        !  the data using the Comm routines.
+        call ESMF_FieldRedist(humidity1, h1a, routehandle1, rc=status)
+        call ESMF_FieldRedist(humidity2, h2a, routehandle2, rc=status)
+
         ! Get data pointers, merge data
-        call ESMF_FieldGetDataPointer(humidity1, h1, rc=rc)
-        call ESMF_FieldGetDataPointer(humidity2, h2, rc=rc)
+        call ESMF_FieldGetDataPointer(h1a, h1, rc=rc)
+        call ESMF_FieldGetDataPointer(h2a, h2, rc=rc)
         call ESMF_FieldGetDataPointer(humidityM, hM, rc=rc)
 
         hM(:,:) = h1(:,:) + h2(:,:)
-
-        ! These are fields on different layouts - call Redist to rearrange
-        !  the data using the Comm routines.
-        call ESMF_FieldRedist(humidityM, humidity2, routehandle, rc=status)
 
 
         ! Output data operated on in place, export state now has new values.
@@ -181,7 +194,8 @@
         call ESMF_StatePrint(importstate, rc=rc)
         call ESMF_StatePrint(exportstate, rc=rc)
     
-        call ESMF_FieldRedistRelease(routehandle)
+        call ESMF_FieldRedistRelease(routehandle1)
+        call ESMF_FieldRedistRelease(routehandle1)
         call ESMF_FieldDestroy(humidityM, rc=rc)
 
         print *, "User Coupler Final returning"
