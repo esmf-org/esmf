@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherUTest.F90,v 1.6 2004/12/16 00:57:30 theurich Exp $
+! $Id: ESMF_VMScatterVMGatherUTest.F90,v 1.7 2004/12/16 04:27:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMScatterVMGatherUTest.F90,v 1.6 2004/12/16 00:57:30 theurich Exp $'
+      '$Id: ESMF_VMScatterVMGatherUTest.F90,v 1.7 2004/12/16 04:27:18 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -89,7 +89,7 @@
       enddo
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_UTest
       ! Verify array1 data before scatter
       write(failMsg, *) "Wrong data."
       write(name, *) "Verifying array1 data before scatter Test"
@@ -105,7 +105,7 @@
       enddo
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_UTest
       ! Verify array2 data before scatter
       write(failMsg, *) "Wrong data."
       write(name, *) "Verifying array2 data before scatter Test"
@@ -121,7 +121,7 @@
       enddo
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_UTest
       ! Scatter from scatterRoot
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Scatter Test"
@@ -130,7 +130,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_UTest
       ! Verify array1 data after scatter
       write(failMsg, *) "Wrong data."
       write(name, *) "Verifying array1 data after scatter Test"
@@ -146,7 +146,7 @@
       enddo
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_UTest
       ! Verify array2 data after scatter
       write(failMsg, *) "Wrong data."
       write(name, *) "Verifying array2 data after scatter Test"
@@ -163,7 +163,7 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_UTest
       ! Gather from gatherRoot
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Gather Test"
@@ -172,7 +172,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_UTest
       ! Verify array1 data after gather
       write(failMsg, *) "Wrong data."
       write(name, *) "Verifying array1 data after gather Test"
@@ -194,7 +194,7 @@
       enddo
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_UTest
       ! Verify array2 data after gather
       write(failMsg, *) "Wrong data."
       write(name, *) "Verifying array2 data after gather Test"
