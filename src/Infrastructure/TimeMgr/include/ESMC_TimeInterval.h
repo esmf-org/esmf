@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.14 2003/04/21 23:41:52 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.15 2003/04/25 09:01:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,10 +46,8 @@
 //   appropriate unit combinations, as per the requirements.  Usually, the
 //   largest resolution of time for a {\tt TimeInterval} is in days, making it
 //   independent of any calendar.  A {\tt TimeInterval} can also be used as a
-//   {\tt Calendar} interval by associating it with a calendar type.  Then it
-//   becomes calendar-dependent, since its largest resolution of time will be
-//   in months and years.  In order to support calendar intervals,
-//   {\tt TimeInterval} adds a calendar type attribute to {\tt BaseTime}.
+//   {\tt Calendar} interval. Then it becomes calendar-dependent, since its
+//   largest resolution of time will be in months and years.  
 //   {\tt TimeInterval} also defines methods for multiplication and division
 //   of {\tt TimeIntervals} by integers, reals, fractions and other
 //   {\tt TimeIntervals}.  {\tt TimeInterval} defines methods for absolute
@@ -68,7 +66,6 @@
 // !USES:
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMC_BaseTime.h>       // inherited BaseTime class
- #include <ESMC_Calendar.h>       // associated Calendar class
 
 // !PUBLIC TYPES:
  class ESMC_TimeInterval;
@@ -81,16 +78,15 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                                              // TODO: (& ESMC_Base class when
                                              // fully aligned with F90 equiv)
   private:
-    // set for Calendar intervals only
-    ESMC_Calendar *Calendar;    // associated calendar for Calendar intervals
+    ESMF_IKIND_I8 YY;      // for Calendar intervals:  number of years
+    ESMF_IKIND_I8 MO;      // for Calendar intervals:  number of months
 
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
 
     // TimeInterval is a shallow class, so only Init methods are needed
-    // TODO:  use default argument for calendar (NULL)
-    int ESMC_TimeIntervalInit(ESMC_Calendar *Cal, const char *TimeList, ...);
+    int ESMC_TimeIntervalInit(const char *timeList, ...);
 
     // Init method to support the F90 optional arguments interface
     int ESMC_TimeIntervalInit(ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
@@ -98,7 +94,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                               int *S, int *MS, int *US, int *NS,
                               double *d_, double *h_, double *m_, double *s_,
                               double *ms_, double *us_, double *ns_,
-                              int *Sn, int *Sd, ESMC_Calendar *cal);
+                              int *Sn, int *Sd);
 
     // accessor methods
 
@@ -131,37 +127,32 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                              double *ms_, double *us_, double *ns_,
                              int *Sn, int *Sd);
 
-    int ESMC_TimeIntervalGetCalendar(ESMC_Calendar *Cal) const;
-    int ESMC_TimeIntervalSetCalendar(ESMC_Calendar *Cal);
-
-    bool ESMC_TimeIntervalIsSameCal(ESMC_TimeInterval *) const;
-
     // return in string format (TMG 1.5.9)
-    int ESMC_TimeIntervalGetString(char *Ts) const;
+    int ESMC_TimeIntervalGetString(char *timeString) const;
 
     // return positive value (TMG 1.5.8)
-    ESMC_TimeInterval *ESMC_TimeIntervalGetAbsValue(ESMC_TimeInterval *) const;
+    ESMC_TimeInterval ESMC_TimeIntervalAbsValue(void) const;
 
     // return negative value (TMG 1.5.8)
-    ESMC_TimeInterval *ESMC_TimeIntervalGetNegAbsVal(ESMC_TimeInterval *) const;
+    ESMC_TimeInterval ESMC_TimeIntervalNegAbsVal(void) const;
 
     // division (TMG 1.5.5)
-    double& operator/(ESMC_TimeInterval &);
-    ESMC_Fraction& operatorDIV(ESMC_TimeInterval &);  // TODO  DIV
+    ESMC_Fraction ESMC_TimeIntervalDiv(const ESMC_TimeInterval &) const;
+    double operator/(const ESMC_TimeInterval &) const;
 
     // subdivision (TMG 1.5.6, 5.3, 7.2)
-    ESMC_TimeInterval& operator/=(int &);
-    ESMC_TimeInterval& operator/ (int &) const;
-    ESMC_TimeInterval& operator/=(double &);
-    ESMC_TimeInterval& operator/ (double &) const;
+    ESMC_TimeInterval  operator/ (const int &) const;
+    ESMC_TimeInterval& operator/=(const int &);
+    ESMC_TimeInterval  operator/ (const double &) const;
+    ESMC_TimeInterval& operator/=(const double &);
 
     // multiplication (TMG 1.5.7, 7.2)
-    ESMC_TimeInterval& operator*=(int &);
-    ESMC_TimeInterval& operator* (int &) const;
-    ESMC_TimeInterval& operator*=(ESMC_Fraction &);
-    ESMC_TimeInterval& operator* (ESMC_Fraction &) const;
-    ESMC_TimeInterval& operator*=(double &);
-    ESMC_TimeInterval& operator* (double &) const;
+    ESMC_TimeInterval  operator* (const int &) const;
+    ESMC_TimeInterval& operator*=(const int &);
+    ESMC_TimeInterval  operator* (const ESMC_Fraction &) const;
+    ESMC_TimeInterval& operator*=(const ESMC_Fraction &);
+    ESMC_TimeInterval  operator* (const double &) const;
+    ESMC_TimeInterval& operator*=(const double &);
 
     // copy or assign from ESMC_BaseTime expressions
     // TODO:  should be implicit ?
@@ -171,9 +162,9 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // for persistence/checkpointing
     int ESMC_TimeIntervalRead(ESMF_IKIND_I8 S, int Sn, int Sd,
-                              ESMC_Calendar *cal);
+                              ESMF_IKIND_I8 YY, ESMF_IKIND_I8 MO);
     int ESMC_TimeIntervalWrite(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                               ESMC_Calendar *cal) const;
+                               ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO) const;
 
     // internal validation
     int ESMC_TimeIntervalValidate(const char *options=0) const;
@@ -183,7 +174,8 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);
-    ESMC_TimeInterval(ESMF_IKIND_I8 S, int Sn, int Sd, ESMC_Calendar *Cal=0);
+    ESMC_TimeInterval(ESMF_IKIND_I8 S, int Sn, int Sd,
+                      ESMF_IKIND_I8 YY, ESMF_IKIND_I8 MO);
     ~ESMC_TimeInterval(void);
 
  // < declare the rest of the public interface methods here >
