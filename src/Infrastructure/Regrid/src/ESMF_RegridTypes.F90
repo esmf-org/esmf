@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.63 2004/11/18 16:49:03 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.64 2004/11/18 22:45:56 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,6 +62,32 @@
       use ESMF_ArrayCommMod
 
       implicit none
+
+!------------------------------------------------------------------------------
+!     !  ESMF_RegridIndexType
+!
+!     ! Description of ESMF_RegridIndexType.
+
+      type ESMF_RegridIndexType
+      sequence
+      private
+
+        integer, dimension(:), pointer :: srcMinIndex, srcMaxIndex
+
+        integer, dimension(:,:), pointer :: dstMinIndex, dstMaxIndex
+
+      end type
+
+!------------------------------------------------------------------------------
+!     !  ESMF_RegridIndex
+!
+!     !  The RegridIndex data structure that is passed between languages.
+
+      type ESMF_RegridIndex
+      sequence
+      private
+        type(ESMF_RegridIndexType), pointer :: ptr     ! pointer to a regrid index
+      end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_RegridMethod
@@ -218,6 +244,9 @@
     public ESMF_RegridCreateEmpty     ! creates an empty regrid structure
     public ESMF_RegridConstructEmpty  ! constructs an empty regrid structure
     public ESMF_RegridDestruct        ! deallocate memory associated with a regrid
+    public ESMF_RegridIndexCreate     ! creates a RegridIndex structure
+    public ESMF_RegridIndexDestroy    ! deallocate memory associated with a
+                                      ! RegridIndex structure
 
     public operator(==), operator(/=) ! for overloading method and option
                                       ! comparison functions
@@ -226,7 +255,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.63 2004/11/18 16:49:03 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.64 2004/11/18 22:45:56 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -386,7 +415,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_RegridAddLink2D(tv, srcAdd, dstAdd, weight, aggregate, &
-                                      srcCount, dstCount, rc)
+                                      index, rc)
 !
 ! !ARGUMENTS:
 
@@ -395,8 +424,7 @@
       integer, dimension(2), intent(in) :: dstAdd
       real(kind=ESMF_KIND_R8), intent(in) :: weight
       logical, intent(in), optional :: aggregate
-      integer, intent(in), optional :: srcCount
-      integer, dimension(2), intent(in), optional :: dstCount
+      type(ESMF_RegridIndex), intent(inout), optional :: index
       integer, intent(out), optional :: rc
 
 !
@@ -419,6 +447,9 @@
 !          be searched for an already occurring weight corresponding to the
 !          current address pair and the current weight added on instead of
 !          making a new link.
+!     \item[{[index]}]
+!          Optional regrid index structure to help speed up the search for
+!          aggregated weights.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -429,10 +460,7 @@
       integer :: localrc
       integer :: numList, i, i1, startIndex, stopIndex
       integer, dimension(:), pointer :: srcPtr, dstPtr
-      integer, dimension(:), allocatable, save :: srcMinIndex, srcMaxIndex
-      integer, dimension(:,:), allocatable, save :: dstMinIndex, dstMaxIndex
       logical :: aggregateUse, newLink
-      logical :: firstTime=.true.
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
 
@@ -442,31 +470,6 @@
       newLink = .true.
       aggregateUse = .false.
       if (present(aggregate)) aggregateUse=aggregate
-
-      ! if it's the first time through and the sizes are passed in, allocate
-      ! storage for min/max indices
-      if (aggregateUse) then
-        if (firstTime) then
-          ! TODO: check for counts
-          firstTime = .false.
-          allocate(srcMinIndex(srcCount), &
-                   srcMaxIndex(srcCount), stat=localrc)
-          allocate(dstMinIndex(dstCount(1), dstCount(2)), &
-                   dstMaxIndex(dstCount(1), dstCount(2)), stat=localrc)
-          srcMinIndex = 0
-          srcMaxIndex = 0
-          dstMinIndex = 0
-          dstMaxIndex = 0
-          return
-        else
-          startIndex = min(srcMinIndex(srcAdd), dstMinIndex(dstAdd(1),dstAdd(2)))
-          stopIndex  = max(srcMaxIndex(srcAdd), dstMaxIndex(dstAdd(1),dstAdd(2)))
-          if (startIndex.eq.0) then
-            startIndex = 1
-            stopIndex  = 0
-          endif
-        endif 
-      endif
 
       call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=localrc)
@@ -480,6 +483,22 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+
+      ! if the weights are being aggregated, calculate the search indices
+      ! either from the default (the whole damn thang) or the optional
+      ! RegridIndex
+      startIndex = 1
+      stopIndex  = numList
+      if (aggregateUse .AND. present(index)) then
+        startIndex = max(index%ptr%srcMinIndex(srcAdd), &
+                         index%ptr%dstMinIndex(dstAdd(1),dstAdd(2)))
+        stopIndex  = min(index%ptr%srcMaxIndex(srcAdd), &
+                         index%ptr%dstMaxIndex(dstAdd(1),dstAdd(2)))
+        if (startIndex.eq.0) then
+          startIndex = 1
+          stopIndex  = 1
+        endif
+      endif 
 
       ! if the aggregation flag is set, search through the already existing
       ! links for the current address pair
@@ -508,6 +527,14 @@
         dstPtr(2*(numList-1)+2) = dstAdd(2)
         srcPtr(numList) = srcAdd
         wgtPtr(numList) = weight
+        if (present(index)) then
+          if (index%ptr%srcMinIndex(srcAdd).eq.0) &
+              index%ptr%srcMinIndex(srcAdd) = numList
+          index%ptr%srcMaxIndex(srcAdd) = numList
+          if (index%ptr%dstMinIndex(dstAdd(1),dstAdd(2)).eq.0) &
+              index%ptr%dstMinIndex(dstAdd(1),dstAdd(2)) = numList
+          index%ptr%dstMaxIndex(dstAdd(1),dstAdd(2)) = numList
+        endif
       endif
 
       call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
@@ -515,8 +542,6 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-
-      !TODO: some call to deallocate arrays
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1154,6 +1179,121 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestruct
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridIndexCreate"
+!BOPI
+! !IROUTINE: ESMF_RegridIndexCreate - Create regrid index structure
+
+! !INTERFACE:
+      function ESMF_RegridIndexCreate(srcCount, dstCount, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_RegridIndex) :: ESMF_RegridIndexCreate
+!
+! !ARGUMENTS:
+      integer, intent(in) :: srcCount
+      integer, dimension(2), intent(in) :: dstCount
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which creates and initializes a regrid index structure.
+!     The structure is later filled with appropriate data in the routine
+!     addLink2D.  Intended for internal ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[srcCount]
+!          Size of the local source grid.
+!     \item[dstCount]
+!          2D array giving the size of the local destination grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      integer :: localrc
+      type(ESMF_RegridIndexType), pointer :: ritype    ! Pointer to new regrid index
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+!     Initialize pointers
+      nullify(ritype)
+      nullify(ESMF_RegridIndexCreate%ptr)
+
+      allocate(ritype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Regrid type", &
+                                     ESMF_CONTEXT, rc)) return
+
+!     allocate and initialize regrid index internals.
+      allocate(ritype%srcMinIndex(srcCount), &
+               ritype%srcMaxIndex(srcCount), stat=localrc)
+      allocate(ritype%dstMinIndex(dstCount(1), dstCount(2)), &
+               ritype%dstMaxIndex(dstCount(1), dstCount(2)), stat=localrc)
+      ritype%srcMinIndex = 0
+      ritype%srcMaxIndex = 0
+      ritype%dstMinIndex = 0
+      ritype%dstMaxIndex = 0
+
+!     Set return values.
+      ESMF_RegridIndexCreate%ptr => ritype
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_RegridIndexCreate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridIndexDestroy"
+!BOPI
+! !IROUTINE: ESMF_RegridIndexDestroy - destroy regrid index structure
+
+! !INTERFACE:
+      subroutine ESMF_RegridIndexDestroy(index, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RegridIndex) :: index
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which destroys a regrid index structure.  Intended for
+!     internal ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[index]
+!          {\tt RegridIndex} to be destroyed.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      ! local variables
+      integer :: localrc                             ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+!     deallocate regrid index internals.
+      deallocate(index%ptr%srcMinIndex, &
+                 index%ptr%srcMaxIndex, &
+                 index%ptr%dstMinIndex, &
+                 index%ptr%dstMaxIndex, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Regrid type", &
+                                     ESMF_CONTEXT, rc)) return
+
+!     Destroy all components of the regrid index structure
+      nullify(index%ptr)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridIndexDestroy
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
