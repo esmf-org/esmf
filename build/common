@@ -1,4 +1,4 @@
-# $Id: common,v 1.8 2002/01/23 21:48:52 dneckels Exp $ 
+# $Id: common,v 1.9 2002/01/28 19:14:38 dneckels Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -73,6 +73,20 @@ builddvi: ${DVIFILES}
 buildpdf: ${PDFFILES}
 
 buildhtml: ${HTMLFILES}
+
+localpdf: chkdir_doc
+	cd ..;  ${OMAKE} buildtex
+	${OMAKE} buildpdf
+
+localdvi: chkdir_doc
+	cd ..;  ${OMAKE} buildtex
+	${OMAKE} builddvi
+
+localhtml: chkdir_doc
+	cd ..;  ${OMAKE} buildtex
+	${OMAKE} buildhtml
+
+localdoc: chkdir_doc localpdf localdvi localhtml
 
 
 # Builds library
