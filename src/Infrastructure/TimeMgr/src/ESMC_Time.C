@@ -23,7 +23,6 @@
  #include <math.h>     // modf()
  #include <time.h>
  #include <string.h>
- #include <ESMC_TimeInterval.h>
 
  // associated class definition file
  #include <ESMC_Time.h>
@@ -31,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.55 2004/02/09 07:06:07 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.56 2004/03/05 00:53:02 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -590,13 +589,8 @@
 //                          in order to copy the ESMC_Time-only properties
 //                          (calendar & timeZone) to the result. 
 //
-    // copy this time's properties (calendar and timezone)
-    ESMC_Time sum = *this;
-
-    // then perform the increment using ESMC_BaseTime operator
-    sum += timeInterval;
-
-    return(sum);
+    // delegate the increment operation to my calendar associate
+    return(calendar->ESMC_CalendarIncrement(this, timeInterval));
 
 }  // end ESMC_Time::operator+
 
@@ -624,15 +618,64 @@
 //                          in order to copy the ESMC_Time-only properties
 //                          (calendar & timeZone) to the result. 
 //
-    // copy this time's properties (calendar and timezone)
-    ESMC_Time diff = *this;
-
-    // then perform the decrement using ESMC_BaseTime operator
-    diff -= timeInterval;
-
-    return(diff);
+    // delegate the decrement operation to my calendar associate
+    return(calendar->ESMC_CalendarDecrement(this, timeInterval));
 
 }  // end ESMC_Time::operator-
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Time(+=) - Increment a Time with a TimeInterval
+//
+// !INTERFACE:
+      ESMC_Time& ESMC_Time::operator+=(
+//
+// !RETURN VALUE:
+//    ESMC_Time& result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
+                                                //      to add
+//
+// !DESCRIPTION:
+//    Adds {\tt timeInterval} expression to this time.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // delegate the increment operation to my calendar associate
+    *this = calendar->ESMC_CalendarIncrement(this, timeInterval);
+
+    return(*this);
+
+}  // end ESMC_Time::operator+=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Time(-=) - Decrement a Time with a TimeInterval
+//
+// !INTERFACE:
+      ESMC_Time& ESMC_Time::operator-=(
+//
+// !RETURN VALUE:
+//    ESMC_Time& result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
+                                                //      to subtract
+//
+// !DESCRIPTION:
+//    Adds {\tt timeInterval} expression to this time.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // delegate the derement operation to my calendar associate
+    *this = calendar->ESMC_CalendarDecrement(this, timeInterval);
+
+    return(*this);
+
+}  // end ESMC_Time::operator-=
 
 //-------------------------------------------------------------------------
 //BOP

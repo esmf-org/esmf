@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.33 2004/01/29 04:44:35 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.34 2004/03/05 00:53:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -143,6 +143,8 @@
     // properties (calendar & timeZone) to the result
     ESMC_Time operator+(const ESMC_TimeInterval &) const; // time + timeInterval
     ESMC_Time operator-(const ESMC_TimeInterval &) const; // time - timeInterval
+    ESMC_Time& operator+=(const ESMC_TimeInterval &); // time += timeInterval
+    ESMC_Time& operator-=(const ESMC_TimeInterval &); // time -= timeInterval
 
     // override 2nd BaseTime (-) operator because 1st (-) operator is overridden
     // (compiler can't find 2nd (-) operator at BaseTime!)
