@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.98 2003/09/12 22:36:50 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.99 2003/09/18 22:56:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -220,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.98 2003/09/12 22:36:50 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.99 2003/09/18 22:56:14 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -498,10 +498,10 @@
 !
 ! !ARGUMENTS:
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: counts
-      real, intent(in) :: x_min
-      real, intent(in) :: x_max
-      real, intent(in) :: y_min
-      real, intent(in) :: y_max
+      real(ESMF_KIND_R8), intent(in) :: x_min
+      real(ESMF_KIND_R8), intent(in) :: x_max
+      real(ESMF_KIND_R8), intent(in) :: y_min
+      real(ESMF_KIND_R8), intent(in) :: y_max
       type (ESMF_DELayout), intent(in) :: layout
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
@@ -616,9 +616,9 @@
 ! !ARGUMENTS:
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
-      real, dimension(:), intent(in) :: min
-      real, dimension(:), intent(in) :: delta1
-      real, dimension(:), intent(in) :: delta2
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: min
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
       type (ESMF_DELayout), intent(in) :: layout
       character (len=*), dimension(:), intent(in), optional :: dim_names
       character (len=*), dimension(:), intent(in), optional :: dim_units
@@ -1174,10 +1174,10 @@
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: counts
-      real, intent(in) :: x_min
-      real, intent(in) :: x_max
-      real, intent(in) :: y_min
-      real, intent(in) :: y_max
+      real(ESMF_KIND_R8), intent(in) :: x_min
+      real(ESMF_KIND_R8), intent(in) :: x_max
+      real(ESMF_KIND_R8), intent(in) :: y_min
+      real(ESMF_KIND_R8), intent(in) :: y_max
       type (ESMF_DELayout), intent(in) :: layout
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
@@ -1240,7 +1240,7 @@
       logical :: rcpresent                    ! Return code present
       integer :: numDE1, numDE2
       integer, dimension(:,:), pointer :: countsPerAxis
-      real :: delta1, delta2
+      real(ESMF_KIND_R8) :: delta1, delta2
       type(ESMF_RelLoc) :: relloc
 
 !     Initialize return code
@@ -1409,9 +1409,9 @@
       type(ESMF_GridType) :: grid
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
-      real, dimension(:), intent(in) :: min
-      real, dimension(:), intent(in) :: delta1
-      real, dimension(:), intent(in) :: delta2
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: min
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
       type (ESMF_DELayout), intent(in) :: layout
       character (len=*), dimension(:), intent(in), optional :: dim_names
       character (len=*), dimension(:), intent(in), optional :: dim_units
@@ -1731,10 +1731,10 @@
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: counts
       integer, intent(out) :: physgrid_id
       type(ESMF_RelLoc), intent(in) :: relloc
-      real, intent(in), optional :: x_min
-      real, intent(in), optional :: x_max
-      real, intent(in), optional :: y_min
-      real, intent(in), optional :: y_max
+      real(ESMF_KIND_R8), intent(in), optional :: x_min
+      real(ESMF_KIND_R8), intent(in), optional :: x_max
+      real(ESMF_KIND_R8), intent(in), optional :: y_min
+      real(ESMF_KIND_R8), intent(in), optional :: y_max
       character (len=*), intent(in), optional :: physgrid_name
       integer, intent(out), optional :: rc
 !
@@ -1768,12 +1768,12 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      real :: delta(2)
-      real :: local_min_coord(2)
-      real :: local_max_coord(2)
+      real(ESMF_KIND_R8) :: delta(2)
+      real(ESMF_KIND_R8) :: local_min_coord(2)
+      real(ESMF_KIND_R8) :: local_max_coord(2)
       integer :: local_nmax(2)
-      real :: global_min_coord(2)
-      real :: global_max_coord(2)
+      real(ESMF_KIND_R8) :: global_min_coord(2)
+      real(ESMF_KIND_R8) :: global_max_coord(2)
       integer :: global_nmax(2)
       integer :: i
 
@@ -1854,11 +1854,11 @@
       type(ESMF_GridType), target :: grid
       integer, intent(out) :: physgrid_id
       type(ESMF_RelLoc), intent(in) :: relloc
-      real, dimension(:), intent(in) :: delta1
-      real, dimension(:), intent(in) :: delta2
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
-      real, dimension(:), intent(in), optional :: min
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: min
       character (len=*), dimension(:), intent(in), optional :: dim_names
       character (len=*), dimension(:), intent(in), optional :: dim_units
       character (len=*), intent(in), optional :: physgrid_name
@@ -1902,8 +1902,9 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       integer :: i, j, myDE(2), counts(2), local_start(2)
-      real :: local_min(2), local_max(2), global_min(2), global_max(2)
-      real, dimension(:), allocatable :: delta1_local, delta2_local
+      real(ESMF_KIND_R8) ::  local_min(2),  local_max(2)
+      real(ESMF_KIND_R8) :: global_min(2), global_max(2)
+      real(ESMF_KIND_R8), dimension(:), allocatable :: delta1_local, delta2_local
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: gridp
 
@@ -2576,13 +2577,13 @@
                                          ! names for each dimension
       character(*), dimension(:), intent(inout), optional :: dim_units
                                          ! units for each dimension
-      real, dimension(:), intent(inout), optional :: global_min
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: global_min
                                          ! global minimum in each coord direction
-      real, dimension(:), intent(inout), optional :: global_max
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: global_max
                                          ! global maximum in each coord direction
-      real, dimension(:), intent(inout), optional :: local_min
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: local_min
                                          ! local minimum in each coord direction
-      real, dimension(:), intent(inout), optional :: local_max
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: local_max
                                          ! local maximum in each coord direction
       integer, intent(out), optional :: rc
 
@@ -2934,7 +2935,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      real, dimension (:), pointer :: buffer
+      real(ESMF_KIND_R8), dimension (:), pointer :: buffer
       integer, intent(in) :: id
       integer, intent(out), optional :: rc
 !
@@ -3007,10 +3008,10 @@
       integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim
       integer, dimension(ESMF_MAXGRIDDIM) :: gcell_start
       integer, dimension(ESMF_MAXGRIDDIM) :: gcell_end
-      real :: delta1
-      real :: delta2
-      real, dimension(ESMF_MAXGRIDDIM) :: global_min_coords
-      real, dimension(ESMF_MAXGRIDDIM) :: global_max_coords
+      real(ESMF_KIND_R8) :: delta1
+      real(ESMF_KIND_R8) :: delta2
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coords
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_max_coords
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -3148,9 +3149,12 @@
       integer, intent(out), optional :: horz_coord_system
       integer, intent(out), optional :: vert_coord_system
       integer, intent(out), optional :: coord_order
-      real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_min_coords
-      real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_max_coords
-      integer, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_cell_dim
+      real(ESMF_KIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
+                            optional :: global_min_coords
+      real(ESMF_KIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
+                            optional :: global_max_coords
+      integer, intent(out), dimension(ESMF_MAXGRIDDIM), &
+                            optional :: global_cell_dim
       integer, intent(out), dimension(:,:), optional :: global_start
       type (ESMF_Logical), intent(out), optional :: periodic(:)
       character(len = *), intent(out), optional :: name
@@ -3973,10 +3977,10 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridType), intent(inout) :: grid
-      real, intent(in) :: x_min
-      real, intent(in) :: y_min
-      real, intent(in) :: delta1
-      real, intent(in) :: delta2
+      real(ESMF_KIND_R8), intent(in) :: x_min
+      real(ESMF_KIND_R8), intent(in) :: y_min
+      real(ESMF_KIND_R8), intent(in) :: delta1
+      real(ESMF_KIND_R8), intent(in) :: delta2
       integer, dimension(:,:), intent(in) :: countsPerAxis
       integer, intent(in) :: numDE1
       integer, intent(in) :: numDE2
@@ -4015,8 +4019,8 @@
       logical :: rcpresent                    ! Return code present
       integer :: DE, numDEs, rank, npts
       integer :: i, j, jDE
-      real :: start, stop
-      real(kind=ESMF_KIND_R4), dimension(:,:,:), pointer :: boxes
+      real(ESMF_KIND_R8) :: start, stop
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
 
 !     Initialize return code
       status = ESMF_SUCCESS
@@ -4099,9 +4103,9 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridType), intent(inout) :: grid
-      real, dimension(:), intent(in) :: min
-      real, dimension(:), intent(in) :: delta1
-      real, dimension(:), intent(in) :: delta2
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: min
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
       integer, intent(out), optional :: rc
@@ -4135,8 +4139,8 @@
       logical :: rcpresent                    ! Return code present
       integer :: DE, numDE1, numDE2, numDEs, rank, npts
       integer :: i, i1, j
-      real :: start, stop
-      real(kind=ESMF_KIND_R4), dimension(:,:,:), pointer :: boxes
+      real(ESMF_KIND_R8) :: start, stop
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
 
 !     Initialize return code
       status = ESMF_SUCCESS
@@ -4356,11 +4360,11 @@
       function ESMF_GridComputeDistance(x1, y1, x2, y2, coord_system, rc)
 
 ! !RETURN VALUE:
-      real (kind=ESMF_KIND_R8) :: ESMF_GridComputeDistance
+      real(ESMF_KIND_R8) :: ESMF_GridComputeDistance
 
 ! !ARGUMENTS:
 
-      real (kind=ESMF_KIND_R8), intent(in) :: &
+      real(ESMF_KIND_R8), intent(in) :: &
          x1,y1,      &! x,y coordinates of two points between which 
          x2,y2        !   the distance is to be computed
 
@@ -4429,8 +4433,10 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      real, dimension(:), intent(in) :: local_min        ! array of local mins
-      real, dimension(:), intent(in) :: local_max        ! array of local maxs
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: local_min
+                                                         ! array of local mins
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: local_max
+                                                         ! array of local maxs
       type(ESMF_DomainList), intent(inout) :: domainlist ! domain list
       integer, intent(out), optional :: rc               ! return code
 
@@ -4467,7 +4473,7 @@
       integer :: i, j, rank, nDEs, num_domains
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
-      real, dimension(:,:,:), pointer :: boxes
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
       type(ESMF_AxisIndex), dimension(:,:), pointer :: grid_ai, localAI
       type(ESMF_Domain) :: domain
       type(ESMF_LocalArray) :: array
@@ -4603,13 +4609,16 @@
 ! !IROUTINE: ESMF_GridBoxIntersectSend - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_GridBoxIntersectSend(grid, local_min, local_max, myAI, &
-                                           domainList, rc)
+      subroutine ESMF_GridBoxIntersectSend(dstGrid, srcGrid, local_min, &
+                                           local_max, myAI, domainList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid) :: grid
-      real, dimension(:), intent(in) :: local_min        ! array of local mins
-      real, dimension(:), intent(in) :: local_max        ! array of local maxs
+      type(ESMF_Grid) :: dstGrid
+      type(ESMF_Grid) :: srcGrid
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: local_min
+                                                         ! array of local mins
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: local_max
+                                                         ! array of local maxs
       type(ESMF_AxisIndex), dimension(:), intent(in) :: myAI
       type(ESMF_DomainList), intent(inout) :: domainlist ! domain list
       integer, intent(out), optional :: rc               ! return code
@@ -4649,7 +4658,7 @@
       integer :: i, j, rank, nDEs, num_domains
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
-      real, dimension(:,:,:), pointer :: boxes
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
       type(ESMF_AxisIndex), dimension(:), pointer :: myLocalAI
       type(ESMF_Domain) :: domain
       type(ESMF_LocalArray) :: array
@@ -4663,7 +4672,7 @@
       endif
 
       ! get set of bounding boxes from the grid
-      call ESMF_GridGetBoundingBoxes(grid%ptr, array, status)
+      call ESMF_GridGetBoundingBoxes(dstGrid%ptr, array, status)
 
       ! get rank and counts from the bounding boxes array
       call ESMF_LocalArrayGet(array, counts=counts, rc=status)
@@ -4683,7 +4692,7 @@
       endif
 
       ! translate myAI to local index
-      call ESMF_GridGlobalToLocalIndex(grid, globalAI1D=myAI, &
+      call ESMF_GridGlobalToLocalIndex(srcGrid, globalAI1D=myAI, &
                                        localAI1D=myLocalAI, rc=status)
 
       ! get pointer to the actual bounding boxes data
