@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.107 2004/08/19 16:52:23 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.108 2004/08/24 22:35:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -125,6 +125,11 @@
       private
          type(ESMF_Pointer) :: this       ! C++ ftable pointer - MUST BE FIRST
          type(ESMF_Base) :: base                  ! base class
+#ifndef ESMF_NO_INITIALIZERS
+         type(ESMF_Status) :: compstatus          ! valid object or not?
+#else
+         type(ESMF_Status) :: compstatus = ESMF_STATUS_INVALID  ! object ok?
+#endif
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
          type(ESMF_Clock) :: clock                ! private component clock
@@ -227,7 +232,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.107 2004/08/19 16:52:23 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.108 2004/08/24 22:35:28 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -369,6 +374,11 @@ end function
         endif
 
         ! Fill in values
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
 
         ! component type
         compp%ctype = ctype
@@ -431,6 +441,7 @@ end function
               ! TODO: construct a msg string and then call something here.
               ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
               if (status .ne. 0) then
+	        call ESMF_BaseDestroy(compp%base)
                 write(msgbuf, *) &
                   "ERROR: loading config file, unable to open either", &
                   " name = ", trim(configFile), " or name = ", trim(fullpath)
@@ -476,10 +487,6 @@ end function
         call ESMF_VMPlanConstruct(compp%vmplan, compp%vm_parent, &
                                   compp%npetlist, compp%petlist)
                                   
-        !! remove me.  nsc 30jul04
-        !! allocate memory for the CWrap member
-        !! allocate(compp%compw)
-
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
         ! if (ESMF_LogPassFoundError(status, rc)) return
@@ -487,6 +494,8 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
    
+        compp%compstatus = ESMF_STATUS_READY
+
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -531,6 +540,15 @@ end function
           rc = ESMF_FAILURE
         endif
 
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+        ! mark obj invalid
+        compp%compstatus = ESMF_STATUS_INVALID
+
         ! call C++ to release function and data pointer tables.
         call c_ESMC_FTableDestroy(compp%this, status)
         ! if (ESMF_LogPassFoundError(status, rc)) return
@@ -550,10 +568,6 @@ end function
 
         ! destruct the VMPlan
         call ESMF_VMPlanDestruct(compp%vmplan)
-
-        !! remove me.   nsc 30jul04
-        !! Deallocate memory held for CWrap member
-        !! deallocate(compp%compw)
 
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -631,6 +645,18 @@ end function
           rc = ESMF_FAILURE
         endif
         
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+        if (compp%compstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
         ! set the default mode to ESMF_BLOCKING
         if (present(blockingFlag)) then
           blocking = blockingFlag
@@ -759,6 +785,18 @@ end function
           rc = ESMF_FAILURE
         endif
 
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+        if (compp%compstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
         call ESMF_GetName(compp%base, cname, status)
 
         ! set the default mode to ESMF_BLOCKING
@@ -847,6 +885,18 @@ end function
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        endif
+
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+        if (compp%compstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         call ESMF_GetName(compp%base, cname, status)
@@ -947,6 +997,18 @@ end function
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        endif
+
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+        if (compp%compstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         ! set the default mode to ESMF_BLOCKING
@@ -1087,6 +1149,18 @@ end function
           rc = ESMF_FAILURE
         endif
 
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+        if (compp%compstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
         ! set the default mode to ESMF_BLOCKING
         if (present(blockingFlag)) then
           blocking = blockingFlag
@@ -1208,6 +1282,18 @@ end function
           rc = ESMF_FAILURE
         endif
 
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+        if (compp%compstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
         if (present(name)) then
           call ESMF_GetName(compp%base, name, status)
         endif
@@ -1291,6 +1377,18 @@ end function
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        endif
+
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+        if (compp%compstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         if (present(name)) then
@@ -1439,6 +1537,18 @@ end function
          rc = ESMF_FAILURE
        endif
 
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+       if (compp%compstatus .ne. ESMF_STATUS_READY) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                     "uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)) return
+       endif
+
        defaultopts = "brief"
 
        ! Make sure object is internally consistent
@@ -1448,10 +1558,7 @@ end function
            ! do default validation
        endif
 
-      ! TODO: add code here
-      if (ESMF_LogMsgFoundError(ESMF_SUCCESS, &
-                                  "component validation error", &
-                                  ESMF_CONTEXT, rc)) return
+       ! TODO: add code here
 
        ! set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -1500,15 +1607,23 @@ end function
        endif
 
        if (.not.associated(compp)) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Invalid or uninitialized Component", &
-                                  ESMF_CONTEXT, rc)) return
+          !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
+          !nsc                      ESMF_LOG_INFO)
+          write (*,*)  "Invalid or uninitialized Component"
+          return
+       endif
+
+       if (compp%compstatus .ne. ESMF_STATUS_READY) then
+          !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
+          !nsc                      ESMF_LOG_INFO)
+          write (*,*)  "Invalid or uninitialized Component"
+          return
        endif
 
        call ESMF_GetName(compp%base, cname, status)
-     !jw  write (msgbuf,*) "  name = ", trim(cname)
+     !jw  write (msgbuf,*) " Component name = ", trim(cname)
      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (*,*) "  name = ", trim(cname)
+       write (*,*) " Component name = ", trim(cname)
        
        ! TODO: add more info here
 
@@ -1567,6 +1682,12 @@ end function
       rcpresent = .TRUE.  
       rc = ESMF_FAILURE
     endif
+
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
 
     ! call CompClass method
     call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
@@ -1632,6 +1753,12 @@ end function
       rc = ESMF_FAILURE
     endif
 
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
     ! call CompClass method
     call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
@@ -1696,6 +1823,12 @@ end function
       rc = ESMF_FAILURE
     endif
 
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
     ! call CompClass method
     call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
@@ -1746,6 +1879,18 @@ end function
     if (present(rc)) then
       rcpresent = .TRUE.  
       rc = ESMF_FAILURE
+    endif
+
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
     endif
 
 #ifndef VM_DONT_SPAWN_PTHREADS

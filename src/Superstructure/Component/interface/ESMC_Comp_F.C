@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.24 2004/04/23 22:10:26 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.25 2004/08/24 22:36:08 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,66 +44,96 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
                         int nstate, enum ftype ftype, void *func, int *status) {
      char *name;
      int *tablerc = new int;
+     int localrc;
      void *f90comp = ptr;
-     ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
+     ESMC_FTable *tabptr;
 
+     if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
+        if (status) *status = ESMF_FAILURE;
+        return;
+     }
+
+     tabptr = **(ESMC_FTable***)ptr;
      newtrim(tname, slen, phase, &nstate, &name);
          
      //printf("SetTypedEP: setting function name = '%s'\n", name);
      if (ftype == FT_VOIDPINTP)
-         *status = (tabptr)->ESMC_FTableSetFuncPtr(name, func, f90comp, tablerc);
+         localrc = (tabptr)->ESMC_FTableSetFuncPtr(name, func, f90comp, tablerc);
      else
-         *status = (tabptr)->ESMC_FTableSetFuncPtr(name, func, ftype);
+         localrc = (tabptr)->ESMC_FTableSetFuncPtr(name, func, ftype);
 
+     if (status) *status = localrc;
      delete[] name;
+     delete tablerc;
 }
 
 static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     char *name = "localdata";
     enum dtype dtype;
+    int localrc;
 
-    *status = (**ptr)->ESMC_FTableGetDataPtr(name, datap, &dtype);
+    if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
+       if (status) *status = ESMF_FAILURE;
+       return;
+    }
+
+    localrc = (**ptr)->ESMC_FTableGetDataPtr(name, datap, &dtype);
+    if (status) *status = localrc;
 }
 
 static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     char *name = "localdata";
     enum dtype dtype = DT_VOIDP;
+    int localrc;
 
-    *status = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
+    if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
+       if (status) *status = ESMF_FAILURE;
+       return;
+    }
+
+    localrc = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
+    if (status) *status = localrc;
 }
 
 extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
-     int rc, funcrc;
+     int localrc, funcrc;
      int *tablerc = new int;
      void *f90comp = ptr;
-     ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
+     ESMC_FTable *tabptr;
      
+
+     if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
+        if (status) *status = ESMF_FAILURE;
+        return;
+     }
+     tabptr = **(ESMC_FTable***)ptr;
+
      // TODO: shouldn't need to expand the table here - should be buried
      // inside ftable code.
-     rc = (tabptr)->ESMC_FTableExtend(8, 2); // room for 8 funcs, 2 data
-     if (rc != ESMF_SUCCESS) {
-         *status = rc;
+     localrc = (tabptr)->ESMC_FTableExtend(8, 2); // room for 8 funcs, 2 data
+     if (localrc != ESMF_SUCCESS) {
+         if (status) *status = localrc;
          return;
      }
 
-     rc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
+     localrc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
                                                            f90comp, tablerc);
-     if (rc != ESMF_SUCCESS) {
-         *status = rc;
+     if (localrc != ESMF_SUCCESS) {
+         if (status) *status = localrc;
          return;
      }
 
-     rc = (tabptr)->ESMC_FTableCallVFuncPtr("register", &funcrc);
-     if (rc != ESMF_SUCCESS) {
-         *status = rc;
+     localrc = (tabptr)->ESMC_FTableCallVFuncPtr("register", &funcrc);
+     if (localrc != ESMF_SUCCESS) {
+         if (status) *status = localrc;
          return;
      }
 
      if (funcrc != ESMF_SUCCESS) {
-         *status = funcrc;
+         if (status) *status = funcrc;
          return;
      }
-     *status = ESMF_SUCCESS;
+     if (status) *status = ESMF_SUCCESS;
      return;
   
      // TODO:  see if it is possible to make this simpler and call directly:
@@ -173,13 +203,20 @@ extern "C" {
                                          void **datap, int *status, int slen) {
          char *tbuf; 
          enum dtype dtype = DT_VOIDP;
+         int localrc;
+
+         if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
+            if (status) *status = ESMF_FAILURE;
+            return;
+         }
 
          newtrim(name, slen, NULL, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
-         *status = (**ptr)->ESMC_FTableSetDataPtr(tbuf, *datap, dtype);
+         localrc = (**ptr)->ESMC_FTableSetDataPtr(tbuf, *datap, dtype);
   
          delete[] tbuf;
+         if (status) *status = localrc;
      }
 
      // ---------- Get Internal State ---------------
@@ -196,13 +233,20 @@ extern "C" {
                                          void **datap, int *status, int slen) {
          char *tbuf; 
          enum dtype dtype;
+         int localrc;
+
+         if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
+            if (status) *status = ESMF_FAILURE;
+            return;
+         }
 
          newtrim(name, slen, NULL, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
-         *status = (**ptr)->ESMC_FTableGetDataPtr(tbuf, datap, &dtype);
+         localrc = (**ptr)->ESMC_FTableGetDataPtr(tbuf, datap, &dtype);
   
          delete[] tbuf;
+         if (status) *status = localrc;
      }
 
 }
@@ -230,7 +274,7 @@ extern "C" {
     *callrc = cargo->rc;
     delete cargo;
 
-    *status = ESMF_SUCCESS;
+    if (status) *status = ESMF_SUCCESS;
   }
 
 }
