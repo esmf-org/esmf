@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.5 2003/11/12 23:13:06 nscollins Exp $
+% $Id: AppDriver_desc.tex,v 1.6 2003/11/13 22:36:29 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,12 +20,13 @@ choices about:
 \item[Serial vs. Concurrent Execution]
 
 In a Serial Execution model each processor 
-executs the same Component until it has produced data needed
+executes the same Component until it has produced data needed
 by another Component, and then all processors change to
 running the next Component.  This has the appeal of simplicity
 of data consumption and production: when a Component starts
 all required data is available for use, and when a Component finishes
-all data produced has been computed.  This approach also has
+all data produced is ready for consumption by the next Component. 
+This approach also has
 the possibility of less data movement if the gridding and
 data decomposition is done such that each processor's memory contains
 the data needed by the next Component.
@@ -45,11 +46,11 @@ Coupling components are responsible for taking data from one
 Component and putting it into the form expected by another Component.
 This might include regridding, change of units, averaging or binning.
 
-Couplers can be written for pairwise data exchange: the Coupler takes
+Couplers can be written for {\it pairwise} data exchange: the Coupler takes
 data from a single Component and transforms it for another single Component.
 This simplifies the structure of the Coupler Component code.
 
-Couplers can also be written a the "hub and spoke" model where a
+Couplers can also be written using a {\it hub and spoke} model where a
 single Coupler accepts data from all other Components, can do data
 merging or splitting, and formats data for all other Components.
 
@@ -64,11 +65,11 @@ Fortran or C++.
 
 \item[Number of executables]
 
-On a multiple processor machine a cooperating job can either be run
+On a multiple processor machine a cooperating job can be run 
 by starting the same executable on all nodes.  All processors run the
-same code, but the computation proceeds by each processor working on
-a different subset of data.  This is a {\tt SPMD} model, Single Program
-Multiple Data.  
+same code, but the computation proceeds in parallel by each processor 
+working on a different subset of data.  This is a {\tt SPMD} model, 
+Single Program Multiple Data.  
 
 The alternative is to start a different executable on different
 processors.  This is a {\tt MPMD} model, Multiple Program Multiple Data.
@@ -79,9 +80,9 @@ inter-process communcations established.
 \end{description}
 
 
-Examples of these combinations are found in the
-subdirectories under the {\tt src/Superstructure/AppDriver } directory.
-A good place to begin with is
+Examples of these combinations are found in the ESMF source code tree, in
+subdirectories under {\tt src/Superstructure/AppDriver}.
+A good place to begin is with
 {\tt seq\_pairwise\_fdriver\_spmd} which
 has sequential component execution, a pairwise coupler, a main program
 in Fortran, and all processors launch the same executable.
