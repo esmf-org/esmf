@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.8 2003/03/22 05:44:12 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.9 2003/03/28 00:50:06 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.8 2003/03/22 05:44:12 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.9 2003/03/28 00:50:06 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -71,9 +71,6 @@
 //EOP
 // !REQUIREMENTS:  
 
-//    cout << "ESMC_BaseTime::ESMC_BaseTimeInit(): S, Sn, Sd = "
-//         << S << ", " << Sn << ", " << Sd << endl;
-
     // S, Sn must be either both positive or both negative;
     //    Sd always positive and >= 1
     if ( ((S >= 0 && Sn >= 0) || (S <= 0 && Sn <= 0)) && Sd >= 1 )
@@ -81,9 +78,6 @@
         this->S = S;
         this->Sn = Sn;
         this->Sd = Sd;
-
-//        cout << "ESMC_BaseTime::ESMC_BaseTimeInit(): S, Sn, Sd = "
-//             << this->S << ", " << this->Sn << ", " << this->Sd << endl;
 
         // normalize (share logic with += ?? )
         int w;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.5 2003/03/27 01:55:51 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.6 2003/03/28 00:50:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.5 2003/03/27 01:55:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.6 2003/03/28 00:50:07 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -61,16 +61,12 @@
 
     int rc; // return code 
 
-//cout << "ESMC_Calendar::ESMC_CalendarInit(): Type = " << type << endl;
     Type = type;
-    //this->Type = Type;
-//cout << "HERE C0" << endl;
 
     switch (Type)
     {
         case ESMC_CAL_GREGORIAN:
         case ESMC_CAL_NOLEAP:
-//cout << "HERE C1" << endl;
             // specific leap year is property of a Time instant, not Calendar ??
             //    OR calculated on-the-fly during Time instant calculations ??
             //    Calendar type only determines whether leap year is used
@@ -85,7 +81,6 @@
             DaysPerYear.Dn = 0;
             DaysPerYear.Dd = 1;
             rc = ESMF_SUCCESS;
-//cout << "HERE C2" << endl;
             break;
 
         case ESMC_CAL_JULIAN:
@@ -118,7 +113,6 @@
             break;
 
         case ESMC_CAL_GENERIC:
-//cout << "HERE C3" << endl;
             // user defined; need more info; user must call
             //   InitGeneric() instead
             rc = ESMF_FAILURE;
@@ -129,7 +123,6 @@
             rc = ESMF_FAILURE;
             break;
     }
-//cout << "ESMC_Calendar::ESMC_CalendarInit() returning" << endl;
     return(rc);
 
 }  // end ESMC_CalendarInit
