@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.22 2003/11/06 23:55:38 jwolfe Exp $
+// $Id: ESMC_Route_F.C,v 1.23 2004/03/01 18:53:24 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -119,23 +119,19 @@ extern "C" {
        }
 
        void FTN(c_esmc_routeprecomputeredist)(ESMC_Route **ptr, int *rank, 
-                     int *my_DE_rcv, 
-                     ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
-                     int *AI_rcv_count, int *global_start_rcv,
-                     int *global_count_rcv, ESMC_DELayout **layout_rcv,
-                     int *my_DE_snd, 
-                     ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot, 
-                     int *AI_snd_count, int *global_start_snd,
-                     int *global_count_snd, ESMC_DELayout **layout_snd, 
+                     int *dstMyDE, ESMC_AxisIndex *dstAI,
+                     int *dstAICount, int *dstGlobalStart,
+                     int *dstGlobalCount, ESMC_DELayout **dstLayout,
+                     int *srcMyDE, ESMC_AxisIndex *srcAI,
+                     int *srcAICount, int *srcGlobalStart,
+                     int *srcGlobalCount, ESMC_DELayout **srcLayout, 
                      int *status) {
 
            *status = (*ptr)->ESMC_RoutePrecomputeRedist(*rank, 
-                             *my_DE_rcv, AI_rcv_exc, AI_rcv_tot, 
-                             *AI_rcv_count, global_start_rcv, 
-                             global_count_rcv, *layout_rcv,
-                             *my_DE_snd, AI_snd_exc, AI_snd_tot, 
-                             *AI_snd_count, global_start_snd,
-                             global_count_snd, *layout_snd);
+                             *dstMyDE, dstAI, *dstAICount,
+                             dstGlobalStart, dstGlobalCount, *dstLayout,
+                             *srcMyDE, srcAI, *srcAICount, srcGlobalStart,
+                             srcGlobalCount, *srcLayout);
        }
 
        void FTN(c_esmc_routeprecomputehalo)(ESMC_Route **ptr, int *rank, 
