@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.184 2004/07/22 14:46:28 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.185 2004/07/22 22:41:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.184 2004/07/22 14:46:28 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.185 2004/07/22 22:41:39 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1317,7 +1317,7 @@
       !-------------
       !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        ! the only think that can be retrieved from an empty grid is the name
+        ! the only thing that can be retrieved from an empty grid is the name
         if (present(name)) then
           call ESMF_GetName(grid%ptr%base, name, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -2783,7 +2783,7 @@
                               horzstagger, vertstagger, &
                               horzcoordsystem, vertcoordsystem, &
                               coordorder, minGlobalCoordPerDim, &
-                              maxGlobalCoordPerDim, periodic, rc)
+                              maxGlobalCoordPerDim, periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -2797,6 +2797,7 @@
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: minGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: maxGlobalCoordPerDim
       type(ESMF_Logical), intent(in), optional :: periodic(:)
+      character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2831,6 +2832,8 @@
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
+!     \item[{[name]}]
+!          Character string name of {\tt ESMF\_Grid}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2838,7 +2841,7 @@
 ! !REQUIREMENTS:
 !EOP
 
-      !integer :: localrc                          ! local error status
+      integer :: localrc                          ! local error status
       integer :: i                                ! loop index
       type(ESMF_GridClass), pointer :: gridp      ! Pointer to new grid
 
@@ -2874,6 +2877,13 @@
         do i=1,size(maxGlobalCoordPerDim)
           gridp%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
         enddo
+      endif
+
+      if (present(name)) then
+          call ESMF_SetName(gridp%base, name, "Grid", localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
