@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.40 2004/05/12 12:24:46 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.41 2004/05/17 17:26:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -399,6 +399,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddIntAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleAddAttribute - Set an integer Attribute
 !
@@ -455,6 +457,8 @@ end function
       end subroutine ESMF_BundleAddIntAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddIntListAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleAddAttribute - Set an integer list Attribute
 !
@@ -521,6 +525,8 @@ end function
       end subroutine ESMF_BundleAddIntListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddRealAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleAddAttribute - Set a real Attribute
 !
@@ -577,6 +583,8 @@ end function
       end subroutine ESMF_BundleAddRealAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddRealListAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleAddAttribute - Set a real list Attribute
 !
@@ -643,6 +651,8 @@ end function
       end subroutine ESMF_BundleAddRealListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddLogicalAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleAddAttribute - Set a logical Attribute
 !
@@ -699,6 +709,8 @@ end function
       end subroutine ESMF_BundleAddLogicalAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddLogicalListAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleAddAttribute - Set a logical list Attribute
 !
@@ -765,6 +777,8 @@ end function
       end subroutine ESMF_BundleAddLogicalListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddCharAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleAddAttribute - Set a character Attribute
 !
@@ -820,6 +834,8 @@ end function
       end subroutine ESMF_BundleAddCharAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddOneField"
 !BOP
 ! !IROUTINE: ESMF_BundleAddField - Add a Field to a Bundle
 !
@@ -876,6 +892,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddFieldList"
 !BOP
 ! !IROUTINE: ESMF_BundleAddField - Add a list of Fields to a Bundle
 !
@@ -937,6 +955,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleCreateNew"
 !BOP
 ! !IROUTINE: ESMF_BundleCreate - Create a Bundle from existing Fields
 !
@@ -1037,6 +1057,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleCreateNoFields"
 !BOP
 ! !IROUTINE: ESMF_BundleCreate - Create a Bundle with no Fields
 !
@@ -1132,6 +1154,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDestroy"
 !BOP
 ! !IROUTINE: ESMF_BundleDestroy - Free all resources associated with a Bundle
 !
@@ -1202,6 +1226,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGet"
 !BOP
 ! !IROUTINE: ESMF_BundleGet - Return information about the Bundle
 !
@@ -1297,6 +1323,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetAllFields"
 !BOPI
 ! !IROUTINE: ESMF_BundleGetAllFields - Retrieve an array of Fields 
 !
@@ -1333,6 +1361,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetIntAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer Attribute
 !
@@ -1395,6 +1425,8 @@ end function
       end subroutine ESMF_BundleGetIntAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetIntListAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer list Attribute
 !
@@ -1461,6 +1493,8 @@ end function
       end subroutine ESMF_BundleGetIntListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetRealAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real Attribute
 !
@@ -1516,6 +1550,8 @@ end function
       end subroutine ESMF_BundleGetRealAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetRealListAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real list Attribute
 !
@@ -1582,6 +1618,8 @@ end function
       end subroutine ESMF_BundleGetRealListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetLogicalAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical Attribute
 !
@@ -1638,6 +1676,8 @@ end function
       end subroutine ESMF_BundleGetLogicalAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetLogicalListAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical list Attribute
 !
@@ -1704,6 +1744,8 @@ end function
       end subroutine ESMF_BundleGetLogicalListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetCharAttr"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a character Attribute
 !
@@ -1760,6 +1802,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetAttributeCount"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttributeCount - Query the number of Attributes
 !
@@ -1810,6 +1854,8 @@ end function
       end subroutine ESMF_BundleGetAttributeCount
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetAttrInfoByName"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an Attribute by name
 !
@@ -1874,6 +1920,8 @@ end function
       end subroutine ESMF_BundleGetAttrInfoByName
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetAttrInfoByNum"
 !BOP
 ! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an Attribute by number
 !
@@ -1944,6 +1992,8 @@ end function
       end subroutine ESMF_BundleGetAttrInfoByNum
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetDataMap"
 !BOP
 ! !IROUTINE: ESMF_BundleGetDataMap - Get packed array ordering
 !
@@ -1983,6 +2033,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetFieldByName"
 !BOP
 ! !IROUTINE: ESMF_BundleGetField - Retrieve a Field by name
 !
@@ -2083,6 +2135,8 @@ end function
       end subroutine ESMF_BundleGetFieldByName
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetFieldByNum"
 !BOP
 ! !IROUTINE: ESMF_BundleGetField - Retrieve a Field by index number
 !
@@ -2164,6 +2218,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetFieldNames"
 !BOPI
 ! !IROUTINE: ESMF_BundleGetFieldNames - Return all Field names in a Bundle
 
@@ -2205,6 +2261,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridCellCount"
 !BOPI
 ! !IROUTINE: ESMF_BundleGetGridCellCount - Returns global and local grid cell count
 !
@@ -2242,6 +2300,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridDimCount"
 !BOPI
 ! !IROUTINE: ESMF_BundleGetGridDimCount - Get dimensionality of Grid
 !
@@ -2279,6 +2339,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridDimSize"
 !BOPI
 ! !IROUTINE: ESMF_BundleGetGridDimSize - Returns the number of items in each dimension
 !
@@ -2319,6 +2381,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridIndexOrder"
 !BOPI
 ! !IROUTINE: ESMF_BundleGetGridIndexOrder - Returns the order of the indices
 !
@@ -2354,6 +2418,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridPointCount"
 !BOPI
 ! !IROUTINE: ESMF_BundleGetGridPointCount - Returns global and local grids point count
 !
@@ -2393,6 +2459,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundlePackData"
 !BOPI
 ! !IROUTINE: ESMF_BundlePackData - Pack Field data into a single Array
 !
@@ -2464,6 +2532,8 @@ end function
       end subroutine ESMF_BundlePackData
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundlePrint"
 !BOP
 ! !IROUTINE: ESMF_BundlePrint - Print diagnostic information about a Bundle
 !
@@ -2526,6 +2596,8 @@ end function
       end subroutine ESMF_BundlePrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRead"
 !BOP
 ! !IROUTINE: ESMF_BundleRead - Create a Bundle from an external source
 !
@@ -2568,6 +2640,8 @@ end function
       end function ESMF_BundleRead
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleReadRestart"
 !BOP
 ! !IROUTINE: ESMF_BundleReadRestart - Read back a saved Bundle
 !
@@ -2613,6 +2687,8 @@ end function
       end function ESMF_BundleReadRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRemoveField"
 !BOP
 ! !IROUTINE: ESMF_BundleRemoveField - Remove a Field from a Bundle
 !
@@ -2653,6 +2729,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleReorder"
 !BOPI
 ! !IROUTINE: ESMF_BundleReorder - Alter memory interleave in packed data
 !
@@ -2691,6 +2769,8 @@ end function
       end subroutine ESMF_BundleReorder
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetDataValues"
 !BOPI
 ! !IROUTINE: ESMF_BundleSetDataValues - Set contents of packed array
 !
@@ -2733,6 +2813,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetGrid"
 !BOP
 ! !IROUTINE: ESMF_BundleSetGrid - Associate a Grid with an empty Bundle
 !
@@ -2811,6 +2893,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleValidate"
 !BOP
 ! !IROUTINE: ESMF_BundleValidate - Perform internal consistency checks
 !
@@ -2870,6 +2954,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleWrite"
 !BOP
 ! !IROUTINE: ESMF_BundleWrite - Save a Bundle to an external destination
 !
@@ -2909,6 +2995,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleWriteRestart"
 !BOP
 ! !IROUTINE: ESMF_BundleWriteRestart - Save Bundle in the quickest manner possible
 !
@@ -2946,6 +3034,8 @@ end function
       end subroutine ESMF_BundleWriteRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleTypeAddFieldList"
 !BOPI
 ! !IROUTINE: ESMF_BundleTypeAddFieldList - Add a list of Fields to a Bundle.
 !
@@ -3081,6 +3171,8 @@ end function
       end subroutine ESMF_BundleTypeAddFieldList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleTypeRepackData"
 !BOPI
 ! !IROUTINE: ESMF_BundleTypeRepackData - Pack Field data into a single Array
 !
@@ -3139,6 +3231,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleConstructNew"
 !BOPI
 ! !IROUTINE: ESMF_BundleConstructNew - Construct the internals of a Bundle
 !
@@ -3231,6 +3325,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleConstructNoFields"
 !BOPI
 ! !IROUTINE: ESMF_BundleConstructNoFields - Construct the internals of a Bundle
 !
@@ -3303,6 +3399,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDestruct"
 !BOPI
 ! !IROUTINE: ESMF_BundleDestruct - Free contents of a Bundle 
 !
