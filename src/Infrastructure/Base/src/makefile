@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.19 2004/05/20 11:42:55 nscollins Exp $ 
+# $Id: makefile,v 1.20 2004/06/08 07:56:38 nscollins Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
 
-CFLAGS    =
+CFLAGS    += -I$(ESMF_DIR)/src/Infrastructure/LogErr/include
 FFLAGS    =
 SOURCEC	  = ESMC_Base.C ESMC_Test.C
 SOURCEF	  = ESMF_Test.F90
