@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2005/03/01 21:04:27 nscollins Exp $
+# $Id: makefile,v 1.19 2005/03/10 21:13:08 nscollins Exp $
 
 ALL:  build_tests
  
@@ -17,13 +17,16 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Regrid/tests
 
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_RegridUTest \
-		$(ESMC_TESTDIR)/ESMF_Regrid1UTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RegridUTest \
+		$(ESMF_TESTDIR)/ESMF_RegridOptionsUTest \
+		$(ESMF_TESTDIR)/ESMF_Regrid1UTest
 
 TESTS_RUN     = RUN_ESMF_RegridUTest \
+		RUN_ESMF_RegridOptionsUTest \
 		RUN_ESMF_Regrid1UTest
 
 TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI \
+	        RUN_ESMF_RegridOptionsUTestUNI \
 	        RUN_ESMF_Regrid1UTestUNI
 
 
@@ -42,12 +45,26 @@ CLOBBERDIRS =
 RUN_ESMF_RegridUTest:
 	-${MPIRUN} -np 8 $(ESMF_TESTDIR)/ESMF_RegridUTest > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
 
-RUN_ESMF_Regrid1UTest:
-	-${MPIRUN} -np 8 $(ESMF_TESTDIR)/ESMF_Regrid1UTest > $(ESMF_TESTDIR)/ESMF_Regrid1UTest.stdout
-
 RUN_ESMF_RegridUTestUNI:
 	echo "PASS: ESMF_RegridUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
 
+#
+#
+#
+RUN_ESMF_RegridOptionsUTest:
+	-${MPIRUN} -np 6 $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest > $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest.stdout
+
+RUN_ESMF_RegridOptionsUTestUNI:
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest > $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest.stdout
+
+
+#
+#
+#
+RUN_ESMF_Regrid1UTest:
+	-${MPIRUN} -np 8 $(ESMF_TESTDIR)/ESMF_Regrid1UTest > $(ESMF_TESTDIR)/ESMF_Regrid1UTest.stdout
+
 RUN_ESMF_Regrid1UTestUNI:
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_Regrid1UTest > $(ESMF_TESTDIR)/ESMF_Regrid1UTest.stdout
+
 
