@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.6 2003/08/04 20:19:19 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.7 2003/08/05 20:16:25 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -240,8 +240,10 @@
       horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
-      periodic(1) = ESMF_TF_TRUE
-      periodic(2) = ESMF_TF_FALSE
+      !periodic(1) = ESMF_TF_TRUE
+      periodic(1) = ESMF_TF_FALSE
+      periodic(2) = ESMF_TF_TRUE
+      !periodic(2) = ESMF_TF_FALSE
       gname = "test grid 1"
 
       grid1 = ESMF_GridCreate(counts=counts, x_min=x_min, x_max=x_max, &
