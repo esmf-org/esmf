@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.15 2004/04/28 23:12:15 cdeluca Exp $
+! $Id: user_model2.F90,v 1.16 2004/05/24 23:10:34 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -94,9 +94,7 @@
         real(ESMF_KIND_R8) :: g_min(2), g_max(2)
         integer :: counts(2)
         integer :: npets, de_id
-        type(ESMF_GridType) :: horz_gridtype
-        type(ESMF_GridStagger) :: horz_stagger
-        type(ESMF_CoordSystem) :: horz_coord_system
+        type(ESMF_GridHorzStagger) :: horz_stagger
         integer :: status
 
         print *, "User Comp Init starting"
@@ -121,18 +119,15 @@
         g_max(1) = 20.0
         g_min(2) = 0.0
         g_max(2) = 5.0
-        horz_gridtype = ESMF_GridType_XY
-        horz_stagger = ESMF_GridStagger_A
-        horz_coord_system = ESMF_CoordSystem_Cartesian
+        horz_stagger = ESMF_GRID_HORZ_STAGGER_A
 
-        grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+        grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
                                 minGlobalCoordPerDim=g_min, &
                                 maxGlobalCoordPerDim=g_max, &
-                                delayout=layout, &
-                                horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
-                                horzCoordSystem=horz_coord_system, &
                                 name="source grid", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_GridDistribute(grid1, delayout=layout, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 2D integer array

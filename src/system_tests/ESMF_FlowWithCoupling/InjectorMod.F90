@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.16 2004/04/28 23:12:15 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.17 2004/05/24 23:09:34 jwolfe Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -104,9 +104,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       integer :: counts(2)
       real :: in_energy, in_velocity, in_rho
       integer :: printout
-      type(ESMF_GridType) :: horz_gridtype
-      type(ESMF_GridStagger) :: horz_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system
+      type(ESMF_GridHorzStagger) :: horz_stagger
       type(injectdata), pointer :: datablock
       type(wrapper) :: wrap
       namelist /input/ counts, x_min, x_max, y_min, y_max, &
@@ -165,20 +163,20 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       ! Create the Grid
       !
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_C_NE
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_C_NE
 
-      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
-                             delayout=layout, &
-                             horzGridType=horz_gridtype, &
                              horzStagger=horz_stagger, &
-                             horzCoordSystem=horz_coord_system, &
                              name="source grid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in injector_init:  grid create"
+        return
+      endif
+      call ESMF_GridDistribute(grid, delayout=layout, rc=rc)
+      if(rc .NE. ESMF_SUCCESS) then
+        print *, "ERROR in injector_init:  grid distribute"
         return
       endif
 
