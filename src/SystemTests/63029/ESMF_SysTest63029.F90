@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.3 2003/02/28 21:46:10 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.4 2003/03/04 16:45:27 nscollins Exp $
 !
 ! System test code #63029
 
@@ -61,6 +61,8 @@
 
 !   Figure out our local processor id
     call ESMF_LayoutGetDEId(layout1, de_id, rc)
+
+    call ESMF_CompPrint(comp1)
 
     print *, "Comp Create finished, name = ", trim(cname)
 
