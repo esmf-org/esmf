@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.192 2004/08/19 17:23:20 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.193 2004/08/24 19:30:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.192 2004/08/19 17:23:20 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.193 2004/08/24 19:30:01 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1323,6 +1323,8 @@
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[periodic]}]
 !          Returns the periodicity along the coordinate axes - logical array.
+!     \item[{[delayout]}]
+!          {\tt delayout} that this {\tt grid} was distributed over.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -1524,6 +1526,8 @@
 !          2-D array of grid counts on each DE and in each direction.
 !     \item[{[periodic]}]
 !          Returns the periodicity along the coordinate axes - logical array.
+!     \item[{[delayout]}]
+!          {\tt delayout} that this {\tt grid} was distributed over.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
