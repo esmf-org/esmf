@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.1 2004/03/03 16:40:42 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.2 2004/03/03 19:45:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.1 2004/03/03 16:40:42 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.2 2004/03/03 19:45:25 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -777,13 +777,14 @@ contains
 ! !IROUTINE: ESMF_newDELayoutGather - MPI-like Gather
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutGather(layout, vm, array, result, len, root, rc)
+  subroutine ESMF_newDELayoutGather(layout, vm, datain, dataout, len, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
     type(ESMF_VM), intent(in)               :: vm
-    integer, intent(in)                     :: array(:), len, root
-    integer, intent(out)                    :: result(:)
+    type(ESMF_DELayoutData_I4), intent(in)  :: datain
+    type(ESMF_DELayoutData_I4), intent(out) :: dataout
+    integer, intent(in)                     :: len, root
     integer, intent(out), optional          :: rc
 !         
 !
@@ -813,7 +814,8 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGather(layout, vm, array, result, len, root, status)
+    call c_ESMC_newDELayoutGather(layout, vm, datain, dataout, len, root, &
+      status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutGather error"
       return

@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.1 2004/03/03 16:38:11 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.2 2004/03/03 19:44:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.1 2004/03/03 16:38:11 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.2 2004/03/03 19:44:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -652,7 +652,7 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
       tempdata += len*4;  // hardcoded for 32bit integer data array
       srcdata[j] = tempdata;
     }
-    srcdata[j] = rootdata;  // restore correct start
+    srcdata[j] = rootdata;  // restore correct start of root's src data
   }else{
     for (int i=0; i<ndes; i++)
       ESMC_newDELayoutCopy(vm, srcdata, destdata, len, rootDE, i);
@@ -675,8 +675,8 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
 // !ARGUMENTS:
 //
   ESMC_VM &vm,    // reference to ESMC_VM object
-  int *array,     // input array
-  int *result,    // output array
+  void **srcdata, // input array
+  void **destdata,// output array
   int len,        // number of elements in input and output arrays
   int rootDE){    // root DE
 //
@@ -684,10 +684,25 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  // simple 1:1 implementation  -> will be more complicated for general case
-  // len must be converted into bytes:
-  int blen = len * 4; // this is hard-coded for 32 bit integers
-  vm.vmachine_gather(array, result, blen, rootDE);
+  // very crude implementation of a layout wide gather
+  int mypet = vm.vmachine_mypet();
+  if (des[rootDE].petid==mypet){
+    // my PET holds the rootDE -> receive chunks from all other DEs
+    int j;
+    for (j=0; j<nmydes; j++)
+      if (mydes[j]==rootDE) break;
+    void *rootdata = destdata[j];  // backup the correct start of rootDE's data
+    char *tempdata = (char *)destdata[j];
+    for (int i=0; i<ndes; i++){
+      ESMC_newDELayoutCopy(vm, srcdata, destdata, len, i, rootDE);
+      tempdata += len*4;  // hardcoded for 32bit integer data array
+      destdata[j] = tempdata;
+    }
+    destdata[j] = rootdata;  // restore correct start of root's destdata
+  }else{
+    for (int i=0; i<ndes; i++)
+      ESMC_newDELayoutCopy(vm, srcdata, destdata, len, i, rootDE);
+  }
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

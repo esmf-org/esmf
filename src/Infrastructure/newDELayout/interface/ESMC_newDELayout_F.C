@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout_F.C,v 1.1 2004/03/03 16:40:42 theurich Exp $
+// $Id: ESMC_newDELayout_F.C,v 1.2 2004/03/03 19:45:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,8 +129,9 @@ extern "C" {
   }
   
   void FTN(c_esmc_newdelayoutgather)(ESMC_newDELayout **ptr, ESMC_VM **vm,
-    int *array, int *result, int *len, int *root, int *status){
-    *status = (*ptr)->ESMC_newDELayoutGather(**vm, array, result, *len, *root);
+    void ***datain, void ***dataout, int *len, int *root, int *status){
+    *status = (*ptr)->ESMC_newDELayoutGather(**vm, *datain, *dataout, *len,
+      *root);
   }
   
 
