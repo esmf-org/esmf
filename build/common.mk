@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.70 2004/08/04 21:05:06 nscollins Exp $
+#  $Id: common.mk,v 1.71 2004/09/14 23:05:04 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -164,7 +164,7 @@ DO_UT_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ut_results.pl -d $(ESMF_TESTDIR)
 DO_EX_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ex_results.pl -d $(ESMF_EXDIR)
 DO_EX_RESULTS.BASH  = ${ESMF_TESTSCRIPTS}/do_ex_results.bash
 DO_ST_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_st_results.pl -d $(ESMF_TESTDIR)
-DO_SUM_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_summary
+DO_SUM_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_summary.pl -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR)
 DO_SUM_RESULTS.BASH = ${ESMF_TESTSCRIPTS}/do_summary.bash
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
