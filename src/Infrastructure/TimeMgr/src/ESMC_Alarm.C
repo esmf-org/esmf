@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.38 2004/05/14 01:24:28 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.39 2004/05/18 11:06:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.38 2004/05/14 01:24:28 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.39 2004/05/18 11:06:06 nscollins Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -191,7 +191,7 @@ int ESMC_Alarm::count=0;
     //        this->ringTime > (passed in) ringTime
 
     returnCode = alarm->ESMC_AlarmValidate();
-    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                                "ESMC_AlarmValidate() failed.", ESMC_LOG_ERROR);
     if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
@@ -250,7 +250,7 @@ int ESMC_Alarm::count=0;
     }
 
     returnCode = alarmCopy->ESMC_AlarmValidate();
-    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                                "ESMC_AlarmValidate() failed.", ESMC_LOG_ERROR);
     if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
@@ -382,7 +382,7 @@ int ESMC_Alarm::count=0;
     //        this->ringTime > (passed in) ringTime
 
     rc = ESMC_AlarmValidate();
-    if (ESMC_LogDefault.ESMC_LogFoundError(rc, "ESMC_AlarmValidate() failed.",
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "ESMC_AlarmValidate() failed.",
                                            ESMC_LOG_ERROR)) {
       // restore original alarm values
       *this = saveAlarm;
@@ -1268,7 +1268,7 @@ int ESMC_Alarm::count=0;
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, &s);
 
-    ESMC_LogDefault.ESMC_LogFoundError(rc, "ESMC_TimeIntervalSet() failed.",
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "ESMC_TimeIntervalSet() failed.",
                                        ESMC_LOG_ERROR); 
 
  } // end ESMC_Alarm

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.60 2004/05/14 01:24:29 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.61 2004/05/18 11:06:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.60 2004/05/14 01:24:29 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.61 2004/05/18 11:06:07 nscollins Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -89,7 +89,7 @@ int ESMC_Calendar::count=0;
  #define ESMC_METHOD "ESMC_CalendarInitialize()"
 
   int rc = ESMC_CalendarSetDefault(calendarType);
-  ESMC_LogDefault.ESMC_LogFoundError(rc, "ESMC_CalendarSetDefault() failed.",
+  ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "ESMC_CalendarSetDefault() failed.",
                                      ESMC_LOG_ERROR);
   return(rc);
 
@@ -197,14 +197,14 @@ int ESMC_Calendar::count=0;
                                             calendar->name, 
                                             calendarType);
 
-    if (ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                                "ESMC_CalendarSet() failed.", ESMC_LOG_ERROR)) {
       if (rc != ESMC_NULL_POINTER) *rc = returnCode;
       return(calendar);
     }
 
     returnCode = calendar->ESMC_CalendarValidate();
-    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                             "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
     if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
@@ -276,13 +276,13 @@ int ESMC_Calendar::count=0;
     returnCode = (*internalCal)->ESMC_CalendarSet(strlen((*internalCal)->name), 
                                                  (*internalCal)->name, 
                                                  calendarType);
-    if (ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                                "ESMC_CalendarSet() failed.", ESMC_LOG_ERROR)) {
       return(returnCode);
     }
 
     returnCode = (*internalCal)->ESMC_CalendarValidate();
-    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                             "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
     return(returnCode);
 
@@ -359,14 +359,14 @@ int ESMC_Calendar::count=0;
                                             daysPerMonth, monthsPerYear,
                                             secondsPerDay, daysPerYear,
                                             daysPerYearDn, daysPerYearDd);
-    if (ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                                "ESMC_CalendarSet() failed.", ESMC_LOG_ERROR)) {
       if (rc != ESMC_NULL_POINTER) *rc = returnCode;
       return(calendar);
     }
 
     returnCode = calendar->ESMC_CalendarValidate();
-    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                             "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
     if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
@@ -420,7 +420,7 @@ int ESMC_Calendar::count=0;
     }
 
     returnCode = calendarCopy->ESMC_CalendarValidate();
-    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                             "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
     if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
@@ -488,7 +488,7 @@ int ESMC_Calendar::count=0;
   }
 
   int rc = (*calendar)->ESMC_CalendarValidate();
-  if (ESMC_LogDefault.ESMC_LogFoundError(rc,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
                          "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR)) {
     return(rc);
   }

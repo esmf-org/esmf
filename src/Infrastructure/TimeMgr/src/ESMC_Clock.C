@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.56 2004/05/14 01:24:28 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.57 2004/05/18 11:06:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.56 2004/05/14 01:24:28 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.57 2004/05/18 11:06:07 nscollins Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -135,7 +135,7 @@ int ESMC_Clock::count=0;
     clock->prevTime = clock->currTime;
 
     returnCode = clock->ESMC_ClockValidate();
-    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                                "ESMC_ClockValidate() failed.", ESMC_LOG_ERROR);
     if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
@@ -189,7 +189,7 @@ int ESMC_Clock::count=0;
     }
 
     returnCode = clockCopy->ESMC_ClockValidate();
-    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                                "ESMC_ClockValidate() failed.", ESMC_LOG_ERROR);
     if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
@@ -299,7 +299,7 @@ int ESMC_Clock::count=0;
     if (advanceCount != ESMC_NULL_POINTER) this->advanceCount = *advanceCount;
 
     rc = ESMC_ClockValidate();
-    if (ESMC_LogDefault.ESMC_LogFoundError(rc, "ESMC_ClockValidate() failed.",
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "ESMC_ClockValidate() failed.",
                                            ESMC_LOG_ERROR)) {
       // restore original clock values
       *this = saveClock;
@@ -408,7 +408,7 @@ int ESMC_Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       calendar);
-      ESMC_LogDefault.ESMC_LogFoundError(rc,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
                                          "ESMC_TimeGet(...calendar) failed.",
                                          ESMC_LOG_ERROR);
     }
@@ -425,7 +425,7 @@ int ESMC_Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, calendarType);
-      ESMC_LogDefault.ESMC_LogFoundError(rc,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
                                        "ESMC_TimeGet(...calendarType) failed.",
                                        ESMC_LOG_ERROR);
     }
@@ -442,7 +442,7 @@ int ESMC_Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, timeZone);
-      ESMC_LogDefault.ESMC_LogFoundError(rc,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
                                          "ESMC_TimeGet(...timeZone) failed.",
                                          ESMC_LOG_ERROR);
     }
@@ -946,7 +946,7 @@ int ESMC_Clock::count=0;
 
     // set current time to wall clock time
     int rc = currTime.ESMC_TimeSyncToRealTime();
-    ESMC_LogDefault.ESMC_LogFoundError(rc,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
                  "currTime.ESMC_TimeSyncToRealTime() failed.", ESMC_LOG_ERROR);
     return(rc);
 
@@ -1083,19 +1083,19 @@ int ESMC_Clock::count=0;
  #define ESMC_METHOD "ESMC_ClockValidate()"
 
     // validate required individual properties
-    if(ESMC_LogDefault.ESMC_LogFoundError(timeStep.ESMC_TimeIntervalValidate(),
+    if(ESMC_LogDefault.ESMC_LogMsgFoundError(timeStep.ESMC_TimeIntervalValidate(),
                                  "timeStep.ESMC_TimeIntervalValidate() failed",
                                  ESMC_LOG_ERROR) ||
-       ESMC_LogDefault.ESMC_LogFoundError(startTime.ESMC_TimeValidate(),
+       ESMC_LogDefault.ESMC_LogMsgFoundError(startTime.ESMC_TimeValidate(),
                                  "startTime.ESMC_TimeValidate() failed",
                                  ESMC_LOG_ERROR) ||
-       ESMC_LogDefault.ESMC_LogFoundError(refTime.ESMC_TimeValidate(),
+       ESMC_LogDefault.ESMC_LogMsgFoundError(refTime.ESMC_TimeValidate(),
                                  "refTime.ESMC_TimeValidate() failed",
                                  ESMC_LOG_ERROR) ||
-       ESMC_LogDefault.ESMC_LogFoundError(currTime.ESMC_TimeValidate(),
+       ESMC_LogDefault.ESMC_LogMsgFoundError(currTime.ESMC_TimeValidate(),
                                  "currTime.ESMC_TimeValidate() failed",
                                  ESMC_LOG_ERROR) ||
-       ESMC_LogDefault.ESMC_LogFoundError(prevTime.ESMC_TimeValidate(),
+       ESMC_LogDefault.ESMC_LogMsgFoundError(prevTime.ESMC_TimeValidate(),
                                  "prevTime.ESMC_TimeValidate() failed",
                                  ESMC_LOG_ERROR)) {
        return(ESMF_FAILURE);
@@ -1103,7 +1103,7 @@ int ESMC_Clock::count=0;
 
     // validate optional stopTime property if set
     if (stopTimeSet) {
-      if(ESMC_LogDefault.ESMC_LogFoundError(stopTime.ESMC_TimeValidate(),
+      if(ESMC_LogDefault.ESMC_LogMsgFoundError(stopTime.ESMC_TimeValidate(),
                                      "stopTime.ESMC_TimeValidate() failed",
                                      ESMC_LOG_ERROR)) return(ESMF_FAILURE);
 
@@ -1134,7 +1134,7 @@ int ESMC_Clock::count=0;
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, &startCal);
 
-      if(ESMC_LogDefault.ESMC_LogFoundError(rc,
+      if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
          "startTime.ESMC_TimeGet(...startCal) failed.", ESMC_LOG_ERROR) {
         return(ESMF_FAILURE);   
       }
@@ -1152,7 +1152,7 @@ int ESMC_Clock::count=0;
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, &stopCal);
 
-      if(ESMC_LogDefault.ESMC_LogFoundError(rc,
+      if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
          "stopTime.ESMC_TimeGet(...stopCal) failed.", ESMC_LOG_ERROR) {
         return(ESMF_FAILURE);   
       }
