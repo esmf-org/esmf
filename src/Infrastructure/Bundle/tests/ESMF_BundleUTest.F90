@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.20 2004/06/09 21:30:50 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.21 2004/06/13 02:44:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.20 2004/06/09 21:30:50 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.21 2004/06/13 02:44:01 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -87,7 +87,7 @@
 
       !NEX_UTest
       !  Verify that an empty Bundle can be created
-      bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
+      bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating Empty Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -153,7 +153,7 @@
 
       ! Commented out because it crashes
       ! Bug Report 969887 opened.
-      !call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
+      !call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
       !write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
       !write(name, *) "Adding an uninitialized Field to an uncreated Bundle Test"
       !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -162,7 +162,7 @@
       !  Verify that a Field can be added to a Bundle
       !  Verify that an empty Bundle can be created
       !EX_UTest
-      bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
+      bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating Empty Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -197,7 +197,7 @@
       ! Add a field to an empty Bundle
       ! Commented out because it crashes
       ! bug report 969887 opened
-      !call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
+      !call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Adding a field to an Empty Bundle"
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -206,7 +206,7 @@
 
       !EX_UTest
       !  Verify that recreating a created Bundle is handled properly
-      bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
+      bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Bundle that has already been created Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -215,7 +215,7 @@
 
       !EX_UTest
       !  Verify that the Field count query from an empty Bundle is handled properly
-      call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc);
+      call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to zero"
       write(name, *) "Getting Field count from an empty Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.0), name, failMsg, result, ESMF_SRCLINE)
@@ -226,7 +226,7 @@
       !  Verify that a Field can be added to an empty Bundle
       ! Commented out because simplefield has not been initialized
       ! uncomment when bug 969887 is resolved
-      !call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
+      !call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Adding a Field to an Empty Bundle Test"
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -234,7 +234,7 @@
 
       !EX_UTest
       !  Verify that the Field count can be queried from a Bundle
-      call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc);
+      call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Field count from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.1), name, failMsg, result, ESMF_SRCLINE)
@@ -244,7 +244,7 @@
       !  Test Requirement FLD2.5.7 Return Grid
       ! Commented out because there is no grid in the Bundle
       ! uncomment when bug 969887 is resolved
-      !call ESMF_BundleGet(bundle2, grid=grid2, rc=rc);
+      !call ESMF_BundleGet(bundle2, grid=grid2, rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Getting a Grid from a Bundle Test Req. FLD2.5.7"
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -252,20 +252,20 @@
 
 
       ! Create an empty Bundle and then add multiple fields to it.
-      !bundle3 = ESMF_BundleCreate(name="southern hemisphere", rc=rc);
-      !bundle3 = ESMF_BundleCreate(name="northern hemisphere", rc=rc);
+      !bundle3 = ESMF_BundleCreate(name="southern hemisphere", rc=rc)
+      !bundle3 = ESMF_BundleCreate(name="northern hemisphere", rc=rc)
    
       !  Verify that multiple Fields can be added to a Bundle 
       ! Commented out because it crashes
       ! Bug Report 969881 opened.
-      !call ESMF_BundleAddField(bundle3, 3, fields, rc);
+      !call ESMF_BundleAddField(bundle3, 3, fields, rc)
       !write(failMsg, *) ""
       !write(name, *) "Adding multiple Fields to a Bundle Test"
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !  Verify that Fields count can be queried from a Bundle 
-      !call ESMF_BundleGet(bundle3, fieldCount=fieldcount, rc=rc);
+      !call ESMF_BundleGet(bundle3, fieldCount=fieldcount, rc=rc)
       !write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to three"
       !write(name, *) "Getting Field count from a Bundle Test"
       !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.3), name, failMsg, result, ESMF_SRCLINE)
