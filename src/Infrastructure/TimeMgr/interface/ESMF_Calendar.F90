@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.34 2003/11/05 01:52:28 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.35 2003/11/05 18:37:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.34 2003/11/05 01:52:28 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.35 2003/11/05 18:37:18 eschwab Exp $'
 
 !==============================================================================
 
@@ -232,7 +232,7 @@
 !     
 !EOP
 ! !REQUIREMENTS:
-!     TMGn.n.n
+!     TMG2.3.4
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSetGeneric(calendar, monthsPerYear, daysPerMonth, &
