@@ -1,0 +1,33 @@
+#!/bin/csh -f
+#
+# $Id: do_ccprotex,v 1.1 2002/07/25 16:54:31 eschwab Exp $
+#
+#===============================================================================
+# ccprotex
+#===============================================================================
+# 
+# Process C++ prologue(s) using ProTex.
+#
+# Usage: cprotex <class> <c++ filename>
+#
+#        <class> is the name of the class whose definition/methods
+#               are instrumented for ProTeX (e.g., TimeInstant)
+#
+#        <C++_filename.cc> is the name of the file that includes the 
+#             prologue(s) instrumented for ProTeX (e.g., TimeInstant.cc)
+#
+# See the ProTeX documentation:
+# http://dao.gsfc.nasa.gov/software/protex
+# for a description of the command-line options used in this script.
+# 
+# E. Schwab                                                       July 23, 2002
+#===============================================================================
+
+if ($#argv != 2 ) then
+  echo "Usage: ccprotex <class> <C++_filename.cc>"
+  exit
+else
+  set class=$1
+  set file=$2
+  perl $DOC_DIR/templates/protex -bC +f $file > ${class}_ccapi.tex
+endif
