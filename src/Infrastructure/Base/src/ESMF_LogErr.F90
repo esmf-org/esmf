@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.14 2004/06/15 06:32:25 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.15 2004/06/15 22:00:44 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -279,13 +279,15 @@ end subroutine ESMF_LogFinalize
         if (present(rcToReturn)) rcToReturn=ESMF_RC_MEM
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
         allocmsg=tempmsg(1:msglen)
-	    logrc = ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
-	    if (.not. logrc) then
+	logrc = ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
+	if (.not. logrc) then
             print *, "Error writing previous error to log file"
             ! what now?  we're already in the error code...
             ! just fall through and return i guess.
         endif
-	    ESMF_LogFoundAllocError=.TRUE.
+	ESMF_LogFoundAllocError=.TRUE.
+    else
+        if (present(rcToReturn)) rcToReturn=ESMF_SUCCESS
     endif	
        
 end function ESMF_LogFoundAllocError
@@ -524,13 +526,15 @@ end subroutine ESMF_LogInitialize
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
 	if (present(rcToReturn)) rcToReturn=ESMF_RC_MEM
         allocmsg=tempmsg(1:msglen)
-	    logrc = ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method,log)
-	    if (.not. logrc) then
+	logrc = ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method,log)
+	if (.not. logrc) then
             print *, "Error writing previous error to log file"
             ! what now?  we're already in the error code...
             ! just fall through and return i guess.
         endif
-	    ESMF_LogMsgFoundAllocError=.TRUE.
+	ESMF_LogMsgFoundAllocError=.TRUE.
+    else
+        if (present(rcToReturn)) rcToReturn=ESMF_SUCCESS
     endif	
        
 end function ESMF_LogMsgFoundAllocError
