@@ -13,7 +13,7 @@
 !  In the text below, USER should be replaced by the specific
 !   module and setservices names.
 !
-!EOP
+!\begin{verbatim}
 
 ! The file which defines the user application and config file.
 ! This must be edited before building this file.
@@ -226,4 +226,6 @@
       call ESMF_Finalize(rc)
 
       end program ESMF_ApplicationDriver
-    
+
+!\end{verbatim}    
+!EOP

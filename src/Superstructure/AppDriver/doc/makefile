@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/11/12 22:11:03 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/11/12 23:11:12 cdeluca Exp $ 
 
 all: alldoc
 
@@ -32,14 +32,12 @@ HTMLFILES =     $(ESMC_DOCDIR)/AppDriver_refdoc
 #
 # Tex Files to make
 #
-TEXFILES_TO_MAKE  = AppDriver_fex.tex AppDriver_ccex.tex
-##TEXFILES_TO_MAKE  = $(addsuffix _ccex.tex, $(basename $(notdir $(wildcard ../seq_pairwise_cdriver_spmd/*.C))))
-##TEXFILES_TO_MAKE += $(addsuffix _chex.tex, $(basename $(notdir $(wildcard ../seq_pairwise_cdriver_spmd/*.h))))
-#TEXFILES_TO_MAKE += $(addsuffix _fex.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.F))))
-#TEXFILES_TO_MAKE += $(addsuffix _fex.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.F90))))
-#TEXFILES_TO_MAKE += $(addsuffix _fex.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.f))))
-#TEXFILES_TO_MAKE += $(addsuffix _fex.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.f90))))
-
+TEXFILES_TO_MAKE  = $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_cdriver_spmd/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _chapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_cdriver_spmd/*.h))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.f90))))
 
 #
 # Files that a doc depends on.  Do not list the the ctex file !  
