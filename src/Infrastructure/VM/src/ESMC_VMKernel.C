@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.18 2004/12/23 04:30:09 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.19 2005/01/06 18:40:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -239,6 +239,7 @@ void ESMC_VMK::vmk_init(void){
     for (int j=0; j<npets; j++){
       // for the default ESMC_VMK all communication is via MPI-1
       commarray[i][j].comm_type = VM_COMM_TYPE_MPI1;
+      commarray[i][j].mpitag = 0; // reset the tag counter
     }
   }
   // set up the request queue
@@ -292,6 +293,9 @@ void ESMC_VMK::vmk_init(void){
 void ESMC_VMK::vmk_finalize(void){
   // finalize default (all MPI) virtual machine
   // todo: delete all allocations of default ESMC_VMK
+  //  - free MPI Group and Comm
+  MPI_Comm_free(&mpi_c);
+  MPI_Group_free(&mpi_g);
   int finalized;
   MPI_Finalized(&finalized);
   if (!finalized)
@@ -1903,7 +1907,10 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest){
     // MPI-1 implementation
     // not sure if I need to make this atomic if called multi-threaded?
     //pthread_mutex_lock(pth_mutex);
-    MPI_Send(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c);
+//    MPI_Send(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c);
+    MPI_Send(message, size, MPI_BYTE, lpid[dest], commarray[mypet][dest].mpitag,
+      mpi_c);
+    ++commarray[mypet][dest].mpitag;
     //pthread_mutex_unlock(pth_mutex);
     break;
   case VM_COMM_TYPE_PTHREAD:
@@ -2029,8 +2036,11 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
     // not sure if I need to make this atomic if called multi-threaded?
     //pthread_mutex_lock(pth_mutex);
 //fprintf(stderr, "MPI_Isend: commhandle=%p\n", (*commhandle)->mpireq);
-    MPI_Isend(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c, 
-       (*commhandle)->mpireq);
+//    MPI_Isend(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c, 
+//       (*commhandle)->mpireq);
+    MPI_Isend(message, size, MPI_BYTE, lpid[dest],
+      commarray[mypet][dest].mpitag, mpi_c, (*commhandle)->mpireq);
+    ++commarray[mypet][dest].mpitag;
     //pthread_mutex_unlock(pth_mutex);
     break;
   case VM_COMM_TYPE_PTHREAD:
@@ -2146,8 +2156,11 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
     // not sure if I need to make this atomic if called multi-threaded
     //pthread_mutex_lock(pth_mutex2);
     MPI_Status mpi_s;
-    MPI_Recv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
-      mpi_c, &mpi_s);
+//    MPI_Recv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
+//    mpi_c, &mpi_s);
+    MPI_Recv(message, size, MPI_BYTE, lpid[source],
+      commarray[source][mypet].mpitag, mpi_c, &mpi_s);
+    ++commarray[source][mypet].mpitag;
     //pthread_mutex_unlock(pth_mutex2);
     break;
   case VM_COMM_TYPE_PTHREAD:
@@ -2275,8 +2288,11 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     // not sure if I need to make this atomic if called multi-threaded
     //pthread_mutex_lock(pth_mutex2);
 //fprintf(stderr, "MPI_Irecv: commhandle=%p\n", (*commhandle)->mpireq);
-    MPI_Irecv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
-      mpi_c, (*commhandle)->mpireq);
+//    MPI_Irecv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
+//      mpi_c, (*commhandle)->mpireq);
+    MPI_Irecv(message, size, MPI_BYTE, lpid[source],
+      commarray[source][mypet].mpitag, mpi_c, (*commhandle)->mpireq);
+    ++commarray[source][mypet].mpitag;
     //pthread_mutex_unlock(pth_mutex2);
     break;
   case VM_COMM_TYPE_PTHREAD:
