@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.26 2004/06/05 00:14:02 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.27 2004/06/14 23:22:07 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.26 2004/06/05 00:14:02 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.27 2004/06/14 23:22:07 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -769,11 +769,15 @@
 
       ! ----------------------------------------------------------------------------
 
+      ! uncomment to test bug #959580
+      !call ESMF_ClockDestroy(clock_gregorian, rc)
+
       totalDays=0
       ! time step from start time to stop time
       call ESMF_TimePrint(startTime, rc=rc)
       call ESMF_TimePrint(stopTime, rc=rc)
-      do while (.not.ESMF_ClockIsStopTime(clock_gregorian, rc))
+      do while (.not.ESMF_ClockIsStopTime(clock_gregorian, rc) .and. &
+                rc == ESMF_SUCCESS)
         call ESMF_ClockAdvance(clock_gregorian, timeStep=timeStep, rc=rc)
         totalDays=totalDays+days
       end do
