@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/18 22:58:26 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/19 23:00:30 svasquez Exp $ 
 
 ALL: system_tests
 
@@ -40,11 +40,11 @@ CLOBBERDIRS =
 
 RUN_SimpleCoupling:
 	-@rm -f testlog stdlog.* logfile.* SimpleCoupling.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/SimpleCoupling >$(ESMC_TESTDIR)/SimpleCoupling.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/SimpleCoupling >$(ESMC_TESTDIR)/SimpleCouplingSTest.stdout
 
 RUN_SimpleCouplingUNI:
 	-@rm -f testlog stdlog.* logfile.* SimpleCoupling.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/SimpleCoupling >$(ESMC_TESTDIR)/SimpleCoupling.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/SimpleCoupling >$(ESMC_TESTDIR)/SimpleCouplingSTest.stdout
 
 SimpleCoupling.rm:
 	echo "SimpleCoupling.rm target called here."
