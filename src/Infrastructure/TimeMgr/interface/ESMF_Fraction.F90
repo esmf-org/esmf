@@ -1,4 +1,4 @@
-! $Id: ESMF_Fraction.F90,v 1.7 2003/07/25 05:17:06 eschwab Exp $
+! $Id: ESMF_Fraction.F90,v 1.8 2003/09/22 22:31:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 ! !MODULE: ESMF_FractionMod
 !
 ! !DESCRIPTION:
-! Part of ESMF F90 API wrapper of C++ implemenation.
+! Part of ESMF F90 API wrapper of C++ implementation.
 !
 ! Defines F90 wrapper entry points for corresponding
 ! C++ implementaion of class {\tt ESMC\_Fraction}.
@@ -38,7 +38,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-
+      use ESMF_BaseMod
       implicit none
 !
 !------------------------------------------------------------------------------
@@ -71,11 +71,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Fraction.F90,v 1.7 2003/07/25 05:17:06 eschwab Exp $'
+      '$Id: ESMF_Fraction.F90,v 1.8 2003/09/22 22:31:45 nscollins Exp $'
 
 !==============================================================================
 
-!      contains
+      contains
 
 !==============================================================================
 !
@@ -83,6 +83,14 @@
 !
 !------------------------------------------------------------------------------
 !
+
+    ! dummy entry point to make ranlib stop complaining about a file
+    ! with no symbols.  TODO: replace with real code asap.   nsc.
+    subroutine ESMF_FractionDummy(rc)
+       integer :: rc
+
+       rc = ESMF_FAILURE
+    end subroutine ESMF_FractionDummy
 
 !------------------------------------------------------------------------------
 

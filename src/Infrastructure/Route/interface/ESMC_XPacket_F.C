@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket_F.C,v 1.3 2003/03/11 23:15:55 nscollins Exp $
+// $Id: ESMC_XPacket_F.C,v 1.4 2003/09/22 22:29:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,6 +31,9 @@
 //
 //EOP
 
+// TOD0: once we comment in the real code, remove this.  it just shuts up
+// ranlib which moans if this file contains no symbols.
+static int foo;
 
 // the interface subroutine names MUST be in lower case
 extern "C" {

@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.10 2003/09/12 01:58:03 eschwab Exp $
+// $Id: ESMC_Fraction_F.C,v 1.11 2003/09/22 22:29:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,6 +30,10 @@
 //  passes ESMC_BAD_POINTER or ESMC_NULL_POINTER.
 //
 //EOP
+
+// TODO: remove this once this file contains real code.  otherwise ranlib
+// moans about no visible symbols.  sigh.
+static int fred;
 
 
 // the interface subroutine names MUST be in lower case
