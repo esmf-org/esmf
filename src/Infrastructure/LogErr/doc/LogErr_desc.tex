@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.17 2005/01/10 23:36:44 cpboulder Exp $
+% $Id: LogErr_desc.tex,v 1.18 2005/02/03 21:44:15 jwolfe Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,9 +13,10 @@
 
 The Log class consists of a variety of methods for writing error, warning, and
 informational messages to files.  A default Log is created at ESMF
-initialization.  Other Logs can be created later in the code by the user.  A 
-set of standard return codes and associated messages are provided for error 
-handling.  
+initialization.  Other Logs can be created later in the code by the user.  Most
+LogErr methods take a Log as an optional argument and apply to the default Log
+when another Log is not specified.  A set of standard return codes and
+associated messages are provided for error handling.  
 
 LogErr provides capabilities to write to a file immediately or store entries in
 a buffer for writing either when the buffer is full, or when the user calls an 
