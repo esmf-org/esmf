@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.1 2004/04/20 19:04:48 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.2 2004/04/20 21:41:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -189,6 +189,13 @@
       !    print *, "Error initializing the machine characteristics"
       !    return
       !endif
+
+      ! Create the global default layout
+      call ESMF_newDELayoutCreateGlobal(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error creating default layout"
+          return
+      endif
 
       ! Test getting the global VM
       call ESMF_VMGetGlobal(testVM, rc)
