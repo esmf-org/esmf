@@ -1,4 +1,4 @@
-% $Id: Array_rest.tex,v 1.3 2004/08/13 21:27:35 nscollins Exp $
+% $Id: Array_rest.tex,v 1.4 2004/08/13 21:51:51 nscollins Exp $
 
 %\subsection{Restrictions}
 
@@ -11,6 +11,11 @@ supported.
 When the {\tt haloWidth} argument is specifed extra space is allocated
 on all axes, even if only a subset of the axes correspond to Grid axes 
 and actually require halo space.
+
+\item {\bf Name cannot be specifed at Create time.}
+The current interfaces do not allow the Array name to be set at
+create time. Until this oversight is fixed use 
+{\tt ESMF\_ArraySet()} on the existing array to set the name.
 
 \item {\bf Arrays of derived types not supported.}  Arrays of derived 
 types will not be directly supported by the framework.
