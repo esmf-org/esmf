@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.10 2003/07/28 15:19:59 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.11 2003/07/29 16:45:36 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -60,7 +60,6 @@
       integer :: i, j
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real :: x_min, x_max, y_min, y_max
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
       integer :: horz_gridtype, vert_gridtype
@@ -907,7 +906,6 @@
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout
       real, dimension(:,:), pointer :: ldata
-      type(ESMF_AxisIndex), dimension(2) :: indext, indexe
       character(len=ESMF_MAXSTR) :: filename
 !
 ! Set initial values
