@@ -15,7 +15,9 @@ ESMF software shall support the following language bindings:
 {\bf Priority:} 1. \\
 {\bf Source:} All codes except GFDL-HIM require F90 interfaces. \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Interface inspection. 
+{\bf Verification:} Interface inspection (verification
+  checklist will include array dimension information and 
+  optional argument handling).
 \end{reqlist}
 
 \ssreq{C++ interface}
@@ -23,7 +25,13 @@ ESMF software shall support the following language bindings:
 {\bf Priority:} 1. \\
 {\bf Source:} GFDL-HIM. \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Interface inspection.
+{\bf Verification:} Interface inspection (verification
+  checklist will include array dimension information and 
+  optional argument handling).\\
+{\bf Notes:} Handling of Try/Catch exception handling and 
+error signal propogation over the C/C++ Fortran boundary 
+will need to be addressed in the preliminary design and
+implementation prototyping.
 \end{reqlist}
 
 \ssreq{C interface}
@@ -32,7 +40,8 @@ ESMF software shall support the following language bindings:
   {\bf Source:} GFDL-HIM. \\
   {\bf Status:} Rejected. \\
   {\bf Notes:} There will be a single interface serving C and C++
-  applications.
+  applications. This C/C++ interface will be sufficient so the C only
+  interface has been rejected.
 \end{reqlist}
 
 \sreq{Platforms}
@@ -106,7 +115,9 @@ precision.
   {\bf Priority:} 1. \\
   {\bf Source:} DAO, NCEP. \\
   {\bf Status:} Approved-1. \\
-  {\bf Verification:} Interface inspection, code inspection, unit
+  {\bf Verification:} Interface inspection (verification 
+  checklist will include array dimension information and
+  optional argument handling) , code inspection, unit
   test, system test. \\
   {\bf Notes:}
   \begin{enumerate}
@@ -225,7 +236,9 @@ comprehensive error logging.
   {\bf Priority:} 1. \\
   {\bf Source:} Required by all codes. \\
   {\bf Status:} Approved-1. \\
-  {\bf Verification:} Interface inspection, code inspection, unit
+  {\bf Verification:} Interface inspection (verification
+  checklist will include array dimension information and 
+  optional argument handling), code inspection, unit
   test, system test.
   {\bf Notes} Components will be required to use ESMF error
 handling utilities for fatal erros to be classified as 
@@ -245,7 +258,73 @@ developed concurrently.
 {\bf Source:} Required for interoperability Milestones I and J. \\
 {\bf Status:} Approved-1. \\
 {\bf Verification:} Interoperability experiments and incremental
-adoption by deployment teams.
+adoption demonstrations by deployment teams.
+\end{reqlist}
+
+\sreq{Extensibility} The ESMF framework will allow extensions both
+for core suppport capabilities and through plug-in components.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} All codes\\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Milestone demonstrations of migration
+of more than twelve major applications and six styles of gridding.
+\end{reqlist}
+
+\sreq{Flexibility} The ESMF framework will be flexible and will
+be suited to a wide range of Earth science applications and a broad span
+of target hardware.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} All codes\\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Milestone demonstrations of migration
+of more than twelve major applications on several different
+platforms covering a wide variety of science scenarios
+that span research to operational forecasting.
+\end{reqlist}
+
+\sreq{Dcoumentation} An exhaustive collection of documentation
+to support ongoing evolution of ESMF is required.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} All codes\\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Compliance with software developers guide.
+{\bf Notes:} The Software Developers Guide specifies a suite of documents 
+that will be produced.
+\end{reqlist}
+
+\sreq{Compatability with batch execution}
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} All codes\\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Milestone demonstrations.
+\end{reqlist}
+
+\sreq{Compatability with interactive execution}
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} All codes\\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Milestone demonstrations.
+\end{reqlist}
+
+\sreq{Compatability with ensemble methods}
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} All codes\\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Milestone demonstrations.
+\end{reqlist}
+
+\sreq{Compatability with multi-institution, multi-component simulations}
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} All codes\\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Milestone demonstrations.
 \end{reqlist}
 
 \sreq{Ease of adoption}
