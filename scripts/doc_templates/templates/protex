@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-#  $Id: protex,v 1.5 2002/10/09 20:40:24 eschwab Exp $
+#  $Id: protex,v 1.6 2002/10/10 15:01:23 dasilva Exp $
 #
 #BOP
 #
@@ -80,6 +80,7 @@
 #                       and hangcaption.
 #  10May2000  C. Redder Revised LaTeX command "\label{sec:prologues}"
 #                       to "\label{app:ProLogues}"
+#  10/10/2002 da Silva  Introduced ARGUMENTS keyword, touch ups.
 #
 #EOP
 #----------------------------------------------------------------------------
@@ -134,11 +135,13 @@ Arg:
             "!PUBLIC MEMBER FUNCTIONS:",
             "!PUBLIC DATA MEMBERS:",
             "!PARAMETERS:",
+            "!ARGUMENTS:",
             "!DEFINED PARAMETERS:",
             "!INPUT PARAMETERS:",
             "!INPUT/OUTPUT PARAMETERS:",
             "!OUTPUT PARAMETERS:",
             "!RETURN VALUE:",
+            "!REQUIREMENTS:",
             "!REVISION HISTORY:",
             "!BUGS:",
             "!SEE ALSO:",
@@ -525,7 +528,8 @@ KEY:       foreach $key ( @keys ) {
                  ###printf "\\subsubsection*{%s}\n", substr($k, 2, $ln - 1);
                  ###printf "{\\Large \\em %s}\n", ucfirst lc substr($k, 2, $ln - 1);
                  $_ = $key;
-                 if( /USES/ || /INPUT/ || /OUTPUT/ ) {
+                if( /USES/ || /INPUT/ || /OUTPUT/ || /PARAMETERS/ || 
+                    /VALUE/  || /ARGUMENTS/ ) {
                     printf "{\\em %s}\n", substr($k, 2, $ln - 1); } # italics
                  else {
                     printf "{\\sf %s}\n", substr($k, 2, $ln - 1); # san serif
@@ -931,6 +935,6 @@ $have_intf ||
 die "ProTeX: invalid prologue, missing !INTERFACE: in <$name_is>";
 
 $have_hist || 
-die "ProTeX: invalid prologue, missing !REVISION HISTORY: in <$name_is>";
+ die "ProTeX: invalid prologue, missing !REVISION HISTORY: in <$name_is>";
 
 }# end sub check_if_all_there
