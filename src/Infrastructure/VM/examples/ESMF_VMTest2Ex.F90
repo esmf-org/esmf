@@ -10,7 +10,7 @@
 !EOP
 !
 
-program vm_test2
+program ESMF_VMTest2Ex
 
   use ESMF_Mod
   

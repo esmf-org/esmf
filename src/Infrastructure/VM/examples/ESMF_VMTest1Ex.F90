@@ -11,7 +11,7 @@
 !
 !BOC
 
-program vm_test1
+program ESMF_VMTest1Ex
 
   use ESMF_Mod
   
