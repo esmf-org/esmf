@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.46 2004/12/07 17:14:53 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.47 2004/12/09 18:28:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.46 2004/12/07 17:14:53 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.47 2004/12/09 18:28:18 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -584,9 +584,11 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
     if (attrAlloc > 0) {
          nbytes = attrAlloc * sizeof(ESMC_Attribute *);
          attrList = (ESMC_Attribute **)malloc(nbytes);
-         for (i=0; i<attrCount; i++)
-            // attrList[i] = ESMC_Attribute::ESMC_Deserialize(buffer, offset);
-            attrList[i] = NULL;
+         for (i=0; i<attrCount; i++) {
+            attrList[i] = new ESMC_Attribute;
+            attrList[i]->ESMC_Attribute::ESMC_Deserialize(buffer, offset);
+            //attrList[i] = NULL;
+         }
          cp = (char *)(buffer + *offset);
     }
 
@@ -719,11 +721,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
     cp = (char *)ip;
     if (attrCount > 0) {
          for (i=0; i<attrCount; i++)
-         ; //    attrlist[i]->ESMC_Attribute::ESMC_Serialize(buffer, length, offset);
+             attrList[i]->ESMC_Attribute::ESMC_Serialize(buffer, length, offset);
          cp = (char *)(buffer + *offset);
     }
-    // TODO: if vector list, have to corral those  
-
 
     *offset = (cp - buffer);
    
@@ -3065,15 +3065,16 @@ extern "C" {
 //    Turn info in attribute class into a stream of bytes.
 //
 //EOPI
-    int fixedpart, nbytes;
-    int *ip;
-    ESMC_Status *sp;
+    int nbytes;
     char *cp;
 
-    fixedpart = sizeof(ESMC_Attribute);
-    if ((*length - *offset) < fixedpart) {
-        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
-        *length += 2 * fixedpart;
+    nbytes = sizeof(ESMC_Attribute);
+    if (items > 1) 
+        nbytes += items * ESMC_DataKindSize(dk);
+    
+    if ((*length - *offset) < nbytes) {
+        buffer = (char *)realloc((void *)buffer, *length + nbytes);
+        *length += nbytes;
     }
 
     cp = (buffer + *offset);
@@ -3081,8 +3082,9 @@ extern "C" {
     cp += sizeof(ESMC_Attribute);
 
     if (items > 1) {
-        // TODO: put data here if separate vector list
-        ;
+        nbytes = items * ESMC_DataKindSize(dk);
+        memcpy(cp, voidp, nbytes);
+        cp += nbytes;
     }
     
     *offset = (cp - buffer);
@@ -3113,16 +3115,20 @@ extern "C" {
 //    Turn a stream of bytes into an object.
 //
 //EOPI
-    int fixedpart, nbytes;
-    int *ip, i;
-    ESMC_Status *sp;
+    int nbytes;
     char *cp;
 
     cp = (buffer + *offset);
+    memcpy(this, cp, sizeof(ESMC_Attribute));
+    cp += sizeof(ESMC_Attribute);
 
-    // update offset to point to past the current obj
-    *offset = (cp - buffer);
+    if (items > 1) {
+        nbytes = items * ESMC_DataKindSize(dk);
+        memcpy(voidp, cp, nbytes);
+        cp += nbytes;
+    }
    
+    *offset = (cp - buffer);
     
   return ESMF_SUCCESS;
 
