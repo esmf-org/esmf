@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.11 2003/12/04 21:03:47 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.12 2003/12/12 20:23:01 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -198,7 +198,7 @@
 !
 ! !PARAMETERS:
       type (ESMF_IOSpec), intent(inout) :: iospec
-      character(len=ESMF_MAXSTR), optional :: filename
+      character(len=*), intent(in), optional :: filename
       type (ESMF_IOFileFormat), intent(in), optional :: iofileformat
       type (ESMF_IORWType), intent(in), optional :: iorwtype
       logical, intent(in), optional :: async_io
@@ -246,7 +246,7 @@
 
 !-------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_IOSpecGet - set values in an IOSpec
+! !IROUTINE: ESMF_IOSpecGet - get values in an IOSpec
 !
 ! !INTERFACE:
       subroutine ESMF_IOSpecGet(iospec, filename, iofileformat, &
@@ -254,8 +254,8 @@
 !
 !
 ! !PARAMETERS:
-      type (ESMF_IOSpec), intent(inout) :: iospec
-      character(len=ESMF_MAXSTR), optional :: filename
+      type (ESMF_IOSpec), intent(in) :: iospec
+      character(len=*), intent(out), optional :: filename
       type (ESMF_IOFileFormat), intent(out), optional :: iofileformat
       type (ESMF_IORWType), intent(out), optional :: iorwtype
       logical, intent(out), optional :: async_io
