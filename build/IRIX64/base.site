@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base.site,v 1.2 2001/12/07 20:21:03 dneckels Exp $ 
 
 #  This file contains site-specific information.  The definitions below
 #  should be changed to match the locations of libraries at your site.
@@ -43,3 +43,4 @@ MPIRUN          = ${ESMC_MPIRUN}
 #MPI_INCLUDE     = -I${ESMF_DIR}/src/sys/mpiuni -DESMC_HAVE_INT_MPI_COMM
 #MPIRUN          = ${ESMF_DIR}/src/sys/mpiuni/mpirun
 
+PCL_INCLUDE      = -I/home/mouache/rosinski/include
