@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.5 2003/09/19 22:13:43 cdeluca Exp $
+# $Id: makefile,v 1.6 2003/10/07 21:12:23 nscollins Exp $
 
 # This needs to be the path of this directory relative to the
 # top level esmf directory.
-LOCDIR	  = src/Infrastructure/Data/
+LOCDIR	  = src/Infrastructure/Array/
 
 # Leave this line alone.
 include $(ESMF_DIR)/makefile

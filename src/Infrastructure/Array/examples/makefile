@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/18 15:57:02 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/10/07 21:15:59 nscollins Exp $ 
 
 ALL:  examples
 
@@ -12,7 +12,7 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/Data/examples
+LOCDIR	  = src/Infrastructure/Array/examples
 
 
 
