@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.54 2003/08/05 22:53:58 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.55 2003/08/06 23:05:42 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.54 2003/08/05 22:53:58 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.55 2003/08/06 23:05:42 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -594,7 +594,7 @@ static int maxroutes = 10;
                                    //       for all DE's in the DELayout and in
                                    //       each direction for the receiving
                                    //       Field
-      int *global_stride_rcv,      // in  - array of global strides for each
+      int *global_count_rcv,       // in  - array of global strides for each
                                    //       direction for the receiving Field
       ESMC_DELayout *layout_rcv,   // in  - pointer to the rcv DELayout
       int my_DE_snd,               // in  - DE identifier in the DELayout of
@@ -612,7 +612,7 @@ static int maxroutes = 10;
                                    //       for all DE's in the DELayout and in
                                    //       each direction for the sending
                                    //       Field
-      int *global_stride_snd,      // in  - array of global strides for each
+      int *global_count_snd,       // in  - array of global strides for each
                                    //       direction for the sending Field
       ESMC_DELayout *layout_snd) { // in  - pointer to the snd DELayout 
 //
@@ -631,6 +631,7 @@ static int maxroutes = 10;
     ESMC_RouteCacheEntry *ep;
     ESMC_Logical periodic[ESMF_MAXGRIDDIM];
     int my_XPcount, their_XPcount;
+    int memory_stride_snd[ESMF_MAXDIM], memory_stride_rcv[ESMF_MAXDIM];
     int i, j, k, rc;
     int their_de, their_de_parent, their_decount;
 
@@ -653,8 +654,8 @@ static int maxroutes = 10;
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
       rc = ESMC_XPacketFromAxisIndex(my_AI_exc, rank, global_start_snd,
-                                     global_stride_snd, periodic, &my_XP,
-                                     &my_XPcount);
+                                     global_count_snd, memory_stride_snd, 
+                                     periodic, &my_XP, &my_XPcount);
 
       // loop over DE's from receiving layout to calculate send table
       layout_rcv->ESMC_DELayoutGetNumDEs(&their_decount);
@@ -678,8 +679,8 @@ static int maxroutes = 10;
  
           // calculate "their" XPacket in the sense of the global data
           rc = ESMC_XPacketFromAxisIndex(their_AI_exc, rank, global_start_rcv,
-                                         global_stride_rcv, periodic, &their_XP,
-                                         &their_XPcount);
+                                         global_count_rcv, memory_stride_rcv, 
+                                         periodic, &their_XP, &their_XPcount);
 
           // calculate the intersection
           intersect_XP = new ESMC_XPacket;
@@ -695,7 +696,7 @@ static int maxroutes = 10;
           // translate from global to local data space
           intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
                                                   rank, global_start_snd,
-                                                  global_stride_snd);
+                                                  memory_stride_snd);
 
           // load the intersecting XPacket into the sending RTable
           sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
@@ -717,8 +718,8 @@ static int maxroutes = 10;
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
       rc = ESMC_XPacketFromAxisIndex(my_AI_exc, rank, global_start_rcv,
-                                     global_stride_rcv, periodic, &my_XP,
-                                     &my_XPcount);
+                                     global_count_rcv, memory_stride_rcv, 
+                                     periodic, &my_XP, &my_XPcount);
 
       // loop over DE's from sending layout to calculate receive table
       for (i=0; i<their_decount; i++) {
@@ -741,8 +742,8 @@ static int maxroutes = 10;
  
           // calculate "their" XPacket in the sense of the global data
           rc = ESMC_XPacketFromAxisIndex(their_AI_exc, rank, global_start_snd,
-                                         global_stride_snd, periodic, &their_XP,
-                                         &their_XPcount);
+                                         global_count_snd, memory_stride_snd, 
+                                         periodic, &their_XP, &their_XPcount);
 
           // calculate the intersection
           intersect_XP = new ESMC_XPacket;
@@ -758,7 +759,7 @@ static int maxroutes = 10;
           // translate from global to local
           intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
                                                   rank, global_start_rcv,
-                                                  global_stride_rcv);
+                                                  memory_stride_rcv);
 
           // load the intersecting XPacket into the receiving RTable
           recvRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
@@ -850,7 +851,7 @@ static int maxroutes = 10;
       int *global_start,           // in  - array of global start information
                                    //       in each dimension and for all
                                    //       DE's in the DELayout
-      int *global_stride,          // in  - array of global stride information
+      int *global_count,           // in  - array of global stride information
                                    //       in each dimension
       ESMC_DELayout *layout,       // in  - pointer to the DELayout 
       ESMC_Logical *periodic) {    // in  - array of flags, one per dim
@@ -864,12 +865,12 @@ static int maxroutes = 10;
 
     ESMC_AxisIndex my_AI[ESMF_MAXDIM], my_AI_tot[ESMF_MAXDIM];
     ESMC_AxisIndex their_AI[ESMF_MAXDIM];
-    ESMC_XPacket *intersect_XP = NULL;
+    ESMC_XPacket intersect_XP;
     ESMC_XPacket *my_XP = NULL;
     ESMC_XPacket *their_XP = NULL;
     int my_global_start[ESMF_MAXDIM], their_global_start[ESMF_MAXDIM];
+    int memory_stride[ESMF_MAXDIM];
     int my_XPcount, their_XPcount;
-    ESMC_Logical falseperiodic[ESMF_MAXDIM];
     ESMC_RouteCacheEntry *ep;
     int rc;   // TODO: really use this
     int i, j, k;
@@ -877,20 +878,15 @@ static int maxroutes = 10;
 
     // Calculate the sending table.
  
-    //  modify global_stride to include halo widths  TODO: pass in AIs as global
-    for (k=0; k<rank; k++) {
-      global_stride[k] = global_stride[k]
-              + AI_exc[my_DE + k*AI_count].min - AI_tot[my_DE + k*AI_count].min
-              + AI_tot[my_DE + k*AI_count].max - AI_exc[my_DE + k*AI_count].max;
-    }
-//    for (k=0; k<rank; k++) {
-//      for (j=0; j<AI_count; j++) {
-//        if (global_start[j + k*AI_count] > 0) {
-//          global_start[j + k*AI_count] = global_start[j + k*AI_count]
-//              + AI_exc[j + k*AI_count].min - AI_tot[j + k*AI_count].min;
-//        }
-//      }
-//    }
+    //  set memory strides to include halo widths  TODO: pass in AIs as global
+      for (k=0; k<rank; k++) {
+        memory_stride[k] = global_count[k]
+                + AI_exc[my_DE + k*AI_count].min - AI_tot[my_DE + k*AI_count].min
+                + AI_tot[my_DE + k*AI_count].max - AI_exc[my_DE + k*AI_count].max;
+        if (k >= 1) {
+          memory_stride[k] = memory_stride[k] * memory_stride[k-1];
+        }
+      }
 
     // get "my" AI out of the AI_exc array
     // TODO:  this is NOT going to work for data dims which are not
@@ -899,15 +895,14 @@ static int maxroutes = 10;
       my_AI[k] = AI_exc[my_DE + k*AI_count];
       my_AI_tot[k] = AI_tot[my_DE + k*AI_count];
       my_global_start[k] = global_start[my_DE + k*AI_count];
-      falseperiodic[k] = ESMF_TF_FALSE;
     }
 
     // calculate "my" (local DE's) XPacket in the sense of the global data
     // nsc - here is where we will need to do this again for periodic
     // boundary support if periodic is true along any axis and if this
     // xpacket is along a corresponding minimum-side boundary.
-    rc = ESMC_XPacketFromAxisIndex(my_AI, rank, my_global_start, global_stride,
-                                   falseperiodic, &my_XP, &my_XPcount);
+    rc = ESMC_XPacketFromAxisIndex(my_AI, rank, my_global_start, global_count,
+                                   memory_stride, periodic, &my_XP, &my_XPcount);
 
     // printf("my_DE = %d, my_XPcount = %d\n", my_DE, my_XPcount);
 
@@ -924,50 +919,34 @@ static int maxroutes = 10;
  
       // calculate "their" XPacket in the sense of the global data
       rc = ESMC_XPacketFromAxisIndex(their_AI, rank, their_global_start,
-                                     global_stride, periodic, &their_XP,
-                                     &their_XPcount);
+                                     global_count, memory_stride, periodic,
+                                     &their_XP, &their_XPcount);
 
       
       // printf("their_de = %d, their_XPcount = %d\n", their_de, their_XPcount);
       // calculate the intersection
-      intersect_XP = new ESMC_XPacket;
-      for (j=0; j<my_XPcount; j++) {
-        for (i=0; i<their_XPcount; i++) {
+      for (i=0; i<their_XPcount; i++) {
 
-          // do not intersect my periodic shadow w/ their shadows...
-          if ((i > 0) && (j > 0)) {
-              // printf("skipping over shadowed compares of DEs\n");
-              continue;
-          }
+        // reuse the same XP for the entire loop.
+        intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[i]);
 
-          if ((my_DE == 0) && (their_de == 9)) 
-              ; // printf("should match\n");
-
-          // reuse the same XP for the entire loop.
-          intersect_XP->ESMC_XPacketIntersect(&my_XP[j], &their_XP[i]);
-
-          // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty()) {
-            // printf("empty intersection between %d and %d, continuing\n",
-            //             my_DE, their_de);
-            continue;
-          }
-
-          // translate from global to local data space
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
-                                                  rank, my_global_start,
-                                                  global_stride);
-
-          // load the intersecting XPacket into the sending RTable
-          sendRT->ESMC_RTableSetEntry(their_de, intersect_XP);
-          ct->ESMC_CommTableSetPartner(their_de);
+        // if there's no intersection, no need to add an entry here
+        if (intersect_XP.ESMC_XPacketEmpty()) {
+          // printf("empty intersection between %d and %d, continuing\n",
+          //             my_DE, their_de);
+          continue;
         }
+
+        // translate from global to local data space
+        intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
+                                               rank, my_global_start,
+                                               memory_stride);
+
+        // load the intersecting XPacket into the sending RTable
+        sendRT->ESMC_RTableSetEntry(their_de, &intersect_XP);
+        ct->ESMC_CommTableSetPartner(their_de);
       }
     }
-
-    // free XP here to prevent memory leaks
-    delete intersect_XP;  // contents have been copied in RTable
-    intersect_XP = NULL;
 
     // Calculate the receiving table.
  
@@ -981,8 +960,8 @@ static int maxroutes = 10;
     // nsc - here is where we will need to do this again for periodic
     // boundary support if periodic is true along any axis and if this
     // xpacket is along a corresponding minimum-side boundary.
-    rc = ESMC_XPacketFromAxisIndex(my_AI, rank, my_global_start, global_stride,
-                                   periodic, &my_XP, &my_XPcount);
+    rc = ESMC_XPacketFromAxisIndex(my_AI, rank, my_global_start, global_count,
+                                   memory_stride, periodic, &my_XP, &my_XPcount);
 
     // loop over DE's from layout to calculate receive table
     for (k=0; k<decount; k++) {
@@ -996,33 +975,26 @@ static int maxroutes = 10;
  
       // calculate "their" XPacket in the sense of the global data
       rc = ESMC_XPacketFromAxisIndex(their_AI, rank, their_global_start,
-                                     global_stride, periodic, &their_XP,
-                                     &their_XPcount);
+                                     global_count, memory_stride, periodic, 
+                                     &their_XP, &their_XPcount);
 
       // calculate the intersection
-      intersect_XP = new ESMC_XPacket;
-      for (j=0; j<my_XPcount; j++) {
-        for (i=0; i<their_XPcount; i++) {
+      for (i=0; i<their_XPcount; i++) {
 
-          // do not intersect my periodic shadow w/ their shadows...
-          if ((i > 0) && (j > 0)) continue;
+        intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[i]);
 
-          intersect_XP->ESMC_XPacketIntersect(&my_XP[j], &their_XP[i]);
+        // if there's no intersection, no need to add an entry here
+        if (intersect_XP.ESMC_XPacketEmpty()) 
+          continue;
+         
+        // translate from global to local
+        intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot,
+                                               rank, my_global_start,
+                                               memory_stride);
 
-          // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty()) 
-            continue;
-          
-
-          // translate from global to local
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot,
-                                                  rank, my_global_start,
-                                                  global_stride);
-
-          // load the intersecting XPacket into the receiving RTable
-          recvRT->ESMC_RTableSetEntry(their_de, intersect_XP);
-          ct->ESMC_CommTableSetPartner(their_de);
-        }
+        // load the intersecting XPacket into the receiving RTable
+        recvRT->ESMC_RTableSetEntry(their_de, &intersect_XP);
+        ct->ESMC_CommTableSetPartner(their_de);
       }
     }
  
@@ -1031,8 +1003,6 @@ static int maxroutes = 10;
     my_XP = NULL;
     delete their_XP; 
     their_XP = NULL;
-    delete intersect_XP;  // contents have been copied in RTable
-    intersect_XP = NULL;
 
     // add to cache table here.
     if (routetable.rcep == NULL) {
