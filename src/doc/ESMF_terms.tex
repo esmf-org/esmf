@@ -124,9 +124,8 @@ object model but simply to achieve a common language.
 
 \item[Decomposition element (DE)] \label{glos:Decomp_Element}
   A decomposition element is a virtual portion of a computer 
-  associated with a processing element and an address space.  A DE may 
-  be associated with an MPI process or a thread.  DELayouts 
-  assign a topology to decomposition elements. 
+  associated with a processing element and an address space.  
+  DELayouts assign a topology to decomposition elements. 
   See also \htmlref{DELayout}{glos:DELayout}, \htmlref{PE}{glos:Process_Element}.
 
 \item[Deep objects] \label{glos:DeepObjects} In an environment
@@ -188,12 +187,6 @@ object model but simply to achieve a common language.
   refer to a structured collection of software building blocks that can be used 
   and customized to develop components, assemble them into an application, and 
   run the application.
-
-\item[Functionality Class] \label{glos:FuncClass}
-  A functionality class is a body that accomplishes a given function, such
-  as I/O. It may contain several different classes or extend over multiple
-  framework layers. Functionality classes are described in the ESMF Architecture
-  Document.
 
 \item[Generic component] \label{glos:GenericComp} A generic component
   is one supplied by the framework.  The user is not expected to 
@@ -370,8 +363,9 @@ object model but simply to achieve a common language.
   via message passing to another process.
 
 \item[Processing element (PE)] \label{glos:Processing_Element}
-  A processing element is associated with a single hardware processor.  It may
-  have a framework ID that is different than its vendor-assigned ID.
+  A processing element is associated with a single hardware processor.  It 
+  has a framework-assigned PE ID that may be different than its 
+  vendor-assigned ID.
   See also \htmlref{DE}{glos:Decomp_Element}.  
 
 \item[Processing node] \label{glos:Pnode} A set of processors to which an
