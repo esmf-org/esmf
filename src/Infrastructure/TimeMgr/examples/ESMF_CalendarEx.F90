@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.24 2004/02/13 18:05:56 svasquez Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.25 2004/05/21 17:30:02 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -198,7 +198,7 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_FAILURE) then
+      if (rc.EQ.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
