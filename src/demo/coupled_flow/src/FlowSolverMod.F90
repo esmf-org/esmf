@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.14 2004/04/28 23:12:12 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.15 2004/05/27 13:31:54 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -120,7 +120,7 @@
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
 
-      print *, "Registered Initialize, Run, and Finalize routines"
+      print *, "FlowSolverMod: Registered Initialize, Run, and Finalize routines"
 
       rc = ESMF_SUCCESS
 
@@ -1590,11 +1590,10 @@
 !
       integer :: status
       logical :: rcpresent
-      integer :: i, j, de_id
+      integer :: i, j, pet_id
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: outarray
-      type(ESMF_Grid) :: grid
-      type(ESMF_DELayout) :: layout
+      type(ESMF_VM) :: vm
       character(len=ESMF_MAXSTR) :: filename
 !
 ! Set initial values
@@ -1611,9 +1610,8 @@
 !
 ! Collect results on DE 0 and output to a file
 !
-      call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
-      call ESMF_GridGet(grid, delayout=layout, rc=status)
-      call ESMF_DELayoutGet(layout, localDE=de_id, rc=status)
+      call ESMF_GridCompGet(gcomp, vm=vm, rc=status)
+      call ESMF_VMGet(vm, localPet=pet_id, rc=status)
 !
 ! Frame number from computation
 !
@@ -1622,21 +1620,21 @@
 ! And now test output to a file
 !
       call ESMF_FieldGather(field_u, 0, outarray, rc=status)
-      if (de_id .eq. 0) then
+      if (pet_id .eq. 0) then
         write(filename, 20)  "U_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
         call ESMF_ArrayDestroy(outarray, status)
       endif
 
       call ESMF_FieldGather(field_v, 0, outarray, rc=status)
-      if (de_id .eq. 0) then
+      if (pet_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
         call ESMF_ArrayDestroy(outarray, status)
       endif
 
       call ESMF_FieldGather(field_sie, 0, outarray, rc=status)
-      if (de_id .eq. 0) then
+      if (pet_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
         call ESMF_ArrayDestroy(outarray, status)
@@ -1646,7 +1644,7 @@
 !
       if(file_no .eq. 1) then
         call ESMF_FieldGather(field_flag, 0, outarray, rc=status)
-        if (de_id .eq. 0) then
+        if (pet_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
           call ESMF_ArrayDestroy(outarray, status)
@@ -1654,11 +1652,11 @@
 
         do j = jmin, jmax
           do i = imin, imax
-            de(i,j) = de_id
+            de(i,j) = pet_id
           enddo
         enddo
         call ESMF_FieldGather(field_de, 0, outarray, rc=status)
-        if (de_id .eq. 0) then
+        if (pet_id .eq. 0) then
           write(filename, 20)  "DE", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
           call ESMF_ArrayDestroy(outarray, status)

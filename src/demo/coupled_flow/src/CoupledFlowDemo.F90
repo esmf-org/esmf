@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.17 2004/05/26 22:20:27 jwolfe Exp $
+! $Id: CoupledFlowDemo.F90,v 1.18 2004/05/27 13:31:54 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -92,7 +92,7 @@
 
 !\end{verbatim}
 !EOP
-        print *, "Registered Initialize, Run, and Finalize routines"
+        print *, "CoupledFlowDemo: Registered Initialize, Run, and Finalize routines"
 
     end subroutine
 
@@ -189,13 +189,13 @@
 !   different connectivity.
 !\begin{verbatim}
     cnameIN = "Injector model"
-    !layoutIN = ESMF_DELayoutCreate(vm, (/ mid, by2 /), rc=rc)
+    layoutIN = ESMF_DELayoutCreate(vm, (/ mid, by2 /), rc=rc)
     INcomp = ESMF_GridCompCreate(vm, cnameIN, rc=rc)
 !\end{verbatim}
 !EOP
 
     cnameFS = "Flow Solver model"
-    !layoutFS = ESMF_DELayoutCreate(vm, (/ quart, by4 /), rc=rc)
+    layoutFS = ESMF_DELayoutCreate(vm, (/ quart, by4 /), rc=rc)
     FScomp = ESMF_GridCompCreate(vm, cnameFS, rc=rc)
 
     cplname = "Two-way coupler"
@@ -211,13 +211,13 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
     call ESMF_GridCompSetServices(INcomp, Injector_register, rc)
-    print *, "Comp SetServices finished, rc= ", rc
+    print *, "Injector Comp SetServices finished, rc= ", rc
 
     call ESMF_GridCompSetServices(FScomp, FlowSolver_register, rc)
-    print *, "Comp SetServices finished, rc= ", rc
+    print *, "FlowSolver Comp SetServices finished, rc= ", rc
 
     call ESMF_CplCompSetServices(cpl, Coupler_register, rc)
-    print *, "Comp SetServices finished, rc= ", rc
+    print *, "Coupler Comp SetServices finished, rc= ", rc
 
  
 !------------------------------------------------------------------------------
@@ -416,27 +416,46 @@ end subroutine coupledflow_run
 
       ! Finalize Injector Component    
       call ESMF_GridCompFinalize(INcomp, INimp, INexp, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) then
+          print *, "Injector Component Finalize routine returned error"
+          return
+      endif
 
       ! Finalize FlowSolver Component
       call ESMF_GridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) then
+          print *, "FlowSolver Component Finalize routine returned error"
+          return
+      endif
 
       ! Finalize Coupler
       call ESMF_CplCompFinalize(cpl, INexp, FSimp, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) then
+          print *, "Coupler Component Finalize routine returned error"
+          return
+      endif
 
+      print *, "CoupledFlowMod finished calling all subcomponent Finalize routines"
 
       ! Then clean them up
 
+      print *, "ready to destroy all states"
       call ESMF_StateDestroy(INimp, rc)
       call ESMF_StateDestroy(INexp, rc)
       call ESMF_StateDestroy(FSimp, rc)
       call ESMF_StateDestroy(FSexp, rc)
 
+      print *, "ready to destroy all components"
       call ESMF_GridCompDestroy(INcomp, rc)
       call ESMF_GridCompDestroy(FScomp, rc)
       call ESMF_CplCompDestroy(cpl, rc)
 
-      call ESMF_DELayoutDestroy(layoutIN, rc)
-      call ESMF_DELayoutDestroy(layoutFS, rc)
+      print *, "ready to destroy all layouts"
+      !call ESMF_DELayoutDestroy(layoutIN, rc)
+      !call ESMF_DELayoutDestroy(layoutFS, rc)
+
+      print *, "end of CoupledFlowMod Finalization routine"
+      rc = ESMF_SUCCESS
 
     end subroutine coupledflow_final
 

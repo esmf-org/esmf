@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.10 2004/04/28 23:12:12 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.11 2004/05/27 13:31:54 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -68,7 +68,7 @@
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, coupler_final, &
                                                          ESMF_SINGLEPHASE, rc)
 
-      print *, "Registered Initialize, Run, and Finalize routines"
+      print *, "CouplerMod: Registered Initialize, Run, and Finalize routines"
 
     end subroutine
 
@@ -308,7 +308,7 @@
         call ESMF_RouteHandleDestroy(fromFlow_rh, rc)
 
         call ESMF_FieldRedistRelease(fromInject_rh, rc)
-        call ESMF_RouteHandleDestroy(fromFlow_rh, rc)
+        call ESMF_RouteHandleDestroy(fromInject_rh, rc)
 
         rc = ESMF_SUCCESS
     

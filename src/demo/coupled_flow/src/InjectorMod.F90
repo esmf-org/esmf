@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.10 2004/04/28 23:12:12 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.11 2004/05/27 13:31:54 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -99,7 +99,7 @@
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                          injector_final, ESMF_SINGLEPHASE, rc)
 
-        print *, "Registered Initialize, Run, and Finalize routines"
+        print *, "InjectorMod: Registered Initialize, Run, and Finalize routines"
 
 
         ! Allocate private persistent space
@@ -107,7 +107,7 @@
         wrap%ptr => datablock
         call ESMF_GridCompSetInternalState(comp, wrap, rc)
 
-        print *, "Registered Private Data block for Internal State"
+        print *, "InjectorMod: Registered Private Data block for Internal State"
     end subroutine
 
 !------------------------------------------------------------------------------
