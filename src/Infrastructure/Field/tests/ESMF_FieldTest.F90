@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldTest.F90,v 1.4 2003/03/12 21:45:49 svasquez Exp $
+! $Id: ESMF_FieldTest.F90,v 1.5 2003/03/12 23:59:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldTest.F90,v 1.4 2003/03/12 21:45:49 svasquez Exp $'
+      '$Id: ESMF_FieldTest.F90,v 1.5 2003/03/12 23:59:11 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -70,31 +70,31 @@
 
      ! Verifing that printing an uninitialized Field is handled properly.
       call ESMF_FieldPrint(f1, rc=rc)
-      write(failMsg, *) "Uninitialized Field f1 print failed"
+      write(failMsg, *) ""
       write(name, *) "Printing an uninitialized Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that a Field can be created with no data
       f1 = ESMF_FieldCreateNoData()
-      write(failMsg, *) "Field f1 create failed"
+      write(failMsg, *) ""
       write(name, *) "Creating a Field with no data Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that an initialized  Field can be printed
       call ESMF_FieldPrint(f1, rc=rc)
-      write(failMsg, *) "Initialized Field print failed"
-      write(name, *) "Printing an initialized Field Test"
+      write(failMsg, *) ""
+      write(name, *) "Printing an initialized Field with no data Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      ! Verifing that the Field name can be queried
+      ! Verifing that the Field name can be queried from a no data Field
       call ESMF_FieldGetName(f1, fname, rc=rc)
-      write(failMsg, *) "Get name of a Field with no data failed"
+      write(failMsg, *) "returned name not 'default_name'"
       write(name, *) "Getting name of Field with no data Test"
       call ESMF_Test((fname.eq."default_name"), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that a Field can be destroyed
       call ESMF_FieldDestroy(f1, rc=rc)
-      write(failMsg, *) "Destroy Field failed"
+      write(failMsg, *) ""
       write(name, *) "Destroying initialized Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -103,36 +103,34 @@
 !      It will be uncommented when the bug is fixed.
 !      print *
 !      call ESMF_FieldGetName(f1, fname, rc=rc)
-!      write(failMsg, *) "Get name of a destroyed Field failed"
+!      write(failMsg, *) ""
 !      write(name, *) "Getting name of a destroyed Field Test"
 !      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 !
 
       ! Verifing that printing a destroyed Field is handled properly.
       call ESMF_FieldPrint(f1, rc=rc)
-      write(failMsg, *) "Printing destroyed Field failed"
+      write(failMsg, *) ""
       write(name, *) "Printing destroyed Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that a Field can be created with a name
       f2 = ESMF_FieldCreateNoData("pressure", rc=rc)
-      write(failMsg, *) "Creating a Field with a name failed"
+      write(failMsg, *) ""
       write(name, *) "Creating Field with name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *
       call ESMF_FieldPrint(f2)
 
       ! Verifing that the Field name can be queried.
       Call ESMF_FieldGetName(f2, fname, rc=rc)
-      write(failMsg, *) "Getting a Field name failed"
+      write(failMsg, *) ""
       write(name, *) "Getting a Field name Test"
       call ESMF_Test((fname.eq."pressure"), name, failMsg, result, ESMF_SRCLINE)
-      print *
       call ESMF_FieldPrint(f2)
 
       ! Verifing that recreating a Field is allowed.
       f2 = ESMF_FieldCreateNoData("temperature", rc=rc)
-      write(failMsg, *) "Field f2 (temperature) should have been created"
+      write(failMsg, *) ""
       write(name, *) "Recreate a created Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f2)
@@ -140,67 +138,67 @@
 
       ! Verifing that a Field can be created after it has been destroyed
       f2 = ESMF_FieldCreateNoData("precipitation", rc=rc)
-      write(failMsg, *) "Field f2 (precipitation) should have been created"
+      write(failMsg, *) ""
       write(name, *) "Recreate a destroyed Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f2)
 
       ! Verifing that a Grid can be created
       grid =  ESMF_GridCreate("atmgrid", rc=rc)
-      write(failMsg, *) "Creating a Grid Failed "
+      write(failMsg, *) ""
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       ! Verifing that a Grid can be printed
       call ESMF_GridPrint(grid, "", rc=rc)
-      write(failMsg, *) "Printing a Grid Failed "
+      write(failMsg, *) ""
       write(name, *) "Printing a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that recreating a created Grid is allowed.
       grid =  ESMF_GridCreate("landgrid", rc=rc)
-      write(failMsg, *) "Grid should have been created"
+      write(failMsg, *) ""
       write(name, *) "Recreating a created Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that an Array can be created
       allocate(f90ptr1(10,20))
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
-      write(failMsg, *) "Creating an Array Failed "
+      write(failMsg, *) ""
       write(name, *) "Creating an Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that an Array can be printed
       call ESMF_ArrayPrint(arr, rc=rc)
-      write(failMsg, *) "Printing an Array Failed "
+      write(failMsg, *) ""
       write(name, *) "Printing an Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that recreating a created Array is allowd
       allocate(f90ptr1(10,20))
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
-      write(failMsg, *) "The array should have been created"
+      write(failMsg, *) ""
       write(name, *) "Recreating a created Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that a Field can be created with a Grid and Array
       f3 = ESMF_FieldCreate(grid, arr, ESMF_NO_COPY, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
-      write(failMsg, *) "Creating an Field with a Grid and Array Failed "
+      write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f3)
 
       ! Verifing that a Field with a Grid and Array can be destroyed
       call ESMF_FieldDestroy(f3, rc=rc)
-      write(failMsg, *) "Destroying an Field with an Grid and Array Failed "
+      write(failMsg, *) ""
       write(name, *) "Destroying a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f3)
 
       ! Verifing that a Field with no data can be destroyed
       call ESMF_FieldDestroy(f2, rc=rc)
-      write(failMsg, *) "Destroying an Field with no data Failed "
+      write(failMsg, *) ""
       write(name, *) "Destroying a Field with no data Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f2)
@@ -208,10 +206,9 @@
 
       ! Verifing that a destroying a destroyed  Field is handled properly.
       call ESMF_FieldDestroy(f2, rc=rc)
-      write(failMsg, *) "Destroying Field that has already been destroyed "
+      write(failMsg, *) ""
       write(name, *) "Destroying a destroyed Field Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f2)
 
-  
       end program ESMF_FieldTest
