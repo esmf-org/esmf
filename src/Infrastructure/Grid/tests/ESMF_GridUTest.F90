@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.7 2003/04/17 20:42:40 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.8 2003/04/22 21:12:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.7 2003/04/17 20:42:40 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.8 2003/04/22 21:12:51 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -86,105 +86,14 @@
       type(ESMF_DELayout) :: layout
 
 
+!--------------------------------------------------------------------------------
+!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!     to OFF, then only the sanity unit tests.
+!--------------------------------------------------------------------------------
 
-#ifdef ESMF_EXHAUSTIVE
 
-      ! perform exhaustive tests here;
-      !   see #else below for non-exhaustive tests
-      ! future release will use run-time switching mechanism
-
-      ! for deep classes, keep create/construct routine and remove init
-      ! for shallow classes, keep init and remove create/construct
-     
-      ! test dynamic allocation of ESMF_Grid
-      grid = ESMF_GridCreate(args, rc)
-      write(name, *) "ESMF_GridCreate"
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-    
-      ! test internal dynamic allocation within statically allocated
-      !   ESMF_Grid
-      call ESMF_GridConstruct(grid, args, rc)
-      write(name, *) "ESMF_GridConstruct"
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test initialization of members of statically allocated ESMF_Grid
-      !   may want to read back values via Get methods for comparison
-      call ESMF_GridInit(grid, args, rc)
-      write(name, *) "ESMF_GridInit"
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test setting of configuration values
-      call ESMF_GridSetConfig(grid, config_set, rc)
-      write(name, *) "ESMF_GridSetConfig"
-      write(failMsg, *) "rc =", rc, ", config_set =", config_set
-      call ESMF_Test((rc.eq.ESMF_SUCCESS),  &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test getting of configuration values,
-      !  compare to values set previously
-      call ESMF_GridGetConfig(grid, config_get, rc)
-      write(name, *) "ESMF_GridGetConfig"
-      write(failMsg, *) "rc =", rc, ", config_get =", config_get
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. config_get .eq. config_set), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test setting of ESMF_Grid members values
-      !call ESMF_GridSet<Value>(grid, value_set, rc)
-      rc = ESMF_FAILURE  ! remove this when this test enabled
-      write(name, *) "ESMF_GridSet<Value>"
-      write(failMsg, *) "rc =", rc, ", value_set =", value_set
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test getting of ESMF_Grid members values,
-      !   compare to values set previously
-      !call ESMF_GridGet<Value>(grid, value_get, rc)
-      rc = ESMF_FAILURE  ! remove this when this test enabled
-      write(name, *) "ESMF_GridGet<Value>"
-      write(failMsg, *) "rc =", rc, ", value_get =", value_get
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
-                      name, failMsg, result, ESMF_SRCLINE)
-    
-      ! test validate method via option string
-      call ESMF_GridValidate(grid, validate_options, rc)
-      write(name, *) "ESMF_GridValidate"
-      write(failMsg, *) "rc =",rc,", validate_options =", trim(validate_options)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test print method via option string
-      call ESMF_GridPrint(grid, print_options, rc)
-      write(name, *) "ESMF_GridPrint"
-      write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test internal dynamic deallocation within statically allocated 
-      !   ESMF_Grid.   only valid for deep classes; remove for shallow
-      call ESMF_GridDestruct(grid, rc)
-      write(name, *) "ESMF_GridDestruct"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test dynamic deallocation of ESMF_Grid
-      !   also tests destructor
-      call ESMF_GridDestroy(grid, rc)
-      write(name, *) "ESMF_GridDestroy"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-#else
-      ! perform non-exhaustive tests here;
-      print *, "******************STATE NON-EXHAUSTIVE UNIT TESTS****************************"
-      print *
 
       !------------------------------------------------------------------------
       i_max = 10
@@ -203,7 +112,12 @@
       y_max = 12.0
       name = "test grid 1"
       halo_width = 1
+
+      ! Creating a layout test
       layout = ESMF_DELayoutCreate(rc=rc)
+      write(name, *) "Creating a DELayout Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
                              x_min=x_min, x_max=x_max, &
@@ -224,6 +138,8 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+#ifdef ESMF_EXHAUSTIVE
+
       ! Test creating an internal Grid
       ! grid2 = ESMF_GridCreateInternal(i_max=i_max, j_max=j_max, &
       !                       x_min=x_min, x_max=x_max, &
@@ -242,6 +158,9 @@
       ! call ESMF_Test((status.eq.ESMF_SUCCESS), &
       !               name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+#endif
+
       ! Printing a Grid
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
@@ -271,6 +190,7 @@
 
 
 
+#ifdef ESMF_EXHAUSTIVE
 
       !------------------------------------------------------------------------
       ! The following code crashes, bug 722780 has been filed
