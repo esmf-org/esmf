@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.3 2002/09/23 20:29:17 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.4 2002/10/07 18:56:36 eschwab Exp $
 #ifndef ESMC_TIME_INTERVAL_H
 #define ESMC_TIME_INTERVAL_H
 
@@ -84,11 +84,22 @@ class ESMC_TimeInterval : public ESMC_Time
     // return in string format (TMG 1.5.9)
     int GetString(char *Ts);
 
-    // magnitude (scalar int or double -- not with S_nd) ??
-    //   return positive value (TMG 1.5.8)
-    int GetAbsValue(ESMC_TimeInterval *);
+    // return positive value (TMG 1.5.8)
+    ESMC_TimeInterval *GetAbsValue(ESMC_TimeInterval *);
+
+    // return negative value (TMG 1.5.8)
+    ESMC_TimeInterval *GetNegAbsValue(ESMC_TimeInterval *);
 
 // !DESCRIPTION:
+//       - For arithmetic consistency both whole seconds and the numerator of
+//         fractional seconds must carry the same sign (both positve or both 
+//         negative), except, of course, for zero values.
+//       - fractional math should be handled by an open-source package if
+//         available (see ESMC_Time.h also)
+//       - Calendar intervals are dependent on a calendar and so represent
+//         a specialized case of a TimeInterval.  A derived class
+//         CalendarInterval will be defined to inherit from TimeInterval
+//         and specialize it for use with Calendars.
 //
 // !BUGS:
 //

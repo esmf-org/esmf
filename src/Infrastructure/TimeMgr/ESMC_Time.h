@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.2 2002/09/23 20:29:17 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.3 2002/10/07 18:56:36 eschwab Exp $
 #ifndef ESMC_TIME_H
 #define ESMC_TIME_H
 
@@ -119,7 +119,12 @@ class ESMC_Time
 //       - minimum elements; maximum range, resolution and flexibility
 //       - each element is bounded to the next higher one (ie. fractional
 //         seconds are < 1.0).
+//       - For arithmetic consistency both whole seconds and the numerator of
+//         fractional seconds must carry the same sign (both positve or both
+//         negative), except, of course, for zero values.
 //       - conversions and other dependencies are done by interface methods
+//       - fractional math should be handled by an open-source package if
+//         available. (see ESMC_TimeInterval.h also)
 //
 //  NOTES:
 //      Core representation meets TMG 1.3, 1.4, 2.2, 5.4
@@ -145,8 +150,8 @@ class ESMC_Time
 //-------------------------------------------------------------------------
   protected:
 
-    int64 S;    // Integer seconds
-    int32 Sn;	// Integer fractional seconds (exact) n/d; numerator
+    int64 S;    // Integer seconds (signed)
+    int32 Sn;	// Integer fractional seconds (exact) n/d; numerator (signed)
     int32 Sd;  	// Integer fractional seconds (exact) n/d; denominator
 
     pthread_mutex_t TimeMutex; // (TMG 7.5)

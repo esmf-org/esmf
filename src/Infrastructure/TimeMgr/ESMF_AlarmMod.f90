@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmMod.f90,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+! $Id: ESMF_AlarmMod.f90,v 1.2 2002/10/07 18:56:36 eschwab Exp $
     module ESMF_AlarmMod
 !===============================================================================
 !BOP
@@ -6,7 +6,7 @@
 ! !MODULE: ESMF_AlarmMod
 !
 ! !USES:
-        use ESMF_TimeIntervalMod
+        use ESMF_TimeIntvMod
         use ESMF_TimeInstantMod
 !
 ! !PUBLIC TYPES:
@@ -15,7 +15,7 @@
         type ESMF_Alarm
             private
             sequence
-                type(ESMF_TimeInterval) :: RingInterval
+                type(ESMF_TimeIntv) :: RingInterval
                 type(ESMF_TimeInstant)  :: RingTime
                 type(ESMF_TimeInstant)  :: NextRingTime
                 type(ESMF_TimeInstant)  :: PrevRingTime
@@ -59,19 +59,19 @@
 !
 !  09Aug02   Earl Schwab  Initial code.
 !
-!EOP
-!===============================================================================
 
 		interface operator(==)
 			module procedure ESMF_AlarmEQ
 		end interface
+
+        private ESMF_AlarmEQ
 
     contains
     
         subroutine ESMF_AlarmInit(this, RingInterval, RingTime, &
                                   StopTime, Enabled, rc)
             type(ESMF_Alarm), intent(inout) :: this
-            type(ESMF_TimeInterval), intent(in), optional :: RingInterval
+            type(ESMF_TimeIntv), intent(in), optional :: RingInterval
             type(ESMF_TimeInstant), intent(in), optional :: RingTime, StopTime
             logical, intent(in) :: Enabled
             integer, intent(out), optional :: rc
@@ -136,7 +136,7 @@
 
         subroutine ESMF_AlarmGetRingInterval(this, RingInterval, rc)
             type(ESMF_Alarm), intent(inout) :: this
-            type(ESMF_TimeInterval), intent(out) :: RingInterval
+            type(ESMF_TimeIntv), intent(out) :: RingInterval
             integer, intent(out), optional :: rc
     
             call c_ESMF_AlarmGetRingInterval(this, RingInterval, rc)
@@ -145,7 +145,7 @@
 
         subroutine ESMF_AlarmSetRingInterval(this, RingInterval, rc)
             type(ESMF_Alarm), intent(inout) :: this
-            type(ESMF_TimeInterval), intent(in) :: RingInterval
+            type(ESMF_TimeIntv), intent(in) :: RingInterval
             integer, intent(out), optional :: rc
     
             call c_ESMF_AlarmSetRingInterval(this, RingInterval, rc)
@@ -232,5 +232,6 @@
             call c_ESMF_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
 
         end function
-
+!EOP
+!===============================================================================
     end module ESMF_AlarmMod

@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockMod.f90,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+! $Id: ESMF_ClockMod.f90,v 1.2 2002/10/07 18:56:36 eschwab Exp $
     module ESMF_ClockMod
 !===============================================================================
 !BOP
@@ -7,7 +7,7 @@
 !
 ! !USES:
         use ESMF_TypesMod
-        use ESMF_TimeIntervalMod
+        use ESMF_TimeIntvMod
         use ESMF_TimeInstantMod
         use ESMF_AlarmMod
 !
@@ -19,7 +19,7 @@
         type ESMF_Clock
             private
             sequence
-                type(ESMF_TimeInterval) :: TimeStep
+                type(ESMF_TimeIntv) :: TimeStep
                 type(ESMF_TimeInstant)  :: StartTime
                 type(ESMF_TimeInstant)  :: StopTime
                 type(ESMF_TimeInstant)  :: RefTime
@@ -62,15 +62,13 @@
 !
 !  09Aug02   Earl Schwab  Initial code.
 !
-!EOP
-!===============================================================================
 
     contains
     
         subroutine ESMF_ClockInit(this, TimeStep, StartTime, StopTime, &
                                   RefTime, rc)
             type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInterval), intent(in) :: TimeStep
+            type(ESMF_TimeIntv), intent(in) :: TimeStep
             type(ESMF_TimeInstant), intent(in) :: StartTime, StopTime, RefTime
             integer, intent(out), optional :: rc
     
@@ -138,7 +136,7 @@
 
         subroutine ESMF_ClockGetTimeInterval(this, TimeInterval, rc)
             type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInterval), intent(out) :: TimeInterval
+            type(ESMF_TimeIntv), intent(out) :: TimeInterval
             integer, intent(out), optional :: rc
 
             call c_ESMF_ClockGetTimeInterval(this, TimeInterval, rc)
@@ -147,7 +145,7 @@
 
         subroutine ESMF_ClockSetTimeInterval(this, TimeInterval, rc)
             type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInterval), intent(in) :: TimeInterval
+            type(ESMF_TimeIntv), intent(in) :: TimeInterval
             integer, intent(out), optional :: rc
 
             call c_ESMF_ClockSetTimeInterval(this, TimeInterval, rc)
@@ -225,5 +223,6 @@
             call c_ESMF_ClockGetPrevSimTime(this, PrevSimTime, rc)
     
         end subroutine
-
+!EOP
+!===============================================================================
     end module ESMF_ClockMod

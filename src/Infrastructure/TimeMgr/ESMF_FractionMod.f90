@@ -1,4 +1,4 @@
-! $Id: ESMF_FractionMod.f90,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+! $Id: ESMF_FractionMod.f90,v 1.2 2002/10/07 18:56:36 eschwab Exp $
       module ESMF_FractionMod
 !===============================================================================
 !BOP
@@ -29,11 +29,11 @@
 !
 !  09Aug02   Earl Schwab  Initial code.
 !
-!EOP
-!===============================================================================
 
 	!contains
 
 	! wrappers to C++ fraction routines
 
+!EOP
+!===============================================================================
 	end module ESMF_FractionMod

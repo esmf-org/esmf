@@ -1,4 +1,4 @@
-% $Id: time_interval_design.tex,v 1.1 2002/08/18 22:43:37 eschwab Exp $
+% $Id: time_interval_design.tex,v 1.2 2002/10/07 18:56:37 eschwab Exp $
 
 TimeInterval inherits from the base class Time.  As such, it gains the core
 representation of time as well as its associated methods.   TimeInterval
@@ -9,4 +9,10 @@ TimeInterval is independent of any calendar.  This is in contrast with a
 TimeInstant, which is calendar-dependent, since its largest units of time
 are months and years.  TimeInterval also defines methods for multiplication
 and division of TimeIntervals by integers, reals, fractions and other
-TimeIntervals.  TimeInterval does not add any new attributes to Time.
+TimeIntervals.  TimeInterval defines methods for absolute value and negative
+absolute value for use with both positive or negative time intervals.  
+TimeInterval does not add any new attributes to Time.
+
+Calendar intervals are dependent on a calendar and so represent a specialized
+case of a TimeInterval.  A derived class CalendarInterval will be defined to
+inherit from TimeInterval and specialize it for use with Calendars.

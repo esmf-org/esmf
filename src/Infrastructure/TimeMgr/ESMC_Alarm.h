@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.2 2002/09/23 20:29:17 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.3 2002/10/07 18:56:36 eschwab Exp $
 #ifndef ESMC_ALARM_H
 #define ESMC_ALARM_H
 
@@ -44,9 +44,12 @@ class ESMC_Alarm
     int TurnOff(void);
 
     bool IsRinging(void);    // TMG 4.4: synchronous query for apps
-    int CheckRingTime(void); // associated clock should invoke after advance:
+    int CheckRingTime(bool positive);
+                         // associated clock should invoke after advance:
                          // TMG4.4, 4.6
-                         //   can be basis for asynchronous alarm reporting
+                         // Check for crossing RingTime in either positive or
+                         //   negative direction
+                         // Can be basis for asynchronous alarm reporting
 
     bool operator==(const ESMC_Alarm &) const; 
 
@@ -55,9 +58,6 @@ class ESMC_Alarm
 
     int GetRingTime(ESMC_TimeInstant *RingTime);    // TMG4.7, 4.8
     int SetRingTime(ESMC_TimeInstant *RingTime);    // TMG4.5.1, 4.7, 4.8
-
-    int GetNextRingTime(ESMC_TimeInstant *NextRingTime);    // TMG 4.7, 4.8
-    int SetNextRingTime(ESMC_TimeInstant *NextRingTime);    // TMG 4.7, 4.8
 
     int GetPrevRingTime(ESMC_TimeInstant *PrevRingTime);    // TMG 4.7, 4.8
     int SetPrevRingTime(ESMC_TimeInstant *PrevRingTime);    // TMG 4.7, 4.8
@@ -84,7 +84,6 @@ class ESMC_Alarm
   private:
     ESMC_TimeInterval RingInterval;	// (TMG 4.5.2)
     ESMC_TimeInstant  RingTime;    // (TMG 4.5.1) (StartTime ??)
-    ESMC_TimeInstant  NextRingTime;
     ESMC_TimeInstant  PrevRingTime;
     ESMC_TimeInstant  StopTime;
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInstantMod.f90,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+! $Id: ESMF_TimeInstantMod.f90,v 1.2 2002/10/07 18:56:36 eschwab Exp $
     module ESMF_TimeInstantMod
 !===============================================================================
 !BOP
@@ -7,7 +7,7 @@
 !
 ! !USES:
         use ESMF_TimeMod
-        use ESMF_TimeIntervalMod
+        use ESMF_TimeIntvMod
             
 ! !PUBLIC TYPES:
         type ESMF_TimeInstant
@@ -82,8 +82,6 @@
 !
 !  09Aug02   Earl Schwab  Initial code.
 !
-!EOP
-!===============================================================================
 
 		interface ESMF_TimeInstantInit
 			module procedure ESMF_TimeInstantInit1
@@ -372,7 +370,7 @@
 		function ESMF_TimeInstantInc(timeinstant, timeinterval)
 			type(ESMF_TimeInstant) :: ESMF_TimeInstantInc
 			type(ESMF_TimeInstant), intent(in) :: timeinstant
-			type(ESMF_TimeInterval), intent(in) :: timeinterval
+			type(ESMF_TimeIntv), intent(in) :: timeinterval
 			type(ESMF_Time) :: time
 			integer(int64) :: S
 			integer(int32) :: Sn, Sd
@@ -392,7 +390,7 @@
         function ESMF_TimeInstantDec(timeinstant, timeinterval)
             type(ESMF_TimeInstant) :: ESMF_TimeInstantDec
             type(ESMF_TimeInstant), intent(in) :: timeinstant
-            type(ESMF_TimeInterval), intent(in) :: timeinterval
+            type(ESMF_TimeIntv), intent(in) :: timeinterval
             type(ESMF_Time) :: time
             integer(int64) :: S
             integer(int32) :: Sn, Sd
@@ -553,5 +551,6 @@
             call c_ESMF_TimeInstantGetRealTime(this, RealTime, rc)
 
         end subroutine
-
+!EOP
+!===============================================================================
     end module ESMF_TimeInstantMod

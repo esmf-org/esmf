@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInstant.h,v 1.3 2002/09/23 20:29:17 eschwab Exp $
+// $Id: ESMC_TimeInstant.h,v 1.4 2002/10/07 18:56:36 eschwab Exp $
 #ifndef ESMC_TIME_INSTANT_H
 #define ESMC_TIME_INSTANT_H
 
@@ -87,6 +87,9 @@ class ESMC_TimeInstant : public ESMC_Time
     int Set_YR_MM_DD_H_M_S(int32  YR, int  MM, int  DD, int  H, int  M, int  S);
 
 // !DESCRIPTION:
+//       - a time value of zero (both whole and numerator) will correspond
+//         to the Julian date of zero UTC.  This will ease conversions 
+//         between Julian and Gregorian calendars.
 //
 // !BUGS:
 //

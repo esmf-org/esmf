@@ -1,4 +1,4 @@
-% $Id: TimeMgr_obj1.tex,v 1.1 2002/08/18 22:43:36 eschwab Exp $
+% $Id: TimeMgr_obj1.tex,v 1.2 2002/10/07 18:56:37 eschwab Exp $
 
 %\section{Object Model}
 
@@ -31,12 +31,15 @@ common core time representation and functionality.
 ESMF\_Calendar encapsulates all the required calendar types and behavior,
 isolating them from Time Instants.  Specific calendar-type objects (e.g.
 Gregorian, Julian, no-leap, etc.) can be instantiated from ESMF\_Calendar.
-For a given application, it is intended that no more than one calendar
-object be instantiated for each calendar type.  The idea is that a calendar
-object is analogous to a "wall calendar," serving as a single point of
-reference throughout an application.  For example, a single Gregorian
-calendar can be instantiated within an application and shared among all
-the time instants.
+Ideally, for a given application, no more than one calendar
+object should be instantiated for each calendar type.  The idea is that
+a calendar object is analogous to a "wall calendar," serving as a single
+point of reference throughout an application.  For example, a single
+Gregorian calendar can be instantiated within an application and shared
+among all the time instants.  However, the design does not preclude having
+multiple calendar instantiations.  For practical reasons of using SPMD or
+MPMD application execution models, there may be multiple instantiations
+of a calendar type; for example, one per component.
 
 For object integrity, all class data members are private; access is via
 public member functions only. The entire ESMF\_Time base class will be

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.2 2002/09/23 20:31:02 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.3 2002/10/07 18:56:36 eschwab Exp $
 #ifndef ESMC_CALENDAR_H
 #define ESMC_CALENDAR_H
 
@@ -11,11 +11,6 @@ typedef enum ESMC_CalendarType {ESMC_GREGORIAN=1, ESMC_JULIAN,  ESMC_NOLEAP,
                                 ESMC_360DAY,      ESMC_GENERIC, ESMC_NOCALENDAR}
              ESMC_CalendarType_e;
 
-// instantiate no more than one calendar type per application
-//    (for reference only, like a wall calendar)
-// generic enough to define for any planetary body
-//   if SecondsPerDay != 86400, then how are minutes and hours defined ??
-//      Assume always minute=60 seconds; hour=3600 seconds
 class ESMC_Calendar
 {
 //-------------------------------------------------------------------------
@@ -67,6 +62,12 @@ class ESMC_Calendar
 					  double *ms);
 
 // !DESCRIPTION:
+//    - Instantiate as few as possilbe; ideally no more than one calendar
+//      type per application (for reference only, like a wall calendar)
+//      But may have multiples for convienience such as one per component.
+//    - Generic enough to define for any planetary body
+//    - if SecondsPerDay != 86400, then how are minutes and hours defined ??
+//      Assume always minute=60 seconds; hour=3600 seconds
 //
 // !BUGS:
 //

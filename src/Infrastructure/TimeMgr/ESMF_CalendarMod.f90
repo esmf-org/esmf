@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarMod.f90,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+! $Id: ESMF_CalendarMod.f90,v 1.2 2002/10/07 18:56:36 eschwab Exp $
       module ESMF_CalendarMod
 !===============================================================================
 !BOP
@@ -59,8 +59,6 @@
 !
 !  09Aug02   Earl Schwab  Initial code.
 !
-!EOP
-!===============================================================================
 
     contains
     
@@ -95,23 +93,23 @@
         subroutine ESMF_CalendarConvertToTime(YR, MM, DD, D, H, M, S, &
                                               MS, US, NS, Sn, Sd, &
                                               d_, h_, m_, s_, ms_, us_, ns_, &
-                                              timeinstant, rc)
+                                              time, rc)
             integer, intent(in), optional :: MM, DD, H, M, MS
             integer(int64), intent(in), optional :: S
             integer(int32), intent(in), optional :: YR, D, US, NS, Sn, Sd
             real, intent(in), optional :: d_, h_, m_, s_, ms_, us_, ns_
-            type(ESMF_TimeInstant) :: timeinstant
+            type(ESMF_Time) :: time
             integer, intent(out), optional :: rc
     
             ! use optional args for any subset
             call c_ESMF_CalendarConvertToTime(YR, MM, DD, D, H, M, S, &
                                               MS, US, NS, Sn, Sd, &
                                               d_, h_, m_, s_, ms_, us_, ns_, &
-                                              timeinstant, rc)
+                                              time, rc)
     
         end subroutine
 
-        subroutine ESMF_CalendarConvertToDate(timeinstant, YR, MM, DD, D, H, &
+        subroutine ESMF_CalendarConvertToDate(time, YR, MM, DD, D, H, &
                                               M, S, MS, US, NS, Sn, Sd, &
                                               d_, h_, m_, s_, ms_, us_, ns_, &
                                               rc)
@@ -119,15 +117,16 @@
             integer(int64), intent(out), optional :: S
             integer(int32), intent(out), optional :: YR, D, US, NS, Sn, Sd
             real, intent(in), optional :: d_, h_, m_, s_, ms_, us_, ns_
-            type(ESMF_TimeInstant) :: timeinstant
+            type(ESMF_Time) :: time
             integer, intent(out), optional :: rc
     
             ! use optional args for any subset
-            call c_ESMF_CalendarConvertToDate(timeinstant, YR, MM, DD, D, H, &
+            call c_ESMF_CalendarConvertToDate(time, YR, MM, DD, D, H, &
                                               M, S, MS, US, NS, Sn, Sd, &
                                               d_, h_, m_, s_, ms_, us_, ns_, &
                                               rc)
     
         end subroutine
-
+!EOP
+!===============================================================================
     end module ESMF_CalendarMod
