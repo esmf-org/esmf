@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.25 2003/12/19 21:42:07 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.26 2004/01/28 20:33:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,12 @@
 
       type ESMF_Array
       sequence
-        type(ESMF_Pointer) :: this       ! opaque pointer to the C++ class data
+        ! opaque pointer to the C++ class data
+#ifndef ESMF_NO_INITIALIZERS
+        type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+#else
+        type(ESMF_Pointer) :: this
+#endif
       end type
 
 !------------------------------------------------------------------------------
@@ -120,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.25 2003/12/19 21:42:07 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.26 2004/01/28 20:33:10 nscollins Exp $'
 !
 !==============================================================================
 !
