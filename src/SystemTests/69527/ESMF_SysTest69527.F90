@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.6 2003/04/04 17:12:35 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.7 2003/04/04 21:10:29 nscollins Exp $
 !
 ! System test code #69527
 
@@ -58,7 +58,7 @@
 
 !   ! Create a DELayout 
     delist = (/ 0, 1 /)
-    layout1 = ESMF_DELayoutCreate(2, 1, delist, ESMF_XFAST, rc)
+    layout1 = ESMF_DELayoutCreate(delist, 2, (/ 2, 1 /), (/ 0, 0 /), rc)
 
     cname = "System Test #69527"
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.6 2003/04/04 16:11:48 nscollins Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.7 2003/04/04 21:10:27 nscollins Exp $
 !
 ! System test code #62502
 
@@ -66,12 +66,12 @@
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     delist = (/ 0, 1, 2, 3 /)
-    layout2 = ESMF_DELayoutCreate(4, 1, delist, ESMF_XFAST, rc)
+    layout2 = ESMF_DELayoutCreate(delist, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
     comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
 
     cname2 = "user model 2"
-    layout3 = ESMF_DELayoutCreate(2, 2, delist, ESMF_XFAST, rc)
+    layout3 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
     comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
 
@@ -105,8 +105,8 @@
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
-      ! initialize time interval to 1 hour
-      call ESMF_TimeIntervalInit(timeStep, H=1, rc=rc)
+      ! initialize time interval to 4 hours
+      call ESMF_TimeIntervalInit(timeStep, H=4, rc=rc)
 
       ! initialize start time to 3/28/2003
       call ESMF_TimeInit(startTime, YR=2003, MM=3, DD=28, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.8 2003/04/04 17:12:37 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.9 2003/04/04 21:10:32 nscollins Exp $
 !
 ! System test code #70385
 
@@ -46,7 +46,7 @@
 
 !   Create a DELayout for the Component
     delist = (/ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 /)
-    layout1 = ESMF_DELayoutCreate(3, 4, delist, ESMF_XFAST, rc)
+    layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
 
     cname = "System Test #70385"
     comp1 = ESMF_GridCompCreate(name=cname, layout=layout1, rc=rc)

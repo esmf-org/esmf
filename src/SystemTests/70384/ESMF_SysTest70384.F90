@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.10 2003/04/04 16:12:00 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.11 2003/04/04 21:10:30 nscollins Exp $
 !
 ! System test code #70384
 
@@ -55,7 +55,7 @@
     delist = (/ 0, 1, 2, 3, 4, 5 /)
     ndex = 2
     ndey = 3
-    layout1 = ESMF_DELayoutCreate(ndex, ndey, delist, ESMF_XFAST, rc)
+    layout1 = ESMF_DELayoutCreate(delist, 2,  (/ ndex, ndey /), (/ 0, 0 /), rc)
     print *, "DELayout Create finished, rc =", rc
 
     ! Create the State
