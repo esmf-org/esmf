@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_TimeMgr.inc,v 1.2 2003/03/27 01:42:04 eschwab Exp $
+$Id: ESMF_TimeMgr.inc,v 1.3 2003/09/12 16:03:29 eschwab Exp $
  
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,6 +35,6 @@ by both C++ and F90 compilers.
 #define SECONDS_PER_HOUR 3600
 #define SECONDS_PER_MINUTE 60
 
-#define MAX_ALARMS 20
+#define MAX_ALARMS 30
 
 #endif
