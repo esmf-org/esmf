@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.45 2003/07/09 17:23:09 jwolfe Exp $
+! $Id: ESMF_Base.F90,v 1.46 2003/07/17 20:35:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,14 +112,14 @@
       end type
 
       type(ESMF_DataKind), parameter :: &
-                   ESMF_KIND_I1 = ESMF_DataKind(selected_int_kind(2)), &
-                   ESMF_KIND_I2 = ESMF_DataKind(selected_int_kind(4)), &
-                   ESMF_KIND_I4 = ESMF_DataKind(selected_int_kind(9)), &
-                   ESMF_KIND_I8 = ESMF_DataKind(selected_int_kind(18)), &
-                   ESMF_KIND_R4 = ESMF_DataKind(selected_real_kind(3,25)), &
-                   ESMF_KIND_R8 = ESMF_DataKind(selected_real_kind(6,45)), &
-                   ESMF_KIND_C8 = ESMF_DataKind(selected_real_kind(3,25)), &
-                   ESMF_KIND_C16 = ESMF_DataKind(selected_real_kind(6,45))
+                   ESMF_KIND_I1 = ESMF_DataKind(1), &
+                   ESMF_KIND_I2 = ESMF_DataKind(2), &
+                   ESMF_KIND_I4 = ESMF_DataKind(3), &
+                   ESMF_KIND_I8 = ESMF_DataKind(4), &
+                   ESMF_KIND_R4 = ESMF_DataKind(5), &
+                   ESMF_KIND_R8 = ESMF_DataKind(6), &
+                   ESMF_KIND_C8 = ESMF_DataKind(7), &
+                   ESMF_KIND_C16 = ESMF_DataKind(8)
 
       !! TODO: I believe that if we defined an assignment(=) operator for
       !! the data kind to convert the derived type into a real integer, 
@@ -312,7 +312,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.45 2003/07/09 17:23:09 jwolfe Exp $'
+               '$Id: ESMF_Base.F90,v 1.46 2003/07/17 20:35:14 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
