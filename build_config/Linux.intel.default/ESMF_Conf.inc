@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.7 2005/02/03 18:08:18 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.8 2005/02/07 22:31:23 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,7 +12,7 @@ Licensed under the GPL.
 
 
 #if 0
-Strict F90 compilers won't allow initializers.  Also, in the past when we 
+Strict F90 compilers will not allow initializers.  Also, in the past when we 
 have had problems with internal compiler errors, it has often helped if we 
 turn off the derived type initializers.  At the moment the intel compiler 
 seems to be ok with setting them, so i have removed the following #define, 
