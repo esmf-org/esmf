@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.4 2003/03/26 01:05:59 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.5 2003/03/28 00:45:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,46 +33,50 @@
 extern "C" {
 
        // keep this for shallow classes, get rid of create/destroy above
-       void FTN(c_esmc_clockinit)(ESMC_Clock **ptr,
+       void FTN(c_esmc_clockinit)(ESMC_Clock *ptr,
                                   ESMC_TimeInterval *timeStep,
                                   ESMC_Time *startTime,
                                   ESMC_Time *stopTime,
                                   ESMC_Time *refTime,
                                   int *status) {
-           *status = (*ptr)->ESMC_ClockInit(timeStep, startTime, stopTime,
-                                            refTime);
+           *status = (ptr)->ESMC_ClockInit(timeStep, startTime, stopTime,
+                                           refTime);
        }
 
-       void FTN(c_esmc_clockadvance)(ESMC_Clock **ptr,
-                                     ESMC_Alarm ***ringingList,
+       void FTN(c_esmc_clockadvance)(ESMC_Clock *ptr,
+                                     ESMC_Alarm *ringingList,
                                      int *numRingingAlarms, int *status) {
-           *status = (*ptr)->ESMC_ClockAdvance(**ringingList, numRingingAlarms);
+           *status = (ptr)->ESMC_ClockAdvance(ringingList, numRingingAlarms);
        }
 
-       void FTN(c_esmc_clockisstoptime)(ESMC_Clock **ptr, 
-                int *esmf_clockIsStopTime, int *status) {
-           *esmf_clockIsStopTime = (int) (*ptr)->ESMC_ClockIsStopTime(status);
+       void FTN(c_esmc_clockisstoptime)(ESMC_Clock *ptr, 
+                                      int *esmf_clockIsStopTime, int *status) {
+           *esmf_clockIsStopTime = (int) (ptr)->ESMC_ClockIsStopTime(status);
+       }
+
+       void FTN(c_esmc_clockgetadvancecount)(ESMC_Clock *ptr, 
+                                             ESMF_IKIND_I8 *advanceCount,
+                                             int *status) {
+           *status = (ptr)->ESMC_ClockGetAdvanceCount(advanceCount);
        }
 
 #if 0
-       void FTN(c_esmc_clockget)(ESMC_Clock **ptr, 
+       void FTN(c_esmc_clockget)(ESMC_Clock *ptr, 
                                          <value> *value, int *status} {
-           *status = (*ptr)->ESMC_ClockGet(&value);
+           *status = (ptr)->ESMC_ClockGet(&value);
        }
 
-       void FTN(c_esmc_clockset)(ESMC_Clock **ptr, 
+       void FTN(c_esmc_clockset)(ESMC_Clock *ptr, 
                                          <value> *value, int *status} {
-           *status = (*ptr)->ESMC_ClockSet(value);
+           *status = (ptr)->ESMC_ClockSet(value);
        }
 
-       void FTN(c_esmc_clockvalidate)(ESMC_Clock **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_ClockValidate(opts);
+       void FTN(c_esmc_clockvalidate)(ESMC_Clock *ptr, char *opts, int *status) {
+           *status = (ptr)->ESMC_ClockValidate(opts);
        }
 
-       void FTN(c_esmc_clockprint)(ESMC_Clock **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_ClockPrint(opts);
+       void FTN(c_esmc_clockprint)(ESMC_Clock *ptr, char *opts, int *status) {
+           *status = (ptr)->ESMC_ClockPrint(opts);
        }
 #endif
 };
-
-
