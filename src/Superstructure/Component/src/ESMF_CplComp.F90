@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.15 2004/03/01 19:27:07 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.16 2004/03/01 21:28:54 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.15 2004/03/01 19:27:07 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.16 2004/03/01 21:28:54 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -593,6 +593,50 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_CplCompReadRestart -- Call the Component's restore routine
+
+! !INTERFACE:
+     recursive subroutine ESMF_CplCompReadRestart(component, iospec, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_CplComp), intent(inout) :: component
+      type (ESMF_IOSpec), intent(inout), optional :: iospec
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user restore code for a component.
+!    
+!  The arguments are: 
+!  \begin{description} 
+!  
+!   \item[component]
+!    Component to call ReadRestart routine for.
+!
+!   \item[{[iospec]}]
+!       {\tt IOSpec} object which describes I/O options.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase restore, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompReadRestart(component%compp, iospec, clock, phase, rc)
+
+        end subroutine ESMF_CplCompReadRestart
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_CplCompRun - Call Component run routine with two States
 
 ! !INTERFACE:
@@ -741,7 +785,6 @@
        end subroutine ESMF_CplCompValidate
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_CplCompWriteRestart -- Call the Component's checkpoint routine
 
@@ -785,50 +828,6 @@
 
         end subroutine ESMF_CplCompWriteRestart
 
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompReadRestart -- Call the Component's restore routine
-
-! !INTERFACE:
-     recursive subroutine ESMF_CplCompReadRestart(component, iospec, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CplComp), intent(inout) :: component
-      type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user restore code for a component.
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[component]
-!    Component to call ReadRestart routine for.
-!
-!   \item[{[iospec]}]
-!       {\tt IOSpec} object which describes I/O options.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase restore, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompReadRestart(component%compp, iospec, clock, phase, rc)
-
-        end subroutine ESMF_CplCompReadRestart
 
 
 
