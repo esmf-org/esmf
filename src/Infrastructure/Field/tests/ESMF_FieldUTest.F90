@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.64 2004/07/22 21:29:06 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.65 2004/07/27 22:56:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.64 2004/07/22 21:29:06 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.65 2004/07/27 22:56:30 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -484,6 +484,17 @@
       write(failMsg, *) ""
       write(name, *) "Getting an F90 pointer directly back from a Field"
       call ESMF_Test((associated(f90ptr2)), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Req. xxx - getting the haloWidth back from a field
+      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=3, rc=rc)
+      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+                            ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
+      call ESMF_FieldGet(f3, haloWidth=i, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting haloWidth back from a Field"
+      call ESMF_Test((i .eq. 3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 
