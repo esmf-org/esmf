@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.8 2004/04/28 23:12:14 cdeluca Exp $
+! $Id: user_model1.F90,v 1.9 2004/04/29 17:11:43 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -98,7 +98,7 @@
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(ESMF_MAXGRIDDIM)
-        integer :: npets, de_id
+        integer :: npets, pet_id
         type(ESMF_GridType) :: horzGridtype
         type(ESMF_GridStagger) :: horzStagger
         type(ESMF_CoordSystem) :: horzCoordSystem
@@ -107,12 +107,12 @@
         ! Query component for VM and create a layout with the right breakdown
         call ESMF_GridCompGet(comp, vm=vm, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_VMGet(vm, petCount=npets, rc=status)
+        call ESMF_VMGet(vm, petCount=npets, localPet=pet_id, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
         delayout = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        print *, de_id, "User Comp 1 Init starting"
+        print *, pet_id, "User Comp 1 Init starting"
 
         ! Add a "humidity" field to the export state.
         counts(1) = 60
@@ -152,13 +152,13 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over whole array to our de id
-        idata = real(de_id)
+        idata = real(pet_id)
 
         call ESMF_StateAddData(exportState, humidity, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
      !   call ESMF_StatePrint(exportState, rc=rc)
 
-        print *, de_id, "User Comp 1 Init returning"
+        print *, pet_id, "User Comp 1 Init returning"
    
 10 continue
         rc = status
