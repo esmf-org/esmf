@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.63 2003/07/17 19:51:06 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.64 2003/07/17 22:57:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -204,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.63 2003/07/17 19:51:06 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.64 2003/07/17 22:57:17 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -434,7 +434,7 @@
 ! !IROUTINE: ESMF_GridCreateInternal - Create a new Grid internally
 
 ! !INTERFACE:
-      function ESMF_GridCreateInternal(i_max, j_max, x_min, x_max, &
+      function ESMF_GridCreateInternal(counts, x_min, x_max, &
                                        y_min, y_max, layout, &
                                        horz_gridtype, vert_gridtype, &
                                        horz_stagger, vert_stagger, &
@@ -445,8 +445,7 @@
       type(ESMF_Grid) :: ESMF_GridCreateInternal
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: i_max
-      integer, intent(in) :: j_max
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: counts
       real, intent(in) :: x_min
       real, intent(in) :: x_max
       real, intent(in) :: y_min
@@ -468,10 +467,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[i\_max]}]
-!          Number of grid increments in the i-direction.
-!     \item[{[j\_max]}]
-!          Number of grid increments in the j-direction.
+!     \item[{[counts]}]
+!          Array of number of grid increments in each direction.
 !     \item[{[x\_min]}]
 !          Minimum physical coordinate in the x-direction.
 !     \item[{[x\_max]}]
@@ -526,7 +523,7 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstruct(grid, i_max, j_max, x_min, x_max, y_min, y_max, &
+      call ESMF_GridConstruct(grid, counts, x_min, x_max, y_min, y_max, &
                               layout, &
                               horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
@@ -978,9 +975,8 @@
 ! !IROUTINE: ESMF_GridConstructInternal - Construct the internals of an allocated Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridConstructInternal(grid, i_max, j_max, &
-                                            x_min, x_max, y_min, y_max, &
-                                            layout, &
+      subroutine ESMF_GridConstructInternal(grid, counts, x_min, x_max, &
+                                            y_min, y_max, layout, &
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
@@ -988,8 +984,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
-      integer, intent(in) :: i_max
-      integer, intent(in) :: j_max
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: counts
       real, intent(in) :: x_min
       real, intent(in) :: x_max
       real, intent(in) :: y_min
@@ -1016,10 +1011,8 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid}
-!     \item[{[i\_max]}]
-!          Number of grid increments in the i-direction.
-!     \item[{[j\_max]}]
-!          Number of grid increments in the j-direction.
+!     \item[{[counts]}]
+!          Array of number of grid increments in each direction.
 !     \item[{[x\_min]}]
 !          Minimum physical coordinate in the x-direction.
 !     \item[{[x\_max]}]
@@ -1077,8 +1070,8 @@
       endif
 
 !     Create the DistGrid
-      grid%distgrid = ESMF_DistGridCreate(i_max=i_max, j_max=j_max, &
-                                          layout=layout, rc=status)
+      grid%distgrid = ESMF_DistGridCreate(counts=counts, layout=layout, &
+                                          rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
         return
@@ -1086,7 +1079,7 @@
 
 !     Create main physgrid
       physgrid_name = 'base'
-      call ESMF_GridAddPhysGrid(grid, i_max, j_max, physgrid_id, &
+      call ESMF_GridAddPhysGrid(grid, counts, physgrid_id, &
                                 x_min, x_max, y_min, y_max, &
                                 physgrid_name, status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1240,14 +1233,13 @@
 ! !IROUTINE: ESMF_GridAddPhysGrid - Add a PhysGrid to a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridAddPhysGrid(grid, i_max, j_max, physgrid_id, &
+      subroutine ESMF_GridAddPhysGrid(grid, counts, physgrid_id, &
                                       x_min, x_max, y_min, y_max, &
                                       physgrid_name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
-      integer, intent(in) :: i_max
-      integer, intent(in) :: j_max
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: counts
       integer, intent(out) :: physgrid_id
       real, intent(in), optional :: x_min
       real, intent(in), optional :: x_max
@@ -1263,10 +1255,8 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[{[i\_max]}]
-!          Number of grid increments in the i-direction.
-!     \item[{[j\_max]}]
-!          Number of grid increments in the j-direction.
+!     \item[{[counts]}]
+!          Array of number of grid increments in each direction.
 !     \item [{[physgrid\_id]}]
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
 !     \item[{[x\_min]}]
@@ -1335,8 +1325,8 @@
       endif
       physgrid_id = grid%num_physgrids 
 
-      delta(1) = (x_max - x_min) / real(i_max)
-      delta(2) = (y_max - y_min) / real(j_max)
+      delta(1) = (x_max - x_min) / real(counts(1))
+      delta(2) = (y_max - y_min) / real(counts(2))
       do i = 1,2
         local_min_coord(i) = delta(i) * &
                              real(grid%distgrid%ptr%MyDE%ai_global(i)%min - 1)
@@ -1347,10 +1337,10 @@
       enddo
       global_min_coord(1)=x_min
       global_max_coord(1)=x_max
-      global_nmax(1)=i_max
+      global_nmax(1)=counts(1)
       global_min_coord(2)=y_min
       global_max_coord(2)=y_max
-      global_nmax(2)=j_max
+      global_nmax(2)=counts(2)
       temp_pgrids(physgrid_id)=ESMF_PhysGridCreate(dim_num=2, &
                                       local_min=local_min_coord, &
                                       local_max=local_max_coord, &
