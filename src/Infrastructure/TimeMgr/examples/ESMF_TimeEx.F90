@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.10 2003/07/28 20:10:32 svasquez Exp $
+! $Id: ESMF_TimeEx.F90,v 1.11 2003/08/30 00:05:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeEx.F90,v 1.10 2003/07/28 20:10:32 svasquez Exp $'
+      '$Id: ESMF_TimeEx.F90,v 1.11 2003/08/30 00:05:41 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a calendar
@@ -60,18 +60,18 @@
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time1 to 2/28/2000 2:24:45
-      call ESMF_TimeSet(time1, yr_i4=2000, &
-                        mm_i4=2, dd_i4=28, h_i4=2, m_i4=24, s_i4=45, &
+      call ESMF_TimeSet(time1, yr=2000, &
+                        mm=2, dd=28, h=2, m=24, s=45, &
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize time2 to 3/1/2000 3:26:01
-      call ESMF_TimeSet(time2, yr_i4=2000, &
-                        mm_i4=3, dd_i4=1, h_i4=3, m_i4=26, s_i4=1, &
+      call ESMF_TimeSet(time2, yr=2000, &
+                        mm=3, dd=1, h=3, m=26, s=1, &
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize time interval1 to 2 days, 1800 seconds (0.5 hour)
-      call ESMF_TimeIntervalSet(timeInterval1, d_i4=2, &
-                                s_i4=1800, rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval1, d=2, &
+                                s=1800, rc=rc)
 
       print *, "Time1 = "
       call ESMF_TimePrint(time1, "string", rc)
@@ -79,13 +79,13 @@
       print *, "Time2 = "
       call ESMF_TimePrint(time2, "string", rc)
 
-      call ESMF_TimeIntervalGet(timeInterval1, d_i4=D, s_i4=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, d=D, s=S, rc=rc)
       print *, "Time Interval1 = ", D, " days, ", S, " seconds."
       print *
 
       ! calculate difference between time2 and time1
       timeInterval2 = time2 - time1
-      call ESMF_TimeIntervalGet(timeInterval2, d_i4=D, h_i4=H, m_i4=M, s_i4=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval2, d=D, h=H, m=M, s=S, rc=rc)
       print *, "Difference between time2 ane time1 = ", D, " days, ", H, &
                " hours, ", M, " minutes, ", S, " seconds."
 
@@ -104,27 +104,27 @@
         print *, "time1 is less than time2."
       end if
 
-      call ESMF_TimeGetCalendar(time1, cal, rc)
+      call ESMF_TimeGet(time1, calendar=cal, rc=rc)
       print *, "time1 calendar = "
       call ESMF_CalendarPrint(cal, rc=rc)
 
-      call ESMF_TimeGetDayOfYear(time1, dayOfYear, rc)
+      call ESMF_TimeGet(time1, dayOfYear=dayOfYear, rc=rc)
       print *, "time1 day of the year = ", dayOfYear
 
-      call ESMF_TimeGetDayOfMonth(time1, dayOfMonth, rc)
+      call ESMF_TimeGet(time1, dayOfMonth=dayOfMonth, rc=rc)
       print *, "time1 day of the month = ", dayOfMonth
 
-      call ESMF_TimeGetDayOfWeek(time1, dayOfWeek, rc)
+      call ESMF_TimeGet(time1, dayOfWeek=dayOfWeek, rc=rc)
       print *, "time1 day of the week = ", dayOfWeek
 
-      call ESMF_TimeGetMidMonth(time1, midMonth, rc)
+      call ESMF_TimeGet(time1, midMonth=midMonth, rc=rc)
       print *
       print *, "time1 middle of the month = "
       call ESMF_TimePrint(midMonth, "string", rc)
 
       ! get wall clock time
       call ESMF_TimeSet(wallClock, calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimeGetRealTime(wallClock, rc)
+      call ESMF_TimeSyncToRealTime(wallClock, rc)
       print *, "Wall Clock Time = "
       call ESMF_TimePrint(wallClock, "string", rc)
 

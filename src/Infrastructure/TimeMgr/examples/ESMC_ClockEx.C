@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.4 2003/06/07 00:41:58 eschwab Exp $
+// $Id: ESMC_ClockEx.C,v 1.5 2003/08/30 00:05:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.4 2003/06/07 00:41:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.5 2003/08/30 00:05:41 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -52,33 +52,32 @@
 
    // initialize time interval to 1 hour
    int H = 1;
-   rc = timeStep.ESMC_TimeIntervalSet(0, 0, 0, 0, 0, 0, &H, 0, 0, 0, 0, 0, 0,
-                                      0, 0, 0, 0, 0, 0, 0, 0, 0);
+   rc = timeStep.ESMC_TimeIntervalSet(0, 0, 0, 0, 0, 0, &H);
 
    // initialize start time to 3/27/2003
    int YR = 2003;
    int MM = 3, DD = 27;
    rc = startTime.ESMC_TimeSet(&YR, 0, &MM, &DD, 0, 0, 0, 0, 0, 0, 0, 0, 
                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                               &gregorianCalendar, 0);
+                               &gregorianCalendar);
 
    // initialize stop time to 3/29/2003
    YR = 2003; MM = 3; DD = 29;
    rc = stopTime.ESMC_TimeSet(&YR, 0, &MM, &DD, 0, 0, 0, 0, 0, 0, 0, 0, 
                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                              &gregorianCalendar, 0);
+                              &gregorianCalendar);
 
    // initialize the clock with the above values
-   rc = clock.ESMC_ClockSet(&timeStep, &startTime, &stopTime, 0);
+   rc = clock.ESMC_ClockSetup(&timeStep, &startTime, &stopTime);
 
    // time step from start time to stop time
    while (!clock.ESMC_ClockIsStopTime(&rc)) {
-     rc = clock.ESMC_ClockAdvance(0, 0);
+     rc = clock.ESMC_ClockAdvance();
    }
 
    // get the number of times the clock was advanced
    ESMF_IKIND_I8 advanceCount;
-   rc = clock.ESMC_ClockGetAdvanceCount(&advanceCount);
+   rc = clock.ESMC_ClockGet(0, 0, 0, 0, 0, 0, 0, 0, &advanceCount);
 
    cout << "The clock was advanced " << advanceCount << " times." << endl;
 
