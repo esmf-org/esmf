@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.17 2004/03/11 16:25:26 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.18 2004/03/11 18:06:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -322,7 +322,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.17 2004/03/11 16:25:26 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.18 2004/03/11 18:06:50 nscollins Exp $'
 
 !==============================================================================
 !
@@ -10837,12 +10837,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -10983,12 +10986,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -11129,12 +11135,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -11275,12 +11284,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -11421,12 +11433,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -11567,12 +11582,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -11713,12 +11731,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -11859,12 +11880,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12005,12 +12029,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12151,12 +12178,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12297,12 +12327,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12443,12 +12476,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12589,12 +12625,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12735,12 +12774,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12881,12 +12923,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13027,12 +13072,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13173,12 +13221,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13319,12 +13370,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13465,12 +13519,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13611,12 +13668,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13757,12 +13817,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13903,12 +13966,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -14049,12 +14115,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -14195,12 +14264,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -14341,12 +14413,15 @@ end function
  endif 
  endif 
  
- if (willalloc) then 
+ ! lb always needs a value even if not allocating 
  lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
+ ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 

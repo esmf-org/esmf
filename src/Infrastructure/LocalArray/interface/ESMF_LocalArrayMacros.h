@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.9 2004/03/11 16:25:27 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.10 2004/03/11 18:06:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -745,12 +745,15 @@
            endif @\
         endif @\
  @\
+        ! lb always needs a value even if not allocating @\
+        lb = 1 @\
+        if (present(lbounds)) then @\
+            lb(1:size(lbounds)) = lbounds @\
+        endif @\
+ @\
+        ! ub is only used during allocation @\
         if (willalloc) then @\
-            lb = 1 @\
             ub(1:size(counts)) = counts @\
-            if (present(lbounds)) then @\
-                lb(1:size(lbounds)) = lbounds @\
-            endif @\
             if (present(ubounds)) then @\
                 ub(1:size(ubounds)) = ubounds @\
             endif @\
