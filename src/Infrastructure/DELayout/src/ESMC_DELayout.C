@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.21 2004/06/21 19:38:33 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.22 2004/10/26 21:34:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.21 2004/06/21 19:38:33 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.22 2004/10/26 21:34:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -177,7 +177,7 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
 //EOP
 //-----------------------------------------------------------------------------
   myvm = &vm;                       // set the pointer onto this VM instance
-  int npets =  vm.vmachine_npets(); // get number of PETs
+  int npets =  vm.vmk_npets(); // get number of PETs
   if (nDEs==0){
     // this will be a 1:1 Layout
     ndes = npets;                   // number of DEs to be the same as PETs
@@ -256,13 +256,13 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
     ESMC_DELayoutFindDEtoPET(npets);
   }
   // Fill local part of layout object
-  int mypet = vm.vmachine_mypet();    // get my PET id
+  int mypet = vm.vmk_mypet();    // get my PET id
   ESMC_DELayoutFillLocal(mypet);
   // Now that the layout is pretty much set up it is time to go through once
   // more to set the correct pids to provide a means to identify the virtual
   // memory space in which the DEs operate.
   for (int i=0; i<ndes; i++)
-    des[i].pid = vm.vmachine_pid(des[i].petid);
+    des[i].pid = vm.vmk_pid(des[i].petid);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -288,7 +288,7 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs,
 //EOP
 //-----------------------------------------------------------------------------
   myvm = &vm;                       // set the pointer onto this VM instance
-  int npets =  vm.vmachine_npets(); // get number of PETs
+  int npets =  vm.vmk_npets(); // get number of PETs
   ndim = nndim; // set the number of dimensions
   // this is a N-dim logical rectangular routine
   logRectFlag = ESMF_TRUE;
@@ -342,13 +342,13 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs,
     ESMC_DELayoutFindDEtoPET(npets);
   }
   // Fill local part of layout object
-  int mypet = vm.vmachine_mypet();    // get my PET id
+  int mypet = vm.vmk_mypet();    // get my PET id
   ESMC_DELayoutFillLocal(mypet);
   // Now that the layout is pretty much set up it is time to go through once
   // more to set the correct pids to provide a means to identify the virtual
   // memory space in which the DEs operate.
   for (int i=0; i<ndes; i++)
-    des[i].pid = vm.vmachine_pid(des[i].petid);
+    des[i].pid = vm.vmk_pid(des[i].petid);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -564,7 +564,7 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
 //
 //EOP
 //-----------------------------------------------------------------------------
-  // print info about the vmachine object
+  // print info about the ESMC_DELayout object
   printf("--- ESMC_DELayoutPrint start ---\n");
   printf("myvm = %p\n", myvm);
   printf("ndes = %d\n", ndes);
@@ -612,7 +612,7 @@ int ESMC_DELayout::ESMC_DELayoutValidate(){
 //-----------------------------------------------------------------------------
   int rc = ESMF_SUCCESS;
 
-  // validate info about the vmachine object
+  // validate info about the ESMC_DELayout object
   //printf("--- ESMC_DELayoutValidate start ---\n");
   //printf("myvm = %p\n", myvm);
   //printf("ndes = %d\n", ndes);
@@ -676,7 +676,7 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
 //-----------------------------------------------------------------------------
   // local reference to VM
   ESMC_VM &vm = *myvm;
-  int mypet = vm.vmachine_mypet();
+  int mypet = vm.vmk_mypet();
   int srcpet = des[srcDE].petid;      // PETid where srcDE lives
   int destpet = des[destDE].petid;    // PETid where destDE lives
   if (srcpet==mypet && destpet==mypet){
@@ -695,22 +695,22 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
   }else if (srcpet==mypet){
     // srcDE is on my PET, but destDE is on another PET
     if (oneToOneFlag==ESMF_TRUE){
-      vm.vmachine_send(srcdata, blen, destpet);
+      vm.vmk_send(srcdata, blen, destpet);
     }else{
       int i;
       for (i=0; i<nmydes; i++)
         if (mydes[i]==srcDE) break;
-      vm.vmachine_send(srcdata[i], blen, destpet);
+      vm.vmk_send(srcdata[i], blen, destpet);
     }
   }else if (destpet==mypet){
     // srcDE is on my PET, but destDE is on another PET
     if (oneToOneFlag==ESMF_TRUE){
-      vm.vmachine_recv(destdata, blen, srcpet);
+      vm.vmk_recv(destdata, blen, srcpet);
     }else{
       int i;
       for (i=0; i<nmydes; i++)
         if (mydes[i]==destDE) break;
-      vm.vmachine_recv(destdata[i], blen, srcpet);
+      vm.vmk_recv(destdata[i], blen, srcpet);
     }
   }
   return ESMF_SUCCESS;
@@ -920,7 +920,7 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
   // local reference to VM
   ESMC_VM &vm = *myvm;
   // very crude implementation of a layout wide scatter
-  int mypet = vm.vmachine_mypet();
+  int mypet = vm.vmk_mypet();
   if (des[rootDE].petid==mypet){
     // my PET holds the rootDE
     if (oneToOneFlag==ESMF_TRUE){
@@ -1015,7 +1015,7 @@ int ESMC_DELayout::ESMC_DELayoutGather(
   // local reference to VM
   ESMC_VM &vm = *myvm;
   // very crude implementation of a layout wide gather
-  int mypet = vm.vmachine_mypet();
+  int mypet = vm.vmk_mypet();
   if (des[rootDE].petid==mypet){
     // my PET holds the rootDE -> receive chunks from all other DEs
     if (oneToOneFlag==ESMF_TRUE){
@@ -1113,7 +1113,7 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
   // local reference to VM
   ESMC_VM &vm = *myvm;
   // very crude implementation of a layout wide gather
-  int mypet = vm.vmachine_mypet();
+  int mypet = vm.vmk_mypet();
   if (des[rootDE].petid==mypet){
     // my PET holds the rootDE -> receive chunks from all other DEs
     if (oneToOneFlag==ESMF_TRUE){
@@ -1220,7 +1220,7 @@ int ESMC_DELayout::ESMC_DELayoutAllFullReduce(
   // local reference to VM
   ESMC_VM &vm = *myvm;
   // very crude implementation of a layout wide FullReduce
-  int mypet = vm.vmachine_mypet();
+  int mypet = vm.vmk_mypet();
   void *localresult;
   int local_i4;
   float local_r4;
@@ -1320,7 +1320,7 @@ int ESMC_DELayout::ESMC_DELayoutAllFullReduce(
     vmt = vmR8;
     break;
   }
-  vm.vmachine_allreduce(localresult, result, 1, vmt, (vmOp)op);
+  vm.vmk_allreduce(localresult, result, 1, vmt, (vmOp)op);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.24 2004/09/22 20:28:43 nscollins Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.25 2004/10/26 21:34:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.24 2004/09/22 20:28:43 nscollins Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.25 2004/10/26 21:34:37 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -40,6 +40,48 @@
 !EOP
 !------------------------------------------------------------------------------
 
+
+   recursive subroutine f_esmf_compsetvminfo(comp, vm_info, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       use ESMF_VMMod
+
+       type(ESMF_CWrap)   :: comp
+       type(ESMF_Pointer) :: vm_info
+       integer :: rc
+
+       call ESMF_CompSet(comp%compp, vm_info=vm_info)
+
+   end subroutine f_esmf_compsetvminfo
+
+   recursive subroutine f_esmf_compgetvmparent(comp, vm_parent, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       use ESMF_VMMod
+
+       type(ESMF_CWrap) :: comp
+       type(ESMF_VM)    :: vm_parent
+       integer :: rc
+
+       call ESMF_CompGet(comp%compp, vm_parent=vm_parent)
+
+   end subroutine f_esmf_compgetvmparent
+
+   recursive subroutine f_esmf_compgetvmplan(comp, vmplan, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       use ESMF_VMMod
+
+       type(ESMF_CWrap) :: comp
+       type(ESMF_VMPlan)    :: vmplan
+       integer :: rc
+
+       call ESMF_CompGet(comp%compp, vmplan=vmplan)
+
+   end subroutine f_esmf_compgetvmplan
 
    recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
        use ESMF_BaseTypesMod    ! ESMF base class

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.27 2004/09/17 13:56:47 theurich Exp $
+// $Id: ESMC_Comp_F.C,v 1.28 2004/10/26 21:34:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,12 +113,16 @@ static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     if (status) *status = localrc;
 }
 
+extern "C" {
+static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo);
+}
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_SetServ"
 extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      int localrc, funcrc;
      int *tablerc = new int;
-     void *f90comp = ptr;
+     ESMC_Comp *f90comp = (ESMC_Comp *)ptr;
      ESMC_FTable *tabptr;
      
 
@@ -159,6 +163,18 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
          return;
      }
      if (status) *status = ESMF_SUCCESS;
+
+     // time to startup the VM for this component...     
+     int rcc;
+     ESMC_VM *vm_parent;
+     FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &rcc);
+     ESMC_VMPlan *vmplan_p;
+     FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &rcc);   // obtain vmplan_p
+     ESMC_VMPlan &vmplan = *vmplan_p; // turun it into a reference to VMPlan
+     void *vm_info = vm_parent->vmk_startup(vmplan,
+       ESMC_FTableCallEntryPointVMHop, NULL);
+     FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &rcc);
+     
      return;
   
      // TODO:  see if it is possible to make this simpler and call directly:
@@ -283,8 +299,73 @@ extern "C" {
 }
 
 
-// these interface subroutine names MUST be in lower case
+// VM-enabled CallBack loop     
 extern "C" {
+  // these interface subroutine names MUST be in lower case
+
+     
+static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo){
+  // This routine is the first level that gets instantiated in new VM
+  // The first argument must be of type (void *) and points to a derived
+  // ESMC_VMK class object.
+  
+  // pull out info from cargo
+  char *name = ((cargotype *)cargo)->name;
+  ESMC_FTable &ftable = *((cargotype *)cargo)->ftable;  // reference to ftable
+  
+  // Need to call a special call function which adds the VM to the interface
+  int funcrc, localrc;
+  localrc = ftable.ESMC_FTableCallVFuncPtr(name, (ESMC_VM*)vm, &funcrc);
+  
+  // TODO: Here I need to communicate between all child PET's to find out if
+  // any failed in the call to user supplied component method
+  
+  // put the return code into cargo   
+  ((cargotype *)cargo)->rc = funcrc;    // TODO cargo is shared between threads
+  
+  return NULL;
+}
+
+// call a function through VM
+void FTN(c_esmc_ftablecallentrypointvm)(
+  ESMC_VM **ptr_vm_parent,  // p2 to the parent VM
+  ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
+  void **vm_info,           // p2 to member which holds info returned by enter
+  void **vm_cargo,          // p2 to member which holds cargo
+  ESMC_FTable **ptr,        // p2 to the ftable of this component
+  char *type,               // string holding type of called entry point
+  int *phase,               // phase selector
+  int *status,              // return error code in status
+  int slen) {               // additional F90 argument associated with type
+       
+  // local variables
+  int funcrc;               // function return value
+  int localrc;              // local return value
+  char *name;               // trimmed type string
+
+  newtrim(type, slen, phase, NULL, &name);
+
+  // TODO: two return codes here - one is whether we could find
+  // the right function to call; the other is the actual return code
+  // from the user function itself.
+
+  // Things get a little confusing here with pointers, so I will define
+  // some temp. variables that make matters a little clearer I hope:
+  ESMC_VM &vm_parent = **ptr_vm_parent;     // reference to parent VM
+  ESMC_VMPlan &vmplan = **ptr_vmplan;       // reference to VMPlan
+  ESMC_FTable &ftable = **ptr;              // reference to function table
+         
+  cargotype *cargo = new cargotype;
+  strcpy(cargo->name, name);   // copy trimmed type string
+  cargo->ftable = &ftable;     // reference to function table
+  cargo->rc = ESMF_SUCCESS;    // initialize return code to SUCCESS for all PETs
+  *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
+         
+  vm_parent.vmk_enter(vmplan, *vm_info, (void*)cargo);
+  
+  delete[] name;
+  *status = ESMF_SUCCESS;
+}
 
   void FTN(c_esmc_compwait)(
     ESMC_VM **ptr_vm_parent,  // p2 to the parent VM
@@ -299,8 +380,8 @@ extern "C" {
     ESMC_VM &vm_parent = **ptr_vm_parent;     // reference to parent VM
     ESMC_VMPlan &vmplan = **ptr_vmplan;       // reference to VMPlan
 
-    // Now call the vmachine_exit function which will block respective PETs
-    vm_parent.vmachine_exit(vmplan, *vm_info);
+    // Now call the vmk_exit function which will block respective PETs
+    vm_parent.vmk_exit(vmplan, *vm_info);
     cargotype *cargo = (cargotype *)*vm_cargo;
     *callrc = cargo->rc;
     delete cargo;
@@ -309,3 +390,6 @@ extern "C" {
   }
 
 }
+
+
+

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.109 2004/08/28 13:39:36 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.110 2004/10/26 21:34:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -232,7 +232,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.109 2004/08/28 13:39:36 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.110 2004/10/26 21:34:38 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -565,6 +565,9 @@ end function
         
         ! Deallocate space held for petlist
         deallocate(compp%petlist)
+
+        ! Shut down this component's VM
+        call ESMF_VMShutdown(compp%vm_parent, compp%vmplan, compp%vm_info)
 
         ! destruct the VMPlan
         call ESMF_VMPlanDestruct(compp%vmplan)
@@ -1246,13 +1249,17 @@ end function
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(compp, name, vm, gridcomptype, grid, &
-                              clock, dirPath, configFile, config, ctype, rc)
+      subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, vm_info, &
+                              gridcomptype, grid, clock, dirPath, configFile, &
+                              config, ctype, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(out), optional :: name
       type(ESMF_VM), intent(out), optional :: vm
+      type(ESMF_VM), intent(out), optional :: vm_parent
+      type(ESMF_VMPlan), intent(out), optional :: vmplan
+      type(ESMF_Pointer), intent(out), optional :: vm_info
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
@@ -1306,6 +1313,18 @@ end function
           vm = compp%vm
         endif
 
+        if (present(vm_parent)) then
+          vm_parent = compp%vm_parent
+        endif
+
+        if (present(vmplan)) then
+          vmplan = compp%vmplan
+        endif
+
+        if (present(vm_info)) then
+          vm_info = compp%vm_info
+        endif
+
         if (present(gridcomptype)) then
           gridcomptype = compp%gridcomptype
         endif
@@ -1344,13 +1363,14 @@ end function
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompSet(compp, name, vm, gridcomptype, grid, &
+      subroutine ESMF_CompSet(compp, name, vm, vm_info, gridcomptype, grid, &
                               clock, dirPath, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(in), optional :: name
       type(ESMF_VM), intent(in), optional :: vm
+      type(ESMF_Pointer), intent(in), optional :: vm_info
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
@@ -1397,6 +1417,10 @@ end function
 
         if (present(vm)) then
           compp%vm = vm
+        endif
+
+        if (present(vm_info)) then
+          compp%vm_info = vm_info
         endif
 
         if (present(gridcomptype)) then
