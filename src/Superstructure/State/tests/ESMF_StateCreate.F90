@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.10 2004/06/12 17:17:57 cdeluca Exp $
+! $Id: ESMF_StateCreate.F90,v 1.11 2004/06/15 07:09:21 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -324,7 +324,7 @@
 
     sname = "Coupler Statelist"
     P_IN("ESMF_StateCreate")
-    state5 = ESMF_StateCreate(sname, ESMF_STATE_LIST, rc=rc)  
+    state5 = ESMF_StateCreate(sname, ESMF_STATE_UNSPECIFIED, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Atmosphere Import"

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.62 2004/06/14 13:52:54 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.63 2004/06/15 07:08:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@
       type(ESMF_StateType), parameter :: &
                 ESMF_STATE_IMPORT   = ESMF_StateType(1), &
                 ESMF_STATE_EXPORT   = ESMF_StateType(2), &
-                ESMF_STATE_LIST     = ESMF_StateType(3), &
+                ESMF_STATE_UNSPECIFIED = ESMF_StateType(3), &
                 ESMF_STATE_INVALID  = ESMF_StateType(4)
 
 !------------------------------------------------------------------------------
@@ -232,7 +232,7 @@
                                    ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_STATE, &
                                    ESMF_STATEITEM_NAME
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
-                                   ESMF_STATE_LIST
+                                   ESMF_STATE_UNSPECIFIED
       public ESMF_NeededFlag, ESMF_NEEDED, &
                                    ESMF_NOTNEEDED
       public ESMF_ReadyFlag,  ESMF_READYTOWRITE, &
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.62 2004/06/14 13:52:54 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.63 2004/06/15 07:08:21 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1517,7 +1517,8 @@ end function
 !   \item[{[statetype]}]
 !    Import or Export {\tt ESMF\_State}.  Valid values are 
 !    {\tt ESMF\_STATE\_IMPORT}, {\tt ESMF\_STATE\_EXPORT}, 
-!    or {\tt ESMF\_STATE\_LIST} The default is {\tt ESMF\_STATE\_LIST}.
+!    or {\tt ESMF\_STATE\_UNSPECIFIED} The default 
+!    is {\tt ESMF\_STATE\_UNSPECIFIED}.
 !   \item[{[bundleList]}]
 !    A list (Fortran array) of {\tt ESMF\_Bundle}s.
 !   \item[{[fieldList]}]
@@ -2969,6 +2970,7 @@ end function
        integer :: localrc                          ! local error status
        integer :: i
        character(len=ESMF_MAXSTR) :: msgbuf
+       logical :: dummy
 
        defaultopts = "brief"
        ! Initialize return code; assume failure until success is certain
@@ -2984,6 +2986,7 @@ end function
            !nsc if (ESMF_LogWrite("Uninitialized or already destroyed State", &
            !nsc                   ESMF_LOG_INFO)) return
            print *, "Uninitialized or already destroyed State"
+           rc = ESMF_SUCCESS
            return
        endif
        sp => state%statep
@@ -2994,10 +2997,12 @@ end function
                                 ESMF_CONTEXT, rc)) return
        if (sp%st .eq. ESMF_STATE_IMPORT) write(msgbuf, *) "  Import State"
        if (sp%st .eq. ESMF_STATE_EXPORT) write(msgbuf, *) "  Export State"
-       if (sp%st .eq. ESMF_STATE_LIST)   write(msgbuf, *) "  State List"
+       if (sp%st .eq. ESMF_STATE_UNSPECIFIED) write(msgbuf, *) "  State Type Unspecified"
        if (sp%st .eq. ESMF_STATE_INVALID) then
-           if (ESMF_LogWrite("Uninitialized or already destroyed State", &
-                             ESMF_LOG_INFO)) return
+           dummy=ESMF_LogWrite("Uninitialized or already destroyed State", &
+                                ESMF_LOG_INFO)
+           rc = ESMF_SUCCESS
+           return
        endif
        !nsc if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
        print *, trim(msgbuf)
@@ -3614,7 +3619,7 @@ end function
         if (present(statetype)) then
           stypep%st = statetype
         else
-          stypep%st = ESMF_STATE_LIST
+          stypep%st = ESMF_STATE_UNSPECIFIED
         endif
         stypep%statestatus = ESMF_STATUS_READY
         stypep%alloccount = 0
