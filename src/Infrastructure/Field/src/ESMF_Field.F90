@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.43 2003/07/24 16:18:45 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.44 2003/07/24 20:35:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.43 2003/07/24 16:18:45 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.44 2003/07/24 20:35:02 nscollins Exp $'
 
 !==============================================================================
 !
@@ -998,6 +998,7 @@
       type(ESMF_Array) :: array                   ! New array
       type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: index
       integer, dimension(ESMF_MAXDIM) :: counts
+      integer :: hwidth
       integer :: i, rank
 
       ! Initialize return code   
@@ -1008,7 +1009,14 @@
         rc = ESMF_FAILURE
       endif     
 
-      call ESMF_FieldConstructNoArray(ftype, grid, relloc, haloWidth, &
+      ! make sure hwidth has a value here.
+      if (present(haloWidth)) then
+          hwidth = haloWidth
+      else
+          hwidth = 0
+      endif
+
+      call ESMF_FieldConstructNoArray(ftype, grid, relloc, hwidth, &
                                       datamap, name, iospec, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA"
@@ -1023,10 +1031,10 @@
       endif 
 
       do i=1, rank
-        counts(i) = index(i)%max - index(i)%min + 1
+        counts(i) = index(i)%max - index(i)%min + (2*hwidth) + 1
       enddo
 
-      array = ESMF_ArrayCreate(arrayspec, counts, haloWidth, status) 
+      array = ESMF_ArrayCreate(arrayspec, counts, hwidth, status) 
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNew: Array create"
         return
