@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.18 2003/01/10 20:23:09 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.19 2003/01/10 22:04:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -197,7 +197,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.18 2003/01/10 20:23:09 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.19 2003/01/10 22:04:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -458,9 +458,17 @@
 !EOP
 ! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
+      integer :: status=ESMF_SUCCESS               ! Error status
+      logical :: rcpresent=.FALSE.                 ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      call ESMF_LayoutDestroy(distgrid%ptr%layout, status)
+
       end subroutine ESMF_DistGridDestroy
 
 !------------------------------------------------------------------------------
