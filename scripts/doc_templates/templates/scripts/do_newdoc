@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newdoc,v 1.7 2002/10/14 21:53:32 cdeluca Exp $
+# $Id: do_newdoc,v 1.8 2002/10/23 16:46:02 eschwab Exp $
 #
 #===============================================================================
 # do_newdoc
@@ -99,10 +99,8 @@ endif
       if(!(-r $newdir/class_rest.tex)) cp $DOCT_DIR/class_rest.tex $newdir
       if(!(-r $newdir/class_fparam.tex)) cp $DOCT_DIR/class_fparam.tex $newdir
       if(!(-r $newdir/class_fex.tex)) cp $DOCT_DIR/class_fex.tex $newdir      
-      if(!(-r $newdir/prologue.F)) cp $DOCT_DIR/prologue.F $newdir      
       if(!(-r $newdir/class_ccparam.tex)) cp $DOCT_DIR/class_ccparam.tex $newdir
       if(!(-r $newdir/class_ccex.tex)) cp $DOCT_DIR/class_ccex.tex $newdir      
-      if(!(-r $newdir/prologue.cc)) cp $DOCT_DIR/prologue.cc $newdir      
       if(!(-r $newdir/$1_desrev.tex)) cp $DOCT_DIR/comp_desrev.tex $newdir/$1_desrev.tex
       if(!(-r $newdir/$1_glos.tex)) cp $DOCT_DIR/comp_glos.tex $newdir/$1_glos.tex
       if(!(-r $newdir/$1.bib)) cp $DOCT_DIR/comp.bib $newdir/$1.bib
@@ -119,7 +117,6 @@ endif
       if(!(-r $newdir/class_rest.tex)) cp $DOCT_DIR/class_rest.tex $newdir
       if(!(-r $newdir/class_fparam.tex)) cp $DOCT_DIR/class_fparam.tex $newdir
       if(!(-r $newdir/class_fex.tex)) cp $DOCT_DIR/class_fex.tex $newdir      
-      if(!(-r $newdir/prologue.F)) cp $DOCT_DIR/prologue.F $newdir      
       if(!(-r $newdir/$1_glos.tex)) cp $DOCT_DIR/comp_glos.tex $newdir/$1_glos.tex
       if(!(-r $newdir/$1.bib)) cp $DOCT_DIR/comp.bib $newdir/$1.bib
       breaksw
@@ -160,7 +157,6 @@ endif
       if(!(-r $newdir/class_rest.tex)) cp $DOCT_DIR/class_rest.tex $newdir
       if(!(-r $newdir/class_fparam.tex)) cp $DOCT_DIR/class_fparam.tex $newdir
       if(!(-r $newdir/class_fex.tex)) cp $DOCT_DIR/class_fex.tex $newdir      
-      if(!(-r $newdir/prologue.F)) cp $DOCT_DIR/prologue.F $newdir      
       if(!(-r $newdir/$1_archrev.tex)) cp $DOCT_DIR/comp_archrev.tex $newdir/$1_archrev.tex
       if(!(-r $newdir/$1_desrev.tex)) cp $DOCT_DIR/comp_desrev.tex $newdir/$1_desrev.tex
       if(!(-r $newdir/$1_glos.tex)) cp $DOCT_DIR/comp_glos.tex $newdir/$1_glos.tex
