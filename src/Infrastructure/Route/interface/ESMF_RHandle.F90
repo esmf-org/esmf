@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.11 2003/09/23 17:53:52 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.12 2003/09/25 16:25:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.11 2003/09/23 17:53:52 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.12 2003/09/25 16:25:42 jwolfe Exp $'
 
 !==============================================================================
 
@@ -234,13 +234,12 @@
 ! !IROUTINE: ESMF_TransformValuesGet - Get values from a TransformValues
 
 ! !INTERFACE:
-      subroutine ESMF_TransformValuesGet(tv, numlist, domainlist, &
-                                         srcindex, dstindex, weights, rc)
+      subroutine ESMF_TransformValuesGet(tv, numlist, srcindex, dstindex, &
+                                         weights, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(in) :: tv
       integer, intent(out), optional :: numlist
-      type(ESMF_DomainList), intent(out), optional :: domainlist
       type(ESMF_LocalArray), intent(out), optional :: srcindex
       type(ESMF_LocalArray), intent(out), optional :: dstindex
       type(ESMF_LocalArray), intent(out), optional :: weights
@@ -255,8 +254,6 @@
 !     \item[tv] 
 !          Class to be queried.
 !     \item[{[numlist]}]
-!          Value to be retrieved.         
-!     \item[{[domainlist]}]
 !          Value to be retrieved.         
 !     \item[{[srcindex]}]
 !          Value to be retrieved.         
@@ -275,7 +272,6 @@
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
         integer :: curnumlist
-        type(ESMF_DomainList) :: curdl
         type(ESMF_LocalArray) :: cursrc
         type(ESMF_LocalArray) :: curdst
         type(ESMF_LocalArray) :: curweights
@@ -291,7 +287,7 @@
         endif
 
         ! Call C++  code to get all current values
-        call c_ESMC_TransformValuesGet(tv, curnumlist, curdl, cursrc, &
+        call c_ESMC_TransformValuesGet(tv, curnumlist, cursrc, &
                                        curdst, curweights, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "TransformValues Get error"
@@ -300,10 +296,6 @@
 
         if (present(numlist)) then
             numlist = curnumlist    
-        endif
-
-        if (present(domainlist)) then
-            domainlist = curdl    
         endif
 
         if (present(srcindex)) then
@@ -318,7 +310,6 @@
             weights = curweights    
         endif
 
-
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_TransformValuesGet
@@ -328,13 +319,12 @@
 ! !IROUTINE: ESMF_TransformValuesSet - Set values in a TransformValues
 
 ! !INTERFACE:
-      subroutine ESMF_TransformValuesSet(tv, numlist, domainlist, &
-                                         srcindex, dstindex, weights, rc)
+      subroutine ESMF_TransformValuesSet(tv, numlist, srcindex, dstindex, &
+                                         weights, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(in) :: tv
       integer, intent(in), optional :: numlist
-      type(ESMF_DomainList), intent(in), optional :: domainlist
       type(ESMF_LocalArray), intent(in), optional :: srcindex
       type(ESMF_LocalArray), intent(in), optional :: dstindex
       type(ESMF_LocalArray), intent(in), optional :: weights
@@ -349,8 +339,6 @@
 !     \item[tv] 
 !          Class to be changed.
 !     \item[{[numlist]}]
-!          Value to be set.         
-!     \item[{[domainlist]}]
 !          Value to be set.         
 !     \item[{[srcindex]}]
 !          Value to be set.         
@@ -370,7 +358,6 @@
         logical :: rcpresent               ! did user specify rc?
         logical :: changed
         integer :: curnumlist
-        type(ESMF_DomainList) :: curdl
         type(ESMF_LocalArray) :: cursrc
         type(ESMF_LocalArray) :: curdst
         type(ESMF_LocalArray) :: curweights
@@ -386,18 +373,13 @@
         endif
 
         ! Get old values and only replace the ones specified.
-        call c_ESMC_TransformValuesGet(tv, curnumlist, curdl, cursrc, &
+        call c_ESMC_TransformValuesGet(tv, curnumlist, cursrc, &
                                        curdst, curweights, status)
         changed = .false.
 
         if (present(numlist)) then
           changed = .true.
           curnumlist = numlist    
-        endif
-
-        if (present(domainlist)) then
-          changed = .true.
-          curdl = domainlist    
         endif
 
         if (present(srcindex)) then
@@ -418,7 +400,7 @@
         ! Overwrite the changed values
         if (changed) then
             ! Call C++  code
-            call c_ESMC_TransformValuesSet(tv, curnumlist, curdl, cursrc, &
+            call c_ESMC_TransformValuesSet(tv, curnumlist, cursrc, &
                                            curdst, curweights, status)
             if (status .ne. ESMF_SUCCESS) then  
               print *, "TransformValues Set error"
