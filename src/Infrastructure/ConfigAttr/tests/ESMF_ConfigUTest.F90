@@ -18,14 +18,15 @@
 !
 ! !REVISION HISTORY:
 !
-!       7apr2003 Leonid Zaslavsky Created. 
+!       7apr2003 Leonid Zaslavsky Created.
+!      14apr2003 Leonid Zaslavsky Corrected.
+!      27apr2003 Leonid Zaslavsky Further corrected and debugged.
 !------------------------------------------------------------------------
 
     program ESMF_Config_Test
 
       use  ESMF_DELayoutMod
-      use ESMF_ConfigMod
-!!!      use  ESMF_temp   
+      use ESMF_ConfigMod   
 
       type(ESMF_DELayout) :: layout  
       type (ESMF_Config) cf 
@@ -47,12 +48,16 @@
       logical :: end
       real temp
 
+      fname ='ESMF_Resource_File_Sample.rc'
 
 ! Initialization:
 !----------------
 
       cf = ESMF_ConfigCreate( rc )
+      print *,'ESMF_ConfigCreate completed, rc =', rc
+
       call ESMF_ConfigLoadFile( cf, fname, rc = rc)
+      print *,'ESMF_ConfigLoadFile loaded file ', fname,' rc = ', rc
 
 !!      if ( .NOT. unique ) then
 !!         print *,' File contains multiple copies of a label' 
@@ -63,6 +68,9 @@
 
       nDE = ESMF_ConfigGetInt ( cf, label ='Number_of_DEs:', default=7, &
            rc = rc )
+      print *,'ESMF_ConfigGetInt got nDE =', nDE,' rc =', rc
+
+
       tau = ESMF_ConfigGetFloat ( cf, &
            label ='Relaxation_time_scale_in_days:', rc = rc)
       answer = ESMF_ConfigGetChar ( cf, 'Do_you_want_quality_control:', &
