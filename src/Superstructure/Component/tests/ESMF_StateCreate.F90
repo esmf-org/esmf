@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.4 2003/02/11 23:23:53 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.5 2003/02/11 23:41:42 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -81,7 +81,7 @@
     call ESMF_StateGetData(state2, "Surface pressure", bundle3, rc=rc)
     print *, "State GetData returned", rc
 
-    call ESMF_BundlePrint(bundle3, rc=rc)
+    call ESMF_BundlePrint(bundle3, "", rc=rc)
     print *, "Bundle Print returned", rc
 
     call ESMF_StateDestroy(state2, rc=rc)
