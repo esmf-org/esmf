@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.59 2004/12/07 21:24:24 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.60 2004/12/07 22:31:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.59 2004/12/07 21:24:24 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.60 2004/12/07 22:31:28 nscollins Exp $'
 
 !==============================================================================
 !
@@ -528,16 +528,18 @@
 ! !IROUTINE: ESMF_RoutePrecomputeDomList - Precompute communication paths
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrecomputeDomList(route, rank, myDE, &
-                                             sendDomainList, recvDomainList, &
+      subroutine ESMF_RoutePrecomputeDomList(route, rank, &
+                                             srcDELayout, dstDELayout, &
+                                             srcDomainList, dstDomainList, &
                                              hasSrcData, hasDstData, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route),      intent(in   ) :: route
       integer,               intent(in   ) :: rank
-      integer,               intent(in   ) :: myDE
-      type(ESMF_DomainList), intent(inout) :: sendDomainList
-      type(ESMF_DomainList), intent(inout) :: recvDomainList
+      type(ESMF_DELayout),   intent(in   ) :: srcDELayout
+      type(ESMF_DELayout),   intent(in   ) :: dstDELayout
+      type(ESMF_DomainList), intent(inout) :: srcDomainList
+      type(ESMF_DomainList), intent(inout) :: dstDomainList
       logical,               intent(in   ), optional :: hasSrcData
       logical,               intent(in   ), optional :: hasDstData
       integer,               intent(  out), optional :: rc
@@ -554,16 +556,24 @@
 !          {\tt ESMF\_Route} to associate this information with.
 !     \item[rank]
 !          Data rank.
-!     \item[myDE]
-!          The ID of the local DE.
-!     \item[sendDomainList]
+!     \item[srcDELayout]
+!          The {\tt ESMF\_DELayout} of the source grid.
+!     \item[dstDELayout]
+!          The {\tt ESMF\_DELayout} of the destination grid.
+!     \item[srcDomainList]
 !          An {\tt ESMF\_DomainList} which contains a list of rectangular
 !          regions of a larger rectangular block of memory, to be sent 
 !          during the execution of this route.
-!     \item[recvDomainList]
+!     \item[dstDomainList]
 !          An {\tt ESMF\_DomainList} which contains a list of rectangular
 !          regions of a larger rectangular block of memory, to be received 
 !          during the execution of this route.
+!     \item[{[hasSrcData]}]
+!          Logical which should be false if this DE contains no source data.  
+!          The default is to assume the current DE contains source data.
+!     \item[{[hasDstData]}]
+!          Logical which should be false if this DE contains no destination data.  
+!          The default is to assume the current DE contains destination data.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -594,30 +604,31 @@
 
       ! Translate AxisIndices from F90 to C++
       if (hasDstDataUse) then
-        do i   = 1, recvDomainList%num_domains
-          do j = 1, recvDomainList%domains(i)%rank
-            recvDomainList%domains(i)%ai(j)%min = &
-                           recvDomainList%domains(i)%ai(j)%min - 1
-            recvDomainList%domains(i)%ai(j)%max = &
-                           recvDomainList%domains(i)%ai(j)%max - 1
+        do i   = 1, dstDomainList%num_domains
+          do j = 1, dstDomainList%domains(i)%rank
+            dstDomainList%domains(i)%ai(j)%min = &
+                           dstDomainList%domains(i)%ai(j)%min - 1
+            dstDomainList%domains(i)%ai(j)%max = &
+                           dstDomainList%domains(i)%ai(j)%max - 1
           enddo
         enddo
       endif
 
       if (hasSrcDataUse) then
-        do i   = 1, sendDomainList%num_domains
-          do j = 1, sendDomainList%domains(i)%rank
-            sendDomainList%domains(i)%ai(j)%min = &
-                           sendDomainList%domains(i)%ai(j)%min - 1
-            sendDomainList%domains(i)%ai(j)%max = &
-                           sendDomainList%domains(i)%ai(j)%max - 1
+        do i   = 1, srcDomainList%num_domains
+          do j = 1, srcDomainList%domains(i)%rank
+            srcDomainList%domains(i)%ai(j)%min = &
+                           srcDomainList%domains(i)%ai(j)%min - 1
+            srcDomainList%domains(i)%ai(j)%max = &
+                           srcDomainList%domains(i)%ai(j)%max - 1
           enddo
         enddo
       endif
 
       ! Call C++  code
-      call c_ESMC_RoutePrecomputeDomList(route, rank, myDE, &
-                                         sendDomainList, recvDomainList, &
+      call c_ESMC_RoutePrecomputeDomList(route, rank, &
+                                         srcDELayout, dstDELayout, &
+                                         srcDomainList, dstDomainList, &
                                          hasSrcDataX, hasDstDataX, localrc)
       if (localrc .ne. ESMF_SUCCESS) then  
         print *, "Route PrecomputeDomainList error"
@@ -626,23 +637,23 @@
 
       ! Translate AxisIndices back to F90 from C++
       if (hasDstDataUse) then
-        do i   = 1, recvDomainList%num_domains
-          do j = 1, recvDomainList%domains(i)%rank
-            recvDomainList%domains(i)%ai(j)%min = &
-                           recvDomainList%domains(i)%ai(j)%min + 1
-            recvDomainList%domains(i)%ai(j)%max = &
-                           recvDomainList%domains(i)%ai(j)%max + 1
+        do i   = 1, dstDomainList%num_domains
+          do j = 1, dstDomainList%domains(i)%rank
+            dstDomainList%domains(i)%ai(j)%min = &
+                           dstDomainList%domains(i)%ai(j)%min + 1
+            dstDomainList%domains(i)%ai(j)%max = &
+                           dstDomainList%domains(i)%ai(j)%max + 1
           enddo
         enddo
       endif
 
       if (hasSrcDataUse) then
-        do i   = 1, sendDomainList%num_domains
-          do j = 1, sendDomainList%domains(i)%rank
-            sendDomainList%domains(i)%ai(j)%min = &
-                           sendDomainList%domains(i)%ai(j)%min + 1
-            sendDomainList%domains(i)%ai(j)%max = &
-                           sendDomainList%domains(i)%ai(j)%max + 1
+        do i   = 1, srcDomainList%num_domains
+          do j = 1, srcDomainList%domains(i)%rank
+            srcDomainList%domains(i)%ai(j)%min = &
+                           srcDomainList%domains(i)%ai(j)%min + 1
+            srcDomainList%domains(i)%ai(j)%max = &
+                           srcDomainList%domains(i)%ai(j)%max + 1
           enddo
         enddo
       endif

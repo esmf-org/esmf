@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.31 2004/12/07 21:24:24 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.32 2004/12/07 22:31:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -153,12 +153,14 @@ extern "C" {
        }
 
        void FTN(c_esmc_routeprecomputedomlist)(ESMC_Route **ptr, int *rank, 
-                  int *myDE, ESMC_DomainList *sendDomainList, 
+                  ESMC_DELayout **srcDELayout, ESMC_DELayout **dstDELayout,
+                  ESMC_DomainList *sendDomainList, 
                   ESMC_DomainList *recvDomainList, 
                   ESMC_Logical *hasSrcData, ESMC_Logical *hasDstData,
                   int *status) {
 
-           *status = (*ptr)->ESMC_RoutePrecomputeDomList(*rank, *myDE,
+           *status = (*ptr)->ESMC_RoutePrecomputeDomList(*rank, 
+                             *srcDELayout, *dstDELayout,
                              sendDomainList, recvDomainList,
                              hasSrcData, hasDstData);
        }

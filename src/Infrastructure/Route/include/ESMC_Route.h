@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.43 2004/12/07 22:17:17 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.44 2004/12/07 22:31:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,8 +130,8 @@
                        ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
                        int AI_snd_count, int *global_start_snd,
                        int *global_count_snd, ESMC_DELayout *delayout_snd);
-    int ESMC_RoutePrecomputeDomList(int rank, ESMC_DELayout *srcLayout, 
-                       ESMC_DELayout *dstLayout,
+    int ESMC_RoutePrecomputeDomList(int rank, ESMC_DELayout *srcDELayout, 
+                       ESMC_DELayout *dstDELayout,
                        ESMC_DomainList *srcDomainList,
                        ESMC_DomainList *dstDomainList,
                        ESMC_Logical *hasSrcData, ESMC_Logical *hasDstData);
