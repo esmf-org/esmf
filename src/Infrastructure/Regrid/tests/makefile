@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/05/23 16:12:46 flanigan Exp $
+# $Id: makefile,v 1.9 2003/12/03 23:19:23 jwolfe Exp $
 
 ALL:  tests
 
@@ -15,14 +15,11 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Regrid/tests
 
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMC_RegridUTest \
-		$(ESMC_TESTDIR)/ESMF_RegridUTest 
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_RegridUTest 
 
-TESTS_RUN     = RUN_ESMC_RegridUTest \
-		RUN_ESMF_RegridUTest 
+TESTS_RUN     = RUN_ESMF_RegridUTest 
 
-TESTS_RUN_UNI = RUN_ESMC_RegridUTestUNI \
-		RUN_ESMF_RegridUTestUNI 
+TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI 
 
 TESTS_RM      = 
 
@@ -34,23 +31,6 @@ DIRS =
 CLEANDIRS   = coredir.*
 CLEANFILES  = *.o *.mod *.txt NULL core $(TESTS_BUILD)
 CLOBBERDIRS =
-
-#
-#
-#
-$(ESMF_TESTDIR)/ESMC_RegridUTest: chkopts ESMC_RegridUTest.o
-	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_RegridUTest ESMC_RegridUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMC_RegridTest.o
-
-RUN_ESMC_RegridUTest:
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMC_RegridUTest > $(ESMF_TESTDIR)/ESMC_RegridUTest.stdout
-
-RUN_ESMC_RegridUTestUNI:
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMC_RegridUTest > $(ESMF_TESTDIR)/ESMC_RegridUTest.stdout
-
-ESMC_RegridUTest.rm:
-	echo "ESMC_RegridTest.rm target called here."
-
 
 #
 #
