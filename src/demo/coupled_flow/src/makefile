@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/01/30 04:40:59 nscollins Exp $
+# $Id: makefile,v 1.5 2004/02/05 21:56:13 nscollins Exp $
 
 ALL: demo
 
@@ -22,19 +22,19 @@ DEMO_BUILD    = $(ESMC_TESTDIR)/CoupledFlowApp
 # are to be compiled/created.
 DEMO_OBJ      = FlowArraysMod.o InjectArraysMod.o \
                 FlowSolverMod.o InjectorMod.o CouplerMod.o \
-                CoupledFlowDemo.o CoupledFlowApp.o
+                CoupledFlowApp.o
 
 DEMO_RUN      = RUN_CoupledFlowApp  
 
 DEMO_RM       = ESMF_CoupledFlowApp.rm
 
-FlowSolverMod.o: FlowArraysMod.o
+FlowSolverMod.o:: FlowArraysMod.o
 
-InjectorMod.o: InjectArraysMod.o
+InjectorMod.o:: InjectArraysMod.o
 
-CoupledFlowDemo.o: FlowSolverMod.o InjectorMod.o CouplerMod.o
+CoupledFlowDemo.o:: FlowSolverMod.o InjectorMod.o CouplerMod.o
 
-CoupledFlowApp.o : CoupledFlowDemo.o
+CoupledFlowApp.o:: CoupledFlowDemo.o
 
 include $(ESMF_DIR)/makefile
 

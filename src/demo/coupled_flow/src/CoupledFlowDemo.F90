@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.5 2004/01/30 04:40:59 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.6 2004/02/05 21:56:13 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -23,11 +23,7 @@
     
     ! User Component registration routines
     use   InjectorMod, only : Injector_register
-#ifdef CCA
-    use FlowSolver2Mod, only : FlowSolver_register
-#else
     use FlowSolverMod, only : FlowSolver_register
-#endif
     use    CouplerMod, only : Coupler_register
 
     implicit none
