@@ -1,4 +1,4 @@
-// $Id: ESMC_class.h,v 1.9 2002/10/14 22:16:11 eschwab Exp $
+// $Id: ESMC_class.h,v 1.10 2002/10/16 22:50:08 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 //
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
@@ -20,14 +20,14 @@
  #ifndef ESMC_<Class>_H
  #define ESMC_<Class>_H
 
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
  #include <ESMC_<Comp>.h> 
 
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //BOP
 // !CLASS:  ESMC_<Class> - one line general statement about this class
 //
@@ -39,7 +39,7 @@
 //
 // < insert a paragraph or two explaining what you'll find in this file >
 //
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
@@ -109,7 +109,7 @@
  // < declare private interface methods here >
 //
 //EOP
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
  };   // end class ESMC_<Class>
 

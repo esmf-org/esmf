@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.8 2002/10/14 21:53:59 cdeluca Exp $
+! $Id: ESMF_class.F90,v 1.9 2002/10/16 22:50:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,9 +12,9 @@
 !
 ! (all lines below between the !BOP and !EOP markers will be included in 
 !  the automated document processing.)
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 ! put any constants or macros which apply to the whole component in this 
 !  include file.  anything public or esmf-wide should be up higher at
 !  the top level include files.
@@ -22,7 +22,7 @@
 #include <ESMF_<Comp>.h>
 
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 ! module definition
 
       module ESMF_<Class>Mod
@@ -38,7 +38,7 @@
 !
 !
 !
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 ! !USES:
       use ESMF_Base    ! ESMF base class
 !     use ESMF_XXXMod  < if needed >
@@ -97,11 +97,11 @@
 !EOP
 
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.8 2002/10/14 21:53:59 cdeluca Exp $
-!-------------------------------------------------------------------------
+      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.9 2002/10/16 22:50:07 nscollins Exp $
+!------------------------------------------------------------------------------
 
 ! interface blocks for functions which are going to have a single
 ! name for ease-of-use, but internally will be implemented as separate
@@ -130,19 +130,19 @@
 
 ! < add other interfaces here>
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       contains
 
 !
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !
 ! This section includes all the <Class> routines
 !
 !
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>CreateNew - Create a new <Class>
 
@@ -182,7 +182,7 @@
       end function ESMF_<Class>CreateNew
 
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>Destroy - free a <Class> created with Create
 
@@ -211,7 +211,7 @@
 !
       end subroutine ESMF_<Class>Destroy
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>Construct - fill in an already allocated <Class>
 
@@ -241,7 +241,7 @@
 !
       end subroutine ESMF_<Class>Construct
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>Destruct - release resources associated w/a <Class>
 
@@ -268,7 +268,7 @@
 !
       end subroutine ESMF_<Class>Destruct
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>Init - initialize a <Class> object
 
@@ -298,7 +298,7 @@
 !
       end subroutine ESMF_<Class>Init
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>GetConfig - get configuration information from a <Class>
 
@@ -322,7 +322,7 @@
 !
       end subroutine ESMF_<Class>GetConfig
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>SetConfig - set configuration information for a <Class>
 
@@ -346,7 +346,7 @@
 !
       end subroutine ESMF_<Class>SetConfig
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>Get<Value> - get <Value> for a <Class>
 
@@ -371,7 +371,7 @@
 !
       end subroutine ESMF_<Class>Get<Value>
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>Set<Value> - set <Value> for a <Class>
 
@@ -396,7 +396,7 @@
 !
       end subroutine ESMF_<Class>Set<Value>
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>Validate - internal consistency check for a <Class>
 
@@ -422,7 +422,7 @@
       end function ESMF_<Class>Validate
 
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_<Class>Print - print contents of a <Class>
 
@@ -447,6 +447,6 @@
 !
       end subroutine ESMF_<Class>Print
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       end module ESMF_<Class>Mod
