@@ -1,4 +1,4 @@
-! $Id: ESMF_VectorStorageSTest.F90,v 1.2.2.1 2005/02/09 21:48:40 nscollins Exp $
+! $Id: ESMF_VectorStorageSTest.F90,v 1.2.2.2 2005/03/03 22:25:40 nscollins Exp $
 !
 ! System test VectorStorage
 !  Description on Sourceforge under System Test #XXXXX
@@ -83,6 +83,8 @@
      ! Get the PET count and our PET number
      call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
+
+     miscount = 0
 
      if (npets .eq. 1) then
        print *, "This test must run with > 1 processor"
