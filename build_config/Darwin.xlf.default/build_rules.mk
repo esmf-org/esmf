@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.10 2004/12/17 21:01:39 nscollins Exp $
+#  $Id: build_rules.mk,v 1.11 2005/01/07 23:45:21 nscollins Exp $
 #
 #  Darwin.xlf.default.mk
 #
@@ -146,7 +146,7 @@ ifeq ($(ESMF_COMM),mpich)
 # for now, assume they are built with gcc settings and not around xlc
 C_CC			= mpicc
 C_CCV			= $(C_CC) --version
-CXX_CC			= mpic++
+CXX_CC			= mpicxx
 CXX_CCV			= $(CXX_CC) --version
 C_FC			= mpif90 
 C_FCV			= $(C_FC) --version
