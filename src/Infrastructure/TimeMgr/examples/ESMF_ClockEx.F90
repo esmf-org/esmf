@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.14 2003/04/30 07:49:33 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.15 2003/05/02 22:15:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,17 +23,13 @@
 ! This program shows an example of how to set-up, run, and examine a basic clock
 !-----------------------------------------------------------------------------
 ! !USES:
-      use ESMF_BaseMod
-      use ESMF_TimeIntervalMod
-      use ESMF_TimeMod
-      use ESMF_CalendarMod
-      use ESMF_ClockMod
+      use ESMF_Mod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.14 2003/04/30 07:49:33 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.15 2003/05/02 22:15:04 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -49,7 +45,7 @@
 
       ! temp variables for Get functions
       double precision :: d_
-      integer :: MM, DD, H, M
+      integer :: MM, DD, H, M, yD
       type(ESMF_TimeInterval) :: time_step
       type(ESMF_TimeInterval) :: time_diff
       integer(ESMF_IKIND_I8) :: advanceCount, D, S
@@ -111,13 +107,13 @@
       call ESMF_TimeIntervalGet(time_step, d_=d_, rc=rc)
       print *, "Clock's timestep = ", d_, " floating point days."
 
-      ! get start time's day of the year
+      ! get start time's floating point day of the year
       call ESMF_TimeGetDayOfYear(startTime, d_, rc=rc)
-      print *, "Start time's day of the year = ", d_
+      print *, "Start time's floating point day of the year = ", d_
 
-      ! get stop time's day of the year
-      call ESMF_TimeGetDayOfYear(stopTime, d_, rc=rc)
-      print *, "Stop time's day of the year = ", d_
+      ! get stop time's integer day of the year
+      call ESMF_TimeGetDayOfYear(stopTime, yD, rc=rc)
+      print *, "Stop time's integer day of the year = ", yD
 
       ! get the number of times the clock was advanced
       call ESMF_ClockGetAdvanceCount(clock, advanceCount, rc)
