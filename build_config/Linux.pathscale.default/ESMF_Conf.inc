@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.3 2005/02/03 17:50:07 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.1 2005/02/03 17:50:09 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,12 +11,10 @@ Licensed under the GPL.
 #endif
 
 #if 0
-In the ESMF_Config.F90 source file, if EOL is defined
-as achar(10) (which is the newline character), 
-the file cannot be compiled (it will not parse). 
-If a bug fix for this is released, the next #define can
-be removed.
+in theory absoft supports initializers, but in practice with the number
+of modules we include, it seems to cause problems when enabled.
 #endif
 
-#define ESMF_HAS_ACHAR_BUG 1
+#define ESMF_NO_INITIALIZERS 1
+
 

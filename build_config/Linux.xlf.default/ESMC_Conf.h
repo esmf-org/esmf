@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.1 2004/12/08 21:36:17 jedwards Exp $"
+"$Id: ESMC_Conf.h,v 1.2 2005/02/03 17:50:11 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -16,8 +16,9 @@ Licensed under the GPL.
 #if !defined(INCLUDED_CONF_H)
 #define INCLUDED_CONF_H
 
-#define PARCH_rs6000
-#define ESMF_ARCH_NAME "rs6000"
+#define PARCH_linux
+#define ESMF_ARCH_NAME "linux"
+
 #define ESMC_USE_READ_REAL_TIME
 
 #define ESMC_HAVE_LIMITS_H

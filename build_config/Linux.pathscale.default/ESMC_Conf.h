@@ -1,11 +1,11 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.4 2005/02/03 17:50:07 nscollins Exp $"
+"$Id: ESMC_Conf.h,v 1.1 2005/02/03 17:50:09 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
 #if 0
 Earth System Modeling Framework
-Copyright 2002-2003, University Corporation for Atmospheric Research,
+Copyright 2002-2005, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -16,8 +16,8 @@ Licensed under the GPL.
 #if !defined(INCLUDED_CONF_H)
 #define INCLUDED_CONF_H
 
-#define PARCH_mac_osx
-#define ESMF_ARCH_NAME "mac_osx"
+#define PARCH_linux
+#define ESMF_ARCH_NAME "linux"
 
 #define ESMC_HAVE_LIMITS_H
 #define ESMC_HAVE_PWD_H 
@@ -32,7 +32,7 @@ Licensed under the GPL.
 
 #define ESMC_SUBSTITUTE_CTRL_CHARS 1
 
-#define FTN(func) func
+#define FTN(func) func##_
 
 #define ESMC_POINTER_SIZE 4
 #undef ESMC_HAVE_OMP_THREADS 
@@ -66,9 +66,8 @@ Licensed under the GPL.
 #endif
 #if S64
 #define ESMF_IS_64BIT_MACHINE 1
-#define ESMF_F90_PTR_BASE_SIZE xx 
+#define ESMF_F90_PTR_BASE_SIZE xx
 #define ESMF_F90_PTR_PLUS_RANK xx
 #endif
-
 
 #endif

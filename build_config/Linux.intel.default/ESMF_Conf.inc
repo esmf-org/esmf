@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.4 2005/01/14 04:39:43 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.5 2005/02/03 17:50:09 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,12 +12,12 @@ Licensed under the GPL.
 
 
 #if 0
-the PGI compiler won't allow initializers.  in the past when we have had
-problems with internal compiler errors, it has often helped if we turn off
-the derived type initializers.  at the moment the intel compiler seems to be
-ok with setting them, so i have removed the following #define, but if the
-problems resurface, try putting this back in.  ditto for the sequence bug
-described below.
+Strict F90 compilers won't allow initializers.  Also, in the past when we 
+have had problems with internal compiler errors, it has often helped if we 
+turn off the derived type initializers.  At the moment the intel compiler 
+seems to be ok with setting them, so i have removed the following #define, 
+but if the problems resurface, try putting this back in.  
+ditto for the sequence bug described below.
 #endif
 
 #if 0
@@ -36,14 +36,5 @@ reactivated.
 #if 0
 -#-define ESMF_SEQUENCE_BUG 1
 #endif
-
-#if 0
-this build is not running the field exclusive system test;
-it is hanging in the state reconcile call.  to prevent the entire
-build from freezing on this one test, simply error out until we
-find and fix the problem.
-#endif
-
-#define ESMF_FieldExcl_AUTO_FAIL 1
 
 

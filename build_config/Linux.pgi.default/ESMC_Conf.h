@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.5 2005/01/25 17:13:25 nscollins Exp $"
+"$Id: ESMC_Conf.h,v 1.6 2005/02/03 17:50:10 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -56,8 +56,6 @@ Licensed under the GPL.
 #endif
 
 #define ESMC_HAVE_SYS_UTSNAME_H
-
-#define ESMF_NO_INITIALIZERS 1
 
 #if 0
 PGI method for marking F90 "not present" optional arguments uses
