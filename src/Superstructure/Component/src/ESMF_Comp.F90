@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.35 2003/04/02 16:35:55 flanigan Exp $
+! $Id: ESMF_Comp.F90,v 1.36 2003/04/08 23:07:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
+      use ESMF_MachineMod
       !use ESMF_ConfigMod
       use ESMF_DELayoutMod
       use ESMF_ClockMod
@@ -117,8 +118,8 @@
          type(ESMF_Pointer) :: this        ! C++ ftable pointer - MUST BE FIRST
          type(ESMF_Base) :: base                  ! base class
          type(ESMF_CompType) :: ctype             ! component type
-         type(ESMF_DELayout) :: layout            ! component layout
          type(ESMF_Config) :: config              ! configuration object
+         type(ESMF_DELayout) :: layout            ! component layout
          logical :: multiphaseinit                ! multiple init, run, final
          integer :: initphasecount                ! max inits, for error check
          logical :: multiphaserun                 ! multiple init, run, final
@@ -165,6 +166,11 @@
       end type
 
 !------------------------------------------------------------------------------
+!     ! private global - has framework init routine been run?
+
+        logical :: frameworknotinit = .true. 
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_Config   ! TODO: move to its own file 
       public ESMF_AppComp, ESMF_GridComp, ESMF_CplComp
@@ -174,6 +180,8 @@
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
+
+      public ESMF_FrameworkInitialize, ESMF_FrameworkFinalize
 
       public ESMF_AppCompCreate, ESMF_GridCompCreate, ESMF_CplCompCreate
       public ESMF_AppCompDestroy, ESMF_GridCompDestroy, ESMF_CplCompDestroy
@@ -200,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.35 2003/04/02 16:35:55 flanigan Exp $'
+      '$Id: ESMF_Comp.F90,v 1.36 2003/04/08 23:07:53 nscollins Exp $'
 
 !==============================================================================
 !
@@ -403,6 +411,9 @@
         endif
         nullify(component%compp)
  
+        ! When destroying App component, finalize framework
+        call ESMF_FrameworkFinalize(status)
+
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -577,13 +588,13 @@
           return
         endif
    
-        if (present(name)) print *, "name present"
-        if (present(layout)) print *, "layout present"
-        if (present(mtype)) print *, "mtype present"
-        if (present(grid)) print *, "grid present"
-        if (present(config)) print *, "config present"
-        if (present(configfile)) print *, "configfile present"
-        if (present(rc)) print *, "rc present"
+        !!if (present(name)) print *, "name present"
+        !!if (present(layout)) print *, "layout present"
+        !!if (present(mtype)) print *, "mtype present"
+        !!if (present(grid)) print *, "grid present"
+        !!if (present(config)) print *, "config present"
+        !!if (present(configfile)) print *, "configfile present"
+        !!if (present(rc)) print *, "rc present"
 
         if (present(configfile)) then
           !lconfig = ESMF_CreateConfig(configfile, rc=status)
@@ -966,9 +977,20 @@
 ! !REQUIREMENTS:
 
 
-        ! local vars
-        integer :: status                                ! local error status
-        logical :: rcpresent                             ! did user specify rc?
+        ! Local vars
+        integer :: status                            ! local error status
+        logical :: rcpresent                         ! did user specify rc?
+
+        ! Has the Full ESMF Framework initialization been run?
+        ! This only happens once per process at the start.
+        if (frameworknotinit) then
+          call ESMF_FrameworkInitialize(status)
+          if (status .ne. ESMF_SUCCESS) then
+            if (present(rc)) rc = ESMF_FAILURE
+            return
+          endif
+          frameworknotinit = .false.    ! only called one time ever.
+        endif
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -1194,14 +1216,15 @@
 !EOP
 ! !REQUIREMENTS:
 
-        if (present(statelist)) print *, "statelist present"
-        if (present(clock)) print *, "clock present"
-        if (present(phase)) print *, "phase present"
-        if (present(rc)) print *, "rc present"
+        !!if (present(statelist)) print *, "statelist present"
+        !!if (present(clock)) print *, "clock present"
+        !!if (present(phase)) print *, "phase present"
+        !!if (present(rc)) print *, "rc present"
 
-        if (present(statelist)) print *, "statelength =", size(statelist)
+        !!if (present(statelist)) print *, "statelength =", size(statelist)
 
-        print *, "calling CompInitialize now, from cplinit"
+        !!print *, "calling CompInitialize now, from cplinit"
+
         call ESMF_CompInitialize(component%compp, ESMF_CPLCOMPTYPE, &
                           statelist=statelist, clock=clock, phase=phase, &
                           ccomp=component, rc=rc)
@@ -2464,5 +2487,88 @@
        end subroutine ESMF_CompPrint
 
 
-       end module ESMF_CompMod
+
+!------------------------------------------------------------------------------
+! 
+! ESMF Framework wide initialization routine. Called exactly once per
+!  execution by each participating process.
+!
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_FrameworkInitialize - Initialize the ESMF Framework.
+!
+! !INTERFACE:
+      subroutine ESMF_FrameworkInitialize(rc)
+!
+! !ARGUMENTS:
+      integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+!     Initialize the ESMF framework.
+!
+!     \begin{description}
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+
+      logical :: rcpresent                          ! Return code present   
+
+!     !Initialize return code
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Initialize the machine model, the comms, etc.
+      call ESMF_MachineInitialize()
+
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FrameworkInitialize
+
+!------------------------------------------------------------------------------
+! !IROUTINE:  ESMF_FrameworkFinalize - Clean up and close the ESMF Framework.
+!
+! !INTERFACE:
+      subroutine ESMF_FrameworkFinalize(rc)
+!
+! !ARGUMENTS:
+      integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+!     Finalize the ESMF Framework.
+!
+!     \begin{description}
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+
+      logical :: rcpresent                          ! Return code present   
+
+!     !Initialize return code
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! currently nothing to do, but here is where MPI could be shut down,
+      !  files closed, etc.
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FrameworkFinalize
+
+end module ESMF_CompMod
 
