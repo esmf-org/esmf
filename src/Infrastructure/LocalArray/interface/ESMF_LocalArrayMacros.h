@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.15 2004/03/17 18:35:27 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.16 2004/04/20 22:51:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
 #define LocalArrayCreateByMTPtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_LocalArrayCreate - Create an ESMF array from an unallocated Fortran pointer @\
 ! @\
 ! !INTERFACE: @\
@@ -80,7 +80,7 @@
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
  @\
 
 
@@ -151,7 +151,7 @@
 #define LocalArrayCreateByFlPtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_LocalArrayCreate - make an ESMF array from an allocated Fortran pointer @\
 ! @\
 ! !INTERFACE: @\
@@ -186,7 +186,7 @@
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
  @\
 
 #define LocalArrayCreateByFlPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -447,7 +447,7 @@
 #define LocalArrayGetDataDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
-!BOP @\
+!BOPI @\
 ! !INTERFACE: @\
 !     subroutine ESMF_LocalArrayGetData<rank><type><kind>(array, fptr, docopy, rc) @\
 ! @\
@@ -474,7 +474,7 @@
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
  @\
 
 #define LocalArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \

@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.8 2004/02/11 19:51:24 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.9 2004/04/20 22:51:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,13 +24,13 @@
 #include "ESMC_Base.h"
 #include "ESMC_LocalArray.h"
 //------------------------------------------------------------------------------
-//BOP
+//BOPI
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which allows F90 to
 // call C++ for supporting {\tt ESMC\_LocalArray} class functions.
 //
-//EOP
+//EOPI
 
 // the interface subroutine names MUST be in lower case
 extern "C" {

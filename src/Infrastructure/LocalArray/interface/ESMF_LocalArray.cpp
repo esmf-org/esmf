@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.5 2004/03/24 14:54:37 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.6 2004/04/20 22:51:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 #include "ESMF_LocalAllocMacros.h"
 ^include "ESMF.h"
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !MODULE: ESMF_LocalArrayMod - Manage data arrays uniformly between F90 and C++     
 !
 ! !DESCRIPTION:
@@ -166,13 +166,13 @@ AllTypesMacro(LocalArrayType)
  
       public ESMF_LocalArrayValidate
       public ESMF_LocalArrayPrint
-!EOP
+!EOPI
       public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.5 2004/03/24 14:54:37 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.6 2004/04/20 22:51:53 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -180,7 +180,7 @@ AllTypesMacro(LocalArrayType)
 !
 !==============================================================================
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayCreate -- Generic interface to create an LocalArray
 
 ! !INTERFACE:
@@ -193,7 +193,7 @@ AllTypesMacro(LocalArrayType)
         module procedure ESMF_LocalArrayCreateBySpec  ! specify ArraySpec
    
         ! Plus interfaces for each T/K/R expanded by macro.
-!EOP
+!EOPI
         
        ! < interfaces for each T/K/R >
 InterfaceMacro(LocalArrCreateByMTPtr)
@@ -202,7 +202,7 @@ InterfaceMacro(LocalArrCreateByMTPtr)
 InterfaceMacro(LocalArrCreateByFlPtr)
 
 
-!BOP
+!BOPI
 ! !DESCRIPTION: 
 ! This interface provides a single (heavily overloaded) entry point for 
 !  the various types of {\tt ESMF\_LocalArrayCreate} functions.   
@@ -247,11 +247,11 @@ InterfaceMacro(LocalArrCreateByFlPtr)
 !  subsequent {\tt ESMF\_LocalArray} Create calls.
 !  
 end interface
-!EOP 
+!EOPI
 
 !------------------------------------------------------------------------------
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayGetData -- Get an F90 pointer to the data contents
 
 ! !INTERFACE:
@@ -266,7 +266,7 @@ InterfaceMacro(LocalArrayGetData)
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_LocalArrayGetData} functions.   
 !  
-!EOP 
+!EOPI
 end interface
 
 !------------------------------------------------------------------------------
@@ -306,7 +306,7 @@ end function
 ! This section includes the LocalArray Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayCreate -- Create an array with explicit arguments
 
 ! !INTERFACE:
@@ -357,7 +357,7 @@ end function
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
         integer, dimension(1) :: countlist
         integer, dimension(1) :: lb, ub
@@ -375,7 +375,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayCreate -- Create an LocalArray specifying all options.
 
 ! !INTERFACE:
@@ -422,7 +422,7 @@ end function
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
         ! Local vars
         type (ESMF_LocalArray) :: array     ! new C++ LocalArray
@@ -470,7 +470,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayCreate -- Create a new LocalArray from an ArraySpec
 
 ! !INTERFACE:
@@ -506,7 +506,7 @@ end function
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
-!EOP
+!EOPI
 
         ! Local vars
         type (ESMF_LocalArray) :: array     ! new C++ LocalArray
@@ -886,7 +886,7 @@ DeclarationMacro(LocalArrayDeallocate)
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       subroutine ESMF_LocalArrayDestroy(array, rc)
 !
@@ -912,7 +912,7 @@ DeclarationMacro(LocalArrayDeallocate)
 !   Otherwise we would need to make a nested call back into F90 from C++ to do
 !   the deallocate() during the object delete.
 !
-!EOP
+!EOPI
 
         ! Local vars
         integer :: status                   ! local error status
@@ -975,7 +975,7 @@ DeclarationMacro(LocalArrayDeallocate)
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArraySetInfo
 !
 ! !INTERFACE:
@@ -995,7 +995,7 @@ DeclarationMacro(LocalArrayDeallocate)
 !      array object to be inconsistent with the F90 pointer, then bad things
 !      will happen.
 !
-!EOP
+!EOPI
 
         integer :: status
 
@@ -1008,7 +1008,7 @@ DeclarationMacro(LocalArrayDeallocate)
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayGetInfo
 !
 ! !INTERFACE:
@@ -1027,7 +1027,7 @@ DeclarationMacro(LocalArrayDeallocate)
 !      Get back information about counts and upper and lower bounds
 !      from an already created array object.
 !
-!EOP
+!EOPI
 
         integer :: status
 
@@ -1075,7 +1075,7 @@ DeclarationMacro(LocalArrayDeallocate)
 ! Query for information from the array.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       subroutine ESMF_LocalArrayGet(array, rank, type, kind, counts, &
                                     lbounds, ubounds, base, name, rc)
@@ -1098,7 +1098,7 @@ DeclarationMacro(LocalArrayDeallocate)
 !      where the caller only wants a single value, specify the argument by name.
 !      All the arguments after the array input are optional to facilitate this.
 !
-!EOP
+!EOPI
 
       integer :: status     ! Error status
       logical :: rcpresent  ! Return code present
@@ -1164,7 +1164,7 @@ DeclarationMacro(LocalArrayDeallocate)
       end subroutine ESMF_LocalArrayGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayGetName - Retrieve the name of a LocalArray
 !
 ! !INTERFACE:
@@ -1182,7 +1182,7 @@ DeclarationMacro(LocalArrayDeallocate)
 !      created without specifying a name, the framework will have assigned it
 !      a unique one.
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1818,7 +1818,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! This section is I/O for LocalArrays
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       subroutine ESMF_LocalArrayWriteRestart(array, iospec, rc)
 !
@@ -1833,7 +1833,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
 !
-!EOP
+!EOPI
 
 !
 ! TODO: code goes here
@@ -1844,7 +1844,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       function ESMF_LocalArrayReadRestart(name, iospec, rc)
 !
@@ -1861,7 +1861,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !      Used to reinitialize all data associated with a {\tt ESMF\_LocalArray}
 !      from the last call to WriteRestart.
 !
-!EOP
+!EOPI
 
         type (ESMF_LocalArray) :: a 
 
@@ -1880,7 +1880,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       subroutine ESMF_LocalArrayWrite(array, iospec, filename, rc)
 !
@@ -1896,7 +1896,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !      options specified in the IOSpec derived type. 
 !
 !
-!EOP
+!EOPI
 
        character (len=16) :: defaultopts      ! default write options 
        character (len=16) :: defaultfile      ! default filename
@@ -1932,7 +1932,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       function ESMF_LocalArrayRead(name, iospec, rc)
 !
@@ -1948,7 +1948,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !      Used to read data from persistent storage in a variety of formats.
 !
 !
-!EOP
+!EOPI
 
         type (ESMF_LocalArray) :: a
 
@@ -1967,7 +1967,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayValidate - Check validity of LocalArray object
 !
 ! !INTERFACE:
@@ -1982,7 +1982,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! !DESCRIPTION:
 !      Routine to print information about a {\tt ESMF\_LocalArray}.
 !
-!EOP
+!EOPI
 
        character (len=6) :: defaultopts      ! default print options 
        integer :: status                     ! local error status
@@ -2022,7 +2022,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayPrint - Print contents of an LocalArray object
 !
 ! !INTERFACE:
@@ -2037,7 +2037,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! !DESCRIPTION:
 !      Routine to print information about a {\tt ESMF\_LocalArray}.
 !
-!EOP
+!EOPI
 
        character (len=6) :: defaultopts      ! default print options 
        integer :: status                     ! local error status
