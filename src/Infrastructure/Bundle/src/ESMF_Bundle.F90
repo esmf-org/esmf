@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.4 2003/10/22 15:37:47 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.5 2003/10/22 15:54:03 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1096,7 +1096,7 @@ end function
 
 !------------------------------------------------------------------------------
 !TODO: decide how to document this.  it's internal only.
-! !!IBOP
+!BOPI
 ! !IROUTINE: ESMF_BundleTypeAddFieldList - Add a list of Fields to a Bundle.
 !
 ! !INTERFACE:
@@ -1129,7 +1129,7 @@ end function
 !
 !     \end{description}
 ! 
-! !!IEOP
+!EOPI
       
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1345,7 +1345,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-! !!IBOP
+!BOPI
 ! !IROUTINE: ESMF_BundleTypeRepackData - Pack Field data into a single Array
 !
 ! !INTERFACE:
@@ -1372,7 +1372,7 @@ end function
 !
 !     \end{description}
 !
-! !!IEOP
+!EOPI
 ! !REQUIREMENTS:  FLD2.1.1, FLD2.2, FLD2.5.9
 
 
