@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.5 2004/02/11 21:54:55 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.6 2004/03/04 16:31:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -790,7 +790,8 @@
         offsets = 0 @\
  @\
         wrap%##mtypekind##mrank##Dptr => newp @\
-        call c_ESMC_LocalArraySetInternal(array, wrap, newp, counts, & @\
+        call c_ESMC_LocalArraySetInternal(array, wrap, & @\
+                                 ESMF_DATA_ADDRESS(newp), counts, & @\
                                  lbounds, ubounds, offsets, & @\
                                  ESMF_TRUE, do_dealloc, status) @\
  @\
