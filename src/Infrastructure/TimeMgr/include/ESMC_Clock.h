@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.40 2005/02/23 05:21:51 theurich Exp $
+// $Id: ESMC_Clock.h,v 1.41 2005/04/02 00:12:24 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -161,10 +161,10 @@
     // TMG3.4.1  after increment, for each alarm,
     //           calls ESMC_Alarm::CheckActive()
 
-    bool ESMC_ClockIsStopTime(int *rc) const;             // TMG3.5.6
+    bool ESMC_ClockIsStopTime(int *rc=0) const;           // TMG3.5.6
     int  ESMC_ClockStopTimeEnable(ESMC_Time *stopTime=0); // WRF
     int  ESMC_ClockStopTimeDisable(void);                 // WRF
-    bool ESMC_ClockIsStopTimeEnabled(int *rc) const;      // WRF
+    bool ESMC_ClockIsStopTimeEnabled(int *rc=0) const;    // WRF
 
     int ESMC_ClockGetNextTime(ESMC_Time         *nextTime,
                               ESMC_TimeInterval *timeStep=0);
