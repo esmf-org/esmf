@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.11 2004/02/10 20:44:10 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.12 2004/02/10 23:16:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.11 2004/02/10 20:44:10 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.12 2004/02/10 23:16:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -214,19 +214,21 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_SetF90Name - set the object name from an F90 caller
+// !IROUTINE:  c_ESMC_SetName - set the object name from an F90 caller
 //
 // !INTERFACE:
-      void FTN(c_esmc_setf90name)(
+      void FTN(c_esmc_setname)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
+      char *classname,          // in - F90, non-null terminated string
+      char *objname,            // in - F90, non-null terminated string
       int *rc,                  // out - return code
-      int nlen) {               // hidden/in - max strlen count for name
+      int clen,                 // hidden/in - max strlen count for classname
+      int olen) {               // hidden/in - max strlen count for objname
 // 
 // !DESCRIPTION:
 //     set the name from an F90 caller.
@@ -235,18 +237,40 @@ extern "C" {
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
+  char *oname = NULL;
+  char *cname = NULL;
 
   if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
+ 
+  if (classname && (clen > 0)) {
+      // copy and convert F90 string to null terminated one
+      cname = ESMC_F90toCstring(classname, clen);
+      if (!cname) {
+          *rc = ESMF_FAILURE;
+          return;
+      }
+  }
 
-  (*rc) = (*base)->ESMC_BaseSetF90Name(name, nlen);
+  if (objname && (olen > 0)) {
+      // copy and convert F90 string to null terminated one
+      oname = ESMC_F90toCstring(objname, olen);
+      if (!oname) {
+          *rc = ESMF_FAILURE;
+          return;
+      }
+  }
 
-  if (rc) *rc = ESMF_SUCCESS;
+  (*rc) = (*base)->ESMC_BaseSetName(oname, cname);
+
+  delete [] oname;
+  delete [] cname; 
+
   return;
 
-}  // end c_ESMC_SetF90Name
+}  // end c_ESMC_SetName
 
 
 //-----------------------------------------------------------------------------
@@ -284,42 +308,6 @@ extern "C" {
 
 }  // end c_ESMC_GetF90ClassName
 
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_SetF90ClassName - set the object name from an F90 caller
-//
-// !INTERFACE:
-      void FTN(c_esmc_setf90classname)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *classname,          // in - F90, non-null terminated string
-      int *rc,                  // out - return code
-      int nlen) {               // hidden/in - max strlen count for name
-// 
-// !DESCRIPTION:
-//     set the name from an F90 caller.
-//
-//EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
-
-  int i, status;
-
-  if (!base) {
-    *rc = ESMF_FAILURE;
-    return;
-  }
-
-  (*rc) = (*base)->ESMC_BaseSetF90ClassName(classname, nlen);
-
-  if (rc) *rc = ESMF_SUCCESS;
-  return;
-
-}  // end c_ESMC_SetF90ClassName
 
 
 //-----------------------------------------------------------------------------

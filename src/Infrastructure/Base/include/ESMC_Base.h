@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.43 2004/02/06 21:43:23 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.44 2004/02/10 23:16:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -281,9 +281,8 @@ extern "C" {
 
   void FTN(c_esmc_baseprint)(ESMC_Base **base, char *opts, int *rc, int nlen);
   void FTN(c_esmc_getf90name)(ESMC_Base **base, char *name, int *rc, int nlen);
-  void FTN(c_esmc_setf90name)(ESMC_Base **base, char *name, int *rc, int nlen);
   void FTN(c_esmc_getf90classname)(ESMC_Base **base, char *name, int *rc, int nlen);
-  void FTN(c_esmc_setf90classname)(ESMC_Base **base, char *name, int *rc, int nlen);
+  void FTN(c_esmc_setname)(ESMC_Base **base, char *classname, char *objname, int *rc, int clen, int olen);
 
   void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, ESMC_DataType *dt, int *count, void *value, int *rc, int nlen);
   void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, int *rc, int nlen, int vlen);

@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.78 2004/02/09 21:21:41 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.79 2004/02/10 23:16:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -381,7 +381,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.78 2004/02/09 21:21:41 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.79 2004/02/10 23:16:06 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -729,19 +729,9 @@ end function
       endif
       ! end cheat
 
-      if (present(namespace)) then
-          call c_ESMC_SetF90ClassName(base, namespace, status)
-      else
-          call c_ESMC_SetF90ClassName(base, "global", status)
-      endif
+      call c_ESMC_SetName(base, namespace, name, status)
 
-      if (present(name)) then
-          call c_ESMC_SetF90Name(base, name, status)
-      else
-          call c_ESMC_SetF90Name(base, "default", status)
-      endif
-
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (rcpresent) rc = status
 
       end subroutine ESMF_SetName
 
