@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.129 2004/12/28 07:19:22 theurich Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.130 2004/12/30 07:07:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.129 2004/12/28 07:19:22 theurich Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.130 2004/12/30 07:07:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5200,12 +5200,19 @@
       index = 1
       if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
         index = 3
-        if (present(AICountPerDE)) then
-          call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(horzDistIdUse)%ptr, &
-                                            horzAI, AICountPerDE, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+        if (grid%ptr%gridStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+          if (present(AICountPerDE)) then
+            call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+                                              horzAI, AICountPerDE, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+          else
+            dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                          "AICountPerDE not present", &
+                                          ESMF_CONTEXT, rc)
+            return
+          endif
         else
           call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(horzDistIdUse)%ptr, &
                                             horzAI, total, rc=localrc)
