@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.2 2003/04/02 16:34:01 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.3 2003/04/11 21:10:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,12 +31,13 @@
       use ESMF_TestMod     ! test methods
       use ESMF_GridMod  ! the class to test
       use ESMF_IOMod
+      use ESMF_Mod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.2 2003/04/02 16:34:01 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.3 2003/04/11 21:10:11 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -70,8 +71,10 @@
       integer :: horz_coord_system, vert_coord_system
       integer :: status
       integer :: phy_grid_id
+      integer :: halo_width
       real :: x_min, x_max, y_min, y_max
       type(ESMF_Grid) :: grid
+      type(ESMF_DELayout) :: layout
 
 
 
@@ -190,17 +193,19 @@
       y_min = 0.0
       y_max = 12.0
       name = "test grid 1"
+      halo_width = 1
 
       grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                             nDE_i=nDE_i, nDE_j=nDE_j, &
+                             x_min=x_min, x_max=x_max, &
+			     y_min=y_min, y_max=y_max, &
+		             layout=layout, &
                              horz_gridtype=horz_gridtype, &
                              vert_gridtype=vert_gridtype, &
                              horz_stagger=horz_stagger, &
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
+			     halo_width=halo_width, &
                              name=name, rc=status)
 
       write(failMsg, *) ""
@@ -219,6 +224,7 @@
 
 
       call ESMF_GridAddPhysGrid(grid, i_max=i_max, j_max=j_max, &
+			     physgrid_id=phy_grid_id, &
                              y_min=y_min, y_max=y_max, &
 			     name, rc=status)
 
