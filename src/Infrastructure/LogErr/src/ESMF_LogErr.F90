@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.35 2004/03/24 09:15:38 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.1 2004/03/24 17:01:33 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,

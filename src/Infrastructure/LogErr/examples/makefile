@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2004/03/19 07:16:52 cpboulder Exp $ 
+# $Id: makefile,v 1.14 2004/03/24 17:01:32 cpboulder Exp $ 
 
 ALL: examples
 
@@ -58,8 +58,7 @@ LOCDIR	  = src/Infrastructure/LogErr/examples
 # depend on this naming convention being followed.
 #
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_TestLog1Ex #\
-                 #$(ESMF_EXDIR)/ESMF_TestLog2Ex 
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_TestLog1Ex 
 
 #
 # List the example run targets in EXAMPLES_RUN and 
@@ -67,12 +66,10 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_TestLog1Ex #\
 # in this makefile.
 #
 
-EXAMPLES_RUN = run_ESMF_TestLog1Ex #\
-               #run_ESMF_TestLog2Ex 
+EXAMPLES_RUN = run_ESMF_TestLog1Ex 
 
 
-UNI_EXAMPLES_RUN = run_ESMF_TestLog1Ex_uni #\
-                  # run_ESMF_TestLog2Ex_uni 
+UNI_EXAMPLES_RUN = run_ESMF_TestLog1Ex_uni 
 
 
 include $(ESMF_DIR)/makefile
@@ -82,71 +79,6 @@ DIRS	  =
 CLEANDIRS   = coredir.*
 CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
 CLOBBERDIRS =
-
-#
-#  ESMC_TestErr1Ex
-#
-#run_ESMC_TestErr1Ex:
-#	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_TestErr1Ex > $(ESMF_EXDIR)/ESMC_TestErr1Ex.stdout
-
-
-#run_ESMC_TestErr1Ex_uni:
-#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_TestErr1Ex > $(ESMF_EXDIR)/ESMC_TestErr1Ex_uni.stdout
-
-
-#
-#  ESMC_TestErr2Ex
-#
-#run_ESMC_TestErr2Ex:
-#	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_TestErr2Ex > $(ESMF_EXDIR)/ESMC_TestErr2Ex.stdout
-
-
-#run_ESMC_TestErr2Ex_uni:
-#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_TestErr2Ex > $(ESMF_EXDIR)/ESMC_TestErr2Ex_uni.stdout
-
-
-#
-#  ESMC_TestErr3Ex
-#
-#run_ESMC_TestErr3Ex:
-#	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_TestErr3Ex > $(ESMF_EXDIR)/ESMC_TestErr3Ex.stdout
-
-
-#run_ESMC_TestErr3Ex_uni:
-#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_TestErr3Ex > $(ESMF_EXDIR)/ESMC_TestErr3Ex_uni.stdout
-
-
-#
-#  ESMF_TestErr1Ex
-#
-#run_ESMF_TestErr1Ex:
-#	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_TestErr1Ex > $(ESMF_EXDIR)/ESMF_TestErr1Ex.stdout
-
-
-#run_ESMF_TestErr1Ex_uni:
-#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TestErr1Ex > $(ESMF_EXDIR)/ESMF_TestErr1Ex_uni.stdout
-
-
-#
-#  ESMF_TestErr2Ex
-#
-#run_ESMF_TestErr2Ex:
-#	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_TestErr2Ex > $(ESMF_EXDIR)/ESMF_TestErr2Ex.stdout
-
-
-#run_ESMF_TestErr2Ex_uni:
-#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TestErr2Ex > $(ESMF_EXDIR)/ESMF_TestErr2Ex_uni.stdout
-
-
-#
-#  ESMF_TestErr3Ex
-#
-#run_ESMF_TestErr3Ex:
-#	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_TestErr3Ex > $(ESMF_EXDIR)/ESMF_TestErr3Ex.stdout
-
-
-#run_ESMF_TestErr3Ex_uni:
-#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TestErr3Ex > $(ESMF_EXDIR)/ESMF_TestErr3Ex_uni.stdout
 
 
 #
@@ -160,15 +92,6 @@ run_ESMF_TestLog1Ex_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TestLog1Ex > $(ESMF_EXDIR)/ESMF_TestLog1Ex_uni.stdout
 
 
-#
-#  ESMF_TestLog2Ex
-#
-#run_ESMF_TestLog2Ex:
-#	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_TestLog2Ex > $(ESMF_EXDIR)/ESMF_TestLog2Ex.stdout
-
-
-#run_ESMF_TestLog2Ex_uni:
-#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TestLog2Ex > $(ESMF_EXDIR)/ESMF_TestLog2Ex_uni.stdout
 
 
 
