@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.95 2004/05/26 11:28:47 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.96 2004/06/04 17:34:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.95 2004/05/26 11:28:47 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.96 2004/06/04 17:34:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -821,7 +821,7 @@ static int maxroutes = 10;
            if(mydeid == theirdeid)
 	      rcvbuf = srcbufstart;
 	   else
-              delayout->ESMC_DELayoutSendRecv((void **)srcbufstart, NULL,
+              delayout->ESMC_DELayoutExchange((void **)srcbufstart, NULL,
                 (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes, 
                  mydeid, theirdeid, ESMF_TRUE);
 
