@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.24 2004/06/05 00:17:33 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.25 2004/06/11 00:25:22 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,8 +32,6 @@
 
       ! local variables
       integer :: d, h, m, s
-      double precision :: quotient, divisor, multiplier 
-      type(ESMF_TimeInterval) :: remainder
 
       ! return code
       integer:: rc
@@ -53,234 +51,102 @@
 !BOE
 !\subsubsection{Time Interval Initialization}
 
-! This example shows how to initialize two {\tt ESMF\_Time}s.
+! This example shows how to initialize two {\tt ESMF\_TimeIntervals}.
 !EOE
 
 !BOC
-      ! initialize time interval1 to 1 day, 1800 seconds (0.5 hour)
+      ! initialize time interval1 to 1 day
       call ESMF_TimeIntervalSet(timeinterval1, d=1, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      ! initialize time interval2 to 4 days, 5400 seconds (1.5 hours)
-      call ESMF_TimeIntervalSet(timeinterval2, d=4, s=5400, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      call ESMF_TimeIntervalGet(timeinterval1, s=s, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      print *, "Time Interval1 = ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeinterval1, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      call ESMF_TimeIntervalGet(timeinterval2, d=d, h=h, m=m, rc=rc)
+      ! initialize time interval2 to 4 days, 1 hour, 30 minutes, 10 seconds
+      call ESMF_TimeIntervalSet(timeinterval2, d=4, h=1, m=30, s=10, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      print *, "Time Interval2 = ", d, " days, ", h, " hours, ", m, " minutes."
       call ESMF_TimeIntervalPrint(timeinterval2, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOE
+!\subsubsection{Time Interval Conversion}
+
+! This example shows how to convert {\tt ESMF\_TimeIntervals} into 
+! different units.
+!EOE
+
 !BOC
-      ! difference
+      call ESMF_TimeIntervalGet(timeinterval1, s=s, rc=rc)
+      print *, "Time Interval1 = ", s, " seconds."
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      call ESMF_TimeIntervalGet(timeinterval2, h=h, m=m, s=s, rc=rc)
+      print *, "Time Interval2 = ", h, " hours, ", m, " minutes, ", &
+                                    s, " seconds."
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOE
+!\subsubsection{Time Interval Difference}
+
+! This example shows how to calculate the difference between two 
+! {\tt ESMF\_TimeIntervals}. 
+!EOE
+
+!BOC
+      ! difference between two time intervals
       timeinterval3 = timeinterval2 - timeinterval1
-      call ESMF_TimeIntervalGet(timeinterval3, d=d, s=s, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
       print *, "Difference between TimeInterval2 and TimeInterval1 = ", &
-               d, " days, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
+               d, " days, ", h, " hours, ", m, " minutes, ", s, " seconds."
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOC
-      ! sum
-      timeinterval3 = timeinterval2 + timeinterval1
-      call ESMF_TimeIntervalGet(timeinterval3, d=d, s=s, rc=rc)
-!EOC
+!BOE
+!\subsubsection{Time Interval Multiplication}
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+! This example shows how to multiply an {\tt ESMF\_TimeInterval}. 
+!EOE
 
 !BOC
-      print *, "Sum of TimeInterval1 and TimeInterval2 = ", d, " days, ", &
-               s, " seconds."
-      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      ! divide
-      quotient = timeinterval2 / timeinterval1
-      print *, "TimeInterval2 divided by TimeInterval1 = ", quotient
-
-      ! modulo
-      remainder = MOD(timeinterval2, timeinterval1)
-      print *, "TimeInterval2 modulo TimeInterval1 = " 
-      call ESMF_TimeIntervalPrint(remainder, "string", rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      ! divide by integer
-      timeinterval3 = timeinterval2 / 2
+      ! multiply time interval by an integer
+      timeinterval3 = timeinterval2 * 3
       call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      print *, "TimeInterval2 divided by 2 = ", d, " days, ", h, " hours, ", &
-               m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      ! divide by double precision real
-      divisor = 1.5
-      timeinterval3 = timeinterval2 / divisor
-      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      print *, "TimeInterval2 divided by 1.5 = ", d, " days, ", h, " hours, ", &
-               m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      ! multiply by integer
-      timeinterval3 = timeinterval1 * 3
-      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      print *, "TimeInterval1 multiplied by 3 = ", d, " days, ", h, &
+      print *, "TimeInterval2 multiplied by 3 = ", d, " days, ", h, &
                " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOC
-      ! multiply by double precision real; use commutative variant of
-      !   (*) operator
-      multiplier = 2.25
-      timeinterval3 = multiplier * timeinterval1
-      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
-!EOC
+!BOE
+!\subsubsection{Time Interval Comparison}
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      print *, "TimeInterval1 multiplied by 2.25 = ", d, " days, ", h, &
-               " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      ! change time interval 1 to negative value
-      timeinterval1 = timeinterval1 * (-1)
-      call ESMF_TimeIntervalGet(timeinterval1, d=d, h=h, m=m, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      print *, "Time Interval1 changed to ", d, " days, ", h, " hours, ", &
-               m, " minutes."
-      call ESMF_TimeIntervalPrint(timeinterval1, "string", rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      ! absolute value
-      timeinterval3 = ESMF_TimeIntervalAbsValue(timeinterval1)
-      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      print *, "Absolute value of TimeInterval1 = ", d, " days, ", h, &
-               " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      ! negative absolute value of time interval 1
-      timeinterval3 = ESMF_TimeIntervalNegAbsValue(timeinterval1)
-      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      print *, "Negative absolute value of TimeInterval1 = ", d, " days, ", h, &
-               " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
-
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      ! negative absolute value of time interval 2
-      timeinterval3 = ESMF_TimeIntervalNegAbsValue(timeinterval2)
-      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-      print *, "Negative absolute value of TimeInterval2 = ", d, " days, ", h, &
-               " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+! This example shows how to compare two {\tt ESMF\_TimeIntervals}. 
+!EOE
 
 !BOC
       ! comparison
-      if (timeinterval2 > timeinterval1) then
-        print *, "TimeInterval2 is larger than TimeInterval1"
-      else if (timeinterval2 .lt. timeinterval1) then
-        print *, "TimeInterval2 is smaller than TimeInterval1"
-      else if (timeinterval2 == timeinterval1) then
-        print *, "TimeInterval2 is equal to TimeInterval1"
+      if (timeinterval1 < timeinterval2) then
+        print *, "TimeInterval1 is smaller than TimeInterval2"
+      else 
+        print *, "TimeInterval1 is larger than or equal to TimeInterval2"
       end if
 
       ! finalize ESMF framework
