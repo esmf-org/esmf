@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.25 2004/01/16 00:38:22 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.26 2004/01/29 04:45:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.25 2004/01/16 00:38:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.26 2004/01/29 04:45:31 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -85,7 +85,9 @@ int ESMC_Alarm::count=0;
     catch (...) {
       // TODO:  call ESMF log/err handler
       cerr << "ESMC_AlarmCreate() memory allocation failed\n";
-      *rc = ESMF_FAILURE;
+      if (rc != ESMC_NULL_POINTER) {
+        *rc = ESMF_FAILURE;
+      }
       return(ESMC_NULL_POINTER);
     }
     
@@ -99,7 +101,9 @@ int ESMC_Alarm::count=0;
         alarm->name[nameLen] = '\0';  // null terminate
       } else {
         // TODO: error, delete and return null alarm?
-        *rc = ESMF_FAILURE;
+        if (rc != ESMC_NULL_POINTER) {
+          *rc = ESMF_FAILURE;
+        }
         return(alarm);
       }
     } else {
@@ -824,7 +828,7 @@ int ESMC_Alarm::count=0;
 //
 // !DESCRIPTION:
 //      Restore information about an {\tt ESMC\_Alarm}.
-//      For persistence/checkpointing
+//      For persistence/checkpointing.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n

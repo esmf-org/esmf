@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.40 2004/01/15 20:59:05 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.41 2004/01/29 04:45:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.40 2004/01/15 20:59:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.41 2004/01/29 04:45:31 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -80,7 +80,9 @@ int ESMC_Clock::count=0;
     catch (...) {
       // TODO:  call ESMF log/err handler
       cerr << "ESMC_ClockCreate() memory allocation failed\n";
-      *rc = ESMF_FAILURE;
+      if (rc != ESMC_NULL_POINTER) {
+        *rc = ESMF_FAILURE;
+      }
       return(ESMC_NULL_POINTER);
     }
 
@@ -91,7 +93,9 @@ int ESMC_Clock::count=0;
         clock->name[nameLen] = '\0';  // null terminate
       } else {
         // TODO: error, delete and return null clock?
-        *rc = ESMF_FAILURE;
+        if (rc != ESMC_NULL_POINTER) {
+          *rc = ESMF_FAILURE;
+        }
         return(clock);
       }
     } else {
@@ -791,7 +795,7 @@ int ESMC_Clock::count=0;
 //
 // !DESCRIPTION:
 //      Restore information about an {\tt ESMC\_Clock}.
-//      For persistence/checkpointing
+//      For persistence/checkpointing.
 // 
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
