@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.72 2003/08/01 20:03:38 dneckels Exp $
+! $Id: ESMF_Grid.F90,v 1.73 2003/08/04 17:20:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
                                             ! necessary to support
                                             ! staggering, vertical
                                             ! grids, background grids
-        logical, dimension(ESMF_MAXGRIDDIM) :: periodic
+        type (ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
                                             ! logical identifier to indicate
                                             ! periodic boundary conditions in
                                             ! each direction
@@ -207,7 +207,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.72 2003/08/01 20:03:38 dneckels Exp $'
+      '$Id: ESMF_Grid.F90,v 1.73 2003/08/04 17:20:14 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -460,8 +460,7 @@
                                        horz_gridtype, vert_gridtype, &
                                        horz_stagger, vert_stagger, &
                                        horz_coord_system, vert_coord_system, &
-                                       periodic, & !!! ALT addition
-                                       name, rc)
+                                       periodic, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateInternal
@@ -479,7 +478,7 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
-      logical, intent(in), optional :: periodic(:) !!! ALT addition
+      type (ESMF_Logical), intent(in), optional :: periodic(:)
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -553,8 +552,7 @@
                               horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
-                              periodic, & !!! ALT addition
-                              name, status)
+                              periodic, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
         return
@@ -1120,8 +1118,7 @@
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
-                                            periodic, & !!! ALT addition
-                                            name, rc)
+                                            periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -1137,7 +1134,7 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
-      logical, intent(in), optional :: periodic(:)  !!! ALT addition
+      type (ESMF_Logical), intent(in), optional :: periodic(:)
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -1459,7 +1456,7 @@
       grid%coord_order = ESMF_CoordOrder_Unknown
       grid%num_physgrids = 0
       do i=1,ESMF_MAXGRIDDIM
-        grid%periodic(i) = .FALSE.
+        grid%periodic(i) = ESMF_TF_FALSE
       enddo
       nullify(grid%physgrids)
 
@@ -2507,7 +2504,7 @@
       real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_max_coords
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_cell_dim
       integer, intent(out), dimension(:,:), optional :: global_start
-      logical, intent(out), optional :: periodic(:) !!! ALT addition
+      type (ESMF_Logical), intent(out), optional :: periodic(:)
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -2611,7 +2608,6 @@
         endif
       endif
 
-!!! ALT addition
       ! get the periodicity
       if (present(periodic)) then
          do i=1,ESMF_MAXGRIDDIM
@@ -2643,7 +2639,7 @@
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
       integer, intent(in), optional :: coord_order
-      logical, intent(in), optional :: periodic(:) !!! ALT addition
+      type (ESMF_Logical), intent(in), optional :: periodic(:)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2695,14 +2691,12 @@
       if(present(horz_coord_system)) grid%horz_coord_system = horz_coord_system
       if(present(vert_coord_system)) grid%vert_coord_system = vert_coord_system
       if(present(coord_order)) grid%coord_order = coord_order
-!!! ALT addition
       if (present(periodic)) then
          do i=1,ESMF_MAXGRIDDIM
             if (i > size(periodic)) exit
             grid%periodic(i) = periodic(i)
          enddo
       endif
-
 
       if(rcpresent) rc = ESMF_SUCCESS
 
