@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.29 2005/01/14 03:38:13 theurich Exp $
+// $Id: ESMC_VM.C,v 1.30 2005/01/28 22:11:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.29 2005/01/14 03:38:13 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.30 2005/01/28 22:11:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -84,6 +84,8 @@ static ESMC_Logical ESMC_VMKeyCompare(char *vmKey1, char *vmKey2){
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMStartup()"
 //BOP
 // !IROUTINE:  ESMC_VMStartup
 //
@@ -97,7 +99,8 @@ void *ESMC_VM::ESMC_VMStartup(
 //
   class ESMC_VMPlan *vmp,         // plan for this child VM
   void *(fctp)(void *, void *),   // fnction pointer to 1st stage callback
-  void *cargo){                   // pointer to cargo structure for in/out data
+  void *cargo,                    // pointer to cargo structure for in/out data
+  int *rc){                       // error return code
 //
 // !DESCRIPTION:
 //    Startup a new child VM according to plan.
@@ -105,8 +108,12 @@ void *ESMC_VM::ESMC_VMStartup(
 //EOP
 //-----------------------------------------------------------------------------
   // startup the VM
-  void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, NULL);
-  
+  void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, NULL, rc);
+  if (*rc) *rc=ESMF_FAILURE;  // translate error into ESMF_FAILURE
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(*rc, " - VMKernel could not "
+    "create additional pthreads! Please check stack limit.", rc))
+    return NULL;  // bail out if pthreads could not be created
+
   // now take care of book keeping for ESMF...
   int i, pid, m, n;
   int localrc;
@@ -134,9 +141,7 @@ void *ESMC_VM::ESMC_VMStartup(
         break;
       }
     }
-
     ++matchArray_count;         // done
-    
   }
   
   // return pointer to info structure
