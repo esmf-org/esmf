@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.38 2004/01/30 19:59:15 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.39 2004/01/31 03:07:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -73,6 +73,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_AlarmCreate
+      public ESMF_AlarmCreateCopy
       public ESMF_AlarmDestroy
       public ESMF_AlarmSet
       public ESMF_AlarmGet
@@ -108,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.38 2004/01/30 19:59:15 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.39 2004/01/31 03:07:19 eschwab Exp $'
 
 !==============================================================================
 !
@@ -236,6 +237,39 @@
                               sticky, rc)
 
       end function ESMF_AlarmCreate
+
+!------------------------------------------------------------------------------
+!BOP    
+! !IROUTINE: ESMF_AlarmCreateCopy - Create a copy of an Alarm
+
+! !INTERFACE:
+      function ESMF_AlarmCreateCopy(alarm, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Alarm) :: ESMF_AlarmCreateCopy
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in)            :: alarm
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Creates a copy of a given {\tt ESMF\_Alarm}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!        The {\tt ESMF\_Alarm} to copy.
+!     \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!     invoke C to C++ entry point to copy alarm
+      call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, rc)
+
+      end function ESMF_AlarmCreateCopy
 
 !------------------------------------------------------------------------------
 !BOP

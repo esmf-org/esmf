@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.27 2004/01/30 19:59:05 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.28 2004/01/31 03:07:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.27 2004/01/30 19:59:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.28 2004/01/31 03:07:19 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -175,6 +175,51 @@ int ESMC_Alarm::count=0;
     return(alarm);
 
  } // end ESMC_AlarmCreate
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmCreateCopy - Creates a copy of an alarm
+//
+// !INTERFACE:
+      ESMC_Alarm *ESMC_AlarmCreateCopy(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Alarm
+//
+// !ARGUMENTS:
+      ESMC_Alarm *alarm,  // in  - alarm to copy
+      int        *rc) {   // out - return code 
+
+// !DESCRIPTION:
+//      Creates a new copy of the given alarm.
+//
+//EOP
+// !REQUIREMENTS:
+
+    int returnCode;
+    ESMC_Alarm *alarmCopy;
+
+    try {
+      // allocate new alarm and pass given alarm to copy constructor.
+      alarmCopy = new ESMC_Alarm(*alarm);
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_AlarmCreateCopy() memory allocation failed\n";
+      if (rc != ESMC_NULL_POINTER) {
+        *rc = ESMF_FAILURE;
+      }
+      return(ESMC_NULL_POINTER);
+    }
+
+    returnCode = alarmCopy->ESMC_AlarmValidate();
+    if (rc != ESMC_NULL_POINTER) {
+      *rc = returnCode;
+    }
+
+    return(alarmCopy);     
+
+ } // end ESMC_AlarmCreateCopy  
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1083,6 +1128,29 @@ int ESMC_Alarm::count=0;
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, &s);
+
+ } // end ESMC_Alarm
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Alarm - native C++ copy constructor
+//
+// !INTERFACE:
+      ESMC_Alarm::ESMC_Alarm(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+      const ESMC_Alarm &alarm) {  // in - alarm to copy
+//
+// !DESCRIPTION:
+//      Copies members of given alarm.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    *this = alarm;
 
  } // end ESMC_Alarm
 

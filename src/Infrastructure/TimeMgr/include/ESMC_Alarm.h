@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.21 2004/01/30 19:59:05 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.22 2004/01/31 03:07:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -223,6 +223,7 @@ class ESMC_Alarm {
 
     // native C++ constructors/destructors
     ESMC_Alarm(void);
+    ESMC_Alarm(const ESMC_Alarm &alarm);
     ~ESMC_Alarm(void);
 
  // < declare the rest of the public interface methods here >
@@ -232,6 +233,9 @@ class ESMC_Alarm {
                                  ESMC_Time*, ESMC_TimeInterval*, ESMC_Time*, 
                                  ESMC_TimeInterval*, int*, ESMC_Time*, bool*,
                                  bool*, int*);
+
+    // friend function to copy an alarm
+    friend ESMC_Alarm *ESMC_AlarmCreateCopy(ESMC_Alarm*, int*);
 
     // friend to de-allocate alarm
     friend int ESMC_AlarmDestroy(ESMC_Alarm *);
@@ -269,6 +273,9 @@ class ESMC_Alarm {
                                  bool*              enabled=0,
                                  bool*              sticky=0,
                                  int*               rc=0);
+
+    // friend function to copy a alarm
+    ESMC_Alarm *ESMC_AlarmCreateCopy(ESMC_Alarm *alarm, int *rc=0);
 
     // friend to de-allocate alarm
     int ESMC_AlarmDestroy(ESMC_Alarm *alarm);

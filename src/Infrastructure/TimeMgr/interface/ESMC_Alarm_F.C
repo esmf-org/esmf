@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.18 2004/01/30 19:59:05 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.19 2004/01/31 03:07:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,6 +66,16 @@ extern "C" {
                                            ESMC_NULL_POINTER : sticky),
                  ((void*) status       == (void*)ESMC_BAD_POINTER ?
                                            ESMC_NULL_POINTER : status) );
+       }
+
+       void FTN(c_esmc_alarmcreatecopy)(ESMC_Alarm **ptr,
+                                        ESMC_Alarm **alarm,
+                                        int *status) {
+          *ptr = ESMC_AlarmCreateCopy(
+                            *alarm,   // required
+
+                    ((void*) status == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : status) );
        }
 
        void FTN(c_esmc_alarmdestroy)(ESMC_Alarm **ptr, int *status) {
