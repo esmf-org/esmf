@@ -1,4 +1,4 @@
-% $Id: newDELayout_refdoc.ctex,v 1.1 2004/03/23 16:37:15 theurich Exp $ 
+% $Id: newDELayout_refdoc.ctex,v 1.2 2004/04/26 19:39:46 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,23 +57,17 @@
 
 
 %============================================================================
-% Usage
+% DELayout Class
 %============================================================================
 
-\section{Usage}
+\section{DELayout Class}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{newDELayout_usage}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/newDELayout/doc/newDELayout_usage}
 #endif
-\newpage
-
-
-%============================================================================
-% User API
-%============================================================================
-
-\section{User API}
+\subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_newDELayout_fapi}
 #elif defined(CONSTITUENT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.26 2004/04/26 13:38:05 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.27 2004/04/26 19:39:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMF.h"
 
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_newDELayoutMod
 !
 
@@ -160,13 +160,13 @@
       public ESMF_newDELayoutAllGlobalReduce
       
       public ESMF_newDELayoutWait
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.26 2004/04/26 13:38:05 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.27 2004/04/26 19:39:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1190,7 +1190,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutCopyCopyGeneral - 
+! !IROUTINE: ESMF_newDELayoutCopyCopy - 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutCopyCopy()
@@ -1889,7 +1889,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutCopyCopyI4 - 
+! !IROUTINE: ESMF_newDELayoutCopyCopy - 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutCopyCopy()
@@ -1977,7 +1977,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutCopyCopyR4 - 
+! !IROUTINE: ESMF_newDELayoutCopyCopy - 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutCopyCopy()
@@ -2065,7 +2065,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutCopyCopyR4 - 
+! !IROUTINE: ESMF_newDELayoutCopyCopy - 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutCopyCopy()
