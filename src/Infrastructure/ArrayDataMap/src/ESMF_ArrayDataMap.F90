@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.22 2004/06/21 22:52:00 cdeluca Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.22.2.1 2004/07/22 20:32:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -211,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.22 2004/06/21 22:52:00 cdeluca Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.22.2.1 2004/07/22 20:32:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -432,7 +432,7 @@ end function
 !EOP
 
         integer :: i, j
-        character(len=ESMF_MAXSTR) :: msgbuf
+        !character(len=ESMF_MAXSTR) :: msgbuf
 
       !jw  write(msgbuf,*)  "ArrayDataMap print:"
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
