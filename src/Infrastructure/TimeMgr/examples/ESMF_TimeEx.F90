@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.28 2004/06/03 17:18:59 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.29 2004/06/03 23:46:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -51,11 +51,11 @@
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOP
+!BOE
 !\subsubsection{Time Initialization}
 
 ! This example shows how to initialize two {\tt ESMF\_Time}s.
-!EOP
+!EOE
 
 !BOC
       ! initialize time1 to 2/28/2000 2:24:45
@@ -85,12 +85,12 @@
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOP
+!BOE
 !\subsubsection{Difference Between Two Times}
 
 ! This example shows how to determine the difference between two
 ! {\tt ESMF\_Time}s.
-!EOP
+!EOE
 
 !BOC
       ! calculate difference between time2 and time1
@@ -110,11 +110,11 @@
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-     if (finalrc.EQ.ESMF_SUCCESS) then
-        print *, "PASS: ESMF_TimeEx.F90"
-     else
-        print *, "FAIL: ESMF_TimeEx.F90"
-     end if
+      if (finalrc.EQ.ESMF_SUCCESS) then
+         print *, "PASS: ESMF_TimeEx.F90"
+      else
+         print *, "FAIL: ESMF_TimeEx.F90"
+      end if
 
 !BOC
       end program ESMF_TimeEx
