@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.51 2003/10/06 21:09:58 uid87920 Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.52 2003/10/07 16:42:08 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.51 2003/10/06 21:09:58 uid87920 Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.52 2003/10/07 16:42:08 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -104,22 +104,14 @@
 
       ! initialize clock time intervals and instants
 
+      ! ----------------------------------------------------------------------------
+
       !NEX_UTest
       ! Test Setting Time Step
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Time Interval Initialization Test"
       call ESMF_TimeIntervalSet(timeStep, h=1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! ----------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Test getting the timestep
-      write(name, *) "Get Time Interval Test"
-      call ESMF_TimeIntervalGet(timeStep, h=H, rc=rc)
-      write(failMsg, *) " Did not return ESMF_SUCCESS and/or timeStep not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(H.eq.1), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -439,15 +431,6 @@
       ! ----------------------------------------------------------------------------
  
       !NEX_UTest
-      write(failMsg, *) " Returned ESMF_FAILURE"
-      write(name, *) "Clock Initialization Test"
-      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! ----------------------------------------------------------------------------
- 
-      !NEX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
       write(failMsg, *) " Returned ESMF_FAILURE"
@@ -471,6 +454,15 @@
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Start Time Print Test"
       call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+ 
+      !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Clock Initialization Test"
+      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -503,23 +495,33 @@
 
 
       ! ----------------------------------------------------------------------------
-
-
+ 
       !NEX_UTest
-      ! time step from start time to stop time
-      do while (.not.ESMF_ClockIsStopTime(clock, rc))
-        call ESMF_ClockAdvance(clock, rc=rc)
-        call ESMF_ClockPrint(clock, rc=rc)
-      end do
-
-      bool = ESMF_ClockIsStopTime(clock, rc)
-      print *, "bool = ", bool
-      write(failMsg, *) " Did not return ESMF_SUCCESS and/or bool not True"
-      write(name, *) "Clock Advance Test"
-      call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(bool)), &
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Clock Initialization Test"
+      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      ! print out ending clock state
-      call ESMF_ClockPrint(clock, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      if (rc.eq.ESMF_SUCCESS) then
+      	!NEX_UTest
+      	! time step from start time to stop time
+      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
+        	call ESMF_ClockAdvance(clock, rc=rc)
+        	call ESMF_ClockPrint(clock, rc=rc)
+      	end do
+
+      	bool = ESMF_ClockIsStopTime(clock, rc)
+      	print *, "bool = ", bool
+      	write(failMsg, *) " Did not return ESMF_SUCCESS and/or bool not True"
+      	write(name, *) "Clock Advance Test"
+      	call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(bool)), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      	! print out ending clock state
+      	call ESMF_ClockPrint(clock, rc=rc)
+       end if
 
       ! ----------------------------------------------------------------------------
 
@@ -794,16 +796,19 @@
 
       ! ----------------------------------------------------------------------------
 
-      totalDays=0
-      days=-1
-      call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
-      call ESMF_TimePrint(startTime, rc=rc)
-      call ESMF_TimePrint(stopTime, rc=rc)
-      ! time step from start time to stop time
-      do while (.not.ESMF_ClockIsStopTime(clock_gregorian, rc))
-        call ESMF_ClockAdvance(clock_gregorian, timeStep=timeStep, rc=rc)
-        totalDays=totalDays+days
-      end do
+      if (rc.eq.ESMF_SUCCESS) then
+      	totalDays=0
+      	days=-1
+      	call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
+      	call ESMF_TimePrint(startTime, rc=rc)
+      	call ESMF_TimePrint(stopTime, rc=rc)
+      	! time step from start time to stop time
+      	do while (.not.ESMF_ClockIsStopTime(clock_gregorian, rc))
+        	call ESMF_ClockAdvance(clock_gregorian, timeStep=timeStep, rc=rc)
+        	totalDays=totalDays+days
+      	end do
+
+       end if
 
       ! ----------------------------------------------------------------------------
 
@@ -865,32 +870,35 @@
 
       ! ----------------------------------------------------------------------------
 
-      call date_and_time(values=timevals)
-      seed=timevals(8)
-      call random_seed(put=seed)
-      testResults = 0
-      do while (.not.ESMF_ClockIsStopTime(clock_gregorian, rc))
-        call random_number(ranNum)
-        days=ranNum*25
-        call random_number(ranNum)
-        H=ranNum*100
-        call random_number(ranNum)
-        MM=ranNum*100
-        call random_number(ranNum)
-        secs=ranNum*100
-        call ESMF_TimeIntervalSet(timeStep, d=days, h=H, m=MM, s=secs, rc=rc)
-        call ESMF_ClockAdvance(clock_gregorian, timeStep=timeStep, rc=rc)
-        call ESMF_ClockGet(clock_gregorian, currTime=currentTime, rc=rc)
-        call ESMF_ClockGet(clock_gregorian, prevTime=previousTime, rc=rc)
-        timeDiff =  currentTime - previousTime 
-        if((timeDiff.ne.timeStep).and.(testResults.eq.0)) then	
-	     testResults=1
-             call ESMF_TimeIntervalPrint(timeStep, rc=rc)
-             call ESMF_TimeIntervalPrint(timeDiff, rc=rc)
-             call ESMF_TimePrint(currentTime, rc=rc)
-             call ESMF_TimePrint(previousTime, rc=rc)
-        end if
-      end do
+      if (rc.eq.ESMF_SUCCESS) then
+      	call date_and_time(values=timevals)
+      	seed=timevals(8)
+      	call random_seed(put=seed)
+      	testResults = 0
+      	do while (.not.ESMF_ClockIsStopTime(clock_gregorian, rc))
+        	call random_number(ranNum)
+        	days=ranNum*25
+        	call random_number(ranNum)
+        	H=ranNum*100
+        	call random_number(ranNum)
+        	MM=ranNum*100
+        	call random_number(ranNum)
+        	secs=ranNum*100
+        	call ESMF_TimeIntervalSet(timeStep, d=days, h=H, m=MM, s=secs, rc=rc)
+        	call ESMF_ClockAdvance(clock_gregorian, timeStep=timeStep, rc=rc)
+        	call ESMF_ClockGet(clock_gregorian, currTime=currentTime, rc=rc)
+        	call ESMF_ClockGet(clock_gregorian, prevTime=previousTime, rc=rc)
+        	timeDiff =  currentTime - previousTime 
+        	if((timeDiff.ne.timeStep).and.(testResults.eq.0)) then	
+	     	testResults=1
+             	call ESMF_TimeIntervalPrint(timeStep, rc=rc)
+             	call ESMF_TimeIntervalPrint(timeDiff, rc=rc)
+             	call ESMF_TimePrint(currentTime, rc=rc)
+             	call ESMF_TimePrint(previousTime, rc=rc)
+        	end if
+      	end do
+
+      end if
 		
         !EX_UTest
         write(failMsg, *) "Time comparison failed."
@@ -899,27 +907,6 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_TimeIntervalSet(timeStep, h=65, rc=rc)
-      write(name, *) "Time Step initialization with hr = 65  Test" 
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      write(failMsg, *) "Seconds should = 234000."
-      write(name, *) "Get Time Step in seconds Test" 
-      call ESMF_TimeIntervalGet(timeStep, s=secs, rc=rc)
-      call ESMF_Test((secs.eq.234000), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-    
-      print *, " Seconds = ", secs
-      
-     ! ----------------------------------------------------------------------------
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
@@ -949,16 +936,19 @@
 
       ! ----------------------------------------------------------------------------
 
-      totalDays=0
-      days=1
-      call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
-      call ESMF_TimePrint(startTime, rc=rc)
-      call ESMF_TimePrint(stopTime, rc=rc)
-      ! time step from start time to stop time
-      do while (.not.ESMF_ClockIsStopTime(clock_no_leap, rc))
-        call ESMF_ClockAdvance(clock_no_leap, timeStep=timeStep, rc=rc)
-        totalDays=totalDays+days
-      end do
+      if (rc.eq.ESMF_SUCCESS) then
+      	totalDays=0
+      	days=1
+      	call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
+      	call ESMF_TimePrint(startTime, rc=rc)
+      	call ESMF_TimePrint(stopTime, rc=rc)
+      	! time step from start time to stop time
+      	do while (.not.ESMF_ClockIsStopTime(clock_no_leap, rc))
+        	call ESMF_ClockAdvance(clock_no_leap, timeStep=timeStep, rc=rc)
+        	totalDays=totalDays+days
+      	end do
+
+      end if
 
       ! ----------------------------------------------------------------------------
 
