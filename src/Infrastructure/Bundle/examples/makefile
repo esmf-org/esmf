@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.3 2003/09/17 22:16:08 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2003/09/18 16:49:38 flanigan Exp $ 
 
-ALL: 
+ALL: examples
 
 CFLAGS    =
 FFLAGS    =
@@ -14,42 +14,32 @@ MANSEC    =
 LIBBASE   = 
 LOCDIR    = src/Infrastructure/Bundle/examples
 
-TESTEXAMPLES_3  = \
-	ESMF_BundleCreateEx RUN_ESMF_BundleCreateEx ESMF_BundleCreateEx.rm 
 
-TESTEXAMPLES_9  = \
-	ESMF_BundleCreateEx RUN_ESMF_BundleCreateExUNI ESMF_BundleCreateEx.rm 
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_BundleCreateEx 
 
-EXAMPLESF       = ESMF_BundleCreateEx.F90
-EXAMPLESC       = 
+
+EXAMPLES_RUN = run_ESMF_BundleCreateEx 
+
+
+EXAPMLES_RUN_UNI = run_ESMF_BundleCreateEx_uni 
+
 
 include $(ESMF_DIR)/makefile
 
+
 DIRS      = 
 
-CLEANDIRS   =
-CLEANFILES  = *.o *.mod ESMF_BundleCreateEx 
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 
-examples: ESMF_BundleCreateEx 
+#
+# ESMF_BundleCreateEx
+#
+run_ESMF_BundleCreateEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_BundleCreateEx > $(ESMF_EXDIR)/ESMF_BundleCreateEx.stdout
 
-
-ESMF_BundleCreateDir: 
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMF_BundleCreateEx: ESMF_BundleCreateEx.o  chkopts
-	-${F90CXXLD} -o ESMF_BundleCreateEx ESMF_BundleCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_BundleCreateEx.o
-
-RUN_ESMF_BundleCreateEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCreateEx.tmps
-	-${MPIRUN} -np 4 ESMF_BundleCreateEx > ESMF_BundleCreateEx.stdout
-
-RUN_ESMF_BundleCreateExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCreateEx.tmps
-	-${MPIRUN} -np 1 ESMF_BundleCreateEx > ESMF_BundleCreateEx.stdout
-
-ESMF_BundleCreateEx.rm:
-	echo "ESMF_BundleCreateEx.rm target called here."
+run_ESMF_BundleCreateEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_BundleCreateEx > $(ESMF_EXDIR)/ESMF_BundleCreateEx_uni.stdout
 
