@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.51 2005/01/12 07:15:37 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.52 2005/01/12 20:05:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,6 +85,13 @@ module ESMF_VMMod
       type(ESMF_Pointer) :: this
   end type
 
+  ! F90 class type to hold pointer to C++ object
+  type ESMF_VMId
+    sequence
+    private
+      type(ESMF_Pointer) :: this
+  end type
+
 !------------------------------------------------------------------------------
 
   ! Module parameters
@@ -101,6 +108,7 @@ module ESMF_VMMod
   public ESMF_CommHandle
   public ESMF_VM
   public ESMF_VMPlan
+  public ESMF_VMId
       
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
@@ -158,7 +166,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.51 2005/01/12 07:15:37 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.52 2005/01/12 20:05:29 theurich Exp $'
 
 !==============================================================================
 

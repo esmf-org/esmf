@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.54 2005/01/12 18:38:27 theurich Exp $
+// $Id: ESMC_Base.C,v 1.55 2005/01/12 20:05:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.54 2005/01/12 18:38:27 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.55 2005/01/12 20:05:29 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -163,6 +163,30 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
   return ID;
 
 } // end ESMC_BaseGetID
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseGetVMId"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetVMId - Get Base class VMId
+//  
+// !INTERFACE:
+      ESMC_VMId *ESMC_Base::ESMC_BaseGetVMId(
+// 
+// !ARGUMENTS:
+      void) const {
+//  
+// !RETURN VALUE:
+//    Unique VMId of the context in which this base object was created
+//  
+// !DESCRIPTION:
+//    Returns the object's VMId.
+//  
+//EOPI
+
+  return vmID;
+
+} // end ESMC_BaseGetVMId
 
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD
