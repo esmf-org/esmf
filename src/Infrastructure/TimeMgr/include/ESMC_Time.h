@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.40 2004/11/24 00:29:03 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.41 2005/04/02 00:13:48 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -51,10 +51,6 @@
 // middle of the month, and synchronizing with a real-time clock.  {\tt Time}
 // adds its associated {\tt Calendar} and local Timezone attributes to
 // {\tt BaseTime}.
-//
-// A time value of zero (both whole and numerator) will correspond
-// to the Julian date of zero UTC.  This will ease conversions 
-// between Julian and Gregorian calendars.
 //
 //-------------------------------------------------------------------------
 //
@@ -142,6 +138,7 @@
     int ESMC_TimeSet(const char *timeList, ...);
     // e.g. ESMC_TimeSet("s" , (double) s);
 
+    bool ESMC_TimeIsLeapYear(int *rc=0) const;
     bool ESMC_TimeIsSameCalendar(ESMC_Time *time, int *rc=0) const;
 
     // to support ESMC_Clock::SyncToWallClock() and TMG 2.5.7
