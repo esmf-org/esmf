@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.68 2004/12/20 21:15:35 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.69 2004/12/20 22:34:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -257,7 +257,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.68 2004/12/20 21:15:35 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.69 2004/12/20 22:34:06 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -762,6 +762,11 @@
 
       ! recvDomainList next
       if (hasDstDataUse .AND. present(dstArray)) then
+        call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=localrc)
+        allocate(     allAI(nDEs,dimCount), &
+                 allLocalAI(nDEs,dimCount), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "allAI arrays", &
+                                       ESMF_CONTEXT, rc)) return
         if (totalUse) then
           call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                            totalindex=allAI, rc=localrc)
@@ -770,11 +775,6 @@
                                            compindex=allAI, rc=localrc)
         endif
         call ESMF_FieldDataMapGet(dstDataMap, dataIndexList=dimOrder, rc=localrc)
-        call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=localrc)
-        allocate(     allAI(nDEs,dimCount), &
-                 allLocalAI(nDEs,dimCount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "allAI arrays", &
-                                       ESMF_CONTEXT, rc)) return
 
         do i = 1,recvDomainList%num_domains
           theirDE = recvDomainList%domains(i)%DE + 1
