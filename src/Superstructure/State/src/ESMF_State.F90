@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.37 2004/03/24 14:54:39 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.38 2004/03/24 15:59:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -287,7 +287,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.37 2004/03/24 14:54:39 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.38 2004/03/24 15:59:39 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1490,7 +1490,7 @@ end function
 !    {\tt ESMF\_STATEDATAINVALID}, or {\tt ESMF\_STATEDATAVALIDITYUNKNOWN}.
 !    If not specified, the default value is set to 
 !    {\tt ESMF\_STATEDATAISVALID}.
-!   \item[{[datareqrestart}]
+!   \item[{[datareqrestart]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAISRESTART} or
 !    {\tt ESMF\_STATEDATANORESTART}. If not specified, the default 
