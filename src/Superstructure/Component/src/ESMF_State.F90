@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.13 2003/02/11 16:38:08 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.14 2003/02/11 18:23:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -149,9 +149,9 @@
       type ESMF_DataHolder
       sequence
       private
-          type(ESMF_Bundle), pointer :: bp
-          type(ESMF_Field), pointer :: fp 
-          type(ESMF_Array), pointer :: ap
+          type(ESMF_Bundle) :: bp
+          type(ESMF_Field) :: fp 
+          type(ESMF_Array) :: ap
       end type
 
 !------------------------------------------------------------------------------
@@ -244,7 +244,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.13 2003/02/11 16:38:08 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.14 2003/02/11 18:23:39 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -756,7 +756,6 @@ end function
 !       ! TODO: add working code here
 
 !       ! round up to next multiple of chunksize
-        print *, itemcount, chunksize, mod(itemcount, chunksize)
         allocsize = itemcount + chunksize - mod(itemcount,chunksize)
         allocate(stypep%datalist(allocsize), stat=status)
         if(status .NE. 0) then     ! this is an F90 rc, not ESMF
@@ -884,6 +883,7 @@ end function
 !       local vars
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
+        type(ESMF_StateData), pointer :: nextitem
         integer :: i
 
         ! Initialize return code; assume failure until success is certain
@@ -899,17 +899,30 @@ end function
         if (stypep%datacount .gt. 0) then
           do i = 1, stypep%datacount
             ! free anything allocated here
+            nextitem => stypep%datalist(i)
+            if (associated(nextitem%datap)) then
+              deallocate(nextitem%datap, stat=status)
+              if(status .NE. 0) then     ! this is an F90 rc, not esmf's
+                 print *, "ERROR in ESMF_StateDestruct: datap deallocation"
+                 return
+              endif
+            endif
+            if (associated(nextitem%namep)) then
+              deallocate(nextitem%namep, stat=status)
+              if(status .NE. 0) then     ! this is an F90 rc, not esmf's
+                 print *, "ERROR in ESMF_StateDestruct: namep deallocation"
+                 return
+              endif
+            endif
           enddo
         endif
         stypep%datacount = 0
 
-        ! TODO: figure out why this next line isn't compiling
-        !if (allocated(stypep%datalist)) then
-        !i = size(stypep%datalist)
-        if (.false.) then
+        ! Now release the entire list
+        if (associated(stypep%datalist)) then
           deallocate(stypep%datalist, stat=status)
           if(status .NE. 0) then     ! this is an F90 rc, not esmf's
-            print *, "ERROR in ESMF_StateDestruct: allocation"
+            print *, "ERROR in ESMF_StateDestruct: deallocation"
             return
           endif
         endif
@@ -1039,6 +1052,7 @@ end function
           deallocate(stypep%datalist, stat=status)
           if(status .NE. 0) then
             print *, "ERROR in ESMF_StateTypeAddBundleList: datalist deallocate"
+            return
           endif
   
           ! Now make this the permanent list
@@ -1058,6 +1072,7 @@ end function
         nextitem%otype = ESMF_STATEBUNDLE
         ! TODO: pull out bundle name here
         !character, pointer :: namep
+        allocate(nextitem%datap, stat=status)
         nextitem%datap%bp = bundles(i)
         !integer :: indirect_index
         nextitem%needed = ESMF_STATEDATANOTNEEDED
