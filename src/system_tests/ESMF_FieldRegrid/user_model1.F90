@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.9 2004/02/09 17:56:01 nscollins Exp $
+! $Id: user_model1.F90,v 1.10 2004/03/04 18:17:33 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -106,10 +106,11 @@
         type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
         integer :: status, myde
 
-        print *, "User Comp Init starting"
-
         ! query comp for layout
         call ESMF_GridCompGet(comp, layout=layout, rc=status)
+        call ESMF_DELayoutGetDEID(layout, de_id)
+
+        print *, de_id, "User Comp 1 Init starting"
 
         ! Add a "humidity" field to the export state.
         counts(1) = 60
@@ -153,7 +154,7 @@
         call ESMF_StateAddData(exportstate, humidity, rc)
      !   call ESMF_StatePrint(exportstate, rc=rc)
 
-        print *, "User Comp Init returning"
+        print *, de_id, "User Comp 1 Init returning"
    
         rc = ESMF_SUCCESS
 
@@ -208,7 +209,8 @@
         allocate(coordArray(2))
         call ESMF_FieldGetRelLoc(humidity, horizRelloc=relloc, rc=status)
         call ESMF_FieldGetGrid(humidity, grid, rc=status)
-        call ESMF_GridGetDE(grid, localCellCountPerDim=counts, rc=status)
+        call ESMF_GridGetDE(grid, localCellCountPerDim=counts, &
+                            horzRelloc=ESMF_CELL_CENTER, rc=status)
         call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &
                                 rc=status)
         call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)

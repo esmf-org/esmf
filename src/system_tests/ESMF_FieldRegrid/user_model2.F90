@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2004/02/19 21:32:55 jwolfe Exp $
+! $Id: user_model2.F90,v 1.9 2004/03/04 18:17:33 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -98,10 +98,12 @@
       type(ESMF_CoordSystem) :: horz_coord_system
       integer :: status, myde
 
-      print *, "User Comp Init starting"
 
       ! Initially import state contains a field with a grid but no data.
       call ESMF_GridCompGet(comp, layout=layout, rc=status)
+      call ESMF_DELayoutGetDEID(layout, de_id)
+
+      print *, de_id, "User Comp 2 Init starting"
 
       ! Add a "humidity" field to the import state.
       countsPerDE1 = (/ 10, 18, 12 /)
@@ -152,7 +154,7 @@
       call ESMF_StateAddData(importstate, humidity, rc)
    !   call ESMF_StatePrint(importstate, rc=rc)
 
-      print *, "User Comp Init returning"
+      print *, de_id, "User Comp 2 Init returning"
    
       rc = ESMF_SUCCESS
 
@@ -278,7 +280,7 @@
       call ESMF_FieldGetRelLoc(humidity, horizRelloc=relloc, rc=status)
       call ESMF_FieldGetGrid(humidity, grid, rc=status)
       call ESMF_GridGetDE(grid, myDE=myDE, localCellCountPerDim=counts, &
-                          rc=status)
+                            horzRelloc=ESMF_CELL_CENTER, rc=status)
       call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &
                               rc=status)
       call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
@@ -288,6 +290,11 @@
       call ESMF_FieldGetData(humidity, array, rc=rc)
       ! Get a pointer to the start of the data
       call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc)
+      print *, "rc from array get data = ", rc
+      !if (associated(data)) print *, "pointer is associated"
+      !if (.not.associated(data)) print *, "pointer is *NOT* associated"
+      call ESMF_ArrayPrint(array)
+      print *, "data in validate: ", data(1,1), data(1, 2), data(2, 1)
 
       ! allocate array for computed results and fill it
       allocate(calc(counts(1), counts(2)))
