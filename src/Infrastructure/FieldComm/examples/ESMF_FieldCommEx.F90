@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.1 2004/06/08 09:28:53 nscollins Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.2 2004/06/11 17:59:39 svasquez Exp $
 !
 ! Example/test code which does communication operations on Fields.
 
@@ -163,7 +163,7 @@
                                regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
+    call ESMF_FieldRegrid(field1, field2, regrid_rh, layout1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
