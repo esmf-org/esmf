@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.26 2004/04/23 23:35:46 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.27 2004/04/29 17:33:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.26 2004/04/23 23:35:46 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.27 2004/04/29 17:33:45 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -898,6 +898,7 @@ end function
 !
  
         ESMF_DataMapReadRestart%status = ESMF_STATE_UNINIT
+        if (present(rc)) rc = ESMF_FAILURE
 
         end function ESMF_DataMapReadRestart
 
@@ -980,6 +981,7 @@ end function
 ! TODO: code goes here
 !
         ESMF_DataMapRead%status = ESMF_STATE_UNINIT
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_DataMapRead
 

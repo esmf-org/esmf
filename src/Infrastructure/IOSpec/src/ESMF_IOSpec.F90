@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.8 2004/04/28 18:05:43 slswift Exp $
+! $Id: ESMF_IOSpec.F90,v 1.9 2004/04/29 17:31:53 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -233,6 +233,8 @@ end function
       print *, "unknown architecture in ESMF_IOFlush()"
 #endif
 
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_IOFlush
 
 !-------------------------------------------------------------------------
@@ -361,6 +363,7 @@ end function
 
 !EOPI
       ESMF_IOSpecCreateCopy = iospec
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_IOSpecCreateCopy
 

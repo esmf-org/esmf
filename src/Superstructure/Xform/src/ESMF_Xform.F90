@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.3 2004/03/18 16:37:37 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.4 2004/04/29 17:30:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.3 2004/03/18 16:37:37 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.4 2004/04/29 17:30:03 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -169,6 +169,8 @@
 !
 ! TODO: code goes here
 !
+        if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_XformSet
 
 !------------------------------------------------------------------------------
@@ -199,6 +201,8 @@
 ! !REQUIREMENTS:
 
         name = xform%name
+        if (present(subr)) subr = 0
+        if (present(rc)) rc = ESMF_FAILURE
 
         end subroutine ESMF_XformGet
 
@@ -231,6 +235,8 @@
 !
 ! TODO: code goes here
 !
+        if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_XformWriteRestart
 
 
@@ -272,6 +278,7 @@
 !
 
         ESMF_XformReadRestart = a 
+        if (present(rc)) rc = ESMF_FAILURE
  
         end function ESMF_XformReadRestart
 
