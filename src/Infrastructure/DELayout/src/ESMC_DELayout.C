@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.17 2004/06/11 14:55:34 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.18 2004/06/14 17:23:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.17 2004/06/11 14:55:34 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.18 2004/06/14 17:23:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1170,12 +1170,14 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
   int *blen = new int[ndes];
   int *bdestdispl = new int[ndes];
   int dtk_size = ESMC_DataKindSize(dtk);
-  for (int i=0; ndes; i++){
+  for (int i=0; i<ndes; i++){
     blen[i] = len[i] * dtk_size;
     bdestdispl[i] = destdispl[i] * dtk_size;
   }
   return ESMC_DELayoutGatherV(srcdata, destdata, blen, bdestdispl, rootDE,
     oneToOneFlag);
+  delete [] blen;
+  delete [] bdestdispl;
 }
 //-----------------------------------------------------------------------------
 
