@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.57 2004/04/24 01:32:20 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.58 2004/04/26 20:31:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.57 2004/04/24 01:32:20 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.58 2004/04/26 20:31:34 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -528,7 +528,8 @@
     }
 
     // convert from remaining reduced units to any user-requested days
-    if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) {
+    if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER ||
+        d_r8 != ESMC_NULL_POINTER) {
       // total relative and absolute days
       ESMF_KIND_I8 days = tiToConvert.d; // relative part 
       tiToConvert.d = 0;           // TODO: don't need tiToConvert.d,
@@ -603,6 +604,11 @@
       }
       if (d_i8 != ESMC_NULL_POINTER) {
         *d_i8 = days;  // >= 64-bit
+      }
+      if (d_r8 != ESMC_NULL_POINTER) {
+        *d_r8 = (ESMF_KIND_R8) days +
+                ((ESMF_KIND_R8) tiToConvert.s /
+                 (ESMF_KIND_R8) tiToConvert.calendar->secondsPerDay);
       }
     }
 
@@ -963,6 +969,10 @@
         break;
     };
 
+    // shouldn't be here
+    // TODO: write LogErr message (internal error)
+    return(errorResult);
+
 }  // end ESMC_TimeIntervalAbsValue (common)
 
 //-------------------------------------------------------------------------
@@ -1130,6 +1140,11 @@
         return(0.0);
         break;
     };
+
+    // shouldn't be here
+    // TODO: write LogErr message (internal error)
+    return(0.0);
+
 }  // end ESMC_TimeInterval::operator/
 
 //-------------------------------------------------------------------------
@@ -1465,6 +1480,10 @@
         return(remainder);
         break;
     };
+
+    // shouldn't be here
+    // TODO: write LogErr message (internal error)
+    return(remainder);
 
 }  // end ESMC_TimeInterval::operator%
 
@@ -2221,6 +2240,10 @@
         return(false);
         break;
     };
+
+    // shouldn't be here
+    // TODO: write LogErr message (internal error)
+    return(false);
 
 }  // end ESMC_TimeIntervalCompare
 
