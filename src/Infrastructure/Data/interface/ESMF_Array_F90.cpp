@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.18 2003/04/02 22:14:52 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.19 2003/04/04 18:23:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -116,6 +116,14 @@
       ArrayWrapperMacro(integer, I4, 3, COL3)
       ArrayWrapperMacro(integer, I8, 3, COL3)
 
+      ArrayWrapperMacro(integer, I2, 4, COL4)
+      ArrayWrapperMacro(integer, I4, 4, COL4)
+      ArrayWrapperMacro(integer, I8, 4, COL4)
+
+      ArrayWrapperMacro(integer, I2, 5, COL5)
+      ArrayWrapperMacro(integer, I4, 5, COL5)
+      ArrayWrapperMacro(integer, I8, 5, COL5)
+
       ArrayWrapperMacro(real, R4, 1, COL1)
       ArrayWrapperMacro(real, R8, 1, COL1)
 
@@ -125,7 +133,13 @@
       ArrayWrapperMacro(real, R4, 3, COL3)
       ArrayWrapperMacro(real, R8, 3, COL3)
 
-      ! TODO: make 1 of these for every supported T/K/R
+      ArrayWrapperMacro(real, R4, 4, COL4)
+      ArrayWrapperMacro(real, R8, 4, COL4)
+
+      ArrayWrapperMacro(real, R4, 5, COL5)
+      ArrayWrapperMacro(real, R8, 5, COL5)
+
+      ! TODO: add any additional type/kind/ranks here
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -158,7 +172,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.18 2003/04/02 22:14:52 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.19 2003/04/04 18:23:10 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -174,27 +188,17 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-!        !module procedure ESMF_ArrayCreateNewNoData
+!      !module procedure ESMF_ArrayCreateNewNoData
         module procedure ESMF_ArrayCreateNewBuffer
         module procedure ESMF_ArrayCreateBySpec
         module procedure ESMF_ArrayCreateBySpecNoData
-!        !module procedure ESMF_ArrayCreateBySpecBuffer
+!      !module procedure ESMF_ArrayCreateBySpecBuffer
 
-        module procedure ESMF_ArrayCreateByPtrI41D
-        module procedure ESMF_ArrayCreateByPtrI81D
-        module procedure ESMF_ArrayCreateByPtrI42D
-        module procedure ESMF_ArrayCreateByPtrI82D
-        module procedure ESMF_ArrayCreateByPtrI43D
-        module procedure ESMF_ArrayCreateByPtrI83D
-        module procedure ESMF_ArrayCreateByPtrR41D
-        module procedure ESMF_ArrayCreateByPtrR81D
-        module procedure ESMF_ArrayCreateByPtrR42D
-        module procedure ESMF_ArrayCreateByPtrR82D
-        module procedure ESMF_ArrayCreateByPtrR43D
-        module procedure ESMF_ArrayCreateByPtrR83D
+       ! < this expands into declarations of interfaces for each T/K/R >
+ArrayInterfaceMacro(ArrayCreateByPtr)
 
 
-! ! TODO: ...to be expanded to all types, kinds, ranks
+! ! TODO: add any additional type/kind/ranks here
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -248,20 +252,11 @@ end interface
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_ArrayGetDataI41D
-        module procedure ESMF_ArrayGetDataI81D
-        module procedure ESMF_ArrayGetDataI42D
-        module procedure ESMF_ArrayGetDataI82D
-        module procedure ESMF_ArrayGetDataI43D
-        module procedure ESMF_ArrayGetDataI83D
-        module procedure ESMF_ArrayGetDataR41D
-        module procedure ESMF_ArrayGetDataR81D
-        module procedure ESMF_ArrayGetDataR42D
-        module procedure ESMF_ArrayGetDataR82D
-        module procedure ESMF_ArrayGetDataR43D
-        module procedure ESMF_ArrayGetDataR83D
+      ! < this expands into declarations of interfaces for each T/K/R >
+ArrayInterfaceMacro(ArrayGetData)
 
-! ! TODO: ...to be expanded to all types, kinds, ranks
+
+! ! TODO: add any additional type/kind/ranks here
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -280,20 +275,10 @@ end interface
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_ArrayDeallocateI41D
-        module procedure ESMF_ArrayDeallocateI81D
-        module procedure ESMF_ArrayDeallocateI42D
-        module procedure ESMF_ArrayDeallocateI82D
-        module procedure ESMF_ArrayDeallocateI43D
-        module procedure ESMF_ArrayDeallocateI83D
-        module procedure ESMF_ArrayDeallocateR41D
-        module procedure ESMF_ArrayDeallocateR81D
-        module procedure ESMF_ArrayDeallocateR42D
-        module procedure ESMF_ArrayDeallocateR82D
-        module procedure ESMF_ArrayDeallocateR43D
-        module procedure ESMF_ArrayDeallocateR83D
+      ! < this expands into declarations of interfaces for each T/K/R >
+ArrayInterfaceMacro(ArrayDeallocate)
 
-! ! TODO: ...to be expanded to all types, kinds, ranks
+! ! TODO: add any additional type/kind/ranks here
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -608,17 +593,35 @@ end function
 
 !! < start of macros which become actual function bodies after expansion >
 
+ArrayCreateMacro(integer, I2, 1, COL1, LEN1, LOC1)
+
 ArrayCreateMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
 ArrayCreateMacro(integer, I8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateMacro(integer, I2, 2, COL2, LEN2, LOC2)
 
 ArrayCreateMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
 ArrayCreateMacro(integer, I8, 2, COL2, LEN2, LOC2)
 
+ArrayCreateMacro(integer, I2, 3, COL3, LEN3, LOC3)
+
 ArrayCreateMacro(integer, I4, 3, COL3, LEN3, LOC3)
 
 ArrayCreateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
+ArrayCreateMacro(integer, I2, 4, COL4, LEN4, LOC4)
+
+ArrayCreateMacro(integer, I4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateMacro(integer, I8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateMacro(integer, I2, 5, COL5, LEN5, LOC5)
+
+ArrayCreateMacro(integer, I4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateMacro(integer, I8, 5, COL5, LEN5, LOC5)
 
 ArrayCreateMacro(real, R4, 1, COL1, LEN1, LOC1)
 
@@ -632,6 +635,14 @@ ArrayCreateMacro(real, R4, 3, COL3, LEN3, LOC3)
 
 ArrayCreateMacro(real, R8, 3, COL3, LEN3, LOC3)
 
+ArrayCreateMacro(real, R4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateMacro(real, R8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateMacro(real, R4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateMacro(real, R8, 5, COL5, LEN5, LOC5)
+
 
 
 !------------------------------------------------------------------------------
@@ -639,17 +650,35 @@ ArrayCreateMacro(real, R8, 3, COL3, LEN3, LOC3)
 
 !! < start of macros which become actual function bodies after expansion >
 
+ArrayCreateSpecMacro(integer, I2, 1, COL1, LEN1, LOC1)
+
 ArrayCreateSpecMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
 ArrayCreateSpecMacro(integer, I8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateSpecMacro(integer, I2, 2, COL2, LEN2, LOC2)
 
 ArrayCreateSpecMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
 ArrayCreateSpecMacro(integer, I8, 2, COL2, LEN2, LOC2)
 
+ArrayCreateSpecMacro(integer, I2, 3, COL3, LEN3, LOC3)
+
 ArrayCreateSpecMacro(integer, I4, 3, COL3, LEN3, LOC3)
 
 ArrayCreateSpecMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
+ArrayCreateSpecMacro(integer, I2, 4, COL4, LEN4, LOC4)
+
+ArrayCreateSpecMacro(integer, I4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateSpecMacro(integer, I8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateSpecMacro(integer, I2, 5, COL5, LEN5, LOC5)
+
+ArrayCreateSpecMacro(integer, I4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateSpecMacro(integer, I8, 5, COL5, LEN5, LOC5)
 
 ArrayCreateSpecMacro(real, R4, 1, COL1, LEN1, LOC1)
 
@@ -663,23 +692,49 @@ ArrayCreateSpecMacro(real, R4, 3, COL3, LEN3, LOC3)
 
 ArrayCreateSpecMacro(real, R8, 3, COL3, LEN3, LOC3)
 
+ArrayCreateSpecMacro(real, R4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateSpecMacro(real, R8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateSpecMacro(real, R4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateSpecMacro(real, R8, 5, COL5, LEN5, LOC5)
+
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
 
+ArrayGetDataMacro(integer, I2, 1, COL1, LEN1, LOC1)
+
 ArrayGetDataMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
 ArrayGetDataMacro(integer, I8, 1, COL1, LEN1, LOC1)
+
+ArrayGetDataMacro(integer, I2, 2, COL2, LEN2, LOC2)
 
 ArrayGetDataMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
 ArrayGetDataMacro(integer, I8, 2, COL2, LEN2, LOC2)
 
+ArrayGetDataMacro(integer, I2, 3, COL3, LEN3, LOC3)
+
 ArrayGetDataMacro(integer, I4, 3, COL3, LEN3, LOC3)
 
 ArrayGetDataMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
+ArrayGetDataMacro(integer, I2, 4, COL4, LEN4, LOC4)
+
+ArrayGetDataMacro(integer, I4, 4, COL4, LEN4, LOC4)
+
+ArrayGetDataMacro(integer, I8, 4, COL4, LEN4, LOC4)
+
+ArrayGetDataMacro(integer, I2, 5, COL5, LEN5, LOC5)
+
+ArrayGetDataMacro(integer, I4, 5, COL5, LEN5, LOC5)
+
+ArrayGetDataMacro(integer, I8, 5, COL5, LEN5, LOC5)
 
 ArrayGetDataMacro(real, R4, 1, COL1, LEN1, LOC1)
 
@@ -693,22 +748,48 @@ ArrayGetDataMacro(real, R4, 3, COL3, LEN3, LOC3)
 
 ArrayGetDataMacro(real, R8, 3, COL3, LEN3, LOC3)
 
+ArrayGetDataMacro(real, R4, 4, COL4, LEN4, LOC4)
+
+ArrayGetDataMacro(real, R8, 4, COL4, LEN4, LOC4)
+
+ArrayGetDataMacro(real, R4, 5, COL5, LEN5, LOC5)
+
+ArrayGetDataMacro(real, R8, 5, COL5, LEN5, LOC5)
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
       
+ArrayDeallocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
+
 ArrayDeallocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
 ArrayDeallocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
+
+ArrayDeallocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
 
 ArrayDeallocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
 ArrayDeallocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
 
+ArrayDeallocateMacro(integer, I2, 3, COL3, LEN3, LOC3)
+
 ArrayDeallocateMacro(integer, I4, 3, COL3, LEN3, LOC3)
 
 ArrayDeallocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
+ArrayDeallocateMacro(integer, I2, 4, COL4, LEN4, LOC4)
+
+ArrayDeallocateMacro(integer, I4, 4, COL4, LEN4, LOC4)
+
+ArrayDeallocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
+
+ArrayDeallocateMacro(integer, I2, 5, COL5, LEN5, LOC5)
+
+ArrayDeallocateMacro(integer, I4, 5, COL5, LEN5, LOC5)
+
+ArrayDeallocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
 
 ArrayDeallocateMacro(real, R4, 1, COL1, LEN1, LOC1)
 
@@ -721,6 +802,14 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 ArrayDeallocateMacro(real, R4, 3, COL3, LEN3, LOC3)
 
 ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
+
+ArrayDeallocateMacro(real, R4, 4, COL4, LEN4, LOC4)
+
+ArrayDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
+
+ArrayDeallocateMacro(real, R4, 5, COL5, LEN5, LOC5)
+
+ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !! < end of automatically generated function >
 

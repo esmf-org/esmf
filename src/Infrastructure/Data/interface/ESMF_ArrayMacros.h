@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.7 2003/04/02 22:14:51 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.8 2003/04/04 18:23:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,19 +13,21 @@
 !
 #endif
 
+#if 0
+!------------------------------------------------------------------------------
 ! Macros for the Array class.
+
+! these are defined because they contain a variable number of commas.
+! they are used as parms in macro calls, and are rescanned by the
+! preprocessor after expansion.
+!------------------------------------------------------------------------------
+#endif
 
 #define COL1 :
 #define COL2 :,:
 #define COL3 :,:,:
 #define COL4 :,:,:,:
 #define COL5 :,:,:,:,:
-
-#define ArrayWrapperMacro(mname, mtypekind, mrank, mdim) \
-! <Created by macro - do not edit directly > @  \
-      type ESMF_ArrWrap##mtypekind##mrank##D @  \
-        mname (ESMF_IKIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr @  \
-      end type ESMF_ArrWrap##mtypekind##mrank##D @  \
 
 #define LEN1 lengths(1)
 #define LEN2 lengths(1), lengths(2)
@@ -40,6 +42,61 @@
 #define LOC5 1,1,1,1,1
 
 
+#if 0
+!------------------------------------------------------------------------------
+! Declare a wrapper for an F90 array pointer
+!------------------------------------------------------------------------------
+#endif
+
+#define ArrayWrapperMacro(mname, mtypekind, mrank, mdim) \
+! <Created by macro - do not edit directly > @  \
+      type ESMF_ArrWrap##mtypekind##mrank##D @  \
+        mname (ESMF_IKIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr @  \
+      end type ESMF_ArrWrap##mtypekind##mrank##D @  \
+
+
+#if 0
+!------------------------------------------------------------------------------
+! Expand a string into each of the T/K/R procedure interface blocks
+!------------------------------------------------------------------------------
+#endif
+
+#define ArrayInterfaceMacro(funcname) \
+!------------------------------------------------------------------------------ @\
+! <This section created by macro - do not edit directly> @\
+    module procedure ESMF_##funcname##I21D @\
+    module procedure ESMF_##funcname##I41D @\
+    module procedure ESMF_##funcname##I81D @\
+    module procedure ESMF_##funcname##I22D @\
+    module procedure ESMF_##funcname##I42D @\
+    module procedure ESMF_##funcname##I82D @\
+    module procedure ESMF_##funcname##I23D @\
+    module procedure ESMF_##funcname##I43D @\
+    module procedure ESMF_##funcname##I83D @\
+    module procedure ESMF_##funcname##I24D @\
+    module procedure ESMF_##funcname##I44D @\
+    module procedure ESMF_##funcname##I84D @\
+    module procedure ESMF_##funcname##I25D @\
+    module procedure ESMF_##funcname##I45D @\
+    module procedure ESMF_##funcname##I85D @\
+    module procedure ESMF_##funcname##R41D @\
+    module procedure ESMF_##funcname##R81D @\
+    module procedure ESMF_##funcname##R42D @\
+    module procedure ESMF_##funcname##R82D @\
+    module procedure ESMF_##funcname##R43D @\
+    module procedure ESMF_##funcname##R83D @\
+    module procedure ESMF_##funcname##R44D @\
+    module procedure ESMF_##funcname##R84D @\
+    module procedure ESMF_##funcname##R45D @\
+    module procedure ESMF_##funcname##R85D @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+#if 0
+!------------------------------------------------------------------------------
+! Create a new array of the given type
+!------------------------------------------------------------------------------
+#endif
 
 #define ArrayCreateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
@@ -161,6 +218,11 @@
 !------------------------------------------------------------------------------ @\
 
 
+#if 0
+!------------------------------------------------------------------------------
+! Create a new array of the given type from an array spec
+!------------------------------------------------------------------------------
+#endif
 
 #define ArrayCreateSpecMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
@@ -259,6 +321,11 @@
 !------------------------------------------------------------------------------ @\
 
 
+#if 0
+!------------------------------------------------------------------------------
+! Get an F90 pointer to the data contained in this array
+!------------------------------------------------------------------------------
+#endif
 
 #define ArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
@@ -336,6 +403,12 @@
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
 
+
+#if 0
+!------------------------------------------------------------------------------
+! Deallocate the contents of the array.
+!------------------------------------------------------------------------------
+#endif
 
 #define ArrayDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
