@@ -1,4 +1,4 @@
- $Id: README,v 1.5 2003/09/02 15:50:34 flanigan Exp $
+ $Id: README,v 1.6 2003/09/02 16:03:12 flanigan Exp $
 
 README file for esmf_build_config directory.
 
@@ -24,7 +24,7 @@ and variables that are used across all platforms.  Users should have
 no need to edit this file.
 
 common.mk will include a site specific makefile fragment file located
-in esmf_build_config.  The included file will follow this naming
+in build_config.  The included file will follow this naming
 convention:
 
      build_config/ESMF_ARCH.ESMF_SITE.mk
