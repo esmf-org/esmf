@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.38 2004/12/10 22:39:53 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.39 2004/12/28 23:28:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.38 2004/12/10 22:39:53 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.39 2004/12/28 23:28:13 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2093,6 +2093,9 @@
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval <= operator Test"
       bool = timeStep <= timeStep2    
+      ! TODO: this print is workaround to a split-line anomaly on babyblue
+      !   see bug# 977786
+      print *
       call ESMF_Test((.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
 
