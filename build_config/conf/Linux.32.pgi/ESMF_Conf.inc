@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.1 2003/09/09 20:23:14 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.2 2003/09/09 21:04:38 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -18,3 +18,11 @@ by letting us write conditional code.
 #endif
 
 #define ESMF_NO_INITIALIZERS 1
+
+#if 0
+the PGI compiler has a bug which prevents forward pointer references from
+working if also using the sequence keyword.  for PGI only, don't sequence
+the State derived types.
+#endif
+
+#define ESMF_SEQUENCE_BUG 1
