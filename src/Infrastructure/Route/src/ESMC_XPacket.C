@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.33 2003/08/05 22:53:58 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.34 2003/08/06 23:06:01 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.33 2003/08/05 22:53:58 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.34 2003/08/06 23:06:01 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -305,7 +305,9 @@
       int size_axisindex,         // in  - size of AxisIndex array
       int *global_start,          // in  - array of global starting numbers
                                   //       per dimension
-      int *global_stride,         // in  - array of global strides per
+      int *global_count,          // in  - array of global starting numbers
+                                  //       per dimension
+      int *memory_stride,         // in  - array of global strides per
                                   //       dimension
       ESMC_Logical *periodic,     // in  - for each dim, is it periodic?
       ESMC_XPacket **xp_list,     // out - list of xp's created
@@ -319,7 +321,7 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    int i, nxp, nextxp;
+    int i, nxp, nextxp, trans_l, trans_r;
     ESMC_XPacket *xps;
     int rc = ESMF_FAILURE;
 
@@ -335,14 +337,20 @@
                //printf("[%d] offset=%d, contig_length=%d, stride=%d\n",
                // i, indexlist[i].min, indexlist[i].max, indexlist[i].stride);
 
+          // calculate global offsets and contig_lengths for the index space
+          for (i=0; i<size_axisindex; i++) {
+            global_l[i] = indexlist[i].min + global_start[i];
+            global_r[i] = indexlist[i].max + global_start[i];
+          }
+
           nxp = 1;
           if (periodic[0] == ESMF_TF_TRUE) { 
              if (global_start[0] <= 0) nxp++;
-             // if ((global_start[0] <= 0) || (global_start[0] >= foo)) nxp++;
+             if (global_r[0] >= global_count[0]) nxp++;
           }
           if (periodic[1] == ESMF_TF_TRUE) {
              if (global_start[1] <= 0) nxp++;
-             // if ((global_start[1] <= 0) || (global_start[1] >= foo)) nxp++;
+             if (global_r[1] >= global_count[1]) nxp++;
           }
 
           xps = new ESMC_XPacket[nxp];
@@ -353,60 +361,74 @@
           // there's always 1.
           nextxp = 0;
 
-          // calculate global offsets and contig_lengths for the index space
-          for (i=0; i<size_axisindex; i++) {
-            global_l[i] = indexlist[i].min + global_start[i];
-            global_r[i] = indexlist[i].max + global_start[i];
-          }
-
           xps[nextxp].rank = 2;
-          xps[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
+          xps[nextxp].offset  = global_l[1]*memory_stride[0] + global_l[0];
           xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
-          xps[nextxp].stride[0] = global_stride[0];
+          xps[nextxp].stride[0] = memory_stride[0];
           xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
 
           // if periodic along the first axis and this piece along boundary:
-          if ((periodic[0] == ESMF_TF_TRUE) && (global_start[0] <= 0)) {
+          if (periodic[0] == ESMF_TF_TRUE) {
+            if (global_start[0] <= 0) {
  
               nextxp++;
 
               xps[nextxp].rank = 2;
 
-              // calculate global offsets and contig_lengths for the index space
-              for (i=0; i<size_axisindex; i++) {
-                global_l[i] = indexlist[i].min + global_start[i];
-                global_r[i] = indexlist[i].max + global_start[i];
-              }
-              global_l[0] += global_stride[0];
-              global_r[0] += global_stride[0];
+              trans_l = global_l[0] + memory_stride[0];
+              trans_r = global_r[0] + memory_stride[0];
     
-              xps[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
-              xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
-              xps[nextxp].stride[0] = global_stride[0];
+              xps[nextxp].offset  = global_l[1]*memory_stride[0] + trans_l;
+              xps[nextxp].contig_length = trans_r - trans_l + 1;
+              xps[nextxp].stride[0] = memory_stride[0];
               xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+            }
+            if (global_r[0] >= global_count[0]) {
+ 
+              nextxp++;
+
+              xps[nextxp].rank = 2;
+
+              trans_l = global_l[0] - memory_stride[0];
+              trans_r = global_r[0] - memory_stride[0];
     
+              xps[nextxp].offset  = global_l[1]*memory_stride[0] + trans_l;
+              xps[nextxp].contig_length = trans_r - trans_l + 1;
+              xps[nextxp].stride[0] = memory_stride[0];
+              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+            }
           }
 
           // if periodic along the second axis and this piece along boundary:
-          if ((periodic[1] == ESMF_TF_TRUE) && (global_start[1] <= 0)) {
+          if (periodic[1] == ESMF_TF_TRUE) {
+            if (global_start[1] <= 0) {
 
               nextxp++;
 
               xps[nextxp].rank = 2;
 
-              // calculate global offsets and contig_lengths for the index space
-              for (i=0; i<size_axisindex; i++) {
-                global_l[i] = indexlist[i].min + global_start[i];
-                global_r[i] = indexlist[i].max + global_start[i];
-              }
-              global_l[1] += global_stride[1];
-              global_r[1] += global_stride[1];
+              trans_l = global_l[1] + global_count[1];
+              trans_r = global_r[1] + global_count[1];
     
-              xps[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
+              xps[nextxp].offset  = trans_l*memory_stride[0] + global_l[0];
               xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
-              xps[nextxp].stride[0] = global_stride[0];
+              xps[nextxp].stride[0] = memory_stride[0];
               xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+            }
+            if (global_r[1] >= global_count[1]) {
+ 
+              nextxp++;
+
+              xps[nextxp].rank = 2;
+
+              trans_l = global_l[1] - global_count[1];
+              trans_r = global_r[1] - global_count[1];
     
+              xps[nextxp].offset  = trans_l*memory_stride[0] + global_l[0];
+              xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
+              xps[nextxp].stride[0] = memory_stride[0];
+              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+            }
           }
 
  //    printf("outgoing ");
@@ -445,7 +467,7 @@
       int rank,                    // in  - rank of AxisIndex array
       int *global_start,           // in  - array of global starting numbers
                                    //       per dimension
-      int *global_stride) {        // in  - array of global strides per
+      int *memory_stride) {        // in  - array of memory strides per
                                    //       dimension
 //
 // !DESCRIPTION:
@@ -467,11 +489,11 @@
       case 2:
         {
           int my_stride = indexlist[0].max - indexlist[0].min + 1;
-          int my_row = global_XP->offset/global_stride[0];
-          int my_left = global_XP->offset - my_row*global_stride[0] 
-                        - global_start[0];
+          int my_row = global_XP->offset/memory_stride[0];
+          int my_left = global_XP->offset - my_row*memory_stride[0] 
+                      - global_start[0];
           int my_right = (global_XP->offset+global_XP->contig_length)
-                       - my_row*global_stride[0] - global_start[0];
+                       - my_row*memory_stride[0] - global_start[0];
           my_row      = my_row - global_start[1];
           this->offset  = my_row*my_stride + my_left;
           this->contig_length = my_right - my_left;
