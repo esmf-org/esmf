@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.6 2004/04/28 15:58:39 slswift Exp $
+# $Id: makefile,v 1.7 2004/04/28 23:36:39 slswift Exp $
 
 ALL: build_here
 
 CFLAGS    =
 FFLAGS    = 
 SOURCEC   = 
-SOURCEF   = wrf_io.F90 field_routines.F90# ESMF_IO.F90
+SOURCEF   = wrf_io.F90 field_routines.F90 ESMF_IO.F90
 CODE      = ext_ncd_get_dom_ti.code ext_ncd_get_var_td.code ext_ncd_get_var_ti.code ext_ncd_put_dom_ti.code ext_ncd_put_var_td.code ext_ncd_put_var_ti.code transpose.code
 #STOREH    = ESMC_IO.h
 
@@ -31,7 +31,7 @@ CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
 
-# ESMF_IO.o:		wrf_io.o field_routines.o
+# ESMF_IO.o:		wrf_io.F90 field_routines.F90
 
 # wrf_io.o:		wrf_io.F90 $(CODE)
 # 			sed -e '1,/BEGINIOFLAGS/d' -e '/ENDIOFLAGS/,$$d' $< > wrf_io_flags.h
