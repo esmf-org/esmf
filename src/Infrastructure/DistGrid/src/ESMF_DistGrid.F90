@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.62 2003/07/31 23:00:35 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.63 2003/07/31 23:36:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.62 2003/07/31 23:00:35 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.63 2003/07/31 23:36:31 nscollins Exp $'
 
 !==============================================================================
 !
@@ -153,7 +153,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridCreateEmpty
          module procedure ESMF_DistGridCreateInternal
-         module procedure ESMF_DistGridCreateInternalSpecd
+         module procedure ESMF_DistGridCreateIntSpec
 !        module procedure ESMF_DistGridCreateCopy
 
 ! !DESCRIPTION:
@@ -362,14 +362,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DistGridCreateInternalSpecd - Create a new DistGrid internally
+! !IROUTINE: ESMF_DistGridCreateIntSpec - Create a new DistGrid internally
 
 ! !INTERFACE:
-      function ESMF_DistGridCreateInternalSpecd(countsPerDE1, countsPerDE2, &
+      function ESMF_DistGridCreateIntSpec(countsPerDE1, countsPerDE2, &
                                                 layout, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DistGrid) :: ESMF_DistGridCreateInternalSpecd
+      type(ESMF_DistGrid) :: ESMF_DistGridCreateIntSpec
 !
 ! !ARGUMENTS:
       integer, dimension(:), intent(in) :: countsPerDE1
@@ -406,7 +406,7 @@
 
 !     Initialize pointers
       nullify(distgrid)
-      nullify(ESMF_DistGridCreateInternalSpecd%ptr)
+      nullify(ESMF_DistGridCreateIntSpec%ptr)
 
 !     Initialize return code
       if(present(rc)) then
@@ -427,10 +427,10 @@
                                           countsPerDE2, name, rc)
 
 !     Set return values.
-      ESMF_DistGridCreateInternalSpecd%ptr => distgrid
+      ESMF_DistGridCreateIntSpec%ptr => distgrid
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_DistGridCreateInternalSpecd
+      end function ESMF_DistGridCreateIntSpec
 
 !------------------------------------------------------------------------------
 !BOP
