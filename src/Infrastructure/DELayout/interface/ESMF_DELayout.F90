@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.13 2004/03/16 17:44:03 svasquez Exp $
+! $Id: ESMF_DELayout.F90,v 1.14 2004/03/16 18:38:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.13 2004/03/16 17:44:03 svasquez Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.14 2004/03/16 18:38:29 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1249,7 +1249,7 @@
 !        The {\tt ESMF\_DELayout}.
 !     \item[DistArray]
 !       The distributed array.
-!     \item[global_dimlengths]
+!     \item[global\_dimlengths]
 !       The global dimension length.
 !     \item[localDimCounts]
 !       THe local dimension counts.
@@ -1349,7 +1349,7 @@
 !        The {\tt ESMF\_DELayout}.
 !     \item[DistArray]
 !       The distributed array.
-!     \item[global_dimlengths]
+!     \item[global\_dimlengths]
 !       The global dimension length.
 !     \item[localDimCounts]
 !       The local dimension counts.
@@ -1450,7 +1450,7 @@
 !        The {\tt ESMF\_DELayout}.          
 !     \item[DistArray]
 !       The distributed array.
-!     \item[global_dimlengths]
+!     \item[global\_dimlengths]
 !       The global dimension length.
 !     \item[localDimCounts]
 !       The local dimension counts.
@@ -2197,9 +2197,9 @@
 !       The send array length.
 !     \item[rnum]
 !       The receive array length.
-!     \item[sde_index]
+!     \item[sde\_index]
 !       The send DE index.
-!     \item[rde_index]
+!     \item[rde\_index]
 !       The receive DE index.
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
