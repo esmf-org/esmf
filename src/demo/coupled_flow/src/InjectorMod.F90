@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.6 2004/03/18 23:21:24 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.7 2004/03/24 22:56:05 jwolfe Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -276,7 +276,12 @@
       call ESMF_StateAddData(exportState, "Q", rc)
       call ESMF_StateAddData(exportState, "FLAG", rc)
 
-end subroutine injector_init1
+      !! DEBUG: these are here so we can run w/o the coupler to debug
+      !!  code.  remove these lines later.
+      call ESMF_StateAddData(exportState, field_sie, rc)
+      rc = ESMF_SUCCESS
+
+      end subroutine injector_init1
 
 !------------------------------------------------------------------------------
 !BOPI
