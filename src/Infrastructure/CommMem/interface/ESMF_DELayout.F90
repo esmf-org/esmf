@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.7 2003/03/24 16:28:14 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.8 2003/03/24 17:09:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.7 2003/03/24 16:28:14 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.8 2003/03/24 17:09:26 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1121,18 +1121,19 @@
 !BOP
 !
 ! !INTERFACE:
-      subroutine ESMF_DELayoutSendRecv(layout, sArray, rArray, arrayLen, &
-                                      sDE, rDE, rc)
+      subroutine ESMF_DELayoutSendRecv(layout, sArray, rArray, sarrayLen, &
+                                      rarrayLen, sDE, rDE, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
       real(4), intent(in) :: sArray(:), rArray(:)
-      integer, intent(in) :: arrayLen
+      integer, intent(in) :: sarrayLen
+      integer, intent(in) :: rarrayLen
       integer, intent(in) :: sDE, rDE
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Performs an MPI-like send-receive for an integer array.
+!     Performs an MPI-like send-receive for a real array.
 !
 !EOP
 
@@ -1149,8 +1150,8 @@
       endif
 
 !     Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutSendRecv(layout, sArray, rArray, arrayLen, & 
-                                      sDE, rDE, rc)
+      call c_ESMC_DELayoutSendRecv(layout, sArray, rArray, sarrayLen, & 
+                                      rarrayLen, sDE, rDE, rc)
       if (status .ne. ESMF_SUCCESS) then
         print *, "ESMF_DELayoutSendRecv error"
         return
