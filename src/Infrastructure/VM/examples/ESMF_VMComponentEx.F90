@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.2 2004/06/21 19:37:31 theurich Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.3 2004/09/03 16:38:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -208,9 +208,9 @@ program ESMF_VMComponentEx
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
-    print *, "PASS: ESMF_VMSendVMRecvEx.F90"
+    print *, "PASS: ESMF_VMComponentEx.F90"
   else
-    print *, "FAIL: ESMF_VMSendVMRecvEx.F90"
+    print *, "FAIL: ESMF_VMComponentEx.F90"
   endif
   
 !BOC  
