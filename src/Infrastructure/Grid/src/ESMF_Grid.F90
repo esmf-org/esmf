@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.190 2004/08/17 23:18:30 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.191 2004/08/18 19:33:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.190 2004/08/17 23:18:30 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.191 2004/08/18 19:33:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1175,9 +1175,9 @@
 !          information for the corresponding grid axis.  If this element is:
 !                  0   the grid axis is not distributed;
 !                  1   the grid axis is distributed by the first decomposition
-!                      axis in the {\tt delayout];
+!                      axis in the {\tt delayout};
 !                  2   the grid axis is distributed by the second decomposition
-!                      axis in the {\tt delayout];
+!                      axis in the {\tt delayout};
 !          The number of array elements should be greater or equal to the number
 !          of grid dimensions.  The default is that the first grid axis is
 !          distributed by the first decompostion axis, the second grid axis is
