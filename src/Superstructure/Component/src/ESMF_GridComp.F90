@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.39 2004/04/30 14:01:39 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.40 2004/04/30 14:45:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.39 2004/04/30 14:01:39 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.40 2004/04/30 14:45:58 theurich Exp $'
 
 !==============================================================================
 !
@@ -671,55 +671,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompFinalize - Call the GridComp's finalize routine
-
-! !INTERFACE:
-      recursive subroutine ESMF_GridCompFinalize(gridcomp, importState, &
-        exportState, clock, phase, blockingFlag, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_GridComp) :: gridcomp
-      type (ESMF_State), intent(inout), optional :: importState
-      type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user finalize code for {\tt gridcomp}.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[gridcomp]
-!    GridComp to call Finalize routine for.
-!   \item[{[importState]}]  
-!    Import data for finalize.
-!   \item[{[exportState]}]  
-!     Export data for finalize.
-!   \item[{[clock]}]  
-!     External clock for passing in time information.
-!   \item[{[phase]}]  
-!     If multiple-phase finalize, which phase number this is.
-!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompFinalize(gridcomp%compp, importState, exportState, &
-          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
-
-        end subroutine ESMF_GridCompFinalize
-
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_GridCompGet - Query a GridComp for information
 !
 ! !INTERFACE:
@@ -727,15 +678,15 @@
         grid, clock, configFile, config, vm, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp), intent(in) :: gridcomp
-      character(len=*), intent(out), optional :: name
+      type(ESMF_GridComp),     intent(in)            :: gridcomp
+      character(len=*),        intent(out), optional :: name
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
-      type(ESMF_Grid), intent(out), optional :: grid
-      type(ESMF_Clock), intent(out), optional :: clock
-      character(len=*), intent(out), optional :: configFile
-      type(ESMF_Config), intent(out), optional :: config
-      type(ESMF_VM), intent(out), optional :: vm
-      integer, intent(out), optional :: rc             
+      type(ESMF_Grid),         intent(out), optional :: grid
+      type(ESMF_Clock),        intent(out), optional :: clock
+      character(len=*),        intent(out), optional :: configFile
+      type(ESMF_Config),       intent(out), optional :: config
+      type(ESMF_VM),           intent(out), optional :: vm
+      integer,                 intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -746,7 +697,7 @@
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[name]
+!   \item[gridcomp]
 !    GridComp to query.
 !   \item[{[name]}]
 !    GridComp name.
@@ -762,6 +713,9 @@
 !   \item[{[config]}]
 !    Already created {\tt Config} object. If specified, takes
 !    priority over filename.
+!   \item[{[vm]}]
+!    VM instance of a currently running component. This is a PET specific
+!    object.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -779,177 +733,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompInitialize - Call the GridComp's initialize routine
-
-! !INTERFACE:
-      recursive subroutine ESMF_GridCompInitialize(gridcomp, importState, &
-        exportState, clock, phase, blockingFlag, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_GridComp) :: gridcomp
-      type (ESMF_State), intent(inout), optional :: importState
-      type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user initialization code for a gridcomp.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[gridcomp]
-!    GridComp to call Initialization routine for.
-!   \item[{[importState]}]  
-!    Import data for initialization.
-!   \item[{[exportState]}]  
-!    Export data for initialization.
-!   \item[{[clock]}]  
-!    External clock for passing in time information.
-!   \item[{[phase]}]  
-!    If multiple-phase init, which phase number this is.
-!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompInitialize(gridcomp%compp, importState, exportState, &
-          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
-
-        end subroutine ESMF_GridCompInitialize
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_GridCompPrint - Print the contents of a GridComp
-!
-! !INTERFACE:
-      subroutine ESMF_GridCompPrint(gridcomp, options, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp) :: gridcomp
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to print information about an {\tt ESMF\_GridComp}.
-!
-!  The arguments are:
-!  \begin{description}
-!   \item[gridcomp]
-!    GridComp to print.
-!   \item[{[options]}]
-!    Print options.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-       print *, "Gridded GridComp:"
-       call ESMF_CompPrint(gridcomp%compp, options, rc)
-
-       end subroutine ESMF_GridCompPrint
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCompReadRestart - Call the GridComp's restore routine
-
-! !INTERFACE:
-      recursive subroutine ESMF_GridCompReadRestart(gridcomp, iospec, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_GridComp), intent(inout) :: gridcomp
-      type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user restore code for a {\tt gridcomp}.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[gridcomp]
-!    GridComp to call ReadRestart routine for.
-!   \item[{[iospec]}]  
-!    I/O options.
-!   \item[{[clock]}]  
-!    External clock for passing in time information.
-!   \item[{[phase]}]  
-!    If multiple-phase finalize, which phase number this is.
-!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, rc)
-
-        end subroutine ESMF_GridCompReadRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCompRun - Call the GridComp's run routine
-
-! !INTERFACE:
-      recursive subroutine ESMF_GridCompRun(gridcomp, importState, &
-        exportState, clock, phase, blockingFlag, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_GridComp) :: gridcomp
-      type (ESMF_State), intent(inout), optional :: importState
-      type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user run code for the {\tt gridcomp}.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[gridcomp]
-!    GridComp to call Run routine for.
-!   \item[{[importState]}]  
-!    Import data for run.
-!   \item[{[exportState]}]  
-!     Export data for run.
-!   \item[{[clock]}]  
-!     External clock for passing in time information.
-!   \item[{[phase]}]  
-!     If multiple-phase run, which phase number this is.
-!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompRun(gridcomp%compp, importState, exportState, &
-          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
-
-        end subroutine ESMF_GridCompRun
-
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_GridCompSet - Set or reset information about the GridComp
 !
 ! !INTERFACE:
@@ -957,14 +740,14 @@
                                                        configFile, config, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: gridcomp
-      character(len=*), intent(in), optional :: name
-      type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
-      type(ESMF_Grid), intent(in), optional :: grid
-      type(ESMF_Clock), intent(in), optional :: clock
-      character(len=*), intent(in), optional :: configFile
-      type(ESMF_Config), intent(in), optional :: config
-      integer, intent(out), optional :: rc             
+      type(ESMF_GridComp),     intent(inout)         :: gridcomp
+      character(len=*),        intent(in),  optional :: name
+      type(ESMF_GridCompType), intent(in),  optional :: gridcomptype 
+      type(ESMF_Grid),         intent(in),  optional :: grid
+      type(ESMF_Clock),        intent(in),  optional :: clock
+      character(len=*),        intent(in),  optional :: configFile
+      type(ESMF_Config),       intent(in),  optional :: config
+      integer,                 intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -986,11 +769,11 @@
 !    Default grid associated with this gridcomp.
 !   \item[{[clock]}]
 !    Private clock associated with this gridcomp.
+!   \item[{[configFile]}]
+!    GridComp-specific configuration filename.
 !   \item[{[config]}]
 !    Already created {\tt ESMF\_Config} object.   If specified, takes
 !    priority over filename.
-!   \item[{[configFile]}]
-!    GridComp-specific configuration filename.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1038,6 +821,188 @@
  
        end subroutine ESMF_GridCompValidate
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_GridCompPrint - Print the contents of a GridComp
+!
+! !INTERFACE:
+      subroutine ESMF_GridCompPrint(gridcomp, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp) :: gridcomp
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about an {\tt ESMF\_GridComp}.
+!
+!  The arguments are:
+!  \begin{description}
+!   \item[gridcomp]
+!    GridComp to print.
+!   \item[{[options]}]
+!    Print options.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+       print *, "Gridded GridComp:"
+       call ESMF_CompPrint(gridcomp%compp, options, rc)
+
+       end subroutine ESMF_GridCompPrint
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompInitialize - Call the GridComp's initialize routine
+
+! !INTERFACE:
+      recursive subroutine ESMF_GridCompInitialize(gridcomp, importState, &
+        exportState, clock, phase, blockingFlag, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp)                              :: gridcomp
+      type (ESMF_State),        intent(inout), optional :: importState
+      type (ESMF_State),        intent(inout), optional :: exportState
+      type (ESMF_Clock),        intent(in),    optional :: clock
+      integer,                  intent(in),    optional :: phase
+      type (ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
+      integer,                  intent(out),   optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user initialization code for a gridcomp.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[gridcomp]
+!    GridComp to call Initialization routine for.
+!   \item[{[importState]}]  
+!    Import data for initialization.
+!   \item[{[exportState]}]  
+!    Export data for initialization.
+!   \item[{[clock]}]  
+!    External clock for passing in time information.
+!   \item[{[phase]}]  
+!    If multiple-phase init, which phase number this is.
+!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[blockingFlag]}]  
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompInitialize(gridcomp%compp, importState, exportState, &
+          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
+
+        end subroutine ESMF_GridCompInitialize
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompRun - Call the GridComp's run routine
+
+! !INTERFACE:
+      recursive subroutine ESMF_GridCompRun(gridcomp, importState, &
+        exportState, clock, phase, blockingFlag, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp)                              :: gridcomp
+      type (ESMF_State),        intent(inout), optional :: importState
+      type (ESMF_State),        intent(inout), optional :: exportState
+      type (ESMF_Clock),        intent(in),    optional :: clock
+      integer,                  intent(in),    optional :: phase
+      type (ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
+      integer,                  intent(out),   optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user run code for the {\tt gridcomp}.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[gridcomp]
+!    GridComp to call Run routine for.
+!   \item[{[importState]}]  
+!    Import data for run.
+!   \item[{[exportState]}]  
+!     Export data for run.
+!   \item[{[clock]}]  
+!     External clock for passing in time information.
+!   \item[{[phase]}]  
+!     If multiple-phase run, which phase number this is.
+!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[blockingFlag]}]  
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompRun(gridcomp%compp, importState, exportState, &
+          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
+
+        end subroutine ESMF_GridCompRun
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompFinalize - Call the GridComp's finalize routine
+
+! !INTERFACE:
+      recursive subroutine ESMF_GridCompFinalize(gridcomp, importState, &
+        exportState, clock, phase, blockingFlag, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp)                              :: gridcomp
+      type (ESMF_State),        intent(inout), optional :: importState
+      type (ESMF_State),        intent(inout), optional :: exportState
+      type (ESMF_Clock),        intent(in),    optional :: clock
+      integer,                  intent(in),    optional :: phase
+      type (ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
+      integer,                  intent(out),   optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user finalize code for {\tt gridcomp}.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[gridcomp]
+!    GridComp to call Finalize routine for.
+!   \item[{[importState]}]  
+!    Import data for finalize.
+!   \item[{[exportState]}]  
+!     Export data for finalize.
+!   \item[{[clock]}]  
+!     External clock for passing in time information.
+!   \item[{[phase]}]  
+!     If multiple-phase finalize, which phase number this is.
+!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[blockingFlag]}]  
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompFinalize(gridcomp%compp, importState, exportState, &
+          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
+
+        end subroutine ESMF_GridCompFinalize
+
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1080,7 +1045,46 @@
 
         end subroutine ESMF_GridCompWriteRestart
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompReadRestart - Call the GridComp's restore routine
 
+! !INTERFACE:
+      recursive subroutine ESMF_GridCompReadRestart(gridcomp, iospec, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp), intent(inout) :: gridcomp
+      type (ESMF_IOSpec), intent(inout), optional :: iospec
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user restore code for a {\tt gridcomp}.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[gridcomp]
+!    GridComp to call ReadRestart routine for.
+!   \item[{[iospec]}]  
+!    I/O options.
+!   \item[{[clock]}]  
+!    External clock for passing in time information.
+!   \item[{[phase]}]  
+!    If multiple-phase finalize, which phase number this is.
+!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, rc)
+
+        end subroutine ESMF_GridCompReadRestart
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -1104,7 +1108,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gridcomp] 
-!      gridded gridcomp object
+!      Gridded component object.
 !     \item[{[max]}] 
 !      Maximum threading level
 !     \item[{[pref\_intra\_process]}] 
@@ -1165,7 +1169,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gridcomp] 
-!      gridded gridcomp object
+!      Gridded component object.
 !     \item[{[max]}] 
 !      Maximum number of PEs per PET
 !     \item[{[pref\_intra\_process]}] 
@@ -1227,7 +1231,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gridcomp] 
-!      gridded gridcomp object
+!      Gridded component object.
 !     \item[{[max]}] 
 !      Maximum number of PEs per PET
 !     \item[{[pref\_intra\_process]}] 
@@ -1269,15 +1273,15 @@
 
 
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GridCompWait - Wait for a GridComp to return
 
 ! !INTERFACE:
   subroutine ESMF_GridCompWait(gridcomp, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in) ::            gridcomp
-    integer, intent(out), optional  ::            rc           
+    type(ESMF_GridComp), intent(in)             :: gridcomp
+    integer,             intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
 !     Wait for an {\tt ESMF\_GridComp} to return.
@@ -1290,7 +1294,7 @@
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
     integer :: status                     ! local error status
     logical :: rcpresent
