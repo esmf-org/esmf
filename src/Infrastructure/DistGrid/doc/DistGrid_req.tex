@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.11 2002/05/08 13:36:53 wsawyer Exp $
+% $Id: DistGrid_req.tex,v 1.12 2002/05/08 13:51:13 wsawyer Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -86,7 +86,6 @@ etc).
 \item[Notes]
 \end{reqlist}
 
-<<<<<<< DistGrid_req.tex
 \ssreq{1D distributed arrays associated with a 2D decompsition}
 
 Within a 2D decomposition, it must be possible for arrays to be
@@ -103,23 +102,6 @@ distributed along a single axis of distribution.
   2D decomposition, which not the default.
 \end{reqlist}
 
-=======
-\ssreq{1D distributed arrays associated with a 2D decompsition}
-
-Within a 2D decomposition, it must be possible for arrays to be
-distributed along a single axis of distribution.
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes] i.e given a 2D decompsition in \texttt{(i,j)}, it must be
-  possible to have arrays that are functions of \texttt{(i,j)},
-  \texttt{(i,j,k)}, etc but also \emph{(j,k)}.
-\end{reqlist}
-
->>>>>>> 1.10
 \sreq{3D decomposition}
 
 ESMF permits 3D domain decomposition, i.e. the distribution of a
@@ -139,15 +121,9 @@ Given a global domain and a PE layout, there will be methods to assign
 each point in the domain to one PE for computation. 
 
 \begin{reqlist}
-<<<<<<< DistGrid_req.tex
 \item[Priority] 
 \item[Source] Requirements for specific flags to control the
   decomposition must be added here.
-=======
-\item[Priority]
-\item[Source] Requirements for specific flags to control the
-  decomposition must be added here.
->>>>>>> 1.10
 \item[Status]
 \item[Verification]
 \item[Notes] in multi-threaded applications, the PE assignment is done
@@ -298,27 +274,15 @@ domains associated with each PE of a  \textbf{DistGrid}.
 \item[Source]
 \item[Status]
 \item[Verification]
-<<<<<<< DistGrid_req.tex
 \item[Notes] Besides being able to retrieve one's own domain
   information, the full list of domains is also required for certain
   operations.
-=======
-\item[Notes] it is natural to treat this as a \textbf{DistGrid}
-  feature, rather than having separate edge detection code in
-  applications. There is more than one way to treat LBCs in a
-  \textbf{DistGrid}: these will be spelt out anon.
->>>>>>> 1.10
 \end{reqlist}
 
-<<<<<<< DistGrid_req.tex
 \sreq{Data domain retrieval}
 
 \ssreq{Domain extents}
-=======
-\req{Grid information retrieval}
->>>>>>> 1.10
 
-<<<<<<< DistGrid_req.tex
 It shall be possible to retrieve the size of a data domain
 along each axis of decomposition.
 
@@ -329,23 +293,11 @@ along each axis of decomposition.
 \item[Verification]
 \item[Notes]
 \end{reqlist}
-=======
-\sreq{Computational domain retrieval}
->>>>>>> 1.10
 
-<<<<<<< DistGrid_req.tex
 \ssreq{Domain begin and end indices}
-=======
-\ssreq{Domain extents}
->>>>>>> 1.10
 
-<<<<<<< DistGrid_req.tex
 It shall be possible to retrieve the beginning and ending indices of a
 data domain along each axis of decomposition.
-=======
-It shall be possible to retrieve the size of a computational domain
-along each axis of decomposition.
->>>>>>> 1.10
 
 \begin{reqlist}
 \item[Priority] 1
@@ -355,19 +307,10 @@ along each axis of decomposition.
 \item[Notes]
 \end{reqlist}
 
-<<<<<<< DistGrid_req.tex
 \ssreq{Maximum domain extent}
-=======
-\ssreq{Domain begin and end indices}
->>>>>>> 1.10
 
-<<<<<<< DistGrid_req.tex
 It shall be possible to retrieve the maximum size along each axis of
 decomposition of all the data domains in the \textbf{DistGrid}. 
-=======
-It shall be possible to retrieve the beginning and ending indices of a
-computational domain along each axis of decomposition.
->>>>>>> 1.10
 
 \begin{reqlist}
 \item[Priority]
@@ -377,20 +320,11 @@ computational domain along each axis of decomposition.
 \item[Notes]
 \end{reqlist}
 
-<<<<<<< DistGrid_req.tex
 \ssreq{Index translation for globally non-conformant data domains}
-=======
-\ssreq{Maximum domain extent}
->>>>>>> 1.10
 
-<<<<<<< DistGrid_req.tex
 Where the local array allocation is not globally-conformant, 
 ESMF will have methods to translate the local indices to
 globally-conformant indices.
-=======
-It shall be possible to retrieve the maximum size along each axis of
-decomposition of all the computational domains in the \textbf{DistGrid}. 
->>>>>>> 1.10
 
 \begin{reqlist}
 \item[Priority]
@@ -405,19 +339,10 @@ decomposition of all the computational domains in the \textbf{DistGrid}.
   indices.  CAM-FV should be globally conformant.
 \end{reqlist}
 
-<<<<<<< DistGrid_req.tex
 \ssreq{Data domain list}
-=======
-\ssreq{Computational domain list}
->>>>>>> 1.10
 
-<<<<<<< DistGrid_req.tex
 ESMF methods will be provided to retrieve the list of data
 domains associated with each PE of a  \textbf{DistGrid}.
-=======
-ESMF methods will be provided to retrieve the list of computational
-domains associated with each PE of a  \textbf{DistGrid}.
->>>>>>> 1.10
 
 \begin{reqlist}
 \item[Priority]
@@ -433,28 +358,8 @@ domains associated with each PE of a  \textbf{DistGrid}.
 
 \ssreq{Domain extents}
 
-<<<<<<< DistGrid_req.tex
 It shall be possible to retrieve the size of a global domain
 along each axis of decomposition.
-=======
-\ssreq{Domain extents}
-
-It shall be possible to retrieve the size of a data domain
-along each axis of decomposition.
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes]
-\end{reqlist}
-
-\ssreq{Domain begin and end indices}
-
-It shall be possible to retrieve the beginning and ending indices of a
-data domain along each axis of decomposition.
->>>>>>> 1.10
 
 \begin{reqlist}
 \item[Priority]
@@ -465,75 +370,16 @@ data domain along each axis of decomposition.
 a priori and does not need to be retrieved.
 \end{reqlist}
 
-<<<<<<< DistGrid_req.tex
 \ssreq{Domain begin and end indices}
-=======
-\ssreq{Maximum domain extent}
 
-It shall be possible to retrieve the maximum size along each axis of
-decomposition of all the data domains in the \textbf{DistGrid}. 
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes]
-\end{reqlist}
-
-\ssreq{Index translation for globally non-conformant data domains}
-
-Where the local array allocation is not globally-conformant, 
-ESMF will have methods to translate the local indices to
-globally-conformant indices.
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes] It is possible (using array lower bound specifications)
-  to generate a \emph{globally conformant} array allocation: such that
-  if Madras is point (80,13) in the global grid, it will be (80,13) on
-  the data domain of any decomposition. Where this is not done, there
-  must be methods to translate local indices to globally conformant
-  indices.
-\end{reqlist}
-
-\ssreq{Data domain list}
-
-ESMF methods will be provided to retrieve the list of data
-domains associated with each PE of a  \textbf{DistGrid}.
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes] Besides being able to retrieve one's own domain
-  information, the full list of domains is also required for certain
-  operations.
-\end{reqlist}
-
-\sreq{Global domain retrieval}
->>>>>>> 1.10
-
-<<<<<<< DistGrid_req.tex
 It shall be possible to retrieve the beginning and ending indices of the
 domain domain along each axis of decomposition.
-=======
-\ssreq{Domain extents}
-
-It shall be possible to retrieve the size of a global domain
-along each axis of decomposition.
->>>>>>> 1.10
 
 \begin{reqlist}
 \item[Priority]
 \item[Source]
 \item[Status]
 \item[Verification]
-<<<<<<< DistGrid_req.tex
 \item[Notes] CAM-FV: the size of the global domain begin and end
 indices are known a priori and does not need to be retrieved.
 \end{reqlist}
@@ -542,23 +388,6 @@ indices are known a priori and does not need to be retrieved.
 
 ESMF methods will be provided to publish and retrieve the PE layout
 associated with a distributed grid.
-=======
-\item[Notes]
-\end{reqlist}
-
-\ssreq{Domain begin and end indices}
->>>>>>> 1.10
-
-<<<<<<< DistGrid_req.tex
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes]
-=======
-It shall be possible to retrieve the beginning and ending indices of the
-domain domain along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority]
@@ -566,20 +395,6 @@ domain domain along each axis of decomposition.
 \item[Status]
 \item[Verification]
 \item[Notes]
-\end{reqlist}
-
-\sreq{PE layout retrieval}
-
-ESMF methods will be provided to publish and retrieve the PE layout
-associated with a distributed grid.
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes]
->>>>>>> 1.10
 \end{reqlist}
 
 \sreq{Grid topology retrieval}
@@ -798,7 +613,6 @@ data arrays where each array element is a derived data type.
 It shall be possible to create a copy on any PE of the entire global
 array from a distributed array.
 
-<<<<<<< DistGrid_req.tex
 \begin{reqlist}
 \item[Priority] 1
 \item[Source] All
@@ -820,13 +634,6 @@ PElist of the entire global array from a distributed array.
 \item[Notes] 
 \end{reqlist}
 
-=======
-\sreq{Allgather}
-
-It shall be possible to create a copy on all PEs of the associated
-PElist of the entire global array from a distributed array.
-
->>>>>>> 1.10
 \sreq{Partial gather} \label{DG:PartGather}
 
 In a 2D decomposition, it shall be possible to perform a gather along
@@ -1344,7 +1151,6 @@ nested grid.
 
 \req{Unstructured grids and ungridded data} \label{DG:Unstructured}.
 
-<<<<<<< DistGrid_req.tex
 Unstructured grids and ungridded location streams will come associated
 with an underlying background grid (see~\ref{DG:terms}). Requirements
 in this section use the background grid to define operations on
@@ -1412,69 +1218,5 @@ streams, using the background grid.
 
 
 
-=======
-Unstructured grids and ungridded location streams will come associated
-with an underlying background grid (see~\ref{DG:terms}). Requirements
-in this section use the background grid to define operations on
-unstructured grids and ungridded location streams. For the purpose of
-\emph{DistGrid}, unstructured grids and ungridded location streams are
-aligned on a single axis, each index of which is associated with a
-background grid cell.
-
-\sreq{Grid association}
-
-It shall be possible to associate a structured grid with unstructured
-grids and ungridded location streams.
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes] The method to generate the background grid requires
-  location information, and belongs to \textbf{PhysGrid}.
-\end{reqlist}
-
-\sreq{Domain decomposition}
-
-It shall be possible to apply domain decomposition to unstructured
-grids and ungridded location streams, using the background grid.
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes]
-\end{reqlist}
-
-\sreq{Halos and halo updates}
-
-It shall be possible to apply halos and halo update operations as
-defined in~\ref{DG:halo} to unstructured grids and ungridded location
-streams, using the background grid.
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes]
-\end{reqlist}
-
-\sreq{Data transpose}
-
-It shall be possible to apply data transposes as defined
-in~\ref{DG:transpose} to unstructured grids and ungridded location
-streams, using the background grid.
-
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes]
-\end{reqlist}
->>>>>>> 1.10
 
 
