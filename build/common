@@ -1,4 +1,4 @@
-# $Id: common,v 1.19 2003/03/06 21:53:51 flanigan Exp $ 
+# $Id: common,v 1.20 2003/03/17 18:33:16 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -183,7 +183,7 @@ tree_run_tests: $(TESTS_RUN)
 
 tree_run_tests_uni: $(TESTS_RUN_UNI)
 
-tests: chkopts chkdir_tests
+tests: chkopts chkdir_tests build_libs
 	$(MAKE) BOPT=$(BOPT) ACTION=tree_tests tree
 
 tests_uni: chkopts chkdir_tests
