@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.41 2004/06/15 07:07:19 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.42 2004/07/22 14:46:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.41 2004/06/15 07:07:19 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.42 2004/07/22 14:46:11 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -1323,8 +1323,8 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,     // in - attribute name
-      int value) {    // in - attribute value
+      char *name,              // in - attribute name
+      ESMF_KIND_I4 value) {    // in - attribute value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1334,7 +1334,7 @@ extern "C" {
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMF_I4, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1357,9 +1357,9 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,     // in - attribute name
-      int count,      // in - number of ints in list
-      int *value) {   // in - attribute values
+      char *name,              // in - attribute name
+      int count,               // in - number of ints in list
+      ESMF_KIND_I4 *value) {   // in - attribute values
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1369,7 +1369,7 @@ extern "C" {
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, count, value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMF_I4, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1378,6 +1378,144 @@ extern "C" {
   return rc;
 
 }  // end ESMC_AttributeSet(int *)
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
+//BOPI
+// !IROUTINE:  ESMC_AttributeSet(long) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      ESMF_KIND_I8 value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOPI
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMF_I8, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(long)
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
+//BOPI
+// !IROUTINE:  ESMC_AttributeSet(long *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      int count,               // in - number of ints in list
+      ESMF_KIND_I8 *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOPI
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMF_I8, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(long *)
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(float) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      ESMF_KIND_R4 value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMF_R4, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(float)
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(float *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      int count,               // in - number of doubles in list
+      ESMF_KIND_R4 *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMF_R4, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(float *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1392,8 +1530,8 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,        // in - attribute name
-      double value) {    // in - attribute value
+      char *name,              // in - attribute name
+      ESMF_KIND_R8 value) {    // in - attribute value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1403,7 +1541,7 @@ extern "C" {
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMF_R8, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1426,9 +1564,9 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,        // in - attribute name
-      int count,         // in - number of doubles in list
-      double *value) {   // in - attribute values
+      char *name,              // in - attribute name
+      int count,               // in - number of doubles in list
+      ESMF_KIND_R8 *value) {   // in - attribute values
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1438,7 +1576,7 @@ extern "C" {
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, count, value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMF_R8, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1472,7 +1610,7 @@ extern "C" {
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_LOGICAL, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1507,7 +1645,7 @@ extern "C" {
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_LOGICAL, count, value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_LOGICAL, ESMF_NOKIND, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1541,7 +1679,7 @@ extern "C" {
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_CHARACTER, 1, value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_CHARACTER, ESMF_NOKIND, 1, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1556,7 +1694,7 @@ extern "C" {
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMC_AttributeSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet(dt,count,value) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_AttributeSet(dt,dk,count,value) - set attribute on an ESMF type
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_AttributeSet(
@@ -1567,6 +1705,7 @@ extern "C" {
 // !ARGUMENTS:
       char *name,       // in - attribute name
       ESMC_DataType dt, // in - data type
+      ESMC_DataKind dk, // in - data kind
       int count,        // in - number of values
       void *value) {    // in - attribute value
 // 
@@ -1578,7 +1717,7 @@ extern "C" {
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, dt, count, value);  
+  attr = new ESMC_Attribute(name, dt, dk, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1586,7 +1725,7 @@ extern "C" {
 
   return rc;
 
-}  // end ESMC_AttributeSet(dt,count,value)
+}  // end ESMC_AttributeSet(dt,dk,count,value)
 
 
 //-----------------------------------------------------------------------------
@@ -1644,8 +1783,8 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,           // in - name of attribute to retrieve
-      int *value) const {   // out - attribute value
+      char *name,                    // in - name of attribute to retrieve
+      ESMF_KIND_I4 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1671,6 +1810,11 @@ extern "C" {
   if (attr->dt != ESMF_DATA_INTEGER) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not type integer", &rc);
+       return rc;
+  }
+  if (attr->dk != ESMF_I4) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not kind I4", &rc);
        return rc;
   }
   if (attr->items != 1) {
@@ -1697,9 +1841,9 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,           // in - name of attribute to retrieve
-      int *count,           // out - number of values in list
-      int *value) const {   // out - attribute value
+      char *name,                    // in - name of attribute to retrieve
+      int *count,                    // out - number of values in list
+      ESMF_KIND_I4 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1727,6 +1871,11 @@ extern "C" {
                   "attribute not type integer", &rc);
        return rc;
   }
+  if (attr->dk != ESMF_I4) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not kind I4", &rc);
+       return rc;
+  }
 
   if (count) 
       *count = attr->items;
@@ -1746,7 +1895,7 @@ extern "C" {
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(double) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_AttributeGet(long) - get attribute from an ESMF type
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_AttributeGet(
@@ -1755,8 +1904,129 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,              // in - name of attribute to retrieve
-      double *value) const {   // out - attribute value
+      char *name,                    // in - name of attribute to retrieve
+      ESMF_KIND_I8 *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
+  }
+
+  if (attr->dt != ESMF_DATA_INTEGER) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type integer", &rc);
+       return rc;
+  }
+  if (attr->dk != ESMF_I8) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not kind I8", &rc);
+       return rc;
+  }
+  if (attr->items != 1) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not single value", &rc);
+       return rc;
+  }
+
+  *value = attr->vl;
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(long)
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(long *) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,                    // in - name of attribute to retrieve
+      int *count,                    // out - number of values in list
+      ESMF_KIND_I8 *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
+  }
+
+  if (attr->dt != ESMF_DATA_INTEGER) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type integer", &rc);
+       return rc;
+  }
+  if (attr->dk != ESMF_I8) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not kind I8", &rc);
+       return rc;
+  }
+
+  if (count) 
+      *count = attr->items;
+
+  if (value) {
+      if (attr->items == 1)
+          value[0] = attr->vl;
+      else for (i=0; i<attr->items; i++)
+          value[i] = attr->vlp[i];
+  }
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(long *)
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(float) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,                    // in - name of attribute to retrieve
+      ESMF_KIND_R4 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1781,7 +2051,12 @@ extern "C" {
 
   if (attr->dt != ESMF_DATA_REAL) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type integer", &rc);
+                  "attribute not type real", &rc);
+       return rc;
+  }
+  if (attr->dk != ESMF_R4) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not kind R4", &rc);
        return rc;
   }
   if (attr->items != 1) {
@@ -1790,7 +2065,128 @@ extern "C" {
        return rc;
   }
 
-  *value = attr->vr;
+  *value = attr->vf;
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(float)
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(float *) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,                    // in - name of attribute to retrieve
+      int *count,                    // out - number of values in list
+      ESMF_KIND_R4 *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
+  }
+
+  if (attr->dt != ESMF_DATA_REAL) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type real", &rc);
+       return rc;
+  }
+  if (attr->dk != ESMF_R4) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not kind R4", &rc);
+       return rc;
+  }
+
+  if (count) 
+      *count = attr->items;
+
+  if (value) {
+      if (attr->items == 1)
+          value[0] = attr->vf;
+      else for (i=0; i<attr->items; i++)
+          value[i] = attr->vfp[i];
+  }
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(float *)
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(double) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,                    // in - name of attribute to retrieve
+      ESMF_KIND_R8 *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
+  }
+
+  if (attr->dt != ESMF_DATA_REAL) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type real", &rc);
+       return rc;
+  }
+  if (attr->dk != ESMF_R8) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not kind R8", &rc);
+       return rc;
+  }
+  if (attr->items != 1) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not single value", &rc);
+       return rc;
+  }
+
+  *value = attr->vd;
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeGet(double)
@@ -1808,9 +2204,9 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,              // in - name of attribute to retrieve
-      int *count,              // out - number of values in list
-      double *value) const {   // out - attribute value
+      char *name,                    // in - name of attribute to retrieve
+      int *count,                    // out - number of values in list
+      ESMF_KIND_R8 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1835,7 +2231,12 @@ extern "C" {
 
   if (attr->dt != ESMF_DATA_REAL) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type integer", &rc);
+                  "attribute not type real", &rc);
+       return rc;
+  }
+  if (attr->dk != ESMF_R8) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not kind R8", &rc);
        return rc;
   }
 
@@ -1844,9 +2245,9 @@ extern "C" {
 
   if (value) {
       if (attr->items == 1)
-          value[0] = attr->vr;
+          value[0] = attr->vd;
       else for (i=0; i<attr->items; i++)
-          value[i] = attr->vrp[i];
+          value[i] = attr->vdp[i];
   }
 
   return ESMF_SUCCESS;
@@ -1892,7 +2293,7 @@ extern "C" {
 
   if (attr->dt != ESMF_DATA_LOGICAL) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type integer", &rc);
+                  "attribute not type logical", &rc);
        return rc;
   }
   if (attr->items != 1) {
@@ -1901,7 +2302,7 @@ extern "C" {
        return rc;
   }
 
-  *value = attr->vl;
+  *value = attr->vb;
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeGet(bool)
@@ -1947,7 +2348,7 @@ extern "C" {
 
   if (attr->dt != ESMF_DATA_LOGICAL) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type integer", &rc);
+                  "attribute not type logical", &rc);
        return rc;
   }
 
@@ -1956,9 +2357,9 @@ extern "C" {
 
   if (value) {
       if (attr->items == 1)
-          value[0] = attr->vl;
+          value[0] = attr->vb;
       else for (i=0; i<attr->items; i++)
-          value[i] = attr->vlp[i];
+          value[i] = attr->vbp[i];
   }
 
   return ESMF_SUCCESS;
@@ -2009,7 +2410,7 @@ extern "C" {
 
   if (attr->dt != ESMF_DATA_CHARACTER) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type integer", &rc);
+                  "attribute not type character", &rc);
        return rc;
   }
   if (attr->items != 1) {
@@ -2027,7 +2428,7 @@ extern "C" {
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(dt,count,value) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_AttributeGet(name) - get attribute from an ESMF type
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_AttributeGet(
@@ -2038,6 +2439,7 @@ extern "C" {
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
       ESMC_DataType *dt,             // out - data type
+      ESMC_DataKind *dk,             // out - data kind
       int *count,                    // out - number of values in list
       void *value) const {           // out - attribute value(s)
 // 
@@ -2065,6 +2467,9 @@ extern "C" {
   if (dt) 
       *dt = attr->dt;
 
+  if (dk) 
+      *dk = attr->dk;
+
   if (count) {
       if (attr->dt == ESMF_DATA_CHARACTER)
           *count = attr->slen;
@@ -2076,13 +2481,19 @@ extern "C" {
       if (attr->items == 1) {
           switch(attr->dt) {
             case ESMF_DATA_INTEGER: 
-              *(int *)value = attr->vi; 
+              if (attr->dk == ESMF_I4)
+                  *(ESMF_KIND_I4 *)value = attr->vi; 
+              else
+                  *(ESMF_KIND_I8 *)value = attr->vl; 
               break;
             case ESMF_DATA_REAL: 
-              *(double *)value = attr->vr; 
+              if (attr->dk == ESMF_R4)
+                  *(ESMF_KIND_R4 *)value = attr->vf; 
+              else
+                  *(ESMF_KIND_R8 *)value = attr->vd; 
               break;
             case ESMF_DATA_LOGICAL: 
-              *(ESMC_Logical *)value = attr->vl; 
+              *(ESMC_Logical *)value = attr->vb; 
               break;
             case ESMF_DATA_CHARACTER:
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -2091,24 +2502,33 @@ extern "C" {
               return rc;
             default:  
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "unknown data type", 
-                                       &rc);
+                                       "unknown data type", &rc);
               return rc;
           }
  
       } else {
           switch(attr->dt) {
             case ESMF_DATA_INTEGER:
-              for (i=0; i<attr->items; i++)
-                  ((int *)value)[i] = attr->vip[i];
+              if (attr->dk == ESMF_I4) {
+                  for (i=0; i<attr->items; i++)
+                      ((ESMF_KIND_I4 *)value)[i] = attr->vip[i];
+              } else {
+                  for (i=0; i<attr->items; i++)
+                      ((ESMF_KIND_I8 *)value)[i] = attr->vlp[i];
+              }
               break;
             case ESMF_DATA_REAL:
-              for (i=0; i<attr->items; i++)
-                  ((double *)value)[i] = attr->vrp[i];
+              if (attr->dk == ESMF_R4) {
+                  for (i=0; i<attr->items; i++)
+                      ((ESMF_KIND_R4 *)value)[i] = attr->vfp[i];
+              } else {
+                  for (i=0; i<attr->items; i++)
+                      ((ESMF_KIND_R8 *)value)[i] = attr->vdp[i];
+              }
               break;
             case ESMF_DATA_LOGICAL:
               for (i=0; i<attr->items; i++)
-                  ((ESMC_Logical *)value)[i] = attr->vlp[i];
+                  ((ESMC_Logical *)value)[i] = attr->vbp[i];
               break;
             default:  
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -2121,13 +2541,13 @@ extern "C" {
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(dt,count,value)
+}  // end ESMC_AttributeGet(name)
 
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(dt,count,value) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_AttributeGet(num) - get attribute from an ESMF type
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_AttributeGet(
@@ -2139,6 +2559,7 @@ extern "C" {
       int num,                       // in - number of attribute to retrieve
       char *name,                    // out - attribute name
       ESMC_DataType *dt,             // out - data type
+      ESMC_DataKind *dk,             // out - data kind
       int *count,                    // out - number of values in list
       void *value) const {           // out - attribute value(s)
 // 
@@ -2162,6 +2583,9 @@ extern "C" {
   if (dt) 
       *dt = attr->dt;
 
+  if (dk) 
+      *dk = attr->dk;
+
   if (count) {
       if (attr->dt == ESMF_DATA_CHARACTER)
           *count = attr->slen;
@@ -2173,13 +2597,19 @@ extern "C" {
       if (attr->items == 1) {
           switch(attr->dt) {
             case ESMF_DATA_INTEGER: 
-              *(int *)value = attr->vi; 
+              if (attr->dk == ESMF_I4)
+                  *(ESMF_KIND_I4 *)value = attr->vi; 
+              else
+                  *(ESMF_KIND_I8 *)value = attr->vl; 
               break;
             case ESMF_DATA_REAL: 
-              *(double *)value = attr->vr; 
+              if (attr->dk == ESMF_R4)
+                  *(ESMF_KIND_R4 *)value = attr->vf; 
+              else
+                  *(ESMF_KIND_R8 *)value = attr->vd; 
               break;
             case ESMF_DATA_LOGICAL: 
-              *(ESMC_Logical *)value = attr->vl; 
+              *(ESMC_Logical *)value = attr->vb; 
               break;
             case ESMF_DATA_CHARACTER:
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -2196,16 +2626,26 @@ extern "C" {
       } else {
           switch(attr->dt) {
             case ESMF_DATA_INTEGER:
-              for (i=0; i<attr->items; i++)
-                  ((int *)value)[i] = attr->vip[i];
+              if (attr->dk == ESMF_I4) {
+                  for (i=0; i<attr->items; i++)
+                      ((ESMF_KIND_I4 *)value)[i] = attr->vip[i];
+              } else {
+                  for (i=0; i<attr->items; i++)
+                      ((ESMF_KIND_I8 *)value)[i] = attr->vlp[i];
+              }
               break;
             case ESMF_DATA_REAL:
-              for (i=0; i<attr->items; i++)
-                  ((double *)value)[i] = attr->vrp[i];
+              if (attr->dk == ESMF_R4) {
+                  for (i=0; i<attr->items; i++)
+                      ((ESMF_KIND_R4 *)value)[i] = attr->vfp[i];
+              } else {
+                  for (i=0; i<attr->items; i++)
+                      ((ESMF_KIND_R8 *)value)[i] = attr->vdp[i];
+              }
               break;
             case ESMF_DATA_LOGICAL:
               for (i=0; i<attr->items; i++)
-                  ((ESMC_Logical *)value)[i] = attr->vlp[i];
+                  ((ESMC_Logical *)value)[i] = attr->vbp[i];
               break;
             default:  
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -2218,7 +2658,7 @@ extern "C" {
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(dt,count,value)
+}  // end ESMC_AttributeGet(num)
 
 
 //-----------------------------------------------------------------------------
@@ -2303,7 +2743,7 @@ extern "C" {
 //
 //EOP
 
-  return ESMF_SUCCESS;
+  return ESMF_FAILURE;
 
 }  // end ESMC_AttributeGetNameList
 
@@ -2328,7 +2768,7 @@ extern "C" {
 //
 //EOP
 
-  return ESMF_SUCCESS;
+  return ESMF_FAILURE;
 
 }  // end ESMC_AttributeSetList
 
@@ -2353,7 +2793,7 @@ extern "C" {
 //
 //EOP
 
-  return ESMF_SUCCESS;
+  return ESMF_FAILURE;
 
 }  // end ESMC_AttributeGetList
 
@@ -2379,7 +2819,7 @@ extern "C" {
 
 //EOP
 
-  return ESMF_SUCCESS;
+  return ESMF_FAILURE;
 
 }  // end ESMC_AttributeCopy
 
@@ -2405,7 +2845,7 @@ extern "C" {
 
 //EOP
 
-  return ESMF_SUCCESS;
+  return ESMF_FAILURE;
 
 }  // end ESMC_AttributeCopyAll
 
@@ -2431,7 +2871,12 @@ extern "C" {
   int rc;
   char msgbuf[ESMF_MAXSTR];
 
-  sprintf(msgbuf, "name '%s', type %s", attrName, ESMC_DataTypeString(dt));
+  if (dk != ESMF_NOKIND) 
+      sprintf(msgbuf, "name '%s', type %s, kind %s", 
+              attrName, ESMC_DataTypeString(dt), ESMC_DataKindString(dk));
+  else
+      sprintf(msgbuf, "name '%s', type %s", attrName, ESMC_DataTypeString(dt));
+ 
   printf(msgbuf);
   //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
@@ -2444,10 +2889,24 @@ extern "C" {
       printf(", value: ");
       //ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
       switch (dt) {
-        case ESMF_DATA_INTEGER:   sprintf(msgbuf, "%d\n", vi); break;
-        case ESMF_DATA_REAL:      sprintf(msgbuf, "%g\n", vr); break; 
-        case ESMF_DATA_LOGICAL:   sprintf(msgbuf, "%s\n", ESMC_LogicalString(vl)); break;
-        case ESMF_DATA_CHARACTER: sprintf(msgbuf, "%s\n", vcp); break;
+        case ESMF_DATA_INTEGER:   
+             if (dk == ESMF_I4)
+                 sprintf(msgbuf, "%d\n", vi); 
+             else
+                 sprintf(msgbuf, "%ld\n", vl); 
+             break;
+        case ESMF_DATA_REAL:      
+             if (dk == ESMF_R4)
+                 sprintf(msgbuf, "%f\n", vf); 
+             else
+                 sprintf(msgbuf, "%g\n", vd); 
+             break; 
+        case ESMF_DATA_LOGICAL:   
+             sprintf(msgbuf, "%s\n", ESMC_LogicalString(vb)); 
+             break;
+        case ESMF_DATA_CHARACTER: 
+             sprintf(msgbuf, "%s\n", vcp); 
+             break;
         default:  
              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
                              "unknown value", &rc);
@@ -2463,10 +2922,25 @@ extern "C" {
       //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
           switch (dt) {
-            case ESMF_DATA_INTEGER: sprintf(msgbuf, " item %d: %d\n", i, vip[i]); break;
-            case ESMF_DATA_REAL:    sprintf(msgbuf, " item %d: %g\n", i, vrp[i]); break; 
-            case ESMF_DATA_LOGICAL: sprintf(msgbuf, " item %d: %s\n", 
-                                          i, ESMC_LogicalString(vlp[i])); break;
+            case ESMF_DATA_INTEGER: 
+                if (dk == ESMF_I4) {
+                    sprintf(msgbuf, " item %d: %d\n", i, vip[i]); 
+                    break; 
+                } else {
+                    sprintf(msgbuf, " item %d: %ld\n", i, vlp[i]); 
+                    break; 
+                }
+            case ESMF_DATA_REAL:    
+                if (dk == ESMF_R4) {
+                    sprintf(msgbuf, " item %d: %f\n", i, vfp[i]); 
+                    break; 
+                } else {
+                    sprintf(msgbuf, " item %d: %g\n", i, vdp[i]); 
+                    break; 
+                }
+            case ESMF_DATA_LOGICAL: 
+                sprintf(msgbuf, " item %d: %s\n", i, ESMC_LogicalString(vbp[i])); 
+                break;
             default: 
              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
                              "unknown value", &rc);
@@ -2564,6 +3038,7 @@ extern "C" {
   memcpy(attrName, source.attrName, ESMF_MAXSTR);
 
   dt = source.dt;
+  dk = source.dk;
   items = source.items;
   slen = source.slen;
   
@@ -2573,13 +3048,19 @@ extern "C" {
   else if (items == 1) {
     switch (dt) {
       case ESMF_DATA_INTEGER:   
-        vi = source.vi;  
+        if (dk == ESMF_I4)
+            vi = source.vi;  
+        else
+            vl = source.vl;  
         break;
       case ESMF_DATA_REAL:      
-        vr = source.vr;  
+        if (dk == ESMF_R4)
+            vf = source.vf;  
+        else
+            vd = source.vd;  
         break;
       case ESMF_DATA_LOGICAL:   
-        vl = source.vl;  
+        vb = source.vb;  
         break;
       case ESMF_DATA_CHARACTER: 
         vcp = new char[slen];   // includes trailing null
@@ -2595,19 +3076,31 @@ extern "C" {
     // items > 1, alloc space for a list and do the copy
       switch (dt) {
         case ESMF_DATA_INTEGER:   
-          vip = new int[items];      
-          for (i=0; i<items; i++)
-              vip[i] = source.vip[i];  
+          if (dk == ESMF_I4) {
+              vip = new ESMF_KIND_I4[items];      
+              for (i=0; i<items; i++)
+                  vip[i] = source.vip[i];  
+          } else {
+              vlp = new ESMF_KIND_I8[items];      
+              for (i=0; i<items; i++)
+                  vlp[i] = source.vlp[i];  
+          }
           break;
         case ESMF_DATA_REAL:      
-          vrp = new double[items];      
-          for (i=0; i<items; i++)
-              vrp[i] = source.vrp[i];  
+          if (dk == ESMF_R4) {
+              vfp = new ESMF_KIND_R4[items];      
+              for (i=0; i<items; i++)
+                  vfp[i] = source.vfp[i];  
+          } else {
+              vdp = new ESMF_KIND_R8[items];      
+              for (i=0; i<items; i++)
+                  vdp[i] = source.vdp[i];  
+          }
           break;
         case ESMF_DATA_LOGICAL:   
-          vlp = new ESMC_Logical[items];      
+          vbp = new ESMC_Logical[items];      
           for (i=0; i<items; i++)
-              vlp[i] = source.vlp[i];  
+              vbp[i] = source.vbp[i];  
           break;
         case ESMF_DATA_CHARACTER: 
         default:
@@ -2664,6 +3157,7 @@ extern "C" {
 // !ARGUMENTS:
         char *name,                // attribute name
         ESMC_DataType datatype,    // data type
+        ESMC_DataKind datakind,    // data kind
         int numitems,              // single or list
         void *datap) {             // generic pointer to values
 //
@@ -2687,6 +3181,7 @@ extern "C" {
   }
 
   dt = datatype;
+  dk = datakind;
   items = numitems;
   slen = 0;          // only used for string values
   
@@ -2699,13 +3194,19 @@ extern "C" {
       else  {
         switch (dt) {
           case ESMF_DATA_INTEGER:   
-            vi = *(int *)datap;  
+            if (dk == ESMF_I4)
+                vi = *(ESMF_KIND_I4 *)datap;  
+            else
+                vl = *(ESMF_KIND_I8 *)datap;  
             break;
           case ESMF_DATA_REAL:      
-            vr = *(double *)datap;  
+            if (dk == ESMF_R4)
+                vf = *(ESMF_KIND_R4 *)datap;  
+            else
+                vd = *(ESMF_KIND_R8 *)datap;  
             break;
           case ESMF_DATA_LOGICAL:   
-            vl = *(ESMC_Logical *)datap;  
+            vb = *(ESMC_Logical *)datap;  
             break;
           case ESMF_DATA_CHARACTER: 
             slen = strlen((char *)datap) + 1;
@@ -2723,25 +3224,41 @@ extern "C" {
     // items > 1, alloc space for a list and do the copy
     switch (dt) {
       case ESMF_DATA_INTEGER:   
-        vip = new int[items];      
-        if (!datap) 
-            break;
-        for (i=0; i<items; i++)
-            vip[i] = ((int *)datap)[i];  
+        if (dk == ESMF_I4) {
+            vip = new ESMF_KIND_I4[items];      
+            if (!datap) 
+                break;
+            for (i=0; i<items; i++)
+                vip[i] = ((ESMF_KIND_I4 *)datap)[i];  
+        } else {
+            vlp = new ESMF_KIND_I8[items];      
+            if (!datap) 
+                break;
+            for (i=0; i<items; i++)
+                vlp[i] = ((ESMF_KIND_I8 *)datap)[i];  
+        }
         break;
       case ESMF_DATA_REAL:      
-        vrp = new double[items];      
-        if (!datap) 
-            break;
-        for (i=0; i<items; i++)
-            vrp[i] = ((double *)datap)[i];  
+        if (dk == ESMF_R4) {
+            vfp = new ESMF_KIND_R4[items];      
+            if (!datap) 
+                break;
+            for (i=0; i<items; i++)
+                vfp[i] = ((ESMF_KIND_R4 *)datap)[i];  
+        } else {
+            vdp = new ESMF_KIND_R8[items];      
+            if (!datap) 
+                break;
+            for (i=0; i<items; i++)
+                vdp[i] = ((ESMF_KIND_R8 *)datap)[i];  
+        }
         break;
       case ESMF_DATA_LOGICAL:   
-        vlp = new ESMC_Logical[items];      
+        vbp = new ESMC_Logical[items];      
         if (!datap) 
             break;
         for (i=0; i<items; i++)
-            vlp[i] = ((ESMC_Logical *)datap)[i];  
+            vbp[i] = ((ESMC_Logical *)datap)[i];  
         break;
       case ESMF_DATA_CHARACTER: 
       default:
@@ -2776,9 +3293,17 @@ extern "C" {
 
   if (items > 1) {
     switch (dt) {
-      case ESMF_DATA_INTEGER:   delete [] vip;  break;
-      case ESMF_DATA_REAL:      delete [] vrp;  break;
-      case ESMF_DATA_LOGICAL:   delete [] vlp;  break;
+      case ESMF_DATA_INTEGER:   
+        if (dk == ESMF_I4) delete [] vip;
+        else delete [] vlp;
+        break;
+      case ESMF_DATA_REAL:      
+        if (dk == ESMF_R8) delete [] vfp;
+        else delete [] vdp;  
+        break;
+      case ESMF_DATA_LOGICAL:   
+        delete [] vbp;  
+        break;
     }
   }
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.54 2004/06/15 12:51:06 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.55 2004/07/22 14:46:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,7 +62,14 @@ enum ESMC_Status { ESMF_STATUS_UNINIT=1,
 enum ESMC_BlockingFlag { ESMF_BLOCKING=1,
                          ESMF_NONBLOCKING};
 
-// ESMF data types and kinds
+// ESMF data types and kinds.
+// this is demented, frankly.  There should be a "TypeKind" single
+// type, which is I4, I8, R4, R8, etc.  there is no advantage to 
+// having types and kinds separate - in C++ it makes no sense at all.
+// an int is different from a long is different from a float is 
+// different from a double.  even in fortran it isn't quite so clean
+// at the language level.  maybe someday we will get time to redesign
+// and fix this.
 enum ESMC_DataType { ESMF_DATA_INTEGER=1,
                      ESMF_DATA_REAL,
                      ESMF_DATA_LOGICAL,
@@ -75,7 +82,8 @@ enum ESMC_DataKind { ESMF_I1=1,
                      ESMF_R4,
                      ESMF_R8,
                      ESMF_C8,
-                     ESMF_C16 };
+                     ESMF_C16,
+                     ESMF_NOKIND=99 };
 
 // ESMF platform-dependent data types
 #ifdef ESMF_IS_32BIT_MACHINE
@@ -111,26 +119,31 @@ struct ESMC_Attribute {
  //private:   // TODO: fix the interfaces and then make this private again
     char attrName[ESMF_MAXSTR]; // inline to reduce memory thrashing
     ESMC_DataType dt;           // type for selecting the right pointer below
+    ESMC_DataKind dk;           // item size for pointers below
     int items;                  // number of items (NOT byte count) for lists
     int slen;                   // for string, length, inc trailing NULL. 
     union {                     // overload pointers to conserve space 
-      int     vi;               // integer, or
-      int    *vip;              // pointer to integer list, or
-      double  vr;               // double (real), or
-      double *vrp;              // pointer to double (real) list, or
-      ESMC_Logical    vl;       // boolean (logical), or
-      ESMC_Logical   *vlp;      // pointer to boolean (logical) list, or
-      char   *vcp;              // pointer to a NULL term character string, or
-      void   *voidp;            // cannot be dereferenced, but generic.
-      // ESMC_Array *ap,        // pointer to an ESMC_Array object (someday?)
+      ESMF_KIND_I4    vi;       // integer, or
+      ESMF_KIND_I4  *vip;       // pointer to integer list, or
+      ESMF_KIND_I8    vl;       // long, or
+      ESMF_KIND_I8  *vlp;       // pointer to long list, or
+      ESMF_KIND_R4    vf;       // float (real*4), or
+      ESMF_KIND_R4  *vfp;       // pointer to float (real*4) list, or
+      ESMF_KIND_R8    vd;       // double (real*8), or
+      ESMF_KIND_R8  *vdp;       // pointer to double (real*8) list, or
+      ESMC_Logical    vb;       // boolean (logical), or
+      ESMC_Logical  *vbp;       // pointer to boolean (logical) list, or
+      char          *vcp;       // pointer to a NULL term character string, or
+      void        *voidp;       // cannot be dereferenced, but generic.
+      // ESMC_Array  *ap;       // pointer to an ESMC_Array object (someday?)
     };
 
  public:
     int ESMC_Print(void);
     ESMC_Attribute& operator=(const ESMC_Attribute &);
     ESMC_Attribute(void);
-    ESMC_Attribute(char *name, ESMC_DataType datatype, int numitems, 
-                   void *datap);
+    ESMC_Attribute(char *name, ESMC_DataType datatype, ESMC_DataKind datakind,
+                   int numitems, void *datap);
     ~ESMC_Attribute(void);
 
 
@@ -229,25 +242,36 @@ class ESMC_Base
     virtual int ESMC_Print(const char *options=0) const;
 
     // attribute methods - set
-    int ESMC_AttributeSet(char *name, int value);
-    int ESMC_AttributeSet(char *name, int count, int *value);
-    int ESMC_AttributeSet(char *name, double value);
-    int ESMC_AttributeSet(char *name, int count, double *value);
+    int ESMC_AttributeSet(char *name, ESMF_KIND_I4 value);
+    int ESMC_AttributeSet(char *name, int count, ESMF_KIND_I4 *value);
+    int ESMC_AttributeSet(char *name, ESMF_KIND_I8 value);
+    int ESMC_AttributeSet(char *name, int count, ESMF_KIND_I8 *value);
+    int ESMC_AttributeSet(char *name, ESMF_KIND_R4 value);
+    int ESMC_AttributeSet(char *name, int count, ESMF_KIND_R4 *value);
+    int ESMC_AttributeSet(char *name, ESMF_KIND_R8 value);
+    int ESMC_AttributeSet(char *name, int count, ESMF_KIND_R8 *value);
     int ESMC_AttributeSet(char *name, ESMC_Logical value);
     int ESMC_AttributeSet(char *name, int count, ESMC_Logical *value);
     int ESMC_AttributeSet(char *name, char *value);
-    int ESMC_AttributeSet(char *name, ESMC_DataType dt, int count, void *value);
+    int ESMC_AttributeSet(char *name, ESMC_DataType dt, ESMC_DataKind dk, 
+                          int count, void *value);
 
     // attribute methods - get
-    int ESMC_AttributeGet(char *name, int *value) const;
-    int ESMC_AttributeGet(char *name, int *count, int *value) const;
-    int ESMC_AttributeGet(char *name, double *value) const;
-    int ESMC_AttributeGet(char *name, int *count, double *value) const;
+    int ESMC_AttributeGet(char *name, ESMF_KIND_I4 *value) const;
+    int ESMC_AttributeGet(char *name, int *count, ESMF_KIND_I4 *value) const;
+    int ESMC_AttributeGet(char *name, ESMF_KIND_I8 *value) const;
+    int ESMC_AttributeGet(char *name, int *count, ESMF_KIND_I8 *value) const;
+    int ESMC_AttributeGet(char *name, ESMF_KIND_R4 *value) const;
+    int ESMC_AttributeGet(char *name, int *count, ESMF_KIND_R4 *value) const;
+    int ESMC_AttributeGet(char *name, ESMF_KIND_R8 *value) const;
+    int ESMC_AttributeGet(char *name, int *count, ESMF_KIND_R8 *value) const;
     int ESMC_AttributeGet(char *name, ESMC_Logical *value) const;
     int ESMC_AttributeGet(char *name, int *count, ESMC_Logical *value) const;
     int ESMC_AttributeGet(char *name, char *value) const;
-    int ESMC_AttributeGet(char *name, ESMC_DataType *dt, int *count, void *value) const;
-    int ESMC_AttributeGet(int num, char *name, ESMC_DataType *dt, int *count, void *value) const;
+    int ESMC_AttributeGet(char *name, ESMC_DataType *dt, ESMC_DataKind *dk, 
+                          int *count, void *value) const;
+    int ESMC_AttributeGet(int num, char *name, ESMC_DataType *dt, 
+                          ESMC_DataKind *dk, int *count, void *value) const;
 
     // count of attributes on an object
     int ESMC_AttributeGetCount(void) const;
@@ -287,15 +311,27 @@ extern "C" {
   void FTN(c_esmc_basevalidate)(ESMC_Base **base, char *opts, int *rc, int nlen);
   void FTN(c_esmc_getclassname)(ESMC_Base **base, char *name, int *rc, int nlen);
   void FTN(c_esmc_getname)(ESMC_Base **base, char *name, int *rc, int nlen);
-  void FTN(c_esmc_setname)(ESMC_Base **base, char *classname, char *objname, int *rc, int clen, int olen);
+  void FTN(c_esmc_setname)(ESMC_Base **base, char *classname, char *objname, 
+                           int *rc, int clen, int olen);
 
-  void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, ESMC_DataType *dt, int *count, void *value, int *rc, int nlen);
-  void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, int *rc, int nlen, int vlen);
+  void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, 
+                                    ESMC_DataType *dt, ESMC_DataKind *dk, 
+                                    int *count, void *value, int *rc, int nlen);
+  void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
+                                    int *rc, int nlen, int vlen);
 
-  void FTN(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, ESMC_DataType *dt, int *count, void *value, int *rc, int nlen);
-  void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, int *rc, int nlen, int vlen);
-  void FTN(c_esmc_attributegetattrinfoname)(ESMC_Base **base, char *name, ESMC_DataType *dt, int *count, int *rc, int nlen);
-  void FTN(c_esmc_attributegetattrinfonum)(ESMC_Base **base, int num, char *name, ESMC_DataType *dt, int *count, int *rc, int nlen);
+  void FTN(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, 
+                                    ESMC_DataType *dt, ESMC_DataKind *dk,
+                                    int *count, void *value, int *rc, int nlen);
+  void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, 
+                                    int *rc, int nlen, int vlen);
+  void FTN(c_esmc_attributegetattrinfoname)(ESMC_Base **base, char *name, 
+                                           ESMC_DataType *dt, ESMC_DataKind *dk,
+                                           int *count, int *rc, int nlen);
+  void FTN(c_esmc_attributegetattrinfonum)(ESMC_Base **base, int num, 
+                                           char *name, ESMC_DataType *dt, 
+                                           ESMC_DataKind *dk, int *count, 
+                                           int *rc, int nlen);
   void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, int *rc);
 
 }

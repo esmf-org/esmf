@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.19 2004/06/15 12:51:06 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.20 2004/07/22 14:46:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.19 2004/06/15 12:51:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.20 2004/07/22 14:46:11 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -71,7 +71,6 @@ extern "C" {
 //     Create a new Base object.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
   char *cname = NULL;
@@ -126,7 +125,6 @@ extern "C" {
 //     Free resources associated with a base object.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   if (base && *base)
       delete (*base);
@@ -156,7 +154,6 @@ extern "C" {
 //     Print the contents of a base object.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
   char *copts = NULL;
@@ -207,7 +204,6 @@ extern "C" {
 //     Validate the contents of a base object.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
   char *copts = NULL;
@@ -257,7 +253,6 @@ extern "C" {
 //     return the name to a Fortran caller.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
 
@@ -296,7 +291,6 @@ extern "C" {
 //     set the name from an F90 caller.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
   char *oname = NULL;
@@ -355,7 +349,6 @@ extern "C" {
 //     return the name to a Fortran caller.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
 
@@ -392,6 +385,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
       ESMC_DataType *dt,        // in - data type, any but character 
+      ESMC_DataKind *dk,        // in - data kind for int/real
       int *count,               // in - number of value(s)
       void *value,              // in - any value or list of values
       int *rc,                  // in - return code
@@ -403,7 +397,6 @@ extern "C" {
 //     since they come with an additional hidden length argument.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
   char *cname;
@@ -431,7 +424,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttributeSet(cname, *dt, *count, value);
+  *rc = (*base)->ESMC_AttributeSet(cname, *dt, *dk, *count, value);
 
   delete [] cname;
   return;
@@ -463,7 +456,6 @@ extern "C" {
 //     with an additional hidden length argument.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
   char *cname, *cvalue;
@@ -505,7 +497,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttributeSet(cname, ESMF_DATA_CHARACTER, 1, cvalue);
+  *rc = (*base)->ESMC_AttributeSet(cname, cvalue);
 
   delete [] cname;
   delete [] cvalue;
@@ -527,7 +519,8 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_DataType *dt,        // in - data type  
+      ESMC_DataType *dt,        // in - data type expected to be returned
+      ESMC_DataKind *dk,        // in - expected data kind for int/real 
       int *count,               // in - must match actual length
       void *value,              // out - value
       int *rc,                  // in - return code
@@ -537,10 +530,10 @@ extern "C" {
 //     Return the (name,value) pair from any object type in the system.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status, attrCount;
   ESMC_DataType attrDt;
+  ESMC_DataKind attrDk;
   char *cname;
 
   if (!base) {
@@ -564,7 +557,7 @@ extern "C" {
       return;
   }
 
-  status = (*base)->ESMC_AttributeGet(cname, &attrDt, &attrCount, NULL);
+  status = (*base)->ESMC_AttributeGet(cname, &attrDt, &attrDk, &attrCount, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute type and count", &status)) {
     //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
@@ -582,6 +575,15 @@ extern "C" {
     if (rc) *rc = status;
     return;
   }
+  if (attrDk != *dk) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(status,
+                         "attribute value not expected kind", &status);
+    //printf("attribute %s not expected kind %s, actually kind %d\n", 
+    //       name, ESMC_DataKindString(*dk), ESMC_DataKindString(attrDk));
+    delete [] cname;
+    if (rc) *rc = status;
+    return;
+  }
   if (attrCount != *count) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "attribute value not expected count", &status);
@@ -592,7 +594,7 @@ extern "C" {
     return;
   }
 
-  status = (*base)->ESMC_AttributeGet(cname, NULL, NULL, value);
+  status = (*base)->ESMC_AttributeGet(cname, NULL, NULL, NULL, value);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute value", &status);
   delete [] cname;
@@ -625,7 +627,6 @@ extern "C" {
 //     Retrieve a (name,value) pair from any object type in the system.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
   ESMC_DataType attrDt;
@@ -651,13 +652,14 @@ extern "C" {
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(cname, &attrDt, &slen, NULL);
+  *rc = (*base)->ESMC_AttributeGet(cname, &attrDt, NULL, &slen, NULL);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     return;
   }
 
   if (attrDt != ESMF_DATA_CHARACTER) {
+      // TODO: this needs to sprintf into a buffer to format up the error msg
       printf("ESMF_AttributeGet: attribute %s not type character\n", name);
       delete [] cname;
       *rc = ESMF_FAILURE;
@@ -704,7 +706,8 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_DataType *dt,        // out - data type
+      ESMC_DataType *dt,        // out - data type (int, float, etc)
+      ESMC_DataKind *dk,        // out - data kind (*4, *8)
       int *count,               // out - item count
       int *rc,                  // in - return code
       int nlen) {               // hidden/in - strlen count for name
@@ -714,7 +717,6 @@ extern "C" {
 //   object type in the system.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status, attrCount;
   char *cname;
@@ -736,6 +738,12 @@ extern "C" {
       return;
   }
 
+  if (!dk) {
+      printf("ESMF_AttributeGetValue: bad attribute datakind argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
   if (!count) {
       printf("ESMF_AttributeGetValue: bad attribute count argument\n");
       *rc = ESMF_FAILURE;
@@ -749,7 +757,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(cname, dt, count, NULL);
+  *rc = (*base)->ESMC_AttributeGet(cname, dt, dk, count, NULL);
 
   delete [] cname;
   return;
@@ -770,7 +778,8 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       int num,                  // in - attr number
       char *name,               // out - F90, non-null terminated string
-      ESMC_DataType *dt,        // out - data type
+      ESMC_DataType *dt,        // out - data type (int, float)
+      ESMC_DataKind *dk,        // out - data kind (*4, *8)
       int *count,               // out - item count
       int *rc,                  // in - return code
       int nlen) {               // hidden/in - strlen count for name
@@ -780,7 +789,6 @@ extern "C" {
 //   object type in the system.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
   char *cname;
@@ -802,6 +810,12 @@ extern "C" {
       return;
   }
 
+  if (!dk) {
+      printf("ESMF_AttributeGetValue: bad attribute datakind argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
   if (!count) {
       printf("ESMF_AttributeGetValue: bad attribute count argument\n");
       *rc = ESMF_FAILURE;
@@ -810,7 +824,7 @@ extern "C" {
 
   cname = new char[ESMF_MAXSTR];
 
-  *rc = (*base)->ESMC_AttributeGet(num, cname, dt, count, NULL);
+  *rc = (*base)->ESMC_AttributeGet(num, cname, dt, dk, count, NULL);
   if (*rc != ESMF_SUCCESS) {
       delete [] cname;
       return;
@@ -843,7 +857,6 @@ extern "C" {
 //   Return the count of attributes for any object type in the system.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
 
@@ -895,7 +908,6 @@ extern "C" {
 
 //
 //EOP
-// !REQUIREMENTS:   
 
 
   int rc, i;
@@ -933,7 +945,6 @@ extern "C" {
 //     Return a list of all attribute names without returning the values.
 //
 //EOP
-// !REQUIREMENTS:   FLD1.7.3
 
   return ESMF_SUCCESS;
 
@@ -958,7 +969,6 @@ extern "C" {
 //    allowed by the interface, all attributes may have to have the same type.
 //
 //EOP
-// !REQUIREMENTS:   (none.  added for completeness)
 
   return ESMF_SUCCESS;
 
@@ -983,7 +993,6 @@ extern "C" {
 //     Get multiple attributes from an object in a single call
 //
 //EOP
-// !REQUIREMENTS:   FLD1.7.4
 
   return ESMF_SUCCESS;
 
@@ -1010,7 +1019,6 @@ extern "C" {
 //     another arg to say what to do with collisions? >>
 
 //EOP
-// !REQUIREMENTS:   FLD1.5.4
 
   return ESMF_SUCCESS;
 
@@ -1036,7 +1044,6 @@ extern "C" {
 //     like {\tt name} must be unique and therefore can't be duplicated.)
 
 //EOP
-// !REQUIREMENTS:   FLD1.5.4
 
   return ESMF_SUCCESS;
 
@@ -1067,7 +1074,6 @@ extern "C" {
 //     Set the same attribute on multiple objects in one call
 //
 //EOP
-// !REQUIREMENTS:   FLD1.5.5 (pri 2)
 
   return ESMF_SUCCESS;
 
@@ -1093,7 +1099,6 @@ extern "C" {
 //     Get the same attribute name from multiple objects in one call
 //
 //EOP
-// !REQUIREMENTS:   FLD1.5.5 (pri 2)
 
   return ESMF_SUCCESS;
 

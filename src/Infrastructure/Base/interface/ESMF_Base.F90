@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.114 2004/06/15 12:51:06 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.115 2004/07/22 14:46:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.114 2004/06/15 12:51:06 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.115 2004/07/22 14:46:11 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -1018,7 +1018,7 @@
 !EOPI
       integer :: i, j
       integer :: min, max, stride
-      character(len=ESMF_MAXSTR) :: msgbuf
+      !character(len=ESMF_MAXSTR) :: msgbuf
 
     !jw  write (msgbuf, *)  "DomainListPrint"
     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
