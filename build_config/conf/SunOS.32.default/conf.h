@@ -1,13 +1,13 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.2 2003/09/12 17:31:04 nscollins Exp $"
+"$Id: conf.h,v 1.1 2003/09/12 17:31:04 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
 #if !defined(INCLUDED_CONF_H)
 #define INCLUDED_CONF_H
 
-#define PARCH_linux
-#define ESMF_ARCH_NAME "linux"
+#define PARCH_solaris
+#define ESMF_ARCH_NAME "solaris"
 
 #define ESMC_HAVE_LIMITS_H
 #define ESMC_HAVE_PWD_H 
@@ -20,15 +20,14 @@
 #define ESMC_HAVE_SYS_TIME_H 
 #define ESMC_HAVE_STDLIB_H
 
+#define ESMC_HAVE_MPI 1
+#define ESMC_POINTER_SIZE 8
+#define ESMC_HAVE_OMP_THREADS 1
+#define ESMC_SUBSTITUTE_CTRL_CHARS 1
+
 #define ESMC_HAVE_FORTRAN_UNDERSCORE 
 #define ESMC_HAVE_FORTRAN_UNDERSCORE_UNDERSCORE
 #define FTN(func) func##_
-
-
-#define ESMC_POINTER_SIZE 4
-#define ESMC_HAVE_OMP_THREADS 1
-
-#define ESMC_HAVE_MPI 1
 
 #define ESMC_HAVE_READLINK
 #define ESMC_HAVE_MEMMOVE
@@ -48,8 +47,9 @@
 
 #define ESMC_HAVE_SYS_UTSNAME_H
 
-#define ESMF_IS_64BIT_MACHINE 1
-#define ESMF_F90_PTR_BASE_SIZE 88 
+#define ESMF_IS_32BIT_MACHINE 1
+#define ESMF_F90_PTR_BASE_SIZE 68
 #define ESMF_F90_PTR_PLUS_RANK 24
+
 
 #endif
