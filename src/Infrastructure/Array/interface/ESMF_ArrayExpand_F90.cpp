@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.8 2004/03/04 16:39:03 nscollins Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.9 2004/03/04 22:21:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.8 2004/03/04 16:39:03 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.9 2004/03/04 22:21:41 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -204,14 +204,14 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateBySpec -- Create a new Array from an ArraySpec
 !
 ! !INTERFACE:
-      function ESMF_ArrayCreateBySpec(spec, counts, halo_width, &
+      function ESMF_ArrayCreateBySpec(arrayspec, counts, halo_width, &
                                       lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateBySpec
 !
 ! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: spec
+      type(ESMF_ArraySpec), intent(in) :: arrayspec
       integer, intent(in), dimension(:) :: counts
       integer, intent(in), optional :: halo_width 
       integer, dimension(:), intent(in), optional :: lbounds
@@ -225,7 +225,7 @@ end interface
 !  The arguments are:
 !  \begin{description}
 !
-!  \item[spec]
+!  \item[arrayspec]
 !    ArraySpec object.
 !
 !  \item[counts]
@@ -267,7 +267,7 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-        call ESMF_ArraySpecGet(spec, rank, type, kind, status)
+        call ESMF_ArraySpecGet(arrayspec, rank, type, kind, status)
         if (status .ne. ESMF_SUCCESS) return
         
         ! Call the list function to make the array
@@ -642,11 +642,10 @@ end interface
 ! !IROUTINE: ESMF_ArraySetData
 !
 ! !INTERFACE:
-      subroutine ESMF_ArraySetData(array, dataspec, databuf, docopy, rc)
+      subroutine ESMF_ArraySetData(array, databuf, docopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array 
-      type(ESMF_ArraySpec), intent(in) :: dataspec
       real, dimension (:), pointer :: databuf    
       type(ESMF_CopyFlag), intent(in) :: docopy 
       integer, intent(out), optional :: rc     
