@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.25 2005/02/02 17:55:46 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.26 2005/02/03 00:18:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -68,8 +68,11 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_Initialize, ESMF_Finalize, ESMF_Abort
-
+      public ESMF_Initialize, ESMF_Finalize
+#if 0      
+      public ESMF_Abort
+#endif
+      
       ! should be private to framework - needed by other modules
       public ESMF_FrameworkInternalInit   
 
