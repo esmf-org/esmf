@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.43 2004/06/17 18:48:09 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.44 2004/09/13 17:49:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@
 // The {\tt Calendar} class defines two methods for converting in both
 // directions between the core {\tt BaseTime} class representation and a
 // calendar date.  Calculations of time intervals (deltas) between
-// timeiinstants is done by the base class {\tt BaseTime} in the core units
+// time instants is done by the base class {\tt BaseTime} in the core units
 // of seconds and fractional seconds.  Thus,  a calendar is only needed for
 // converting core time to calendar time and vice versa.
 //
