@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.17 2004/04/16 21:08:37 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.18 2004/04/20 19:11:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.17 2004/04/16 21:08:37 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.18 2004/04/20 19:11:02 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -46,6 +46,7 @@
       ! individual test result code
       integer :: rc, H, M, S, MM, DD, D, YY, days, months, years, totalDays, &
                  hours, minutes, secs, testResults, ans
+      logical :: bool
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -1846,6 +1847,161 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
 	print *, "secs =", secs
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep2, s=-1, rc=rc)
+      write(name, *) "Time Step initialization with seconds = -1  Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, s=1, rc=rc)
+      write(name, *) "Time Step initialization with seconds = 1  Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, s=1, rc=rc)
+      write(name, *) "Time Step initialization with seconds = 1  Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep3, s=1, rc=rc)
+      write(name, *) "Time Step initialization with seconds = 1  Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the <=  operator
+      ! resultTime = ESMF_TimeIntervalOperator(<=)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval <= operator Test"
+      bool = timeStep2 <= timeStep    
+      call ESMF_Test((bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the <=  operator
+      ! resultTime = ESMF_TimeIntervalOperator(<=)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval <= operator Test"
+      bool = timeStep <= timeStep3    
+      call ESMF_Test((bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the <=  operator
+      ! resultTime = ESMF_TimeIntervalOperator(<=)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval <= operator Test"
+      bool = timeStep <= timeStep2    
+      call ESMF_Test((.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the <  operator
+      ! resultTime = ESMF_TimeIntervalOperator(<)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval < operator Test"
+      bool = timeStep2 < timeStep    
+      call ESMF_Test((bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the <  operator
+      ! resultTime = ESMF_TimeIntervalOperator(<)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval < operator Test"
+      bool = timeStep3 < timeStep    
+      call ESMF_Test((.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the <  operator
+      ! resultTime = ESMF_TimeIntervalOperator(<)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval < operator Test"
+      bool = timeStep < timeStep2    
+      call ESMF_Test((.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the >=  operator
+      ! resultTime = ESMF_TimeIntervalOperator(>=)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval >= operator Test"
+      bool = timeStep2 >= timeStep    
+      call ESMF_Test((.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the >=  operator
+      ! resultTime = ESMF_TimeIntervalOperator(>=)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval >= operator Test"
+      bool = timeStep3 >= timeStep    
+      call ESMF_Test((bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the >=  operator
+      ! resultTime = ESMF_TimeIntervalOperator(>=)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval >= operator Test"
+      bool = timeStep >= timeStep2    
+      call ESMF_Test((bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the >  operator
+      ! resultTime = ESMF_TimeIntervalOperator(>)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval > operator Test"
+      bool = timeStep2 > timeStep    
+      call ESMF_Test((.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the >  operator
+      ! resultTime = ESMF_TimeIntervalOperator(>)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval > operator Test"
+      bool = timeStep3 > timeStep    
+      call ESMF_Test((.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the >  operator
+      ! resultTime = ESMF_TimeIntervalOperator(>)(time1, time2)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "TimeInterval > operator Test"
+      bool = timeStep > timeStep2    
+      call ESMF_Test((bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)
