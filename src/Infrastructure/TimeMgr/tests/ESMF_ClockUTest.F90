@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.14 2003/04/22 15:31:31 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.15 2003/04/22 15:51:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.14 2003/04/22 15:31:31 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.15 2003/04/22 15:51:56 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -157,7 +157,7 @@
 
       ! Test Setting Time Step
       write(failMsg, *) " Returned ESMF_FAILURE"
-      write(name, *) "Set Time Interval Initiation Test"
+      write(name, *) "Set Time Interval Initialization Test"
       call ESMF_TimeIntervalInit(timeStep, H=1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -175,7 +175,7 @@
       ! ----------------------------------------------------------------------------
 
       ! Test Setting the Start Time
-      write(name, *) "Set Start Time Initiation Test"
+      write(name, *) "Set Start Time Initialization Test"
       YR=2003
       call ESMF_TimeInit(startTime, YR=YR, MM=3, DD=13, &
                                    cal=gregorianCalendar, rc=rc)
@@ -230,7 +230,7 @@
       ! ----------------------------------------------------------------------------
 
       ! Set time to illegite month
-      write(name, *) "Stop Time Initiation to illegite month (0) Test"
+      write(name, *) "Stop Time Initialization to illegite month (0) Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
       YR=2003
       call ESMF_TimeInit(stopTime, YR=YR, MM=0, DD=14, &
@@ -241,7 +241,7 @@
       ! ----------------------------------------------------------------------------
 
       ! Set time to illegite month
-      write(name, *) "Stop Time Initiation to illegite month (13) Test"
+      write(name, *) "Stop Time Initialization to illegite month (13) Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
       YR=2003
       call ESMF_TimeInit(stopTime, YR=YR, MM=13, DD=14, &
@@ -253,7 +253,7 @@
       ! ----------------------------------------------------------------------------
 
       ! Set time to illegite day
-      write(name, *) "Stop Time Initiation to  Feb. 31st. Test"
+      write(name, *) "Stop Time Initialization to  Feb. 31st. Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
       YR=2003
       call ESMF_TimeInit(stopTime, YR=YR, MM=2, DD=31, &
@@ -305,7 +305,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      write(name, *) "Stop Time Initiation Test"
+      write(name, *) "Stop Time Initialization Test"
       YR=2003
       call ESMF_TimeInit(stopTime, YR=YR, MM=3, DD=14, &
                                    cal=gregorianCalendar, rc=rc)
@@ -331,14 +331,14 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      write(name, *) "Clock Initiation Test with uninitialized startTime"
+      write(name, *) "Clock Initialization Test with uninitialized startTime"
       write(failMsg, *) " Returned ESMF_SUCCESS"
       call ESMF_ClockInit(clock, timeStep, startTime2, stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      write(name, *) "Clock Initiation Test"
+      write(name, *) "Clock Initialization Test"
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -390,7 +390,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      write(name, *) "Clock Initiation with stop time set before start time Test"
+      write(name, *) "Clock Initialization with stop time set before start time Test"
       YR=2002
       call ESMF_TimeInit(stopTime, YR=YR, MM=3, DD=14, &
                                    cal=gregorianCalendar, rc=rc)
