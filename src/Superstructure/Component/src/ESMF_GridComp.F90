@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.40 2004/04/30 14:45:58 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.41 2004/04/30 14:48:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.40 2004/04/30 14:45:58 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.41 2004/04/30 14:48:16 theurich Exp $'
 
 !==============================================================================
 !
@@ -336,7 +336,7 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[vm]
-!    VM of the component out of which this ESMF_GridCompCreate call is issued.
+!    VM of the component out of which this ESMF\_GridCompCreate call is issued.
 !    This will become the parent VM of the created Gridded Component.
 !   \item[{[name]}]
 !    GridComp name.
