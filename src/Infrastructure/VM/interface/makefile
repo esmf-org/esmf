@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/12/14 15:38:19 theurich Exp $
+# $Id: makefile,v 1.6 2004/12/28 04:46:16 theurich Exp $
 
 # leave alone.
 ALL: build_here
@@ -12,7 +12,7 @@ FFLAGS    =
 # If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_VM_F.C
 # If you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_VMTypes.F90 ESMF_VMBase.F90 ESMF_VMComm.F90
+SOURCEF	  = ESMF_VM.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List all .h files which should be copied to common include dir

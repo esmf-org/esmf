@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComm.F90,v 1.1 2004/12/03 21:07:37 nscollins Exp $
+! $Id: ESMF_VM.F90,v 1.45 2004/12/28 04:46:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,7 +13,7 @@
 !==============================================================================
 !
 ! ESMF VM Module
-module ESMF_VMCommMod
+module ESMF_VMMod
 !
 !==============================================================================
 !
@@ -34,9 +34,8 @@ module ESMF_VMCommMod
 !------------------------------------------------------------------------------
 ! !USES:
   use ESMF_BaseTypesMod
+  use ESMF_BaseMod                          ! ESMF base class
   use ESMF_LogErrMod
-  use ESMF_VMTypesMod
-  use ESMF_VMBaseMod
       
   implicit none
 
@@ -44,10 +43,81 @@ module ESMF_VMCommMod
 ! !PRIVATE TYPES:
   private
       
-! VM Type and others defined in ESMF_VMTypes.F90
+!------------------------------------------------------------------------------
+!     ! ESMF_CommHandle
+!
+! TODO: This needs to be filled with life once we work on non-blocking 
+!     
+!     ! Shallow sync/async communications type.  Mirrored on C++ side.
+!     ! Contains a place to hold
+!     ! the MPI handle in the case of nonblocking MPI calls.  The wait
+!     ! parameter controls whether the "IsComplete" call blocks/waits
+!     ! or simply tests and returns.
+      
+  type ESMF_CommHandle
+  sequence
+  private
+#ifndef ESMF_NO_INITIALIZERS
+    type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+#else
+    type(ESMF_Pointer) :: this
+#endif
+!    integer :: dummy  !so compiler is satisfied for now...
+!    integer :: mpi_handle  ! mpi returns this for async calls
+!    integer :: wait        ! after an async call, does query block?
+  end type
+      
+  integer, parameter :: ESMF_TEST_COMPLETE = 1, ESMF_WAIT_COMPLETE = 2
+
+!------------------------------------------------------------------------------
+
+  ! F90 class type to hold pointer to C++ object
+  type ESMF_VM
+    sequence
+    private
+      type(ESMF_Pointer) :: this
+  end type
+
+  ! F90 class type to hold pointer to C++ object
+  type ESMF_VMPlan
+    sequence
+    private
+      type(ESMF_Pointer) :: this
+  end type
+
+!------------------------------------------------------------------------------
+
+  ! Module parameters
+  integer, parameter:: ESMF_PREF_INTRA_PROCESS_SHMHACK  = 0 !default
+  integer, parameter:: ESMF_PREF_INTRA_PROCESS_PTHREAD  = 1
+
+  integer, parameter:: ESMF_PREF_INTRA_SSI_POSIXIPC     = 0
+  integer, parameter:: ESMF_PREF_INTRA_SSI_MPI1         = 1 !default
+      
+  integer, parameter:: ESMF_PREF_INTER_SSI_MPI1         = 0 !default
+  
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+  public ESMF_CommHandle
+  public ESMF_VM
+  public ESMF_VMPlan
+      
+!------------------------------------------------------------------------------
+! !PUBLIC PARAMETERS:
+      
+  public ESMF_TEST_COMPLETE, ESMF_WAIT_COMPLETE
+  public ESMF_PREF_INTRA_PROCESS_SHMHACK
+  public ESMF_PREF_INTRA_PROCESS_PTHREAD
+  public ESMF_PREF_INTRA_SSI_POSIXIPC
+  public ESMF_PREF_INTRA_SSI_MPI1
+  public ESMF_PREF_INTER_SSI_MPI1
+
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! !PRIVATE MODULE VARIABLES:
+
+  type(ESMF_VM) :: GlobalVM     ! This is a reference to the global VM
 
 !------------------------------------------------------------------------------
 !
@@ -59,6 +129,10 @@ module ESMF_VMCommMod
   public ESMF_VMBarrier
   public ESMF_VMBroadcast
   public ESMF_VMGather
+  public ESMF_VMGet
+  public ESMF_VMGetGlobal
+  public ESMF_VMGetPETLocalInfo
+  public ESMF_VMPrint
   public ESMF_VMRecv
   public ESMF_VMScatter
   public ESMF_VMSend
@@ -82,7 +156,7 @@ module ESMF_VMCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VMComm.F90,v 1.1 2004/12/03 21:07:37 nscollins Exp $'
+      '$Id: ESMF_VM.F90,v 1.45 2004/12/28 04:46:15 theurich Exp $'
 
 !==============================================================================
 
@@ -1515,6 +1589,228 @@ module ESMF_VMCommMod
   end subroutine ESMF_VMGatherLogical
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGet()"
+!BOP
+! !IROUTINE: ESMF_VMGet - Get VM internals
+
+! !INTERFACE:
+  subroutine ESMF_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
+    okOpenMpFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),      intent(in)              :: vm
+    integer,            intent(out),  optional  :: localPet
+    integer,            intent(out),  optional  :: petCount
+    integer,            intent(out),  optional  :: peCount
+    integer,            intent(out),  optional  :: mpiCommunicator
+    type(ESMF_Logical), intent(out),  optional  :: okOpenMpFlag
+    integer,            intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Get internal information about the specified {\tt ESMF\_VM} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        Queried {\tt ESMF\_VM} object.
+!   \item[{[localPet]}]
+!        Upon return this holds the id of the PET that instantiates the local
+!        user code.
+!   \item[{[petCount]}]
+!        Upon return this holds the number of PETs in the specified 
+!        {\tt ESMF\_VM} object.
+!   \item[{[peCount]}]
+!        Upon return this holds the number of PEs referenced by the specified
+!        {\tt ESMF\_VM} object.
+!   \item[{[mpiCommunicator]}]
+!        Upon return this holds the MPI intra-communicator used by the 
+!        specified {\tt ESMF\_VM} object. This communicator may be used for
+!        user-level MPI communications. It is recommended that the user
+!        duplicates the communicator via {\tt MPI\_Comm\_Dup()} in order to
+!        prevent any interference with ESMF communications.
+!   \item[{[okOpenMpFlag]}]
+!        Upon return this holds a flag indicating whether user-level OpenMP
+!        threading is supported by the specified {\tt ESMF\_VM} object.
+!        \begin{description}
+!        \item[{\tt ESMF\_TRUE}]
+!             User-level OpenMP threading is supported.
+!        \item[{\tt ESMF\_FALSE}]
+!             User-level OpenMP threading is not supported.
+!        \end{description}
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
+      okOpenMpFlag, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMGet
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_VMGetGlobal - Get Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMGetGlobal(vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(out)            :: vm
+    integer,       intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!   Get the global default {\tt ESMF\_VM} object. This is the {\tt ESMF\_VM}
+!   object that was created during {\tt ESMF\_Initialize()} and is the ultimate
+!   parent of all {\tt ESMF\_VM} objects in an ESMF application.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        Upon return this holds the global default {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Copy the handle to the global VM into the output variable
+    vm = GlobalVM
+
+    ! Set return values
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMGetGlobal
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetPETLocalInfo()"
+!BOP
+! !IROUTINE: ESMF_VMGetPETLocalInfo - Get VM PET local internals
+
+! !INTERFACE:
+  subroutine ESMF_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
+    threadId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),  intent(in)              :: vm
+    integer,        intent(in)              :: pet
+    integer,        intent(out),  optional  :: peCount
+    integer,        intent(out),  optional  :: ssiId
+    integer,        intent(out),  optional  :: threadCount
+    integer,        intent(out),  optional  :: threadId
+    integer,        intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Get internal information about the specified PET within the specified
+!   {\tt ESMF\_VM} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!         Queried {\tt ESMF\_VM} object.
+!   \item[pet] 
+!         Queried PET id within the specified {\tt ESMF\_VM} object.
+!   \item[{[peCount]}]
+!        Upon return this holds the number of PEs associated with the specified
+!        PET in the {\tt ESMF\_VM} object.
+!   \item[{[ssiId]}]
+!        Upon return this holds the id of the single-system image (SSI) the
+!        specified PET is running on.
+!   \item[{[threadCount]}]
+!        Upon return this holds the number of PETs in the specified PET's 
+!        thread group.
+!   \item[{[threadId]}]
+!        Upon return this holds the thread id of the specified PET within the 
+!        {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
+      threadId, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMGetPETLocalInfo
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPrint()"
+!BOP
+! !IROUTINE: ESMF_VMPrint - Print VM internals
+
+! !INTERFACE:
+  subroutine ESMF_VMPrint(vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),  intent(in)              :: vm
+    integer,        intent(out),  optional  :: rc           
+!
+! !DESCRIPTION:
+!   Prints internal information about the specified {\tt ESMF\_VM} to
+!   {\tt stdout}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        Specified {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMPrint(vm, localrc) 
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMPrint
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -3323,7 +3619,7 @@ module ESMF_VMCommMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMInitialize(ESMF_GlobalVM, localrc)
+    call c_ESMC_VMInitialize(GlobalVM, localrc)
 
     ! Use LogErr to handle return code
     !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3723,4 +4019,4 @@ module ESMF_VMCommMod
 !------------------------------------------------------------------------------
 
 
-end module ESMF_VMCommMod
+end module ESMF_VMMod
