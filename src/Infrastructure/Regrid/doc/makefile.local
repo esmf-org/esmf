@@ -41,4 +41,4 @@ fsrc:  ${FSRC}
 	touch fsrc
 
 clean:
-	rm -f *.dvi *.ps Regrid_desdoc/* fsrc ccsrc
+	rm -f *.dvi *.ps *.pdf Regrid_desdoc/* fsrc ccsrc
