@@ -1,4 +1,4 @@
-% $Id: ESMF_buildreq.tex,v 1.2 2003/01/29 22:59:45 flanigan Exp $
+% $Id: ESMF_buildreq.tex,v 1.3 2003/02/07 20:13:16 flanigan Exp $
 
 \sreq{Build}
 
@@ -7,10 +7,9 @@ The build system will utilize the Build program Make from
 GNU.  Other vendors' make programs will not be supported.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} Makefiles will test make being used and generate
-warning if GNU make not being used.
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} inspection
 \end{reqlist}
 
 \ssreq{Library Archive Files}
@@ -18,15 +17,16 @@ Both .a and .so archive files will be created by the
 build system.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} After build linkable .a and .so files will exist.
+{\bf Source:} ESMF-Core \\
+{\bf Status:}  proposed \\
+{\bf Verification:} inspection
 \end{reqlist}
 
-\ssreq{Targets}
+\ssreq{Common Targets}
 The build system tasks will be controlled with a series of
-makefile targets.  These targets will only be available 
-in the makefile located in \$ESMF\_DIR.  These targets will be:
+makefile targets. These are the targets that will be available
+for all releases:
+
 \begin{description}
 \item[all] Builds all libraries, test programs and documentation.
 \item[install] Installs ESMF products.
@@ -51,43 +51,43 @@ in the makefile located in \$ESMF\_DIR.  These targets will be:
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} Review
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} code inspection
 \end{reqlist}
 
 \ssreq{Local Builds}
 Builds within the current working directory will be
-accomplished with a build to the target ``local''.
-Only build tasks within and below the CWD will be
-processed.  
+accomplished with a build to the same targets as
+used in the top level.
+Only build tasks within and below the current working directory
+will be processed.  
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} Review
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} inspection
 \end{reqlist}
-
 
 \ssreq{Internal Documentation}
 Documentation will exist to explain the structure and 
 internal workings of the Build System.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} Less Confusion.
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} inspection
 \end{reqlist}
 
 \ssreq{User Documentation}
 Documentation will exist to cover steps needed to build ESMF
-and EVA source trees.  This will include procedures for 
+EVA and Implementation Report  source trees.  This will include procedures for 
 changing the compile and link options.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} ESMF Group Review
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} inspection
 \end{reqlist}
 
 \ssreq{Developer Documentation}
@@ -95,9 +95,9 @@ Documentation will exist to cover steps needed to add source
 code to the ESMF and EVA source trees.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} ESMF Group Review
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} inspection
 \end{reqlist}
 
 \ssreq{EVA Builds}
@@ -105,9 +105,9 @@ The same makefile targets, variables and rules
 will be used by the EVA build system.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} EVA test programs.
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} inspection
 \end{reqlist}
 
 
@@ -115,50 +115,50 @@ will be used by the EVA build system.
 The same set of files can be used for builds on separate 
 system architectures concurrently.
 \begin{reqlist}
-{\bf Priority:} 2. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} Test.
+{\bf Priority:} 1. \\
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} inspection
 \end{reqlist}
 
 \ssreq{Dependency Checking}
 The build system will take into account the dependencies 
 between source code files and build products.  
 \begin{reqlist}
-{\bf Priority:} 2. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} Script
+{\bf Priority:} 1. \\
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} system test
 \end{reqlist}
 
 \ssreq{Automatic Dependency Generation}
 The build system will scan source code files to 
 generate dependency lists.
 \begin{reqlist}
-{\bf Priority:} 3. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} Script
+{\bf Priority:} 1. \\
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} system test
 \end{reqlist}
 
 \ssreq{Log Files}
 Status and error log files will be generated by 
 the build system.
 \begin{reqlist}
-{\bf Priority:} 3. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} Visual Check
+{\bf Priority:} 1. \\
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} inspection
 \end{reqlist}
 
 \ssreq{Configuration Checking}
 The build system will check for the required system 
 libraries and utilities.
 \begin{reqlist}
-{\bf Priority:} 3. \\
-{\bf Source:} ESMF/CSS. \\
-{\bf Status:} DRAFT. \\
-{\bf Verification:} Script
+{\bf Priority:} 1. \\
+{\bf Source:} ESMF-Core \\
+{\bf Status:} proposed \\
+{\bf Verification:} test
 \end{reqlist}
 
 \ssreq{Easily customize build for local machine}
@@ -166,9 +166,9 @@ The ESMF shall have the ability to easily customize the build environment.
 System libraries that are required can be set easily, without modifying 
 the build files directly. If the paths to required system libraries 
 are not provided or incorrect the build system will let the user know 
-how to set them and die gracefully.
+how to set them and die gracefully.  
 \begin{reqlist}
-{\bf Priority:} 2. \\
+{\bf Priority:} 1. \\
 {\bf Source:} CCSM-CPL. \\
 {\bf Status:} Approved-2. \\
 {\bf Verification:} Set library paths correctly and incorrectly and test that 
