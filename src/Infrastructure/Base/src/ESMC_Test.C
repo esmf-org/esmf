@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.C,v 1.1 2003/02/28 01:10:01 eschwab Exp $
+// $Id: ESMC_Test.C,v 1.2 2003/02/28 18:00:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,    
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Test.C,v 1.1 2003/02/28 01:10:01 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Test.C,v 1.2 2003/02/28 18:00:20 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -48,7 +48,7 @@
       int ESMC_Test(
 //
 // !RETURN VALUE:
-//    number of failures; O = all passed
+//    ESMF_SUCCESS or ESMF_FAILURE
 //
 // !ARGUMENTS:
       int condition,
@@ -64,6 +64,12 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
+ if (result == 0 || failMsg == 0 || file == 0) {
+   cout << "FAIL " << __FILE__ << ", line " << __LINE__ <<
+           ", null pointer(s) passed in" << endl;
+   return(ESMF_FAILURE);
+ }
+
  if (condition) {
    cout << "PASS " << file << ", line " << line << endl;
  }
@@ -71,4 +77,6 @@
    cout << "FAIL " << file << ", line " << line << ", " << failMsg << endl;
    (*result)++; // count total failures; 0 = all pass
  }
+ return(ESMF_SUCCESS);
+
 } // end ESMC_Test
