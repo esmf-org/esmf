@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.3 2004/06/08 18:39:15 cdeluca Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.4 2004/06/10 23:39:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -125,7 +125,7 @@
  @\
         ! TODO: set array as data in field. @\
         field%ftypep%localfield%localdata = array @\
-        field%ftypep%datastatus = ESMF_STATE_READY @\
+        field%ftypep%datastatus = ESMF_STATUS_READY @\
  @\
         if (rcpresent) rc = status @\
  @\

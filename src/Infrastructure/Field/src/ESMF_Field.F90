@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.162 2004/06/09 23:15:46 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.163 2004/06/10 23:39:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -143,9 +143,9 @@
        
         type (ESMF_Base) :: base             ! base class object
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-        type (ESMF_Status) :: fieldstatus = ESMF_STATE_UNINIT
-        type (ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT
-        type (ESMF_Status) :: datastatus = ESMF_STATE_UNINIT
+        type (ESMF_Status) :: fieldstatus = ESMF_STATUS_UNINIT
+        type (ESMF_Status) :: gridstatus = ESMF_STATUS_UNINIT
+        type (ESMF_Status) :: datastatus = ESMF_STATUS_UNINIT
         type (ESMF_GridClass), pointer :: gridp => NULL()  ! for faster access
 #else
         type (ESMF_Status) :: fieldstatus
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.162 2004/06/09 23:15:46 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.163 2004/06/10 23:39:48 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1246,14 +1246,14 @@
         endif
  
         ftype => field%ftypep
-        if (ftype%fieldstatus .ne. ESMF_STATE_READY) then
+        if (ftype%fieldstatus .ne. ESMF_STATUS_READY) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
         endif
 
         if (present(grid)) then
-            if (ftype%gridstatus .ne. ESMF_STATE_READY) then
+            if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
                 if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "No Grid or Bad Grid attached to Field", &
                                  ESMF_CONTEXT, rc)) return
@@ -1262,7 +1262,7 @@
         endif
 
         if (present(array)) then
-            if (ftype%datastatus .ne. ESMF_STATE_READY) then
+            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
                 if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "No data attached to Field", &
                                  ESMF_CONTEXT, rc)) return
@@ -1280,7 +1280,7 @@
 
         if (present(horzRelloc)) then
             ! TODO: what's the proper test here?  ditto code above.
-            !if (ftype%datastatus .ne. ESMF_STATE_READY) then
+            !if (ftype%datastatus .ne. ESMF_STATUS_READY) then
             !    if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
             !                    "No data attached to Field", &
             !                     ESMF_CONTEXT, rc)) return
@@ -1293,7 +1293,7 @@
 
         if (present(vertRelloc)) then
             ! TODO: what's the proper test here?  ditto code above.
-            !if (ftype%datastatus .ne. ESMF_STATE_READY) then
+            !if (ftype%datastatus .ne. ESMF_STATUS_READY) then
             !  print *, "ERROR: No data attached to Field"
             !  return
             !endif
@@ -1372,13 +1372,13 @@
 
       ftypep => field%ftypep
 
-      if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+      if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+      if (ftypep%datastatus .ne. ESMF_STATUS_READY) then
            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "No data associated with Field", &
                                  ESMF_CONTEXT, rc)) return
@@ -2299,7 +2299,7 @@
       !jw  dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Field status = ", trim(str)
 
-        if (fp%fieldstatus .ne. ESMF_STATE_READY) then
+        if (fp%fieldstatus .ne. ESMF_STATUS_READY) then
           if (present(rc)) rc = ESMF_FAILURE
           return
         endif
@@ -2318,7 +2318,7 @@
       !jw  write(msgbuf, *)  "Grid status = ", trim(str)
       !jw  dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Grid status = ", trim(str)
-        if (fp%gridstatus .eq. ESMF_STATE_READY) then 
+        if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
            call ESMF_GridPrint(fp%grid, "", status)
         endif
 
@@ -2326,7 +2326,7 @@
       !jw  write(msgbuf, *)  "Data status = ", trim(str)
       !jw  dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Data status = ", trim(str)
-        if (fp%datastatus .eq. ESMF_STATE_READY) then 
+        if (fp%datastatus .eq. ESMF_STATUS_READY) then 
            call ESMF_ArrayPrint(fp%localfield%localdata, "", status)
         endif
 
@@ -2512,21 +2512,21 @@
 
       ftypep => field%ftypep
 
-      if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+      if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! TODO: do we allow this?  if so, do we just destroy the old array?
-      !if (ftypep%datastatus .eq. ESMF_STATE_READY) then
+      !if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
       !   if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
       !                          "Data already associated with Field", &
       !                           ESMF_CONTEXT, rc)) return
       !endif
 
       ftypep%localfield%localdata = array
-      ftypep%datastatus = ESMF_STATE_READY
+      ftypep%datastatus = ESMF_STATUS_READY
    
       ! TODO: add some validation here to be sure the array is the right
       ! size for the grid decomposition
@@ -2583,7 +2583,7 @@
                                  ESMF_CONTEXT, rc)) return
         endif
  
-        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+        if (field%ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
@@ -2592,12 +2592,12 @@
         ! decide if we're regridding or just adding a grid to a partially
         ! created field.
         had_grid = .FALSE.
-        if (field%ftypep%gridstatus .eq. ESMF_STATE_READY) had_grid = .TRUE.
+        if (field%ftypep%gridstatus .eq. ESMF_STATUS_READY) had_grid = .TRUE.
 
         if (.not. had_grid) then
            ! if no grid, just add it
            field%ftypep%grid = grid
-           field%ftypep%gridstatus = ESMF_STATE_READY
+           field%ftypep%gridstatus = ESMF_STATUS_READY
         else
            ! this could be considered a request to regrid the data
            if (ESMF_LogWrite("Replacing existing grid not yet supported", &
@@ -2659,7 +2659,7 @@
                                  ESMF_CONTEXT, rc)) return
         endif
  
-        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+        if (field%ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
@@ -2668,7 +2668,7 @@
         ! decide if we're reordering data or just setting an initial map
         ! created field.
         had_data = .FALSE.
-        if (field%ftypep%datastatus .eq. ESMF_STATE_READY) had_data = .TRUE.
+        if (field%ftypep%datastatus .eq. ESMF_STATUS_READY) had_data = .TRUE.
 
         if (.not. had_data) then
            ! if no datamap, just add it
@@ -2790,7 +2790,7 @@
                                  ESMF_CONTEXT, rc)) return
       endif 
 
-      if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+      if (field%ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
@@ -3850,7 +3850,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       ftype%localfield%localdata = array
-      ftype%datastatus = ESMF_STATE_READY
+      ftype%datastatus = ESMF_STATUS_READY
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -3937,8 +3937,8 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       ftype%localfield%localdata = array
-      !ftype%localfield%datastatus = ESMF_STATE_READY
-      ftype%datastatus = ESMF_STATE_READY
+      !ftype%localfield%datastatus = ESMF_STATUS_READY
+      ftype%datastatus = ESMF_STATUS_READY
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -4028,7 +4028,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       ftype%grid = grid
-      ftype%gridstatus = ESMF_STATE_READY
+      ftype%gridstatus = ESMF_STATUS_READY
 
       call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
       if (present(datamap)) then
@@ -4069,7 +4069,7 @@
         !                          ESMF_CONTEXT, rc)) return
       endif
 
-      ftype%fieldstatus = ESMF_STATE_READY
+      ftype%fieldstatus = ESMF_STATUS_READY
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -4154,7 +4154,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       ftype%grid = grid
-      ftype%gridstatus = ESMF_STATE_READY
+      ftype%gridstatus = ESMF_STATUS_READY
 
       call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
       if (present(datamap)) then
@@ -4186,7 +4186,7 @@
 ! add more code here
 !
      
-      ftype%fieldstatus = ESMF_STATE_READY
+      ftype%fieldstatus = ESMF_STATUS_READY
 
       if (rcpresent) rc = ESMF_SUCCESS
       
@@ -4251,15 +4251,15 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! Initialize field contents
-      !ftypep%localfield%gridstatus = ESMF_STATE_UNINIT
-      !ftypep%localfield%datastatus = ESMF_STATE_UNINIT
-      ftypep%gridstatus = ESMF_STATE_UNINIT
-      ftypep%datastatus = ESMF_STATE_UNINIT
+      !ftypep%localfield%gridstatus = ESMF_STATUS_UNINIT
+      !ftypep%localfield%datastatus = ESMF_STATUS_UNINIT
+      ftypep%gridstatus = ESMF_STATUS_UNINIT
+      ftypep%datastatus = ESMF_STATUS_UNINIT
 
       ! Set the mapping as unknown/invalid
       call ESMF_FieldDataMapSetInvalid(ftypep%mapping, status)
 
-      ftypep%fieldstatus = ESMF_STATE_READY
+      ftypep%fieldstatus = ESMF_STATUS_READY
 
 !
 ! add more code here

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.52 2004/05/21 16:57:54 theurich Exp $
+// $Id: ESMC_Base.h,v 1.53 2004/06/10 23:39:47 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -48,12 +48,12 @@ enum ESMC_Logical { ESMF_TRUE=1,
                     ESMF_FALSE };
 
 // ESMF class states
-enum ESMC_Status { ESMF_STATE_UNINIT=1,
-                   ESMF_STATE_READY,
-                   ESMF_STATE_UNALLOCATED,
-                   ESMF_STATE_ALLOCATED,
-                   ESMF_STATE_BUSY,
-                   ESMF_STATE_INVALID };
+enum ESMC_Status { ESMF_STATUS_UNINIT=1,
+                   ESMF_STATUS_READY,
+                   ESMF_STATUS_UNALLOCATED,
+                   ESMF_STATUS_ALLOCATED,
+                   ESMF_STATUS_BUSY,
+                   ESMF_STATUS_INVALID };
 
 #define ESMC_NULL_POINTER (0)
 #define ESMC_BAD_POINTER (-1)

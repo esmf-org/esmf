@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.110 2004/06/09 23:13:52 jwolfe Exp $
+! $Id: ESMF_Base.F90,v 1.111 2004/06/10 23:39:47 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -153,7 +153,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.110 2004/06/09 23:13:52 jwolfe Exp $'
+               '$Id: ESMF_Base.F90,v 1.111 2004/06/10 23:39:47 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -1397,12 +1397,12 @@
 !
 !EOPI
 
-      if (status .eq. ESMF_STATE_UNINIT) string = "Uninitialized"
-      if (status .eq. ESMF_STATE_READY) string = "Ready"
-      if (status .eq. ESMF_STATE_UNALLOCATED) string = "Unallocated"
-      if (status .eq. ESMF_STATE_ALLOCATED) string = "Allocated"
-      if (status .eq. ESMF_STATE_BUSY) string = "Busy"
-      if (status .eq. ESMF_STATE_INVALID) string = "Invalid"
+      if (status .eq. ESMF_STATUS_UNINIT) string = "Uninitialized"
+      if (status .eq. ESMF_STATUS_READY) string = "Ready"
+      if (status .eq. ESMF_STATUS_UNALLOCATED) string = "Unallocated"
+      if (status .eq. ESMF_STATUS_ALLOCATED) string = "Allocated"
+      if (status .eq. ESMF_STATUS_BUSY) string = "Busy"
+      if (status .eq. ESMF_STATUS_INVALID) string = "Invalid"
  
       if (present(rc)) rc = ESMF_SUCCESS
 

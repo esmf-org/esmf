@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.31 2004/06/10 21:18:29 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.32 2004/06/10 23:39:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.31 2004/06/10 21:18:29 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.32 2004/06/10 23:39:48 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -458,7 +458,7 @@
 
       btypep => bundle%btypep
 
-      if (btypep%bundlestatus .ne. ESMF_STATE_READY) then
+      if (btypep%bundlestatus .ne. ESMF_STATUS_READY) then
         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -678,8 +678,8 @@
       dtypep => dstBundle%btypep
       stypep => srcBundle%btypep
 
-      if (dtypep%bundlestatus.ne.ESMF_STATE_READY .or. &
-          stypep%bundlestatus.ne.ESMF_STATE_READY) then
+      if (dtypep%bundlestatus.ne.ESMF_STATUS_READY .or. &
+          stypep%bundlestatus.ne.ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return

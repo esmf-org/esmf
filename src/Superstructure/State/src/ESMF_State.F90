@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.51 2004/06/10 22:07:37 jwolfe Exp $
+! $Id: ESMF_State.F90,v 1.52 2004/06/10 23:39:50 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -291,7 +291,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.51 2004/06/10 22:07:37 jwolfe Exp $'
+      '$Id: ESMF_State.F90,v 1.52 2004/06/10 23:39:50 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1714,7 +1714,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
       stypep => state%statep
-      if (stypep%statestatus .ne. ESMF_STATE_READY) then
+      if (stypep%statestatus .ne. ESMF_STATUS_READY) then
         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or invalid State", &
                                  ESMF_CONTEXT, rc)) return
@@ -3634,7 +3634,7 @@ end function
         else
           stypep%st = ESMF_STATELIST
         endif
-        stypep%statestatus = ESMF_STATE_READY
+        stypep%statestatus = ESMF_STATUS_READY
         stypep%alloccount = 0
         stypep%datacount = 0
         nullify(stypep%datalist)
@@ -3683,7 +3683,7 @@ end function
         ! themselves; they could be added to multiple states.  it is
         ! the user's responsibility to delete them when finished.
         stypep%st = ESMF_STATEINVALID
-        stypep%statestatus = ESMF_STATE_INVALID
+        stypep%statestatus = ESMF_STATUS_INVALID
         if (stypep%datacount .gt. 0) then
           do i = 1, stypep%datacount
             ! free anything allocated here
@@ -4711,7 +4711,7 @@ end function
                               "Error: invalid or uninitialized state object", &
                                   ESMF_CONTEXT, rc)) return
       endif
-      if (stypep%statestatus .ne. ESMF_STATE_READY) then
+      if (stypep%statestatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                               "Error: invalid or uninitialized state object", &
                                   ESMF_CONTEXT, rc)) return

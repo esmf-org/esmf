@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.1 2004/06/08 09:27:15 nscollins Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.2 2004/06/10 23:39:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -87,12 +87,12 @@
           integer :: status
       end type
 
-      type(ESMF_Status), parameter :: ESMF_STATE_UNINIT = ESMF_Status(1), &
-                                      ESMF_STATE_READY = ESMF_Status(2), &
-                                      ESMF_STATE_UNALLOCATED = ESMF_Status(3), &
-                                      ESMF_STATE_ALLOCATED = ESMF_Status(4), &
-                                      ESMF_STATE_BUSY = ESMF_Status(5), &
-                                      ESMF_STATE_INVALID = ESMF_Status(6)
+      type(ESMF_Status), parameter :: ESMF_STATUS_UNINIT = ESMF_Status(1), &
+                                      ESMF_STATUS_READY = ESMF_Status(2), &
+                                      ESMF_STATUS_UNALLOCATED = ESMF_Status(3), &
+                                      ESMF_STATUS_ALLOCATED = ESMF_Status(4), &
+                                      ESMF_STATUS_BUSY = ESMF_Status(5), &
+                                      ESMF_STATUS_INVALID = ESMF_Status(6)
  
 !------------------------------------------------------------------------------
 !
@@ -302,9 +302,9 @@
 !
 ! !PUBLIC TYPES:
 
-      public ESMF_STATE_UNINIT, ESMF_STATE_READY, &
-             ESMF_STATE_UNALLOCATED, ESMF_STATE_ALLOCATED, &
-             ESMF_STATE_BUSY, ESMF_STATE_INVALID
+      public ESMF_STATUS_UNINIT, ESMF_STATUS_READY, &
+             ESMF_STATUS_UNALLOCATED, ESMF_STATUS_ALLOCATED, &
+             ESMF_STATUS_BUSY, ESMF_STATUS_INVALID
 
       public ESMF_DATA_INTEGER, ESMF_DATA_REAL, &
              ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER, ESMF_DATA_COMPLEX

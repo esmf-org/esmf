@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.51 2004/06/10 06:03:43 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.52 2004/06/10 23:39:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -106,8 +106,8 @@
         type(ESMF_Array) :: packed_data               ! local packed array
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type(ESMF_GridClass), pointer :: gridp => NULL() ! local data
-        type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT    ! is grid set 
-        type(ESMF_Status) :: arraystatus = ESMF_STATE_UNINIT   ! is array set 
+        type(ESMF_Status) :: gridstatus = ESMF_STATUS_UNINIT    ! is grid set 
+        type(ESMF_Status) :: arraystatus = ESMF_STATUS_UNINIT   ! is array set 
         integer :: accesscount = 0                    ! reserved for future use
 #else
         type(ESMF_GridClass), pointer :: gridp
@@ -126,8 +126,8 @@
       !private
         type(ESMF_Base) :: base                   ! base class object
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-        type(ESMF_Status) :: bundlestatus = ESMF_STATE_UNINIT
-        type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT     ! is grid set
+        type(ESMF_Status) :: bundlestatus = ESMF_STATUS_UNINIT
+        type(ESMF_Status) :: gridstatus = ESMF_STATUS_UNINIT     ! is grid set
         type(ESMF_GridClass), pointer :: gridp => NULL() ! shortcut
         type(ESMF_Field), dimension(:), pointer :: flist => NULL() 
         integer :: field_count = 0                ! how many fields in here
@@ -959,7 +959,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
       btype => bundle%btypep
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+      if (btype%bundlestatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -1152,7 +1152,7 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
           btypep%grid = grid
-          btypep%gridstatus = ESMF_STATE_READY
+          btypep%gridstatus = ESMF_STATUS_READY
       endif
 
       ! Set return values.
@@ -1295,7 +1295,7 @@ end function
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
       endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+      if (btype%bundlestatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -1303,7 +1303,7 @@ end function
 
       if (present(grid)) then
           ! Validate bundle has grid before trying to return it.
-          if (btype%gridstatus .ne. ESMF_STATE_READY) then
+          if (btype%gridstatus .ne. ESMF_STATUS_READY) then
                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Bad Grid", &
                                  ESMF_CONTEXT, rc)) return
@@ -2102,7 +2102,7 @@ end function
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
       endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+      if (btype%bundlestatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -2201,7 +2201,7 @@ end function
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
       endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+      if (btype%bundlestatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -2529,7 +2529,7 @@ end function
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
       endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+      if (btype%bundlestatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -2659,7 +2659,7 @@ end function
 !
       type(ESMF_Bundle) :: b
 
-      b%btypep%bundlestatus = ESMF_STATE_UNINIT
+      b%btypep%bundlestatus = ESMF_STATUS_UNINIT
 
       ESMF_BundleRead = b
 
@@ -2706,7 +2706,7 @@ end function
 !
       type(ESMF_Bundle) :: b
 
-      b%btypep%bundlestatus = ESMF_STATE_UNINIT
+      b%btypep%bundlestatus = ESMF_STATUS_UNINIT
 
       ESMF_BundleReadRestart = b
 
@@ -2895,7 +2895,7 @@ end function
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
       endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+      if (btype%bundlestatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -2903,7 +2903,7 @@ end function
    
       ! here we will only let someone associate a grid with a bundle
       ! if there is not one already associated with it.  
-      if (btype%gridstatus .eq. ESMF_STATE_READY) then
+      if (btype%gridstatus .eq. ESMF_STATUS_READY) then
         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Bundle is already associated with a Grid", &
                                  ESMF_CONTEXT, rc)) return
@@ -2915,7 +2915,7 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       btype%grid = grid
-      btype%gridstatus = ESMF_STATE_READY
+      btype%gridstatus = ESMF_STATUS_READY
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -2981,7 +2981,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif 
 
-      if (bundle%btypep%bundlestatus .ne. ESMF_STATE_READY) then
+      if (bundle%btypep%bundlestatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -3184,13 +3184,13 @@ end function
       !  associated with the bundle.  Note that Fields can be created
       !  that don't have associated grids yet, so we have to be able to
       !  deal consistently with that.
-      if (btype%gridstatus .eq. ESMF_STATE_UNINIT) then
+      if (btype%gridstatus .eq. ESMF_STATUS_UNINIT) then
           do i=1, fieldCount
             call ESMF_FieldGet(btype%flist(i), grid=grid, rc=status)
             if (status .ne. ESMF_SUCCESS) cycle
 
             btype%grid = grid
-            btype%gridstatus = ESMF_STATE_READY
+            btype%gridstatus = ESMF_STATUS_READY
             status = ESMF_SUCCESS
             exit
           enddo
@@ -3413,16 +3413,16 @@ end function
 
       ! Initialize bundle contents
       
-      btype%localbundle%gridstatus = ESMF_STATE_UNINIT
-      btype%localbundle%arraystatus = ESMF_STATE_UNINIT
-      btype%gridstatus = ESMF_STATE_UNINIT
+      btype%localbundle%gridstatus = ESMF_STATUS_UNINIT
+      btype%localbundle%arraystatus = ESMF_STATUS_UNINIT
+      btype%gridstatus = ESMF_STATUS_UNINIT
    
       btype%field_count = 0
       nullify(btype%flist)
       
       btype%pack_flag = ESMF_NO_PACKED_DATA
 !     nullify(btype%localbundle%packed_data)
-      btype%bundlestatus = ESMF_STATE_READY
+      btype%bundlestatus = ESMF_STATUS_READY
   
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -3467,7 +3467,7 @@ end function
           rc = ESMF_FAILURE
       endif
 
-     btype%bundlestatus = ESMF_STATE_INVALID
+     btype%bundlestatus = ESMF_STATUS_INVALID
      call ESMF_BaseDestroy(btype%base, status)
 
      !

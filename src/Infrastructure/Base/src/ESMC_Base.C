@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.39 2004/06/10 22:45:00 eschwab Exp $
+// $Id: ESMC_Base.C,v 1.40 2004/06/10 23:39:47 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.39 2004/06/10 22:45:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.40 2004/06/10 23:39:47 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -589,7 +589,7 @@ static int globalCount = 0;
 //
 //EOPI
 
-  if (baseStatus != ESMF_STATE_READY) 
+  if (baseStatus != ESMF_STATUS_READY) 
     return ESMF_FAILURE;
 
   return ESMF_SUCCESS;
@@ -830,12 +830,12 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //EOPI
 
     switch (stat) {
-      case ESMF_STATE_UNINIT:       return  "Uninitialized";
-      case ESMF_STATE_READY:        return  "Ready";
-      case ESMF_STATE_UNALLOCATED:  return  "Unallocated";
-      case ESMF_STATE_ALLOCATED:    return  "Allocated";
-      case ESMF_STATE_BUSY:         return  "Busy";
-      case ESMF_STATE_INVALID:      return  "Invalid";
+      case ESMF_STATUS_UNINIT:       return  "Uninitialized";
+      case ESMF_STATUS_READY:        return  "Ready";
+      case ESMF_STATUS_UNALLOCATED:  return  "Unallocated";
+      case ESMF_STATUS_ALLOCATED:    return  "Allocated";
+      case ESMF_STATUS_BUSY:         return  "Busy";
+      case ESMF_STATUS_INVALID:      return  "Invalid";
       default:
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
                                       "Unknown Status", NULL);
@@ -2807,7 +2807,7 @@ extern "C" {
   attrAlloc = 0;
   attrList = ESMC_NULL_POINTER;
 
-  baseStatus = ESMF_STATE_READY;
+  baseStatus = ESMF_STATUS_READY;
 
  } // end ESMC_Base
 
@@ -2848,12 +2848,12 @@ extern "C" {
   attrList = ESMC_NULL_POINTER;
   if (nattrs > 0) {
       if (ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
-          baseStatus = ESMF_STATE_INVALID;   // can't return err, but can
+          baseStatus = ESMF_STATUS_INVALID;   // can't return err, but can
           return;                            // try to indicate unhappiness
       }
   }
 
-  baseStatus = ESMF_STATE_READY;
+  baseStatus = ESMF_STATUS_READY;
 
  } // end ESMC_Base
 
@@ -2877,7 +2877,7 @@ extern "C" {
 //EOPI
   int i;
 
-  baseStatus = ESMF_STATE_INVALID;
+  baseStatus = ESMF_STATUS_INVALID;
 
   // if attribute lists, delete them.
   for (i=0; i<attrCount; i++) 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.17 2004/06/09 23:16:06 jwolfe Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.18 2004/06/10 23:39:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@
       sequence
       private
 #ifndef ESMF_NO_INITIALIZERS
-        type(ESMF_Status) :: status = ESMF_STATE_UNINIT
+        type(ESMF_Status) :: status = ESMF_STATUS_UNINIT
 #else
         type(ESMF_Status) :: status 
 #endif
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.17 2004/06/09 23:16:06 jwolfe Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.18 2004/06/10 23:39:49 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -269,7 +269,7 @@
       !jw  write (msgbuf, *)  "FieldDataMap print:"
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         write (*, *)  "FieldDataMap print:"
-        if (fielddatamap%status .ne. ESMF_STATE_READY) then
+        if (fielddatamap%status .ne. ESMF_STATUS_READY) then
       !jw    write (msgbuf, *)  "Uninitialized or Invalid object"
       !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
           write (*, *)  "Uninitialized or Invalid object"
@@ -471,7 +471,7 @@
         if (present(vertRelloc)) fielddatamap%vertRelloc = vertRelloc
 
         ! mark object as initialized and ready to be used
-        fielddatamap%status = ESMF_STATE_READY
+        fielddatamap%status = ESMF_STATUS_READY
 
         ! if user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -568,7 +568,7 @@
         endif
 
         ! mark object as initialized and ready to be used
-        fielddatamap%status = ESMF_STATE_READY
+        fielddatamap%status = ESMF_STATUS_READY
 
         ! if user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -606,7 +606,7 @@
 
         call ESMF_ArrayDataMapSetInvalid(fielddatamap%adm, rc)
 
-        fielddatamap%status = ESMF_STATE_INVALID
+        fielddatamap%status = ESMF_STATUS_INVALID
 
         ! If user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -662,7 +662,7 @@
         endif
 
 
-        if (fielddatamap%status .ne. ESMF_STATE_READY) then
+        if (fielddatamap%status .ne. ESMF_STATUS_READY) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed FieldDataMap", &
                                  ESMF_CONTEXT, rc)) return
@@ -755,7 +755,7 @@
 ! TODO: code goes here
 !
  
-        ESMF_FieldDataMapReadRestart%status = ESMF_STATE_UNINIT
+        ESMF_FieldDataMapReadRestart%status = ESMF_STATUS_UNINIT
         if (present(rc)) rc = ESMF_FAILURE
 
         end function ESMF_FieldDataMapReadRestart
@@ -842,7 +842,7 @@
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
-        ESMF_FieldDataMapRead%status = ESMF_STATE_UNINIT
+        ESMF_FieldDataMapRead%status = ESMF_STATUS_UNINIT
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_FieldDataMapRead

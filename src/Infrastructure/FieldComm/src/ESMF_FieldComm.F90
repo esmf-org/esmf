@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.42 2004/06/10 17:44:26 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.43 2004/06/10 23:39:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.42 2004/06/10 17:44:26 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.43 2004/06/10 23:39:49 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -483,7 +483,7 @@
 
       ftypep => field%ftypep
 
-      if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+      if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
@@ -702,8 +702,8 @@
       dstFtypep => dstField%ftypep
       srcFtypep => srcField%ftypep
 
-      if (dstFtypep%fieldstatus.ne.ESMF_STATE_READY .or. &
-          srcFtypep%fieldstatus.ne.ESMF_STATE_READY) then
+      if (dstFtypep%fieldstatus.ne.ESMF_STATUS_READY .or. &
+          srcFtypep%fieldstatus.ne.ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
@@ -802,7 +802,7 @@
 
       srcFtypep => srcField%ftypep
 
-      if (srcFtypep%fieldstatus.ne.ESMF_STATE_READY) then
+      if (srcFtypep%fieldstatus.ne.ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return

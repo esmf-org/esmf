@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.14 2004/06/09 23:14:21 jwolfe Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.15 2004/06/10 23:39:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@
       sequence
       private
 #ifndef ESMF_NO_INITIALIZERS
-        type(ESMF_Status) :: status = ESMF_STATE_UNINIT
+        type(ESMF_Status) :: status = ESMF_STATUS_UNINIT
 #else
         type(ESMF_Status) :: status 
 #endif
@@ -209,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.14 2004/06/09 23:14:21 jwolfe Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.15 2004/06/10 23:39:45 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -435,7 +435,7 @@ end function
       !jw  write(msgbuf,*)  "ArrayDataMap print:"
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         write(*,*)  "ArrayDataMap print:"
-        if (datamap%status .ne. ESMF_STATE_READY) then
+        if (datamap%status .ne. ESMF_STATUS_READY) then
       !jw    write(msgbuf,*)  "Uninitialized or Invalid object"
       !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
           write(*,*)  "Uninitialized or Invalid object"
@@ -637,7 +637,7 @@ end function
         endif
 
         ! mark object as initialized and ready to be used
-        datamap%status = ESMF_STATE_READY
+        datamap%status = ESMF_STATUS_READY
 
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
@@ -774,7 +774,7 @@ end function
         endif
 
         ! mark object as initialized and ready to be used
-        datamap%status = ESMF_STATE_READY
+        datamap%status = ESMF_STATUS_READY
 
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
@@ -810,7 +810,7 @@ end function
 !
 !EOP
 
-        datamap%status = ESMF_STATE_INVALID
+        datamap%status = ESMF_STATUS_INVALID
 
         ! If user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -850,7 +850,7 @@ end function
         ! initialize return code
         if (present(rc)) rc = ESMF_FAILURE
 
-        if (datamap%status .ne. ESMF_STATE_READY) return
+        if (datamap%status .ne. ESMF_STATUS_READY) return
             
         ! TODO: add more validation here - for index numbers, etc
  
@@ -938,7 +938,7 @@ end function
 ! TODO: code goes here
 !
  
-        ESMF_ArrayDataMapReadRestart%status = ESMF_STATE_UNINIT
+        ESMF_ArrayDataMapReadRestart%status = ESMF_STATUS_UNINIT
         if (present(rc)) rc = ESMF_FAILURE
 
         end function ESMF_ArrayDataMapReadRestart
@@ -1023,7 +1023,7 @@ end function
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
-        ESMF_ArrayDataMapRead%status = ESMF_STATE_UNINIT
+        ESMF_ArrayDataMapRead%status = ESMF_STATUS_UNINIT
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayDataMapRead

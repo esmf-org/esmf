@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.18 2004/06/10 21:18:29 cdeluca Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.19 2004/06/10 23:39:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@
         ! only the bundle interleave needed here because each field contains
         ! its own private data map.   
 #ifndef ESMF_NO_INITIALIZERS
-        type(ESMF_Status) :: status = ESMF_STATE_UNINIT
+        type(ESMF_Status) :: status = ESMF_STATUS_UNINIT
         type(ESMF_BundleInterleave) :: bil = ESMF_INTERLEAVE_BY_ITEM
 #else
         type(ESMF_Status) :: status 
@@ -126,7 +126,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.18 2004/06/10 21:18:29 cdeluca Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.19 2004/06/10 23:39:48 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -274,7 +274,7 @@ end function
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         write (*, *)  "BundleDataMap print:"
 
-        if (bundledatamap%status .ne. ESMF_STATE_READY) then
+        if (bundledatamap%status .ne. ESMF_STATUS_READY) then
       !jw    write (msgbuf, *)  "Uninitialized or Invalid object"
       !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
           write (*, *)  "Uninitialized or Invalid object"
@@ -399,7 +399,7 @@ end function
         if (present(bundleinterleave)) bundledatamap%bil = bundleinterleave
   
         ! mark object as initialized and ready to be used
-        bundledatamap%status = ESMF_STATE_READY
+        bundledatamap%status = ESMF_STATUS_READY
 
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
@@ -435,7 +435,7 @@ end function
 !
 !EOP
 
-        bundledatamap%status = ESMF_STATE_INVALID
+        bundledatamap%status = ESMF_STATUS_INVALID
 
         ! If user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -494,7 +494,7 @@ end function
         endif
 
 
-        if (bundledatamap%status .ne. ESMF_STATE_READY) then
+        if (bundledatamap%status .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed BundleDataMap", &
                                  ESMF_CONTEXT, rc)) return
@@ -626,7 +626,7 @@ end function
 ! TODO: code goes here
 !
  
-        ESMF_BundleDataMapReadRestart%status = ESMF_STATE_UNINIT
+        ESMF_BundleDataMapReadRestart%status = ESMF_STATUS_UNINIT
         if (present(rc)) rc = ESMF_FAILURE
 
         end function ESMF_BundleDataMapReadRestart
@@ -711,7 +711,7 @@ end function
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
-        ESMF_BundleDataMapRead%status = ESMF_STATE_UNINIT
+        ESMF_BundleDataMapRead%status = ESMF_STATUS_UNINIT
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_BundleDataMapRead

@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.11 2004/06/08 09:27:18 nscollins Exp $
+! $Id: ESMF_IOSpec.F90,v 1.12 2004/06/10 23:39:50 cdeluca Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -341,7 +341,7 @@ end function
           iospec%async_io = .false.
       endif
 
-      iospec%iostatus = ESMF_STATE_READY
+      iospec%iostatus = ESMF_STATUS_READY
       
       if (present(rc)) rc = ESMF_SUCCESS
 
