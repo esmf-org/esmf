@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2004/03/16 18:00:54 nscollins Exp $
+# $Id: build_rules.mk,v 1.7 2004/05/14 13:32:21 nscollins Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -113,9 +113,9 @@ CXX_FLINKER	   = ${CXX_CC}
 CXX_CCV		   = ${CXX_CC} -V
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 C_F90CXXLD         = ${CXX_FC} -mp
-C_F90CXXLIBS       = -lpgc -lstd -lC
+C_F90CXXLIBS       = -lpgc -lrt -lstd -lC
 C_CXXF90LD         = ${CXX_CC} 
-C_CXXF90LIBS       = -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
+C_CXXF90LIBS       = -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
 C_CXXSO            = ${CXX_CC} -shared
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
