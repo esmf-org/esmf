@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.50 2004/06/13 19:30:45 cdeluca Exp $
+// $Id: ESMC_LogErr.h,v 1.51 2005/01/11 23:14:48 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,8 +39,10 @@
 
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
+#include "ESMC_VM.h"
 
 enum ESMC_MsgType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
+enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2};
 int ESMC_LogFinalize();         
 char *ESMC_LogGetErrMsg(int rc);          
 int ESMC_LogSetFilename(char filename[]);
@@ -68,6 +70,10 @@ private:
     int stream;
 
     int max_elements;
+    
+    ESMC_VM  *ESMC_LogVM;
+    
+    int *pet_number;
 		
     ESMC_Logical fileI0;        // If true, output written to files
 
@@ -90,8 +96,9 @@ private:
     bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int LINE,char FILE[],
          char method[],int *rcToReturn);
     void ESMC_LogOpen(char filename[]);
-    bool ESMC_LogWrite(char msg[],int logtype);
-    bool ESMC_LogWrite(char msg[],int logtype,int LINE,char FILE[],
+    void ESMC_LogOpen(char filename[],int logtype);
+    bool ESMC_LogWrite(char msg[],int msgtype);
+    bool ESMC_LogWrite(char msg[],int msgtype,int LINE,char FILE[],
          char method[]);       
 // !PUBLIC Variables:          
     FILE *ESMC_LogFile;
