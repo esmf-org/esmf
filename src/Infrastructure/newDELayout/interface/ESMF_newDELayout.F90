@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.5 2004/03/05 19:49:53 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.6 2004/03/09 22:38:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.5 2004/03/05 19:49:53 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.6 2004/03/09 22:38:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -214,11 +214,11 @@ contains
   function ESMF_newDELayoutCreateND(vm, nDEs, DEtoPET, cyclic, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM), intent(in)                 :: vm
-    integer, intent(in), optional             :: nDEs(:)
-    integer, intent(in), optional             :: DEtoPET(:)
-    type(ESMF_Logical), intent(in), optional  :: cyclic
-    integer, intent(out), optional            :: rc
+    type(ESMF_VM),      intent(in)            :: vm
+    integer,            intent(in),  optional :: nDEs(:)
+    integer,            intent(in),  optional :: DEtoPET(:)
+    type(ESMF_Logical), intent(in),  optional :: cyclic
+    integer,            intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
       type(ESMF_newDELayout) :: ESMF_newDELayoutCreateND
