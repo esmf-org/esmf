@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.2 2003/02/10 22:11:20 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.3 2003/02/11 23:40:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.2 2003/02/10 22:11:20 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.3 2003/02/11 23:40:11 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -798,7 +798,7 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array 
-      type(ESMF_AxisIndex), intent(in) :: indexlist
+      type(ESMF_AxisIndex), intent(in) :: indexlist(:)
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -812,6 +812,7 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 ! TODO: code goes here
 !
         ! call c routine to add index
+        call c_ESMC_ArraySetAxisIndex(array, indexlist, rc)
 
         end subroutine ESMF_ArraySetAxisIndex
 
@@ -824,7 +825,7 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array 
-      type(ESMF_AxisIndex), intent(out) :: indexlist
+      type(ESMF_AxisIndex), intent(out) :: indexlist(:)
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -837,6 +838,7 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 ! TODO: code goes here
 !
         ! call c routine to query index
+        call c_ESMC_ArrayGetAxisIndex(array, indexlist, rc)
 
         end subroutine ESMF_ArrayGetAxisIndex
 
@@ -1111,6 +1113,50 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 ! TODO: code goes here
 !
         end subroutine ESMF_ArrayGet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayGetName - Retrieve the name of a Array
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayGetName(array, name, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: array
+      character (len = *), intent(out) :: name
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!      Returns the name of the array.  If the array was created without
+!      specifying a name, the framework will have assigned it a unique one.
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code; assume failure until success is certain
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      ! TODO: add an interface to the C stuff here
+      !call c_ESMC_ArrayGetName(array, name, status)
+      !if(status .NE. 0) then
+      !  print *, "ERROR in ESMF_ArrayGetName"
+      !  return
+      !endif
+
+      name = "default array name"
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetName
+
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
