@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.6 2004/03/24 18:31:08 cdeluca Exp $
+% $Id: Array_refdoc.ctex,v 1.7 2004/06/16 14:53:49 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,8 +21,8 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{<Title>}
-\newcommand{\myauthors}{<Authors>}
+\newcommand{\mytitle}{Array Class}
+\newcommand{\myauthors}{ESMF Core Team}
 #endif
 
 #ifdef STANDALONE
@@ -54,9 +54,11 @@
 #ifdef STANDALONE
 \input{Array_usage}
 \input{../../Array/doc/ESMF_ArrayCreateEx_fapi}
+\input{../../Array/doc/ESMF_ArrayGetEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/ArrayComm/doc/Array_usage}
 \input{../Infrastructure/Array/doc/ESMF_ArrayCreateEx_fapi}
+\input{../Infrastructure/Array/doc/ESMF_ArrayGetEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
