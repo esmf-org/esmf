@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.40 2004/02/24 14:09:35 theurich Exp $
+#  $Id: common.mk,v 1.41 2004/03/12 16:34:43 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -134,6 +134,7 @@ OBJS		= ${OBJSC} ${OBJSF}
 
 DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results
 DO_EX_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results
+DO_ST_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
@@ -460,6 +461,12 @@ run_system_tests_uni:  chkopts chkdir_tests
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
+#
+# report statistics on system tests
+#
+check_system_tests:
+	$(DO_ST_RESULTS)
+
 
 #-------------------------------------------------------------------------------
 #  Targets for building and running unit tests.
@@ -512,6 +519,12 @@ run_tests_uni:  chkopts chkdir_tests
 	$(DO_UT_RESULTS)
 
 tree_run_tests_uni: $(TESTS_RUN_UNI)
+
+#
+# report statistics on tests
+#
+check_tests:
+	$(DO_UT_RESULTS)
 
 #-------------------------------------------------------------------------------
 # Targets for building and running examples
@@ -592,6 +605,12 @@ run_examples_uni:  chkopts chkdir_examples
 
 tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 
+#
+# report statistics on examples
+#
+check_examples:
+	$(DO_EX_RESULTS)
+
 
 #-------------------------------------------------------------------------------
 # Targets for building and running demos.
@@ -640,6 +659,13 @@ run_demo_uni:  chkopts chkdir_tests
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_demo_uni tree
 
 tree_run_demo_uni: $(DEMO_RUN_UNI) 
+
+
+#-------------------------------------------------------------------------------
+# Targets for checking the builds
+#-------------------------------------------------------------------------------
+
+check_results: check_tests check_examples check_system_tests
 
 
 #-------------------------------------------------------------------------------
