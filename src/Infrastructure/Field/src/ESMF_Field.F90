@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.131 2004/03/20 00:08:39 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.132 2004/03/22 18:21:02 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -74,19 +74,19 @@
                                ESMF_READONLY = ESMF_Access(1)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_DataAllocate
+!     ! ESMF_AllocFlag
 !
 !     ! Interface flag for setting whether Field does the data allocation.
 
-      type ESMF_DataAllocate
+      type ESMF_AllocFlag
       sequence
       private
         integer :: a_type
       end type
 
-      type(ESMF_DataAllocate), parameter ::  &
-                               ESMF_DO_ALLOCATE = ESMF_DataAllocate(0), &
-                               ESMF_NO_ALLOCATE = ESMF_DataAllocate(1)
+      type(ESMF_AllocFlag), parameter ::  &
+                               ESMF_DO_ALLOCATE = ESMF_AllocFlag(0), &
+                               ESMF_NO_ALLOCATE = ESMF_AllocFlag(1)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_LocalField
@@ -156,7 +156,7 @@
 ! !PUBLIC TYPES:
       public ESMF_Field, ESMF_Access
       public ESMF_FieldType, ESMF_LocalField  ! for internal lib use only
-      public ESMF_DataAllocate, ESMF_NO_ALLOCATE, ESMF_DO_ALLOCATE
+      public ESMF_AllocFlag, ESMF_NO_ALLOCATE, ESMF_DO_ALLOCATE
 
 !------------------------------------------------------------------------------
 !
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.131 2004/03/20 00:08:39 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.132 2004/03/22 18:21:02 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -808,7 +808,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid               
       type(ESMF_ArraySpec), intent(in) :: arrayspec     
-      type(ESMF_DataAllocate), intent(in), optional :: allocflag
+      type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
@@ -3260,7 +3260,7 @@
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
       type(ESMF_ArraySpec), intent(in) :: arrayspec     
-      type(ESMF_DataAllocate), intent(in), optional :: allocflag
+      type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
