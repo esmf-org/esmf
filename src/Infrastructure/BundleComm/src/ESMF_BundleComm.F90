@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.34 2004/08/28 00:14:43 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.35 2004/09/23 21:45:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.34 2004/08/28 00:14:43 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.35 2004/09/23 21:45:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -349,7 +349,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHaloRelease"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleHaloRelease - Release resources associated w/ handle
 
 ! !INTERFACE:
@@ -372,7 +372,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
       call ESMF_RouteHandleDestroy(routehandle, rc)
 
@@ -473,7 +473,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRedist"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleRedist - Data redistribution operation on a Bundle
 
 ! !INTERFACE:
@@ -530,7 +530,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 ! !REQUIREMENTS: 
 
       integer :: status                            ! Error status
@@ -568,7 +568,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRedistRelease"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleRedistRelease - Release resources associated with handle
 
 ! !INTERFACE:
@@ -591,7 +591,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
       call ESMF_RouteHandleDestroy(routehandle, rc)
 
@@ -600,7 +600,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRedistStore"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleRedistStore - Data redistribution operation on a Bundle
 
 ! !INTERFACE:
@@ -646,7 +646,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
