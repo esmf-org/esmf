@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.16 2004/10/28 22:11:30 nscollins Exp $
+#  $Id: build_rules.mk,v 1.17 2004/11/19 17:39:04 nscollins Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -122,8 +122,8 @@ endif
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CCV		   = ${C_CC} -v
-C_FCV              = ${C_FC} -V
+C_CCV		   = ${C_CC} -v 2>&1 | head -3
+C_FCV              = ${C_FC} -V 2>&1 | head -2
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
@@ -142,7 +142,7 @@ F_FIXNOCPP      = -fixed
 #
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CCV		   = ${CXX_CC} -V
+CXX_CCV		   = ${CXX_CC} -V 2>&1 | head -3
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 CXXLIBBASE         = /soft/com/packages/intel-7/compiler70/ia32/lib
 F90LIBBASE         = /soft/com/packages/nag-f95-4.2/lib
