@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.3 2004/08/05 17:03:53 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.4 2004/10/27 17:25:00 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -36,7 +36,7 @@ getopts("d:", \%options);
 
 	if (not $ok) {
 		#The examples directory does not exist.
-		print "The are no executable or stdout examples files, either the 'gmake build_examples' has \n";
+		print "There are no executable or stdout examples files, either the 'gmake build_examples' has \n";
 		print "not been run or the 'build_examples' did not build successfully. \n\n";
 	}
 	else {
