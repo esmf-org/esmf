@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.4 2002/11/07 23:10:59 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.5 2002/12/06 16:42:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -15,21 +15,25 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ Array methods declared
-// in the companion file ESMC_Array.h
+// in the companion file ESMC_Array.h.  
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// The {\tt ESMF\_Array} object allows C++ to emulate the richer
+// Fortran language Array operations.  It allows strided access, 
+// subsetting operations, known dimension sizes, and typed access 
+// to arrays instead of just a starting address to a block of memory.  
 //
 //-----------------------------------------------------------------------------
 //
 
 // associated class definition file
-#include <ESMC_Array.h>
+#include "../include/ESMC_Array.h"
+#include "../include/ESMC_Alloc.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.4 2002/11/07 23:10:59 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.5 2002/12/06 16:42:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -184,8 +188,11 @@
 //   The return from this routine is a pointer to the new Array data.
 //
      ESMC_Array *a = new ESMC_Array;
+     int ni, nj;
   
-     *rc = ESMF_SUCCESS;
+     (allocfuncaddr)(f90ptr, &ni, &nj, rc);
+
+     //*rc = ESMF_SUCCESS;
      return a;
 
  } // end ESMC_ArrayCreate_F
@@ -413,6 +420,72 @@
 //
 
  } // end ESMC_ArrayPrint
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AllocFuncStore - internal routine
+//
+// !INTERFACE:
+      ESMC_AllocFuncStore(
+//
+// !RETURN VALUE:
+//    return code
+//
+// !ARGUMENTS:
+      void *func) {   // in - fortran function pointer
+//
+// !DESCRIPTION:
+//      stores a fortran function pointer used to call back into
+//      fortran to do an allocation.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+    
+    if (func != (void *)0)
+        allocfuncaddr = func;
+
+
+    return ESMF_SUCCESS;
+        
+
+ } // end ESMC_AllocFuncStore
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DeallocFuncStore - internal routine
+//
+// !INTERFACE:
+      ESMC_DeallocFuncStore(
+//
+// !RETURN VALUE:
+//    return code
+//
+// !ARGUMENTS:
+      void *func) {   // in - fortran function pointer
+//
+// !DESCRIPTION:
+//      stores a fortran function pointer used to call back into
+//      fortran to do an allocation.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+    
+    if (func != (void *)0)
+        deallocfuncaddr = func;
+
+
+    return ESMF_SUCCESS;
+        
+
+ } // end ESMC_DeallocFuncStore
 
 //-----------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Alloc_F.F90,v 1.1 2002/11/27 21:11:58 nscollins Exp $
+!  $Id: ESMF_Alloc_F.F90,v 1.2 2002/12/06 16:42:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,12 +23,12 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Alloc_F.F90,v 1.1 2002/11/27 21:11:58 nscollins Exp $'
+!      '$Id: ESMF_Alloc_F.F90,v 1.2 2002/12/06 16:42:10 nscollins Exp $'
 !==============================================================================
    subroutine f_esmf_allocate2dr4(f90ptr, ni, nj, rc)
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_AllocMod   ! ESMF allocation routines
-     real*4, pointer :: f90ptr(ni, *)
+     real*4, pointer :: f90ptr(:,:)
      integer, intent(in) :: ni, nj
      integer, intent(out) :: rc              
 
@@ -39,7 +39,7 @@
    subroutine f_esmf_deallocate2dr4(f90ptr, rc)
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_AllocMod   ! ESMF allocation routines
-     real*4 :: f90ptr(*)
+     real*4, pointer :: f90ptr(:,:)
      integer, intent(out), optional :: rc     
 
      call ESMF_Deallocate(f90ptr, rc)
