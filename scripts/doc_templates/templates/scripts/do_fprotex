@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_fprotex,v 1.8 2003/04/14 20:02:02 cdeluca Exp $
+# $Id: do_fprotex,v 1.9 2004/02/10 00:15:43 svasquez Exp $
 #
 #===============================================================================
 # do_fprotex
@@ -38,7 +38,10 @@ else
   set fnsuffix='fapi.tex'
   set class=$1
   set file=$2
-  perl $PROTEX -bFi +f $file > ${class}_${fnsuffix}
+  if ($#argv > 2) then
+  set extra=$3
+  endif
+  perl $PROTEX -bFi +f $file > ${class}${extra}_${fnsuffix}
 endif
 
 
