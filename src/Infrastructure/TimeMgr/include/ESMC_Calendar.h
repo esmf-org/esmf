@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.23 2003/11/10 20:58:19 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.24 2003/12/19 19:19:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -67,7 +67,7 @@
 //  
 // !USES:
  #include <ESMC_Base.h>           // inherited Base class
- #include <ESMC_BaseTime.h>
+ #include <ESMC_BaseTime.h>       // inherited BaseTime class
  #include <ESMC_Time.h>
 
 // TODO: replace with monthsPerYear property
@@ -159,20 +159,9 @@ class ESMC_Calendar {
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_CalendarReadRestart(ESMC_CalendarType type,
-                                 int         *daysPerMonth,
-                                 ESMF_KIND_I4 secondsPerDay,
-                                 ESMF_KIND_I4 secondsPerYear,
-                                 ESMF_KIND_I4 daysPerYear,
-                                 ESMF_KIND_I4 daysPerYeardN,
-                                 ESMF_KIND_I4 daysPerYeardD);
-    int ESMC_CalendarWriteRestart(ESMC_CalendarType *type,
-                                  int          *daysPerMonth,
-                                  ESMF_KIND_I4 *secondsPerDay,
-                                  ESMF_KIND_I4 *secondsPerYear,
-                                  ESMF_KIND_I4 *daysPerYear,
-                                  ESMF_KIND_I4 *daysPerYeardN,
-                                  ESMF_KIND_I4 *daysPerYeardD) const;
+    int ESMC_CalendarReadRestart(int nameLen, const char *name=0,
+                                 ESMC_IOSpec *iospec=0);
+    int ESMC_CalendarWriteRestart(ESMC_IOSpec *iospec=0) const;
 
     // internal validation
     int ESMC_CalendarValidate(const char *options=0) const;

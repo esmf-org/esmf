@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.35 2003/11/10 20:58:19 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.36 2003/12/19 19:20:22 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.35 2003/11/10 20:58:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.36 2003/12/19 19:20:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -675,37 +675,22 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType type,       // in
-      int         *daysPerMonth,    // in
-      ESMF_KIND_I4 secondsPerDay,   // in
-      ESMF_KIND_I4 secondsPerYear,  // in
-      ESMF_KIND_I4 daysPerYear,     // in
-      ESMF_KIND_I4 daysPerYeardN,   // in
-      ESMF_KIND_I4 daysPerYeardD) { // in
-// 
+      int          nameLen,   // in
+      const char  *name,      // in
+      ESMC_IOSpec *iospec) {  // in
+//
 // !DESCRIPTION:
-//      Restores {\tt EMSC\_Calendar} state for persistence/checkpointing
-// 
+//      restore {\tt Calendar} state for persistence/checkpointing.
+//
 //EOP
 // !REQUIREMENTS:
 
-    if (daysPerMonth == ESMC_NULL_POINTER) {
-      cout << "ESMC_Calendar::ESMC_CalendarReadRestart(): null pointer passed in" << endl;
-      return(ESMF_FAILURE);
-    }
+    int rc = ESMF_SUCCESS;
 
-    this->type = type;
-    for (int i=0; i<MONTHS_PER_YEAR; i++)
-    {
-        this->daysPerMonth[i] = daysPerMonth[i];    
-    }
-    this->secondsPerDay  = secondsPerDay;
-    this->secondsPerYear = secondsPerYear;
-    this->daysPerYear.d  = daysPerYear;
-    this->daysPerYear.dN = daysPerYeardN;
-    this->daysPerYear.dD = daysPerYeardD;
+    // TODO:  read calendar state from iospec/name, then restore
+    //        (share code with ESMC_CalendarSet()).
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
 }  // end ESMC_CalendarReadRestart
 
@@ -720,44 +705,19 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType *type,             // out
-      int          *daysPerMonth,          // out
-      ESMF_KIND_I4 *secondsPerDay,         // out
-      ESMF_KIND_I4 *secondsPerYear,        // out
-      ESMF_KIND_I4 *daysPerYear,           // out
-      ESMF_KIND_I4 *daysPerYeardN,         // out
-      ESMF_KIND_I4 *daysPerYeardD) const { // out
-// 
+      ESMC_IOSpec *iospec) const {
+//
 // !DESCRIPTION:
-//      Returns {\tt EMSC\_Calendar} state for persistence/checkpointing
-// 
+//      Save {\tt Calendar} state for persistence/checkpointing
+//
 //EOP
 // !REQUIREMENTS:
 
-    if (type           == ESMC_NULL_POINTER ||
-        daysPerMonth   == ESMC_NULL_POINTER ||
-        secondsPerDay  == ESMC_NULL_POINTER ||
-        secondsPerYear == ESMC_NULL_POINTER ||
-        daysPerYear    == ESMC_NULL_POINTER ||
-        daysPerYeardN  == ESMC_NULL_POINTER ||
-        daysPerYeardD  == ESMC_NULL_POINTER) {
-      cout << "ESMC_Calendar::ESMC_CalendarWriteRestart(): "
-           <<  "null pointer(s) passed in" << endl;
-      return(ESMF_FAILURE);
-    }
+    int rc = ESMF_SUCCESS;
 
-    *type = this->type;
-    for (int i=0; i<MONTHS_PER_YEAR; i++)
-    {
-        daysPerMonth[i] = this->daysPerMonth[i];    
-    }
-    *secondsPerDay  = this->secondsPerDay;
-    *secondsPerYear = this->secondsPerYear;
-    *daysPerYear    = this->daysPerYear.d;
-    *daysPerYeardN  = this->daysPerYear.dN;
-    *daysPerYeardD  = this->daysPerYear.dD;
+    // TODO:
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
 }  // end ESMC_CalendarWriteRestart
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.52 2003/11/10 20:58:19 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.53 2003/12/19 19:22:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,6 +40,9 @@
 
       ! inherit from base time class
       use ESMF_BaseTimeMod
+
+      ! for ReadRestart()/WriteRestart()
+      use ESMF_IOMod
 
       ! associated derived types
       use ESMF_TimeIntervalMod
@@ -107,11 +110,11 @@
       public operator(.LT.)
       private ESMF_TimeLT
 
-      public operator(.GT.)
-      private ESMF_TimeGT
-
       public operator(.LE.)
       private ESMF_TimeLE
+
+      public operator(.GT.)
+      private ESMF_TimeGT
 
       public operator(.GE.)
       private ESMF_TimeGE
@@ -120,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.52 2003/11/10 20:58:19 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.53 2003/12/19 19:22:00 eschwab Exp $'
 
 !==============================================================================
 !
@@ -200,20 +203,6 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      interface operator(.GT.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeGT
-
-! !DESCRIPTION:
-!     This interface overloads the .GT. operator for the {\tt ESMF\_Time} class.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
       interface operator(.LE.)
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -221,6 +210,20 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the .LE. operator for the {\tt ESMF\_Time} class.
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(.GT.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeGT
+
+! !DESCRIPTION:
+!     This interface overloads the .GT. operator for the {\tt ESMF\_Time} class.
 !
 !EOP
       end interface
@@ -296,6 +299,35 @@
 !     Initializes an {\tt ESMF\_Time} with a set of user-specified units
 !     via F90 optional arguments.
 !
+!     The range of valid values for mm and dd depend on the calendar used.
+!     For Gregorian, Julian, and No-Leap calendars, mm is [1-12] and dd is
+!     [1-28,29,30, or 31], depending on the value of mm and whether yr or
+!     yr\_i8 is a leap year.  For the 360-day calendar, mm is [1-12] and dd is
+!     [1-30].  For the Julian-day and No-calendar, yr, yr\_i8, mm, and dd are
+!     invalid inputs, since these calendars do not define them.  When valid,
+!     the yr and yr\_i8 arguments should be fully specified, e.g. 2003 instead
+!     of 03.  yr and yr\_i8 ranges are only limited by machine word size, 
+!     except for the Gregorian calendar, where the lower year limit is -4800.
+!     This is a limitation of the Gregorian date-to-Julian day conversion
+!     algorithm used to convert a Gregorian date to the internal representation
+!     of seconds.  The algorithm is from Henry F. Fliegel and Thomas C. Van
+!     Flandern, in Communications of the ACM, CACM, volume 11, number 10,
+!     October 1968, p. 657.  The Custom calendar will have a user-defined
+!     definition of yr, yr\_i8, mm, and dd.
+!
+!     The Julian day specifier, d or d\_i8, can be used with either the
+!     Julian-day or No-calendar, and has a valid range depending on the
+!     word size.  For a 32-bit d, the range is [-24855 to 24855].   For a
+!     64-bit d or d\_i8, the valid range is [-32045 to 1,067,519,911].
+!     The reference day of d=0 corresponds to 11/24/-4713 in the Gregorian
+!     calendar, which is derived from the Julian-day to Gregorian conversion
+!     algorithm by Fliegel/Van Flandern (see above).  The lower range day
+!     value of -32045 is the lowest for which the Fliegel/Van Flandern 
+!     algorithm works.  The upper range of the algorithm is only limited by
+!     machine word size.
+!
+!     Hours, minutes, seconds, and sub-seconds can be used with any calendar.
+!
 !     Time manager represents and manipulates time internally with integers
 !     to maintain precision. Hence, user-specified floating point values are
 !     converted internally to integers.
@@ -305,53 +337,56 @@
 !     \item[time]
 !          The object instance to initialize.
 !     \item[{[yr]}]
-!          Integer year CCYR (>= 32-bit).
+!          Integer year (>= 32-bit).  Default = 0
 !     \item[{[yr\_i8]}]
-!          Integer year CCYR (large, >= 64-bit).
+!          Integer year (large, >= 64-bit).  Default = 0
 !     \item[{[mm]}]
-!          Integer month 1-12.
+!          Integer month.  Default = 1
 !     \item[{[dd]}]
-!          Integer day of the month 1-31.
+!          Integer day of the month.  Default = 1
 !     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).
+!          Integer Julian days (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).
+!          Integer Julian days (large, >= 64-bit).  Default = 0
 !     \item[{[h]}]
-!          Integer hours.
+!          Integer hours.  Default = 0
 !     \item[{[m]}]
-!          Integer minutes.
+!          Integer minutes.  Default = 0
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).
+!          Integer seconds (>= 32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).
+!          Integer seconds (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.
+!          Integer milliseconds.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.
+!          Integer microseconds.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.
+!          Integer nanoseconds.  Default = 0
 !     \item[{[d\_r8]}]
-!          Double precision days.
+!          Double precision days.  Default = 0.0
 !     \item[{[h\_r8]}]
-!          Double precision hours.
+!          Double precision hours.  Default = 0.0
 !     \item[{[m\_r8]}]
-!          Double precision minutes.
+!          Double precision minutes.  Default = 0.0
 !     \item[{[s\_r8]}]
-!          Double precision seconds.
+!          Double precision seconds.  Default = 0.0
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.
+!          Double precision milliseconds.  Default = 0.0
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.
+!          Double precision microseconds.  Default = 0.0
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.
+!          Double precision nanoseconds.  Default = 0.0
 !     \item[{[sN]}]
-!          Integer fractional seconds - numerator.
+!          Integer numerator portion of fractional seconds (sN/sD).
+!          Default = 0
 !     \item[{[sD]}]
-!          Integer fractional seconds - denominator.
+!          Integer denominator portion of fractional seconds (sN/sD).
+!          Default = 1
 !     \item[{[calendar]}]
-!          Associated {\tt Calendar}.
+!          Associated {\tt Calendar}.  Default = ESMF\_CAL\_NOCALENDAR.
 !     \item[{[timeZone]}]
-!          Associated timezone (hours offset from GMT, e.g. EST = -5).
+!          Associated timezone (hours offset from UTC, e.g. EST = -5).
+!          Default = 0 (UTC)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -383,8 +418,8 @@
                                     ms_r8, us_r8, ns_r8, &
                                     sN, sD, &
                                     calendar,   timeZone, &
-                                    timeString, dayOfWeek, dayOfMonth, &
-                                    midMonth,   dayOfYear, dayOfYear_r8, &
+                                    timeString, dayOfWeek, midMonth, &
+                                    dayOfYear,  dayOfYear_r8, &
                                     dayOfYear_intvl, rc)
 
 ! !ARGUMENTS:
@@ -415,7 +450,6 @@
       integer,                 intent(out), optional :: timeZone
       character (len=*),       intent(out), optional :: timeString
       integer,                 intent(out), optional :: dayOfWeek
-      integer,                 intent(out), optional :: dayOfMonth
       type(ESMF_Time),         intent(out), optional :: midMonth
       integer(ESMF_KIND_I4),   intent(out), optional :: dayOfYear
       real(ESMF_KIND_R8),      intent(out), optional :: dayOfYear_r8
@@ -437,46 +471,45 @@
 !     whereas {\tt ESMF\_TimeGet(s=seconds)} would return
 !       {\tt seconds = 7200}.
 !
-!     For {\tt timeString}, {\tt dayOfWeek}, {\tt dayOfMonth}, {\tt midMonth}, 
-!     {\tt dayOfYear}, {\tt dayOfYear\_r8}, and {\tt dayOfYear\_intvl} described 
-!     below, valid calendars are Gregorian, Julian Date, No Leap, 360 Day 
-!     and Custom calendars.  Not valid for Julian day or no calendar.
+!     For {\tt timeString}, {\tt dayOfWeek}, {\tt midMonth}, 
+!     {\tt dayOfYear}, {\tt dayOfYear\_r8}, and {\tt dayOfYear\_intvl}
+!     described below, valid calendars are Gregorian, Julian Date, No Leap,
+!     360 Day and Custom calendars.  Not valid for Julian day or no calendar. \\
 !
 !     For timeString, convert {\tt ESMF\_Time}'s value into ISO 8601
 !     format YYYY-MM-DDThh:mm:ss.  See ~\cite{ISO}.
 !     
-!     For dayOfWeek, get the day of the week the given {\tt ESMF\_Time}
+!     For dayOfWeek, gets the day of the week the given {\tt ESMF\_Time}
 !     instant falls on.  ISO 8601 standard:  Monday = 1 through Sunday = 7.
 !     See ~\cite{ISO}.
 !
-!     For dayOfMonth, get the day of the month the {\tt ESMF\_Time} instant
-!     falls on (1-31).
-!
-!     For midMonth, get the middle time instant of the month the given
+!     For midMonth, gets the middle time instant of the month that the given
 !     {\tt ESMF\_Time} instant falls on.
 !
-!     For dayOfYear, get the day of the year the given {\tt ESMF\_Time}
-!     instant falls on (1-365).  Returned as an integer value.
+!     For dayOfYear, gets the day of the year that the given {\tt ESMF\_Time}
+!     instant falls on.  See range discusion in argument list below.
+!     Return as an integer value.
 !
-!     For dayOfYear\_r8, get the day of the year the given {\tt ESMF\_Time}
-!     instant falls on (1.x-365.x).  Returned as floating point value;
-!     fractional part represents the time of day. 
+!     For dayOfYear\_r8, gets the day of the year the given {\tt ESMF\_Time}
+!     instant falls on.  See range discusion in argument list below.
+!     Return as floating point value; fractional part represents the time of
+!     day.
 !
-!     For dayOfYear\_intvl, get the day of the year the given {\tt ESMF\_Time}
-!     instant falls on (1-365).  Returned as an {\tt ESMF\_TimeInterval}.
+!     For dayOfYear\_intvl, gets the day of the year the given {\tt ESMF\_Time}
+!     instant falls on.  Return as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
 !          The object instance to query.
 !     \item[{[yr]}]
-!          Integer year CCYR (>= 32-bit).
+!          Integer year (>= 32-bit).
 !     \item[{[yr\_i8]}]
-!          Integer year CCYR (large, >= 64-bit).
+!          Integer year (large, >= 64-bit).
 !     \item[{[mm]}]
-!          Integer month 1-12.
+!          Integer month.
 !     \item[{[dd]}]
-!          Integer day of the month 1-31.
+!          Integer day of the month.
 !     \item[{[d]}]
 !          Integer Julian days (>= 32-bit).
 !     \item[{[d\_i8]}]
@@ -510,29 +543,32 @@
 !     \item[{[ns\_r8]}]
 !          Double precision nanoseconds.
 !     \item[{[sN]}]
-!          Integer fractional seconds - numerator.
+!          Integer numerator portion of fractional seconds (sN/sD).
 !     \item[{[sD]}]
-!          Integer fractional seconds - denominator.
+!          Integer denominator portion of fractional seconds (sN/sD).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}.
 !     \item[{[timeZone]}]
-!          Associated timezone (hours offset from GMT, e.g. EST = -5).
+!          Associated timezone (hours offset from UCT, e.g. EST = -5).
 !     \item[{[timeString]}]
 !          Convert time value to ISO 8601 format string YYYY-MM-DDThh:mm:ss.
 !          See ~\cite{ISO}.
 !     \item[{[dayOfWeek]}]
-!          Get the time instant's day of the week (1-7).
-!     \item[{[dayOfMonth]}]
-!          The time instant's day of the month (1-31).
+!          The time instant's day of the week [1-7].
 !     \item[{[MidMonth]}]
 !          The given time instant's middle-of-the-month time instant.
 !     \item[{[dayOfYear]}]
-!          The {\tt ESMF\_Time} instant's integer day of the year (1-365).
+!          The {\tt ESMF\_Time} instant's integer day of the year.
+!          [1-366] for Gregorian and Julian calendars, [1-365] for No-Leap
+!          calendar.  [1-360] for 360-Day calendar.  User-defined range
+!          for Custom calendar.
 !     \item[{[dayOfYear\_r8]}]
-!          The {\tt ESMF\_Time} instant's floating point day of the year
-!          (1.x-365.x).
+!          The {\tt ESMF\_Time} instant's floating point day of the year.
+!          [1.x-366.x] for Gregorian and Julian calendars, [1.x-365.x] for
+!          No-Leap calendar.  [1.x-360.x] for 360-Day calendar.  User-defined
+!          range for Custom calendar.
 !     \item[{[dayOfYear\_intvl]}]
-!          The {\tt ESMF\_Time} instant's day of the year (1-365) as an
+!          The {\tt ESMF\_Time} instant's day of the year as an
 !          {\tt ESMF\_TimeInterval}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -547,7 +583,7 @@
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
                           sN, sD, calendar, timeZone, timeString, dayOfWeek, &
-                          dayOfMonth, MidMonth, dayOfYear, dayOfYear_r8, &
+                          MidMonth, dayOfYear, dayOfYear_r8, &
                           dayOfYear_intvl, rc)
     
       end subroutine ESMF_TimeGet
@@ -574,9 +610,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          The first Time to compare.
+!          The first {\tt ESMF\_Time} in comparison.
 !     \item[time2]
-!          The second Time to compare.
+!          The second {\tt ESMF\_Time} in comparison.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -672,7 +708,7 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 !
 ! !DESCRIPTION:
-!     Decrements a {\tt time} with a {\tt timeInterval},
+!     Decrements an {\tt ESMF\_Time} with an {\tt ESMF\_TimeInterval},
 !     and returns the result as an {\tt ESMF\_Time}.
 !
 !     The arguments are:
@@ -720,9 +756,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          The first {\tt ESMF\_Time}.
+!          The first {\tt ESMF\_Time} in comparison.
 !     \item[time2]
-!          The second {\tt ESMF\_Time}.
+!          The second {\tt ESMF\_Time} in comparison.
 !     \end{description}
 !
 !EOP
@@ -736,7 +772,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeEQ - Time 1 equal to Time 2?
+! !IROUTINE: ESMF_TimeEQ - Test if Time 1 is equal to Time 2
 !
 ! !INTERFACE:
       function ESMF_TimeEQ(time1, time2)
@@ -755,9 +791,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          First time instant to compare.
+!          First {\tt ESMF\_Time} in comparison.
 !     \item[time2]
-!          Second time instant to compare.
+!          Second {\tt ESMF\_Time} in comparison.
 !     \end{description}
 !
 !EOP
@@ -771,7 +807,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeNE - Time 1 not equal to Time 2?
+! !IROUTINE: ESMF_TimeNE - Test if Time 1 is not equal to Time 2
 !
 ! !INTERFACE:
       function ESMF_TimeNE(time1, time2)
@@ -790,9 +826,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          First time instant to compare.
+!          First {\tt ESMF\_Time} in comparison.
 !     \item[time2]
-!          Second time instant to compare.
+!          Second {\tt ESMF\_Time} in comparison.
 !     \end{description}
 !
 !EOP
@@ -806,7 +842,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeLT - Time 1 less than Time 2?
+! !IROUTINE: ESMF_TimeLT - Test if Time 1 is less than Time 2
 !
 ! !INTERFACE:
       function ESMF_TimeLT(time1, time2)
@@ -825,9 +861,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          First time instant to compare.
+!          First {\tt ESMF\_Time} in comparison.
 !     \item[time2]
-!          Second time instant to compare.
+!          Second {\tt ESMF\_Time} in comparison.
 !     \end{description}
 !
 !EOP
@@ -841,42 +877,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGT - Time 1 greater than Time 2?
-!
-! !INTERFACE:
-      function ESMF_TimeGT(time1, time2)
-!
-! !RETURN VALUE:
-      logical :: ESMF_TimeGT
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time1
-      type(ESMF_Time), intent(in) :: time2
-!
-! !DESCRIPTION:
-!     Returns true if {\tt time1} is greater than {\tt time2}, false
-!     otherwise.  This method is overloaded with the (>) operator.   
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First time instant to compare.
-!     \item[time2]
-!          Second time instant to compare.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
-
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeGT(time1, time2, ESMF_TimeGT)
-
-      end function ESMF_TimeGT
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeLE - Time 1 less than or equal to Time 2?
+! !IROUTINE: ESMF_TimeLE - Test if Time 1 is less than or equal to Time 2
 !
 ! !INTERFACE:
       function ESMF_TimeLE(time1, time2)
@@ -896,9 +897,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          First time instant to compare.
+!          First {\tt ESMF\_Time} in comparison.
 !     \item[time2]
-!          Second time instant to compare.
+!          Second {\tt ESMF\_Time} in comparison.
 !     \end{description}
 !
 !EOP
@@ -912,7 +913,42 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGE - Time 1 greater than or equal to Time 2?
+! !IROUTINE: ESMF_TimeGT - Test if Time 1 is greater than Time 2
+!
+! !INTERFACE:
+      function ESMF_TimeGT(time1, time2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeGT
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time1
+      type(ESMF_Time), intent(in) :: time2
+!
+! !DESCRIPTION:
+!     Returns true if {\tt time1} is greater than {\tt time2}, false
+!     otherwise.  This method is overloaded with the (>) operator.   
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First {\tt ESMF\_Time} in comparison.
+!     \item[time2]
+!          Second {\tt ESMF\_Time} in comparison.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeGT(time1, time2, ESMF_TimeGT)
+
+      end function ESMF_TimeGT
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeGE - Test if Time 1 is greater than or equal to Time 2
 !
 ! !INTERFACE:
       function ESMF_TimeGE(time1, time2)
@@ -932,9 +968,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          First time instant to compare.
+!          First {\tt ESMF\_Time} in comparison.
 !     \item[time2]
-!          Second time instant to compare.
+!          Second {\tt ESMF\_Time} in comparison.
 !     \end{description}
 !
 !EOP
@@ -956,34 +992,26 @@
 ! !IROUTINE:  ESMF_TimeReadRestart - Restore the contents of a Time
 
 ! !INTERFACE:
-      subroutine ESMF_TimeReadRestart(time, s, sN, sD, calendar, timeZone, rc)
-
+      subroutine ESMF_TimeReadRestart(time, name, iospec, rc)
+!
 ! !ARGUMENTS:
-      type(ESMF_Time),       intent(out) :: time
-      integer(ESMF_KIND_I8), intent(in)  :: s
-      integer(ESMF_KIND_I4), intent(in)  :: sN
-      integer(ESMF_KIND_I4), intent(in)  :: sD
-      type(ESMF_Calendar),   intent(in)  :: calendar
-      integer,               intent(in)  :: timeZone
-      integer,               intent(out), optional :: rc
+      type(ESMF_Time),   intent(in)            :: time
+      character (len=*), intent(in)            :: name
+      type(ESMF_IOSpec), intent(in),  optional :: iospec
+      integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Restores the contents of an {\tt ESMF\_Time} for restart.
+!     Restores an {\tt ESMF\_Time} object from the last call to
+!     {\tt ESMF\_TimeWriteRestart()}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
-!          {\tt ESMF\_Time} instant to restore.
-!     \item[s]
-!          64-bit integer seconds.
-!     \item[sN]
-!          Integer fractional seconds - numerator.
-!     \item[sD]
-!          Integer fractional seconds - denominator.
-!     \item[calendar]
-!          Associated {\tt ESMF\_Calendar}.
-!     \item[timeZone]
-!          Associated timezone (hours offset from GMT, e.g. EST = -5).
+!          Restore into this {\tt ESMF\_Time}.
+!     \item[name]
+!          Restore from this object name.
+!     \item[{[iospec]}]
+!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -991,8 +1019,13 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+
+      ! get length of given name for C++ validation
+      integer :: nameLen       
+      nameLen = len_trim(name)
    
-      call c_ESMC_TimeReadRestart(time, s, sN, sD, calendar, timeZone, rc)
+!     invoke C to C++ entry point to restore time
+      call c_ESMC_TimeReadRestart(time, nameLen, name, iospec, rc)
 
       end subroutine ESMF_TimeReadRestart
 
@@ -1001,34 +1034,23 @@
 ! !IROUTINE:  ESMF_TimeWriteRestart - Save the contents of a Time
 
 ! !INTERFACE:
-      subroutine ESMF_TimeWriteRestart(time, s, sN, sD, calendar, timeZone, rc)
+      subroutine ESMF_TimeWriteRestart(time, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),       intent(in)  :: time
-      integer(ESMF_KIND_I8), intent(out) :: s
-      integer(ESMF_KIND_I4), intent(out) :: sN
-      integer(ESMF_KIND_I4), intent(out) :: sD
-      type(ESMF_Calendar),   intent(out) :: calendar
-      integer,               intent(out) :: timeZone
-      integer,               intent(out), optional :: rc
+      type(ESMF_Time),   intent(in)            :: time
+      type(ESMF_IOSpec), intent(in),  optional :: iospec
+      integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Saves the contents of an {\tt ESMF\_Time} for restart.
+!     Saves an {\tt ESMF\_Time} object.  Default options are to select the
+!     fastest way to save to disk.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
-!          {\tt ESMF\_Time} instant to save.
-!     \item[s]
-!          64-bit integer seconds.
-!     \item[sN]
-!          Integer fractional seconds - numerator.
-!     \item[sD]
-!          Integer fractional seconds - denominator.
-!     \item[calendar]
-!          Associated {\tt ESMF\_Calendar}.
-!     \item[timeZone]
-!          Associated timezone (hours offset from GMT, e.g. EST = -5).
+!          The object instance to save.
+!     \item[{[iospec]}]
+!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1037,7 +1059,8 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
    
-      call c_ESMC_TimeWriteRestart(time, s, sN, sD, calendar, timeZone, rc)
+!     invoke C to C++ entry point
+      call c_ESMC_TimeWriteRestart(time, iospec, rc)
 
       end subroutine ESMF_TimeWriteRestart
 
@@ -1054,13 +1077,13 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Check whether a {\tt time} is valid.  The options control the type
+!     Checks whether an {\tt ESMF\_Time} is valid.  The options control the type
 !     of validation.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
-!          {\tt ESMF\_Time} instant to validate.
+!          {\tt ESMF\_Time} instant to be validated.
 !     \item[{[options]}]
 !          Validation options. If none specified, validates all Time property
 !            values. \\
@@ -1091,14 +1114,14 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing and debugging, this method prints out 
-!     the contents of an {\tt ESMF\_Time}.  The options control
-!     the type of information and level of detail.
+!     Prints out the contents of an {\tt ESMF\_Time}, in support of testing
+!     and debugging.  The options control the type of information and level
+!     of detail.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
-!          {\tt ESMF\_Time} instant to print out.
+!          The {\tt ESMF\_Time} to be printed out.
 !     \item[{[options]}]
 !          Print options. If none specified, prints all Time property values. \\
 !          "string" - prints Time's value in ISO 8601 format

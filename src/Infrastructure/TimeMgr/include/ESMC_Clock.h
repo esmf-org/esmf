@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.23 2003/10/22 02:29:16 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.24 2003/12/19 19:19:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -65,6 +65,7 @@
 //
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+ #include <ESMC_IO.h>    // IOSpec class for ReadRestart()/WriteRestart()
  #include <ESMC_TimeInterval.h>
  #include <ESMC_Time.h>
  #include <ESMC_Alarm.h>
@@ -173,25 +174,12 @@
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_ClockReadRestart(ESMC_TimeInterval *timeStep,
-                              ESMC_Time         *startTime,
-                              ESMC_Time         *stopTime,
-                              ESMC_Time         *refTime,
-                              ESMC_Time         *currTime,
-                              ESMC_Time         *prevTime,
-                              ESMF_KIND_I8       advanceCount,
-                              int                numAlarms,
-                              ESMC_Alarm        *alarmList[]);
 
-    int ESMC_ClockWriteRestart(ESMC_TimeInterval *timeStep,
-                               ESMC_Time         *startTime,
-                               ESMC_Time         *stopTime,
-                               ESMC_Time         *refTime,
-                               ESMC_Time         *currTime,
-                               ESMC_Time         *prevTime,
-                               ESMF_KIND_I8      *advanceCount,
-                               int               *numAlarms,
-                               ESMC_Alarm        *alarmList[] ) const;
+    // friend to restore state
+    friend ESMC_Clock *ESMC_ClockReadRestart(int, const char*, 
+                                             ESMC_IOSpec*, int*);
+    // save state
+    int ESMC_ClockWriteRestart(ESMC_IOSpec *iospec=0) const;
 
     // internal validation
     int ESMC_ClockValidate(const char *options=0) const;
@@ -253,5 +241,11 @@
 
     // friend function to de-allocate clock
     int ESMC_ClockDestroy(ESMC_Clock *clock);
+
+    // friend to restore state
+    ESMC_Clock *ESMC_ClockReadRestart(int nameLen,
+                                      const char*  name=0,
+                                      ESMC_IOSpec* iospec=0,
+                                      int*         rc=0);
 
 #endif // ESMC_CLOCK_H

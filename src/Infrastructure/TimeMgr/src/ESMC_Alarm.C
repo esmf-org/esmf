@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.22 2003/11/11 20:34:25 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.23 2003/12/19 19:20:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.22 2003/11/11 20:34:25 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.23 2003/12/19 19:20:21 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -786,25 +786,16 @@ int ESMC_Alarm::count=0;
 // !IROUTINE:  ESMC_AlarmReadRestart - restore contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmReadRestart(
+      ESMC_Alarm *ESMC_AlarmReadRestart(
 //
 // !RETURN VALUE:
-//    int error return code
+//    pointer to newly allocated and restored ESMC_Alarm
 //
 // !ARGUMENTS:
-      ESMC_Clock        **clock,
-      ESMC_TimeInterval *ringInterval,
-      ESMC_TimeInterval *ringDuration,
-      ESMC_Time         *ringTime,
-      ESMC_Time         *prevRingTime,
-      ESMC_Time         *stopTime,
-      ESMC_Time         *ringBegin,
-      ESMC_Time         *refTime,
-      int               nRingDurationTimeSteps,
-      int               nTimeStepsRinging,
-      bool              ringing,
-      bool              enabled,
-      bool              sticky) {
+      int          nameLen,  // in
+      const char  *name,     // in
+      ESMC_IOSpec *iospec,   // in
+      int         *rc ) {    // out - return code
 
 //
 // !DESCRIPTION:
@@ -814,31 +805,10 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (clock == ESMC_NULL_POINTER || ringInterval == ESMC_NULL_POINTER ||
-        ringDuration == ESMC_NULL_POINTER || ringTime == ESMC_NULL_POINTER  ||
-        prevRingTime == ESMC_NULL_POINTER || stopTime == ESMC_NULL_POINTER  ||
-        ringBegin == ESMC_NULL_POINTER || refTime  == ESMC_NULL_POINTER) {
-      // TODO: log error
-      cout << "ESMC_Alarm::ESMC_AlarmReadRestart(): null pointer(s) passed in"
-           << endl;
-      return(ESMF_FAILURE);
-    }
+    // TODO:  read alarm state from iospec/name, then allocate/restore
+    //        (share code with ESMC_AlarmCreate()).
 
-    this->clock        = *clock;
-    this->ringInterval = *ringInterval;
-    this->ringDuration = *ringDuration;
-    this->ringTime     = *ringTime;
-    this->prevRingTime = *prevRingTime;
-    this->stopTime     = *stopTime;
-    this->ringBegin    = *ringBegin;
-    this->refTime      = *refTime;
-    this->nRingDurationTimeSteps = nRingDurationTimeSteps;
-    this->nTimeStepsRinging      = nTimeStepsRinging;
-    this->ringing      = ringing;
-    this->enabled      = enabled;
-    this->sticky       = sticky;
-
-    return(ESMF_SUCCESS);
+    return(ESMC_NULL_POINTER);
 
  } // end ESMC_AlarmReadRestart
 
@@ -853,20 +823,7 @@ int ESMC_Alarm::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Clock        **clock,
-      ESMC_TimeInterval *ringInterval,
-      ESMC_TimeInterval *ringDuration,
-      ESMC_Time         *ringTime,
-      ESMC_Time         *prevRingTime,
-      ESMC_Time         *stopTime,
-      ESMC_Time         *ringBegin,
-      ESMC_Time         *refTime,
-      int               *nRingDurationTimeSteps,
-      int               *nTimeStepsRinging,
-      bool              *ringing,
-      bool              *enabled,
-      bool              *sticky) const {
-
+      ESMC_IOSpec *iospec) const {
 //
 // !DESCRIPTION:
 //      Save information about an {\tt ESMC\_Alarm}.
@@ -875,33 +832,7 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (clock == ESMC_NULL_POINTER || ringInterval == ESMC_NULL_POINTER ||
-        ringDuration == ESMC_NULL_POINTER || ringTime == ESMC_NULL_POINTER ||
-        prevRingTime == ESMC_NULL_POINTER || stopTime == ESMC_NULL_POINTER ||
-        ringBegin == ESMC_NULL_POINTER || refTime  == ESMC_NULL_POINTER ||
-        nRingDurationTimeSteps == ESMC_NULL_POINTER ||
-        nTimeStepsRinging == ESMC_NULL_POINTER ||
-        ringing == ESMC_NULL_POINTER ||
-        enabled == ESMC_NULL_POINTER || sticky == ESMC_NULL_POINTER) {
-      // TODO: log error
-      cout << "ESMC_Alarm::ESMC_AlarmWriteRestart(): null pointer(s) passed in"
-           << endl;
-      return(ESMF_FAILURE);
-    }
-
-    *clock        = this->clock;
-    *ringInterval = this->ringInterval;
-    *ringDuration = this->ringDuration;
-    *ringTime     = this->ringTime;
-    *prevRingTime = this->prevRingTime;
-    *stopTime     = this->stopTime;
-    *ringBegin    = this->ringBegin;
-    *refTime      = this->refTime;
-    *nRingDurationTimeSteps = this->nRingDurationTimeSteps;
-    *nTimeStepsRinging      = this->nTimeStepsRinging;
-    *ringing      = this->ringing;
-    *enabled      = this->enabled;
-    *sticky       = this->sticky;
+    // TODO:  save alarm state using iospec/name.  Default to disk file.
 
     return(ESMF_SUCCESS);
 

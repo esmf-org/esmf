@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.35 2003/10/30 20:08:12 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.36 2003/12/19 19:22:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,8 +38,13 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      ! associated derived types
+      ! inherit from ESMF base class
       use ESMF_BaseMod
+
+      ! for ReadRestart()/WriteRestart()
+      use ESMF_IOMod
+
+      ! associated derived types
       use ESMF_TimeIntervalMod
       use ESMF_TimeMod
       use ESMF_ClockTypeMod
@@ -103,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.35 2003/10/30 20:08:12 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.36 2003/12/19 19:22:00 eschwab Exp $'
 
 !==============================================================================
 !
@@ -167,39 +172,41 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]
-!          Optional name for the newly created alarm.  If not specified,
+!          The name for the newly created alarm.  If not specified,
 !          a default unique name will be generated: "AlarmNNN" where NNN
 !          is a unique sequence number from 001 to 999.
 !     \item[clock]
 !          The clock with which to associate this newly created alarm.
 !     \item[{[ringTime]}]
-!          Optional ring time for a one-shot alarm or the first repeating
-!          (interval) alarm.
+!          The ring time for a one-shot alarm or the first ring time for a 
+!          repeating (interval) alarm.
 !     \item[{[ringInterval]}]
-!          Optional ring interval for repeating (interval) alarms.
+!          The ring interval for repeating (interval) alarms.  If
+!          {\tt ringTime} is not also specified (first ring time), it will be
+!          calculated as the {\tt clock}'s current time plus {\tt ringInterval}.
 !     \item[{[stopTime]}]
-!          Optional stop time for repeating (interval) alarms.  If not
+!          The stop time for repeating (interval) alarms.  If not
 !          specified, an interval alarm will repeat forever.
 !     \item[{[ringDuration]}]
-!          Optional absolute ring duration:  If not sticky (see argument below),
+!          The absolute ring duration.  If not sticky (see argument below),
 !          alarms rings for ringDuration, then turns itself off.  Mutually 
 !          exclusive with nRingDurationTimeSteps (below); used only if
 !          nRingDurationTimeSteps is zero.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[nRingDurationTimeSteps]}]
-!          Optional relative ring duration:  If not sticky (see argument below),
+!          The relative ring duration.  If not sticky (see argument below),
 !          alarms rings for nRingDurationTimeSteps, then turns itself off.
 !          Mutually exclusive with ringDuration (above); used if non-zero,
 !          otherwise ringDuration is used.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[refTime]}]
-!          Optional reference time for an alarm.
+!          The reference time for an alarm.
 !     \item[{[enabled]}]
-!          Optionally set the enabled state; default is on (true).  If disabled,
+!          Sets the enabled state; default is on (true).  If disabled,
 !          an alarm will not function at all.
 !          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
 !     \item[{[sticky]}]
-!          Optionally set the sticky state; default is on (true).  If sticky,
+!          Sets the sticky state; default is on (true).  If sticky,
 !          once an alarm is ringing, it will remain ringing until turned off 
 !          manually via a user call to {\tt ESMF\_AlarmRingerOff()}.
 !          If not sticky, an alarm will turn itself off after a certain
@@ -285,54 +292,51 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Sets an {\tt ESMF\_Alarm}'s properties.
+!     Sets/resets one or more of the properties of an {\tt ESMF\_Alarm} that
+!     was previously initialized via {\tt ESMF\_AlarmCreate()}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
 !          The object instance to set.
 !     \item[{[name]}]
-!          Optional name for this alarm.  If not specified, a default unique
-!          name will be generated: "AlarmNNN" where NNN is a unique sequence
-!          number from 001 to 999.
+!          A new name for this alarm.  
 !     \item[{[clock]}]
-!          Optionally re-associate with a different clock.
+!          Re-associates this alarm with a different clock.
 !     \item[{[ringTime]}]
-!          Optional ring time for a one-shot alarm or the first repeating
-!          (interval) alarm.
+!          The next ring time for a one-shot alarm or a repeating (interval)
+!          alarm.
 !     \item[{[ringInterval]}]
-!          Optional ring interval for repeating (interval) alarms.
+!          The ring interval for repeating (interval) alarms.
 !     \item[{[stopTime]}]
-!          Optional stop time for repeating (interval) alarms.  If not
-!          specified, an interval alarm will repeat forever.
+!          The stop time for repeating (interval) alarms.
 !     \item[{[ringDuration]}]
-!          Optional absolute ring duration:  If not sticky (see argument below),
+!          The absolute ring duration.  If not sticky (see argument below),
 !          alarms rings for ringDuration, then turns itself off.  Mutually 
 !          exclusive with nRingDurationTimeSteps (below); used only if
 !          nRingDurationTimeSteps is zero.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[nRingDurationTimeSteps]}]
-!          Optional relative ring duration:  If not sticky (see argument below),
+!          The relative ring duration.  If not sticky (see argument below),
 !          alarms rings for nRingDurationTimeSteps, then turns itself off.
 !          Mutually exclusive with ringDuration (above); used if non-zero,
 !          otherwise ringDuration is used.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[refTime]}]
-!          Optional reference time for an alarm.
+!          The reference time for an alarm.
 !     \item[{[ringing]}]
-!          Optionally set the ringing state; default is off (false). 
+!          Sets the ringing state.
 !          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
 !     \item[{[enabled]}]
-!          Optionally set the enabled state; default is on (true).  If disabled,
-!          an alarm will not function at all.
+!          Sets the enabled state.  If disabled, an alarm will not function
+!          at all.
 !          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
 !     \item[{[sticky]}]
-!          Optionally set the sticky state; default is on (true).  If sticky,
-!          once an alarm is ringing, it will remain ringing until turned off 
-!          manually via a user call to {\tt ESMF\_AlarmRingerOff()}.
-!          If not sticky, an alarm will turn itself off after a certain
-!          ring duration specified by either ringDuration or
-!          nRingDurationTimeSteps (see above).
+!          Sets the sticky state.  If sticky, once an alarm is ringing, it
+!          will remain ringing until turned off manually via a user call to
+!          {\tt ESMF\_AlarmRingerOff()}.  If not sticky, an alarm will turn
+!          itself off after a certain ring duration specified by either
+!          ringDuration or nRingDurationTimeSteps (see above).
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -389,52 +393,52 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Gets an {\tt ESMF\_Alarm}'s properties.
+!     Gets one or more of an {\tt ESMF\_Alarm}'s properties.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
-!          The object instance to get.
+!          The object instance to query.
 !     \item[{[name]}]
-!          Gets the name of this alarm.
+!          The name of this alarm.
 !     \item[{[clock]}]
-!          Gets the associated clock.
+!          The associated clock.
 !     \item[{[ringTime]}]
-!          Gets the ring time for a one-shot alarm or the next repeating alarm.
+!          The ring time for a one-shot alarm or the next repeating alarm.
 !     \item[{[prevRingTime]}]
-!          Gets the previous ring time.
+!          The previous ring time.
 !     \item[{[ringInterval]}]
-!          Gets the ring interval for repeating (interval) alarms.
+!          The ring interval for repeating (interval) alarms.
 !     \item[{[stopTime]}]
-!          Gets the stop time for repeating (interval) alarms.
+!          The stop time for repeating (interval) alarms.
 !     \item[{[ringDuration]}]
-!          Gets the ringDuration.  Mutually exclusive with 
+!          The ring duration.  Mutually exclusive with 
 !          nRingDurationTimeSteps (see below).
 !     \item[{[nRingDurationTimeSteps]}]
-!          Gets nRingDurationTimeSteps.  Mutually exclusive with ringDuration
-!          (see above).
+!          The number of time steps comprising the ring duration.  Mutually
+!          exclusive with ringDuration (see above).
 !     \item[{[nTimeStepsRinging]}]
-!          Gets the number of timesteps the alarm has been ringing thus far.
-!          Used internally for tracking nRingDurationTimeSteps ring 
+!          The number of time steps for which the alarm has been ringing thus
+!          far.  Used internally for tracking nRingDurationTimeSteps ring 
 !          durations (see above).  Mutually exclusive with ringBegin
 !          (see below).
 !     \item[{[ringBegin]}]
-!          Gets the time the alarm began ringing.  Used internally for tracking
+!          The time when the alarm began ringing.  Used internally for tracking
 !          ringDuration (see above).  Mutually exclusive with nTimeStepsRinging
 !          (see above).
 !     \item[{[refTime]}]
-!          Gets the reference time for an alarm.
+!          The reference time for an alarm.
 !     \item[{[ringing]}]
-!          Gets the current ringing state.
+!          The current ringing state.
 !          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
 !     \item[{[ringingOnPrevTimeStep]}]
-!          Gets the ringing state upon the previous time step. Same as
+!          The ringing state upon the previous time step. Same as
 !          {\tt ESMF\_AlarmWasPrevRinging()}.
 !     \item[{[enabled]}]
-!          Gets the enabled state.
+!          The enabled state.
 !          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
 !     \item[{[sticky]}]
-!          Gets the sticky state. 
+!          The sticky state. 
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \end{description}
 !EOP
@@ -679,7 +683,7 @@
 !     the current clock timestep or a passed-in timestep.
 !
 !     See also method
-!           {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_NEXTRINGING, ...)}
+!       {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_NEXTRINGING, ...)}
 !     to get a list of all alarms belonging to a {\tt ESMF\_Clock} that will
 !     ring on the next time step.
 !
@@ -719,7 +723,7 @@
 !     Check if {\tt ESMF\_Alarm} was ringing on the previous clock timestep.
 !
 !     See also method
-!           {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_PREVRINGING, ...)}
+!       {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_PREVRINGING, ...)}
 !     get a list of all alarms belonging to a {\tt ESMF\_Clock} that were
 !     ringing on the previous time step.
 !
@@ -758,7 +762,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
-!          The object instance to set sticky.
+!          The object instance to be set sticky.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -829,7 +833,7 @@
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Check if {\tt ESMF\_Alarm} is sticky.
+!     Check if {\tt alarm} is sticky.
 !
 !     The arguments are:
 !     \begin{description}
@@ -888,66 +892,29 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmReadRestart - Restore an Alarm
+! !IROUTINE: ESMF_AlarmReadRestart - Restore the contents of an Alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmReadRestart(alarm, clock, ringInterval, &
-                                       ringDuration, ringTime, prevRingTime, &
-                                       stopTime, ringBegin, refTime, &
-                                       nRingDurationTimeSteps, &
-                                       nTimeStepsRinging, &
-                                       ringing, enabled, sticky, rc)
-
+      function ESMF_AlarmReadRestart(name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Alarm) :: ESMF_AlarmReadRestart
+!
 ! !ARGUMENTS:
-      type(ESMF_Alarm),        intent(out)           :: alarm
-      type(ESMF_Clock),        intent(in)            :: clock
-      type(ESMF_TimeInterval), intent(in)            :: ringInterval
-      type(ESMF_TimeInterval), intent(in)            :: ringDuration
-      type(ESMF_Time),         intent(in)            :: ringTime
-      type(ESMF_Time),         intent(in)            :: prevRingTime
-      type(ESMF_Time),         intent(in)            :: stopTime
-      type(ESMF_Time),         intent(in)            :: ringBegin
-      type(ESMF_Time),         intent(in)            :: refTime
-      integer,                 intent(in)            :: nRingDurationTimeSteps
-      integer,                 intent(in)            :: nTimeStepsRinging
-      logical,                 intent(in)            :: ringing
-      logical,                 intent(in)            :: enabled
-      logical,                 intent(in)            :: sticky
-      integer,                 intent(out), optional :: rc
+      character (len=*), intent(in)            :: name
+      type(ESMF_IOSpec), intent(in),  optional :: iospec
+      integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Restores an {\tt ESMF\_Alarm}.
+!     Restores an {\tt ESMF\_Alarm} object from the last call to
+!     {\tt ESMF\_AlarmWriteRestart()}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[alarm]
-!          The object instance to restore.
-!     \item[clock]
-!          The associated clock.
-!     \item[ringInterval]
-!          The ring interval for repeating alarms.
-!     \item[ringDuration]
-!          The ring duration.
-!     \item[ringTime]
-!          Ring time for one-shot or first repeating alarm.
-!     \item[prevRingTime]
-!          The {\tt ESMF\_Alarm}'s previous ring time.
-!     \item[stopTime]
-!          Stop time for repeating alarms.
-!     \item[ringBegin]
-!          Begin time for ringing alarm.
-!     \item[refTime]
-!          The {\tt ESMF\_Alarm}'s reference time.
-!     \item[{[nRingDurationTimeSteps]}]
-!          Alarms can ring for nRingDurationTimeSteps, rather than ringDuration.
-!     \item[{[nTimeStepsRinging]}]
-!          Number of timesteps the alarm has been ringing thus far.
-!     \item[ringing]
-!          The {\tt ESMF\_Alarm}'s ringing state.
-!     \item[enabled]
-!          {\tt ESMF\_Alarm} enabled/disabled.
-!     \item[sticky]
-!          {\tt ESMF\_Alarm} sticky flag.
+!     \item[name]
+!          The name of the object instance to restore.
+!     \item[{[iospec]}]
+!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -955,78 +922,38 @@
 !EOP
 ! !REQUIREMENTS:
 
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmReadRestart(alarm, clock, ringInterval, ringDuration, &
-                                   ringTime, prevRingTime, stopTime, &      
-                                   ringBegin, refTime, &
-                                   nRingDurationTimeSteps, &
-                                   nTimeStepsRinging, &
-                                   ringing, enabled, sticky, rc)
+      ! get length of given name for C++ validation
+      integer :: nameLen
+      nameLen = len_trim(name)
 
-      end subroutine ESMF_AlarmReadRestart
+!     invoke C to C++ entry point to allocate and restore alarm
+      call c_ESMC_AlarmReadRestart(ESMF_AlarmReadRestart, nameLen, name, &
+                                   iospec, rc)
+
+      end function ESMF_AlarmReadRestart
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmWriteRestart - Save an Alarm
+! !IROUTINE: ESMF_AlarmWriteRestart - Save the contents of an Alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmWriteRestart(alarm, clock, ringInterval, &
-                                        ringDuration, ringTime, prevRingTime, &
-                                        stopTime, ringBegin, refTime, &
-                                        nRingDurationTimeSteps, &
-                                        nTimeStepsRinging, &
-                                        ringing, enabled, sticky, rc)
+      subroutine ESMF_AlarmWriteRestart(alarm, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm),        intent(in)            :: alarm
-      type(ESMF_Clock),        intent(out)           :: clock
-      type(ESMF_TimeInterval), intent(out)           :: ringInterval
-      type(ESMF_TimeInterval), intent(out)           :: ringDuration
-      type(ESMF_Time),         intent(out)           :: ringTime
-      type(ESMF_Time),         intent(out)           :: prevRingTime
-      type(ESMF_Time),         intent(out)           :: stopTime
-      type(ESMF_Time),         intent(out)           :: ringBegin
-      type(ESMF_Time),         intent(out)           :: refTime
-      integer,                 intent(out)           :: nRingDurationTimeSteps
-      integer,                 intent(out)           :: nTimeStepsRinging
-      logical,                 intent(out)           :: ringing
-      logical,                 intent(out)           :: enabled
-      logical,                 intent(out)           :: sticky
-      integer,                 intent(out), optional :: rc
+      type(ESMF_Alarm),  intent(in)            :: alarm
+      type(ESMF_IOSpec), intent(in),  optional :: iospec
+      integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Saves an {\tt ESMF\_Alarm}.
+!     Saves an {\tt ESMF\_Alarm} object.  Default options are to select the
+!     fastest way to save to disk.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
 !          The object instance to save.
-!     \item[clock]
-!          The associated clock.
-!     \item[ringInterval]
-!          Ring interval for repeating alarms.
-!     \item[ringDuration]
-!          The ring duration.
-!     \item[ringTime]
-!          Ring time for one-shot or first repeating alarm.
-!     \item[prevRingTime]
-!          The {\tt ESMF\_Alarm}'s previous ring time.
-!     \item[stopTime]
-!          Stop time for repeating alarms.
-!     \item[ringBegin]
-!          Begin time for ringing alarm.
-!     \item[refTime]
-!          The {\tt ESMF\_Alarm}'s reference time.
-!     \item[{[nRingDurationTimeSteps]}]
-!          Alarms can ring for nRingDurationTimeSteps, rather than ringDuration.
-!     \item[{[nTimeStepsRinging]}]
-!          Number of timesteps the alarm has been ringing thus far.
-!     \item[ringing]
-!          The {\tt ESMF\_Alarm}'s ringing state.
-!     \item[enabled]
-!          {\tt ESMF\_Alarm} enabled/disabled.
-!     \item[sticky]
-!          {\tt ESMF\_Alarm} sticky flag.
+!     \item[{[iospec]}]
+!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1035,12 +962,7 @@
 ! !REQUIREMENTS:
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmWriteRestart(alarm, clock, ringInterval, ringDuration, &
-                                    ringTime, prevRingTime, stopTime, &
-                                    ringBegin, refTime, &
-                                    nRingDurationTimeSteps, &
-                                    nTimeStepsRinging, &
-                                    ringing, enabled, sticky, rc)
+      call c_ESMC_AlarmWriteRestart(alarm, iospec, rc)
 
       end subroutine ESMF_AlarmWriteRestart
 
@@ -1063,9 +985,9 @@
 !     The arguments are:  
 !     \begin{description}
 !     \item[alarm]
-!          {\tt ESMF\_Alarm} to validate.
+!          {\tt ESMF\_Alarm} to be validated.
 !     \item[{[options]}]
-!          Validate options.  TODO:  To be determined.
+!          Validation options.  TODO:  To be determined.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 
@@ -1092,14 +1014,14 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out a {\tt ESMF\_Alarm}'s
-!     properties.  The options control the type of information and level
+!     Prints out an {\tt ESMF\_Alarm}'s properties, in support of testing
+!     and debugging.  The options control the type of information and level
 !     of detail.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
-!          {\tt ESMF\_Alarm} to print out.
+!          {\tt ESMF\_Alarm} to be printed out.
 !     \item[{[options]}]
 !          Print options. If none specified, prints all alarm property values.\\
 !          "name"         - print the alarm's name. \\

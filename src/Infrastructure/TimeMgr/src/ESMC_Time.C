@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.46 2003/11/10 20:58:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.47 2003/12/19 19:20:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -241,7 +241,6 @@
       int           *timeZone,    // out - timezone (hours offset from UTC)
       char          *timeString,  // out - ISO 8601 format YYYY-MM-DDThh:mm:ss
       int           *dayOfWeek,   // out - day of the week (Mon = 1, Sun = 7)
-      int           *dayOfMonth,  // out - day of the month
       ESMC_Time     *midMonth,    // out - middle of the month time instant
       ESMF_KIND_I4 *dayOfYear,    // out - day of the year as an integer
       ESMF_KIND_R8 *dayOfYear_r8, // out - day of the year as a floating point
@@ -295,10 +294,6 @@
     }
     if (dayOfWeek != ESMC_NULL_POINTER) {
       if (ESMC_TimeGetDayOfWeek(dayOfWeek) == ESMF_FAILURE)
-        return(ESMF_FAILURE);
-    }
-    if (dayOfMonth != ESMC_NULL_POINTER) {
-      if (ESMC_TimeGetDayOfMonth(dayOfMonth) == ESMF_FAILURE)
         return(ESMF_FAILURE);
     }
     if (midMonth != ESMC_NULL_POINTER) {
@@ -575,41 +570,31 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,          // in - integer seconds
-      ESMF_KIND_I4 sN,         // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD,         // in - fractional seconds, denominator
-      ESMC_Calendar *calendar, // in - associated calendar
-      int timeZone) {          // in - associated timezone
+      int          nameLen,   // in
+      const char  *name,      // in   
+      ESMC_IOSpec *iospec) {  // in
 //
 // !DESCRIPTION:
-//      restore {\tt Time} state for persistence/checkpointing
+//      restore {\tt Time} state for persistence/checkpointing.
 //
 //EOP
 // !REQUIREMENTS:  
 
-    int rc;
+    int rc = ESMF_SUCCESS;
 
-    if (calendar == ESMC_NULL_POINTER) {
-      cout << "ESMC_Time::ESMC_TimeReadRestart(): null pointer passed in"
-           << endl;
-      return(ESMF_FAILURE);
-    }
+    // TODO:  read time state from iospec/name, then restore
+    //        (share code with ESMC_TimeSet()).
 
-    // use base class Read() first
-    rc = ESMC_BaseTime::ESMC_BaseTimeReadRestart(s, sN, sD);
+    // TODO: use base class ReadRestart() first
+    // rc = ESMC_BaseTime::ESMC_BaseTimeReadRestart(s, sN, sD);
 
-    this->calendar = calendar; // TODO?: this only restores calendar pointer;
-                               //  component must be sure to restore
-                               //  corresponding calendar first
-    this->timeZone = timeZone;
-  
     return(rc);
 
  }  // end ESMC_TimeReadRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeWriteRestart - return Time state
+// !IROUTINE:  ESMC_TimeWriteRestart - save Time state
 //
 // !INTERFACE:
       int ESMC_Time::ESMC_TimeWriteRestart(
@@ -618,36 +603,22 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 *s,          // out - integer seconds
-      ESMF_KIND_I4 *sN,         // out - fractional seconds, numerator
-      ESMF_KIND_I4 *sD,         // out - fractional seconds, denominator
-      ESMC_Calendar *calendar,  // out - associated calendar
-      int *timeZone) const {    // out - associated timezone
+      ESMC_IOSpec *iospec) const {
 //
 // !DESCRIPTION:
-//      return {\tt Time} state for persistence/checkpointing
+//      Save {\tt Time} state for persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  
 
-    int rc;
+    int rc = ESMF_SUCCESS;
 
-    if (s  == ESMC_NULL_POINTER || sN  == ESMC_NULL_POINTER ||
-        sD == ESMC_NULL_POINTER || calendar== ESMC_NULL_POINTER ||
-        timeZone == ESMC_NULL_POINTER) {
-      cout << "ESMC_Time::ESMC_TimeWriteRestart(): null pointer(s) passed in"
-           << endl;
-      return(ESMF_FAILURE);
-    }
+    // TODO: use base class Write() first
+    //  rc = ESMC_BaseTime::ESMC_BaseTimeWriteRestart(s, sN, sD);
 
-    // use base class Write() first
-    rc = ESMC_BaseTime::ESMC_BaseTimeWriteRestart(s, sN, sD);
-
-    calendar= this->calendar;  // TODO?: this only saves calendar pointer;
+    // calendar= this->calendar;  // TODO?: this only saves calendar pointer;
                                //  component must be sure to save corresponding
                                //  calendar.
-    *timeZone = this->timeZone;
-  
     return(rc);
 
  }  // end ESMC_TimeWriteRestart
@@ -969,39 +940,6 @@
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeGetDayOfWeek
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimeGetDayOfMonth - Get a Time's day of the month value
-//
-// !INTERFACE:
-      int ESMC_Time::ESMC_TimeGetDayOfMonth(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *dayOfMonth) const {    // out - time's day of month value
-//
-// !DESCRIPTION:
-//      Gets a {\tt Time}'s day of the month value
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // validate inputs
-    if (dayOfMonth == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar->type == ESMC_CAL_JULIANDAY ||
-        this->calendar->type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
-
-    // TODO: use native C++ Get() when ready
-    ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                  ESMC_NULL_POINTER, dayOfMonth);
- 
-    return(ESMF_SUCCESS);
-
- }  // end ESMC_TimeGetDayOfMonth
 
 //-------------------------------------------------------------------------
 //BOP

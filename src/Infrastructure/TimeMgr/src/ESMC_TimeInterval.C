@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.38 2003/10/22 01:15:10 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.39 2003/12/19 19:20:22 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.38 2003/10/22 01:15:10 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.39 2003/12/19 19:20:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1001,28 +1001,23 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,     // in - integer seconds
-      ESMF_KIND_I4 sN,    // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD,    // in - fractional seconds, denominator
-      ESMF_KIND_I8 yy,    // in - calendar interval number of years
-      ESMF_KIND_I8 mo,    // in - calendar interval number of months
-      ESMF_KIND_I8 d) {   // in - calendar interval number of days
+      int          nameLen,   // in
+      const char  *name,      // in
+      ESMC_IOSpec *iospec) {  // in
 //
 // !DESCRIPTION:
-//      restore {\tt ESMC\_TimeInterval} state for persistence/checkpointing
+//      restore {\tt TimeInterval} state for persistence/checkpointing.
 //
 //EOP
-// !REQUIREMENTS:  
+// !REQUIREMENTS:
 
-    int rc;
+    int rc = ESMF_SUCCESS;
 
-    // use base class Read() first
-    rc = ESMC_BaseTime::ESMC_BaseTimeReadRestart(s, sN, sD);
+    // TODO:  read time interval state from iospec/name, then restore
+    //        (share code with ESMC_TimeIntervalSet()).
 
-    // restore exclusive Time Interval properties
-    this->yy = yy;
-    this->mo = mo;
-    this->d  = d;
+    // TODO: use base class ReadRestart() first
+    // rc = ESMC_BaseTime::ESMC_BaseTimeReadRestart(s, sN, sD);
 
     return(rc);
 
@@ -1039,36 +1034,22 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 *s,           // out - integer seconds
-      ESMF_KIND_I4 *sN,          // out - fractional seconds, numerator
-      ESMF_KIND_I4 *sD,          // out - fractional seconds, denominator
-      ESMF_KIND_I8 *yy,          // out - calendar interval number of years
-      ESMF_KIND_I8 *mo,          // out - calendar interval number of months
-      ESMF_KIND_I8 *d) const {   // out - calendar interval number of days
+      ESMC_IOSpec *iospec) const {
 //
 // !DESCRIPTION:
-//      return {\tt ESMC\_TimeInterval} state for persistence/checkpointing
+//      Save {\tt TimeInterval} state for persistence/checkpointing
 //
 //EOP
-// !REQUIREMENTS:  
+// !REQUIREMENTS: 
 
-    int rc;
+    int rc = ESMF_SUCCESS;
 
-    if (s  == ESMC_NULL_POINTER || sN == ESMC_NULL_POINTER ||
-        sD == ESMC_NULL_POINTER || yy == ESMC_NULL_POINTER ||
-        mo == ESMC_NULL_POINTER || d  == ESMC_NULL_POINTER) {
-      cout << "ESMC_TimeInterval::ESMC_TimeIntervalWriteRestart(): null pointer(s) " << "passed in" << endl;
-      return(ESMF_FAILURE);
-    }
+    // TODO: use base class Write() first
+    //  rc = ESMC_BaseTime::ESMC_BaseTimeWriteRestart(s, sN, sD);
 
-    // use base class Write() first
-    rc = ESMC_BaseTime::ESMC_BaseTimeWriteRestart(s, sN, sD);
-
-    //  return exclusive Time Interval properties
-    *yy = this->yy;
-    *mo = this->mo;
-    *d  = this->d;
-
+    // calendar= this->calendar;  // TODO?: this only saves calendar pointer;
+                               //  component must be sure to save corresponding
+                               //  calendar.
     return(rc);
 
  }  // end ESMC_TimeIntervalWriteRestart

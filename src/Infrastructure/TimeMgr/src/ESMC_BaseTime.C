@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.25 2003/09/04 18:57:57 cdeluca Exp $
+// $Id: ESMC_BaseTime.C,v 1.26 2003/12/19 19:20:22 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.25 2003/09/04 18:57:57 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.26 2003/12/19 19:20:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -584,21 +584,22 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,    // in - integer seconds
-      ESMF_KIND_I4 sN,   // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD) { // in - fractional seconds, denominator
+      int          nameLen,   // in
+      const char  *name,      // in
+      ESMC_IOSpec *iospec) {  // in
 //
 // !DESCRIPTION:
-//      restore {\tt ESMC\_BaseTime} state for persistence/checkpointing
+//      restore {\tt BaseTime} state for persistence/checkpointing.
 //
 //EOP
-// !REQUIREMENTS:  
+// !REQUIREMENTS:
 
-    this->s  = s;
-    this->sN = sN;
-    this->sD = sD;
+    int rc = ESMF_SUCCESS;
 
-    return(ESMF_SUCCESS);
+    // TODO:  read base time state from iospec/name, then restore
+    //        (share code with ESMC_BaseTimeSet()).
+
+    return(rc);
 
 }  // end ESMC_BaseTimeReadRestart
 
@@ -613,27 +614,19 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 *s,    // out - integer seconds
-      ESMF_KIND_I4 *sN,             // out - fractional seconds, numerator
-      ESMF_KIND_I4 *sD) const {     // out - fractional seconds, denominator
+      ESMC_IOSpec *iospec) const {
 //
 // !DESCRIPTION:
-//      return {\tt ESMC\_BaseTime} state for persistence/checkpointing
+//      Save {\tt BaseTime} state for persistence/checkpointing
 //
 //EOP
-// !REQUIREMENTS:  
+// !REQUIREMENTS: 
 
-    if (s  == ESMC_NULL_POINTER || sN == ESMC_NULL_POINTER ||
-        sD == ESMC_NULL_POINTER) {
-      cout << "ESMC_BaseTime::ESMC_BaseTimeWriteRestart(): null pointer(s) passed in " << endl;
-      return(ESMF_FAILURE);
-    }
+    int rc = ESMF_SUCCESS;
 
-    *s  = this->s;
-    *sN = this->sN;
-    *sD = this->sD;
+    // TODO:
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
 }  // end ESMC_BaseTimeWriteRestart
 

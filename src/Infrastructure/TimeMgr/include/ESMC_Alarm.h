@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.19 2003/10/22 02:29:16 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.20 2003/12/19 19:19:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 //
-// ESMF TimeInstant C++ definition include file
+// ESMF Alarm C++ definition include file
 //
 // (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)
@@ -75,6 +75,7 @@
 //
 // !USES:
  #include <ESMC_Base.h>
+ #include <ESMC_IO.h>    // IOSpec class for ReadRestart()/WriteRestart()
  #include <ESMC_TimeInterval.h>
  #include <ESMC_Time.h>
  class ESMC_Clock;
@@ -208,35 +209,11 @@ class ESMC_Alarm {
 
     // for persistence/checkpointing
 
-    // restore state
-    int ESMC_AlarmReadRestart(ESMC_Clock        **clock,
-                              ESMC_TimeInterval *ringInterval,
-                              ESMC_TimeInterval *ringDuration,
-                              ESMC_Time         *ringTime,
-                              ESMC_Time         *prevRingTime,
-                              ESMC_Time         *stopTime,
-                              ESMC_Time         *ringBegin,
-                              ESMC_Time         *refTime,
-                              int               nRingDurationTimeSteps,
-                              int               nTimeStepsRinging,
-                              bool              ringing,
-                              bool              enabled,
-                              bool              sticky);
-
+    // friend to restore state
+    friend ESMC_Alarm *ESMC_AlarmReadRestart(int, const char*,
+                                             ESMC_IOSpec*, int*);
     // save state
-    int ESMC_AlarmWriteRestart(ESMC_Clock        **clock,
-                               ESMC_TimeInterval *ringInterval,
-                               ESMC_TimeInterval *ringDuration,
-                               ESMC_Time         *ringTime,
-                               ESMC_Time         *prevRingTime,
-                               ESMC_Time         *stopTime,
-                               ESMC_Time         *ringBegin,
-                               ESMC_Time         *refTime,
-                               int               *nRingDurationTimeSteps,
-                               int               *nTimeStepsRinging,
-                               bool              *ringing,
-                               bool              *enabled,
-                               bool              *sticky) const;
+    int ESMC_AlarmWriteRestart(ESMC_IOSpec *iospec=0) const;
 
     // internal validation
     int ESMC_AlarmValidate(const char *options=0) const;
@@ -258,6 +235,7 @@ class ESMC_Alarm {
 
     // friend to de-allocate alarm
     friend int ESMC_AlarmDestroy(ESMC_Alarm *);
+
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
@@ -294,5 +272,11 @@ class ESMC_Alarm {
 
     // friend to de-allocate alarm
     int ESMC_AlarmDestroy(ESMC_Alarm *alarm);
+
+    // friend to restore state
+    ESMC_Alarm *ESMC_AlarmReadRestart(int nameLen,
+                                      const char*  name=0,
+                                      ESMC_IOSpec* iospec=0,
+                                      int*         rc=0);
 
 #endif // ESMC_ALARM_H

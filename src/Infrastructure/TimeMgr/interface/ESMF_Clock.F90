@@ -33,8 +33,13 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      ! associated derived types
+      ! inherit from ESMF base class
       use ESMF_BaseMod
+
+      ! for ReadRestart()/WriteRestart()
+      use ESMF_IOMod
+
+      ! associated derived types
       use ESMF_TimeIntervalMod
       use ESMF_TimeMod
       use ESMF_AlarmTypeMod
@@ -90,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.35 2003/11/06 19:08:08 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.36 2003/12/19 19:22:00 eschwab Exp $'
 
 !==============================================================================
 !
@@ -144,17 +149,20 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]     
-!          Optional name for the newly created clock.  If not specified,
-!          a default unique name will be generated: "ClockNNN" where NNN
+!          The name for the newly created clock.  If not specified, a
+!          default unique name will be generated: "ClockNNN" where NNN
 !          is a unique sequence number from 001 to 999.
 !     \item[timeStep]
 !          The {\tt ESMF\_Clock}'s time step interval.
 !     \item[startTime]
 !          The {\tt ESMF\_Clock}'s starting time.
 !     \item[{[stopTime]}]
-!          The {\tt ESMF\_Clock}'s stopping time.
+!          The {\tt ESMF\_Clock}'s stopping time.  If not specified,
+!          clock runs "forever"; user uses other means to know when
+!          to stop (e.g. ESMF\_Alarm or ESMF\_ClockGet(clock, currTime)).
 !     \item[{[refTime]}]
-!          The {\tt ESMF\_Clock}'s reference time.
+!          The {\tt ESMF\_Clock}'s reference time.  Provides reference point
+!          for simulation time (see currSimTime in ESMF\_ClockGet() below).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -227,24 +235,31 @@
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Sets one or more of the properties of an {\tt ESMF\_Clock}.
+!     Sets/resets one or more of the properties of an {\tt ESMF\_Clock} that
+!     was previously initialized via {\tt ESMF\_ClockCreate()}.
 !     
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          The object instance to set.
 !     \item[{[name]}]
-!          Optional name for this clock.  If not specified, a default unique
+!          The name for this clock.  If not specified, a default unique
 !          name will be generated: "ClockNNN" where NNN is a unique sequence
 !          number from 001 to 999.
 !     \item[{[timeStep]}]
-!          The {\tt ESMF\_Clock}'s time step interval.
+!          The {\tt ESMF\_Clock}'s time step interval.  This is used to
+!          change a clock's timestep property for those applications that need
+!          variable timesteps.  Also see {\tt ESMF\_ClockAdvance()} below
+!          for specifying variable timesteps that are NOT saved as the clock's
+!          internal time step property.
 !     \item[{[startTime]}]
 !          The {\tt ESMF\_Clock}'s starting time.
 !     \item[{[stopTime]}]
 !          The {\tt ESMF\_Clock}'s stopping time.
+!          See description in {\tt ESMF\_ClockCreate()} above.
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.
+!          See description in {\tt ESMF\_ClockCreate()} above.
 !     \item[{[currTime]}]
 !          The current time.
 !     \item[{[advanceCount]}]
@@ -297,12 +312,12 @@
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Gets the properties of a {\tt ESMF\_Clock}.
+!     Gets one or more of the properties of an {\tt ESMF\_Clock}.
 !     
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!          The object instance to initialize.
+!          The object instance to query.
 !     \item[{[name]}]
 !          The name of this clock.
 !     \item[{[timeStep]}]
@@ -314,13 +329,15 @@
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.
 !     \item[{[currTime]}]
-!          The current time.
+!          The {\tt ESMF\_Clock}'s current time.
 !     \item[{[prevTime]}]
-!          The previous time.
+!          The {\tt ESMF\_Clock}'s previous time.  Equals currTime at
+!          the previous time step.
 !     \item[{[currSimTime]}]
 !          The current simulation time (currTime - refTime).
 !     \item[{[prevSimTime]}]
-!          The previous simulation time.
+!          The previous simulation time.  Equals currSimTime at
+!          the previous time step.
 !     \item[{[advanceCount]}]
 !          The number of times the {\tt ESMF\_Clock} has been advanced.
 !     \item[{[numAlarms]}]
@@ -388,8 +405,8 @@
 !     \item[{[timeStep]}]
 !          Time step is performed with given timeStep, instead of
 !          the {\tt ESMF\_Clock}'s.  Does not replace the {\tt ESMF\_Clock}'s 
-!          timeStep; use {\tt ESMF\_ClockSet(clock, timeStep, ...)} for this purpose.
-!          Supports applications with variable time steps.
+!          timeStep; use {\tt ESMF\_ClockSet(clock, timeStep, ...)} for
+!          this purpose.  Supports applications with variable time steps.
 !     \item[{[ringingAlarmList]}]
 !          Returns the array of alarms that are ringing after the
 !          time step.
@@ -434,7 +451,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockIsStopTime - Has the Clock reached its stop time?
+! !IROUTINE: ESMF_ClockIsStopTime - Test if the Clock has reached or exceeded its stop time
 
 ! !INTERFACE:
       function ESMF_ClockIsStopTime(clock, rc)
@@ -447,8 +464,8 @@
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Returns true if the {\tt clock} has reached its stop time, and
-!     false otherwise.
+!     Returns true if the {\tt clock} has reached or exceeded its stop time,
+!     and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -481,7 +498,8 @@
     
 ! !DESCRIPTION:
 !     Calculates what the next time of the {\tt clock} will be, based on
-!     the {\tt clock}'s current time step or an optionally passed-in {\tt timeStep}.
+!     the {\tt clock}'s current time step or an optionally passed-in
+!     {\tt timeStep}.
 !     
 !     The arguments are:
 !     \begin{description}
@@ -576,9 +594,10 @@
 !
 !            {\tt ESMF\_ALARMLIST\_RINGING} :
 !                Returns only those {\tt clock} alarms that are currently
-!                ringing.  See also method {\tt ESMF\_ClockAdvance()} for getting the
-!                list of ringing alarms subsequent to a time step.  See also
-!                method {\tt ESMF\_AlarmIsRinging()} for checking a single alarm.
+!                ringing.  See also method {\tt ESMF\_ClockAdvance()} for
+!                getting the list of ringing alarms subsequent to a time step.
+!                See also method {\tt ESMF\_AlarmIsRinging()} for checking a
+!                single alarm.
 !
 !            {\tt ESMF\_ALARMLIST\_NEXTRINGING} :
 !                Return only those alarms that will ring upon the next
@@ -597,8 +616,8 @@
 !          The number of {\tt ESMF\_Alarm}s in the returned list.
 !     \item[{[timeStep]}]
 !          Optional time step to be used instead of the {\tt clock}'s.
-!          Only used with {\tt ESMF\_ALARMLIST\_NEXTRINGING alarmListType} (see above);
-!          ignored if specified with other {\tt alarmListTypes}.
+!          Only used with {\tt ESMF\_ALARMLIST\_NEXTRINGING alarmListType}
+!          (see above); ignored if specified with other {\tt alarmListTypes}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -644,7 +663,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!          The object instance to synchronize to wall clock time.
+!          The object instance to be synchronized with wall clock time.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -702,123 +721,75 @@
 ! !IROUTINE: ESMF_ClockReadRestart - Restore the contents of a Clock
 
 ! !INTERFACE:
-      subroutine ESMF_ClockReadRestart(clock, timeStep, startTime, stopTime, &
-                                      refTime, currTime, prevTime, &
-                                      advanceCount, numAlarms, alarmList, rc)
-
+      function ESMF_ClockReadRestart(name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Clock) :: ESMF_ClockReadRestart
+!
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(out)                :: clock
-      type(ESMF_TimeInterval), intent(in)                 :: timeStep
-      type(ESMF_Time),         intent(in)                 :: startTime
-      type(ESMF_Time),         intent(in)                 :: stopTime
-      type(ESMF_Time),         intent(in)                 :: refTime
-      type(ESMF_Time),         intent(in)                 :: currTime
-      type(ESMF_Time),         intent(in)                 :: prevTime
-      integer(ESMF_KIND_I8),   intent(in)                 :: advanceCount
-      integer,                 intent(in)                 :: numAlarms
-      type(ESMF_Alarm), dimension(MAX_ALARMS), intent(in) :: alarmList
-      integer,                 intent(out), optional      :: rc
-    
+      character (len=*), intent(in)            :: name
+      type(ESMF_IOSpec), intent(in),  optional :: iospec
+      integer,           intent(out), optional :: rc
+
 ! !DESCRIPTION:
-!     Restores the contents of an {\tt ESMF\_Clock} for restart.
-!     
+!     Restores an {\tt ESMF\_Clock} object from the last call to
+!     {\tt ESMF\_ClockWriteRestart()}.
+!
 !     The arguments are:
 !     \begin{description}
-!     \item[clock]
-!          The object instance to restore.
-!     \item[timeStep]
-!          The {\tt ESMF\_Clock}'s time step interval.
-!     \item[startTime]
-!          The {\tt ESMF\_Clock}'s starting time.
-!     \item[stopTime]
-!          The {\tt ESMF\_Clock}'s stopping time.
-!     \item[refTime]
-!          The {\tt ESMF\_Clock}'s reference time.
-!     \item[currTime]
-!          The {\tt ESMF\_Clock}'s current time.
-!     \item[PrevTime]
-!          The {\tt ESMF\_Clock}'s previous time.
-!     \item[advanceCount]
-!          The number of times the {\tt ESMF\_Clock} has been advanced.
-!     \item[numAlarms]
-!          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s
-!          {\tt ESMF\_Alarm} list.
-!     \item[alarmList]
-!          The {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list.
+!     \item[name]
+!          The name of the object instance to restore.
+!     \item[{[iospec]}]      
+!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!     
+!     \end{description}  
+!
 !EOP
 ! !REQUIREMENTS:
 
-!     invoke C to C++ entry point
-      call c_ESMC_ClockReadRestart(clock, timeStep, startTime, stopTime, &
-                                   refTime, currTime, prevTime, advanceCount, &
-                                   numAlarms, alarmList, rc)
-    
-      end subroutine ESMF_ClockReadRestart
+      ! get length of given name for C++ validation
+      integer :: nameLen
+      nameLen = len_trim(name)
+
+!     invoke C to C++ entry point to allocate and restore clock
+      call c_ESMC_ClockReadRestart(ESMF_ClockReadRestart, nameLen, name, &
+                                   iospec, rc)
+
+      end function ESMF_ClockReadRestart
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ClockWriteRestart - Save the contents of a Clock 
 
 ! !INTERFACE:
-      subroutine ESMF_ClockWriteRestart(clock, timeStep, startTime, stopTime, &
-                                        refTime, currTime, prevTime, &
-                                        advanceCount, numAlarms, alarmList, rc)
+      subroutine ESMF_ClockWriteRestart(clock, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(in)                  :: clock
-      type(ESMF_TimeInterval), intent(out)                 :: timeStep
-      type(ESMF_Time),         intent(out)                 :: startTime
-      type(ESMF_Time),         intent(out)                 :: stopTime
-      type(ESMF_Time),         intent(out)                 :: refTime
-      type(ESMF_Time),         intent(out)                 :: currTime
-      type(ESMF_Time),         intent(out)                 :: prevTime
-      integer(ESMF_KIND_I8),   intent(out)                 :: advanceCount
-      integer,                 intent(out)                 :: numAlarms
-      type(ESMF_Alarm), dimension(MAX_ALARMS), intent(out) :: alarmList
-      integer,                 intent(out), optional       :: rc
+      type(ESMF_Clock),  intent(in)            :: clock
+      type(ESMF_IOSpec), intent(in),  optional :: iospec
+      integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Saves the contents of an {\tt ESMF\_Clock} for restart.
-!     
+!     Saves an {\tt ESMF\_Clock} object.  Default options are to select the
+!     fastest way to save to disk.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          The object instance to save.
-!     \item[timeStep]
-!          The {\tt ESMF\_Clock}'s time step interval.
-!     \item[startTime]
-!          The {\tt ESMF\_Clock}'s starting time.
-!     \item[stopTime]
-!          The {\tt ESMF\_Clock}'s stopping time.
-!     \item[refTime]
-!          The {\tt ESMF\_Clock}'s reference time.
-!     \item[currTime]
-!          The {\tt ESMF\_Clock}'s current time.
-!     \item[prevTime]
-!          The {\tt ESMF\_Clock}'s previous time.
-!     \item[advanceCount]
-!          The number of times the {\tt ESMF\_Clock} has been advanced.
-!     \item[numAlarms]
-!          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s
-!          {\tt ESMF\_Alarm} list.
-!     \item[alarmList]
-!          The {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list.
+!     \item[{[iospec]}]
+!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!     
+!
 !EOP
 ! !REQUIREMENTS:
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockWriteRestart(clock, timeStep, startTime, stopTime, &
-                                    refTime, currTime, prevTime, advanceCount, &
-                                    numAlarms, alarmList, rc)
-    
+      call c_ESMC_ClockWriteRestart(clock, iospec, rc)
+
       end subroutine ESMF_ClockWriteRestart
 
 !------------------------------------------------------------------------------
@@ -840,9 +811,9 @@
 !     The arguments are:  
 !     \begin{description}
 !     \item[clock]
-!          {\tt ESMF\_Clock} to validate.
+!          {\tt ESMF\_Clock} to be validated.
 !     \item[{[options]}]
-!          Validate options.  TODO: To be determined.
+!          Validation options.  TODO: To be determined.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 
@@ -869,14 +840,14 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing and debugging, this method prints out 
-!     the contents of an {\tt ESMF\_Clock}.  The options control
-!     the type of information and level of detail.
+!     Prints out an {\tt ESMF\_Clock}'s properties, in support of testing
+!     and debugging.  The options control the type of information and level     
+!     of detail.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!          {\tt ESMF\_Clock} to print out.
+!          {\tt ESMF\_Clock} to be printed out.
 !     \item[{[options]}]
 !          Print options. If none specified, prints all clock property values.\\
 !          "name"         - print the clock's name. \\

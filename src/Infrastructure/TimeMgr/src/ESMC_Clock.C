@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.37 2003/10/22 21:58:19 cdeluca Exp $
+// $Id: ESMC_Clock.C,v 1.38 2003/12/19 19:20:22 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.37 2003/10/22 21:58:19 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.38 2003/12/19 19:20:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -399,6 +399,8 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:
 
     *rc = ESMF_SUCCESS;
+
+    // TODO:  first check if stopTime has been specified; if not, return false.
 
     // positive time step ?
     if (stopTime > startTime) {
@@ -780,51 +782,29 @@ int ESMC_Clock::count=0;
 // !IROUTINE:  ESMC_ClockReadRestart - restore contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockReadRestart(
+      ESMC_Clock *ESMC_ClockReadRestart(
 //
 // !RETURN VALUE:
-//    int error return code
+//    pointer to newly allocated and restored ESMC_Clock
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *timeStep,             // in
-      ESMC_Time         *startTime,            // in
-      ESMC_Time         *stopTime,             // in
-      ESMC_Time         *refTime,              // in
-      ESMC_Time         *currTime,             // in
-      ESMC_Time         *prevTime,             // in
-      ESMF_KIND_I8       advanceCount,         // in
-      int                numAlarms,            // in 
-      ESMC_Alarm        *alarmList[]) {        // in
+      int          nameLen,  // in
+      const char  *name,     // in
+      ESMC_IOSpec *iospec,   // in
+      int         *rc ) {    // out - return code
+
 //
 // !DESCRIPTION:
-//      Restore information about a {\tt ESMC\_Clock}.
-//      {\tt ESMC\_Base} class method.
-//
+//      Restore information about an {\tt ESMC\_Clock}.
+//      For persistence/checkpointing
+// 
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (timeStep  == ESMC_NULL_POINTER || startTime == ESMC_NULL_POINTER ||
-        stopTime  == ESMC_NULL_POINTER || refTime   == ESMC_NULL_POINTER ||
-        currTime  == ESMC_NULL_POINTER || prevTime  == ESMC_NULL_POINTER ||
-        alarmList == ESMC_NULL_POINTER) {
-      cout << "ESMC_Clock::ESMC_ClockReadRestart(): null pointer(s) passed in"
-           << endl;
-      return(ESMF_FAILURE);
-    }
-    
-    this->timeStep     = *timeStep;
-    this->startTime    = *startTime;
-    this->stopTime     = *stopTime;
-    this->refTime      = *refTime;
-    this->currTime     = *currTime;
-    this->prevTime     = *prevTime;
-    this->advanceCount = advanceCount;
-    this->numAlarms    = numAlarms;
-    for (int i=0; i<this->numAlarms; i++) this->alarmList[i] = alarmList[i];
-                              // TODO: component must be sure Alarms are
-                              // restored first
-    
-    return(ESMF_SUCCESS);
+    // TODO:  read clock state from iospec/name, then allocate/restore
+    //        (share code with ESMC_ClockCreate()).
+
+    return(ESMC_NULL_POINTER);
 
  } // end ESMC_ClockReadRestart
 
@@ -839,44 +819,17 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *timeStep,             // out
-      ESMC_Time         *startTime,            // out
-      ESMC_Time         *stopTime,             // out
-      ESMC_Time         *refTime,              // out
-      ESMC_Time         *currTime,             // out
-      ESMC_Time         *prevTime,             // out
-      ESMF_KIND_I8      *advanceCount,         // out
-      int               *numAlarms,            // out 
-      ESMC_Alarm        *alarmList[]) const {  // out
+      ESMC_IOSpec *iospec) const {
 //
 // !DESCRIPTION:
-//      Save information about a {\tt ESMC\_Clock}.
-//      {\tt ESMC\_Base} class method.
+//      Save information about an {\tt ESMC\_Clock}.
+//      For persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (timeStep     == ESMC_NULL_POINTER || startTime == ESMC_NULL_POINTER ||
-        stopTime     == ESMC_NULL_POINTER || refTime   == ESMC_NULL_POINTER ||
-        currTime     == ESMC_NULL_POINTER || prevTime  == ESMC_NULL_POINTER ||
-        advanceCount == ESMC_NULL_POINTER || alarmList == ESMC_NULL_POINTER ||
-        numAlarms    == ESMC_NULL_POINTER) {
-      cout << "ESMC_Clock::ESMC_ClockWriteRestart(): null pointer(s) passed in"
-           << endl;
-      return(ESMF_FAILURE);
-    }
-    
-    *timeStep     = this->timeStep;
-    *startTime    = this->startTime;
-    *stopTime     = this->stopTime;
-    *refTime      = this->refTime;
-    *currTime     = this->currTime;
-    *prevTime     = this->prevTime;
-    *advanceCount = this->advanceCount;
-    *numAlarms    = this->numAlarms;
-    for (int i=0; i<this->numAlarms; i++) alarmList[i] = this->alarmList[i];
-                               // TODO: only saves pointers; component must be
-                               // sure Alarms are saved afterward
+    // TODO:  save clock state using iospec/name.  Default to disk file.
+
     return(ESMF_SUCCESS);
 
  } // end ESMC_ClockWriteRestart

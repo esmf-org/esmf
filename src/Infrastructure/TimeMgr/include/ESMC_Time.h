@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.28 2003/10/22 01:19:09 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.29 2003/12/19 19:19:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 //
 // !USES:
  #include <ESMC_Base.h>           // inherited Base class
- #include <ESMC_BaseTime.h>       // inherited Time class
+ #include <ESMC_BaseTime.h>       // inherited BaseTime class
  #include <ESMC_Calendar.h>       // associated Calendar class
  #include <ESMC_TimeInterval.h> 
 
@@ -116,7 +116,7 @@
                      ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
                      ESMC_Calendar *calendar=0, int *timeZone=0,
                      char *timeString=0, int *dayOfWeek=0,
-                     int *dayOfMonth=0, ESMC_Time *midMonth=0,
+                     ESMC_Time *midMonth=0,
                      ESMF_KIND_I4 *dayOfYear=0,
                      ESMF_KIND_R8 *dayOfYear_r8=0,
                      ESMC_TimeInterval *dayOfYear_intvl=0) const;
@@ -150,12 +150,9 @@
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_TimeReadRestart(ESMF_KIND_I8 s,
-                             ESMF_KIND_I4 sN, ESMF_KIND_I4 sD,
-                             ESMC_Calendar *calendar, int timeZone);
-    int ESMC_TimeWriteRestart(ESMF_KIND_I8 *s,
-                              ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                              ESMC_Calendar *calendar, int *timeZone) const;
+    int ESMC_TimeReadRestart(int nameLen, const char *name=0,
+                             ESMC_IOSpec *iospec=0);
+    int ESMC_TimeWriteRestart(ESMC_IOSpec *iospec=0) const;
 
     // internal validation
     int ESMC_TimeValidate(const char *options=0) const;  // (TMG 7.1.1)
@@ -178,7 +175,6 @@
     int ESMC_TimeGetString(char *timeString) const;
 
     int ESMC_TimeGetDayOfWeek(int *dayOfWeek) const;    // (TMG 2.5.3)
-    int ESMC_TimeGetDayOfMonth(int *dayOfMonth) const;  // (TMG 2.5.4)
     int ESMC_TimeGetMidMonth(ESMC_Time *midMonth) const;
 
     int ESMC_TimeGetDayOfYear(ESMF_KIND_I4 *dayOfYear) const;
