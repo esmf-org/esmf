@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInstant.F90,v 1.2 2002/10/21 20:11:01 eschwab Exp $
+! $Id: ESMF_TimeInstant.F90,v 1.3 2002/10/22 17:59:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -167,185 +167,382 @@
 !EOP
 ! !REQUIREMENTS:  AAAn.n.n
     
-        ! invoke C to C++ entry point
-        ! use optional args for any subset
+!       ! invoke C to C++ entry point
+!       ! use optional args for any subset
         call c_ESMF_TimeInstInit2(this, YR, MM, DD, D, H, M, S, &
                                         MS, US, NS, Sn, Sd, &
                                         d_, h_, m_, s_, ms_, us_, ns_, &
                                         calendar, timezone, rc)
         end subroutine
     
-        !
-        ! generic get/set routines which use F90 optional arguments
-        !
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstGet - Get time instant
 
-        subroutine ESMF_TimeInstGet(this, YR, MM, DD, D, H, M, S, &
-                                       MS, US, NS, Sn, Sd, &
-                                       d_, h_, m_, s_, ms_, us_, ns_, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer, intent(out), optional :: MM, DD, H, M, MS
-            integer(INT64), intent(out), optional :: S
-            integer(INT32), intent(out), optional :: YR, D, US, NS, Sn, Sd
-            real, intent(out), optional :: d_, h_, m_, s_, ms_, us_, ns_
-            integer, intent(out), optional :: rc
+! !INTERFACE:
+	subroutine ESMF_TimeInstGet(this, YR, MM, DD, D, H, M, S, &
+                                    MS, US, NS, Sn, Sd, &
+                                    d_, h_, m_, s_, ms_, us_, ns_, rc)
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer, intent(out), optional :: MM, DD, H, M, MS
+        integer(INT64), intent(out), optional :: S
+        integer(INT32), intent(out), optional :: YR, D, US, NS, Sn, Sd
+        real, intent(out), optional :: d_, h_, m_, s_, ms_, us_, ns_
+        integer, intent(out), optional :: rc
     
-            ! use optional args for any subset
+! !DESCRIPTION:
+!
+!	 generic get routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+!	    ! invoke C to C++ entry point
+!           ! use optional args for any subset
             call c_ESMF_TimeInstantGet(this, YR, MM, DD, D, H, M, S, &
                                        MS, US, NS, Sn, Sd, &
                                        d_, h_, m_, s_, ms_, us_, ns_, rc)
-    
-        end subroutine
 
-        subroutine ESMF_TimeInstSet(this, YR, MM, DD, D, H, M, S, &
+
+           end subroutine
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstSet - Set time instant
+
+! !INTERFACE:
+	subroutine ESMF_TimeInstantSet(this, YR, MM, DD, D, H, M, S, &
                                        MS, US, NS, Sn, Sd, &
                                        d_, h_, m_, s_, ms_, us_, ns_, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer, intent(in), optional :: MM, DD, H, M, MS
-            integer(INT64), intent(in), optional :: S
-            integer(INT32), intent(in), optional :: YR, D, US, NS, Sn, Sd
-            real, intent(out), optional :: d_, h_, m_, s_, ms_, us_, ns_
-            integer, intent(out), optional :: rc
+
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer, intent(in), optional :: MM, DD, H, M, MS
+        integer(INT64), intent(in), optional :: S
+        integer(INT32), intent(in), optional :: YR, D, US, NS, Sn, Sd
+        real, intent(out), optional :: d_, h_, m_, s_, ms_, us_, ns_
+        integer, intent(out), optional :: rc
     
-            ! use optional args for any subset
+! !DESCRIPTION:
+!
+! 	generic set routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+!           ! invoke C to C++ entry point
+!           ! use optional args for any subset
             call c_ESMF_TimeInstantSet(this, YR, MM, DD, D, H, M, S, &
                                        MS, US, NS, Sn, Sd, &
                                        d_, h_, m_, s_, ms_, us_, ns_, rc)
     
-        end subroutine
+           end subroutine
 
-        !
-        ! wrappers for "inherited" ESMF_Time base class routines
-        !
+!
+! 	wrappers for "inherited" ESMF_Time base class routines
+!
 
-        subroutine ESMF_TimeInstGet_D(this, D, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(out) :: D
-            integer, intent(out), optional :: rc
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstGet_D - Set time instant
     
-            ! call ESMF_Time base class subroutine
+! !INTERFACE:
+	subroutine ESMF_TimeInstGet_D(this, D, rc)
+
+! !ARGUMENTS:
+       type(ESMF_TimeInstant), intent(inout) :: this
+       integer(INT32), intent(out) :: D
+       integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!
+! 	generic set routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeGet_D(this%time, D, rc)
 
-        end subroutine
+            end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstSet_D - Set time instant
+
+! !INTERFACE:
         subroutine ESMF_TimeInstSet_D(this, D, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(in) :: D
-            integer, intent(out), optional :: rc
     
-            ! call ESMF_Time base class subroutine
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT32), intent(in) :: D
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!
+! 	generic set routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeSet_D(this%time, D, rc)
 
-        end subroutine
+            end subroutine
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstGet_d_ - Get time instant
 
+! !INTERFACE:
         subroutine ESMF_TimeInstGet_d_(this, d, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            real, intent(out) :: d
-            integer, intent(out), optional :: rc
-    
-            ! call ESMF_Time base class subroutine
+
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        real, intent(out) :: d
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!
+! 	generic get routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeGet_d_(this%time, d, rc)
 
-        end subroutine
+            end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstSet_d_ - Set time instant
+
+! !INTERFACE:
         subroutine ESMF_TimeInstSet_d_(this, d, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            real, intent(in) :: d
-            integer, intent(out), optional :: rc
     
-            ! call ESMF_Time base class subroutine
+! !ARGUMENTS:
+       type(ESMF_TimeInstant), intent(inout) :: this
+       real, intent(in) :: d
+       integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!
+! 	generic set routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeSet_d_(this%time, d, rc)
 
-        end subroutine
+            end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstGet_s_ - Set time instant
+
+! !INTERFACE:
         subroutine ESMF_TimeInstGet_s_(this, s, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            real, intent(out) :: s
-            integer, intent(out), optional :: rc
     
-            ! call ESMF_Time base class subroutine
+
+! !ARGUMENTS:
+       type(ESMF_TimeInstant), intent(inout) :: this
+       real, intent(out) :: s
+       integer, intent(out), optional :: rc
+
+
+! !DESCRIPTION:
+!
+! 	generic set routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeGet_s(this%time, s, rc)
 
-        end subroutine
+            end subroutine
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstGet_s_ - Set time instant
 
+! !INTERFACE:
         subroutine ESMF_TimeInstSet_s_(this, s, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            real, intent(in) :: s
-            integer, intent(out), optional :: rc
     
-            ! call ESMF_Time base class subroutine
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        real, intent(in) :: s
+        integer, intent(out), optional :: rc
+! !DESCRIPTION:
+! 
+! 	generic set routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeSet_s(this%time, s, rc)
 
-        end subroutine
+            end subroutine
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstRead_S - Read time instant
 
+! !INTERFACE:
         subroutine ESMF_TimeInstRead_S(this, S)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT64), intent(out) :: S
     
-            print *, "ESMF_TimeTimeInstantRead_S entered"
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT64), intent(out) :: S
 
-            ! call ESMF_Time base class subroutine
+
+! !DESCRIPTION:
+!
+! 	generic read routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+            print *, "ESMF_TimeTimeInstantRead_S entered"
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeRead_S(this%time, S)
 
-        end subroutine
+            end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstWrite_S - Write time instant
+
+
+! !INTERFACE:
         subroutine ESMF_TimeInstWrite_S(this, S)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT64), intent(in) :: S
     
-            print *, "ESMF_TimeInstWrite_S entered"
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT64), intent(in) :: S
 
-            ! call ESMF_Time base class subroutine
+! !DESCRIPTION:
+!
+! 	generic write routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+            print *, "ESMF_TimeInstWrite_S entered"
+!            ! invoke C to C++ entry point
+!            ! call ESMF_Time base class subroutine
             call c_ESMF_TimeWrite_S(this%time, S, rc)
 
-        end subroutine
+            end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstRead_Sn - Read Time instant
+
+
+! !INTERFACE:
         subroutine ESMF_TimeInstRead_Sn(this, Sn)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(out) :: Sn
     
-            print *, "ESMF_TimeInstRead_Sn entered"
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+         integer(INT32), intent(out) :: Sn
 
-            ! call ESMF_Time base class subroutine
+! !DESCRIPTION:
+!
+! 	generic read routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+
+            print *, "ESMF_TimeInstRead_Sn entered"
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeRead_Sn(this%time, Sn, rc)
 
         end subroutine
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstWrite_Sn - Write time instant
 
+
+! !INTERFACE:
         subroutine ESMF_TimeInstWrite_Sn(this, Sn)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT64), intent(in) :: Sn
-    
-            print *, "ESMF_TimeInstWrite_Sn entered"
 
-            ! call ESMF_Time base class subroutine
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT64), intent(in) :: Sn
+    
+! !DESCRIPTION:
+!
+!	 generic write routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+
+            print *, "ESMF_TimeInstWrite_Sn entered"
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeWrite_Sn(this%time, Sn, rc)
 
-        end subroutine
+            end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstRead_Sd - Read time instant
+
+
+! !INTERFACE:
         subroutine ESMF_TimeInstRead_Sd(this, Sd)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(out) :: Sd
-    
-            print *, "ESMF_TimeInstRead_Sd entered"
 
-            ! call ESMF_Time base class subroutine
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT32), intent(out) :: Sd
+
+! !DESCRIPTION:
+!
+! 	generic read routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+
+            print *, "ESMF_TimeInstRead_Sd entered"
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeRead_Sd(this%time, Sd, rc)
 
-        end subroutine
+            end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: subroutine ESMF_TimeInstWrite_Sd - Write time instant
+
+
+! !INTERFACE:
         subroutine ESMF_TimeInstWrite_Sd(this, Sd)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT64), intent(in) :: Sd
     
-            print *, "ESMF_TimeInstWrite_Sd entered"
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT64), intent(in) :: Sd
 
-            ! call ESMF_Time base class subroutine
+! !DESCRIPTION:
+!
+! 	generic write routine which use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+            print *, "ESMF_TimeInstWrite_Sd entered"
+!           ! invoke C to C++ entry point
+!           ! call ESMF_Time base class subroutine
             call c_ESMF_TimeWrite_Sd(this%time, Sd, rc)
 
-        end subroutine
+            end subroutine
 
-        !
-        !  wrappers for ESMF_Time base class overloaded operators
-        !
+!
+!  	wrappers for ESMF_Time base class overloaded operators
+!
 
 !------------------------------------------------------------------------------
 !BOP
@@ -361,12 +558,12 @@
         type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
 !
 ! !DESCRIPTION:
-        ! overloaded (==) operator interface function maps to
-        !   ESMF_Time base class
+! 	overloaded (==) operator interface function maps to
+!   	ESMF_Time base class
 !EOP
 ! !REQUIREMENTS:  TMG 2.4.3
 
-        ! invoke C to C++ entry point for ESMF_Time base class function
+!        ! invoke C to C++ entry point for ESMF_Time base class function
         call c_ESMF_TimeEQ(timeinstant1%time, timeinstant2%time, &
                            ESMF_TimeInstEQ)
 
@@ -386,13 +583,13 @@
         type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
 !
 ! !DESCRIPTION:
-        ! overloaded (/=) operator interface function maps to
-        !   ESMF_Time base class
+! 	overloaded (/=) operator interface function maps to
+!   	ESMF_Time base class
 
 !EOP
 ! !REQUIREMENTS:  TMG 2.4.3
 
-        ! invoke C to C++ entry point for ESMF_Time base class function
+!        ! invoke C to C++ entry point for ESMF_Time base class function
         call c_ESMF_TimeNE(timeinstant1%time, timeinstant2%time, &
                            ESMF_TimeInstantNE)
 
@@ -400,240 +597,564 @@
 
 !------------------------------------------------------------------------------
 !BOP
-        ! overloaded (<) operator interface function maps to
-        !   ESMF_Time base class
+! !IROUTINE: ESMF_TimeInstLT - 
+!
+! !INTERFACE:
         function ESMF_TimeInstLT(timeinstant1, timeinstant2)
-            logical :: ESMF_TimeInstLT
-            type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
+!
+! !RETURN VALUE:
+        logical :: ESMF_TimeInstLT
+!
+! !ARGUMENTS:
+	type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
+!
+! !DESCRIPTION:
+! 	overloaded (<) operator interface function maps to
+!   	ESMF_Time base class
 
-            ! call ESMF_Time base class function
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
+!           ! call ESMF_Time base class function
             call c_ESMF_TimeLT(timeinstant1%time, timeinstant2%time, &
                                ESMF_TimeInstLT)
 
-        end function
+            end function ESMF_TimeInstLT
 
-        ! overloaded (>) operator interface function maps to
-        !   ESMF_Time base class
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGT -
+!
+! !INTERFACE:
         function ESMF_TimeInstGT(timeinstant1, timeinstant2)
-            logical :: ESMF_TimeInstGT
+!
+! !RETURN VALUE:
+        logical :: ESMF_TimeInstGT
+!
+! !ARGUMENTS:
             type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
+!
+! !DESCRIPTION:
+!	overloaded (>) operator interface function maps to
+!   	ESMF_Time base class
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
 
             ! call ESMF_Time base class function
             call c_ESMF_TimeGT(timeinstant1%time, timeinstant2%time, &
                                ESMF_TimeInstGT)
 
-        end function
+            end function ESMF_TimeInstGT
 
-        ! overloaded (<=) operator interface function maps to
-        !   ESMF_Time base class
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstLE -
+!
+! !INTERFACE:
         function ESMF_TimeInstLE(timeinstant1, timeinstant2)
-            logical :: ESMF_TimeInstLE
-            type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
+!
+! !RETURN VALUE:
+        logical :: ESMF_TimeInstLE
+!
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
+!
+! !DESCRIPTION:
+! 	overloaded (<=) operator interface function maps to
+!   	ESMF_Time base class
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
 
-            ! call ESMF_Time base class function
+!           ! call ESMF_Time base class function
             call c_ESMF_TimeLE(timeinstant1%time, timeinstant2%time, &
                                ESMF_TimeInstLE)
 
-        end function
+            end function ESMF_TimeInstLE
 
-        ! overloaded (>=) operator interface function maps to
-        !   ESMF_Time base class
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGE
+!
+! !INTERFACE:
         function ESMF_TimeInstGE(timeinstant1, timeinstant2)
-            logical :: ESMF_TimeInstGE
-            type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
+!
+! !RETURN VALUE:
+        logical :: ESMF_TimeInstGE
+!
+! !ARGUMENTS:
+         type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
+!
+! !DESCRIPTION:
+! 	overloaded (>=) operator interface function maps to
+!   	ESMF_Time base class
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
 
-            ! call ESMF_Time base class function
+!           ! call ESMF_Time base class function
             call c_ESMF_TimeGE(timeinstant1%time, timeinstant2%time, &
                                ESMF_TimeInstGE)
 
-        end function
+            end function ESMF_TimeInstGE
 
-		! overloaded (+) operator interface function maps to
-		!   ESMF_Time base class
-		function ESMF_TimeInstInc(timeinstant, timeinterval)
-			type(ESMF_TimeInstant) :: ESMF_TimeInstInc
-			type(ESMF_TimeInst), intent(in) :: timeinstant
-			type(ESMF_TimeIntv), intent(in) :: timeinterval
-			type(ESMF_Time) :: time
-			integer(INT64) :: S
-			integer(INT32) :: Sn, Sd
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstInc
+!
+! !INTERFACE:
+	function ESMF_TimeInstInc(timeinstant, timeinterval)
+!
+! !RETURN VALUE:
+	type(ESMF_TimeInstant) :: ESMF_TimeInstInc
+!
+! !ARGUMENTS:
+	type(ESMF_TimeInst), intent(in) :: timeinstant
+	type(ESMF_TimeIntv), intent(in) :: timeinterval
+!
+! !DESCRIPTION:
+! 	overloaded (+) operator interface function maps to
+!   	ESMF_Time base class
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+		type(ESMF_Time) :: time
+		integer(INT64) :: S
+		integer(INT32) :: Sn, Sd
 
-			! get time from timeinterval (really need C++ "friend" feature ?? )
-			call c_ESMF_TimeIntvGet_S_nd(interval, S, Sn, Sd, rc)
-			call c_ESMF_TimeInit(time, S, Sn, Sd, rc)
+!		! get time from timeinterval (really need C++ "friend" feature ?? )
+		call c_ESMF_TimeIntvGet_S_nd(timeinterval, S, Sn, Sd, rc)
+		call c_ESMF_TimeInit(time, S, Sn, Sd, rc)
 
-			! call ESMF_Time base class function
-			call c_ESMF_TimeSum(timeinstant%time, time, &
+!		! call ESMF_Time base class function
+		call c_ESMF_TimeSum(timeinstant%time, time, &
 								ESMF_TimeInstInc%time)
 
-		end function
-
-        ! overloaded (-) operator interface function maps to
-        !   ESMF_Time base class
+		end function ESMF_TimeInstInc
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstDec
+!
+! !INTERFACE:
         function ESMF_TimeInstDec(timeinstant, timeinterval)
-            type(ESMF_TimeInstant) :: ESMF_TimeInstDec
-            type(ESMF_TimeInstant), intent(in) :: timeinstant
-            type(ESMF_TimeIntv), intent(in) :: timeinterval
+!
+! !RETURN VALUE:
+        type(ESMF_TimeInstant) :: ESMF_TimeInstDec
+
+!
+! !ARGUMENTS:
+       type(ESMF_TimeInstant) :: ESMF_TimeInstDec
+       type(ESMF_TimeInstant), intent(in) :: timeinstant
+       type(ESMF_TimeIntv), intent(in) :: timeinterval
+!
+! !DESCRIPTION:
+! 	overloaded (-) operator interface function maps to
+!   	ESMF_Time base class
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
             type(ESMF_Time) :: time
             integer(INT64) :: S
             integer(INT32) :: Sn, Sd
 
-            ! get time from timeinterval (really need C++ "friend" feature ?? )
+!           ! get time from timeinterval (really need C++ "friend" feature ?? )
             call c_ESMF_TimeIntvGet_S_nd(interval, S, Sn, Sd, rc)
             call c_ESMF_TimeInit(time, S, Sn, Sd, rc)
 
-            ! call ESMF_Time base class function
+!           ! call ESMF_Time base class function
             call c_ESMF_TimeDiff(timeinstant%time, time, &
                                  ESMF_TimeInstDec%time)
 
-        end function
+            end function  ESMF_TimeInstDec
 
-        ! overloaded (-) operator interface function maps to
-        !   ESMF_Time base class
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeInstDiff
+!
+! !INTERFACE:
         function ESMF_TimeInstDiff(timeinstant1, timeinstant2)
-            type(ESMF_TimeInstant) :: ESMF_TimeInstDiff
-            type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
+!
+! !RETURN VALUE:
+        type(ESMF_TimeInstant) :: ESMF_TimeInstDiff
+!
+! !ARGUMENTS:
+	type(ESMF_TimeInstant) :: ESMF_TimeInstDiff
+        type(ESMF_TimeInstant), intent(in) :: timeinstant1, timeinstant2
 
-            ! call ESMF_Time base class function
+!
+! !DESCRIPTION:
+! 	overloaded (-) operator interface function maps to
+!   	ESMF_Time base class
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
+!           ! call ESMF_Time base class function
             call c_ESMF_TimeDiff(timeinstant1%time, timeinstant2%time, &
                                  ESMF_TimeInstDiff%time)
 
-        end function
+            end function  ESMF_TimeInstDiff
 
-        !
-        ! shortcut routines for common get/set groupings
-        !
-
+!
+! 	shortcut routines for common get/set groupings
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGet_YR_MM_DD_S
+!
+! !INTERFACE:
         subroutine ESMF_TimeInstGet_YR_MM_DD_S(this, YR, MM, DD, S, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(out) :: YR, S
-            integer, intent(out) :: MM, DD
-            integer, intent(out), optional :: rc
+!
+! !RETURN VALUE:
+        integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT32), intent(out) :: YR, S
+        integer, intent(out) :: MM, DD
+        integer, intent(out), optional :: rc
     
-            call c_ESMF_TimeInstGet_YR_MM_DD_S(this, YR, MM, DD, S, rc)
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
 
-        end subroutine
 
+           call c_ESMF_TimeInstGet_YR_MM_DD_S(this, YR, MM, DD, S, rc)
+
+
+           end subroutine ESMF_TimeInstGet_YR_MM_DD_S
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstSet_YR_MM_DD_S
+!
+! !INTERFACE:
         subroutine ESMF_TimeInstSet_YR_MM_DD_S(this, YR, MM, DD, S, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(in) :: YR, S
-            integer, intent(in) :: MM, DD
-            integer, intent(out), optional :: rc
+!
+! !RETURN VALUE:
+         integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+         type(ESMF_TimeInstant), intent(inout) :: this
+         integer(INT32), intent(in) :: YR, S
+         integer, intent(in) :: MM, DD
+         integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
+
     
             call c_ESMF_TimeInstSet_YR_MM_DD_S(this, YR, MM, DD, S, rc)
 
-        end subroutine
+            end subroutine ESMF_TimeInstSet_YR_MM_DD_S
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TmInstGet_YR_MM_DD_H_M_S
+!
+! !INTERFACE:
         subroutine ESMF_TmInstGet_YR_MM_DD_H_M_S(this, YR, MM, DD, &
                                                  H, M, S, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(out) :: YR
-            integer, intent(out) :: MM, DD, H, M, S
-            integer, intent(out), optional :: rc
-    
+!
+! !RETURN VALUE:
+        integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT32), intent(out) :: YR
+        integer, intent(out) :: MM, DD, H, M, S
+        integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
             call c_ESMF_TmInstGet_YR_MM_DD_H_M_S(this, YR, MM, DD, &
                                                  H, M, S, rc)
 
-        end subroutine
+            end subroutine ESMF_TmInstGet_YR_MM_DD_H_M_S
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TmInstSet_YR_MM_DD_H_M_S
+!
+! !INTERFACE:
         subroutine ESMF_TmInstSet_YR_MM_DD_H_M_S(this, YR, MM, DD, &
                                                  H, M, S, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(in) :: YR
-            integer, intent(in) :: MM, DD, H, M, S
-            integer, intent(in), optional :: rc
-    
+!
+! !RETURN VALUE:
+         integer, intent(in), optional :: rc
+!
+! !ARGUMENTS:
+         type(ESMF_TimeInstant), intent(inout) :: this
+         integer(INT32), intent(in) :: YR
+         integer, intent(in) :: MM, DD, H, M, S
+         integer, intent(in), optional :: rc
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
             call c_ESMF_TmInstSet_YR_MM_DD_H_M_S(this, YR, MM, DD, &
                                                  H, M, S, rc)
 
-        end subroutine
+            end subroutine ESMF_TmInstSet_YR_MM_DD_H_M_S
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TInsGetYR_MM_DD_H_M_S_nd
+!
+! !INTERFACE:
         subroutine ESMF_TInsGetYR_MM_DD_H_M_S_nd(this, YR, MM, DD, &
                                                  H, M, S, Sn, Sd, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(out) :: YR, Sn, Sd
-            integer, intent(out) :: MM, DD, H, M, S
-            integer, intent(out), optional :: rc
+!
+! !RETURN VALUE:
+        integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT32), intent(out) :: YR, Sn, Sd
+        integer, intent(out) :: MM, DD, H, M, S
+        integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
     
             call c_ESMF_TInsGetYR_MM_DD_H_M_S_nd(this, YR, MM, DD, &
                                                  H, M, S, Sn, Sd, rc)
 
-        end subroutine
+            end subroutine ESMF_TInsGetYR_MM_DD_H_M_S_nd
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TInsSetYR_MM_DD_H_M_S_nd
+!
+! !INTERFACE:
         subroutine ESMF_TInsSetYR_MM_DD_H_M_S_nd(this, YR, MM, DD, &
                                                  H, M, S, Sn, Sd, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer(INT32), intent(in) :: YR, Sn, Sd
-            integer, intent(in) :: MM, DD, H, M, S
-            integer, intent(in), optional :: rc
+!
+! !RETURN VALUE:
+        integer, intent(in), optional :: rc
+!
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer(INT32), intent(in) :: YR, Sn, Sd
+        integer, intent(in) :: MM, DD, H, M, S
+        integer, intent(in), optional :: rc
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
     
             call c_ESMF_TInsSetYR_MM_DD_H_M_S_nd(this, YR, MM, DD, &
                                                  H, M, S, Sn, Sd, rc)
 
-        end subroutine
+            end subroutine ESMF_TInsSetYR_MM_DD_H_M_S_nd
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGetCalendar
+!
+! !INTERFACE:
         subroutine ESMF_TimeInstGetCalendar(this, Calendar, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer, intent(out) :: Calendar
-            integer, intent(out), optional :: rc
+!
+! !RETURN VALUE:
+        integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer, intent(out) :: Calendar
+        integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
     
             call c_ESMF_TimeInstGetCalendar(this, Calendar, rc)
 
-        end subroutine
+            end subroutine ESMF_TimeInstGetCalendar
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGetTimezone
+!
+! !INTERFACE:
         subroutine ESMF_TimeInstGetTimezone(this, Timezone, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer, intent(out) :: Timezone
-            integer, intent(out), optional :: rc
-    
+!
+! !RETURN VALUE:
+        integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer, intent(out) :: Timezone
+        integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
             call c_ESMF_TimeInstGetTimezone(this, Timezone, rc)
 
-        end subroutine
+            end subroutine ESMF_TimeInstGetTimezone
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGetString
+!
+! !INTERFACE:
         subroutine ESMF_TimeInstGetString(this, Ts, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            character, dimension(40), intent(out) :: Ts
-            integer, intent(out), optional :: rc
+!
+! !RETURN VALUE:
+        integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        character, dimension(40), intent(out) :: Ts
+        integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
     
             call c_ESMF_TimeInstGetString(this, Ts, rc)
 
-        end subroutine
+            end subroutine ESMF_TimeInstGetString
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGetDayOfYear
+!
+! !INTERFACE:
         subroutine ESMF_TimeInstGetDayOfYear(this, DayOfYear, rc)
+!
+! !RETURN VALUE:
+          integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
             type(ESMF_TimeInstant), intent(inout) :: this
             integer, intent(out) :: DayOfYear
             integer, intent(out), optional :: rc
-    
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
             call c_ESMF_TimeInstGetDayOfYear(this, DayOfYear, rc)
 
-        end subroutine
+            end subroutine ESMF_TimeInstGetDayOfYear
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGetDayOfWeek
+!
+! !INTERFACE:
         subroutine ESMF_TimeInstGetDayOfWeek(this, DayOfWeek, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer, intent(out) :: DayOfWeek
-            integer, intent(out), optional :: rc
+!
+! !RETURN VALUE:
+        integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+         type(ESMF_TimeInstant), intent(inout) :: this
+         integer, intent(out) :: DayOfWeek
+         integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
     
             call c_ESMF_TimeInstGetDayOfWeek(this, DayOfWeek, rc)
 
-        end subroutine
+            end subroutine ESMF_TimeInstGetDayOfWeek
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGetMidMonth
+!
+! !INTERFACE:
         subroutine ESMF_TimeInstGetMidMonth(this, MidMonth, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer, intent(out) :: MidMonth
-            integer, intent(out), optional :: rc
-    
+!
+! !RETURN VALUE:
+        integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+        type(ESMF_TimeInstant), intent(inout) :: this
+        integer, intent(out) :: MidMonth
+        integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
             call c_ESMF_TimeInstGetMidMonth(this, MidMonth, rc)
 
-        end subroutine
+            end subroutine ESMF_TimeInstGetMidMonth
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInstGetRealTime
+!
+! !INTERFACE:
         subroutine ESMF_TimeInstGetRealTime(this, RealTime, rc)
-            type(ESMF_TimeInstant), intent(inout) :: this
-            integer, intent(out) :: RealTime
-            integer, intent(out), optional :: rc
+!
+! !RETURN VALUE:
+       integer, intent(out), optional :: rc
+!
+! !ARGUMENTS:
+       type(ESMF_TimeInstant), intent(inout) :: this
+       integer, intent(out) :: RealTime
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!
+!
+!EOP
+! !REQUIREMENTS:  TMG 2.4.3
+
     
             call c_ESMF_TimeInstGetRealTime(this, RealTime, rc)
 
-        end subroutine
+            end subroutine ESMF_TimeInstGetRealTime
+
 !EOP
 !===============================================================================
     end module ESMF_TimeInstantMod
