@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.2 2004/08/17 19:26:22 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.3 2004/08/17 21:39:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.2 2004/08/17 19:26:22 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.3 2004/08/17 21:39:49 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -148,6 +148,57 @@
       call ESMF_Test((rc2.eq.ESMF_RC_MEM), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc2 = ", rc2
 
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Error Msg Found Alloc Error
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      rc=ESMF_LogMsgFoundAllocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      write(name, *) "Error Msg Found Alloc Error Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_RC_MEM), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Error Msg Found Error
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      rc=ESMF_LogMsgFoundAllocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      write(name, *) "Error Msg Found Error Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Found Alloc Error
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      rc=ESMF_LogFoundAllocError(ESMF_FAILURE,rcToReturn=rc2)
+      write(name, *) "Log Found Alloc Error Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_RC_MEM"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_RC_MEM), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
 
       !------------------------------------------------------------------------
       !EX_UTest
