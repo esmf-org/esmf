@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2005/01/28 20:46:05 jwolfe Exp $ 
+# $Id: makefile,v 1.18.2.1 2005/02/10 18:56:48 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -78,6 +78,8 @@ EXAMPLES_RUN = run_ESMC_FieldCreateEx \
 
 EXAMPLES_RUN_UNI = run_ESMC_FieldCreateEx_uni \
                    run_ESMF_FieldCreateEx_uni \
+                   run_ESMF_FieldFromUserEx_uni \
+                   run_ESMF_FieldGlobalEx_uni \
                    run_ESMF_FieldWriteEx_uni
 
 include $(ESMF_DIR)/makefile
@@ -117,11 +119,17 @@ ESMF_FieldFromUserEx.o	: UserCodeMod.o
 run_ESMF_FieldFromUserEx:
 	-${MPIRUN} -np 6 $(ESMF_EXDIR)/ESMF_FieldFromUserEx > $(ESMF_EXDIR)/ESMF_FieldFromUserEx.stdout
 
+run_ESMF_FieldFromUserEx_uni:
+	echo "PASS: ESMF_FieldFromUserEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldFromUserEx.stdout
+
 #
 # ESMF_FieldGlobalEx
 #
 run_ESMF_FieldGlobalEx:
 	-${MPIRUN} -np 6 $(ESMF_EXDIR)/ESMF_FieldGlobalEx > $(ESMF_EXDIR)/ESMF_FieldGlobalEx.stdout
+
+run_ESMF_FieldGlobalEx_uni:
+	echo "PASS: ESMF_FieldGlobalEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldGlobalEx.stdout
 
 #
 # ESMF_FieldWriteEx

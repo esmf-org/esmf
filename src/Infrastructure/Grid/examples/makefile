@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2004/08/03 19:33:49 nscollins Exp $
+# $Id: makefile,v 1.11.2.1 2005/02/10 18:58:14 nscollins Exp $
 
 ALL: build_examples
 
@@ -85,7 +85,7 @@ run_ESMF_GridCreateEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_GridCreateEx > $(ESMF_EXDIR)/ESMF_GridCreateEx.stdout
 
 run_ESMF_GridCreateEx_uni:
-	echo "ESMF_GridCreateEx not set up to run on one processor."
+	echo "PASS: ESMF_GridCreateEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_GridCreateEx.stdout
 
 
 
