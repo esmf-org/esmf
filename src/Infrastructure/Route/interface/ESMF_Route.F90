@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.37 2003/11/06 23:57:08 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.38 2003/11/07 15:35:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.37 2003/11/06 23:57:08 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.38 2003/11/07 15:35:37 nscollins Exp $'
 
 !==============================================================================
 !
@@ -746,8 +746,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
-      integer(ESMF_KIND_I4), pointer, intent(in), optional :: srcarray(:,:)
-      integer(ESMF_KIND_I4), pointer, intent(in), optional :: dstarray(:)
+      integer(ESMF_KIND_I4), pointer, optional :: srcarray(:,:)
+      integer(ESMF_KIND_I4), pointer, optional :: dstarray(:)
       integer, intent(out), optional :: rc            
 
 !
@@ -803,8 +803,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
-      real(ESMF_KIND_R8), pointer, intent(in), optional :: srcarray(:,:)
-      real(ESMF_KIND_R8), pointer, intent(in), optional :: dstarray(:)
+      real(ESMF_KIND_R8), pointer, optional :: srcarray(:,:)
+      real(ESMF_KIND_R8), pointer, optional :: dstarray(:)
       integer, intent(out), optional :: rc            
 
 !
