@@ -1,3 +1,10 @@
+/* The following code was modified to provide stubs for ESMF */
+/* to build WITHOUT pthreads.                                */
+/* If you want to use pthreads you shouldn't be accessing    */
+/* this file!                                                */
+   
+
+
 /* Linuxthreads - a simple clone()-based implementation of Posix        */
 /* threads for Linux.                                                   */
 /* Copyright (C) 1996 Xavier Leroy (Xavier.Leroy@inria.fr)              */
@@ -174,13 +181,13 @@ typedef struct _pthread_descr_struct *_pthread_descr;
 # define _PTHREAD_DESCR_DEFINED
 #endif
 
-
+#ifndef _AIX
 /* Attributes for threads.  */
 typedef struct __pthread_attr_s
 {
 
 } pthread_attr_t;
-
+#endif
 
 /* Conditions (not abstract because of PTHREAD_COND_INITIALIZER */
 
@@ -189,18 +196,18 @@ __extension__ typedef long long __pthread_cond_align_t;
 #else
 typedef long __pthread_cond_align_t;
 #endif
-
+#ifndef _AIX
 typedef struct
 {
 
 } pthread_cond_t;
-
 
 /* Attribute for conditionally variables.  */
 typedef struct
 {
   int __dummy;
 } pthread_condattr_t;
+
 
 /* Keys for thread-specific data */
 typedef unsigned int pthread_key_t;
@@ -274,8 +281,12 @@ typedef struct {
 
 /* Thread identifiers */
 typedef unsigned long int pthread_t;
-
+#endif
 #endif	/* bits/pthreadtypes.h */
+
+#ifdef _AIX
+#define __const const
+#endif
 
 /* Function for handling threads.  */
 
