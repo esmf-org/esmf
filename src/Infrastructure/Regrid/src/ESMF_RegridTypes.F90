@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.9 2003/08/25 22:48:58 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.10 2003/08/27 14:25:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,6 +43,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod      ! ESMF base   class
+      use ESMF_LocalArrayMod
       use ESMF_ArrayBaseMod  ! ESMF array  class
       use ESMF_ArrayExpandMod  ! ESMF array  class
       use ESMF_RouteMod     ! ESMF route  class
@@ -151,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.9 2003/08/25 22:48:58 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.10 2003/08/27 14:25:59 nscollins Exp $'
 
 !==============================================================================
 !
@@ -174,19 +175,14 @@
 ! !IROUTINE: ESMF_RegridAddLink - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridAddLink(regrid, src_add, dst_add, weights, rc)
+      subroutine ESMF_RegridAddLink(routehandle, src_add, dst_add, weight, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_RegridType), intent(inout) :: regrid
-
-      type(ESMF_Array), intent(in) :: &
-         src_add,                     &! address in source      field array
-         dst_add                       ! address in destination field array
-
-      type(ESMF_Array), intent(in) :: &
-         weights                       ! weight(s) for this link
-
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, dimension(2), intent(in) :: src_add
+      integer, dimension(2), intent(in) :: dst_add
+      real(kind=ESMF_IKIND_R8), intent(in) :: weight
       integer, intent(out) :: rc
 
 !
@@ -195,8 +191,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[regrid]
-!          Regrid type to which the new link is to be added.
+!     \item[routehandle]
+!          RouteHandle type to which the new link is to be added.
 !     \item[src\_add]
 !          Address in source field array for this link.
 !     \item[dst\_add]
@@ -211,17 +207,27 @@
 ! !REQUIREMENTS:
 !  TODO
 
-      integer :: new_links
+      ! do these need to be 2 separate x and y arrays?
+      integer, dimension(:), pointer :: src_ptr, dst_ptr
+      real(kind=ESMF_IKIND_R8), dimension(:), pointer :: wgt_ptr
       type (ESMF_ARRAY) :: &! temps for use when re-sizing arrays
          src_add_tmp, dst_add_tmp, weights_tmp
+      type(ESMF_TransformValues) :: tv
 
       rc = ESMF_FAILURE
+
+      ! get real pointers to data
+      call ESMF_RouteHandleGet(routehandle, tdata=tv, rc=rc)
+
+      call ESMF_LocalArrayGetData(tv%srcindex, src_ptr, ESMF_DATA_REF, rc)
+      call ESMF_LocalArrayGetData(tv%dstindex, dst_ptr, ESMF_DATA_REF, rc)
+      call ESMF_LocalArrayGetData(tv%weights, wgt_ptr, ESMF_DATA_REF, rc)
 
       !
       !  increment number of links for this regrid
       !
       
-      new_links = regrid%num_links + 1
+      tv%numlinks = tv%numlinks + 1
       
       !
       !  if new number of links exceeds array sizes, re-size arrays
@@ -229,11 +235,15 @@
       
       ! TODO: resize check
       
-      regrid%num_links = new_links
       
       !
       ! TODO: Add addresses and weights to regrid arrays
       !
+      src_ptr((tv%numlinks * 2) + 0) = src_add(1)
+      src_ptr((tv%numlinks * 2) + 1) = src_add(2)
+      dst_ptr((tv%numlinks * 2) + 0) = dst_add(1)
+      dst_ptr((tv%numlinks * 2) + 1) = dst_add(2)
+      wgt_ptr(tv%numlinks) = weight
 
 
       rc = ESMF_SUCCESS      

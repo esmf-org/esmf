@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.18 2003/08/26 22:44:44 jwolfe Exp $
+// $Id: ESMC_Route_F.C,v 1.19 2003/08/27 14:26:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -127,11 +127,11 @@ extern "C" {
                              *layout, periodic);
        }
 
-       void FTN(c_esmc_routeprecomputedomainlist)(ESMC_Route **ptr, int *rank, 
+       void FTN(c_esmc_routeprecomputedomlist)(ESMC_Route **ptr, int *rank, 
                   int *my_DE, ESMC_DomainList *sendDomainList, 
                   ESMC_DomainList *recvDomainList, int *status) {
 
-           *status = (*ptr)->ESMC_RoutePrecomputeDomainList(*rank, *my_DE,
+           *status = (*ptr)->ESMC_RoutePrecomputeDomList(*rank, *my_DE,
                              sendDomainList, recvDomainList);
        }
 

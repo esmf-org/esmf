@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.29 2003/08/26 22:44:25 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.30 2003/08/27 14:26:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@
       public ESMF_RoutePrecomputeHalo
       public ESMF_RoutePrecomputeRedist
       public ESMF_RoutePrecomputeRegrid
-      public ESMF_RoutePrecomputeDomainList
+      public ESMF_RoutePrecomputeDomList
       public ESMF_RouteRun
  
       public ESMF_RouteValidate
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.29 2003/08/26 22:44:25 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.30 2003/08/27 14:26:06 nscollins Exp $'
 
 !==============================================================================
 !
@@ -902,10 +902,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RoutePrecomputeDomainList - Precompute communication paths
+! !IROUTINE: ESMF_RoutePrecomputeDomList - Precompute communication paths
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrecomputeDomainList(route, rank, my_DE, &
+      subroutine ESMF_RoutePrecomputeDomList(route, rank, my_DE, &
                                  sendDomainList, recvDomainList, rc)
 
 ! !ARGUMENTS:
@@ -950,7 +950,7 @@
         ! TODO:?  Translate AxisIndices from F90 to C++
 
         ! Call C++  code
-        call c_ESMC_RoutePrecomputeDomainList(route, rank, my_DE, &
+        call c_ESMC_RoutePrecomputeDomList(route, rank, my_DE, &
                                sendDomainList, recvDomainList, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route PrecomputeDomainList error"
@@ -961,7 +961,7 @@
 
         if (rcpresent) rc = status
 
-        end subroutine ESMF_RoutePrecomputeDomainList
+        end subroutine ESMF_RoutePrecomputeDomList
 
 !------------------------------------------------------------------------------
 !BOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.10 2003/08/26 22:43:36 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.11 2003/08/27 14:25:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.10 2003/08/26 22:43:36 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.11 2003/08/27 14:25:58 nscollins Exp $'
 
 !==============================================================================
 
@@ -133,6 +133,7 @@
       type(ESMF_LocalArray) :: srcCenterX, srcCenterY, center_coord
       type(ESMF_DomainList), pointer :: sendDomainList, recvDomainList
       type(ESMF_Route) :: route
+      type(ESMF_RouteHandle) :: rh
       type(ESMF_RegridType) :: temp_regrid
       character (len = ESMF_MAXSTR) :: name
 
@@ -145,7 +146,7 @@
       endif
 
       ! Construct an empty regrid structure
-      ESMF_RegridConstructBilinear = ESMF_RouteHandleCreate(rc=status)
+      rh = ESMF_RouteHandleCreate(rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConsByFieldBilinear: RouteHandleCreate ", &
                  "returned failure"
@@ -217,7 +218,7 @@
         src_size_y = recvDomainList%domains(i)%ai(2)%max &
                    - recvDomainList%domains(i)%ai(2)%min + 1
         stop  = start + src_size_x*src_size_y - 1
-        call ESMF_RegridBilinearSearch(src_center_x(start:stop), &
+        call ESMF_RegridBilinearSearch(rh, src_center_x(start:stop), &
                                        src_center_y(start:stop), &
                                        src_mask(start:stop), &
                                        src_size_x, src_size_y, start, &
@@ -228,6 +229,7 @@
 
       !deallocate(src_center_x, src_center_y)
       
+      ESMF_RegridConstructBilinear = rh
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_RegridConstructBilinear
@@ -237,23 +239,24 @@
 ! !IROUTINE: ESMF_RegridBilinearSearch - Searches a bilinear Regrid structure
 
 ! !INTERFACE:
-      subroutine ESMF_RegridBilinearSearch(srcCenterX, srcCenterY, srcMask, &
+      subroutine ESMF_RegridBilinearSearch(rh, srcCenterX, srcCenterY, srcMask, &
                                            srcSizeX, srcSizeY, srcStart, &
                                            dstCenterX, dstCenterY, dstMask, &
                                            dstSizeX, dstSizeY, rc)
 !
 ! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(inout) :: rh
+      integer, intent(in) :: srcSizeX  ! apparently these have to be first
+      integer, intent(in) :: srcSizeY  ! so the compiler knows they're ints
+      integer, intent(in) :: srcStart  ! when it goes to use them as dims
+      integer, intent(in) :: dstSizeX  ! in the lines below.
+      integer, intent(in) :: dstSizeY
       real(ESMF_IKIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterX
       real(ESMF_IKIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterY
       logical, dimension(srcSizeX,srcSizeY), intent(in) :: srcMask
       real(ESMF_IKIND_R8), dimension(dstSizeX,dstSizeY), intent(in) :: dstCenterX
       real(ESMF_IKIND_R8), dimension(dstSizeX,dstSizeY), intent(in) :: dstCenterY
       logical, dimension(dstSizeX,dstSizeY), intent(in) :: dstMask
-      integer, intent(in) :: srcSizeX
-      integer, intent(in) :: srcSizeY
-      integer, intent(in) :: srcStart
-      integer, intent(in) :: dstSizeX
-      integer, intent(in) :: dstSizeY
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -542,8 +545,7 @@
               src_add(1) = iii
               src_add(2) = jjj
    !           src_add(3) = src_DEid
-  !            call ESMF_RegridAddLink(ESMF_RegridConstructBilinear, &
-  !                                    src_add, dst_add, weights(1), rc)
+              call ESMF_RegridAddLink(rh, src_add, dst_add, weights(1), rc)
             endif
             if (srcmask(ip1,jjj)) then
               dst_add(1) = i
@@ -552,8 +554,7 @@
               src_add(1) = ip1
               src_add(2) = jjj
    !           src_add(3) = src_DEid
-  !            call ESMF_RegridAddLink(ESMF_RegridConstructBilinear, &
-  !                                    src_add, dst_add, weights(2), rc)
+              call ESMF_RegridAddLink(rh, src_add, dst_add, weights(2), rc)
             endif
             if (srcmask(ip1,jp1)) then
               dst_add(1) = i
@@ -562,8 +563,7 @@
               src_add(1) = ip1
               src_add(2) = jp1
    !           src_add(3) = src_DEid
-  !            call ESMF_RegridAddLink(ESMF_RegridConstructBilinear, &
-  !                                    src_add, dst_add, weights(3), rc)
+              call ESMF_RegridAddLink(rh, src_add, dst_add, weights(3), rc)
             endif
             if (srcmask(iii,jp1)) then
               dst_add(1) = i
@@ -572,8 +572,7 @@
               src_add(1) = iii
               src_add(2) = jp1
    !           src_add(3) = src_DEid
-  !            call ESMF_RegridAddLink(ESMF_RegridConstructBilinear, &
-  !                                    src_add, dst_add, weights(4), rc)
+              call ESMF_RegridAddLink(rh, src_add, dst_add, weights(4), rc)
             endif
 
           endif ! found box

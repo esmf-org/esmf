@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.2 2003/08/25 22:48:34 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.3 2003/08/27 14:26:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 
       type ESMF_TransformValues      
       sequence
-      private
+        integer :: numlinks
         type (ESMF_LocalArray) :: srcindex             
         type (ESMF_LocalArray) :: dstindex        
         type (ESMF_LocalArray) :: weights
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.2 2003/08/25 22:48:34 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.3 2003/08/27 14:26:06 nscollins Exp $'
 
 !==============================================================================
 
