@@ -68,6 +68,53 @@ int *vmachine::cpuid;
 int *vmachine::ssiid;
 
 
+extern "C"{
+static int MPI_InitWrapper(void){
+  // This wrapper is used for MPICH in order to provide argc and argv
+  int pid = getpid();
+  char command[80], fname[80], args[8000];
+  sprintf(command, "ps -p %d -o args= > .args.%d", pid, pid);
+  system(command);
+  sprintf(fname, ".args.%d", pid);
+  FILE *fp=fopen(fname, "r");
+  fscanf(fp, "%[^\n]", args);
+  fclose(fp);
+  sprintf(command, "rm -f .args.%d", pid);
+  system(command);
+  // now the string 'args' holds the complete command line with arguments
+  // next prepare the argc and argv variables
+  int argc=0;
+  char **argv = new char*[100];
+  for (int k=0; k<100; k++)
+    argv[k] = new char[160];
+  int i=0;
+  int j=0;
+  // chop up args and thus set up argc and argv
+  while (args[i] != '\0'){
+    if (args[i] != ' '){
+      argv[argc][j] = args[i];
+      ++j;
+    }else{
+      argv[argc][j] = '\0';
+      ++argc;
+      j=0;
+    }
+    ++i;
+  }
+  argv[argc][j] = '\0';
+  ++argc;
+  // now argc and argv are valid
+  //printf("argc=%d\n", argc);
+  //for (i=0; i<argc; i++)
+  //  printf("%s\n", argv[i]);
+
+  // now argc and argv can be used
+  MPI_Init(&argc, &argv);
+  return 0;
+}
+}
+
+
 void vmachine::vmachine_init(void){
   // initialize the physical machine and a default (all MPI) virtual machine
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
@@ -87,12 +134,11 @@ void vmachine::vmachine_init(void){
   int initialized;
   MPI_Initialized(&initialized);
   if (!initialized){
-    // MPI_Init(NULL, NULL);
-    // MPICH fix for broken MPI_Init():
-    int fix_argc=0;
-    char *fix_v=NULL;
-    char **fix_argv=&fix_v;
-    MPI_Init(&fix_argc, &fix_argv);
+#ifdef ESMF_MPICH   
+    MPI_InitWrapper();
+#else
+    MPI_Init(NULL, NULL);
+#endif
   } 
   // so now MPI is for sure initialized...
   int rank, size;
