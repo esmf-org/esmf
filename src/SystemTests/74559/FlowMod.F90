@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.1 2003/04/15 15:42:20 nscollins Exp $
+! $Id: FlowMod.F90,v 1.2 2003/04/16 22:54:01 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -107,9 +107,9 @@
         i_max = 40
         j_max = 20
         x_min = 0.0
-        x_max = 20.0
+        x_max = 200.0
         y_min = 0.0
-        y_max = 5.0
+        y_max = 50.0
         horz_gridtype = ESMF_GridType_XY
         vert_gridtype = ESMF_GridType_Unknown
         horz_stagger = ESMF_GridStagger_A
@@ -141,7 +141,7 @@
         return
       endif
 
-      call FlowInit(gcomp, status)
+      call FlowInit(gcomp, clock, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid create"
         return
@@ -153,10 +153,11 @@
 
 !-------------------------------------------------------------------------
  
-    subroutine FlowInit(gcomp, rc)
+    subroutine FlowInit(gcomp, clock, rc)
 
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: gcomp
+      type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out), optional :: rc
 !
 ! Local variables
@@ -164,6 +165,7 @@
       integer :: status
       integer :: i, j, x, y, nx, ny
       logical :: rcpresent
+      double precision :: s_
       type(ESMF_Grid) :: grid
       type(ESMF_DElayout) :: layout
 !
@@ -197,7 +199,7 @@
 !
 ! read in parameters   ! TODO: just set here for now
 !
-      uin = 1.5
+      uin = 1.00
       rhoin = 6.0
       siein= 0.50
       gamma = 1.40
@@ -237,6 +239,8 @@
         return
       endif
       call ESMF_DELayoutGetDEPosition(layout, x, y, status)
+      x = x + 1
+      y = y + 1
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return
@@ -248,30 +252,33 @@
       enddo
       if (x.eq.1) then  ! left boundary
         do j = jmin_t, jmax_t
-          do i = imin_t, imin
+          do i = imin_t, imin-1
             flag(i,j) = 1.0
           enddo
         enddo
       endif
       if (x.eq.nx) then  ! right boundary
         do j = jmin_t, jmax_t
-          do i = imax, imax_t
+          do i = imax+1, imax_t
             flag(i,j) = 2.0
           enddo
         enddo
       endif
       if (y.eq.1) then  ! bottom boundary
-        do j = jmin_t, jmin
+        do j = jmin_t, jmin-1
           do i = imin_t, imax_t
             flag(i,j) = 3.0
           enddo
         enddo
       endif
       if (y.eq.ny) then  ! top boundary
-        do j = jmax, jmax_t
+        do j = jmax+1, jmax_t
           do i = imin_t, imax_t
             flag(i,j) = 4.0
           enddo
+        enddo
+        do i = imin_t, imax_t
+          if (flag(i,jmax).eq.0.0) flag(i,jmax) = 5.0
         enddo
       endif
 !
@@ -312,6 +319,75 @@
           endif
         enddo
       enddo
+!
+! add an obstacle
+!
+      if (x.eq.1 .and. y.eq.1) then
+        do j = 1,4
+          do i = 4,9
+            flag(i,j) = -1
+          enddo
+        enddo
+      endif
+!
+! obstacle normal boundary conditions here
+!
+      do j = jmin, jmax
+        do i = imin, imax
+          if (flag(i,j) .eq. -1.0) then
+            u(i,j) = 0.0
+            rhou(i,j) = 0.0
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+          if (flag(i+1,j) .eq. -1.0) then
+            u(i,j) = 0.0
+            rhou(i,j) = 0.0
+          endif
+          if (flag(i,j+1) .eq. -1.0) then
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+        enddo
+      enddo
+!
+! obstacle tangential boundary conditions here
+!
+      do j = jmin, jmax
+        do i = imin, imax
+          if (flag(i,j).eq.-1.0 .and. flag(i,j+1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
+            u(i,j) = u(i,j+1)
+            rhou(i,j) = rhou(i,j+1)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i,j-1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
+            u(i,j) = u(i,j-1)
+            rhou(i,j) = rhou(i,j-1)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i+1,j).ne.-1.0 .and. flag(i,j+1).eq.-1.0) then
+            v(i,j) = v(i+1,j)
+            rhov(i,j) = rhov(i+1,j)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i-1,j).ne.-1.0 .and. flag(i,j+1).eq.-1.0) then
+            v(i,j) = v(i-1,j)
+            rhov(i,j) = rhov(i-1,j)
+          endif
+        enddo
+      enddo
+!
+! initialize timestep
+!
+      call ESMF_ClockGetTimeStep(clock, time_step, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowSolve: clock get timestep"
+        return
+      endif
+      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowSolve: time interval get"
+        return
+      endif
+      dt = s_
+      write(*,*) 'dt = ', dt
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -331,6 +407,7 @@
 !
       integer :: status
       logical :: rcpresent
+      double precision :: s_
 !
 ! Set initial values
 !
@@ -346,12 +423,17 @@
 ! 
 ! Get timestep from clock
 !
-!     call ESMF_ClockGetTimeStep(clock, dt, status)
-!     if(status .NE. ESMF_SUCCESS) then
-!       print *, "ERROR in FlowSolve: clock get timestep"
-!       return
-!     endif
-      dt = 0.02
+      call ESMF_ClockGetTimeStep(clock, time_step, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowSolve: clock get timestep"
+        return
+      endif
+      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowSolve: time interval get"
+        return
+      endif
+      dt = s_
 !
 ! calculate RHOU's and RHOV's
 !
@@ -411,7 +493,7 @@
 ! calculate RHOU's and RHOV's
 !
       do j = jmin, jmax
-        do i = imin, imax-1
+        do i = imin, imax
           u_ij  = 0.5 * (u(i-1,j) + u(i,j))
           u_ipj = 0.5 * (u(i+1,j) + u(i,j))
           if (u_ij .ge. 0.0) then
@@ -447,7 +529,7 @@
         return
       endif
 
-      do j = jmin, jmax-1
+      do j = jmin, jmax
         do i = imin, imax
           v_ij  = 0.5 * (v(i,j-1) + v(i,j))
           v_ijp = 0.5 * (v(i,j+1) + v(i,j))
@@ -702,25 +784,18 @@
 !  update velocities
 !
       do j = jmin, jmax
-        do i = imin, imax-1
+        do i = imin, imax
           rhoav = 0.5*(rho(i,j) + rho(i+1,j))
           if (rhoav.gt.0.0) u(i,j) = rhou(i,j)/rhoav
         enddo
       enddo
       do j = jmin, jmax
-        u(imax,j) = u(imax-1,j)
-      enddo
-      do j = jmin, jmax-1
         do i = imin, imax
           rhoav = 0.5*(rho(i,j) + rho(i,j+1))
           if (rhoav.gt.0.0) v(i,j) = rhov(i,j)/rhoav
         enddo
       enddo
-      do i = imin, imax
-        v(i,jmax) = 0.0
-      enddo
         
-!  TODO:  if there are obstacles, set their normal velocities to zero
 !
 !  add boundary conditions  WARNING: these are not general
 !
@@ -748,6 +823,54 @@
             v(i,j) = 0.0
             rhov(i,j) = 0.0
           endif
+          if (flag(i,j).eq.5.0) then
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+        enddo
+      enddo
+!
+! obstacle normal boundary conditions here
+!
+      do j = jmin, jmax
+        do i = imin, imax
+          if (flag(i,j) .eq. -1.0) then
+            u(i,j) = 0.0
+            rhou(i,j) = 0.0
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+          if (flag(i+1,j) .eq. -1.0) then
+            u(i,j) = 0.0
+            rhou(i,j) = 0.0
+          endif
+          if (flag(i,j+1) .eq. -1.0) then
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+        enddo
+      enddo
+!
+! obstacle tangential boundary conditions here
+!
+      do j = jmin, jmax
+        do i = imin, imax
+          if (flag(i,j).eq.-1.0 .and. flag(i,j+1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
+            u(i,j) = u(i,j+1)
+            rhou(i,j) = rhou(i,j+1)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i,j-1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
+            u(i,j) = u(i,j-1)
+            rhou(i,j) = rhou(i,j-1)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i+1,j).ne.-1.0 .and. flag(i,j+1).eq.-1.0) then
+            v(i,j) = v(i+1,j)
+            rhov(i,j) = rhov(i+1,j)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i-1,j).ne.-1.0 .and. flag(i,j+1).eq.-1.0) then
+            v(i,j) = v(i-1,j)
+            rhov(i,j) = rhov(i-1,j)
+          endif
         enddo
       enddo
       call ESMF_FieldHalo(field_u, status)
@@ -758,6 +881,16 @@
       call ESMF_FieldHalo(field_v, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  v halo"
+        return
+      endif
+      call ESMF_FieldHalo(field_rhou, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowVel:  rhou halo"
+        return
+      endif
+      call ESMF_FieldHalo(field_rhov, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowVel:  rhov halo"
         return
       endif
 
@@ -796,13 +929,33 @@
           p(i,j) = (gamma-1.0)*rho(i,j)*sie(i,j)
         enddo
       enddo
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin, jmax_t
+        do i = imin, imax_t
           q(i,j) = q0*rho(i,j)*uin*sqrt(dx**2+dy**2)*((u(i-1,j)-u(i,j))/dx &
                                                      +(v(i,j-1)-v(i,j))/dy)
           q(i,j) = max(q(i,j), 0.0)
         enddo
       enddo
+!
+!  add boundary conditions  WARNING: these are not general
+!
+      do j = jmin_t, jmax_t
+        do i = imin_t, imax_t
+          if (flag(i,j).eq.2.0) then
+            p(i,j) = p(imax,j)
+            q(i,j) = q(imax,j)
+          endif
+          if (flag(i,j).eq.3.0) then
+            p(i,j) = p(i,jmin)
+            q(i,j) = q(i,jmin)
+          endif
+          if (flag(i,j).eq.4.0) then
+            p(i,j) = p(i,jmax)
+            q(i,j) = q(i,jmax)
+          endif
+        enddo
+      enddo
+
       call ESMF_FieldHalo(field_p, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  p halo"
