@@ -68,6 +68,14 @@ explicitly coded time step within the overall component.
   are a CPU, a network connection, a communication API, a protocol, a 
   particular network fabric or a piece of computer memory. 
 
+\item[Concurrent execution] \label{glos:ConcurrentExecution} 
+Concurrent execution of model components occurs when two components,
+whether in the same or different executables, run simultaneously.
+Components executing concurrently may be in the same or different 
+executables and may have coincident or non-overlapping memory 
+distributions.  See \htmladdnormallink{sequential execution}
+{glos:SequentialExecution}.
+
 \item[Coupler component] \label{glos:Coupler}
   A component that includes all data and actions needed to enable 
   communication between two or more other components.
@@ -76,6 +84,13 @@ explicitly coded time step within the overall component.
   operator that defines the data indices required to perform
   the computation at a point.  For instance, a forward differencing
   operation in X at $(i,j)$ has a dependency on $(i+1,j)$.
+
+\item[Data parallel] \label{glos:DataParallel} In a data parallel operation,
+roughly the same calculation is performed by all processors at the same 
+time on the same data set, which is partitioned among multiple memory 
+locations.  Operations within many model components are essentially data 
+parallel.  See \htmladdnormallink{task parallel}{glos:TaskParallel}, 
+\htmladdnormallink{SPMD}{glos:SPMD}, \htmladdnormallink{MPMD}{glos:MPMD}.
 
 \item[Data transpose] \label{glos:DataTranspose} Rearrangement of data arrays 
   between two distributed grids sharing the same global domain.
@@ -142,6 +157,10 @@ exhange.
 \item[Field] \label{glos:Field} A field is a physical quantity
   defined within a region of space.  A field includes a grid 
   and any metadata necessary for a full description of the field data.
+
+\item[Framework] \label{glos:Framework} We use the term framework to 
+refer to a structured collection of software building blocks that can be used 
+and customized to compose, couple, and run applications.
 
 \item[Functionality Class] \label{glos:FuncClass}
 A functionality class is a body that accomplishes a given function, such
@@ -312,6 +331,14 @@ have a framework ID that is different than its vendor-assigned ID.
   resources (processors, memory, CPU time, I/O channels, etc.) to
   executables.
 
+\item[Sequential execution] \label{glos:SequentialExecution}
+Sequential execution of model components describes the case in which 
+one component waits for the other to finish before it begins
+to run.  Components executing sequentially may be in the same or 
+different executables and may have conincident or non-overlapping 
+memory distributions.  See \htmladdnormallink{concurrent execution}
+{glos:ConcurrentExecution}.
+
 \item[Span] \label{glos:Span} The physical extent associated with a grid.
 
 \item[SPMD] \label{glos:SPMD} Single Program Multiple Datastream. 
@@ -319,8 +346,15 @@ have a framework ID that is different than its vendor-assigned ID.
   components (representing for example the atmosphere, the ocean, 
   land surface) executing serially or concurrently.
 
-\item [System time] \label{SysTime}Time spent doing system tasks such as I/O or in system calls.  May also
+\item [System time] \label{glos:SysTime}Time spent doing system tasks such as I/O or in system calls.  May also
 include time spent running other processes on a multiprocessor system.
+
+\item[Task parallel] \label{glos:TaskParallel}  In a task parallel operation,
+different calculations are performed by different processors at the same time
+on what are usually different data sets.  Operations on different model 
+components running within either a SPMD or MPMD application may be task 
+parallel.  See \htmladdnormallink{data parallel}{glos:DataParallel}, 
+\htmladdnormallink{SPMD}{glos:SPMD}, \htmladdnormallink{MPMD}{glos:MPMD}.
 
 \item [Time instant] \label{glos:TimeInstant}
 Generic name for an absolute time and date specification. A time instant is made 
