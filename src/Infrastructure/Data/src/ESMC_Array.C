@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.9 2002/12/10 22:54:54 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.10 2003/01/07 21:14:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.9 2002/12/10 22:54:54 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.10 2003/01/07 21:14:32 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -451,6 +451,10 @@
         printf("dim[%d] = %d  ", i, this->length[i]);
     printf("\n");
     
+    if (this->type == ESMF_DATA_REAL) {
+        for (i=0; i<10; i++)  // make sure it's also less than count
+            printf("%d %lg\n", i, (double *)(this->base_addr) + i);
+    }
 
     rc = ESMF_SUCCESS;
     return rc;
