@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.55 2004/06/09 22:04:44 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.56 2004/06/11 20:16:24 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.55 2004/06/09 22:04:44 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.56 2004/06/11 20:16:24 eschwab Exp $'
 
 !==============================================================================
 !
@@ -750,17 +750,17 @@
 !          {\tt ESMF\_Clock} to be printed out.
 !     \item[{[options]}]
 !          Print options. If none specified, prints all clock property values.\\
-!          "name"         - print the clock's name. \\
-!          "timeStep"     - print the clock's time step. \\
-!          "startTime"    - print the clock's start time. \\
-!          "stopTime"     - print the clock's stop time. \\
-!          "refTime"      - print the clock's reference time. \\
-!          "currTime"     - print the current clock time. \\
-!          "prevTime"     - print the previous clock time. \\
 !          "advanceCount" - print the number of times the clock has been
 !                           advanced. \\
 !          "alarmCount"   - print the number of alarms in the clock's list. \\
 !          "alarmList"    - print the clock's alarm list. \\
+!          "currTime"     - print the current clock time. \\
+!          "name"         - print the clock's name. \\
+!          "prevTime"     - print the previous clock time. \\
+!          "refTime"      - print the clock's reference time. \\
+!          "startTime"    - print the clock's start time. \\
+!          "stopTime"     - print the clock's stop time. \\
+!          "timeStep"     - print the clock's time step. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
