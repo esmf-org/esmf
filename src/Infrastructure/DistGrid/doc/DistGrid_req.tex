@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.26 2002/08/27 20:05:06 cdeluca Exp $
+% $Id: DistGrid_req.tex,v 1.27 2002/08/28 02:09:53 cdeluca Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -253,8 +253,12 @@ synchronization of exclusive domains across a distributed grid.
 {\bf Priority:} 1. \\ 
 {\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL. \\
 {\bf Status:} Approved-1. \\
+<<<<<<< DistGrid_req.tex
+{\bf Verification:} Unit and system tests.
+=======
 {\bf Verification:} Unit and system tests.
 
+>>>>>>> 1.26
 \end{reqlist}
 
 \sreq{Validity of grid topology}
@@ -329,8 +333,7 @@ an exclusive domain along each axis of decomposition.
 {\bf Source:} NCEP-GSM, NCEP-SSI, MIT, GFDL. \\
 {\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.\\
-{\bf Notes:} for non-contiguous decompositions.
-
+{\bf Notes:} For non-contiguous decompositions.
 \end{reqlist}
 
 \ssreq{Maximum domain extent}
@@ -342,8 +345,7 @@ decomposition of all the exclusive domains in the distributed grid.
 {\bf Priority:} 1. \\ 
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL. \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test.\\
-{\bf Notes:}
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Exclusive domain list}
@@ -613,7 +615,6 @@ global domain.
 {\bf Verification:} Unit test.
 \end{reqlist}
 
-
 \sreq{Equality of domain decomposition}
 
 It shall be possible to state if two distributed grids sharing a
@@ -819,7 +820,6 @@ PElist of the entire global array from a distributed array.
 {\bf Verification:} Unit test. \\
 {\bf Notes:} It is up to the user to verify that there is enough
 memory available to hold a copy of the global array.
-
 \end{reqlist}
 
 \sreq{Partial gather} \label{DG:PartGather}
@@ -1242,27 +1242,23 @@ Hemisphere, both over land. This creates a grid topology with a
 fold. Vector components experience sign reversal on crossing a fold;
 also some points on the vector stencil may be redundant.
 
-(figure)
-
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:} POP, CICE, GFDL, MIT. \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \sreq{Vector component reversal}
 
 Going over the fold of a tripolar grid requires both vector components
-to fli sign.
+to flip sign.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:} POP, CICE, GFDL, MIT. \\
 {\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:}
 \end{reqlist}
 
 \sreq{Redundancy enforcement}
@@ -1276,8 +1272,7 @@ methods to enforce exact redundancy.
 {\bf Priority:} 1. \\ 
 {\bf Source:} POP, CICE, MIT, GFDL \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \sreq{Validity of grid}
@@ -1290,8 +1285,7 @@ vector row at the southern edge.
 {\bf Priority:} 2. \\ 
 {\bf Source:} POP, CICE, MIT, GFDL. \\
 {\bf Status:} Approved-2. \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \req{Cubed-sphere grid}
@@ -1313,7 +1307,7 @@ sphere to perform the appropriate component interchanges.
 {\bf Source:} MIT \\
 {\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:} Needed for a milestone
+{\bf Notes:} Needed for a milestone.
 \end{reqlist}
 
 \sreq{Redundancy enforcement}
@@ -1467,9 +1461,9 @@ grids and ungridded location streams, using the background grid.
 {\bf Notes:}  Needed for PSAS, but not a milestone.
 \end{reqlist}
 
-\sreq{Distgrid operations}
+\sreq{Distributed grid operations}
 
-It shall be possible to apply all DistGrid operations (halo update,
+It shall be possible to apply all distributed grid operations (halo update,
 data transpose, global reductions, scatter/gather) to unstructured
 grids and ungridded location streams, using the background grid.
 
@@ -1480,6 +1474,15 @@ grids and ungridded location streams, using the background grid.
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Needed for PSAS, but not a milestone.
 \end{reqlist}
+<<<<<<< DistGrid_req.tex
 
 
 
+
+
+
+=======
+
+
+
+>>>>>>> 1.26
