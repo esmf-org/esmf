@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2004/08/03 19:33:50 nscollins Exp $
+# $Id: makefile,v 1.10 2004/09/23 17:42:14 nscollins Exp $
 
 
 ALL:  build_examples
@@ -93,7 +93,7 @@ run_ESMC_RouteEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_RouteEx > $(ESMF_EXDIR)/ESMC_RouteEx.stdout
 
 run_ESMC_RouteEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_RouteEx > $(ESMF_EXDIR)/ESMC_RouteEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_RouteEx > $(ESMF_EXDIR)/ESMC_RouteEx.stdout
 
 
 #
@@ -103,5 +103,5 @@ run_ESMF_RouteEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_RouteEx > $(ESMF_EXDIR)/ESMF_RouteEx.stdout
 
 run_ESMF_RouteEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_RouteEx > $(ESMF_EXDIR)/ESMF_RouteEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_RouteEx > $(ESMF_EXDIR)/ESMF_RouteEx.stdout
 

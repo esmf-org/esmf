@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/08/03 19:33:40 nscollins Exp $ 
+# $Id: makefile,v 1.7 2004/09/23 17:40:07 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -47,7 +47,7 @@ run_ESMF_ArrayCreateEx:
 
 
 run_ESMF_ArrayCreateEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayCreateEx > $(ESMF_EXDIR)/ESMF_ArrayCreateEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayCreateEx > $(ESMF_EXDIR)/ESMF_ArrayCreateEx.stdout
 
 
 #
@@ -58,5 +58,5 @@ run_ESMF_ArrayGetEx:
 
 
 run_ESMF_ArrayGetEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayGetEx > $(ESMF_EXDIR)/ESMF_ArrayGetEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayGetEx > $(ESMF_EXDIR)/ESMF_ArrayGetEx.stdout
 

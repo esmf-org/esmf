@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2004/08/03 19:33:46 nscollins Exp $ 
+# $Id: makefile,v 1.17 2004/09/23 17:41:16 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -96,7 +96,7 @@ run_ESMC_FieldCreateEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_FieldCreateEx > $(ESMF_EXDIR)/ESMC_FieldCreateEx.stdout
 
 run_ESMC_FieldCreateEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_FieldCreateEx > $(ESMF_EXDIR)/ESMC_FieldCreateEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_FieldCreateEx > $(ESMF_EXDIR)/ESMC_FieldCreateEx.stdout
 
 #
 # ESMF_FieldCreateEx
@@ -105,7 +105,7 @@ run_ESMF_FieldCreateEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_FieldCreateEx > $(ESMF_EXDIR)/ESMF_FieldCreateEx.stdout
 
 run_ESMF_FieldCreateEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_FieldCreateEx > $(ESMF_EXDIR)/ESMF_FieldCreateEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_FieldCreateEx > $(ESMF_EXDIR)/ESMF_FieldCreateEx.stdout
 
 #
 # ESMF_FieldGlobalEx
@@ -120,7 +120,7 @@ run_ESMF_FieldGlobalEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_FieldWriteEx > $(ESMF_EXDIR)/ESMF_FieldWriteEx.stdout
 
  run_ESMF_FieldWriteEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_FieldWriteEx > $(ESMF_EXDIR)/ESMF_FieldWriteEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_FieldWriteEx > $(ESMF_EXDIR)/ESMF_FieldWriteEx.stdout
 
 
 

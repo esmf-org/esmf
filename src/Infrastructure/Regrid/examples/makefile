@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2004/08/03 19:33:50 nscollins Exp $
+# $Id: makefile,v 1.9 2004/09/23 17:41:59 nscollins Exp $
 
 ALL: build_examples
 
@@ -83,6 +83,6 @@ run_ESMF_RegridEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_RegridEx > $(ESMF_EXDIR)/ESMF_RegridEx.stdout
 
 run_ESMF_RegridEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_RegridEx > $(ESMF_EXDIR)/ESMF_RegridEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_RegridEx > $(ESMF_EXDIR)/ESMF_RegridEx.stdout
 
 

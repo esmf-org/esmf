@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2004/08/03 19:33:49 nscollins Exp $ 
+# $Id: makefile,v 1.21 2004/09/23 17:41:38 nscollins Exp $ 
 
 ALL: build_examples
 
@@ -92,7 +92,7 @@ run_ESMF_LogErrEx:
 
 
 run_ESMF_LogErrEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_LogErrEx > $(ESMF_EXDIR)/ESMF_LogErrEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_LogErrEx > $(ESMF_EXDIR)/ESMF_LogErrEx.stdout
 
 #
 #  ESMC_LogErrEx
@@ -102,7 +102,7 @@ run_ESMF_LogErrEx_uni:
 
 
 #run_ESMC_LogErrEx_uni:
-#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_LogErrEx > $(ESMF_EXDIR)/ESMC_LogErrEx_uni.stdout
+#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_LogErrEx > $(ESMF_EXDIR)/ESMC_LogErrEx.stdout
 
 
 

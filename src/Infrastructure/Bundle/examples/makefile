@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2004/08/03 19:33:43 nscollins Exp $ 
+# $Id: makefile,v 1.9 2004/09/23 17:40:46 nscollins Exp $ 
 
 ALL: build_examples
 
@@ -88,5 +88,5 @@ run_ESMF_BundleCreateEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_BundleCreateEx > $(ESMF_EXDIR)/ESMF_BundleCreateEx.stdout
 
 run_ESMF_BundleCreateEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_BundleCreateEx > $(ESMF_EXDIR)/ESMF_BundleCreateEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_BundleCreateEx > $(ESMF_EXDIR)/ESMF_BundleCreateEx.stdout
 
