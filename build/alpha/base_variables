@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.3 2002/10/22 22:28:23 nscollins Exp $ 
+# $Id: base_variables,v 1.4 2002/11/07 23:10:00 nscollins Exp $ 
 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
@@ -38,6 +38,8 @@ CXX_CLINKER	   = cxx
 CXX_FLINKER	   = f90
 CXX_CCV		   = unknown
 CXX_SYS_LIB	   = -lcomplex -lfor -lutil -lFutil -lots
+C_F90CXXLIBS       = -L/usr/ccs/lib/cmplrs/cxx -lcxx 
+C_F90CXXLD         = f90
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g
 GCXX_FOPTFLAGS	   = -g
