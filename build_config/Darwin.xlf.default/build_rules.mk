@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.4 2004/06/07 16:01:57 nscollins Exp $
+#  $Id: build_rules.mk,v 1.5 2004/06/07 17:06:36 slswift Exp $
 #
 #  Darwin.xlf.default.mk
 #
@@ -29,8 +29,8 @@ endif
 ifeq ($(ESMF_NO_IOCODE),true)
 BLAS_LIB         =
 LAPACK_LIB       =
-NETCDF_LIB       =
-NETCDF_INCLUDE   =
+NETCDF_LIB       = -lnetcdf_stubs
+NETCDF_INCLUDE   = -I${ESMF_DIR}/src/Infrastructure/stubs/netcdf_stubs
 HDF_LIB          =
 HDF_INCLUDE      =
 else
@@ -176,7 +176,7 @@ GCOMP_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
 OCOMP_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
 OCOMP_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 #
-PARCH			= rs6000
+PARCH			= mac_osx
 
 
 SL_SUFFIX   = so

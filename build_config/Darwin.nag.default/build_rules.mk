@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.8 2004/06/07 16:01:57 nscollins Exp $
+#  $Id: build_rules.mk,v 1.9 2004/06/07 17:06:34 slswift Exp $
 #
 #  Darwin.nag.default.mk
 #
@@ -33,8 +33,8 @@ endif
 ifeq ($(ESMF_NO_IOCODE),true)
 BLAS_LIB         =
 LAPACK_LIB       =
-NETCDF_LIB       =
-NETCDF_INCLUDE   =
+NETCDF_LIB       = -lnetcdf_stubs
+NETCDF_INCLUDE   = -I${ESMF_DIR}/src/Infrastructure/stubs/netcdf_stubs
 HDF_LIB          =
 HDF_INCLUDE      =
 else
@@ -132,11 +132,11 @@ O_FOPTFLAGS	   = -O
 #
 # Fortran compiler 
 #
-FFLAGS          = -w=x77 -kind=byte -dusty -mismatch_all-gline
-F_FREECPP       = -ffree -fpp
-F_FIXCPP        = -ffixed -fpp
-F_FREENOCPP     = -ffree
-F_FIXNOCPP      = -ffixed
+FFLAGS          = -w=x77 -kind=byte -dusty -mismatch_all -gline
+F_FREECPP       = -free -fpp
+F_FIXCPP        = -fixed -fpp
+F_FREENOCPP     = -free
+F_FIXNOCPP      = -fixed
 #
 # C++ compiler
 #

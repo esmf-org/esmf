@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.12 2004/06/07 16:01:57 nscollins Exp $
+#  $Id: build_rules.mk,v 1.13 2004/06/07 17:07:00 slswift Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -38,8 +38,8 @@ endif
 ifeq ($(ESMF_NO_IOCODE),true)
 BLAS_LIB         =
 LAPACK_LIB       =
-NETCDF_LIB       =
-NETCDF_INCLUDE   =
+NETCDF_LIB       = -lnetcdf_stubs
+NETCDF_INCLUDE   = -I${ESMF_DIR}/src/Infrastructure/stubs/netcdf_stubs
 HDF_LIB          =
 HDF_INCLUDE      =
 else
