@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.16 2003/02/18 20:43:11 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.17 2003/02/18 21:59:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,6 +100,7 @@
       type ESMF_CompClass
       sequence
       private
+         character(len=ESMF_MAXSTR) :: compname
          type(ESMF_CompType) :: ctype
          type(ESMF_ModelType) :: mtype
          type(ESMF_State) :: importstate
@@ -163,7 +164,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.16 2003/02/18 20:43:11 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.17 2003/02/18 21:59:12 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -202,7 +203,7 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section includes the Component Create and Destroy methods.
+! This section includes Component Create/Destroy, Construct/Destruct methods.
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -283,8 +284,8 @@ end interface
         endif
 
         ! Call construction method to initialize component internals
-        !call ESMF_CompConstruct(compclass, name, layout, ctype, mtype, &
-        !                                                     filepath, status)
+        call ESMF_CompConstruct(compclass, name, layout, ctype, mtype, &
+                                                             filepath, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
@@ -357,6 +358,152 @@ end interface
 
         end subroutine ESMF_CompDestroy
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
+
+! !INTERFACE:
+      subroutine ESMF_CompConstruct(compp, name, layout, ctype, mtype, filepath, rc)
+!
+! !ARGUMENTS:
+      type (ESMF_CompClass), pointer :: compp
+      character(len=*), intent(in) :: name
+      type(ESMF_Layout), intent(in) :: layout
+      type(ESMF_CompType), intent(in) :: ctype
+      type(ESMF_ModelType), intent(in) :: mtype 
+      character(len=*), intent(in), optional :: filepath
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Take a new component datatype and fill in the contents.
+!
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[compp]
+!    Component internal structure to be filled in.
+!
+!   \item[name]
+!    Component name.
+!
+!   \item[layout]
+!    Component layout.
+!
+!   \item[ctype]
+!    Component type, where valid types include ESMF\_APPCOMP, ESMF\_GRIDCOMP, 
+!    and ESMF\_CPLCOMP for Applications, Gridded Components, and Couplers,
+!    respectively.
+!
+!   \item[mtype]
+!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
+!
+!   \item[{[filepath]}]
+!    Directory where component-specfic configuration or data files
+!    are located.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+
+        ! local vars
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! TODO: fill in values here.
+        compp%compname = name
+	compp%ctype = ctype
+	compp%mtype = mtype
+        !compp%clock = ESMF_ClockCreate()
+        compp%layout = layout
+        compp%filepath = filepath
+
+        compp%importstate = ESMF_StateCreate(name, ESMF_STATEIMPORT, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "CompConstruct: State create error"
+          return
+        endif
+        compp%exportstate = ESMF_StateCreate(name, ESMF_STATEEXPORT, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "CompConstruct: State create error"
+          return
+        endif
+
+        nullify(compp%statelist)
+
+        compp%instance_id = 1
+        compp%function_count = 0
+   
+        ! Set return values
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_CompConstruct
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CompDestruct - Internal routine for freeing resources
+
+! !INTERFACE:
+      subroutine ESMF_CompDestruct(compp, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CompClass), pointer :: compp
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Releases all resources associated with this {\tt Component}.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[compp]
+!      Component internal structure to be freed.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        ! local vars
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! TODO: add code here.
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component contents destruction error"
+          return
+        endif
+
+        ! Set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_CompDestruct
+
 
 
 !------------------------------------------------------------------------------
@@ -402,6 +549,7 @@ end interface
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
+        integer :: de_id                        ! the current DE
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -411,13 +559,17 @@ end interface
           rc = ESMF_FAILURE
         endif
 
+        ! See if this is currently running on a DE which is part of the
+        ! proper Layout.
+	call ESMF_LayoutGetDEId(component%compp%layout, de_id, status)
+
+        ! TODO: decide whether to return here or continue.
+
         ! TODO: handle optional args, do framework setup for this comp.
         ! Call user-supplied init routine.
+
         ! TODO: add code here
-        ! look up init routine in the list (or use #define index?)
-        ! and call it (from here? from C++?)
-        !call c_ESMC_CompInit(component, status)
-        !call (component%funclist(init))(component, status)
+        !call c_ESMC_CompDispatch(component%funclist(INIT))(component, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
           return
@@ -470,6 +622,7 @@ end interface
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
+        integer :: de_id                        ! the current DE
 
         ! Initalize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -479,10 +632,17 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-        ! Verify are are on a PE which is part of this layout
-        ! Call user-specified run routine
-        ! TODO: supply optional args
-        !call c_ESMC_CompRun(component, timesteps, status)
+        ! See if this is currently running on a DE which is part of the
+        ! proper Layout.
+	call ESMF_LayoutGetDEId(component%compp%layout, de_id, status)
+
+        ! TODO: decide whether to return here or continue.
+
+        ! TODO: handle optional args, do framework setup for this comp.
+        ! Call user-supplied init routine.
+
+        ! TODO: add code here
+        !call c_ESMC_CompDispatch(component%funclist(RUN))(component, timesteps, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component run error"
           return
@@ -528,6 +688,7 @@ end interface
 !       local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
+        integer :: de_id                        ! the current DE
 
 !       Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -537,8 +698,17 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       Routine which interfaces to the C++ creation routine.
-        !call c_ESMC_CompFinalize(component, status)
+        ! See if this is currently running on a DE which is part of the
+        ! proper Layout.
+	call ESMF_LayoutGetDEId(component%compp%layout, de_id, status)
+
+        ! TODO: decide whether to return here or continue.
+
+        ! TODO: handle optional args, do framework setup for this comp.
+        ! Call user-supplied init routine.
+
+        ! TODO: add code here
+        !call c_ESMC_CompDispatch(component%funclist(FINAL))(component, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component finalization error"
           return
