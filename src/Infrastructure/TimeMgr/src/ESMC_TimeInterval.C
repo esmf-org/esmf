@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.70 2004/10/29 23:44:31 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.71 2004/11/05 04:05:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.70 2004/10/29 23:44:31 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.71 2004/11/05 04:05:54 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -2557,13 +2557,13 @@
 //
 // !DESCRIPTION:
 //    Assign {\tt ESMC\_Fraction} expression to this time interval.
-//    Supports inherited operators from {\tt ESMC\_Fraction}
+//    Supports inherited operators from {\tt ESMC\_Fraction}.
 //
 //EOP
 // !REQUIREMENTS:  
 
-    // invoke base class assignment operator
-    // TODO:  should be implicit ?
+    // invoke fraction assignment operator; supports Time1-Time2 operator
+    // in ESMC_Time.  TODO:  should be implicit ?
     ESMC_Fraction::operator=(fraction);
 
     return(*this);
