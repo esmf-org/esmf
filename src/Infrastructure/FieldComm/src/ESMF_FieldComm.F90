@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.17 2004/03/19 23:33:41 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.18 2004/03/23 21:04:22 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.17 2004/03/19 23:33:41 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.18 2004/03/23 21:04:22 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -250,6 +250,7 @@
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
+      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
       integer :: i, datarank, thisdim, thislength, numDims
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
@@ -269,8 +270,9 @@
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(ftypep%mapping, dataIorder=dimorder, &
-                           rc=status)
+      call ESMF_DataMapGet(ftypep%mapping, &
+                           horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                           dataIorder=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldGather: DataMapGet returned failure"
         return
@@ -283,6 +285,7 @@
       allocate(decomps(numDims), stat=status)
 
       call ESMF_GridGet(ftypep%grid, &
+                        horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                         globalCellCountPerDim=globalCellCountPerDim, &
                         maxLocalCellCountPerDim=maxLocalCellCountPerDim, &
                         rc=status)
@@ -1480,7 +1483,9 @@
       allocate(gl_src_AI(nDEs, numDims), stat=status)
       allocate(gl_dst_AI(nDEs, numDims), stat=status)
 
-      call ESMF_GridGet(ftypep%grid, globalCellCountPerDim=global_count, &
+      call ESMF_GridGet(ftypep%grid, &
+                        horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                        globalCellCountPerDim=global_count, &
                         globalStartPerDEPerDim=globalStartPerDEPerDim, &
                         periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
