@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/02/04 20:52:28 flanigan Exp $ 
+# $Id: makefile,v 1.11 2003/02/04 21:06:34 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -62,14 +62,17 @@ ${ESMC_DOCDIR}/ESMF_archdoc.pdf: ${ESMC_DOCDIR}/ESMF_archdoc.dvi
 
 # Html Files
 ${ESMC_DOCDIR}/ESMF_reqdoc: ESMF_req.tex ESMF_buildreq.tex
+	-rm -r $(ESMC_DOCDIR)/ESMF_reqdoc
 	${DOL2H} ESMF req
 	mv -f ESMF_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_usrdoc: $(USERDOC_FILES)
+	-rm -r $(ESMC_DOCDIR)/ESMF_usrdoc
 	${DOL2H} ESMF usr
 	mv -f ESMF_usrdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_archdoc: $(ARCHDOC_FILES)
+	-rm -r $(ESMC_DOCDIR)/ESMF_archdoc
 	${DOL2H} ESMF arch
 	mv -f ESMF_archdoc ${ESMC_DOCDIR}
 
