@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.117 2003/12/05 23:15:25 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.118 2003/12/08 18:34:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.117 2003/12/05 23:15:25 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.118 2003/12/08 18:34:21 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3729,7 +3729,7 @@
                               coord_order, global_min_coord, &
                               global_max_coord, global_cell_dim, &
                               global_start, local_cell_max_dim, &
-                              periodic, name, rc)
+                              local_axis_length, periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -3749,6 +3749,8 @@
       integer, intent(out), dimension(:,:), optional :: global_start
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), &
                             optional :: local_cell_max_dim
+      integer, intent(out), dimension(:,:), pointer, &
+                            optional :: local_axis_length
       type (ESMF_Logical), intent(out), optional :: periodic(:)
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
@@ -3789,6 +3791,8 @@
 !          Array of global starting locations for each DE and in each direction.
 !     \item[{[local\_cell\_max\_dim]}]
 !          Array of maximum grid counts on any DE in each direction.
+!     \item[{[local\_axis\_length]}]
+!          2-D array of grid counts on each DE and in each direction.
 !     \item[{[periodic]}]
 !          Returns the periodicity along the coordinate axes - logical array.
 !     \item[{[name]}]
@@ -3839,6 +3843,15 @@
                               rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridGet: DistGrid get"
+          return
+        endif
+      endif
+      if(present(local_axis_length)) then
+        ! TODO: check size of local_axis_length
+        call ESMF_DistGridGetAllCounts(gridp%distgrid%ptr, &
+                              local_axis_length, rc=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridGet: DistGrid get all counts"
           return
         endif
       endif
