@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.29 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.30 2003/08/30 00:37:22 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.29 2003/08/29 05:31:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.30 2003/08/30 00:37:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -381,6 +381,7 @@
 
  } // end ESMC_ClockAdvance
 
+#if 0
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_ClockAdvance - increment a clock's time
@@ -413,6 +414,7 @@
     return(ESMF_SUCCESS);
 
  } // end ESMC_ClockAdvance
+#endif
 
 //-------------------------------------------------------------------------
 //BOP
