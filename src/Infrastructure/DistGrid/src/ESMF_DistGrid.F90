@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.112 2004/04/19 21:51:09 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.113 2004/04/19 22:07:18 nscollins Exp $'
 
 !==============================================================================
 !
@@ -686,8 +686,7 @@
       logical :: rcpresent                          ! Return code present
       integer :: globalCellCount
       integer :: i, j, nDE, nDEs(0:2), bnd
-      integer, dimension(ESMF_MAXDECOMPDIM) :: decompCount, &
-                                               globalCellCountPerDim, &
+      integer, dimension(ESMF_MAXDECOMPDIM) :: globalCellCountPerDim, &
                                                nDEsUse
       type(ESMF_DistGridLocal),  pointer :: me
       type(ESMF_DistGridGlobal), pointer :: glob
@@ -943,7 +942,7 @@
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
-      integer :: i, j, nDEs(2), nndes
+      integer :: i, j, nndes
       type(ESMF_DistGridGlobal), pointer :: glob
       type(ESMF_DistGridType), pointer :: dgtype
 
@@ -1876,7 +1875,7 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       type(ESMF_DistGridGlobal), pointer :: glob
-      integer :: nDEs(2), i, j, nndes
+      integer :: i, j, nndes
 
       ! Initialize return code
       status = ESMF_FAILURE
