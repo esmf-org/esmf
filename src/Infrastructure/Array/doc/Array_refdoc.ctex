@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.4 2003/10/22 03:39:55 cdeluca Exp $
+% $Id: Array_refdoc.ctex,v 1.5 2003/10/22 03:58:50 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -83,8 +83,10 @@
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_Array_fapi}
+\input{../../ArrayComm/doc/ESMF_ArrayComm_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Array/doc/ESMF_Array_fapi}
+\input{../Infrastructure/Array/doc/ESMF_ArrayComm_fapi}
 #endif
 
 #ifdef STANDALONE
