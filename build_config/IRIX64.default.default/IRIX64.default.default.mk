@@ -1,4 +1,4 @@
-# $Id: IRIX64.default.default.mk,v 1.1 2003/10/17 19:34:56 nscollins Exp $
+# $Id: IRIX64.default.default.mk,v 1.2 2003/10/20 19:58:51 nscollins Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -38,26 +38,38 @@ LAPACK_LIB     = -lcomplib.sgimath
 # Powerchallenge.
 #
 # If you are using the MPICH implementation of MPI with version BELOW 1.1,
-# you should remove the -DESMC_HAVE_INT_MPI_COMM. If you are using MPICH Version 1.1
-# or SGI's version of MPI you MUST retain it.
+# you should remove the -DESMC_HAVE_INT_MPI_COMM. If you are using MPICH 
+# Version 1.1 or SGI's version of MPI you MUST retain it.
 #
+ifeq ($(ESMF_COMM),mpi)
 ESMC_MPIRUN      = mpirun 
 MPI_LIB        = -lmpi -lmpi++
 MPI_INCLUDE     = -DESMC_HAVE_INT_MPI_COMM
 MPIRUN          = ${ESMC_MPIRUN}
+endif
+
+#
 # The following is for mpiuni
-#MPI_HOME        = ${ESMF_DIR}/src/Infrastructure/mpiuni
-#MPI_LIB         = -lmpiuni
-#MPI_INCLUDE     = -I${MPI_HOME}
-#MPIRUN          = ${MPI_HOME}/mpirun
+#
+ifeq ($(ESMF_COMM),mpiuni)
+MPI_HOME        = ${ESMF_DIR}/src/Infrastructure/mpiuni
+MPI_LIB         = -lmpiuni
+MPI_INCLUDE     = -I${MPI_HOME}
+MPIRUN          = ${MPI_HOME}/mpirun
+endif
+
 #
 # The following lines can be used with MPICH
 #
-#MPI_LIB        = -L/home/alice/mpich/lib/IRIX64/ch_p4 -lmpi
-#MPI_INCLUDE    = -DESMC_HAVE_INT_MPI_COMM -I/home/alice/mpich/include
-#MPIRUN         =  /home/alice/mpich/lib/IRIX64/ch_p4/mpirun
+ifeq ($(ESMF_COMM),mpich)
+MPI_LIB        = -L/home/alice/mpich/lib/IRIX64/ch_p4 -lmpi
+MPI_INCLUDE    = -DESMC_HAVE_INT_MPI_COMM -I/home/alice/mpich/include
+MPIRUN         =  /home/alice/mpich/lib/IRIX64/ch_p4/mpirun
+endif
+
 #
 # The following lines can be used with MPIUNI
+# (what is the difference between this and the one above?)
 #
 #MPI_LIB         =${LDIR}/libmpiuni.a
 #MPI_INCLUDE     = -I${ESMF_DIR}/src/sys/mpiuni -DESMC_HAVE_INT_MPI_COMM
