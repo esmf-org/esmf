@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.10 2003/04/02 20:47:43 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.11 2003/04/03 15:10:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,9 +91,9 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
 
 static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     char *name = "localdata";
-    enum dtype *dtype;
+    enum dtype dtype;
 
-    *status = (**ptr)->ESMC_FTableGetDataPtr(name, datap, dtype);
+    *status = (**ptr)->ESMC_FTableGetDataPtr(name, datap, &dtype);
 }
 
 static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
@@ -228,12 +228,12 @@ extern "C" {
      void FTN(esmf_usercompgetinternalstate)(ESMC_FTable ***ptr, char *name,
                                          void **datap, int *status, int slen) {
          char *tbuf; 
-         enum dtype *dtype;
+         enum dtype dtype;
 
          newtrim(name, slen, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
-         *status = (**ptr)->ESMC_FTableGetDataPtr(tbuf, datap, dtype);
+         *status = (**ptr)->ESMC_FTableGetDataPtr(tbuf, datap, &dtype);
   
          delete[] tbuf;
      }
