@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.18 2004/04/26 13:38:05 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.19 2004/04/26 14:02:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.18 2004/04/26 13:38:05 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.19 2004/04/26 14:02:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -771,6 +771,66 @@ int ESMC_newDELayout::ESMC_newDELayoutCopyCopy(
   int blen2 = len2 * ESMC_DataKindSize(dtk2);
   return ESMC_newDELayoutCopyCopy(srcData1, srcData2, dstData1, dstData2, 
     blen1, blen2, de1, de2, oneToOneFlag);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutBcast
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutBcast(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **data,    // data 
+  int blen,       // message size in bytes
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // very crude implementation of a layout wide bcast
+  for (int i=0; i<ndes; i++)
+    ESMC_newDELayoutCopy(data, data, blen, rootDE, i, ESMF_TRUE);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutBcast
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutBcast(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **data,    // data 
+  int len,       // message size in bytes
+  ESMC_DataKind dtk,// data type kind
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen = len * ESMC_DataKindSize(dtk);
+  // very crude implementation of a layout wide bcast
+  for (int i=0; i<ndes; i++)
+    ESMC_newDELayoutCopy(data, data, blen, rootDE, i, ESMF_TRUE);
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
