@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.h,v 1.7 2003/04/14 14:51:28 nscollins Exp $
+// $Id: ESMC_Machine.h,v 1.8 2003/04/14 21:11:19 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -96,10 +96,14 @@
 //    int ESMC_MachineSetConfig(const ESMC_MachineConfig *config);
 
  // accessor methods for class members
-      int ESMC_MachineGetNumNodes(int *nodes) const { *nodes = numNodes; }
-      int ESMC_MachineSetNumNodes(int nodes) { numNodes = nodes; }
-      int ESMC_MachineGetNumCPUs(int *cpu) const { *cpu = numCPUs; }
-      int ESMC_MachineSetNumCPUs(int cpu) { numNodes = cpu; }
+      int ESMC_MachineGetNumNodes(int *nodes) const { 
+               *nodes = numNodes; return ESMF_SUCCESS; }
+      int ESMC_MachineSetNumNodes(int nodes) { 
+               numNodes = nodes; return ESMF_SUCCESS; }
+      int ESMC_MachineGetNumCPUs(int *cpu) const { 
+               *cpu = numCPUs; return ESMF_SUCCESS; }
+      int ESMC_MachineSetNumCPUs(int cpu) { 
+               numNodes = cpu; return ESMF_SUCCESS; }
       int ESMC_MachineGetNumCPUsperNode(int *cpuspernode) const;
       int ESMC_MachineSetNumCPUsperNode(int cpuspernode);
 
