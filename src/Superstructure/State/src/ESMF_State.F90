@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.85 2005/02/25 03:07:38 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.86 2005/02/26 00:04:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.85 2005/02/25 03:07:38 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.86 2005/02/26 00:04:49 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1088,6 +1088,8 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+
+      stypep => state%statep
 
       if (present(name)) call c_ESMC_GetName(stypep%base, name, localrc)
       if (present(statetype)) statetype = stypep%st
@@ -2380,6 +2382,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      stypep => state%statep
 
       ! Start out assuming the name does not exist, and if it is found
       ! then overwrite the type and jump out of the loop.   It will not be
@@ -5377,6 +5380,8 @@ end interface
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+      sp => state%statep
 
       call c_ESMC_BaseSerialize(sp%base, buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
