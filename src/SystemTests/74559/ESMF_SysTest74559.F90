@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.15 2003/06/20 17:45:55 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.16 2003/07/31 23:03:57 jwolfe Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -161,18 +161,18 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize time interval to 2 seconds
-      call ESMF_TimeIntervalSet(timeStep, S=2, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, s_i4=2, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize start time to 12May2003, 9:00 am
-      call ESMF_TimeSet(startTime, YR=2003, MM=5, DD=12, H=9, &
-                        cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(startTime, yr_i4=2003, mm_i4=5, dd_i4=12, h_i4=9, &
+                        calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize stop time to 12May2003, 3:00 pm
       ! to keep runtime down
-      call ESMF_TimeSet(stopTime, YR=2003, MM=5, DD=12, H=15, &
-                        cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=5, dd_i4=12, h_i4=15, &
+                        calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize the clock with the above values

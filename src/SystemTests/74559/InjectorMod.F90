@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.10 2003/06/07 00:49:20 eschwab Exp $
+! $Id: InjectorMod.F90,v 1.11 2003/07/31 23:04:51 jwolfe Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -97,16 +97,16 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real :: x_min, x_max, y_min, y_max
-      integer :: i_max, j_max
+      integer :: counts(2)
       real :: in_energy, in_velocity, in_rho
       integer :: printout
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
-      integer :: myde, halo_width
+      integer :: myde
       type(injectdata), pointer :: datablock
       type(wrapper) :: wrap
-      namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
+      namelist /input/ counts, x_min, x_max, y_min, y_max, &
                        printout, in_energy, in_velocity, in_rho
 
 
@@ -133,13 +133,13 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       ! initialize start time to 12May2003, 2:00 pm
       ! for testing, initialize start time to 12May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_start_time, &
-                                 YR=2003, MM=5, DD=12, H=14, &
-                                 cal=datablock%gregorianCalendar, rc=rc)
+                                 yr_i4=2003, mm_i4=5, dd_i4=12, h_i4=14, &
+                                 calendar=datablock%gregorianCalendar, rc=rc)
 
       ! initialize stop time to 13May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_stop_time, &
-                                 YR=2003, MM=5, DD=13, H=14, &
-                                 cal=datablock%gregorianCalendar, rc=rc)
+                                 yr_i4=2003, mm_i4=5, dd_i4=13, h_i4=14, &
+                                 calendar=datablock%gregorianCalendar, rc=rc)
 
 
       datablock%inject_energy = in_energy
@@ -160,9 +160,8 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       vert_stagger = ESMF_GridStagger_Unknown
       horz_coord_system = ESMF_CoordSystem_Cartesian
       vert_coord_system = ESMF_CoordSystem_Unknown
-      halo_width = 1
 
-      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+      grid = ESMF_GridCreate(counts=counts, &
                              x_min=x_min, x_max=x_max, &
                              y_min=y_min, y_max=y_max, &
                              layout=layout, &
@@ -172,7 +171,6 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-                             halo_width=halo_width, &
                              name="source grid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in injector_init:  grid create"

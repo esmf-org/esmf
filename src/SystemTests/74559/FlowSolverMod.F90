@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.12 2003/05/27 17:18:39 jwolfe Exp $
+! $Id: FlowSolverMod.F90,v 1.13 2003/07/31 23:04:22 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -113,12 +113,12 @@
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real(kind=ESMF_IKIND_R4) :: x_min, x_max, y_min, y_max
-      integer :: i_max, j_max
+      integer :: counts(2)
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
-      integer :: myde, halo_width
-      namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
+      integer :: myde
+      namelist /input/ counts, x_min, x_max, y_min, y_max, &
                        uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
                        printout, sieobs, nobsdesc, iobs_min, iobs_max, &
@@ -144,8 +144,8 @@
 !
 ! Calculate some other quantities
 !
-      dx = (x_max - x_min)/i_max      ! Should be calls to PhysGrid eventually
-      dy = (y_max - y_min)/j_max
+      dx = (x_max - x_min)/counts(1)   ! Should be calls to PhysGrid eventually
+      dy = (y_max - y_min)/counts(2)
 !
 ! Query component for information.
 !
@@ -156,16 +156,14 @@
       horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_C
       horz_coord_system = ESMF_CoordSystem_Cartesian
-      halo_width = 1
 
-      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+      grid = ESMF_GridCreate(counts=counts, &
                              x_min=x_min, x_max=x_max, &
                              y_min=y_min, y_max=y_max, &
                              layout=layout, &
                              horz_gridtype=horz_gridtype, &
                              horz_stagger=horz_stagger, &
                              horz_coord_system=horz_coord_system, &
-                             halo_width=halo_width, &
                              name="source grid", rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flow_init:  grid create"
@@ -417,6 +415,11 @@
             global(1,1) = i
             call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
                                              local2d=local, rc=status)
+            if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
+            if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
+  ! TODO:  The above two lines are junk, making up for the halo width which is
+  !        no longer in Grid. GlobalToLocal should be an Array method
+            local(1,2) = local(1,2) + 1
             if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
               flag(local(1,1),local(1,2)) = -1
             endif
@@ -432,6 +435,10 @@
           global(1,2) = j
           call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
                                            local2d=local, rc=status)
+            if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
+            if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
+  ! TODO:  The above two lines are junk, making up for the halo width which is
+  !        no longer in Grid. GlobalToLocal should be an Array method
           if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
             flag(local(1,1),local(1,2)) = 10
           endif
@@ -489,7 +496,7 @@
         print *, "ERROR in FlowSolve: clock get timestep"
         return
       endif
-      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=status)
+      call ESMF_TimeIntervalGet(time_step, s_r8=s_, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
         return
@@ -573,7 +580,7 @@
         print *, "ERROR in FlowSolve: clock get timestep"
         return
       endif
-      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=status)
+      call ESMF_TimeIntervalGet(time_step, s_r8=s_, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
         return
