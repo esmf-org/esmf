@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout_F.C,v 1.8 2004/04/02 21:25:02 theurich Exp $
+// $Id: ESMC_newDELayout_F.C,v 1.9 2004/04/05 17:59:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -102,28 +102,50 @@ extern "C" {
        
   void FTN(c_esmc_newdelayoutcopy)(ESMC_newDELayout **ptr,
     void ***datain, void ***dataout, int *len, int *src, int* dest,
-    int *status){
-    *status = (*ptr)->ESMC_newDELayoutCopy(*datain, *dataout, *len,
-      *src, *dest);
+    ESMC_Logical *oneToOneFlag, int *status){
+    if (*oneToOneFlag == ESMF_TRUE){
+      *status = (*ptr)->ESMC_newDELayoutCopy((void **)datain, (void **)dataout,
+        *len, *src, *dest, *oneToOneFlag);
+    }else{
+      *status = (*ptr)->ESMC_newDELayoutCopy(*datain, *dataout, *len,
+        *src, *dest, *oneToOneFlag);
+    }
   }
   
   void FTN(c_esmc_newdelayoutscatter)(ESMC_newDELayout **ptr,
-    void ***datain, void ***dataout, int *len, int *root, int *status){
-    *status = (*ptr)->ESMC_newDELayoutScatter(*datain, *dataout, *len,
-      *root);
+    void ***datain, void ***dataout, int *len, int *root, 
+    ESMC_Logical *oneToOneFlag, int *status){
+    if (*oneToOneFlag == ESMF_TRUE){
+      *status = (*ptr)->ESMC_newDELayoutScatter((void **)datain, 
+        (void **)dataout, *len, *root, *oneToOneFlag);
+    }else{      
+      *status = (*ptr)->ESMC_newDELayoutScatter(*datain, *dataout, *len,
+        *root, *oneToOneFlag);
+    }
   }
   
   void FTN(c_esmc_newdelayoutgather)(ESMC_newDELayout **ptr,
-    void ***datain, void ***dataout, int *len, int *root, int *status){
-    *status = (*ptr)->ESMC_newDELayoutGather(*datain, *dataout, *len,
-      *root);
+    void ***datain, void ***dataout, int *len, int *root, 
+    ESMC_Logical *oneToOneFlag, int *status){
+    if (*oneToOneFlag == ESMF_TRUE){
+      *status = (*ptr)->ESMC_newDELayoutGather((void **)datain, 
+        (void **)dataout, *len, *root, *oneToOneFlag);
+    }else{
+      *status = (*ptr)->ESMC_newDELayoutGather(*datain, *dataout, *len,
+        *root, *oneToOneFlag);
+    }
   }
   
   void FTN(c_esmc_newdelayoutallglobalreduce)(ESMC_newDELayout **ptr, 
     void ***datain, void *result, int *len, ESMC_DataKind *dtk,
-    ESMC_newOp *op, int *status){
-    *status = (*ptr)->ESMC_newDELayoutAllGlobalReduce(*datain, result,
-      *len, *dtk, *op);
+    ESMC_newOp *op, ESMC_Logical *oneToOneFlag, int *status){
+    if (*oneToOneFlag == ESMF_TRUE){
+      *status = (*ptr)->ESMC_newDELayoutAllGlobalReduce((void **)datain, result,
+        *len, *dtk, *op, *oneToOneFlag);
+    }else{
+      *status = (*ptr)->ESMC_newDELayoutAllGlobalReduce(*datain, result,
+        *len, *dtk, *op, *oneToOneFlag);
+    }
   }
 
   // ~~~ DELayoutData ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

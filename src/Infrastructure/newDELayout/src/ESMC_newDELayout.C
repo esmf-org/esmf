@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.8 2004/04/02 21:25:02 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.9 2004/04/05 17:59:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.8 2004/04/02 21:25:02 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.9 2004/04/05 17:59:46 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -510,7 +510,8 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
   void **destdata,// output array
   int len,        // size in bytes that need to be copied from src to dest
   int srcDE,      // input DE
-  int destDE){    // output DE
+  int destDE,     // output DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
 //
 // !DESCRIPTION:
 //
@@ -518,31 +519,42 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
 //-----------------------------------------------------------------------------
   // local reference to VM
   ESMC_VM &vm = *myvm;
-  // len must be converted into bytes:
   int mypet = vm.vmachine_mypet();
   int srcpet = des[srcDE].petid;      // PETid where srcDE lives
   int destpet = des[destDE].petid;    // PETid where destDE lives
   if (srcpet==mypet && destpet==mypet){
     // srcDE and destDE are on my PET
-    int i, j;
-    for (i=0; i<nmydes; i++)
-      if (mydes[i]==srcDE) break;
-    for (j=0; j<nmydes; j++)
-      if (mydes[j]==destDE) break;
-    // now i is this PETs srcDE index and j is this PETs destDE index
-    memcpy(destdata[j], srcdata[i], len);
+    if (oneToOneFlag==ESMF_TRUE){
+      memcpy(destdata, srcdata, len);
+    }else{
+      int i, j;
+      for (i=0; i<nmydes; i++)
+        if (mydes[i]==srcDE) break;
+      for (j=0; j<nmydes; j++)
+        if (mydes[j]==destDE) break;
+      // now i is this PETs srcDE index and j is this PETs destDE index
+      memcpy(destdata[j], srcdata[i], len);
+    }
   }else if (srcpet==mypet){
     // srcDE is on my PET, but destDE is on another PET
-    int i;
-    for (i=0; i<nmydes; i++)
-      if (mydes[i]==srcDE) break;
-    vm.vmachine_send(srcdata[i], len, destpet);
+    if (oneToOneFlag==ESMF_TRUE){
+      vm.vmachine_send(srcdata, len, destpet);
+    }else{
+      int i;
+      for (i=0; i<nmydes; i++)
+        if (mydes[i]==srcDE) break;
+      vm.vmachine_send(srcdata[i], len, destpet);
+    }
   }else if (destpet==mypet){
     // srcDE is on my PET, but destDE is on another PET
-    int i;
-    for (i=0; i<nmydes; i++)
-      if (mydes[i]==destDE) break;
-    vm.vmachine_recv(destdata[i], len, srcpet);
+    if (oneToOneFlag==ESMF_TRUE){
+      vm.vmachine_recv(destdata, len, srcpet);
+    }else{
+      int i;
+      for (i=0; i<nmydes; i++)
+        if (mydes[i]==destDE) break;
+      vm.vmachine_recv(destdata[i], len, srcpet);
+    }
   }
   return ESMF_SUCCESS;
 }
@@ -564,7 +576,8 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
   void **srcdata, // input array
   void **destdata,// output array
   int len,        // message size in bytes
-  int rootDE){    // root DE
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
 //
 // !DESCRIPTION:
 //
@@ -576,20 +589,34 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
   int mypet = vm.vmachine_mypet();
   if (des[rootDE].petid==mypet){
     // my PET holds the rootDE
-    int j;
-    for (j=0; j<nmydes; j++)
-      if (mydes[j]==rootDE) break;
-    void *rootdata = srcdata[j];    // backup the correct start of rootDE's data
-    char *tempdata = (char *)srcdata[j];
-    for (int i=0; i<ndes; i++){
-      ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i);
-      tempdata += len;
-      srcdata[j] = tempdata;
+    if (oneToOneFlag==ESMF_TRUE){
+      char *tempdata = (char *)srcdata;
+      for (int i=0; i<ndes; i++){
+        ESMC_newDELayoutCopy((void **)tempdata, destdata, len, rootDE, i,
+          ESMF_TRUE);
+        tempdata += len;
+      }
+    }else{
+      int j;
+      for (j=0; j<nmydes; j++)
+        if (mydes[j]==rootDE) break;
+      void *rootdata = srcdata[j]; // backup the correct start of rootDE's data
+      char *tempdata = (char *)srcdata[j];
+      for (int i=0; i<ndes; i++){
+        ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i, ESMF_FALSE);
+        tempdata += len;
+        srcdata[j] = tempdata;
+      }
+      srcdata[j] = rootdata;  // restore correct start of root's src data
     }
-    srcdata[j] = rootdata;  // restore correct start of root's src data
   }else{
-    for (int i=0; i<ndes; i++)
-      ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i);
+    if (oneToOneFlag==ESMF_TRUE){
+      for (int i=0; i<ndes; i++)
+        ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i, ESMF_TRUE);
+    }else{
+      for (int i=0; i<ndes; i++)
+        ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i, ESMF_FALSE);
+    }
   }
   return ESMF_SUCCESS;
 }
@@ -611,7 +638,8 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
   void **srcdata, // input array
   void **destdata,// output array
   int len,        // message size in bytes
-  int rootDE){    // root DE
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
 //
 // !DESCRIPTION:
 //
@@ -623,20 +651,34 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
   int mypet = vm.vmachine_mypet();
   if (des[rootDE].petid==mypet){
     // my PET holds the rootDE -> receive chunks from all other DEs
-    int j;
-    for (j=0; j<nmydes; j++)
-      if (mydes[j]==rootDE) break;
-    void *rootdata = destdata[j];  // backup the correct start of rootDE's data
-    char *tempdata = (char *)destdata[j];
-    for (int i=0; i<ndes; i++){
-      ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE);
-      tempdata += len;
-      destdata[j] = tempdata;
+    if (oneToOneFlag==ESMF_TRUE){
+      char *tempdata = (char *)destdata;
+      for (int i=0; i<ndes; i++){
+        ESMC_newDELayoutCopy(srcdata, (void **)tempdata, len, i, rootDE,
+          ESMF_TRUE);
+        tempdata += len;
+      }
+    }else{
+      int j;
+      for (j=0; j<nmydes; j++)
+        if (mydes[j]==rootDE) break;
+      void *rootdata = destdata[j]; // backup the correct start of rootDE's data
+      char *tempdata = (char *)destdata[j];
+      for (int i=0; i<ndes; i++){
+        ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE, ESMF_FALSE);
+        tempdata += len;
+        destdata[j] = tempdata;
+      }
+      destdata[j] = rootdata;  // restore correct start of root's destdata
     }
-    destdata[j] = rootdata;  // restore correct start of root's destdata
   }else{
-    for (int i=0; i<ndes; i++)
-      ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE);
+    if (oneToOneFlag==ESMF_TRUE){
+      for (int i=0; i<ndes; i++)
+        ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE, ESMF_TRUE);
+    }else{
+      for (int i=0; i<ndes; i++)
+        ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE, ESMF_FALSE);
+    }
   }
   return ESMF_SUCCESS;
 }
@@ -659,7 +701,8 @@ int ESMC_newDELayout::ESMC_newDELayoutAllGlobalReduce(
   void *result,       // result
   int len,            // number of elements in each DE
   ESMC_DataKind dtk,  // data type kind
-  ESMC_newOp op){     // reduction operation
+  ESMC_newOp op,      // reduction operation
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
 //
 // !DESCRIPTION:
 //    Reduce data into a single value
@@ -682,12 +725,20 @@ int ESMC_newDELayout::ESMC_newDELayoutAllGlobalReduce(
       {
         localresult = (void *)&local_i4;
         local_i4 = 0;
-        for (int i=0; i<nmydes; i++){
-          // looping over all of my DEs
-          int *tempdata = (int *)srcdata[i];
+        if (oneToOneFlag==ESMF_TRUE){
+          int *tempdata = (int *)srcdata;
           for (int j=0; j<len; j++){
             // looping over all the elements in this DE
             local_i4 += tempdata[j];
+          }
+        }else{
+          for (int i=0; i<nmydes; i++){
+            // looping over all of my DEs
+            int *tempdata = (int *)srcdata[i];
+            for (int j=0; j<len; j++){
+              // looping over all the elements in this DE
+              local_i4 += tempdata[j];
+            }
           }
         }
       }
@@ -696,12 +747,20 @@ int ESMC_newDELayout::ESMC_newDELayoutAllGlobalReduce(
       {
         localresult = (void *)&local_r4;
         local_r4 = 0.;
-        for (int i=0; i<nmydes; i++){
-          // looping over all of my DEs
-          float *tempdata = (float *)srcdata[i];
+        if (oneToOneFlag==ESMF_TRUE){
+          float *tempdata = (float *)srcdata;
           for (int j=0; j<len; j++){
             // looping over all the elements in this DE
             local_r4 += tempdata[j];
+          }
+        }else{
+          for (int i=0; i<nmydes; i++){
+            // looping over all of my DEs
+            float *tempdata = (float *)srcdata[i];
+            for (int j=0; j<len; j++){
+              // looping over all the elements in this DE
+              local_r4 += tempdata[j];
+            }
           }
         }
       }
@@ -710,12 +769,20 @@ int ESMC_newDELayout::ESMC_newDELayoutAllGlobalReduce(
       {
         localresult = (void *)&local_r8;
         local_r8 = 0.;
-        for (int i=0; i<nmydes; i++){
-          // looping over all of my DEs
-          double *tempdata = (double *)srcdata[i];
+        if (oneToOneFlag==ESMF_TRUE){
+          double *tempdata = (double *)srcdata;
           for (int j=0; j<len; j++){
             // looping over all the elements in this DE
             local_r8 += tempdata[j];
+          }
+        }else{
+          for (int i=0; i<nmydes; i++){
+            // looping over all of my DEs
+            double *tempdata = (double *)srcdata[i];
+            for (int j=0; j<len; j++){
+              // looping over all the elements in this DE
+              local_r8 += tempdata[j];
+            }
           }
         }
       }

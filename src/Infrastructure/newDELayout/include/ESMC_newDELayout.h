@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.h,v 1.7 2004/04/02 21:25:02 theurich Exp $
+// $Id: ESMC_newDELayout.h,v 1.8 2004/04/05 17:59:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,13 +80,13 @@ class ESMC_newDELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_newDELayoutPrint(void);
     // Communication
     int ESMC_newDELayoutCopy(void **srcdata, void **destdata, 
-      int len, int srcDE, int destDE);
+      int len, int srcDE, int destDE, ESMC_Logical oneToOneFlag);
     int ESMC_newDELayoutScatter(void **srcdata, void **destdata, 
-      int len, int rootDE);
+      int len, int rootDE, ESMC_Logical oneToOneFlag);
     int ESMC_newDELayoutGather(void **srcdata, void **destdata, 
-      int len, int rootDE);
-    int ESMC_newDELayoutAllGlobalReduce(void **srcdata, 
-      void *result, int len, ESMC_DataKind dtk, ESMC_newOp op);
+      int len, int rootDE, ESMC_Logical oneToOneFlag);
+    int ESMC_newDELayoutAllGlobalReduce(void **srcdata, void *result, int len,
+      ESMC_DataKind dtk, ESMC_newOp op, ESMC_Logical oneToOneFlag);
   private:
     int ESMC_newDELayout::ESMC_newDELayoutFindDEtoPET(int npets);
     int ESMC_newDELayout::ESMC_newDELayoutFillLocal(int mypet);        
