@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2004/05/14 22:34:26 slswift Exp $ 
+# $Id: makefile,v 1.8 2004/06/16 08:24:39 nscollins Exp $ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable
@@ -25,8 +25,8 @@ CLEANFILES  = *.o *.mod loadmap.txt
 CLOBBERDIRS =
 
 # object files which need to be compiled into the executable.
-APPOBJS = CouplerComponentTemplate.o GridComponentTemplate.o GridComp2.o \
-          ParentGridComponentTemplate.o AppDriver.o
+APPOBJS = CplCompTemplate.o GridComp1Template.o GridComp2Template.o \
+          ParentGridCompTemplate.o AppDriver.o
 
 #
 # Sample application for which we supply skeleton files to use as a 
