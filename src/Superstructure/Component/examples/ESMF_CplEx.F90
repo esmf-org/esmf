@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.10 2004/01/26 17:44:42 nscollins Exp $
+! $Id: ESMF_CplEx.F90,v 1.11 2004/01/27 22:07:11 eschwab Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -209,11 +209,11 @@
     call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
 
     ! initialize start time to 5/1/2004
-    call ESMF_TimeSet(startTime, yr=2004, mm=5, dd=1, &
+    call ESMF_TimeSet(startTime, yy=2004, mm=5, dd=1, &
                       calendar=gregorianCalendar, rc=rc)
 
     ! initialize stop time to 5/2/2004
-    call ESMF_TimeSet(stopTime, yr=2004, mm=5, dd=2, &
+    call ESMF_TimeSet(stopTime, yy=2004, mm=5, dd=2, &
                       calendar=gregorianCalendar, rc=rc)
 
     ! initialize the clock with the above values
