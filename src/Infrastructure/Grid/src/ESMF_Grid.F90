@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.100 2003/10/09 22:56:03 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.101 2003/10/10 17:14:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -226,7 +226,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.100 2003/10/09 22:56:03 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.101 2003/10/10 17:14:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3337,7 +3337,7 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: i, j, i1, i2, j1, j2, haloWidth
+      integer :: i, j, i1, i2, j1, j2, haloWidth, countsPlus(2)
       real(ESMF_KIND_R8) :: coord1, coord2
       real(ESMF_KIND_R8), dimension(:,:), pointer :: temp1, temp2
       type(ESMF_Array), dimension(:), pointer :: arrayTemp
@@ -3364,77 +3364,87 @@
       ! create ESMF_Arrays
       kind = ESMF_R8
       type = ESMF_DATA_REAL
-      arrayTemp(1) = ESMF_ArrayCreate(numDims, type, kind, counts, &
+      countsPlus(1) = counts(1) + 2*haloWidth
+      countsPlus(2) = counts(2) + 2*haloWidth
+      arrayTemp(1) = ESMF_ArrayCreate(numDims, type, kind, countsPlus, &
                                       halo_width=haloWidth, rc=status)
-      arrayTemp(2) = ESMF_ArrayCreate(numDims, type, kind, counts, &
+      arrayTemp(2) = ESMF_ArrayCreate(numDims, type, kind, countsPlus, &
                                       halo_width=haloWidth, rc=status)
       call ESMF_ArrayGetData(arrayTemp(1), temp1, ESMF_DATA_REF, status)
       call ESMF_ArrayGetData(arrayTemp(2), temp2, ESMF_DATA_REF, status)
 
 !     For now, an if construct for the different relative locations
 !     TODO: also set corners and faces
-      i1 = 1 - haloWidth
-      i2 = counts(1) + haloWidth
-      j1 = 1 - haloWidth
-      j2 = counts(2) + haloWidth
       if (relloc .eq. ESMF_CELL_UNDEFINED) then
         status = ESMF_FAILURE
 
       elseif (relloc .eq. ESMF_CELL_CENTER) then
-        do i = i1,i2
-          coord1 = delta(1)*0.5*real(i+i-1) + min(1)
-          do j = j1,j2
-            coord2 = delta(2)*0.5*real(j+j-1) + min(2)
+        do i = 1,countsPlus(1)
+          i1 = i - haloWidth
+          coord1 = delta(1)*0.5*real(i1+i1-1) + min(1)
+          do j = 1,countsPlus(2)
+            j1 = j - haloWidth
+            coord2 = delta(2)*0.5*real(j1+j1-1) + min(2)
             temp1(i,j) = coord1 
             temp2(i,j) = coord2 
           enddo
         enddo
 
       elseif (relloc .eq. ESMF_CELL_NFACE) then
-        do i = i1,i2
-          coord1 = delta(1)*0.5*real(i+i-1) + min(1)
-          do j = j1,j2
-            coord2 = delta(2)*real(j) + min(2)
+        do i = 1,countsPlus(1)
+          i1 = i - haloWidth
+          coord1 = delta(1)*0.5*real(i1+i1-1) + min(1)
+          do j = 1,countsPlus(2)
+            j1 = j - haloWidth
+            coord2 = delta(2)*real(j1) + min(2)
             temp1(i,j) = coord1 
             temp2(i,j) = coord2 
           enddo
         enddo
 
       elseif (relloc .eq. ESMF_CELL_SFACE) then
-        do i = i1,i2
-          coord1 = delta(1)*0.5*real(i+i-1) + min(1)
-          do j = j1,j2
-            coord2 = delta(2)*real(j-1) + min(2)
+        do i = 1,countsPlus(1)
+          i1 = i - haloWidth
+          coord1 = delta(1)*0.5*real(i1+i1-1) + min(1)
+          do j = 1,countsPlus(2)
+            j1 = j - haloWidth
+            coord2 = delta(2)*real(j1-1) + min(2)
             temp1(i,j) = coord1 
             temp2(i,j) = coord2 
           enddo
         enddo
 
       elseif (relloc .eq. ESMF_CELL_EFACE) then
-        do i = i1,i2
-          coord1 = delta(1)*real(i) + min(1)
-          do j = j1,j2
-            coord2 = delta(2)*0.5*real(j+j-1) + min(2)
+        do i = 1,countsPlus(1)
+          i1 = i - haloWidth
+          coord1 = delta(1)*real(i1) + min(1)
+          do j = 1,countsPlus(2)
+            j1 = j - haloWidth
+            coord2 = delta(2)*0.5*real(j1+j1-1) + min(2)
             temp1(i,j) = coord1 
             temp2(i,j) = coord2 
           enddo
         enddo
 
       elseif (relloc .eq. ESMF_CELL_WFACE) then
-        do i = i1,i2
-          coord1 = delta(1)*real(i-1) + min(1)
-          do j = j1,j2
-            coord2 = delta(2)*0.5*real(j+j-1) + min(2)
+        do i = 1,countsPlus(1)
+          i1 = i - haloWidth
+          coord1 = delta(1)*real(i1-1) + min(1)
+          do j = 1,countsPlus(2)
+            j1 = j - haloWidth
+            coord2 = delta(2)*0.5*real(j1+j1-1) + min(2)
             temp1(i,j) = coord1 
             temp2(i,j) = coord2 
           enddo
         enddo
 
       elseif (relloc .eq. ESMF_CELL_NECORNER) then
-        do i = i1,i2
-          coord1 = delta(1)*real(i) + min(1)
-          do j = j1,j2
-            coord2 = delta(2)*real(j) + min(2)
+        do i = 1,countsPlus(1)
+          i1 = i - haloWidth
+          coord1 = delta(1)*real(i1) + min(1)
+          do j = 1,countsPlus(2)
+            j1 = j - haloWidth
+            coord2 = delta(2)*real(j1) + min(2)
             temp1(i,j) = coord1 
             temp2(i,j) = coord2 
           enddo
