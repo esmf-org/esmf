@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.18 2003/01/16 17:24:18 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.19 2003/01/16 18:23:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -73,18 +73,10 @@
         integer :: num_region_ids        ! a counter for the number of
                                          ! region identifiers for this
                                          ! subgrid
-        integer :: global_max_i          ! cell count extents in 1st coord
-                                         ! direction
-        integer :: global_max_j          ! cell count extents in 2nd coord
-                                         ! direction
         real :: global_min_coord1        ! coordinate extents in 1st coord
         real :: global_max_coord1        ! direction
         real :: global_min_coord2        ! coordinate extents in 2nd coord
         real :: global_max_coord2        ! direction
-        integer :: local_max_i           ! cell count extents in 1st coord
-                                         ! direction
-        integer :: local_max_j           ! cell count extents in 2nd coord
-                                         ! direction
         real :: local_min_coord1         ! coordinate extents in 1st coord
         real :: local_max_coord1         ! direction
         real :: local_min_coord2         ! coordinate extents in 2nd coord
@@ -184,7 +176,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.18 2003/01/16 17:24:18 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.19 2003/01/16 18:23:49 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -548,14 +540,10 @@
       physgrid%num_lmasks = 0
       physgrid%num_mmasks = 0
       physgrid%num_region_ids = 0
-      physgrid%global_max_i = 0
-      physgrid%global_max_j = 0
       physgrid%global_min_coord1 = 0.0
       physgrid%global_max_coord1 = 0.0
       physgrid%global_min_coord2 = 0.0
       physgrid%global_max_coord2 = 0.0
-      physgrid%local_max_i = 0
-      physgrid%local_max_j = 0
       physgrid%local_min_coord1 = 0.0
       physgrid%local_max_coord1 = 0.0
       physgrid%local_min_coord2 = 0.0
@@ -806,22 +794,18 @@
                  local_min_coord1 = physgrid%local_min_coord1
       if(present(local_max_coord1)) &
                  local_max_coord1 = physgrid%local_max_coord1
-      if(present(local_nmax1)) local_nmax1 = physgrid%local_max_i
       if(present(local_min_coord2)) &
                  local_min_coord2 = physgrid%local_min_coord2
       if(present(local_max_coord2)) &
                  local_max_coord2 = physgrid%local_max_coord2
-      if(present(local_nmax2)) local_nmax2 = physgrid%local_max_j
       if(present(global_min_coord1)) &
                  global_min_coord1 = physgrid%global_min_coord1
       if(present(global_max_coord1)) &
                  global_max_coord1 = physgrid%global_max_coord1
-      if(present(global_nmax1)) global_nmax1 = physgrid%global_max_i
       if(present(global_min_coord2)) &
                  global_min_coord2 = physgrid%global_min_coord2
       if(present(global_max_coord2)) &
                  global_max_coord2 = physgrid%global_max_coord2
-      if(present(global_nmax2)) global_nmax2 = physgrid%global_max_j
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -911,22 +895,18 @@
                  physgrid%local_min_coord1 = local_min_coord1
       if(present(local_max_coord1)) &
                  physgrid%local_max_coord1 = local_max_coord1
-      if(present(local_nmax1)) physgrid%local_max_i = local_nmax1
       if(present(local_min_coord2)) &
                  physgrid%local_min_coord2 = local_min_coord2
       if(present(local_max_coord2)) &
                  physgrid%local_max_coord2 = local_max_coord2
-      if(present(local_nmax2)) physgrid%local_max_j = local_nmax2
       if(present(global_min_coord1)) &
                  physgrid%global_min_coord1 = global_min_coord1
       if(present(global_max_coord1)) &
                  physgrid%global_max_coord1 = global_max_coord1
-      if(present(global_nmax1)) physgrid%global_max_i = global_nmax1
       if(present(global_min_coord2)) &
                  physgrid%global_min_coord2 = global_min_coord2
       if(present(global_max_coord2)) &
                  physgrid%global_max_coord2 = global_max_coord2
-      if(present(global_nmax2)) physgrid%global_max_j = global_nmax2
 
       if(rcpresent) rc = ESMF_SUCCESS
 
