@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.110 2004/04/13 22:56:33 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.111 2004/04/19 20:25:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -719,15 +719,23 @@
       ! Allocate resources based on number of DE's
       call ESMF_newDELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
                                logRectFlag=lrFlag, rc=status)
-      if (otoFlag /= ESMF_TRUE) stop    ! ensure this is 1-to-1 layout
-      if (ndim /= 2) stop               ! ensure this is 2D Layout
-      if (lrFlag /= ESMF_TRUE) stop     ! ensure this is logical rectangular l.
-      call ESMF_newDELayoutGet(delayout, deCountPerDim=nDEs, rc=status)
-      ! now need to do some shifting to satisfy funny stuff here...
-      nDEs(2) = nDEs(1)
-      nDEs(1) = nDEs(0)
+
+      ! Check DELayout attributes
+      if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layout
+        print *, "ERROR in ESMF_DistGridConstructInternal: not a 1-to-1 layout"
+        return
+      endif
+      if (ndim .ne. 2) then               ! ensure this is 2D Layout
+        print *, "ERROR in ESMF_DistGridConstructInternal: not a 2D layout"
+        return
+      endif
+      ! if (lrFlag .ne. ESMF_TRUE) then     ! ensure this is logical rect layout
+      !   print *, "ERROR in ESMF_DistGridConstructInternal: ", &
+      !            "not a logically rectangular layout"
+      !   return
+      ! endif
+      call ESMF_newDELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=status)
       nDEs(0) = 1
-      print *, 'newDELayout: ', nDEs(0), nDEs(1), nDEs(2)
       nDE = nDEs(1) * nDEs(2)
       if((status .NE. ESMF_SUCCESS) .or. (nDE .le. 0)) then
         print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
@@ -1723,8 +1731,8 @@
       ! bring things into the form that the local code expects them in
       nDEx = deCountPerDim(1)
       nDEy = deCountPerDim(2)
-      myDEx = coord(1)+1
-      myDEy = coord(2)+1
+      myDEx = coord(1)
+      myDEy = coord(2)
 
       DEID = (myDEy-1)*nDEx + myDEx
 
