@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.11 2003/03/13 17:01:20 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.12 2003/03/13 21:18:16 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,11 +76,9 @@
 
  // miscellaneous fun stuff
     int ESMC_XPacketIntersect(ESMC_XPacket *xpacket1, 
-                              ESMC_XPacket *xpacket2,
-                              ESMC_XPacket *intxp);
+                              ESMC_XPacket *xpacket2);
     int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
-                                  int size_axisindex,
-                                  ESMC_XPacket *xpacket);
+                                  int size_axisindex);
  
  // native C++ constructors/destructors
 	ESMC_XPacket(void);
