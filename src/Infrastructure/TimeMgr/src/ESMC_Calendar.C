@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.36 2003/12/19 19:20:22 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.37 2004/01/12 21:30:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.36 2003/12/19 19:20:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.37 2004/01/12 21:30:27 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -602,10 +602,10 @@
             if (dayOfYear <= 0) dayOfYear += daysPerYear.d;  
 
             if (mm != ESMC_NULL_POINTER) {
-              *mm = dayOfYear / 30 + 1;  // each month has 30 days
+              *mm = (dayOfYear-1) / 30 + 1;  // each month has 30 days
             }
             if (dd != ESMC_NULL_POINTER) {
-              *dd = dayOfYear % 30;      // each month has 30 days
+              *dd = (dayOfYear-1) % 30 + 1;  // each month has 30 days
             }
 
             // convert basetime seconds to Julian days
