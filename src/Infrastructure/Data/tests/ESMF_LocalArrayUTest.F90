@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.10 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.11 2003/09/05 21:46:34 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -47,6 +47,8 @@
     integer :: result = 0
 
     
+    call ESMF_FrameworkInitialize()
+
 !-------------------------------------------------------------------------------
 !   ! Test 1:
 !   !  Create based on an existing, allocated F90 pointer. 
@@ -717,6 +719,9 @@
     print *, "array 1 destroy returned"
 
 !-------------------------------------------------------------------------------
+
+    call ESMF_FrameworkFinalize()
+
 
     end program ESMF_LocalArrayTest
     

@@ -103,6 +103,7 @@
     type(PtrSWrap5) :: sizetest5S(2)
     
 
+    call ESMF_FrameworkInitialize()
 
     call c_ESMF_SizePrint(sizetest1(1), sizetest1(2), 1)
     call c_ESMF_SizePrint(sizetest2(1), sizetest2(2), 2)
@@ -122,6 +123,7 @@
     call c_ESMF_SizePrint(sizetest4S(1), sizetest4S(2), 4)
     call c_ESMF_SizePrint(sizetest5S(1), sizetest5S(2), 5)
 
+    call ESMF_FrameworkFinalize()
 
     end program test
     
