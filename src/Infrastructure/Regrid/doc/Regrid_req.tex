@@ -1,4 +1,4 @@
-% $Id: Regrid_req.tex,v 1.12 2002/05/14 17:44:57 miredell Exp $
+% $Id: Regrid_req.tex,v 1.13 2002/05/15 22:48:52 cnh Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -35,7 +35,7 @@ Components must be able to destroy regriddings to free up memory.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} POP, CICE, CAM desired, NSIPP, CCSM-CPL, NCEP-SSI \\
+{\bf Source:} POP, CICE, CAM desired, NSIPP, CCSM-CPL, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -48,7 +48,7 @@ Components must be able to query various properties of a regridding.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} CCSM-CPL, NCEP-SSI \\
+{\bf Source:} CCSM-CPL, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Ideally, components should not need to access internal
@@ -67,7 +67,7 @@ renormalize or to adapt to dynamic area fractions (like ice fraction).
 
 \begin{reqlist}
 {\bf Priority:} 3 \\
-{\bf Source:} CCSM-CPL, NCEP-SSI \\
+{\bf Source:} CCSM-CPL, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} In general, this should be strongly discouraged as it may
@@ -82,7 +82,7 @@ Components may be able to read regridding information from a file.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} POP, CICE, CAM desired, NSIPP, CCSM-CPL, NCEP-SSI \\
+{\bf Source:} POP, CICE, CAM desired, NSIPP, CCSM-CPL, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Useful if creating regriddings is time-consuming to avoid
@@ -96,7 +96,7 @@ Components may be able to write regridding information to a file.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} POP, CICE, CAM desired, NSIPP, CCSM-CPL, NCEP-SSI \\
+{\bf Source:} POP, CICE, CAM desired, NSIPP, CCSM-CPL, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Useful if creating regriddings is time-consuming - compute once
@@ -127,7 +127,7 @@ a single call must be supported.
 
 \begin{reqlist}
 {\bf Priority:} 1  \\
-{\bf Source:} CCSM-CPL, NCEP-GSM, NCEP-SSI \\
+{\bf Source:} CCSM-CPL, NCEP-GSM, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} This should be supplied for efficiency, but may not
@@ -142,7 +142,7 @@ of a full field structure and is supplied for efficiency.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} POP, CICE, CAM desired, CCSM-CPL, NCEP-GSM, NCEP-SSI \\
+{\bf Source:} POP, CICE, CAM desired, CCSM-CPL, NCEP-GSM, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Field info may still be used for creation of the
@@ -157,7 +157,7 @@ fields and grids on which the fields are placed.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} POP, CICE, CAM desired, NSIPP, CCSM-CPL, NCEP-SSI, NCEP-GSM \\
+{\bf Source:} POP, CICE, CAM desired, NSIPP, CCSM-CPL, NCEP-SSI, NCEP-GSM, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} A rudimentary error check, but would probably rely on
@@ -172,7 +172,7 @@ pair.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} POP, CICE, CAM required, CCSM-CPL \\
+{\bf Source:} POP, CICE, CAM required, CCSM-CPL, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Both non-conservative and conservative methods will be needed
@@ -230,7 +230,7 @@ required have been so noted within their own respective decriptions.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} PSAS, NSIPP, NCEP-SSI \\
+{\bf Source:} PSAS, NSIPP, NCEP-SSI , MIT(milestone)\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Needed by PSAS, but not milestone
@@ -246,7 +246,7 @@ the use of a mask.  Note that use of a mask is inappropriate for some methods
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} CCSM-CPL (desired) \\
-              WRF required, NSIPP, NCEP-GSM \\
+              WRF required, NSIPP, NCEP-GSM, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -262,7 +262,7 @@ be determined (eg source grid is ``master'').
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:}  \\
-              WRF required, NSIPP, NCEP-GSM \\
+              WRF required, NSIPP, NCEP-GSM, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -324,7 +324,7 @@ defined.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} POP,CICE,CAM required, NSIPP, CCSM-CPL \\
+{\bf Source:} POP,CICE,CAM required, NSIPP, CCSM-CPL, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Methods exist for both first and second-order
@@ -359,7 +359,7 @@ A method for verifying conservation must be supplied.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} CAM-FV, CAM-EUL \\
+{\bf Source:} CAM-FV, CAM-EUL, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} CAM-FV vertical remapping requires this.
@@ -383,7 +383,7 @@ regridded fields.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  POP, CICE, CAM required, CCSM-CPL, NCEP-GSM, NCEP-SSI \\
+{\bf Source:}  POP, CICE, CAM required, CCSM-CPL, NCEP-GSM, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} This will require either internal approximations to
@@ -391,6 +391,8 @@ regridded fields.
              user to pass gradient information (eg second-order conservative
              methods).  See requirements on field dependence.  Also, this
              requirement can be in conflict with monotonicity requirements.
+             Options to specify what happens to higher-order at
+             boundaries are needed.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -403,7 +405,7 @@ inferred by the grid type or specified by user.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  POP, CICE, CAM required, NSIPP, CCSM-CPL, NCEP-SSI \\
+{\bf Source:}  POP, CICE, CAM required, NSIPP, CCSM-CPL, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} In spherical coordinates, meridional velocity components
@@ -422,7 +424,7 @@ coordinate singularities such as the poles in spherical coordinates.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:}  POP, CICE (CCSM) desired, NSIPP, CCSM-CPL (desired) \\
+{\bf Source:}  POP, CICE (CCSM) desired, NSIPP, CCSM-CPL (desired), MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Currently working on whether it is even possible to do this
@@ -440,7 +442,7 @@ no physical grid information is required for creating the regridding.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  WRF required, NSIPP \\
+{\bf Source:}  WRF required, NSIPP, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Will need a general way to specify stencils
@@ -574,7 +576,7 @@ with the functional transform being applied.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  NCEP-SSI (milestone), NSIPP \\
+{\bf Source:}  NCEP-SSI (milestone), NSIPP, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} MI - The NCEP-SSI transforms between vertical EOF space
@@ -590,7 +592,7 @@ Adjoints shall be supplied for interpolation TO ungridded data.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  NCEP-SSI (milestone), PSAS (not milestone), NSIPP  \\
+{\bf Source:}  NCEP-SSI (milestone), PSAS (not milestone), NSIPP, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -603,7 +605,7 @@ Methods for regridding FROM ungridded data TO gridded data may be
 supplied (eg nearest-neighbor distance-weighted schemes).
 
 \begin{reqlist}
-{\bf Priority:} 1 \\
+{\bf Priority:} 3 \\
 {\bf Source:} MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
@@ -621,7 +623,7 @@ strongly dependent on model fields.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:}  CAM-FV, NSIPP, CCSM-CPL \\
+{\bf Source:}  CAM-FV, NSIPP, CCSM-CPL, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} The implementation report will examine use of
@@ -645,7 +647,7 @@ cells of two grids shall be available.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:}  NSIPP \\
+{\bf Source:}  NSIPP, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
