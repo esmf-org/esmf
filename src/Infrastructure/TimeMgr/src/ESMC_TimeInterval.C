@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.44 2004/02/09 07:06:07 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.45 2004/03/05 00:50:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.44 2004/02/09 07:06:07 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.45 2004/03/05 00:50:02 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -111,7 +111,9 @@
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    // calendar interval
+    // relative calendar interval
+    //  TODO:  when calendar, startTime, endTime specified, convert to
+    //         absolute seconds instead of holding in relative yy, mm, d.
     if (yy != ESMC_NULL_POINTER) {
       this->yy = *yy;  // >= 32-bit
     } else if (yy_i8 != ESMC_NULL_POINTER) {
@@ -128,20 +130,20 @@
       this->d = *d_i8; // >= 64-bit
     }
 
-    // TODO: use Calendar-defined SecondsPerDay; for now assume 86400
+    // TODO: use Calendar-defined SecondsPerDay; default to 86400 (earth-cal)
+    //       (really can't do if calendar, hence days, is undefined!)
     // get number of seconds in a day
-    int secPerDay = SECONDS_PER_DAY;
-//    if (calendar != ESMC_NULL_POINTER) {
-//      secPerDay = calendar->secondsPerDay;
-//    }
-
-    if (d != ESMC_NULL_POINTER) {
-      this->s = ((ESMF_KIND_I8) *d) * secPerDay;  // >= 32-bit
-    } else if (d_i8 != ESMC_NULL_POINTER) {
-      this->s = *d_i8 * secPerDay; // >= 64-bit
-    } else if (d_r8 != ESMC_NULL_POINTER) {
-      this->s = (ESMF_KIND_I8) (*d_r8 * secPerDay);
-    }
+//  int secPerDay = SECONDS_PER_DAY;  // default to Earth-type calendar
+//  if (calendar != ESMC_NULL_POINTER) {  // TODO: or startTime or endTime
+//    secPerDay = calendar->secondsPerDay;
+//  }
+//  if (d != ESMC_NULL_POINTER) {
+//    this->s += ((ESMF_KIND_I8) *d) * secPerDay;  // >= 32-bit
+//  } else if (d_i8 != ESMC_NULL_POINTER) {
+//    this->s += *d_i8 * secPerDay; // >= 64-bit
+//  } else if (d_r8 != ESMC_NULL_POINTER) {
+//    this->s += (ESMF_KIND_I8) (*d_r8 * secPerDay);
+//  }
 
     // use base class set for sub-day values
     ESMC_BaseTimeSet(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
@@ -206,10 +208,18 @@
 
     // TODO: fractional, sub-seconds
 
-    // inititialize time value to pass to base time class get
-    ESMF_KIND_I8 baseTimeToDivide = this->s;
+    // Inititialize time-to-convert value to pass to base time class get().
+    // Represents remaining unconverted time; any years, months or days
+    //   requested will be removed from this time.  In this way, a requested
+    //   unit is bounded by the next higher requested unit.
+    ESMF_KIND_I8 baseTimeToConvert = this->s;
 
-    // calendar interval
+    // relative calendar interval
+    //  TODO:  When calendar, startTime, endTime specified, can convert 
+    //         between relative and absolute units.  Relative and absolute
+    //         parts are additive (e.g. d=1, h=48 equals 3 days).
+
+    // TODO: yy and mm need similar logic as d below
 
     if (yy != ESMC_NULL_POINTER) {
       // ensure fit in given int
@@ -229,44 +239,33 @@
       *mm_i8 = this->mm;   // >= 64-bit
     }
 
-      // TODO: use when Calendar Intervals implemented
-//    if (d != ESMC_NULL_POINTER) {
-//      // ensure fit in given int
-//      if (this->d < INT_MIN || this->d > INT_MAX) return(ESMF_FAILURE);
-//      *d = (ESMF_KIND_I4) this->d;  // >= 32-bit
-//    }
-//    if (d_i8 != ESMC_NULL_POINTER) {
-//      *d_i8 = this->d;  // >= 64-bit
-//    }
-
-    // TODO: use Calendar-defined SecondsPerDay; for now assume 86400
+    // TODO: use Calendar-defined SecondsPerDay; default to 86400 (earth-cal)
+    //       (really can't do if calendar, hence days, is undefined!)
     // get number of seconds in a day
-    int secPerDay = SECONDS_PER_DAY;
-//    if (Calendar != ESMC_NULL_POINTER) {
-//      secPerDay = Calendar->SecondsPerDay;
-//    }
+    int secPerDay = SECONDS_PER_DAY;  // default to Earth-type calendar
+//  if (calendar != ESMC_NULL_POINTER) {  // TODO: or startTime or endTime
+//    secPerDay = calendar->secondsPerDay;
+//  }
+    baseTimeToConvert += this->d * secPerDay;
 
-    if (d != ESMC_NULL_POINTER) {
-      ESMF_KIND_I8 days = this->s / secPerDay;
-      // ensure fit in given int
-      if (days < INT_MIN || days > INT_MAX) return(ESMF_FAILURE);
-      *d = days;
-    }
-    if (d_i8 != ESMC_NULL_POINTER) {
-      *d_i8 = this->s / secPerDay;
-    }
-    if (d_r8 != ESMC_NULL_POINTER) {
-      *d_r8 = (ESMF_KIND_R8) this->s / (ESMF_KIND_R8) secPerDay;
-    }
-
-    // if any type of day was requested, remove days from baseTimeToDivide
-    if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER ||
-        d_r8 != ESMC_NULL_POINTER) {
-      baseTimeToDivide %= secPerDay;
+    if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) {
+      // total relative and absolute days
+      ESMF_KIND_I8 days = baseTimeToConvert / secPerDay;
+      if (d != ESMC_NULL_POINTER) {
+        // ensure fit in given int
+        if (days < INT_MIN || days > INT_MAX) return(ESMF_FAILURE);
+        *d = (ESMF_KIND_I4) days;  // >= 32-bit
+      }
+      if (d_i8 != ESMC_NULL_POINTER) {
+        *d_i8 = days;  // >= 64-bit
+      }
+      // remove days from base time to get remaining sub-day units (h,m,s)
+      baseTimeToConvert %= secPerDay;
     }
 
-    // use base class to get sub-day values on remaining unconverted base time
-    if (ESMC_BaseTimeGet(baseTimeToDivide, h, m, s, s_i8, ms, us, ns,
+    // use base class to get sub-day values (h,m,s) on remaining
+    //   unconverted base time
+    if (ESMC_BaseTimeGet(baseTimeToConvert, h, m, s, s_i8, ms, us, ns,
                          h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, sN, sD) ==
                          ESMF_FAILURE) return(ESMF_FAILURE);
 
@@ -959,6 +958,69 @@
 }  // end ESMC_TimeInterval::operator*=
 
 //-------------------------------------------------------------------------
+//BOP 
+// !IROUTINE:  ESMC_TimeInterval(+) - Sum of two TimeIntervals
+//    
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator+(
+//    
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//    
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to add
+//
+// !DESCRIPTION:
+//    Adds given {\tt timeInterval} expression to this {\tt timeInterval}.
+//
+//EOP
+// !REQUIREMENTS:
+
+    ESMC_TimeInterval sum;
+
+    // TODO: fractional & calendar interval parts
+
+    // then perform the addition using ESMC_BaseTime operator
+    sum = ESMC_BaseTime::operator+(timeInterval);
+
+    return(sum);
+
+}  // end ESMC_TimeInterval::operator+
+
+//-------------------------------------------------------------------------
+//BOP 
+// !IROUTINE:  ESMC_TimeInterval(-) - Difference between two TimeIntervals
+//    
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator-(
+//    
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//    
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to subtract
+//
+// !DESCRIPTION:
+//    Subtracts given {\tt timeInterval} expression from this 
+//    {\tt timeInterval}.
+//
+//EOP
+// !REQUIREMENTS:
+
+    ESMC_TimeInterval diff;
+
+    // TODO: fractional & calendar interval parts
+
+    // then perform the subtraction using ESMC_BaseTime operator
+    diff = ESMC_BaseTime::operator-(timeInterval);
+
+    return(diff);
+
+}  // end ESMC_TimeInterval::operator-
+
+//-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_TimeInterval(=) - copy or assign from BaseTime expression
 //
@@ -1137,7 +1199,7 @@
 //   ESMC_BaseTime(0, 0, 1) { // TODO: F90 issue with base class constructor?
    s  = 0;
    sN = 0;
-   sD = 0;
+   sD = 1;
    yy = 0;
    mm = 0;
    d  = 0;
@@ -1157,10 +1219,7 @@
 // !ARGUMENTS:
       ESMF_KIND_I8 s,     // in - integer seconds
       ESMF_KIND_I4 sN,    // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD,    // in - fractional seconds, denominator
-      ESMF_KIND_I8 yy,    // in - calendar interval number of years
-      ESMF_KIND_I8 mm,    // in - calendar interval number of months
-      ESMF_KIND_I8 d) :   // in - calendar interval number of days
+      ESMF_KIND_I4 sD) :  // in - fractional seconds, denominator
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_TimeInterval} via {\tt ESMC\_BaseTime}
@@ -1170,6 +1229,29 @@
 // !REQUIREMENTS:
 
     ESMC_BaseTime(s, sN, sD) {  // pass to base class constructor
+
+} // end ESMC_TimeInterval
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval - native C++ constructor
+//
+// !INTERFACE:
+     ESMC_TimeInterval::ESMC_TimeInterval(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+      ESMF_KIND_I8 yy,    // in - calendar interval number of years
+      ESMF_KIND_I8 mm,    // in - calendar interval number of months
+      ESMF_KIND_I8 d) {   // in - calendar interval number of days
+//
+// !DESCRIPTION:
+//      Initializes a {\tt ESMC\_TimeInterval} via calendar units
+//
+//EOP
+// !REQUIREMENTS:
 
     this->yy = yy;
     this->mm = mm;

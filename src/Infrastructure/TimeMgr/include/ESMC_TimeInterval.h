@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.28 2004/01/26 21:28:21 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.29 2004/03/05 00:50:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -79,9 +79,9 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                                              // TODO: (& ESMC_Base class when
                                              // fully aligned with F90 equiv)
   private:
-    ESMF_KIND_I8 yy;      // for Calendar intervals:  number of years
-    ESMF_KIND_I8 mm;      // for Calendar intervals:  number of months
-    ESMF_KIND_I8 d;       // for Calendar intervals:  number of days
+    ESMF_KIND_I8 yy;      // for relative Calendar intervals:  number of years
+    ESMF_KIND_I8 mm;      // for relative Calendar intervals:  number of months
+    ESMF_KIND_I8 d;       // for relative Calendar intervals:  number of days
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -159,6 +159,10 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     ESMC_TimeInterval  operator* (const ESMF_KIND_R8 &) const;
     ESMC_TimeInterval& operator*=(const ESMF_KIND_R8 &);
 
+    // addition, subtraction
+    ESMC_TimeInterval operator+(const ESMC_TimeInterval &) const;
+    ESMC_TimeInterval operator-(const ESMC_TimeInterval &) const;
+
     // copy or assign from ESMC_BaseTime expressions
     // TODO:  should be implicit ?
     ESMC_TimeInterval& operator=(const ESMC_BaseTime &);
@@ -178,8 +182,8 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);
-    ESMC_TimeInterval(ESMF_KIND_I8 s, int sN, int sD,
-                      ESMF_KIND_I8 yy, ESMF_KIND_I8 mm, ESMF_KIND_I8 d);
+    ESMC_TimeInterval(ESMF_KIND_I8 s, int sN=0, int sD=1);
+    ESMC_TimeInterval(ESMF_KIND_I8 yy, ESMF_KIND_I8 mm, ESMF_KIND_I8 d);
 
     ~ESMC_TimeInterval(void);
 
@@ -200,6 +204,8 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // return in string format (TMG 1.5.9)
     int ESMC_TimeIntervalGetString(char *timeString) const;
 
+    friend class ESMC_Calendar;
+                                                        // (TMG 2.5.5)
 //
  // < declare private interface methods here >
 //
