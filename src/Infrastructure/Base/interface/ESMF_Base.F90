@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.93 2004/04/13 22:55:53 jwolfe Exp $
+! $Id: ESMF_Base.F90,v 1.94 2004/04/14 20:48:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,7 +122,8 @@
       type(ESMF_DataType), parameter :: ESMF_DATA_INTEGER = ESMF_DataType(1), &
                                         ESMF_DATA_REAL = ESMF_DataType(2), &
                                         ESMF_DATA_LOGICAL = ESMF_DataType(3), &
-                                        ESMF_DATA_CHARACTER = ESMF_DataType(4)
+                                        ESMF_DATA_CHARACTER = ESMF_DataType(4), &
+                                        ESMF_DATA_COMPLEX = ESMF_DataType(5)
 
 !------------------------------------------------------------------------------
 !
@@ -294,7 +295,7 @@
              ESMF_STATE_BUSY, ESMF_STATE_INVALID
 
       public ESMF_DATA_INTEGER, ESMF_DATA_REAL, &
-             ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER
+             ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER, ESMF_DATA_COMPLEX
 
       public ESMF_I1, ESMF_I2, ESMF_I4, ESMF_I8, & 
              ESMF_R4, ESMF_R8, ESMF_C8, ESMF_C16
@@ -422,7 +423,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.93 2004/04/13 22:55:53 jwolfe Exp $'
+               '$Id: ESMF_Base.F90,v 1.94 2004/04/14 20:48:04 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -1406,7 +1407,7 @@ end function
 !     \end{description}
 !
 !EOPI
-      integer :: status, i, j
+      integer :: i, j
       integer :: min, max, stride
 
       print *, "DomainListPrint"
