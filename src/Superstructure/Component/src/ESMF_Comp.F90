@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.125 2005/03/22 04:03:42 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.126 2005/03/22 04:33:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -254,7 +254,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.125 2005/03/22 04:03:42 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.126 2005/03/22 04:33:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1278,7 +1278,7 @@ end function
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, 
+      recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
         vm_info, gridcomptype, grid, clock, dirPath, configFile, &
         config, ctype, rc)
 !
