@@ -1,4 +1,4 @@
-% $Id: IO_req.tex,v 1.11 2002/05/13 21:31:41 pwjones Exp $
+% $Id: IO_req.tex,v 1.12 2002/05/14 17:14:24 miredell Exp $
 
 %=============================================================================
 % Requirements may be itemized under a main topic:
@@ -18,10 +18,9 @@ unstuctured grids, as well as observational data has to be determined
 within ESMF. The ESMF metadata conventions shall be an extension of the NetCDF 
 Climate-Forecast (CF) Metadata Convensions \cite{NetCDF_CF_v1_beta3}.
 
-
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} DAO, NCEP-GSM, NCEP-SSI, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Document inspection \\
 \end{reqlist}
@@ -35,7 +34,7 @@ cover all supported formats.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} DAO, NCEP-GSM, NCEP-SSI, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 \end{reqlist}
@@ -51,7 +50,7 @@ files for regular gridded data covered by ESMF metadata conventions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} DAO, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 \end{reqlist}
@@ -104,7 +103,7 @@ regular gridded data covered by ESMF metadata conventions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP \\
+{\bf Source:} DAO \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 \end{reqlist}
@@ -119,7 +118,7 @@ files for data on unstructured grids covered by ESMF metadata conventions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP \\
+{\bf Source:} DAO \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 \end{reqlist}
@@ -134,7 +133,7 @@ files for observational data  covered by ESMF metadata conventions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP \\
+{\bf Source:} DAO \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 \end{reqlist}
@@ -191,7 +190,7 @@ files for regular gridded data covered by ESMF metadata conventions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP \\
+{\bf Source:} DAO \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 \end{reqlist}
@@ -205,7 +204,7 @@ files for data on unstructured grids covered by ESMF metadata conventions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP \\
+{\bf Source:} DAO \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 \end{reqlist}
@@ -219,7 +218,7 @@ files for observational data  covered by ESMF metadata conventions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP \\
+{\bf Source:} DAO \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 \end{reqlist}
@@ -233,14 +232,13 @@ files for regular gridded data covered by ESMF metadata conventions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} NCEP \\
+{\bf Source:} NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Although GRIB1 is currently in operational use at NCEP,
 it is proposed that ESMF will support GRIB2 format assuming transition
 in the next two years.
 \end{reqlist}
-
 
 
 \sreq{Reading and Writing GRIB files for Data on Unstructured Grids}
@@ -249,32 +247,14 @@ ESMF has to provide interfaces and software to read and write GRIB
 files for data on unstructured grids covered by ESMF metadata conventions.
 
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} NCEP \\
+{\bf Priority:} 3 \\
+{\bf Source:} \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Although GRIB1 is currently in operational use at NCEP,
 it is proposed that ESMF will support GRIB2 format assuming transition
 in the next two years.
 \end{reqlist}
-
-
-\sreq{Reading and Writing GRIB files for Observational Data}
-
-ESMF has to provide interfaces and software to read and write GRIB
-files for observational data covered by ESMF metadata conventions.
-
-\begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} NCEP \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:} Although GRIB1 is currently in operational use at NCEP,
-it is proposed that ESMF will support GRIB2 format assuming transition
-in the next two years.
-\end{reqlist}
-
-
 
 
 \sreq{Reading and Writing Native Binary Files}
@@ -288,7 +268,7 @@ Point Standard.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} DAO, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} DAO, NCEP-GSM, NCEP-SSI, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} XML metadata should be specified. Possibility of BIG
@@ -296,14 +276,14 @@ ENDIAN and LITTLE ENDIAN bit ordering should be taken into account.
 \end{reqlist}
 
 
-\sreq{Reading BUFR Files}
+\sreq{Reading and Writing BUFR Files}
 
-ESMF has to provide interfaces and software to read BUFR files for
+ESMF has to provide interfaces and software to read and write BUFR files for
 observational data covered by ESMF metadata convensions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP required \\
+{\bf Source:} DAO, NCEP-SSI (milestone) \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Limitations on types of data, etc.
@@ -313,7 +293,7 @@ observational data covered by ESMF metadata convensions.
 \req{Parallel I/O Requirements}
 
 
-\sreq{Single-threaded IO of distribuded data}
+\sreq{Single-threaded IO of distributed data}
 
 ESMF should provide single-threaded IO of distributed data when a
 single process acquires all the data from other processors and writes
@@ -323,7 +303,7 @@ processes.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP, NSIPP, CAM-EUL, CLM, CCSM-CPL \\
+{\bf Source:} DAO, NCEP-GSM, NCEP-SSI, NSIPP, CAM-EUL, CLM, CCSM-CPL \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test.
 \end{reqlist}
@@ -340,13 +320,13 @@ processors using high-speed disks.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} DAO, NCEP, NSIPP \\
+{\bf Source:} DAO, NCEP-SSI, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
 
-\sreq{Multi-threaded read of distribuded data from a single file}
+\sreq{Multi-threaded read of distributed data from a single file}
 
 
 ESMF should provide multi-threaded read of distributed data when each
@@ -354,7 +334,7 @@ process reads data from the the same file.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} NCEP, DAO, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} NCEP-GSM, NCEP-SSI, DAO, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test.
 {\bf Note} The ESMF I/O may provide this functionality only when it is 
@@ -362,8 +342,7 @@ enabled by underlying library.
 \end{reqlist}
 
 
-
-\sreq{Multi-threaded write of distribuded data to a single file}
+\sreq{Multi-threaded write of distributed data to a single file}
 
 
 ESMF should provide multi-threaded write of distributed data to the same 
@@ -371,7 +350,7 @@ file.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} NCEP, DAO, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} NCEP-GSM, NCEP-SSI, DAO, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test.
 {\bf Note} The ESMF I/O may provide this functionality only when it is 

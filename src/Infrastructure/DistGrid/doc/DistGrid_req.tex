@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.15 2002/05/13 16:54:08 pwjones Exp $
+% $Id: DistGrid_req.tex,v 1.16 2002/05/14 17:18:59 miredell Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -14,10 +14,38 @@ types follow in Part~\ref{DG:gridtypes}.
 Given a global domain and a PElist, there will be methods to derive an
 appropriate layout of PEs in multiple dimensions.
 
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\ssreq{Subdivide a PE layout}
+
+Subdivide a PE layout.  All Distgrid operations shall work on such a sub-layout.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source] NCEP-SSI \\
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 \sreq{User-specified PE layout}
 
 It will be possible to override the internally generated PE layout above
 by direct user specification.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
 
 \sreq{1D decomposition}
 
@@ -26,7 +54,7 @@ ESMF permits 1D domain decomposition, i.e. the distribution of a
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL \\
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, NCEP-GSM, NCEP-SSI \\
 \item[Status]
 \item[Verification]
 \item[Notes] probably can be treated as a special case of 2D with no
@@ -45,13 +73,20 @@ etc).
   orders: full generality is potentially a lot of work. \\
  CAM-FV: (XY, XYZ, XZY).  Consistently decomposed blockwise in Y. \\
  CCSM-CPL: (XY) \\
+ NCEP-GSM: spectral (YXZ) decomposed cyclically on X;
+           grid (XZY) decomposed cyclically on Y \\
+ NCEP-SSI: spectral (background error) (T,YX,ZT) decomposed on X;
+           spectral (transform) (T,YX,ZT) decomposed on ZT;
+           grid (transform) (T,Y,X,ZT) decomposed on ZT;
+           ungridded obs (T,YX,ZT) decomposed variable blocked on YX \\
 \item[Status]
 \item[Verification]
 \item[Notes]  In CAM-FV dynamics, 4D tracer areas are XYZT or
 	possibly XZTY, where T is the tracer dimension.  In the physics
 	there are cases of T in the second dimension.  The CAM
 	chunking mechanism brings up several additional indexing
-	orders (needs to be documented by other teams)
+	orders (needs to be documented by other teams) \\
+        In the NCEP-SSI, tracers (T) are split into 2 different dimensions. \\
 \end{reqlist}
 
 \sreq{2D decomposition}
@@ -61,7 +96,7 @@ ESMF permits 2D domain decomposition, i.e. the distribution of a
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI \\
 \item[Status]
 \item[Verification]
 \item[Notes] should NOT be treated as a special case of 3D!
@@ -83,7 +118,12 @@ etc).
   The decomposition is blockwise in X-Y for physics and blockwise in 
   Y-Z for dynamics.  \\
   CCSM-CPL: (XY) \\
-  POP (XY), CICE (XY)
+  POP (XY), CICE (XY) \\
+  NCEP-GSM: spectral (semi-implicit) (ZYX) decomposed blocked on Y and X; 
+            spectral (transform) (YXZ) decomposed cyclically on X and blocked on Z;
+            grid (transform) (XYZ) decomposed cyclicaly on Y and blocked on Z; 
+            grid (physics) (ZXY) decomposed cyclicaly on X and Y. \\
+  NCEP-SSI: grid (T,Y,X,ZT) decomposed variable blocked on Y and X \\
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -126,7 +166,7 @@ each point in the domain to one PE for computation.
 \begin{reqlist}
 \item[Priority] 
 \item[Source] Requirements for specific flags to control the
-  decomposition must be added here. CAM-EUL, CLM, CCSM-CPL, POP, CICE 
+  decomposition must be added here. CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] in multi-threaded applications, the PE assignment is done
@@ -155,7 +195,7 @@ extents.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE 
+\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] WS:  there will there be a fairly wide spectrum 
@@ -194,7 +234,7 @@ synchronization of computational domains across a distributed grid.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] 
@@ -206,6 +246,14 @@ synchronization of computational domains across a distributed grid.
 Given a data dependency specification, ESMF will be capable of
 asserting whether or not a given distributed grid topology is
 conformant with that pattern.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
 
 \sreq{Periodic boundary conditions}
 
@@ -235,7 +283,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -254,6 +302,19 @@ computational domain along each axis of decomposition.
 \item[Notes]
 \end{reqlist}
 
+\ssreq{Domain index list}
+
+It shall be possible to retrieve the full index list of a
+computational domain along each axis of decomposition.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] NCEP-GSM, NCEP-SSI
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 \ssreq{Maximum domain extent}
 
 It shall be possible to retrieve the maximum size along each axis of
@@ -261,7 +322,7 @@ decomposition of all the computational domains in the \textbf{DistGrid}.
 
 \begin{reqlist}
 \item[Priority] 
-\item[Source] CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -291,7 +352,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -310,6 +371,19 @@ data domain along each axis of decomposition.
 \item[Notes]
 \end{reqlist}
 
+\ssreq{Domain index list}
+
+It shall be possible to retrieve the full index list of a
+data domain along each axis of decomposition.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] NCEP-GSM, NCEP-SSI
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 \ssreq{Maximum domain extent}
 
 It shall be possible to retrieve the maximum size along each axis of
@@ -317,7 +391,7 @@ decomposition of all the data domains in the \textbf{DistGrid}.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] CCSM-CPL, POP, CICE
+\item[Source] CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -366,7 +440,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] CCSM-CPL, POP, CICE
+\item[Source] CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] CAM-FV: the size of the global domain is known
@@ -376,7 +450,7 @@ a priori and does not need to be retrieved.
 \ssreq{Domain begin and end indices}
 
 It shall be possible to retrieve the beginning and ending indices of the
-domain domain along each axis of decomposition.
+global domain along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority]
@@ -489,7 +563,7 @@ data transfer may not be complete when the call returns.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP
+\item[Source] CAM-FV, NSIPP, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] maybe we're pre-empting design issues, but I'd want
@@ -517,7 +591,7 @@ issued unblocked halo update.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -530,7 +604,7 @@ ESMF shall provide methods to declare halo points valid or invalid
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] POP (desired), CICE (desired) 
+\item[Source] POP (desired), CICE (desired)
 \item[Status]
 \item[Verification]
 \item[Notes] This feature can be used to detect when to perform a halo
@@ -570,7 +644,7 @@ data transfer may not be complete when the call returns.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition), NSIPP
+\item[Source] CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] maybe we're pre-empting design issues, but I'd want
@@ -584,7 +658,7 @@ data transfer is complete when the call returns.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] doesn't necessarily need separate call, same as unblocked
@@ -598,7 +672,7 @@ issued unblocked data transpose.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition), NSIPP
+\item[Source] CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -638,7 +712,7 @@ PElist of the entire global array from a distributed array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] 
@@ -683,6 +757,18 @@ either axis.
 \item[Notes] 
 \end{reqlist}
 
+\req{Broadcast}
+
+It shall be possible to broadcast data to all PEs in the domain decomposition.
+
+\begin{reqlist}
+\item[Priority] 
+\item[Source] NCEP-SSI
+\item[Status]
+\item[Verification]
+\item[Notes] 
+\end{reqlist}
+
 \req{Bundling}
 
 ESMF shall provide a method to bundle multiple data arrays on the same
@@ -690,7 +776,7 @@ distribution for aggregate data transfer.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] Note that all arrays in a bundle must share the same
@@ -712,7 +798,7 @@ a distributed grid.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -780,7 +866,7 @@ floating-point or complex array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -821,7 +907,7 @@ bitwise identical on different decompositions.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] trace to GR. CAM-EUL, CLM
+\item[Source] trace to GR. CAM-EUL, CLM, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes] Possibly a compile-time option of normal (optimized)
@@ -910,7 +996,7 @@ distributed integer or FP array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -924,7 +1010,7 @@ retrievable.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -938,7 +1024,7 @@ distributed integer or FP array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -952,12 +1038,23 @@ retrievable.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI
 \item[Status]
 \item[Verification]
 \item[Notes]
 \end{reqlist}
 
+\req{Blocked and Unblocked Collectives}
+
+It shall be possible to perform gather, scatter, broadcast, and reduction in both blocked and unblocked forms.
+
+\begin{reqlist}
+\item[Priority] 
+\item[Source] NCEP-SSI
+\item[Status]
+\item[Verification]
+\item[Notes] 
+\end{reqlist}
 
 \req{Grid staggering}
 
@@ -1116,9 +1213,9 @@ methods to enforce exact redundancy.
 
 \req{Spectral grid}
 
-Spectral models generally have two associated grids, one in physical
-space, and one in spectral (wavenumber) space. The sequence of
-transformations to pass data between the two grids is treated at its
+Spectral models generally have three associated grids, one in physical
+space, one in Fourier space, and one in spectral (wavenumber) space. The sequence of
+transformations to pass data between the grids is treated at its
 highest level within the Regrid semantics. Within these, there is
 generally a specific step to redistribute data to optimize specific
 operations (FFTS and LTs). This section will highlight the specific
@@ -1152,6 +1249,7 @@ a data transpose in~\ref{DG:transpose}.
 \item[Verification]
 \item[Notes] Already covered by Req.~\ref{DG:PartGather}, but
   highlighted here.
+  \\ (MI) The NCEP codes will be able to satisfy this need with data transposes.
 \end{reqlist}
 
 \req{Exchange grid}
@@ -1172,6 +1270,14 @@ discussions on these grids.
 \end{reqlist}
 
 \req{Reduced grids}
+
+\begin{reqlist}
+\item[Priority]
+\item[Source] NCEP-GSM
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
 
 \req{Nested grids}
 
@@ -1217,8 +1323,8 @@ It shall be possible to associate a structured grid with unstructured
 grids and ungridded location streams.
 
 \begin{reqlist}
-\item[Priority] 3
-\item[Source] PSAS, NSIPP
+\item[Priority] 1
+\item[Source] PSAS, NSIPP, NCEP-SSI (milestone)
 \item[Status]
 \item[Verification]
 \item[Notes] The method to generate the background grid requires
@@ -1232,8 +1338,8 @@ It shall be possible to apply domain decomposition to unstructured
 grids and ungridded location streams, using the background grid.
 
 \begin{reqlist}
-\item[Priority] 3
-\item[Source] PSAS, NSIPP
+\item[Priority] 1
+\item[Source] PSAS, NSIPP, NCEP-SSI (milestone)
 \item[Status] 
 \item[Verification]
 \item[Notes]  Needed for PSAS, but not a milestone.
@@ -1246,8 +1352,8 @@ defined in~\ref{DG:halo} to unstructured grids and ungridded location
 streams, using the background grid.
 
 \begin{reqlist}
-\item[Priority] 3
-\item[Source] PSAS, NSIPP
+\item[Priority] 1
+\item[Source] PSAS, NSIPP, NCEP-SSI (milestone)
 \item[Status]
 \item[Verification]
 \item[Notes] Needed for PSAS, but not a milestone.
@@ -1260,15 +1366,11 @@ in~\ref{DG:transpose} to unstructured grids and ungridded location
 streams, using the background grid.
 
 \begin{reqlist}
-\item[Priority] 3
-\item[Source] PSAS
+\item[Priority] 1
+\item[Source] PSAS, NCEP-SSI (milestone)
 \item[Status]
 \item[Verification]
 \item[Notes] Needed for PSAS, but not a milestone.
 \end{reqlist}
-
-
-
-
 
 
