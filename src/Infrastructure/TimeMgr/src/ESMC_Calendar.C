@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.27 2003/06/10 17:29:47 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.28 2003/06/13 16:11:28 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,8 +14,8 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt Calendar} methods declared
-// in the companion file {\tt ESMC_Calendar.h}
+// The code in this file implements the C++ {\tt EMSC\_Calendar} methods declared
+// in the companion file {\tt ESMC\_Calendar.h}
 //
 //-------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.27 2003/06/10 17:29:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.28 2003/06/13 16:11:28 rstaufer Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -54,7 +54,7 @@
       ESMC_CalendarType type) {   // in - initialize to be Calendar type
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt Calendar} to be of a specific type
+//      Initialzes a {\tt EMSC\_Calendar} to be of a specific type
 //
 //EOP
 // !REQUIREMENTS:
@@ -161,7 +161,7 @@
       int DaysPerYearDd) {  // in
 // 
 // !DESCRIPTION:
-//      Initialzes a {\tt Calendar} to be a custom, user-defined type
+//      Initialzes a {\tt EMSC\_Calendar} to be a custom, user-defined type
 // 
 //EOP
 // !REQUIREMENTS:
@@ -586,7 +586,7 @@
       int daysPerYearDd)       { // in
 // 
 // !DESCRIPTION:
-//      Restores {\tt Calendar} state for persistence/checkpointing
+//      Restores {\tt EMSC\_Calendar} state for persistence/checkpointing
 // 
 //EOP
 // !REQUIREMENTS:
@@ -631,7 +631,7 @@
       int *daysPerYearDd) const { // out
 // 
 // !DESCRIPTION:
-//      Returns {\tt Calendar} state for persistence/checkpointing
+//      Returns {\tt EMSC\_Calendar} state for persistence/checkpointing
 // 
 //EOP
 // !REQUIREMENTS:
@@ -675,7 +675,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      validate {\tt Calendar} state
+//      validate {\tt EMSC\_Calendar} state
 //
 //EOP
 // !REQUIREMENTS: 
@@ -701,7 +701,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      print {\tt Calendar} state for testing/debugging
+//      print {\tt EMSC\_Calendar} state for testing/debugging
 //
 //EOP
 // !REQUIREMENTS: 
