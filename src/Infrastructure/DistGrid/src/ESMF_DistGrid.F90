@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.47 2003/04/28 20:24:25 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.48 2003/04/29 14:46:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.47 2003/04/28 20:24:25 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.48 2003/04/29 14:46:19 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1851,7 +1851,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DistGridAllGather - Create N copies of the full Array
+! !IROUTINE: ESMF_DistGridAllGather - Create N copies of an N-way decomposed Array
 
 ! !INTERFACE:
       subroutine ESMF_DistGridAllGather(distgrid, srcarray, dstarray, rc)
@@ -1869,10 +1869,13 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          Class to be used.
-!     \item[{[srcarray]}]
-!          ESMF\_Array to be allgathered.
-!     \item[{[dstarray]}]
-!          ESMF\_Array containing collected data.
+!     \item[srcarray]
+!          N-way decomposed {\tt Array} to be allgathered.
+!     \item[dstarray]
+!          N copies (one per DE in the layout) of full {\tt Array} 
+!          containing collected data.  Note that this {\tt Array} is 
+!          not meaningful in a {\tt Field} object anymore unless it
+!          is redistributed, for example with a Scatter operation.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
