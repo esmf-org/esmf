@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/03/04 17:17:19 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/03/04 17:28:10 nscollins Exp $ 
 
 ALL:
 
@@ -39,11 +39,11 @@ $(ESMC_TESTDIR)/ESMF_SysTest62502: ESMF_SysTest62502.o user_model1.o \
 
 RUN_ESMF_SysTest62502:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest62502.tmps
-	${MPIRUN} -np 2 $(ESMC_TESTDIR)/ESMF_SysTest62502 >$(ESMC_TESTDIR)/ ESMF_SysTest62502.stdout
+	${MPIRUN} -np 2 $(ESMC_TESTDIR)/ESMF_SysTest62502 >$(ESMC_TESTDIR)/ESMF_SysTest62502.stdout
 
 RUN_ESMF_SysTest62502UNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest62502.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)ESMF_SysTest62502 > $(ESMC_TESTDIR)ESMF_SysTest62502.stdout
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SysTest62502 > $(ESMC_TESTDIR)/ESMF_SysTest62502.stdout
 
 ESMF_SysTest62502.rm:
 	echo "ESMF_SysTest62502.rm target called here."
