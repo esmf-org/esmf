@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2004/08/03 19:33:51 nscollins Exp $
+# $Id: makefile,v 1.13 2005/01/04 23:29:55 theurich Exp $
 
 ALL: build_examples
 
@@ -78,10 +78,7 @@ EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
                     run_ESMF_VMAllFullReduceEx \
                     run_ESMF_VMComponentEx
 
-EXAMPLES_RUN_UNI  = run_ESMF_VMTest1Ex_uni \
-                    run_ESMF_VMGetMPICommunicatorEx_uni \
-                    run_ESMF_VMSendVMRecvEx_uni \
-                    run_ESMF_VMScatterVMGatherEx_uni \
+EXAMPLES_RUN_UNI  = run_ESMF_VMDefaultBasicsEx_uni \
                     run_ESMF_VMAllFullReduceEx_uni \
                     run_ESMF_VMComponentEx_uni
 
@@ -100,8 +97,8 @@ CLOBBERDIRS =
 run_ESMF_VMDefaultBasicsEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx > $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx.stdout
 
-run_ESMF_VMTest1Ex_uni:
-	echo "ESMF_VMDefaultBasicsEx not set up to run on one processor."
+run_ESMF_VMDefaultBasicsEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx > $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx.stdout
 
 run_ESMF_VMGetMPICommunicatorEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx > $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx.stdout
@@ -125,11 +122,11 @@ run_ESMF_VMAllFullReduceEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx > $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx.stdout
 
 run_ESMF_VMAllFullReduceEx_uni:
-	echo "ESMF_VMAllFullReduceEx not set up to run on one processor."
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx > $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx.stdout
 
 run_ESMF_VMComponentEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMComponentEx > $(ESMF_EXDIR)/ESMF_VMComponentEx.stdout
 
 run_ESMF_VMComponentEx_uni:
-	echo "ESMF_VMComponentEx not set up to run on one processor."
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_VMComponentEx > $(ESMF_EXDIR)/ESMF_VMComponentEx.stdout
 
