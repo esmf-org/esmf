@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.209 2004/12/20 21:17:54 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.210 2004/12/22 19:07:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.209 2004/12/20 21:17:54 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.210 2004/12/22 19:07:11 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3345,7 +3345,8 @@
   !    call ESMF_StatusString(gp%gridStatus, str, rc)
   !    print *, "Grid status = ", trim(str)
 
-      if (gp%gridStatus /= ESMF_GRID_STATUS_READY) then
+      if ((gp%gridStatus.ne.ESMF_GRID_STATUS_READY) .AND. &
+          (gp%gridStatus.ne.ESMF_GRID_STATUS_INIT)) then
         if (present(rc)) rc = ESMF_FAILURE
         return
       endif
@@ -3355,19 +3356,23 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! TODO: add calls to //physgrid-Done\\ and distgrid prints
 
-      ! Print the Associated physgrids
-      print *, 'PhysGrids associated with this grid:'
-      do i=1, gp%numPhysGrids
-        call ESMF_PhysGridPrint(gp%physgrids(i), 'no-opt')
-      enddo
+      ! if the grid has been distributed, then print the associated
+      ! physgrids and distgrids
+      if (gp%gridStatus.eq.ESMF_GRID_STATUS_READY) then
 
-      ! Print the DistGrid
-      print *, 'DistGrids associated with this Grid:'
-      do i=1, gp%numDistGrids
-        call ESMF_DistGridPrint(gp%distgrids(i), 'no-opt')
-      enddo
+        ! Print the Associated physgrids
+        print *, 'PhysGrids associated with this grid:'
+        do i=1, gp%numPhysGrids
+          call ESMF_PhysGridPrint(gp%physgrids(i), 'no-opt')
+        enddo
+
+        ! Print the DistGrid
+        print *, 'DistGrids associated with this Grid:'
+        do i=1, gp%numDistGrids
+          call ESMF_DistGridPrint(gp%distgrids(i), 'no-opt')
+        enddo
+      endif
 
       print *, "*********End Grid Print"
 
