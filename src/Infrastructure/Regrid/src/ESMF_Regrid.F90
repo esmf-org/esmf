@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.29 2003/08/28 16:50:47 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.30 2003/08/28 17:23:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.29 2003/08/28 16:50:47 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.30 2003/08/28 17:23:28 nscollins Exp $'
 
 !==============================================================================
 !
@@ -260,13 +260,13 @@
       !  more than just a single route and weight array.
       ! TODO: so this code needs to be overhauled...   
 
-      integer :: stat               ! Error status
+      integer :: status             ! Error status
       logical :: rcpresent          ! Return code present
       character (len=ESMF_MAXSTR) :: regrid_name
 
       ! Initialize return code
       rcpresent = .FALSE.
-      stat = ESMF_FAILURE
+      status = ESMF_FAILURE
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -281,87 +281,86 @@
          !*** no regrid type required
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "Field copy not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
 
       !-------------
       case(ESMF_RegridMethod_Redist)   ! redistribution of field
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "Redistribution not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
 
       !-------------
       case(ESMF_RegridMethod_Bilinear) ! bilinear
           routehandle = ESMF_RegridConstructBilinear( &
                                               srcarray, srcgrid, srcdatamap, &
                                               dstarray, dstgrid, dstdatamap, &
-                                              srcmask, dstmask, rc=stat)
+                                              srcmask, dstmask, rc=status)
 
       !-------------
       case(ESMF_RegridMethod_Bicubic)  ! bicubic
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "Bicubic not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
 
       !-------------
       case(ESMF_RegridMethod_Conserv1)
       !   routehandle = ESMF_RegridConstructConserv(srcarray, dstarray, &
-      !                                        regrid_name, order=1, rc=stat)
+      !                                        regrid_name, order=1, rc=status)
       !-------------
       case(ESMF_RegridMethod_Conserv2) ! 2nd-order conservative
       !   routehandle = ESMF_RegridConstructConserv(srcarray, dstarray, &
-      !                                        regrid_name, order=2, rc=stat)
+      !                                        regrid_name, order=2, rc=status)
       !-------------
       case(ESMF_RegridMethod_Raster) ! regrid by rasterizing domain
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "Raster method not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_NearNbr) ! nearest-neighbor dist-weighted avg
       !   routehandle = ESMF_RegridConstructNearNbr(srcarray, dstarray, &
-      !                                        regrid_name, rc=stat)
+      !                                        regrid_name, rc=status)
       !-------------
       case(ESMF_RegridMethod_Fourier) ! Fourier transform
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "Fourier transforms not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_Legendre) ! Legendre transform
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "Legendre transforms not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_Index) ! index-space regridding (shift, stencil)
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "Index-space methods not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_Linear) ! linear for 1-d regridding
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "1-d linear methods not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_Spline) ! cubic spline for 1-d regridding
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "1-d cubic splines not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_User) ! cubic spline for 1-d regridding
          print *, "ERROR in ESMF_RegridCreateFromArray: ", &
                   "User-defined regridding not yet supported"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
       !-------------
       case default
          print *, "ERROR in ESMF_RegridCreateFromArray: Invalid method"
-         stat = ESMF_FAILURE
+         status = ESMF_FAILURE
       end select
 
-      if (stat /= ESMF_SUCCESS) then
+      if (status /= ESMF_SUCCESS) then
          ! Use error function eventually...
          print *, 'ERROR in ESMF_RegridCreateFromArray: error in creation'
-         if (rcpresent) rc = stat
-      else
-         if (rcpresent) rc = ESMF_SUCCESS
       endif
+
+      if (rcpresent) rc = status
 
       end subroutine ESMF_RegridCreateFromArray
 
@@ -391,13 +390,17 @@
 !     routine regrids the source array to a new array on the destination
 !     grid.  
 !
-! !REQUIREMENTS:  TODO
 !EOP
+    integer :: status
+    logical :: rcpresent
+    type(ESMF_Route) :: rh
+    type(ESMF_Array) :: tempdst 
+    type(ESMF_TransformValues) :: tv
 
    ! get the first route from the table and run it to gather the
    ! data values which overlap this bounding box.
  
-   !call ESMF_RouteHandleGet(routehandle, rhandle1=rh, rc=status)
+   call ESMF_RouteHandleGet(routehandle, route1=rh, rc=status)
 
    ! from the domain or from someplace, get the counts of how many data points
    ! we are expecting from other DEs.  we might also need to know what
@@ -513,51 +516,82 @@
 ! !REQUIREMENTS:
 !  TODO
 
-      logical :: rcpresent = .FALSE.
-      integer :: stat, status = ESMF_SUCCESS
+      logical :: rcpresent
+      integer :: status
 
-      if (present(rc)) rcpresent = .TRUE.
+      ! Assume failure until sure of success
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then 
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
       
       ! Get name if requested
       if (present(name)) then
-         call ESMF_RegridTypeGet(regrid%ptr, name=name, rc=stat)
-         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
+         call ESMF_RegridTypeGet(regrid%ptr, name=name, rc=status)
+         if (status .ne. ESMF_SUCCESS) then
+             print *, "ESMF_RegridGet: failed getting regrid name"
+             return
+         endif
       endif
 
 ! TODO: make these arrays, grid, datamaps.   Are we really going to 
 !  store the arrays & grids this was based on?  why?   nsc.
 !      ! Get bundles if requested
 !      if (present(srcbundle)) then
-!         call ESMF_RegridTypeGet(regrid%ptr, srcbundle=srcbundle, rc=stat)
-!         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
+!         call ESMF_RegridTypeGet(regrid%ptr, srcbundle=srcbundle, rc=status)
+!        if (status .ne. ESMF_SUCCESS) then
+!            print *, "ESMF_RegridGet: failed getting regrid bundle"
+!            return
+!        endif
 !      endif
 !      if (present(dstbundle)) then
-!         call ESMF_RegridTypeGet(regrid%ptr, dstbundle=dstbundle, rc=stat)
-!         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
+!         call ESMF_RegridTypeGet(regrid%ptr, dstbundle=dstbundle, rc=status)
+!        if (status .ne. ESMF_SUCCESS) then
+!            print *, "ESMF_RegridGet: failed getting regrid bundle"
+!            return
+!        endif
 !      endif
 !
 !      ! Get fields if requested
 !      if (present(srcfield)) then
-!         call ESMF_RegridTypeGet(regrid%ptr, srcfield=srcfield, rc=stat)
-!         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
+!         call ESMF_RegridTypeGet(regrid%ptr, srcfield=srcfield, rc=status)
+!        if (status .ne. ESMF_SUCCESS) then
+!            print *, "ESMF_RegridGet: failed getting regrid ..."
+!            return
+!        endif
 !      endif
 !      if (present(dstfield)) then
 !         call ESMF_RegridTypeGet(regrid%ptr, dstfield=dstfield, rc=stat)
+!        if (status .ne. ESMF_SUCCESS) then
+!            print *, "ESMF_RegridGet: failed getting regrid ..."
+!            return
+!        endif
 !         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
 !      endif
 !
       ! get method or number of links or gather route
       if (present(method)) then
-         call ESMF_RegridTypeGet(regrid%ptr, method=method, rc=stat)
-         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
+         call ESMF_RegridTypeGet(regrid%ptr, method=method, rc=status)
+         if (status .ne. ESMF_SUCCESS) then
+             print *, "ESMF_RegridGet: failed getting regrid ..."
+             return
+         endif
       endif
       if (present(num_links)) then
-         call ESMF_RegridTypeGet(regrid%ptr, num_links=num_links, rc=stat)
-         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
+         call ESMF_RegridTypeGet(regrid%ptr, num_links=num_links, rc=status)
+         if (status .ne. ESMF_SUCCESS) then
+             print *, "ESMF_RegridGet: failed getting regrid ..."
+             return
+         endif
       endif
       if (present(gather)) then
-         call ESMF_RegridTypeGet(regrid%ptr, gather=gather, rc=stat)
-         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
+         call ESMF_RegridTypeGet(regrid%ptr, gather=gather, rc=status)
+         if (status .ne. ESMF_SUCCESS) then
+             print *, "ESMF_RegridGet: failed getting regrid ..."
+             return
+         endif
       endif
 
       if (rcpresent) rc = status
@@ -590,12 +624,12 @@
 ! !REQUIREMENTS: TODO
 !EOP
 
-      integer :: stat               ! Error status
+      integer :: status             ! Error status
       logical :: rcpresent          ! Return code present
 
       ! Initialize return code
       rcpresent = .FALSE.
-      stat = ESMF_FAILURE
+      status = ESMF_FAILURE
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE

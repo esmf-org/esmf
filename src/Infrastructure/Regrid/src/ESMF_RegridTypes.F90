@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.11 2003/08/27 23:38:29 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.12 2003/08/28 17:23:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.11 2003/08/27 23:38:29 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.12 2003/08/28 17:23:28 nscollins Exp $'
 
 !==============================================================================
 !
@@ -308,9 +308,11 @@
 !EOP
 ! !REQUIREMENTS:
 
-      logical :: rcpresent = .FALSE.
-      integer :: stat, status = ESMF_SUCCESS
+      logical :: rcpresent
+      integer :: stat, status
 
+      rcpresent=.FALSE.
+      status = ESMF_FAILURE
       if (present(rc)) rcpresent = .TRUE.
       
       ! Get name if requested
@@ -413,9 +415,11 @@
 ! !REQUIREMENTS:
 !  TODO
 
-      logical :: rcpresent = .FALSE.
-      integer :: stat, status = ESMF_SUCCESS
+      logical :: rcpresent
+      integer :: stat, status
 
+      rcpresent=.FALSE.
+      status = ESMF_FAILURE
       if (present(rc)) rcpresent = .TRUE.
       
       ! Set name if requested
