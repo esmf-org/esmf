@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.66 2004/07/20 23:07:16 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.67 2004/09/14 22:29:44 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.66 2004/07/20 23:07:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.67 2004/09/14 22:29:44 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1292,6 +1292,7 @@
     //  the reference date
     ESMC_TimeInterval delta;
     delta = *this - referenceMonday;
+    delta.calendar = this->calendar;
     ESMF_KIND_I8 diffDays;
     // TODO: use native C++ Get() when ready
     rc = delta.ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
@@ -1639,6 +1640,7 @@
 
     // calculate difference between 1/1/yy and our (this) time
     *dayOfYear = *this - dayOne;
+    dayOfYear->calendar = this->calendar;
     
     return(rc);
 
