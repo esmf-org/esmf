@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/12/20 17:29:59 rfaincht Exp $ 
+# $Id: makefile,v 1.6 2004/12/21 16:11:28 rfaincht Exp $ 
 
 ALL:  build_tests
 
@@ -17,12 +17,12 @@ LOCDIR	  = src/Infrastructure/VM/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_VMUTest\
 		$(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest\
-		$(ESMC_TESTDIR)/ESMF_VMSendrecvUTest\
+		$(ESMC_TESTDIR)/ESMF_VMSendRecvUTest\
 		$(ESMC_TESTDIR)/ESMF_VMScatterVMGatherUTest
 
 TESTS_RUN     = RUN_ESMF_VMUTest\
                 RUN_ESMF_VMSendVMRecvUTest\
-                RUN_ESMF_VMSendrecvUTest\
+                RUN_ESMF_VMSendRecvUTest\
                 RUN_ESMF_VMScatterVMGatherUTest
 
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
@@ -64,12 +64,12 @@ ESMF_VMSendVMRecvUTest.rm:
 #
 # VM Sendreceive
 #
-RUN_ESMF_VMSendrecvUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_VMSendrecvUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMSendrecvUTest > $(ESMC_TESTDIR)/ESMF_VMSendrecvUTest.stdout
+RUN_ESMF_VMSendRecvUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_VMSendRecvUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMSendRecvUTest > $(ESMC_TESTDIR)/ESMF_VMSendRecvUTest.stdout
 
-ESMF_VMSendrecvUTest.rm:
-	echo "ESMF_VMSendrecvUTest.rm target called here."
+ESMF_VMSendRecvUTest.rm:
+	echo "ESMF_VMSendRecvUTest.rm target called here."
 
 RUN_ESMF_VMSendVMRecvUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_VMSendVMRecvUTest.tmps
