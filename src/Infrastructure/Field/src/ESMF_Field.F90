@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.159 2004/06/09 16:42:17 slswift Exp $
+! $Id: ESMF_Field.F90,v 1.160 2004/06/09 17:05:57 slswift Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,9 +61,8 @@
       use ESMF_ArrayCommMod
       use ESMF_TimeMod
       use ESMF_FieldDataMapMod
-#if !defined(ESMF_NO_IOCODE)
       use wrf_data
-#endif      
+
       implicit none
 
 !------------------------------------------------------------------------------
@@ -282,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.159 2004/06/09 16:42:17 slswift Exp $'
+      '$Id: ESMF_Field.F90,v 1.160 2004/06/09 17:05:57 slswift Exp $'
 
 !==============================================================================
 !
@@ -2880,7 +2879,7 @@
               print*, "Unrecognized IO Fileformat."
               return
            endif
-        else
+        else ! No IOSpec passed in, so check in the Field
            call ESMF_IOSpecGet(field%ftypep%iospec, iofileformat=fileformat, rc=status)
            if (fileformat == ESMF_IO_FILEFORMAT_HDF) then
               print*, "HDF output is not currently supported."
@@ -2898,8 +2897,6 @@
               print*, "Unrecognized IO Fileformat."
               return
            endif
-        else
-           call ESMF_FieldWriteFileASCII(field, iospec, rc=status)
         endif
 
         if ( present(timestamp) ) then
