@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.29 2003/10/09 22:56:32 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.30 2003/10/09 23:31:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.29 2003/10/09 22:56:32 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.30 2003/10/09 23:31:26 nscollins Exp $'
 
 !==============================================================================
 
@@ -422,13 +422,13 @@
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(inout) :: tv
       type(ESMF_Domain), intent(in) :: domain
-      logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
       type(ESMF_CoordSystem), intent(in) :: coordSystem
       integer, intent(in) :: srcSizeX  ! apparently these have to be first
       integer, intent(in) :: srcSizeY  ! so the compiler knows they're ints
       integer, intent(in) :: srcStart  ! when it goes to use them as dims
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
+      logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterX
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterY
       logical, dimension(srcSizeX,srcSizeY), intent(in) :: srcMask
