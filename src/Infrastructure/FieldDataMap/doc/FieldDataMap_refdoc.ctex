@@ -1,4 +1,4 @@
-% $Id: FieldDataMap_refdoc.ctex,v 1.1 2004/05/04 13:53:27 nscollins Exp $
+% $Id: FieldDataMap_refdoc.ctex,v 1.2 2004/05/11 12:17:03 nscollins Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{DataMap Design}
+\newcommand{\mytitle}{Field DataMap Design}
 \newcommand{\myauthors}{Nancy Collins}
 #endif
 
@@ -67,34 +67,34 @@
 % %\input{../Infrastructure/Field/doc/Field_param}
 % #endif
 
-\section{DataMap Class}
+\section{Field DataMap Class}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{DataMap_desc}
+\input{FieldDataMap_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DataMap/doc/DataMap_desc}
+\input{../Infrastructure/FieldDataMap/doc/FieldDataMap_desc}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{DataMap_usage}
+\input{FieldDataMap_usage}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DataMap/doc/DataMap_usage}
+\input{../Infrastructure/FieldDataMap/doc/FieldDataMap_usage}
 #endif
 
 %\subsubsection{Restrictions and Future Work}
 #ifdef STANDALONE
-%\input{DataMap_rest}
+%\input{FieldDataMap_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/DataMap/doc/DataMap_rest}
+%\input{../Infrastructure/FieldDataMap/doc/FieldDataMap_rest}
 #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{../../DataMap/doc/ESMF_DataMap_fapi}
+\input{../../FieldDataMap/doc/ESMF_FieldDataMap_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DataMap/doc/ESMF_DataMap_fapi}
+\input{../Infrastructure/FieldDataMap/doc/ESMF_FieldDataMap_fapi}
 #endif
 
 %#ifdef STANDALONE
