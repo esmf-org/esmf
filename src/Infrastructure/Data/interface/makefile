@@ -1,13 +1,15 @@
-# $Id: makefile,v 1.13 2003/07/15 21:11:06 jwolfe Exp $
+# $Id: makefile,v 1.14 2003/07/30 17:10:06 nscollins Exp $
 
 # leave alone.
 ALL: lib 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_LocalArray_F.C
+SOURCEC	  = ESMC_LocalArray_F.C ESMC_DataMap.C
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  =  ESMF_LocalArray.F90 ESMF_LocalAlloc_C.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
+# include files which go into the public src dir
+STOREH	  =  ESMC_DataMap.h
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

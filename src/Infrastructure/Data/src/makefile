@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/07/10 18:48:19 nscollins Exp $
+# $Id: makefile,v 1.11 2003/07/30 17:10:06 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -6,7 +6,7 @@ ALL: lib
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  =  ESMC_LocalArray.C 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  
+SOURCEF	  =  ESMF_DataMap.F90
 # if you have .h include files in this dir, list them all on the line below.
 STOREH	  = ESMC_LocalArray.h
 
