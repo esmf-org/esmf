@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout.F90,v 1.1 2002/12/30 21:58:59 nscollins Exp $
+! $Id: ESMF_Layout.F90,v 1.2 2002/12/30 22:09:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Layout.F90,v 1.1 2002/12/30 21:58:59 nscollins Exp $'
+      '$Id: ESMF_Layout.F90,v 1.2 2002/12/30 22:09:37 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -136,12 +136,13 @@ end interface
 ! !IROUTINE: ESMF_LayoutCreateNew -- Create a new Layout specifying all options.
 
 ! !INTERFACE:
-      function ESMF_LayoutCreateNew(rc)
+      function ESMF_LayoutCreateNew(nde_i, nde_j, nde_k, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Layout) :: ESMF_LayoutCreateNew
 !
 ! !ARGUMENTS:
+      integer, intent(in) :: nde_i, nde_j, nde_k
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -151,7 +152,16 @@ end interface
 !    
 !  The arguments are:
 !  \begin{description}
-!
+! 
+!   \item[nde_i]
+!     Number of {\tt DE}s in the {\tt I} dimension.
+! 
+!   \item[nde_j]
+!     Number of {\tt DE}s in the {\tt J} dimension.
+! 
+!   \item[nde_k]
+!     Number of {\tt DE}s in the {\tt K} dimension.
+! 
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -176,7 +186,7 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        !call c_ESMC_LayoutCreate(status)
+        !call c_ESMC_LayoutCreate(nde_i, nde_j, nde_k, status)
         !if (status .ne. ESMF_SUCCESS) then
         !  print *, "Layout construction error"
         !  return
