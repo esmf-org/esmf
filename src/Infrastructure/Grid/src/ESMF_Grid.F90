@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.115 2003/10/28 18:22:29 atrayanov Exp $
+! $Id: ESMF_Grid.F90,v 1.116 2003/11/07 18:40:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.115 2003/10/28 18:22:29 atrayanov Exp $'
+      '$Id: ESMF_Grid.F90,v 1.116 2003/11/07 18:40:32 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1376,6 +1376,16 @@
           endif
           physgridId = physgridId + 1 
 
+          physgridName = 'cell_eface'
+          relloc = ESMF_CELL_EFACE
+          call ESMF_GridAddPhysGrid(grid, numDims, counts, physgridId, relloc, &
+                                    min, max, physgridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructUniform: Add physgrid"
+            return
+          endif
+          physgridId = physgridId + 1 
+
       end select
 
 !     Create vertical physgrid if requested  TODO
@@ -1603,6 +1613,17 @@
         case (4)
           physgrid_name = 'cell_nface'
           relloc = ESMF_CELL_NFACE
+          call ESMF_GridAddPhysGrid(grid, physgridId, relloc, numDims, delta1, &
+                                    delta2, countsPerDE1, countsPerDE2, min, &
+                                    dim_names, dim_units, physgrid_name, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructSpecd: Add physgrid"
+            return
+          endif
+          physgridId = physgridId + 1 
+
+          physgrid_name = 'cell_eface'
+          relloc = ESMF_CELL_EFACE
           call ESMF_GridAddPhysGrid(grid, physgridId, relloc, numDims, delta1, &
                                     delta2, countsPerDE1, countsPerDE2, min, &
                                     dim_names, dim_units, physgrid_name, status)
