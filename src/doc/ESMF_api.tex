@@ -144,59 +144,6 @@ user code.
 
 \end{itemize}
 
-\subsection{Common Options for Print Methods}
-
-All ESMF classes have a print method to print out internal information, 
-usually for debugging purposes.  All print methods support a common
-set of options, including:
-
-\begin{itemize}
-\item{\bf "brief"}
-   Print the most important parts of the object, including information
-   about subobjects (e.g. Fields will call Print on their Grids, Arrays
-   and DataMaps).  This is the default if no option string is specified.
-\item{\bf "full"}
-   Print in excruciating detail, as much information as possible.
-\item{\bf "object only"}
-   Print only information about the object itself, nothing about
-   subobjects it may contain (like states, bundles, fields).
-\item{\bf "label=mystring"}
-   Prepend {\tt mystring} in front of the print so user can give simple
-   labels to identify which object is being printed.
-
-\end{itemize}
-
-Multiple options can be specified by separating them with commas:
-
-{\tt call ESMF\_<Class>Print(object, "brief, object only", rc) }
-{\tt call ESMF\_<Class>Print(object, "full, label=Temperature", rc) }
-
-Objects may have in addition specific flags which select options
-that are only applicable to themselves.
-
-\subsection{Common Options for Validate Methods}
-
-Most ESMF classes have a validate method to verify that a 
-particular object has been initialized and that it is internally consistent.
-All validate methods support a common set of options, including:
-
-\begin{itemize}
-\item{\bf "brief"}
-   Validate the most important parts of the object, including 
-   subobjects (e.g. Fields will call Validate on their Grids, Arrays
-   and DataMaps).  This is the default if no option string is specified.
-\item{\bf "full"}
-   Validate in excruciating detail, may be slow.
-\item{\bf "object only"}
-   Validate only information about the object itself, not validating any
-   subobjects it may contain.
-
-\end{itemize}
-
-Multiple options can be specified by separating them with commas:
-
-{\tt call ESMF\_<Class>Validate(object, "brief, object only", rc) }
-
 \subsection{The ESMF Data Hierarchy}
 
 The ESMF API is organized around an hierarchy of five classes that 
@@ -294,25 +241,26 @@ Although it is not an ESMF class, the linear {\bf address space}
 of the computer is another fundamental index space that must be 
 mapped to data stored by the ESMF system.  
 
-In order to map between the index spaces of all of these classes,
+\subsection{ESMF DataMap Classes}
+
+In order to map the index spaces of the spatial classes,
 we require either implicit rules (in which case the relationship 
-between index spaces is defined by default), or interfaces that 
-allow the user to specify the desired association.  The mechanisms
-within ESMF for defining these associations are:
+between index spaces is defined by default), or special classes that 
+allow the user to specify the desired association.  The following
+classes define how the data is laid out in memory.
 
 \begin{itemize}
 
-\item {\bf VM to DELayout} The DELayout provides interfaces and 
-shortcuts that map between its DEs and the PETs defined in the 
-VM.
+\item {\bf ArrayDataMap} The ArrayDataMap class specifies how the 
+address space of the computer relates to the array rank (e.g. row 
+or column major order), and, optionally, how a list of array ranks 
+corresponds to a list of grid dimensions.   
 
-\item {\bf DELayout to Grid} The Grid provides interfaces that map 
-between the index space defined by its coordinates and the decomposition 
-described by the DELayout.
+\item {\bf FieldDataMap} The FieldDataMap specifies the number of 
+directional components in a vector Field, and how they are interleaved.
 
-\item {\bf Grid, Array, and Field} The DataMap class maps between 
-an Array and a Grid.  It defines the relationships between their
-index spaces as well as any additional dimensions defined by the Field.
+\item {\bf BundleDataMap} The BundleDataMap dictates how the Fields
+within a Bundle are interleaved.  
 
 \end{itemize}
 
@@ -373,6 +321,58 @@ by name, and can be retrieved either directly by name or by querying
 for a count of Attributes and retrieving Attribute names and values
 by index number.
 
+\subsection{Common Options for Print Methods}
+
+All ESMF classes have a print method to print out internal information, 
+usually for debugging purposes.  All print methods support a common
+set of options, including:
+
+\begin{itemize}
+\item{\bf "brief"}
+   Print the most important parts of the object, including information
+   about subobjects (e.g. Fields will call Print on their Grids, Arrays
+   and DataMaps).  This is the default if no option string is specified.
+\item{\bf "full"}
+   Print in excruciating detail, as much information as possible.
+\item{\bf "object only"}
+   Print only information about the object itself, nothing about
+   subobjects it may contain (like states, bundles, fields).
+\item{\bf "label=mystring"}
+   Prepend {\tt mystring} in front of the print so user can give simple
+   labels to identify which object is being printed.
+
+\end{itemize}
+
+Multiple options can be specified by separating them with commas:
+
+{\tt call ESMF\_<Class>Print(object, "brief, object only", rc) }
+{\tt call ESMF\_<Class>Print(object, "full, label=Temperature", rc) }
+
+Objects may have in addition specific flags which select options
+that are only applicable to themselves.
+
+\subsection{Common Options for Validate Methods}
+
+Most ESMF classes have a validate method to verify that a 
+particular object has been initialized and that it is internally consistent.
+All validate methods support a common set of options, including:
+
+\begin{itemize}
+\item{\bf "brief"}
+   Validate the most important parts of the object, including 
+   subobjects (e.g. Fields will call Validate on their Grids, Arrays
+   and DataMaps).  This is the default if no option string is specified.
+\item{\bf "full"}
+   Validate in excruciating detail, may be slow.
+\item{\bf "object only"}
+   Validate only information about the object itself, not validating any
+   subobjects it may contain.
+
+\end{itemize}
+
+Multiple options can be specified by separating them with commas:
+
+{\tt call ESMF\_<Class>Validate(object, "brief, object only", rc) }
 
 \section{Integrating ESMF into Applications}
 
