@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.84 2004/04/09 19:55:36 theurich Exp $
+// $Id: ESMC_Route.C,v 1.85 2004/04/12 15:44:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.84 2004/04/09 19:55:36 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.85 2004/04/12 15:44:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -735,6 +735,8 @@ static int maxroutes = 10;
     rc = layout->ESMC_DELayoutGetDEID(&mydeid);
 #endif
     rc = ct->ESMC_CommTableGetCount(&ccount);
+    
+    printf("ESMC_RouteRun: %p, %p\n", srcaddr, dstaddr);
 
     //printf("Ready to run Route on DE %d, commtable count = %d:\n",
     //           mydeid, ccount);
@@ -746,12 +748,12 @@ static int maxroutes = 10;
         // find out who the next id is 
         rc = ct->ESMC_CommTableGetPartner(i, &theirdeid, &needed);
         if (!needed) {
-            //printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
+            printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
 	    continue;
-        //} else {
-            //printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
+        } else {
+            printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
         }
-
+        
         // find total number of xpackets
 	rc = recvRT->ESMC_RTableGetCount(theirdeid, &xrcount);
 	rc = sendRT->ESMC_RTableGetCount(theirdeid, &xscount);
@@ -761,12 +763,12 @@ static int maxroutes = 10;
 
             // look up the corresponding send/recv xpackets in the rtables
 
-            //if (xscount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xscount);
+            if (xscount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xscount);
             if (ixs < xscount) {
                 rc = sendRT->ESMC_RTableGetEntry(theirdeid, ixs, &sendxp);
                 rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length, sstride, srep_count);
-                // printf("RouteRun: sendxp\n");
-                // sendxp->ESMC_XPacketPrint();
+                printf("RouteRun: sendxp\n");
+                sendxp->ESMC_XPacketPrint();
             } else {
                 sendxp = NULL;
                 srank = 0;
@@ -775,15 +777,16 @@ static int maxroutes = 10;
                     srep_count[j]=0;
 		    sstride[j]=0;
                 }
-                // printf("nothing to send\n");
+                printf("nothing to send\n");
             }
+            printf("soffset: %d\n", soffset);
 
-            //if (xrcount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xrcount);
+            if (xrcount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xrcount);
             if (ixr < xrcount) {
                 rc = recvRT->ESMC_RTableGetEntry(theirdeid, ixr, &recvxp);
                 rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length, rstride, rrep_count);
-                // printf("RouteRun: recvxp\n");
-                // recvxp->ESMC_XPacketPrint();
+                 printf("RouteRun: recvxp\n");
+                 recvxp->ESMC_XPacketPrint();
             } else {
                 recvxp = NULL;
                 rrank = 0;
@@ -792,8 +795,9 @@ static int maxroutes = 10;
                     rrep_count[j]=0;
                     rstride[j]=0;
                 }
-                // printf("nothing to recv\n");
+                printf("nothing to recv\n");
             }
+            printf("roffset: %d\n", roffset);
         
        
             // ready to call the comm routines - multiple times, one for
@@ -832,6 +836,8 @@ static int maxroutes = 10;
                rcvbufstart = NULL;
 	   srcbuf = srcbufstart;
 	   rcvbuf = rcvbufstart;
+           
+           printf("srcbufstart=%p, rcvbufstart%p\n", srcbufstart, rcvbufstart);
 
            // copy in to the send buffer
 	   if(srctcount > 0) {
@@ -1257,7 +1263,9 @@ static int maxroutes = 10;
 
           // get the parent DE identifier for this DE in the rcv layout
 #ifdef ESMF_ENABLE_VM
-  // GJT_TODO
+          dstdeLayout->ESMC_newDELayoutGetDEMatch(theirDE, *delayout, NULL,
+            &theirDEParent, 1);
+          printf("Match1: %d, %d\n", theirDE, theirDEParent);
 #else
           dstLayout->ESMC_DELayoutGetParentDEID(theirDE, layout, 
                                                 &theirDEParent);
@@ -1325,7 +1333,9 @@ static int maxroutes = 10;
 
           // get the parent DE identifier for this DE in the src layout
 #ifdef ESMF_ENABLE_VM
-  // GJT_TODO
+          dstdeLayout->ESMC_newDELayoutGetDEMatch(theirDE, *delayout, NULL,
+            &theirDEParent, 1);
+          printf("Match2: %d, %d\n", theirDE, theirDEParent);
 #else
           dstLayout->ESMC_DELayoutGetParentDEID(theirDE, layout, 
                                                 &theirDEParent);

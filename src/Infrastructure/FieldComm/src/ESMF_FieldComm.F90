@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.21 2004/04/02 18:38:17 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.22 2004/04/12 15:44:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,6 +39,9 @@
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_DELayoutMod
+#ifdef ESMF_ENABLE_VM
+      use ESMF_newDELayoutMod    ! ESMF layout class
+#endif
       use ESMF_LocalArrayMod
       use ESMF_ArrayMod
       use ESMF_RHandleMod
@@ -92,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.21 2004/04/02 18:38:17 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.22 2004/04/12 15:44:09 theurich Exp $'
 
 !==============================================================================
 !
@@ -748,7 +751,11 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStore(srcField, dstField, parentLayout, &
-                                       routehandle, rc)
+                                       routehandle, rc &
+#ifdef ESMF_ENABLE_VM
+                                       , parentDelayout &
+#endif
+                                       )
 !
 !
 ! !ARGUMENTS:
@@ -757,6 +764,9 @@
       type(ESMF_DELayout), intent(in) :: parentLayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc               
+#ifdef ESMF_ENABLE_VM
+      type(ESMF_newDELayout), intent(in) :: parentDelayout
+#endif
 !
 ! !DESCRIPTION:
 !     Precompute a redistribution operation over the data
@@ -833,7 +843,11 @@
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
                                  parentLayout, &
-                                 routehandle, status)
+                                 routehandle, status &
+#ifdef ESMF_ENABLE_VM
+                                 , parentDelayout &
+#endif
+                                 )
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRedistStore: ArrayRedistStore returned failure"
         return

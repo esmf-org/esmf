@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.47 2004/04/09 21:58:33 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.48 2004/04/12 15:44:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.47 2004/04/09 21:58:33 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.48 2004/04/12 15:44:39 theurich Exp $'
 
 !==============================================================================
 !
@@ -1163,7 +1163,11 @@
                                             dstGlobalCount, dstLayout, &
                                             srcMyDE, srcCompAI, &
                                             srcTotalAI, srcGlobalStart, &
-                                            srcGlobalCount, srcLayout, rc)
+                                            srcGlobalCount, srcLayout, rc &
+#ifdef ESMF_ENABLE_VM
+                                            , dstDelayout, srcDelayout &
+#endif
+                                            )
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -1181,6 +1185,9 @@
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
       type(ESMF_DELayout), intent(in) :: srcLayout
       integer, intent(out), optional :: rc
+#ifdef ESMF_ENABLE_VM
+      type(ESMF_newDELayout), intent(in), optional :: dstDelayout, srcDelayout
+#endif
 
 !
 ! !DESCRIPTION:
@@ -1235,6 +1242,15 @@
         enddo
 
         ! Call C++  code
+#ifdef ESMF_ENABLE_VM
+        call c_ESMC_RoutePrecomputeRedist(route, rank, &
+                                          dstMyDE, dstCompAI, dstTotalAI, &
+                                          dstAICount, dstGlobalStart, &
+                                          dstGlobalCount, dstDelayout, &
+                                          srcMyDE, srcCompAI, srcTotalAI, &
+                                          srcAICount, srcGlobalStart, &
+                                          srcGlobalCount, srcDelayout, status)
+#else
         call c_ESMC_RoutePrecomputeRedist(route, rank, &
                                           dstMyDE, dstCompAI, dstTotalAI, &
                                           dstAICount, dstGlobalStart, &
@@ -1242,6 +1258,7 @@
                                           srcMyDE, srcCompAI, srcTotalAI, &
                                           srcAICount, srcGlobalStart, &
                                           srcGlobalCount, srcLayout, status)
+#endif
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route PrecomputeRedist error"
           ! don't return before adding 1 back to AIs

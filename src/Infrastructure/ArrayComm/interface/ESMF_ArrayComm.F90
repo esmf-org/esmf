@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.32 2004/04/09 19:57:56 theurich Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.33 2004/04/12 15:43:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.32 2004/04/09 19:57:56 theurich Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.33 2004/04/12 15:43:48 theurich Exp $'
 !
 !==============================================================================
 !
@@ -1026,7 +1026,11 @@
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistStore(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
-                                       parentLayout, routehandle, rc)
+                                       parentLayout, routehandle, rc &
+#ifdef ESMF_ENABLE_VM
+                                       , parentDelayout &
+#endif
+                                       )
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
@@ -1038,6 +1042,9 @@
       type(ESMF_DELayout), intent(in) :: parentLayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
+#ifdef ESMF_ENABLE_VM
+      type(ESMF_newDELayout), intent(in), optional :: parentDelayout
+#endif
 !
 ! !DESCRIPTION:
 !  Compute and store information about this redistribute operation.
@@ -1089,6 +1096,9 @@
       integer :: gridrank, datarank
       integer :: i, dimCount
       logical :: hascachedroute     ! can we reuse an existing route?
+#ifdef ESMF_ENABLE_VM
+      type (ESMF_newDELayout) :: dstDelayout, srcDElayout
+#endif
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -1102,14 +1112,28 @@
       routehandle = ESMF_RouteHandleCreate(status)
 
       ! Extract layout information from the Grids
+#ifdef ESMF_ENABLE_VM
+      call ESMF_GridGet(dstGrid, delayout=dstDelayout, rc=status)
+#else
       call ESMF_GridGetDELayout(dstGrid, dstLayout, status)
+#endif
+#ifdef ESMF_ENABLE_VM
+      call ESMF_GridGet(srcGrid, delayout=srcDelayout, rc=status)
+#else
       call ESMF_GridGetDELayout(srcGrid, srcLayout, status)
+#endif
       call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
+#ifdef ESMF_ENABLE_VM
+      call ESMF_newDELayoutGet(dstDelayout, deCount=nDEs, localDe=dstMyDE, &
+        rc=status)
+      call ESMF_newDELayoutGet(srcDelayout, localDe=srcMyDE, rc=status)
+#else
       call ESMF_DELayoutGetDEid(dstLayout, dstMyDE, status)
       call ESMF_DELayoutGetDEid(srcLayout, srcMyDE, status)
       call ESMF_DElayoutGetNumDEs(srcLayout, nDEs, rc=status)
+#endif
 
       ! Allocate temporary arrays
       allocate(           periodic(      gridrank), stat=status)
@@ -1226,18 +1250,30 @@
       call ESMF_RouteGetCached(datarank, &
                                dstMyDE, dstCompAI, dstTotalAI, nDEs, dstLayout, &
                                srcMyDE, srcCompAI, srcTotalAI, nDEs, srcLayout, &
-                               periodic, hascachedroute, route, status)
+                               periodic, hascachedroute, route, status &
+#ifdef ESMF_ENABLE_VM
+                               , dstDelayout, srcDelayout &
+#endif
+                               )
 
       if (.not. hascachedroute) then
           ! Create the route object.
-          route = ESMF_RouteCreate(parentLayout, rc)
+          route = ESMF_RouteCreate(parentLayout, rc &
+#ifdef ESMF_ENABLE_VM
+               , parentDelayout &
+#endif
+          )
 
           call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstCompAI, &
                                           dstTotalAI, dstStartPerDEPerDim, &
                                           dstCellCountPerDim, dstLayout, &
                                           srcMyDE, srcCompAI, srcTotalAI, &
                                           srcStartPerDEPerDim, &
-                                          srcCellCountPerDim, srcLayout, status)
+                                          srcCellCountPerDim, srcLayout, status&
+#ifdef ESMF_ENABLE_VM
+                                          , dstDelayout, srcDelayout &
+#endif
+                                          )
       endif
 
       ! and set route into routehandle object
