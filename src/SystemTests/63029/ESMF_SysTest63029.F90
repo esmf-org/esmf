@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.11 2003/04/14 14:51:45 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.12 2003/04/22 21:33:33 nscollins Exp $
 !
 ! System test code #63029
 
@@ -42,6 +42,7 @@
 !-------------------------------------------------------------------------
 !
 
+    call ESMF_FrameworkInitialize(rc)
 
     ! Create a default 1xN DELayout
     layout1 = ESMF_DELayoutCreate(rc)
@@ -139,6 +140,8 @@
 !-------------------------------------------------------------------------
  
  10   print *, "System Test #63029 complete!"
+
+      call ESMF_FrameworkFinalize(rc)
 
       end program ESMF_SysTest63029
     
