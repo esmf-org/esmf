@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.73 2004/11/18 23:02:57 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.74 2004/11/24 00:33:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.73 2004/11/18 23:02:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.74 2004/11/24 00:33:47 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -272,9 +272,14 @@
                                   //       unit conversions
       ESMC_CalendarType *calendarTypeIn, // in  - calendar type for calendar
                                          //       interval unit conversions
-      int   timeStringLen,          // in  - F90 time string size
-      int  *tempTimeStringLen,      // out - temp F90 time string size
-      char *tempTimeString) const { // out - ISO 8601 format PyYmMdDThHmMsS
+      int   timeStringLen,             // in  - F90 time string size
+      int  *tempTimeStringLen,         // out - temp F90 time string size
+      char *tempTimeString,            // out - hybrid format
+                                       //       PyYmMdDThHmMs[:n/d]S
+      int   timeStringLenISOFrac,          // in  - F90 ISO time string size
+      int  *tempTimeStringLenISOFrac,      // out - tmp F90 ISO time string size
+      char *tempTimeStringISOFrac) const { // out - ISO 8601 format
+                                       //       PyYmMdDThHmMs[.f]S
 //
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_TimeInterval}'s values in user-specified format.
@@ -760,6 +765,13 @@
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLen = strlen(tempTimeString);
+    }
+    if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
+        timeStringLenISOFrac > 0) {
+      rc = ESMC_TimeIntervalGetString(tempTimeStringISOFrac, "isofrac");
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+      *tempTimeStringLenISOFrac = strlen(tempTimeStringISOFrac);
     }
 
     return(ESMF_SUCCESS);
@@ -2673,7 +2685,7 @@
     if (options != ESMC_NULL_POINTER) {
       if (strncmp(options, "string", 6) == 0) {
         char timeString[ESMF_MAXSTR];
-        ESMC_TimeIntervalGetString(timeString);
+        ESMC_TimeIntervalGetString(timeString, &options[6]);
         cout << timeString << endl;
       }
     } else {
@@ -2847,10 +2859,14 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      char *timeString) const {    // out - time interval value in string format
+      char *timeString, const char *options) const {    // out - time interval
+                                                        //       value in
+                                                        //       string format
 //
 // !DESCRIPTION:
-//      Gets a {\tt ESMC\_TimeInterval}'s value in character format
+//      Gets a {\tt ESMC\_TimeInterval}'s value in ISO 8601 string format
+//      PyYmMdDThHmMs[:n/d]S (hybrid) (default, options == "")
+//      PyYmMdDThHmMs[.f]S   (strict) (options == "isofrac")
 //
 //EOP
 // !REQUIREMENTS:  
@@ -2884,20 +2900,36 @@
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
-    // ISO 8601 format PyYmMdDThHmMs[.f]S, where f is fractional seconds
-
     // format everything except seconds
     sprintf(timeString, "P%lldY%lldM%lldDT%dH%dM\0", yy_i8, mm_i8, d_i8, h, m);
 
-    // convert integer fractional seconds to decimal form
-    double fractionalSeconds = 0.0;
-    if (sD != 0) fractionalSeconds = (double) sN / (double) sD;
+    // format seconds according to specified options
+    bool isofrac = false;
+    if (options != ESMC_NULL_POINTER) {
+      if (strstr(options, "isofrac") != ESMC_NULL_POINTER) isofrac = true;
+    }
+    if (isofrac) {
+      // strict ISO 8601 format PyYmMdDThHmMs[.f]S 
 
-    // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
-    if (fabs(fractionalSeconds) >= 5e-10) {
-      sprintf(timeString, "%s%.9fS\0", timeString, (s + fractionalSeconds));
-    } else { // no fractional seconds, just append integer seconds
-      sprintf(timeString, "%s%dS\0", timeString, s);
+      // convert integer fractional seconds to decimal form
+      double fractionalSeconds = 0.0;
+      if (sD != 0) fractionalSeconds = (double) sN / (double) sD;
+
+      // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
+      if (fabs(fractionalSeconds) >= 5e-10) {
+        sprintf(timeString, "%s%.9fS\0", timeString, (s + fractionalSeconds));
+      } else { // no fractional seconds, just append integer seconds
+        sprintf(timeString, "%s%dS\0", timeString, s);
+      }
+    } else { // not strict ISO fractional seconds format
+      // hybrid ISO 8601 format PyYmMdDThHmMs[:n/d]S 
+
+      // if fractionalSeconds non-zero (sN!=0) append full fractional value
+      if (sN != 0) {
+        sprintf(timeString, "%s%d:%d/%dS\0", timeString, s, sN, sD);
+      } else { // no fractional seconds, just append integer seconds
+        sprintf(timeString, "%s%dS\0", timeString, s);
+      }
     }
 
     return(rc);

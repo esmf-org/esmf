@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.40 2004/11/05 04:02:45 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.41 2004/11/24 00:30:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -140,7 +140,10 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                              ESMC_Calendar **calendarIn=0,
                              ESMC_CalendarType *calendarTypeIn=0,
                              int timeStringLen=0, int *tempTimeStringLen=0,
-                             char *tempTimeString=0) const;
+                             char *tempTimeString=0,
+                             int timeStringLenISOFrac=0,
+                             int *tempTimeStringLenISOFrac=0,
+                             char *tempTimeStringISOFrac=0) const;
 
     // native C++ interface -- via variable argument lists
     //   corresponds to F90 named-optional-arguments interface
@@ -244,7 +247,8 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 //
   private:
     // return in string format (TMG 1.5.9)
-    int ESMC_TimeIntervalGetString(char *timeString) const;
+    int ESMC_TimeIntervalGetString(char *timeString, 
+                                   const char *options=0) const;
 
     // common method for overloaded comparison operators
     bool ESMC_TimeIntervalCompare(const ESMC_TimeInterval &,
