@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2003/10/22 21:00:50 cdeluca Exp $
+# $Id: makefile,v 1.1 2003/10/22 21:00:55 cdeluca Exp $
 
 # Leave alone.
 ALL: lib 
@@ -10,35 +10,35 @@ CFLAGS    = ${MPI_INCLUDE}
 FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_FTable_F.C ESMC_Comp.C ESMC_Comp_F.C ESMC_GridComp.C \
-            ESMC_CplComp.C
+SOURCEC	  = ESMC_FTable.C
 # If you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_Comp_C.F90 
+SOURCEF	  = ESMF_Xform.F90 ESMF_Comp.F90 \
+            ESMF_GridComp.F90 ESMF_CplComp.F90 ESMF_AppComp.F90 ESMF.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
-# List .h files to be copied to higher level common include directory
-STOREH	  = 
+# If you have public .h files in this dir, list them here
+STOREH    =
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = Componentobj
+MANSEC	  = Xformobj
 LIBBASE	  = libesmf
+
 
 
 # The following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Superstructure/Component/interface
+LOCDIR	  = src/Superstructure/Xform/src
 
 
 include $(ESMF_DIR)/makefile
 
-# Leave the following line blank.
+# leave the following line blank.
 DIRS	  = 
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
-
 
