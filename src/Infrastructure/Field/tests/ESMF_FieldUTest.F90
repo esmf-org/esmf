@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.65 2004/07/27 22:56:30 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.66 2004/08/02 17:02:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.65 2004/07/27 22:56:30 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.66 2004/08/02 17:02:41 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -394,7 +394,6 @@
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
-      !-X_UTest
       ! Verifing the ESMF_FieldSetDataMap
       ! commenting out - not implemented yet.  nsc 21jun04
       !call ESMF_FieldDataMapSetDefault(dm1, ESMF_INDEX_JI, rc=rc)
