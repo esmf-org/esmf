@@ -1,19 +1,20 @@
 #if 0
-$Id: ESMF_LogErr.inc,v 1.1 2003/04/03 20:05:44 nscollins Exp $
+ $Id: ESMF_LogErr.inc,v 1.2 2004/05/12 21:34:30 cpboulder Exp $
 
-Earth System Modeling Framework
-Copyright 2002-2003, University Corporation for Atmospheric Research,
-Massachusetts Institute of Technology, Geophysical Fluid Dynamics
-Laboratory, University of Michigan, National Centers for Environmental
-Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
-NASA Goddard Space Flight Center.
-Licensed under the GPL.
+ Earth System Modeling Framework
+ Copyright 2002-2003, University Corporation for Atmospheric Research,
+ Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+ Laboratory, University of Michigan, National Centers for Environmental
+ Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+ NASA Goddard Space Flight Center.
+ Licensed under the GPL.
+ ------------------------------------------------------------------------------
 
-
-ESMF Error include file of constants for both FORTRAN or C++.
-Do not have C++ or F90 style comments in here because this file is processed
-by both C++ and F90 compilers.
-
+ This file is included in framework source code and will give filename and
+ line numbers where messages were generated from.  For user code in which
+ no preprocessing step is preferred, the routines will report the messages
+ but no line or file information.  If user code wants to generate this,
+ they will have to include this file and use a preprocessing step.
 
 #endif
 
