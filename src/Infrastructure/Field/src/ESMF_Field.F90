@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.120 2004/03/16 18:04:06 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.121 2004/03/17 01:42:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -194,7 +194,7 @@
                                        !   DataMap is already present)
 
 
-   public ESMF_FieldSetAttribute       ! Set and Get Attributes
+   public ESMF_FieldAddAttribute       ! Set and Get Attributes
    public ESMF_FieldGetAttribute       !  
 
    public ESMF_FieldGetAttributeCount  ! number of attribs
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.120 2004/03/16 18:04:06 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.121 2004/03/17 01:42:26 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -342,10 +342,10 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldSetAttribute  - Set Field Attributes
+! !IROUTINE: ESMF_FieldAddAttribute  - Set Field Attributes
 !
 ! !INTERFACE:
-      interface ESMF_FieldSetAttribute 
+      interface ESMF_FieldAddAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldSetIntAttr
@@ -2831,10 +2831,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set an integer Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set an integer Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
+      ! Private name; call using ESMF_FieldAddAttribute()
       subroutine ESMF_FieldSetIntAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2877,7 +2877,7 @@
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
+        print *, "ERROR in ESMF_FieldAddAttribute"
         return
       endif 
 
@@ -2887,10 +2887,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set an integer list Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set an integer list Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
+      ! Private name; call using ESMF_FieldAddAttribute()
       subroutine ESMF_FieldSetIntListAttr(field, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -2936,14 +2936,14 @@
   
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldSetAttribute: count longer than value list"
+          print *, "ESMF_FieldAddAttribute: count longer than value list"
           return
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
+        print *, "ERROR in ESMF_FieldAddAttribute"
         return
       endif 
 
@@ -2953,10 +2953,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a real Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a real Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
+      ! Private name; call using ESMF_FieldAddAttribute()
       subroutine ESMF_FieldSetRealAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2999,7 +2999,7 @@
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
+        print *, "ERROR in ESMF_FieldAddAttribute"
         return
       endif 
 
@@ -3009,10 +3009,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a real list Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a real list Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
+      ! Private name; call using ESMF_FieldAddAttribute()
       subroutine ESMF_FieldSetRealListAttr(field, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -3058,14 +3058,14 @@
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldSetAttribute: count longer than value list"
+          print *, "ESMF_FieldAddAttribute: count longer than value list"
           return
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
+        print *, "ERROR in ESMF_FieldAddAttribute"
         return
       endif 
 
@@ -3075,10 +3075,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a logical Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a logical Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
+      ! Private name; call using ESMF_FieldAddAttribute()
       subroutine ESMF_FieldSetLogicalAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -3121,7 +3121,7 @@
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_LOGICAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
+        print *, "ERROR in ESMF_FieldAddAttribute"
         return
       endif 
 
@@ -3131,10 +3131,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a logical list Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a logical list Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
+      ! Private name; call using ESMF_FieldAddAttribute()
       subroutine ESMF_FieldSetLogicalListAttr(field, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -3180,14 +3180,14 @@
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldSetAttribute: count longer than value list"
+          print *, "ESMF_FieldAddAttribute: count longer than value list"
           return
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_LOGICAL, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
+        print *, "ERROR in ESMF_FieldAddAttribute"
         return
       endif 
 
@@ -3197,10 +3197,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a character Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a character Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
+      ! Private name; call using ESMF_FieldAddAttribute()
       subroutine ESMF_FieldSetCharAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -3242,7 +3242,7 @@
 
       call c_ESMC_AttributeSetChar(field%ftypep%base, name, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
+        print *, "ERROR in ESMF_FieldAddAttribute"
         return
       endif 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.30 2004/03/16 21:53:39 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.31 2004/03/17 01:42:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -270,7 +270,7 @@
       ! TODO: this needs to be renamed.
       !public ESMF_StateValidate          ! is import state ready to read?
  
-      public ESMF_StateSetAttribute       ! Set and Get Attributes
+      public ESMF_StateAddAttribute       ! Set and Get Attributes
       public ESMF_StateGetAttribute       !  
 
       public ESMF_StateGetAttributeCount  ! number of Attributes
@@ -288,7 +288,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.30 2004/03/16 21:53:39 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.31 2004/03/17 01:42:26 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -446,10 +446,10 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateSetAttribute - Set a State Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a State Attribute
 !
 ! !INTERFACE:
-      interface ESMF_StateSetAttribute 
+      interface ESMF_StateAddAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_StateSetIntAttr
@@ -2695,10 +2695,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetAttribute - Set an integer Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set an integer Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateSetAttribute()
+      ! Private name; call using ESMF_StateAddAttribute()
       subroutine ESMF_StateSetIntAttr(state, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2741,7 +2741,7 @@ end function
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_INTEGER, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateSetAttribute"
+        print *, "ERROR in ESMF_StateAddAttribute"
         return
       endif 
 
@@ -2751,10 +2751,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetAttribute - Set an integer list Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set an integer list Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateSetAttribute()
+      ! Private name; call using ESMF_StateAddAttribute()
       subroutine ESMF_StateSetIntListAttr(state, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -2807,7 +2807,7 @@ end function
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_INTEGER, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateSetAttribute"
+        print *, "ERROR in ESMF_StateAddAttribute"
         return
       endif 
 
@@ -2817,10 +2817,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetAttribute - Set a real Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a real Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateSetAttribute()
+      ! Private name; call using ESMF_StateAddAttribute()
       subroutine ESMF_StateSetRealAttr(state, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2863,7 +2863,7 @@ end function
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_REAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateSetAttribute"
+        print *, "ERROR in ESMF_StateAddAttribute"
         return
       endif 
 
@@ -2873,10 +2873,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetAttribute - Set a real list Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a real list Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateSetAttribute()
+      ! Private name; call using ESMF_StateAddAttribute()
       subroutine ESMF_StateSetRealListAttr(state, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -2930,7 +2930,7 @@ end function
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_REAL, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateSetAttribute"
+        print *, "ERROR in ESMF_StateAddAttribute"
         return
       endif 
 
@@ -2940,10 +2940,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetAttribute - Set a logical Attribute 
+! !IROUTINE: ESMF_StateAddAttribute - Set a logical Attribute 
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateSetAttribute()
+      ! Private name; call using ESMF_StateAddAttribute()
       subroutine ESMF_StateSetLogicalAttr(state, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2987,7 +2987,7 @@ end function
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_LOGICAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateSetAttribute"
+        print *, "ERROR in ESMF_StateAddAttribute"
         return
       endif 
 
@@ -2997,10 +2997,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetAttribute - Set a logical list Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a logical list Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateSetAttribute()
+      ! Private name; call using ESMF_StateAddAttribute()
       subroutine ESMF_StateSetLogicalListAttr(state, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -3054,7 +3054,7 @@ end function
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_LOGICAL, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateSetAttribute"
+        print *, "ERROR in ESMF_StateAddAttribute"
         return
       endif 
 
@@ -3064,10 +3064,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetAttribute - Set a character Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a character Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateSetAttribute()
+      ! Private name; call using ESMF_StateAddAttribute()
       subroutine ESMF_StateSetCharAttr(state, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -3109,7 +3109,7 @@ end function
 
       call c_ESMC_AttributeSetChar(state%statep%base, name, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateSetAttribute"
+        print *, "ERROR in ESMF_StateAddAttribute"
         return
       endif 
 

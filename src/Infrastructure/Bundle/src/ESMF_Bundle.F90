@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.27 2004/03/09 21:30:10 svasquez Exp $
+! $Id: ESMF_Bundle.F90,v 1.28 2004/03/17 01:42:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@
 
        public ESMF_BundleGetName      ! Get Bundle name
 
-       public ESMF_BundleSetAttribute       ! Set and Get Attributes
+       public ESMF_BundleAddAttribute       ! Set and Get Attributes
        public ESMF_BundleGetAttribute       !   interface to Base class
 
        public ESMF_BundleGetAttributeCount  ! number of attribs
@@ -292,10 +292,10 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a Bundle Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a Bundle Attribute
 !
 ! !INTERFACE:
-      interface ESMF_BundleSetAttribute 
+      interface ESMF_BundleAddAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_BundleSetIntAttr
@@ -2399,10 +2399,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set an integer Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set an integer Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
+      ! Private name; call using ESMF_BundleAddAttribute()
       subroutine ESMF_BundleSetIntAttr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2445,7 +2445,7 @@ end function
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_INTEGER, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
+        print *, "ERROR in ESMF_BundleAddAttribute"
         return
       endif 
 
@@ -2455,10 +2455,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set an integer list Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set an integer list Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
+      ! Private name; call using ESMF_BundleAddAttribute()
       subroutine ESMF_BundleSetIntListAttr(bundle, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -2511,7 +2511,7 @@ end function
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_INTEGER, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
+        print *, "ERROR in ESMF_BundleAddAttribute"
         return
       endif 
 
@@ -2521,10 +2521,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a real Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a real Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
+      ! Private name; call using ESMF_BundleAddAttribute()
       subroutine ESMF_BundleSetRealAttr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2567,7 +2567,7 @@ end function
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_REAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
+        print *, "ERROR in ESMF_BundleAddAttribute"
         return
       endif 
 
@@ -2577,10 +2577,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a real list Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a real list Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
+      ! Private name; call using ESMF_BundleAddAttribute()
       subroutine ESMF_BundleSetRealListAttr(bundle, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -2633,7 +2633,7 @@ end function
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_REAL, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
+        print *, "ERROR in ESMF_BundleAddAttribute"
         return
       endif 
 
@@ -2643,10 +2643,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a logical Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a logical Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
+      ! Private name; call using ESMF_BundleAddAttribute()
       subroutine ESMF_BundleSetLogicalAttr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2689,7 +2689,7 @@ end function
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_LOGICAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
+        print *, "ERROR in ESMF_BundleAddAttribute"
         return
       endif 
 
@@ -2699,10 +2699,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a logical list Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a logical list Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
+      ! Private name; call using ESMF_BundleAddAttribute()
       subroutine ESMF_BundleSetLogicalListAttr(bundle, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -2755,7 +2755,7 @@ end function
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_LOGICAL, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
+        print *, "ERROR in ESMF_BundleAddAttribute"
         return
       endif 
 
@@ -2765,10 +2765,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a character Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a character Attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
+      ! Private name; call using ESMF_BundleAddAttribute()
       subroutine ESMF_BundleSetCharAttr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2810,7 +2810,7 @@ end function
 
       call c_ESMC_AttributeSetChar(bundle%btypep%base, name, value, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
+        print *, "ERROR in ESMF_BundleAddAttribute"
         return
       endif 
 
