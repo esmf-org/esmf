@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/01/23 21:06:29 nscollins Exp $
+# $Id: makefile,v 1.3 2003/01/29 00:04:03 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -10,13 +10,13 @@ CFLAGS    =
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  =  ESMC_State_F.C ESMC_Xform_F.C ESMC_Comp_F.C \
-             ESMC_App_F.C ESMC_Cpl_F.C ESMC_GComp_F.C
+SOURCEC	  = ESMC_State.C ESMC_Xform.C ESMC_Comp.C ESMC_App.C ESMC_Cpl.C ESMC_GComp.C 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_State.F90 ESMF_Xform.F90 ESMF_Comp.F90 \
-            ESMF_App.F90 ESMF_Cpl.F90 ESMF_GComp.F90
+SOURCEF	  = 
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
+# list .h files to be copied to higher level common include directory
+STOREH	  = 
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
