@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/04/19 02:03:52 eschwab Exp $ 
+# $Id: makefile,v 1.8 2003/04/22 20:34:43 eschwab Exp $ 
 
 ALL:  examples
 
@@ -15,21 +15,33 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/TimeMgr/examples
 
 TESTEXAMPLES_3  = \
+	ESMF_CalRange RUN_ESMF_CalRange ESMF_CalRange.rm \
 	ESMF_CalendarEx RUN_ESMF_CalendarEx ESMF_CalendarEx.rm \
 	ESMF_ClockEx RUN_ESMF_ClockEx ESMF_ClockEx.rm \
 	ESMC_ClockEx RUN_ESMC_ClockEx ESMC_ClockEx.rm
 
-EXAMPLESF       = ESMF_ClockEx.F90 ESMF_Calendar.F90
+EXAMPLESF       = ESMF_ClockEx.F90 ESMF_Calendar.F90 ESMF_CalRange.F90
 EXAMPLESC       = ESMC_ClockEx.C
 
 include ${ESMF_DIR}/makefile
 
 DIRS = 
 
-examples: ESMF_CalendarEx ESMF_ClockEx ESMC_ClockEx
+examples: ESMF_CalRange ESMF_CalendarEx ESMF_ClockEx ESMC_ClockEx
 
 ESMF_TimeMgrDir:
 	mkdir -p ${ESMC_TESTDIR}
+
+ESMF_CalRange: ESMF_CalRange.o  chkopts
+	-${SL_F_LINKER} -g -o ESMF_CalRange ESMF_CalRange.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_CalRange.o
+
+RUN_ESMF_CalRange:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CalRange.tmps
+	ESMF_CalRange > ESMF_CalRange.stdout
+
+ESMF_CalRange.rm:
+	echo "ESMF_CalRange.rm target called here."
 
 ESMF_CalendarEx: ESMF_CalendarEx.o  chkopts
 	-${SL_F_LINKER} -g -o ESMF_CalendarEx ESMF_CalendarEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
