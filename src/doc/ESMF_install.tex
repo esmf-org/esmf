@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.4 2001/11/28 22:25:32 dneckels Exp $
+% $Id: ESMF_install.tex,v 1.5 2001/11/29 17:11:40 dneckels Exp $
 
 \section{Installation}
 
@@ -70,7 +70,10 @@ ${ESMF_DIR}/test${BOPT}/${ESMF_ARCH}
 
 \noindent To build documentation:
 \begin{verbatim}
-  gmake BOPT=g alldoc
+  gmake dvi           ! Makes the dvi files
+  gmake pdf           ! Makes the pdf files
+  gmake html          ! Creates the html directory.
+  gmake alldoc        ! Builds all the above documents.
 \end{verbatim}
 
 To use the library from C/C++, link with the library executable and include

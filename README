@@ -1,4 +1,4 @@
- $Id: README,v 1.2 2001/11/15 22:56:37 dneckels Exp $
+ $Id: README,v 1.3 2001/11/29 17:11:40 dneckels Exp $
 ================================================================================
                                    README
 
@@ -46,7 +46,7 @@ To build and run F90 tests (on a non-mpi machine):
 
   gmake BOPT=g test_f90uni
 
-Output files from the tests are directed to files in $ESMF_DIR/test/${ESMF_ARCH}
+Output files from the tests are directed to files in $ESMF_DIR/test${BOPT}/${ESMF_ARCH}
 directories.
 
 To build documentation:

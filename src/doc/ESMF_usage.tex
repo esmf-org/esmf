@@ -1,4 +1,4 @@
-% $Id: ESMF_usage.tex,v 1.1 2001/11/13 18:35:47 dneckels Exp $
+% $Id: ESMF_usage.tex,v 1.2 2001/11/29 17:11:40 dneckels Exp $
 
 \section{Basic Usage and Conventions}
 
@@ -18,22 +18,24 @@ of Fortran derived types are private.
 \item{\it All types should be initialized.} In order to provide consistent
 argument checking and to increase the overall robustness of the library,
 a user should call one of the {\tt ``Init''} routines before using the
-library's Fortran derived types, or a {\tt ``Construct''} routine before 
-using its C/C++ classes.
+library's Fortran derived types, or the {\tt ``Construct''} routine before 
+using its C/C++ classes.  A {\tt ``New''} routine is provided for C/C++ if
+dynamic memory allocation is desired.
 
 \end{itemize}
 
 \subsection{Error Handling}
 
 All C/C++ procedures return an integer error code.  All F90 procedures have 
-an optional integer return code argument.  Return codes are translated 
+an optional integer return code argument (with the exception of a select few
+functions that use {\tt stdargs}).  Return codes are translated 
 into error descriptions using the methods: 
 
 \begin{verbatim}
     void ESMC_ErrPrint(int rc)
 
     subroutine ESMF_ErrPrint(rc)  
-    integer, intent(in) :: rc
+    integer, intent(in), optional :: rc
 \end{verbatim}
 
 A return code of {\tt ESM[F/C]\_SUCCESS} indicates that an 
