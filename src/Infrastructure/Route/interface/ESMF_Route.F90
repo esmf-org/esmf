@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.38 2003/11/07 15:35:37 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.39 2004/01/07 22:38:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,9 @@
       public ESMF_RoutePrecomputeRegrid
       public ESMF_RoutePrecomputeDomList
       public ESMF_RouteRun
+      public ESMF_RouteRunF90PtrI411D
       public ESMF_RouteRunF90PtrI421D
+      public ESMF_RouteRunF90PtrR811D
       public ESMF_RouteRunF90PtrR821D
  
       public ESMF_RouteValidate
@@ -91,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.38 2003/11/07 15:35:37 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.39 2004/01/07 22:38:43 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -739,6 +741,63 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_RouteRunF90PtrI411D - Execute the communications the Route represents
+
+! !INTERFACE:
+      subroutine ESMF_RouteRunF90PtrI411D(route, srcarray, dstarray, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer(ESMF_KIND_I4), pointer, optional :: srcarray(:)
+      integer(ESMF_KIND_I4), pointer, optional :: dstarray(:)
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Execute the communications a Route represents.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be executed.
+!     \item[{[srcarray]}]
+!          F90 Array containing data to be sent.
+!     \item[{[dstarray]}]
+!          F90 Array containing data to be received.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code
+        call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Run error"
+          return  
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RouteRunF90PtrI411D
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_RouteRunF90PtrI421D - Execute the communications the Route represents
 
 ! !INTERFACE:
@@ -793,6 +852,63 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_RouteRunF90PtrI421D
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RouteRunF90PtrR811D - Execute the communications the Route represents
+
+! !INTERFACE:
+      subroutine ESMF_RouteRunF90PtrR811D(route, srcarray, dstarray, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      real(ESMF_KIND_R8), pointer, optional :: srcarray(:)
+      real(ESMF_KIND_R8), pointer, optional :: dstarray(:)
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Execute the communications a Route represents.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be executed.
+!     \item[{[srcarray]}]
+!          F90 Array containing data to be sent.
+!     \item[{[dstarray]}]
+!          F90 Array containing data to be received.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code
+        call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Run error"
+          return  
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RouteRunF90PtrR811D
 
 !------------------------------------------------------------------------------
 !BOP
