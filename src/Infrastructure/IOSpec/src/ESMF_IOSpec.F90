@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.2 2004/03/18 16:24:25 nscollins Exp $
+! $Id: ESMF_IOSpec.F90,v 1.3 2004/03/22 16:10:59 cdeluca Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -142,7 +142,7 @@
       contains
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IOFlush - flush output on a unit number
 !
 ! !INTERFACE:
@@ -159,7 +159,7 @@
 !
 ! !REQUIREMENTS: 
 
-!EOP
+!EOPI
       integer :: status
 
       status = ESMF_FAILURE

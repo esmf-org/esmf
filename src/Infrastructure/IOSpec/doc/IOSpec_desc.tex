@@ -1,23 +1,12 @@
-% $Id: IOSpec_desc.tex,v 1.1 2004/03/17 04:56:31 cdeluca Exp $
+% $Id: IOSpec_desc.tex,v 1.2 2004/03/22 16:10:59 cdeluca Exp $
 
-A Field represents a scalar physical field, such as temperature.  
-ESMF does not currently support vector fields, so the components of 
-a vector field must be stored as separate Field objects.  The 
-ESMF Field class contains the discretized field data, a reference 
-to its associated grid, and metadata.  
-
-The Field class maintains the relationship of
-how data maps onto the Grid (e.g. one item per cell located at
-the cell center, one item per cell located at the NW corner, 
-one item per cell vertex, etc).  This means that different Fields
-which are on the same underlying Grid but have different
-mappings (staggerings) can share the same Grid object without
-needing to copy or replicate it multiple times. 
-
-The Field class provides methods for initialization, setting and 
-retrieving data values, I/O, general data redistribution and regridding, 
-standard communication methods such as gather and scatter, and 
-manipulation of attributes.
+The IOSpec in a simple class that specifies the options for 
+an IO activity.  An important choice is the IO format.  Currently
+ netCDF, HDF5, and binary are supported.  Other options include 
+whether IO should be written to a single file or multiple files, 
+the Fortran unit number, and the filename.  The IO activity can
+be identified as being a restart write (\tt ESMF\_IO\_RESTART) or 
+a history write (\tt ESMF\_IO\_HISTORY), if desired.
 
 
 

@@ -1,87 +1,16 @@
-% $Id: IOSpec_usage.tex,v 1.1 2004/03/17 04:56:31 cdeluca Exp $
+% $Id: IOSpec_usage.tex,v 1.2 2004/03/22 16:10:59 cdeluca Exp $
 
 %\subsection{Use and Examples}
 
-A Field serves as an annotator of data, since it carries 
-a description of the grid it is associated with and metadata 
-such as name and units.  Fields can be used in this capacity
-alone, as convenient, descriptive containers into which arrays 
-can be placed and retrieved.  However, for most codes the primary 
-use of Fields is in the context of Import and Export States,
-which are the objects that carry coupling information between 
-Components.  Fields enable data to be self-describing, and a
-State holding ESMF Fields contains data in a standard format
-that is easy to query and manipulate.  
+The IOSpec can be used in two ways.  The first way an IOSpec can 
+be used is by passing it into the creation method of a data class 
+such as a Field or Bundle.  This sets a default IOSpec for the 
+data object.  Any IO method that involves the data object will 
+use the settings in the default IOSpec, as long as there is no 
+other IO specification that overrides it.  This brings us to the 
+second way to use an IOSpec.  
 
-The information that is necessary for describing a Field to 
-another Component is similar to the information needed to write 
-history files.  Another use of Fields is as a mechanism for 
-writing out data to files for history and restart.
-
-The sections below go into more detail about Field usage.
-
-\subsubsection{Field Creation}
-
-Fields can be created and destroyed at any time during 
-application execution.  However, these Field methods require 
-some time to complete.  We do not recommend that the user
-create or destroy Fields inside performance-critical 
-computational loops.
-
-All versions of the {\tt ESMF\_FieldCreate} 
-routines require a Grid object as input, or require a Grid
-be added before most operations involving Fields can be performed.
-The Grid contains the information needed to know which 
-Decomposition Elements (DEs) are participating in 
-the processing of this Field, and which subsets of the data
-are local to this DE.
-
-Requests to access local Field data will not require 
-communication overhead; the user code is expected to
-query the Grid object to discover what part of the
-overall dataset is local to this processor and do
-computations based on that data.
-
-The details of how the create process happens depends 
-on which of the variants of the {\tt ESMF\_FieldCreate()} 
-call is used.  Some of the variants are discussed below.
-
-There are versions of the {\tt ESMF\_FieldCreate()} interface
-which create the Field based on the input Grid.  The ESMF
-can allocate the proper amount of 
-space but not assign initial values.  The user code
-can then get the pointer to the uninitialized buffer and 
-set the initial data values.
-
-Other versions of the {\tt ESMF\_FieldCreate()} interface
-allow user code to attach arrays that have already been
-allocated by the user.  Empty Fields can also be created in
-which case the data can be added at some later time.
-
-For versions of Create which do not specify data values,
-user code can create an ArraySpec object, which
-contains information about the Type, Kind, and Rank of the
-data values in the array.  Then at Field create time, the
-appropriate amount of memory is allocated to contain the
-data which is local to each DE.
-
-\input{../Infrastructure/Field/doc/ESMF_FieldCreateEx_fapi}
-
-\subsubsection{Accessing Field Data}
-
-The user code on each DE calls the {\tt ESMF\_FieldGridQuery}
-routine to find out about the local subset of the data, including
-the number of items, the extents
-of the dimensions, and the corresponding coordinates of this
-decomposition.
-
-The user code can then call {\tt ESMF\_FieldGet()} to
-begin iterating through the data.  This routine returns a
-pointer to the buffer.  
-
-\subsubsection{Field Deletion}
-
-There is a {\tt ESMF\_FieldDestroy()} method which releases
-any data buffers which were allocated or copied by this Field,
-and deletes the Field object.  Since the Grid can be shared
-amongst multiple Fields, the Grid is not deleted by this call.
+The second mode of usage is to pass an IOSpec into a particular 
+IO method, such as an {\tt ESMF\_FieldWrite()} call.  The IOSpec 
+passed into a write or read call overrides any default settings 
+that were set up at data object creation.
