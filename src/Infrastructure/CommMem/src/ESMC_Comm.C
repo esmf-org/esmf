@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.22 2003/04/28 19:23:29 nscollins Exp $
+// $Id: ESMC_Comm.C,v 1.23 2003/07/11 01:00:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.22 2003/04/28 19:23:29 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.23 2003/07/11 01:00:00 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -759,7 +759,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
       void *rbuf,
       int num,
       ESMC_Datatype type,
-      ESMC_DE *root) {
+      ESMC_DE *rootDE) {
 //
 // !DESCRIPTION:
 //      
@@ -769,13 +769,19 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 
   int rootpID;
 
-  root->ESMC_DEGetpID(&rootpID);
+  if (sbuf == ESMC_NULL_POINTER || rbuf == ESMC_NULL_POINTER ||
+      rootDE == ESMC_NULL_POINTER) {
+    return(ESMF_FAILURE);
+  }
 
-#ifdef MPI
+  rootDE->PE->ESMC_PEGetEsmfID(&rootpID);
+  //rootDE->ESMC_DEGetpID(&rootpID);  TODO: really should be (MPI) process ID
+
+  //printf("ESMC_CommScatter(): rootDE's rootPID = %d\n", rootpID);
+
   MPI_Scatter(sbuf, num, ESMC_DatatypeToMPI[type],
               rbuf, num, ESMC_DatatypeToMPI[type],
               rootpID, MPI_COMM_WORLD);
-#endif
 
   return(ESMF_SUCCESS);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.17 2003/04/25 15:42:15 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.18 2003/07/11 01:00:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,6 +134,7 @@ typedef int ESMC_CommType;
     int ESMC_DELayoutGetDEExists(int deid, ESMC_DELayout *other, ESMC_Logical *exists) const;
     int ESMC_DELayoutGetXXX(void) const;
     int ESMC_DELayoutGetDE(int x, int y, int z, ESMC_DE *de) const;
+    int ESMC_DELayoutGetDE(int deid, ESMC_DE **de) const;
 
     int ESMC_DELayoutGetDEExclusive(ESMC_DE *de) const;    
     int ESMC_DELayoutSetAxisIndex(int global_counts[], int size_gcount,
@@ -160,6 +161,8 @@ typedef int ESMC_CommType;
   //       Or remove comm from DELayout (standalone) and remove these
   //       entry points from DELayout?
 
+    int ESMC_DELayoutScatter(void *sndArray, void *rcvArray, int len, 
+                             ESMC_Datatype type, int rootDEid); 
     int ESMC_DELayoutAllGatherVI(int *sndArray, int  sndLen, 
 				 int *rcvArray, int *rcvLen, int *rcvDispls);
     int ESMC_DELayoutAllGatherVF(float *sndArray, int  sndLen, 

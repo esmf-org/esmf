@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.33 2003/07/10 23:01:46 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.34 2003/07/11 01:00:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.33 2003/07/10 23:01:46 jwolfe Exp $";
+           "$Id: ESMC_DELayout.C,v 1.34 2003/07/11 01:00:00 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1399,6 +1399,46 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_DELayoutGetDE - get DE with given ID
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetDE(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int deid,              // in  - given DE id
+      ESMC_DE **de) const {   // out - matching DE
+//
+// !DESCRIPTION:
+//    Returns {\tt ESMC\_DE} for given DE id
+//EOP
+// !REQUIREMENTS:  
+
+  int testid;
+
+  // linear search for DE id
+  for (int i=0; i<length[0]; i++) {
+    for (int j=0; j<length[1]; j++) {
+      for (int k=0; k<length[2]; k++) {
+        layout[i][j][k].ESMC_DEGetESMFID(&testid);
+        if (testid == deid) {
+          // found -- return this DE
+          *de = &layout[i][j][k];
+          return(ESMF_SUCCESS);
+        }
+      }
+    }
+  }
+
+  //cout << "id not found" << endl;
+  return(ESMF_FAILURE);
+
+ } // end ESMC_DELayoutGetDE
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_DELayoutGetDEIDat - get DE ID at position (x,y,z)
 //
 // !INTERFACE:
@@ -1492,6 +1532,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   int peid, testid;
 
   myPE.ESMC_PEGetEsmfID(&peid);
+  //cout << "ESMC_DELayoutGetDEID(): myPEid = " << peid << endl;
 
   // linear search for DE TODO: compute once on initialization ?
   for (int i=0; i<length[0]; i++) {
@@ -1501,6 +1542,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         if (peid == testid) {
           // found -- return this id
           layout[i][j][k].ESMC_DEGetESMFID(deid);
+          //cout << "ESMC_DELayoutGetDEID(): i,j,k, deid = " << i << j << k << *deid << endl;
           return(ESMF_SUCCESS);
         }
       }
@@ -2399,6 +2441,47 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   ESMC_DELayoutDestruct();
 
  } // end ~ESMC_DELayout
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutScatter - Perform MPI-like scatter of data array from one DE to all others in layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutScatter(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void *sndArray,      // in  - send data array
+      void *rcvArray,      // out - received data array
+      int len,             // in  - data array chunk size
+      ESMC_Datatype type,  // in - array data type
+      int rootDEid) {      // in  - root DE performing the scatter
+//
+// !DESCRIPTION:
+//    Perform MPI-like scatter of a data array from one DE to all others
+//    in the layout.
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+  // TODO: make comm public and invoke directly rather than at DELayout level ?
+  //       (does not depend on any DELayout knowledge)
+
+  ESMC_DE *rootDE;
+  int rc;
+
+  // perform scatter operation across all DEs in the layout
+  rc = ESMC_DELayoutGetDE(rootDEid, &rootDE);
+  rc = comm.ESMC_CommScatter(sndArray, rcvArray, len, type, rootDE);
+  if (rc != ESMF_SUCCESS) {
+    cout << "ESMC_DELayoutScatter() error" << endl;
+  }
+
+  return(rc);
+
+ } // end ESMC_DELayoutScatter
 
 //-----------------------------------------------------------------------------
 //BOP

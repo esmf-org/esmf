@@ -139,6 +139,14 @@ extern "C" {
            //*status = (*ptr)->ESMC_DELayoutPrint(opts);
        }
 
+       void FTN(c_esmc_delayoutscatter)(ESMC_DELayout **ptr,
+                                 void *sndarray, void *rcvarray, int *len,
+                                 ESMC_Datatype *type, int *rootdeid,
+                                 int *status) {
+           *status = (*ptr)->ESMC_DELayoutScatter(sndarray, rcvarray, *len,
+                                                  *type, *rootdeid);
+       }
+
        void FTN(c_esmc_delayoutallreduce)(ESMC_DELayout **ptr, int *array,
                                  int *result, int *len, int *op, int *status) {
            *status = (*ptr)->ESMC_DELayoutAllReduce(array, result, *len,
