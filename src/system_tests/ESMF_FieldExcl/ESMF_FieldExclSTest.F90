@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.11 2004/11/01 23:47:33 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.12 2004/11/03 00:14:00 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -22,6 +22,11 @@
 !                 to the function's solution for a measurement of the
 !                 accuracy of the Regrid.  Those values are output for
 !                 each DE.
+!
+! WARNING - this system test is being used to debug some of the
+!  new routines used for concurrent components.  it currently generates
+!  a lot of debugging output.  this will be removed when the code is
+!  all working.
 !
 !\begin{verbatim}
 

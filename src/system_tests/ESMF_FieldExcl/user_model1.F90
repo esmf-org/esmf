@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.5 2004/10/11 22:52:09 jwolfe Exp $
+! $Id: user_model1.F90,v 1.6 2004/11/03 00:14:00 nscollins Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -74,6 +74,9 @@
         integer :: counts(ESMF_MAXGRIDDIM)
         integer :: npets, pet_id, countsPerDE1(4), countsPerDE2(1)
         type(ESMF_GridHorzStagger) :: horz_stagger
+        type(ESMF_Field) :: temp1
+        type(ESMF_Bundle) :: bundle1
+        type(ESMF_State) :: state1
         integer :: status
 
         ! this should be overwritten by a more specific error code on error
@@ -138,6 +141,23 @@
         if (status .ne. ESMF_SUCCESS) goto 10
      !   call ESMF_StatePrint(exportState, rc=status)
 
+        ! for debugging Reconcile only, add some other objects to the state.
+        ! they will not be used in the coupler, but will be grist to debug
+        ! the reconcile code.
+        state1 = ESMF_StateCreate(rc=status)
+        call ESMF_StateAddState(exportState, state1, rc=status)
+        temp1 = ESMF_FieldCreateNoData(rc=status)
+        bundle1 = ESMF_BundleCreate(rc=status)
+        call ESMF_BundleSetAttribute(bundle1, "Region", "Artic", rc=status)
+        call ESMF_BundleSetAttribute(bundle1, "Cover", "World", rc=status)
+        call ESMF_BundleSetAttribute(bundle1, "Scale Factor", 1.0, rc=status)
+        call ESMF_BundleAddField(bundle1, temp1, rc=status)
+        call ESMF_StateAddBundle(exportState, bundle1, rc=status)
+        call ESMF_StateAddArray(exportState, array1, rc=status)
+
+  
+        call ESMF_StatePrint(exportState, rc=status)
+     
         print *, pet_id, "User Comp 1 Init returning"
    
         rc = ESMF_SUCCESS
