@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2003/10/16 23:16:24 jwolfe Exp $
+! $Id: user_model2.F90,v 1.4 2003/10/20 23:46:50 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -148,7 +148,7 @@
       idata = real(de_id)
 
       call ESMF_StateAddData(importstate, humidity, rc)
-      call ESMF_StatePrint(importstate, rc=rc)
+   !   call ESMF_StatePrint(importstate, rc=rc)
 
       print *, "User Comp Init returning"
    
@@ -175,14 +175,14 @@
       print *, "User Comp Run starting"
 
       ! Get information from the component.
-      call ESMF_StatePrint(importstate, rc=status)
+  !    call ESMF_StatePrint(importstate, rc=status)
       call ESMF_StateGetData(importstate, "humidity", humidity, rc=status)
-      call ESMF_FieldPrint(humidity, "", rc=status)
+  !    call ESMF_FieldPrint(humidity, "", rc=status)
     
       ! This is where the model specific computation goes.
       call ESMF_FieldGetData(humidity, array1, rc=status)
       print *, "Imported Array in user model 2:"
-      call ESMF_ArrayPrint(array1, "", rc)
+  !    call ESMF_ArrayPrint(array1, "", rc)
 
       print *, "User Comp Run returning"
 
@@ -203,10 +203,17 @@
 
       ! Local variables
       integer :: status
+      type(ESMF_Field) :: field
+      integer :: localrc, finalrc
       type(mylocaldata), pointer :: mydatablock
       type(wrapper) :: wrap
 
       print *, "User Comp Final starting"  
+
+      ! set this up to run the validate code on all fields
+      ! so we can see and compare the output.  but if any of
+      ! the verify routines return error, return error at the end.
+      finalrc = ESMF_SUCCESS
 
       ! Get our local info
       nullify(wrap%ptr)
@@ -216,15 +223,110 @@
 
       mydatablock => wrap%ptr
       print *, "before deallocate, dataoffset = ", mydatablock%dataoffset
+
+      ! check validity of results
+      ! Get Fields from import state
+      call ESMF_StateGetData(importstate, "humidity", field, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyResults(field, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
       deallocate(mydatablock, stat=status)
       print *, "deallocate returned ", status
       nullify(wrap%ptr)
 
+30 continue
+      ! come straight here if you cannot get the data from the state.
+      ! otherwise error codes are accumulated but ignored until the
+      ! end so we can see the output from all the cases to help track
+      ! down errors.
+
       print *, "User Comp Final returning"
+      rc = finalrc
+   
+    end subroutine user_final
+
+!--------------------------------------------------------------------------------
+!   !  The routine where results are validated.
+!   !
+ 
+    subroutine verifyResults(humidity, rc)
+      type(ESMF_Field), intent(in) :: humidity
+      integer, intent(out) :: rc
+
+      ! Local variables
+      integer :: status, i, j, myDE, counts(2)
+      type(ESMF_RelLoc) :: relloc
+      type(ESMF_Array) :: array
+      type(ESMF_Array), dimension(:), pointer :: coordArray
+      type(ESMF_Grid) :: grid
+      real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
+      real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, data, coordX, coordY
+
+      print *, "User verifyResults starting"  
+
+      pi = 3.14159
+
+      ! get the grid and coordinates
+      allocate(coordArray(2))
+      call ESMF_FieldGetRelLoc(humidity, relloc, status)
+      call ESMF_FieldGetGrid(humidity, grid, rc=status)
+      call ESMF_GridGetDE(grid, myDE=myDE, local_axis_length=counts, &
+                          rc=status)
+      call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &
+                              rc=status)
+      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
+      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+
+      ! update field values here
+      call ESMF_FieldGetData(humidity, array, rc=rc)
+      ! Get a pointer to the start of the data
+      call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc)
+
+      ! allocate array for computed results and fill it
+      allocate(calc(counts(1), counts(2)))
+      do j   = 1,counts(2)
+        do i = 1,counts(1)
+          calc(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                           + 2.0*sin(coordY(i,j)/50.0*pi)
+        enddo
+      enddo
+
+     ! calculate data error from computed results
+      maxError    = 0.0
+      maxPerError = 0.0
+      maxCValue   = 0.0
+      minCValue   = 1000.0
+      maxDValue   = 0.0
+      minDValue   = 1000.0
+      do j   = 1,counts(2)
+        do i = 1,counts(1)
+          error       = abs(data(i,j)) - abs(calc(i,j))
+          minCValue   = min(minCValue, abs(calc(i,j)))
+          maxCValue   = max(maxCValue, abs(calc(i,j)))
+          minDValue   = min(minDValue, abs(data(i,j)))
+          maxDValue   = max(maxDValue, abs(data(i,j)))
+          maxError    = max(maxError, abs(error))
+          maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
+        enddo
+      enddo
+
+      write(*,*) "Results for DE #", myDE, ":"
+      write(*,*) "   minimum regridded value = ", minDValue
+      write(*,*) "   maximum regridded value = ", maxDValue
+      write(*,*) "   minimum computed value  = ", minCValue
+      write(*,*) "   maximum computed value  = ", maxCValue
+      write(*,*) "   maximum error           = ", maxError
+      write(*,*) "   maximum percent error   = ", maxPerError
+      print *, "User verifyResults returning"
    
       rc = ESMF_SUCCESS
 
-    end subroutine user_final
+    end subroutine verifyResults
 
 
     end module user_model2

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2003/10/16 23:16:12 jwolfe Exp $
+! $Id: user_model1.F90,v 1.4 2003/10/20 23:46:50 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -88,7 +88,7 @@
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
 
-!     ! Local variables
+       ! Local variables
         type(ESMF_Field) :: humidity
         type(ESMF_DELayout) :: layout
         integer :: i, x, y
@@ -148,7 +148,7 @@
         idata = real(de_id)
 
         call ESMF_StateAddData(exportstate, humidity, rc)
-        call ESMF_StatePrint(exportstate, rc=rc)
+     !   call ESMF_StatePrint(exportstate, rc=rc)
 
         print *, "User Comp Init returning"
    
@@ -167,11 +167,15 @@
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
 
-!     ! Local variables
+       ! Local variables
         type(ESMF_Field) :: humidity
+        type(ESMF_RelLoc) :: relloc
         type(ESMF_Array) :: array1
-        real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
-        integer :: status
+        type(ESMF_Array), dimension(:), pointer :: coordArray
+        type(ESMF_Grid) :: grid
+        real(ESMF_KIND_R8) :: pi
+        real(ESMF_KIND_R8), dimension(:,:), pointer :: idata, coordX, coordY
+        integer :: status, i, j, counts(2)
         type(mylocaldata), pointer :: mydatablock
         type(wrapper) :: wrap
 
@@ -186,6 +190,8 @@
         !!if (present(rc)) print *, "rc present"
         !!if (.not.present(rc)) print *, "rc *not* present"
 
+        pi = 3.14159
+
         ! Get our local info
         call ESMF_GridCompGetInternalState(comp, wrap, status)
         mydatablock => wrap%ptr
@@ -195,18 +201,33 @@
         ! Get the Field and Bundle data from the State
         call ESMF_StateGetData(exportstate, "humidity", humidity, rc=status)
       
+        ! get the grid and coordinates
+        allocate(coordArray(2))
+        call ESMF_FieldGetRelLoc(humidity, relloc, status)
+        call ESMF_FieldGetGrid(humidity, grid, rc=status)
+        call ESMF_GridGetDE(grid, local_axis_length=counts, rc=status)
+        call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &
+                                rc=status)
+        call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+
         ! update field values here
         call ESMF_FieldGetData(humidity, array1, rc=rc) 
         ! Get a pointer to the start of the data
         call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc)
 
         ! increment data values in place
-        idata = idata + 10.0
-     
+    !    idata = idata + 10.0
+        do j   = 1,counts(2)
+          do i = 1,counts(1)
+            idata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                              + 2.0*sin(coordY(i,j)/50.0*pi)
+          enddo
+        enddo
 
-        call ESMF_StatePrint(exportstate, rc=status)
-        call ESMF_FieldPrint(humidity, rc=status)
-        call ESMF_ArrayPrint(array1, "", rc=status)
+     !   call ESMF_StatePrint(exportstate, rc=status)
+     !   call ESMF_FieldPrint(humidity, rc=status)
+     !   call ESMF_ArrayPrint(array1, "", rc=status)
  
         print *, "User Comp Run returning"
 
