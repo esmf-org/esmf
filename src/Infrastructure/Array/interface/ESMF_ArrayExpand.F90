@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand.F90,v 1.12 2004/02/12 22:03:29 nscollins Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.13 2004/03/04 16:39:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -24,29 +24,35 @@
 ! INCLUDES
 ! < ignore blank lines below. they are created by the files which
 ! define various macros. >
+#include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayBaseMod
       implicit none
+
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
+
 !------------------------------------------------------------------------------
 ! ! ESMF_ArrayOrigin
 !
 ! ! Private flag which indicates the create was initiated on the F90 side.
 ! ! This matches an enum on the C++ side and the values must match.
 ! ! Update ../include/ESMC_Array.h if you change these values.
+
       type ESMF_ArrayOrigin
       sequence
       private
         integer :: origin
       end type
+
       type(ESMF_ArrayOrigin), parameter :: &
                             ESMF_FROM_FORTRAN = ESMF_ArrayOrigin(1), &
                             ESMF_FROM_CPLUSPLUS = ESMF_ArrayOrigin(2)
+
 !------------------------------------------------------------------------------
 ! ! Internal wrapper structures for passing f90 pointers to C++ and
 ! ! guaranteeing they are passed by reference on all compilers and all
@@ -191,25 +197,33 @@
 ! < end macro - do not edit directly > 
  
 
+
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
+
       public ESMF_ArrayCreate, ESMF_ArrayDestroy
+
       public ESMF_ArraySetData
       public ESMF_ArrayGetData
+
       public ESMF_ArrayF90Allocate
       public ESMF_ArrayF90Deallocate
       public ESMF_ArrayConstructF90Ptr ! needed for C++ callback only
+
 !EOP
       public operator(.eq.), operator(.ne.)
+
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand.F90,v 1.12 2004/02/12 22:03:29 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.13 2004/03/04 16:39:01 nscollins Exp $'
+
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+
 !BOP
 ! !IROUTINE: ESMF_ArrayCreate -- Generic interface to create an Array
 !
@@ -222,12 +236,16 @@
         module procedure ESMF_ArrayCreateBySpec ! specify ArraySpec
 !
         ! Plus interfaces for each T/K/R
+
 !EOP
+
+
 ! ! < interfaces for each T/K/R >
 ! --Array--InterfaceMacro(ArrayCreateByMTArr)
 !
 ! ! < interfaces for each T/K/R >
 ! --Array--InterfaceMacro(ArrayCreateByFullArr)
+
        ! < interfaces for each T/K/R >
 !------------------------------------------------------------------------------ 
 ! <This section created by macro - do not edit directly> 
@@ -259,6 +277,7 @@
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
        ! < interfaces for each T/K/R >
 !------------------------------------------------------------------------------ 
 ! <This section created by macro - do not edit directly> 
@@ -289,6 +308,8 @@
  module procedure ESMF_ArrayCreateByFullPtrR85D 
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
+
 
 !BOP
 ! !DESCRIPTION:
@@ -339,7 +360,9 @@
 !
 end interface
 !EOP
+
 !------------------------------------------------------------------------------
+
 !BOP
 ! !IROUTINE: ESMF_ArrayGetData -- Get an F90 pointer to the data contents
 !
@@ -379,15 +402,20 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 ! types of {\tt ESMF\_ArrayGetData} functions.
 !
 !EOP
 end interface
+
 !==============================================================================
+
       contains
+
 !==============================================================================
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
@@ -442,6 +470,7 @@ end interface
 !
 !EOP
 ! !REQUIREMENTS:
+
         ! Local vars
         type (ESMF_Array) :: array ! new C++ Array
         integer :: status ! local error status
@@ -449,22 +478,29 @@ end interface
         integer :: rank
         type(ESMF_DataType) :: type
         type(ESMF_DataKind) :: kind
+
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
+
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
         call ESMF_ArraySpecGet(spec, rank, type, kind, status)
         if (status .ne. ESMF_SUCCESS) return
+
         ! Call the list function to make the array
         ESMF_ArrayCreateBySpec = ESMF_ArrayCreateByList(rank, type, kind, &
                                                        counts, halo_width, &
                                                        lbounds, ubounds, status)
         if (rcpresent) rc = status
+
         end function ESMF_ArrayCreateBySpec
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ArrayCreateByList -- Create an Array specifying all options.
@@ -526,20 +562,25 @@ end interface
 !
 !EOP
 ! !REQUIREMENTS:
+
+
         ! Local vars
         type (ESMF_Array) :: array ! new C++ Array
         integer :: hwidth ! local copy of halo width
         integer, dimension(ESMF_MAXDIM) :: lb, ub ! local bounds
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
+
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
+
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
         ! Always supply a halo value, setting it to 0 if not specified.
         if (present(halo_width)) then
           hwidth = halo_width
@@ -555,6 +596,8 @@ end interface
         if (present(ubounds)) then
             ub(1:size(ubounds)) = ubounds
         endif
+
+
         ! TODO: should this take the counts, or not? for now i am going to
         ! set the counts after i have created the f90 array and not here.
         call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
@@ -563,12 +606,17 @@ end interface
           print *, "Array construction error"
           return
         endif
+
         call ESMF_ArrayConstructF90Ptr(array, counts, hwidth, rank, type, &
                                        kind, lb, ub, status)
+
         ! Set return values
         ESMF_ArrayCreateByList = array
         if (rcpresent) rc = status
+
         end function ESMF_ArrayCreateByList
+
+
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_ArrayConstructF90Ptr - Create and add F90 ptr to array
@@ -637,19 +685,25 @@ end interface
 !
 !EOP
 ! !REQUIREMENTS:
+
+
         ! Local vars
         integer :: localkind, localtype
+
         ! Initialize return code; assume failure until success is certain
         ! Note from this point down in the calling stack rc is not optional.
         ! This is all internal code, heavily macroized - no reason to add
         ! unnecessary code to check for non-present error return variables.
         rc = ESMF_FAILURE
+
         localtype = type%dtype
         localkind = kind%dkind
+
         ! Call a T/K/R specific interface in order to create the proper
         ! type of F90 pointer, allocate the space, set the values in the
         ! Array object, and return. (The routine this code is calling is
         ! generated by macro.)
+
         ! Call proper create F90 ptr routine
         select case (localtype)
           case (ESMF_DATA_INTEGER%dtype)
@@ -668,6 +722,7 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case (2)
                 select case (localkind)
                   case (ESMF_I2%dkind)
@@ -682,6 +737,7 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case (3)
                 select case (localkind)
                   case (ESMF_I2%dkind)
@@ -696,6 +752,7 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case (4)
                 select case (localkind)
                   case (ESMF_I2%dkind)
@@ -710,6 +767,7 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case (5)
                 select case (localkind)
                   case (ESMF_I2%dkind)
@@ -724,8 +782,10 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case default
             end select
+
            case (ESMF_DATA_REAL%dtype)
             select case (rank)
               case (1)
@@ -739,6 +799,7 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case (2)
                 select case (localkind)
                   case (ESMF_R4%dkind)
@@ -750,6 +811,7 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case (3)
                 select case (localkind)
                   case (ESMF_R4%dkind)
@@ -761,6 +823,7 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case (4)
                 select case (localkind)
                   case (ESMF_R4%dkind)
@@ -772,6 +835,7 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case (5)
                 select case (localkind)
                   case (ESMF_R4%dkind)
@@ -783,14 +847,18 @@ end interface
                   case default
                     print *, "unsupported kind"
                 end select
+
               case default
                 print *, "unsupported rank"
             end select
           case default
             print *, "unsupported type"
          end select
+
         ! Note: rc is already set, nothing to do here.
+
         end subroutine ESMF_ArrayConstructF90Ptr
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ArraySetData
@@ -814,14 +882,19 @@ end interface
 !
 !EOP
 ! !REQUIREMENTS:
+
 !
 ! TODO: code goes here
 !
         rc = ESMF_FAILURE
+
         end subroutine ESMF_ArraySetData
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -929,6 +1002,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1038,6 +1112,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1145,6 +1220,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1254,6 +1330,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1361,6 +1438,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1470,6 +1548,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1577,6 +1656,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1686,6 +1766,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1793,6 +1874,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1902,6 +1984,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2009,6 +2092,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2118,6 +2202,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2225,6 +2310,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2334,6 +2420,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2441,6 +2528,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2550,6 +2638,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2657,6 +2746,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2766,6 +2856,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2873,6 +2964,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2982,6 +3074,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3089,6 +3182,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -3198,6 +3292,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3305,6 +3400,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -3414,6 +3510,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3522,9 +3619,13 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3644,6 +3745,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -3765,6 +3867,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3884,6 +3987,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4005,6 +4109,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -4124,6 +4229,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4245,6 +4351,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -4364,6 +4471,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4485,6 +4593,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -4604,6 +4713,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4725,6 +4835,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -4844,6 +4955,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4965,6 +5077,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -5084,6 +5197,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -5205,6 +5319,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -5324,6 +5439,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -5445,6 +5561,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -5564,6 +5681,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -5685,6 +5803,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -5804,6 +5923,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -5925,6 +6045,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6044,6 +6165,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6165,6 +6287,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6284,6 +6407,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6405,6 +6529,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6525,9 +6650,12 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6630,6 +6758,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6734,6 +6863,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6836,6 +6966,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6940,6 +7071,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7042,6 +7174,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7146,6 +7279,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7248,6 +7382,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7352,6 +7487,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7454,6 +7590,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7558,6 +7695,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7660,6 +7798,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7764,6 +7903,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7866,6 +8006,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7970,6 +8111,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8072,6 +8214,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -8176,6 +8319,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8278,6 +8422,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -8382,6 +8527,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8484,6 +8630,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -8588,6 +8735,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8690,6 +8838,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -8794,6 +8943,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8896,6 +9046,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -9000,6 +9151,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9103,9 +9255,14 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9221,6 +9378,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -9338,6 +9496,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9453,6 +9612,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -9570,6 +9730,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9685,6 +9846,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -9802,6 +9964,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9917,6 +10080,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -10034,6 +10198,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -10149,6 +10314,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -10266,6 +10432,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -10381,6 +10548,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -10498,6 +10666,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -10613,6 +10782,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -10730,6 +10900,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -10845,6 +11016,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -10962,6 +11134,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -11077,6 +11250,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -11194,6 +11368,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -11309,6 +11484,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -11426,6 +11602,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -11541,6 +11718,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -11658,6 +11836,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -11773,6 +11952,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -11890,6 +12070,7 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -12006,9 +12187,13 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -12153,8 +12338,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I21Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I21Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12169,6 +12354,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -12314,8 +12500,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I41Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I41Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12330,6 +12516,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -12475,8 +12662,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I81Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I81Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12491,6 +12678,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -12636,8 +12824,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I22Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I22Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12652,6 +12840,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -12797,8 +12986,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I42Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I42Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12813,6 +13002,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -12958,8 +13148,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I82Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I82Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12974,6 +13164,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13119,8 +13310,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I23Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I23Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13135,6 +13326,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13280,8 +13472,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I43Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I43Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13296,6 +13488,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13441,8 +13634,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I83Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I83Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13457,6 +13650,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13602,8 +13796,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I24Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I24Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13618,6 +13812,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13763,8 +13958,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I44Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I44Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13779,6 +13974,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13924,8 +14120,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I84Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I84Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13940,6 +14136,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14085,8 +14282,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I25Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I25Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14101,6 +14298,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14246,8 +14444,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I45Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I45Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14262,6 +14460,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14407,8 +14606,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %I85Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % I85Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14423,6 +14622,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14568,8 +14768,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R41Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R41Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14584,6 +14784,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14729,8 +14930,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R81Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R81Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14745,6 +14946,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14890,8 +15092,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R42Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R42Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14906,6 +15108,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15051,8 +15254,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R82Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R82Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15067,6 +15270,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15212,8 +15416,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R43Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R43Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15228,6 +15432,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15373,8 +15578,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R83Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R83Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15389,6 +15594,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15534,8 +15740,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R44Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R44Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15550,6 +15756,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15695,8 +15902,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R84Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R84Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15711,6 +15918,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15856,8 +16064,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R45Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R45Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15872,6 +16080,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16017,8 +16226,8 @@ end interface
  ! Until we need to use byte offsets, leave them 0. 
  offsets = 0 
  
- wrap %R85Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
+ wrap % R85Dptr => newp 
+ call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -16034,9 +16243,12 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -16104,10 +16316,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I21Dptr 
+ localp = wrap % I21Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I21Dptr 
+ f90ptr => wrap % I21Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16116,6 +16328,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16184,10 +16397,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I41Dptr 
+ localp = wrap % I41Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I41Dptr 
+ f90ptr => wrap % I41Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16196,6 +16409,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16264,10 +16478,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I81Dptr 
+ localp = wrap % I81Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I81Dptr 
+ f90ptr => wrap % I81Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16276,6 +16490,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16344,10 +16559,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I22Dptr 
+ localp = wrap % I22Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I22Dptr 
+ f90ptr => wrap % I22Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16356,6 +16571,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16424,10 +16640,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I42Dptr 
+ localp = wrap % I42Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I42Dptr 
+ f90ptr => wrap % I42Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16436,6 +16652,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16504,10 +16721,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I82Dptr 
+ localp = wrap % I82Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I82Dptr 
+ f90ptr => wrap % I82Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16516,6 +16733,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16584,10 +16802,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I23Dptr 
+ localp = wrap % I23Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I23Dptr 
+ f90ptr => wrap % I23Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16596,6 +16814,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16664,10 +16883,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I43Dptr 
+ localp = wrap % I43Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I43Dptr 
+ f90ptr => wrap % I43Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16676,6 +16895,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16744,10 +16964,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I83Dptr 
+ localp = wrap % I83Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I83Dptr 
+ f90ptr => wrap % I83Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16756,6 +16976,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16824,10 +17045,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I24Dptr 
+ localp = wrap % I24Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I24Dptr 
+ f90ptr => wrap % I24Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16836,6 +17057,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16904,10 +17126,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I44Dptr 
+ localp = wrap % I44Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I44Dptr 
+ f90ptr => wrap % I44Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16916,6 +17138,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16984,10 +17207,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I84Dptr 
+ localp = wrap % I84Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I84Dptr 
+ f90ptr => wrap % I84Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16996,6 +17219,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17064,10 +17288,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I25Dptr 
+ localp = wrap % I25Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I25Dptr 
+ f90ptr => wrap % I25Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17076,6 +17300,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17144,10 +17369,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I45Dptr 
+ localp = wrap % I45Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I45Dptr 
+ f90ptr => wrap % I45Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17156,6 +17381,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17224,10 +17450,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %I85Dptr 
+ localp = wrap % I85Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %I85Dptr 
+ f90ptr => wrap % I85Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17236,6 +17462,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17304,10 +17531,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R41Dptr 
+ localp = wrap % R41Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R41Dptr 
+ f90ptr => wrap % R41Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17316,6 +17543,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17384,10 +17612,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R81Dptr 
+ localp = wrap % R81Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R81Dptr 
+ f90ptr => wrap % R81Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17396,6 +17624,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17464,10 +17693,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R42Dptr 
+ localp = wrap % R42Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R42Dptr 
+ f90ptr => wrap % R42Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17476,6 +17705,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17544,10 +17774,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R82Dptr 
+ localp = wrap % R82Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R82Dptr 
+ f90ptr => wrap % R82Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17556,6 +17786,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17624,10 +17855,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R43Dptr 
+ localp = wrap % R43Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R43Dptr 
+ f90ptr => wrap % R43Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17636,6 +17867,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17704,10 +17936,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R83Dptr 
+ localp = wrap % R83Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R83Dptr 
+ f90ptr => wrap % R83Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17716,6 +17948,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17784,10 +18017,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R44Dptr 
+ localp = wrap % R44Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R44Dptr 
+ f90ptr => wrap % R44Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17796,6 +18029,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17864,10 +18098,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R84Dptr 
+ localp = wrap % R84Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R84Dptr 
+ f90ptr => wrap % R84Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17876,6 +18110,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -17944,10 +18179,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R45Dptr 
+ localp = wrap % R45Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R45Dptr 
+ f90ptr => wrap % R45Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -17956,6 +18191,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18024,10 +18260,10 @@ end interface
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap %R85Dptr 
+ localp = wrap % R85Dptr 
  f90ptr => localp 
  else 
- f90ptr => wrap %R85Dptr 
+ f90ptr => wrap % R85Dptr 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -18037,9 +18273,12 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -18064,7 +18303,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I21Dptr) 
+ deallocate(wrap % I21Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18072,6 +18311,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18097,7 +18337,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I41Dptr) 
+ deallocate(wrap % I41Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18105,6 +18345,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18130,7 +18371,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I81Dptr) 
+ deallocate(wrap % I81Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18138,6 +18379,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18163,7 +18405,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I22Dptr) 
+ deallocate(wrap % I22Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18171,6 +18413,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18196,7 +18439,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I42Dptr) 
+ deallocate(wrap % I42Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18204,6 +18447,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18229,7 +18473,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I82Dptr) 
+ deallocate(wrap % I82Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18237,6 +18481,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18262,7 +18507,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I23Dptr) 
+ deallocate(wrap % I23Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18270,6 +18515,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18295,7 +18541,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I43Dptr) 
+ deallocate(wrap % I43Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18303,6 +18549,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18328,7 +18575,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I83Dptr) 
+ deallocate(wrap % I83Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18336,6 +18583,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18361,7 +18609,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I24Dptr) 
+ deallocate(wrap % I24Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18369,6 +18617,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18394,7 +18643,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I44Dptr) 
+ deallocate(wrap % I44Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18402,6 +18651,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18427,7 +18677,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I84Dptr) 
+ deallocate(wrap % I84Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18435,6 +18685,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18460,7 +18711,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I25Dptr) 
+ deallocate(wrap % I25Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18468,6 +18719,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18493,7 +18745,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I45Dptr) 
+ deallocate(wrap % I45Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18501,6 +18753,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18526,7 +18779,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %I85Dptr) 
+ deallocate(wrap % I85Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18534,6 +18787,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18559,7 +18813,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R41Dptr) 
+ deallocate(wrap % R41Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18567,6 +18821,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18592,7 +18847,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R81Dptr) 
+ deallocate(wrap % R81Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18600,6 +18855,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18625,7 +18881,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R42Dptr) 
+ deallocate(wrap % R42Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18633,6 +18889,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18658,7 +18915,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R82Dptr) 
+ deallocate(wrap % R82Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18666,6 +18923,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18691,7 +18949,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R43Dptr) 
+ deallocate(wrap % R43Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18699,6 +18957,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18724,7 +18983,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R83Dptr) 
+ deallocate(wrap % R83Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18732,6 +18991,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18757,7 +19017,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R44Dptr) 
+ deallocate(wrap % R44Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18765,6 +19025,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18790,7 +19051,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R84Dptr) 
+ deallocate(wrap % R84Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18798,6 +19059,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18823,7 +19085,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R45Dptr) 
+ deallocate(wrap % R45Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18831,6 +19093,7 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -18856,7 +19119,7 @@ end interface
  status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap %R85Dptr) 
+ deallocate(wrap % R85Dptr) 
  
  if (present(rc)) rc = status 
  
@@ -18865,9 +19128,12 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !! < end of automatically generated function >
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
@@ -18900,6 +19166,7 @@ end interface
 !
 !EOP
 ! !REQUIREMENTS:
+
         ! Local vars
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
@@ -18907,6 +19174,7 @@ end interface
         integer :: rank
         type(ESMF_DataType) :: type
         type(ESMF_DataKind) :: kind
+
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -18914,16 +19182,20 @@ end interface
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
         ! Simple validity check
         if (array%this .eq. ESMF_NULL_POINTER) then
             print *, "Array not initialized or Destroyed"
             return
         endif
+
         needsdealloc = .FALSE.
+
         ! TODO: document the current rule - if we do the allocate in
         ! the case of ESMF_DATA_COPY at create time then we delete the
         ! space. otherwise, the user needs to destroy the array
         ! (we will ignore the data) and call deallocate themselves.
+
         ! Call Destruct first, then free this memory
         call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
         if (needsdealloc) then
@@ -18937,6 +19209,7 @@ end interface
           endif
           call c_ESMC_ArraySetNoDealloc(array, status)
         endif
+
         ! Calling deallocate first means this will not return back to F90
         ! before returning for good.
         call c_ESMC_ArrayDestroy(array, status)
@@ -18944,17 +19217,23 @@ end interface
           print *, "Array destruction error"
           return
         endif
+
         ! mark this as destroyed
         array%this = ESMF_NULL_POINTER
+
         ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_ArrayDestroy
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
 ! This section is Allocate/Deallocate for Arrays
 !
 !------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_ArrayF90Allocate - Allocate an F90 pointer and set Array info
@@ -19000,10 +19279,12 @@ end interface
 !
 !EOPI
 ! !REQUIREMENTS:
+
     integer :: status ! local error status
     integer, dimension(ESMF_MAXDIM) :: lb, ub
     integer, dimension(ESMF_MAXDIM) :: offsets
     integer :: localkind, localtype
+
     !! local variables, expanded by macro
 ! <Created by macro - do not edit directly > 
  type(ESMF_ArrWrapI21D) :: localI21D 
@@ -19042,12 +19323,17 @@ end interface
  type(ESMF_ArrWrapR85D) :: localR85D 
  
 
+
+
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
+
     lb(1:size(lbounds)) = lbounds
     ub(1:size(ubounds)) = ubounds
+
     localtype = type%dtype
     localkind = kind%dkind
+
     !! macros which are expanded by the preprocessor
     select case (localtype)
       case (ESMF_DATA_INTEGER%dtype)
@@ -19069,7 +19355,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI21D, & 
- localI21D % I21Dptr( 1 ), & 
+ ESMF_DATA_ADDRESS(localI21D%I21Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19094,7 +19380,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI41D, & 
- localI41D % I41Dptr( 1 ), & 
+ ESMF_DATA_ADDRESS(localI41D%I41Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19119,7 +19405,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI81D, & 
- localI81D % I81Dptr( 1 ), & 
+ ESMF_DATA_ADDRESS(localI81D%I81Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19131,6 +19417,7 @@ end interface
 
               case default
             end select
+
           case (2)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -19148,7 +19435,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI22D, & 
- localI22D % I22Dptr( 1,1 ), & 
+ ESMF_DATA_ADDRESS(localI22D%I22Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19173,7 +19460,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI42D, & 
- localI42D % I42Dptr( 1,1 ), & 
+ ESMF_DATA_ADDRESS(localI42D%I42Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19198,7 +19485,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI82D, & 
- localI82D % I82Dptr( 1,1 ), & 
+ ESMF_DATA_ADDRESS(localI82D%I82Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19210,6 +19497,7 @@ end interface
 
               case default
             end select
+
           case (3)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -19227,7 +19515,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI23D, & 
- localI23D % I23Dptr( 1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localI23D%I23Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19252,7 +19540,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI43D, & 
- localI43D % I43Dptr( 1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localI43D%I43Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19277,7 +19565,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI83D, & 
- localI83D % I83Dptr( 1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localI83D%I83Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19289,6 +19577,7 @@ end interface
 
               case default
             end select
+
           case (4)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -19306,7 +19595,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI24D, & 
- localI24D % I24Dptr( 1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localI24D%I24Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19331,7 +19620,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI44D, & 
- localI44D % I44Dptr( 1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localI44D%I44Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19356,7 +19645,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI84D, & 
- localI84D % I84Dptr( 1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localI84D%I84Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19368,6 +19657,7 @@ end interface
 
               case default
             end select
+
           case (5)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -19385,7 +19675,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI25D, & 
- localI25D % I25Dptr( 1,1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localI25D%I25Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19410,7 +19700,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI45D, & 
- localI45D % I45Dptr( 1,1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localI45D%I45Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19435,7 +19725,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI85D, & 
- localI85D % I85Dptr( 1,1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localI85D%I85Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19447,8 +19737,10 @@ end interface
 
               case default
             end select
+
           case default
         end select
+
        case (ESMF_DATA_REAL%dtype)
         select case (rank)
           case (1)
@@ -19468,7 +19760,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR41D, & 
- localR41D % R41Dptr( 1 ), & 
+ ESMF_DATA_ADDRESS(localR41D%R41Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19493,7 +19785,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR81D, & 
- localR81D % R81Dptr( 1 ), & 
+ ESMF_DATA_ADDRESS(localR81D%R81Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19505,6 +19797,7 @@ end interface
 
               case default
             end select
+
           case (2)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -19522,7 +19815,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR42D, & 
- localR42D % R42Dptr( 1,1 ), & 
+ ESMF_DATA_ADDRESS(localR42D%R42Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19547,7 +19840,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR82D, & 
- localR82D % R82Dptr( 1,1 ), & 
+ ESMF_DATA_ADDRESS(localR82D%R82Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19559,6 +19852,7 @@ end interface
 
               case default
             end select
+
           case (3)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -19576,7 +19870,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR43D, & 
- localR43D % R43Dptr( 1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localR43D%R43Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19601,7 +19895,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR83D, & 
- localR83D % R83Dptr( 1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localR83D%R83Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19613,6 +19907,7 @@ end interface
 
               case default
             end select
+
           case (4)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -19630,7 +19925,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR44D, & 
- localR44D % R44Dptr( 1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localR44D%R44Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19655,7 +19950,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR84D, & 
- localR84D % R84Dptr( 1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localR84D%R84Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19667,6 +19962,7 @@ end interface
 
               case default
             end select
+
           case (5)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -19684,7 +19980,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR45D, & 
- localR45D % R45Dptr( 1,1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localR45D%R45Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19709,7 +20005,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR85D, & 
- localR85D % R85Dptr( 1,1,1,1,1 ), & 
+ ESMF_DATA_ADDRESS(localR85D%R85Dptr ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19721,12 +20017,17 @@ end interface
 
               case default
             end select
+
           case default
         end select
       case default
      end select
+
      if (present(rc)) rc = status
+
      end subroutine ESMF_ArrayF90Allocate
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ArrayF90Deallocate - Deallocate an F90 pointer
@@ -19759,8 +20060,10 @@ end interface
 !
 !EOP
 ! !REQUIREMENTS:
+
     integer :: status ! local error status
     integer :: localkind, localtype
+
     !! local variables, expanded by macro
 ! <Created by macro - do not edit directly > 
  type(ESMF_ArrWrapI21D) :: localI21D 
@@ -19799,9 +20102,13 @@ end interface
  type(ESMF_ArrWrapR85D) :: localR85D 
  
 
+
+
     if (present(rc)) rc = ESMF_FAILURE
+
     localtype = type
     localkind = kind
+
     !! macros which are expanded by the preprocessor
     select case (localtype)
       case (ESMF_DATA_INTEGER%dtype)
@@ -19831,6 +20138,7 @@ end interface
 
               case default
             end select
+
           case (2)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -19856,6 +20164,7 @@ end interface
 
               case default
             end select
+
           case (3)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -19881,6 +20190,7 @@ end interface
 
               case default
             end select
+
           case (4)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -19906,6 +20216,7 @@ end interface
 
               case default
             end select
+
           case (5)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -19931,8 +20242,10 @@ end interface
 
               case default
             end select
+
           case default
         end select
+
        case (ESMF_DATA_REAL%dtype)
         select case (rank)
           case (1)
@@ -19953,6 +20266,7 @@ end interface
 
               case default
             end select
+
           case (2)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -19971,6 +20285,7 @@ end interface
 
               case default
             end select
+
           case (3)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -19989,6 +20304,7 @@ end interface
 
               case default
             end select
+
           case (4)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -20007,6 +20323,7 @@ end interface
 
               case default
             end select
+
           case (5)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -20025,15 +20342,22 @@ end interface
 
               case default
             end select
+
           case default
         end select
       case default
      end select
+
      if (status .ne. 0) then
         print *, "ESMC_ArrayDelete: Deallocation error"
         return
       endif
+
      if (present(rc)) rc = ESMF_SUCCESS
+
      end subroutine ESMF_ArrayF90Deallocate
+
 !------------------------------------------------------------------------------
+
+
         end module ESMF_ArrayExpandMod

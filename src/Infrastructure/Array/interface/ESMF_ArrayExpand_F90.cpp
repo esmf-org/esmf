@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.7 2004/02/11 16:51:56 nscollins Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.8 2004/03/04 16:39:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,6 +26,7 @@
 !   define various macros. >
 #include "ESMF_ArrayMacros.h"
 #include "ESMF_AllocMacros.h"
+^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
@@ -80,7 +81,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.7 2004/02/11 16:51:56 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.8 2004/03/04 16:39:03 nscollins Exp $'
 
 !==============================================================================
 ! 

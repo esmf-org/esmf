@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.11 2004/02/12 22:03:15 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.12 2004/03/04 16:39:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -857,7 +857,7 @@
         offsets = 0 @\
  @\
         wrap % ##mtypekind##mrank##Dptr => newp @\
-        call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & @\
+        call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & @\
                                  lb, ub, offsets, & @\
                                  ESMF_TRUE, do_dealloc, hwidth, status) @\
  @\
