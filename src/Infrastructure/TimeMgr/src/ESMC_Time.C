@@ -24,13 +24,15 @@
  #include <time.h>
  #include <string.h>
 
+ #include <ESMC_TimeInterval.h>
+
  // associated class definition file
  #include <ESMC_Time.h>
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.56 2004/03/05 00:53:02 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.57 2004/03/10 03:07:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
