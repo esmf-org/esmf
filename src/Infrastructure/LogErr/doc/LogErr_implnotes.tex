@@ -1,4 +1,4 @@
-% $Id: LogErr_implnotes.tex,v 1.8 2004/06/22 20:07:32 cpboulder Exp $
+% $Id: LogErr_implnotes.tex,v 1.9 2004/09/24 20:52:46 cpboulder Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 % Licensed under the GPL.
 %\subsection{Implementation Notes}
 \begin{enumerate}
-\item The Log class was implemented in C/C++, but uses the Fortran I/O 
+\item The Log class was implemented in Fortran and uses the Fortran I/O 
 libraries when the class methods are called from Fortran. We forced the C/C++
 methods to use the Fortran I/O library by creating utility functions that are
 written in Fortran, but callable from Log's C++ methods.  These utility 

@@ -1,4 +1,4 @@
-% $Id: LogErr_rest.tex,v 1.9 2004/06/22 20:07:32 cpboulder Exp $
+% $Id: LogErr_rest.tex,v 1.10 2004/09/24 20:52:46 cpboulder Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,11 +19,7 @@ and the file and line number will not appear in the Log text.
 
 \item{\bf Get and set methods not implemented.}
 Currently, the {\tt ESMF\_LogGet()} and {\tt ESMF\_LogSet()} methods are 
-not implemented.
-
-\item{\bf Flush after write.}
-Flushing occurs after every write instead of allowing the user to
-specify the buffer size.
+partially implemented.   
 
 \item{\bf Log only appends entries.}
 Currently, all writing to the log is appended rather deleting the old contents

@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.10 2004/06/23 16:27:27 cdeluca Exp $
+% $Id: LogErr_usage.tex,v 1.11 2004/09/24 20:52:46 cpboulder Exp $
 
 %\subsection{Use and Examples}
 
@@ -34,8 +34,7 @@ not fully implemented at this time.
 
 Depending on how the options are set, {\tt ESMF\_LogWrite()} either writes user
 messages directly to a Log file or writes to a buffer that can be flushed when 
-full or by using the {\tt ESMF\_LogFlush()} method.  In the current 
-implementation the Log flushes after every write.  
+full or by using the {\tt ESMF\_LogFlush()} method.
 
 For every {\tt ESMF\_LogWrite()}, a time and date stamp is prepended to the
 Log entry.  The time is given in microsecond precision.
