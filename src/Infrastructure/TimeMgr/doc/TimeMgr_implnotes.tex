@@ -1,4 +1,4 @@
-% $Id: TimeMgr_implnotes.tex,v 1.7 2004/02/27 22:09:26 cdeluca Exp $
+% $Id: TimeMgr_implnotes.tex,v 1.8 2004/06/18 22:32:56 eschwab Exp $
 
 \subsection{Design and Implementation Notes}
 \begin{enumerate}
@@ -6,7 +6,7 @@
 \item {\bf Base TimeIntervals and Times on the same integer representation.} 
 It is useful to allow both TimeIntervals and Times to 
 inherit from a single class, BaseTime.  In C++, this can be
-implemented by using inheritance.  In F90, it can be implemented
+implemented by using inheritance.  In Fortran, it can be implemented
 by having the derived types TimeIntervals and Times
 contain a derived type BaseTime.  In both cases, the 
 BaseTime class can be made private and invisible to the user.
