@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.49 2004/02/05 21:28:05 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.50 2004/02/10 18:55:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.49 2004/02/05 21:28:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.50 2004/02/10 18:55:46 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -984,17 +984,64 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
+    // validate required individual properties
     if(timeStep.ESMC_TimeIntervalValidate() != ESMF_SUCCESS ||
        startTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
-       stopTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
-       refTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
-       currTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
-       prevTime.ESMC_TimeValidate()) return(ESMF_FAILURE);
+       currTime.ESMC_TimeValidate()  != ESMF_SUCCESS ||
+       prevTime.ESMC_TimeValidate()  != ESMF_SUCCESS) return(ESMF_FAILURE);
 
-    // TODO:  if stoptime > startTime, then timeStep should be
-    //        positive and vice versa
-    // TODO:  if timeStep > 0, then currTime >= prevTime and vice versa
-    
+#if 0
+    // TODO: validate optional properties if set
+    if(stopTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
+       refTime.ESMC_TimeValidate()) != ESMF_SUCCESS) return(ESMF_FAILURE);
+
+    // startTime and stopTime calendars should be the same
+    //   (TODO: only if stopTime set)
+    // TODO: use native C++ Get, not F90 entry point, when ready
+    ESMC_Calendar *startCal, *stopCal;
+    startTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, 
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, &startCal);
+    stopTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, 
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, &stopCal);
+    if (startCal == ESMC_NULL_POINTER || stopCal == ESMC_NULL_POINTER)
+      return(ESMF_FAILURE);
+    if (*startCal != *stopCal) return(ESMF_FAILURE);
+
+    // check if timeStep positive, then stoptime > startTime, and vice versa
+    // similarly for currTime and prevTime (TODO: if only stopTime set)
+    ESMC_TimeInterval zeroTimeStep(0,0,1,0,0,0);
+    if(timeStep > zeroTimeStep) {
+      if (stopTime <= startTime) return(ESMF_FAILURE);
+      if (currTime <  prevTime)  return(ESMF_FAILURE);
+    } else if(timeStep < zeroTimeStep) {
+      if (stopTime >= startTime) return(ESMF_FAILURE);
+      if (currTime >  prevTime)  return(ESMF_FAILURE);
+    } else return(ESMF_FAILURE);  // timeStep == zeroTimeStep
+
+TODO:  if timeStep > 0, then currTime >= prevTime and vice versa
+
+#endif
+
     return(ESMF_SUCCESS);
 
  } // end ESMC_ClockValidate
