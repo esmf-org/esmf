@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.51 2004/07/23 17:02:33 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.52 2004/07/27 22:53:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.51 2004/07/23 17:02:33 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.52 2004/07/27 22:53:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -384,18 +384,31 @@
       allInOne = .false.
 
       ! if the routehandle has not been precomputed, do so now
-      call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
-      if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
+      ! first check if the RouteHandle is valid (constructed)
+      call ESMF_RouteHandleValidate(routehandle, rc=status)
+      
+      ! if valid, check the routehandle type
+      if (rc.eq.ESMF_SUCCESS) then
+        call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
+        if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
+          allInOne = .true.
+        elseif (htype .ne. ESMF_HALOHANDLE) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                        "routehandle not defined for halo", &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
+      ! if not valid, try calling HaloStore to initialize
+      else
         allInOne = .true.
+      endif
+
+      ! if needed, call FieldHaloStore to set up the routehandle
+      if (allInOne) then
         dummy = ESMF_LogWrite("uninitialized routehandle: calling FieldHaloStore", &
                               ESMF_LOG_WARNING, &
                               ESMF_CONTEXT)
         call ESMF_FieldHaloStore(field, routehandle, halodirection, status)
-      elseif (htype .ne. ESMF_HALOHANDLE) then
-        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                      "routehandle not defined for halo", &
-                                      ESMF_CONTEXT, rc)
-        return
       endif
 
       call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, &
@@ -621,9 +634,27 @@
       allInOne = .false.
 
       ! if the routehandle has not been precomputed, do so now
-      call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
-      if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
+      ! first check if the RouteHandle is valid (constructed)
+      call ESMF_RouteHandleValidate(routehandle, rc=status)
+
+      ! if valid, check the routehandle type
+      if (rc.eq.ESMF_SUCCESS) then
+        call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
+        if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
+          allInOne = .true.
+        elseif (htype .ne. ESMF_REDISTHANDLE) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                        "routehandle not defined for redist", &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
+      ! if not valid, try calling RedistStore to initialize
+      else
         allInOne = .true.
+      endif
+
+      ! if needed, call FieldRedistStore
+      if (allInOne) then
         dummy = ESMF_LogWrite("uninitialized routehandle: calling FieldRedistStore", &
                               ESMF_LOG_WARNING, &
                               ESMF_CONTEXT)
@@ -635,11 +666,6 @@
         endif
         call ESMF_FieldRedistStore(srcField, dstField, parentDelayout, &
                                    routehandle, status)
-      elseif (htype .ne. ESMF_REDISTHANDLE) then
-        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                      "routehandle not defined for redist", &
-                                      ESMF_CONTEXT, rc)
-        return
       endif
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
@@ -1089,20 +1115,33 @@
       allInOne = .false.
 
       ! if the routehandle has not been precomputed, do so now
-      call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
-      if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
+      ! first check if the RouteHandle is valid (constructed)
+      call ESMF_RouteHandleValidate(routehandle, rc=status)
+
+      ! if valid, check the routehandle type
+      if (rc.eq.ESMF_SUCCESS) then
+        call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
+        if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
+          allInOne = .true.
+        elseif (htype .ne. ESMF_REGRIDHANDLE) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                        "routehandle not defined for regrid", &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
+      ! if not valid, try calling RegridStore to initialize
+      else
         allInOne = .true.
+      endif
+
+      ! if needed, call FieldRegridStore to set up the routehandle
+      if (allInOne) then
         dummy = ESMF_LogWrite("uninitialized routehandle: calling FieldRegridStore", &
                               ESMF_LOG_WARNING, &
                               ESMF_CONTEXT)
         call ESMF_FieldRegridStore(srcField, dstField, parentDelayout, &
                                    routehandle, regridmethod, regridnorm, &
                                    srcMask, dstMask, status)
-      elseif (htype .ne. ESMF_REGRIDHANDLE) then
-        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                      "routehandle not defined for regrid", &
-                                      ESMF_CONTEXT, rc)
-        return
       endif
 
       ! Our DE number in the parent layout
