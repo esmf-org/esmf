@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.54 2004/06/14 13:50:27 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.55 2004/06/15 07:57:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@
       type ESMF_BundleFieldAccess
       sequence
       private
-         type(ESMF_BundleInterleave) :: bfa_type
+         type(ESMF_Interleave) :: bfa_type
          integer :: bfa_start
          integer :: bfa_end
          integer :: bfa_strides
@@ -985,7 +985,7 @@ end function
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fieldList
       type(ESMF_PackFlag), intent(in), optional :: packflag 
-      type(ESMF_BundleInterleave), intent(in), optional :: bundleinterleave
+      type(ESMF_Interleave), intent(in), optional :: bundleinterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
@@ -3279,7 +3279,7 @@ end function
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
-      type(ESMF_BundleInterleave), intent(in), optional :: bundleinterleave
+      type(ESMF_Interleave), intent(in), optional :: bundleinterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
@@ -3309,8 +3309,10 @@ end function
 !      into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
 !      The default is {\tt ESMF\_NO\_PACKED\_DATA}.
 !   \item [{[bundleinterleave]}]
-!      {\tt ESMF\_BundleInterleave} type.  Controls whether the data in
+!      {\tt ESMF\_Interleave} type.  Controls whether the data in
 !      the packed bundle is interleaved by field or by item.
+!      Valid options are {\tt ESMF\_INTERLEAVE\_BY\_BLOCK} or
+!      {\tt ESMF\_INTERLEAVE\_BY\_ITEM}.  The default is by item.
 !   \item [{[name]}]
 !      {\tt ESMF\_Bundle} name.  A default name will be generated if
 !      one is not specified.

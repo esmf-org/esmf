@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap_C.F90,v 1.4 2004/06/08 09:27:15 nscollins Exp $
+! $Id: ESMF_BundleDataMap_C.F90,v 1.5 2004/06/15 07:57:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_BundleDataMap_C.F90,v 1.4 2004/06/08 09:27:15 nscollins Exp $'
+!      '$Id: ESMF_BundleDataMap_C.F90,v 1.5 2004/06/15 07:57:27 nscollins Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -43,10 +43,11 @@
     subroutine f_esmf_bundledatamapsetdefault(bdmp, btype, rc)
       use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
+      use ESMF_ArrayDataMapMod
       use ESMF_BundleDataMapMod
 
       type(ESMF_BundleDataMap), pointer :: bdmp
-      type(ESMF_BundleInterleave), intent(in) :: btype
+      type(ESMF_Interleave), intent(in) :: btype
       integer, intent(out), optional :: rc
      
 
@@ -59,10 +60,11 @@
     subroutine f_esmf_bundledatamapget(bdmp, btype, rc)
       use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
+      use ESMF_ArrayDataMapMod
       use ESMF_BundleDataMapMod
 
       type(ESMF_BundleDataMap), pointer :: bdmp
-      type(ESMF_BundleInterleave), intent(out) :: btype
+      type(ESMF_Interleave), intent(out) :: btype
       integer, intent(out) :: rc
      
 
@@ -74,10 +76,11 @@
     subroutine f_esmf_bundledatamapset(bdmp, btype, rc)
       use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
+      use ESMF_ArrayDataMapMod
       use ESMF_BundleDataMapMod
 
       type(ESMF_BundleDataMap), pointer :: bdmp
-      type(ESMF_BundleInterleave), intent(in) :: btype
+      type(ESMF_Interleave), intent(in) :: btype
       integer, intent(out) :: rc
      
 

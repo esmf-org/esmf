@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.19 2004/06/13 05:25:42 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.20 2004/06/15 07:57:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@
         ! in each grid cell.
         type(ESMF_Logical) :: isScalar                  ! scalar values
         integer, dimension(ESMF_MAXDIM) :: rankLength   ! len if > scalar
-        type(ESMF_Interleave) :: interleave             ! if > scalar
+        type(ESMF_InterleaveType) :: interleave         ! if > scalar
         type(ESMF_RelLoc) :: horzRelloc                 ! data item loc/cell
         type(ESMF_RelLoc) :: vertRelloc                 ! data item loc/cell
 
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.19 2004/06/13 05:25:42 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.20 2004/06/15 07:57:28 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -287,9 +287,10 @@
       !jw  write (msgbuf, *)  "  Vertical Relative location = ", trim(str)
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         write (*, *)  "  Vertical Relative location = ", trim(str)
-        ! TODO: These are private now, they need a print routine.
-        !call ESMF_InterleaveString(fielddatamap%interleave%il_type, str, rc)
-        !write (msgbuf, *)  "  Interleave type = ", trim(str), &
+        call ESMF_InterleaveTypeString(fielddatamap%interleave, str, rc)
+        write (*, *)  "  Interleave type = ", trim(str)
+        ! TODO: need methods
+      !nsc write (msgbuf, *)  "  Interleave type = ", trim(str), &
         !         ".  Interleave Start,end,stride = ",  &
         !         fielddatamap%interleave%il_start, & 
         !         fielddatamap%interleave%il_end, & 

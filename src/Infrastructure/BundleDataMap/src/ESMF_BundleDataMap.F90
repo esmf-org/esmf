@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.20 2004/06/13 05:25:42 cdeluca Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.21 2004/06/15 07:57:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,24 +52,12 @@
       use ESMF_LogErrMod
       use ESMF_BaseMod
       use ESMF_IOSpecMod
+      use ESMF_ArrayDataMapMod
 
 ! !PUBLIC TYPES:
       implicit none
       private
 
-!------------------------------------------------------------------------------
-!  ! Interleave for packed arrays - are data for different fields 
-!  ! concatenated or interleaved by item,
-
-      type ESMF_BundleInterleave
-      sequence
-      private
-          integer :: bil
-      end type
-
-      type(ESMF_BundleInterleave), parameter ::  &
-                    ESMF_INTERLEAVE_BY_ITEM = ESMF_BundleInterleave(1), &
-                    ESMF_INTERLEAVE_BY_FIELD  = ESMF_BundleInterleave(2)
 
 !------------------------------------------------------------------------------
 !  ! ESMF_BundleDataMap
@@ -85,10 +73,10 @@
         ! its own private data map.   
 #ifndef ESMF_NO_INITIALIZERS
         type(ESMF_Status) :: status = ESMF_STATUS_UNINIT
-        type(ESMF_BundleInterleave) :: bil = ESMF_INTERLEAVE_BY_ITEM
+        type(ESMF_Interleave) :: bil = ESMF_INTERLEAVE_BY_ITEM
 #else
         type(ESMF_Status) :: status 
-        type(ESMF_BundleInterleave) :: bil
+        type(ESMF_Interleave) :: bil
 #endif
       end type
 
@@ -97,9 +85,6 @@
 ! !PUBLIC MEMBER TYPES:
 !
       public ESMF_BundleDataMap
-
-      public ESMF_BundleInterleave
-      public ESMF_INTERLEAVE_BY_ITEM, ESMF_INTERLEAVE_BY_FIELD
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -115,7 +100,6 @@
       public ESMF_BundleDataMapWrite, ESMF_BundleDataMapRead 
       public ESMF_BundleDataMapValidate, ESMF_BundleDataMapPrint
 
-      public ESMF_BundleInterleaveString
 
       public operator(.eq.), operator(.ne.)
 
@@ -126,7 +110,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.20 2004/06/13 05:25:42 cdeluca Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.21 2004/06/15 07:57:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -139,42 +123,11 @@
 
 
 !------------------------------------------------------------------------------
-! overload .eq. & .ne. with additional derived types so you can compare
-!  them as if they were simple integers.
-
-interface operator (.eq.)
- module procedure ESMF_bileq
-end interface
-
-interface operator (.ne.)
- module procedure ESMF_bilne
-end interface
-
-!------------------------------------------------------------------------------
 ! end of declarations & definitions
 !------------------------------------------------------------------------------
 
 
       contains
-
-
-!------------------------------------------------------------------------------
-! function to compare two ESMF_BundleInterleave flags 
-
-function ESMF_bileq(il1, il2)
- logical ESMF_bileq
- type(ESMF_BundleInterleave), intent(in) :: il1, il2
-
- ESMF_bileq = (il1%bil .eq. il2%bil)
-end function
-
-function ESMF_bilne(il1, il2)
- logical ESMF_bilne
- type(ESMF_BundleInterleave), intent(in) :: il1, il2
-
- ESMF_bilne = (il1%bil .ne. il2%bil)
-end function
-
 
 
 !------------------------------------------------------------------------------
@@ -188,7 +141,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(in) :: bundledatamap  
-      type(ESMF_BundleInterleave), intent(out), optional :: bundleinterleave
+      type(ESMF_Interleave), intent(out), optional :: bundleinterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -282,7 +235,7 @@ end function
         endif
 
         ! TODO: add print code here
-        call ESMF_BundleInterleaveString(bundledatamap%bil, str, rc)
+        call ESMF_InterleaveString(bundledatamap%bil, str, rc)
       !jw  write (msgbuf, *)  " Data: ", str
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         write (*, *)  " Data: ", str
@@ -303,7 +256,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(inout) :: bundledatamap  
-      type(ESMF_BundleInterleave), intent(in), optional :: bundleinterleave
+      type(ESMF_Interleave), intent(in), optional :: bundleinterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -356,7 +309,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap) :: bundledatamap
-      type(ESMF_BundleInterleave), intent(in), optional :: bundleinterleave
+      type(ESMF_Interleave), intent(in), optional :: bundleinterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -393,7 +346,7 @@ end function
         endif
 
         ! set the default
-        bundledatamap%bil = ESMF_INTERLEAVE_BY_FIELD
+        bundledatamap%bil = ESMF_INTERLEAVE_BY_BLOCK
 
         ! initialize the contents of the bundle datamap
         if (present(bundleinterleave)) bundledatamap%bil = bundleinterleave
@@ -505,44 +458,6 @@ end function
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_BundleDataMapValidate
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleInterleaveString"
-!BOPI
-! !IROUTINE:  ESMF_BundleInterleaveString - Return an interleave as a string
-!
-! !INTERFACE:
-      subroutine ESMF_BundleInterleaveString(interleave, string, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_BundleInterleave), intent(in) :: interleave
-      character (len = *), intent(out) :: string
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Return an {\tt ESMF\_BundleInterleave} as a printable string.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [interleave]
-!           The {\tt ESMF\_BundleInterleave} to be turned into a string.
-!     \item [string]
-!          Return string.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!
-!EOPI
-
-        if (interleave .eq. ESMF_INTERLEAVE_BY_FIELD) string = "Interleave by Field"
-        if (interleave .eq. ESMF_INTERLEAVE_BY_ITEM) string = "Interleave by Item"
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_BundleInterleaveString
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

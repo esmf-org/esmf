@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMapUTest.F90,v 1.9 2004/06/14 18:38:42 svasquez Exp $
+! $Id: ESMF_BundleDataMapUTest.F90,v 1.10 2004/06/15 07:57:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleDataMapUTest.F90,v 1.9 2004/06/14 18:38:42 svasquez Exp $'
+      '$Id: ESMF_BundleDataMapUTest.F90,v 1.10 2004/06/15 07:57:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -100,7 +100,7 @@
       call ESMF_BundleDataMapGet(bundleDataMap1,  bundleInterleave=interleave, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS and/or interleave incorrect"
       write(name, *) "Get BundleDataMap Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(interleave.eq.ESMF_INTERLEAVE_BY_FIELD), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(interleave.eq.ESMF_INTERLEAVE_BY_BLOCK), &
            name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

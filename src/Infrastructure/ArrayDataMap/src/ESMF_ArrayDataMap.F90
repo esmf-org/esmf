@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.17 2004/06/14 20:10:29 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.18 2004/06/15 07:57:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,27 +59,27 @@
 
 !------------------------------------------------------------------------------
 !  ! Interleaved types are used when there are multiple variables or
-!  ! if individual data items are > scalar
+!  ! if individual data items are > scalar.  This is the public flag.
 
-      type ESMF_InterleaveType
+      type ESMF_Interleave
       sequence
       private
           integer :: il_type
       end type
 
-      type(ESMF_InterleaveType), parameter ::  &
-                    ESMF_IL_BLOCK = ESMF_InterleaveType(1), &
-                    ESMF_IL_ITEM = ESMF_InterleaveType(2)
+      type(ESMF_Interleave), parameter ::  &
+                    ESMF_INTERLEAVE_BY_BLOCK = ESMF_Interleave(1), &
+                    ESMF_INTERLEAVE_BY_ITEM = ESMF_Interleave(2)
 
 !------------------------------------------------------------------------------
 !  ! Expected to be used most often for packed bundles, to allow access to
 !  ! data for an individual field.  Can also be used to describe vector data
-!  ! that is packed into a single array.
+!  ! that is packed into a single array.  This is the private object.
 
-      type ESMF_Interleave
+      type ESMF_InterleaveType
       sequence
       private
-         type(ESMF_InterleaveType) :: il_type
+         type(ESMF_Interleave) :: il_type
          integer :: il_start
          integer :: il_end
          integer :: il_strides 
@@ -168,9 +168,10 @@
 !
       public ESMF_ArrayDataMap
 
-      public ESMF_InterleaveType   ! why?
       public ESMF_Interleave
-      public ESMF_IL_BLOCK, ESMF_IL_ITEM
+      public ESMF_INTERLEAVE_BY_BLOCK, ESMF_INTERLEAVE_BY_ITEM
+
+      public ESMF_InterleaveType ! public only for field datamap use
 
       public ESMF_IndexOrder
       public ESMF_INDEX_I,   ESMF_INDEX_IJ,  ESMF_INDEX_JI
@@ -199,6 +200,7 @@
       public ESMF_ArrayDataMapValidate, ESMF_ArrayDataMapPrint
 
       public ESMF_RelLocString, ESMF_InterleaveString, ESMF_IndexOrderString
+      public ESMF_InterleaveTypeString
 
       public operator(.eq.), operator(.ne.)
 
@@ -209,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.17 2004/06/14 20:10:29 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.18 2004/06/15 07:57:26 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -280,18 +282,18 @@ function ESMF_rlne(rl1, rl2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_InterleaveType flags 
+! function to compare two ESMF_Interleave flags 
 
 function ESMF_ileq(il1, il2)
  logical ESMF_ileq
- type(ESMF_InterleaveType), intent(in) :: il1, il2
+ type(ESMF_Interleave), intent(in) :: il1, il2
 
  ESMF_ileq = (il1%il_type .eq. il2%il_type)
 end function
 
 function ESMF_ilne(il1, il2)
  logical ESMF_ilne
- type(ESMF_InterleaveType), intent(in) :: il1, il2
+ type(ESMF_Interleave), intent(in) :: il1, il2
 
  ESMF_ilne = (il1%il_type .ne. il2%il_type)
 end function
@@ -1107,6 +1109,43 @@ end function
       subroutine ESMF_InterleaveString(interleave, string, rc)
 !
 ! !ARGUMENTS:
+      type(ESMF_Interleave), intent(in) :: interleave
+      character (len = *), intent(out) :: string
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an {\tt ESMF\_Interleave} as a printable string.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [interleave]
+!           The {\tt ESMF\_Interleave} to be turned into a string.
+!     \item [string]
+!          Return string.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!
+!EOPI
+
+        if (interleave .eq. ESMF_INTERLEAVE_BY_BLOCK) string = "Block Interleave"
+        if (interleave .eq. ESMF_INTERLEAVE_BY_ITEM) string = "Item Interleave"
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_InterleaveString
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InterleaveTypeString"
+!BOPI
+! !IROUTINE:  ESMF_InterleaveTypeString - Return an interleave type as a string
+!
+! !INTERFACE:
+      subroutine ESMF_InterleaveTypeString(interleave, string, rc)
+!
+! !ARGUMENTS:
       type(ESMF_InterleaveType), intent(in) :: interleave
       character (len = *), intent(out) :: string
       integer, intent(out), optional :: rc
@@ -1127,12 +1166,12 @@ end function
 !
 !EOPI
 
-        if (interleave .eq. ESMF_IL_BLOCK) string = "Block Interleave"
-        if (interleave .eq. ESMF_IL_ITEM) string = "Item Interleave"
+        if (interleave.il_type .eq. ESMF_INTERLEAVE_BY_BLOCK) string = "Block Interleave"
+        if (interleave.il_type .eq. ESMF_INTERLEAVE_BY_ITEM) string = "Item Interleave"
 
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_InterleaveString
+        end subroutine ESMF_InterleaveTypeString
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
