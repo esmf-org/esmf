@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.1 2003/10/22 21:00:55 cdeluca Exp $
+! $Id: ESMF_Xform.F90,v 1.2 2004/03/09 20:09:08 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.1 2003/10/22 21:00:55 cdeluca Exp $'
+      '$Id: ESMF_Xform.F90,v 1.2 2004/03/09 20:09:08 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -106,24 +106,20 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Fill in the values for an Xform.
+!      Fill in the values for an Xform.
 !
-!  The arguments are:
-!  \begin{description}
-!   \item[xform]
-!    The {\tt Transform} object to be initialized.
-!
-!   \item[name]
+!      The arguments are:
+!      \begin{description}
+!       \item[xform]
+!        The {\tt Transform} object to be initialized.
+!       \item[name]
 !     The name of the {\tt Transform}.
-!
-!   \item[subr]
-!     The subroutine to be called when executing this {\tt Transform}.
-!     It must be declared as returning an integer return code value.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
+!       \item[subr]
+!         The subroutine to be called when executing this {\tt Transform}.
+!         It must be declared as returning an integer return code value.
+!       \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
