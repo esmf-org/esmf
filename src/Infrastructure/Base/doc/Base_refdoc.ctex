@@ -1,4 +1,4 @@
-% $Id: Base_refdoc.ctex,v 1.4 2003/07/27 19:30:48 cdeluca Exp $ 
+% $Id: Base_refdoc.ctex,v 1.5 2003/08/04 18:49:28 cdeluca Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,7 +49,8 @@
 % #endif
 
 %\section{Installation and General Usage}
-%See the \htmladdnormallink{ESMF User's Guide}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
+%See the \htmladdnormallink{ESMF User Guide}
+%{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
 %usage of the ESMF libraries.
 
 %\section{Architecture}
@@ -59,8 +60,8 @@
 % \input{../Infrastructure/Base/doc/Base_arch}
 % #endif
 
-\newpage
-\section{<Name1> Class}
+%\newpage
+%\section{<Name1> Class}
 
 % \subsection{Description}
 % #ifdef STANDALONE
@@ -83,53 +84,53 @@
 % %\input{../Infrastructure/Base/doc/class_ex} 
 % #endif
 
-\newpage
-\section{<Name2> Class} ...
+%\newpage
+%\section{<Name2> Class} ...
 
-#ifdef STANDALONE
+%#ifdef STANDALONE
 %\section{Glossary}
 %\input{Base_glos}
 
 %\section{Bibliography}
-\bibliography{Base} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{Bibliography}
+%\bibliography{Base} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
 
-\newpage
-\setcounter{section}{1}
-\renewcommand{\thesection}{\Alph{section}}
-\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+%\newpage
+%\setcounter{section}{1}
+%\renewcommand{\thesection}{\Alph{section}}
+%\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
 
-\section*{Appendix A:  Fortran Interface}
-\addcontentsline{toc}{section}{Appendix A:  Fortran Interface}
+%\section*{Appendix A:  Fortran Interface}
+%\addcontentsline{toc}{section}{Appendix A:  Fortran Interface}
 
 %\input{<Name1>}
 
-\newpage
-\setcounter{section}{2}
-\renewcommand{\thesection}{\Alph{section}}
-\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+%\newpage
+%\setcounter{section}{2}
+%\renewcommand{\thesection}{\Alph{section}}
+%\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
 
-\section*{Appendix B:  Class Implementations}
-\addcontentsline{toc}{section}{Appendix B:  Class Implementations}
+%\section*{Appendix B:  Class Implementations}
+%\addcontentsline{toc}{section}{Appendix B:  Class Implementations}
 
-\subsection{Public Classes}
-
+%\subsection{Public Classes}
+%#endif
 
 %
 %  There is no ESMF_Base.F90 to make 
 %  EMSF_Base_fapi.tex
 %
-#ifdef STANDALONE
+%#ifdef STANDALONE
 %\input{ESMF_Base_fapi}
-#elif defined(CONSTITUENT)
+%#elif defined(CONSTITUENT)
 %\input{../Infrastructure/Base/doc/ESMF_Base_fapi}
-#endif
+%#endif
 
-\subsection{Private Classes}
+%\subsection{Private Classes}
 
 %\input{<Name2>}
-#endif
+%#endif
 
 #ifdef STANDALONE
 \end{document}

@@ -167,10 +167,15 @@
 %#ifdef STANDALONE
 %\input{TimeInterval_rest}
 %#elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
+%\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
 %#endif
 
+%\subsection{Implementation Note}
+#ifdef STANDALONE
+\input{TimeMgr_inote_BaseTime.tex}
+#elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_inote_BaseTime.tex}
+#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
