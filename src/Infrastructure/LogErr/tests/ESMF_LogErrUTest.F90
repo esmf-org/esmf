@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.20 2005/03/31 22:08:09 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.21 2005/04/04 21:37:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.20 2005/03/31 22:08:09 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.21 2005/04/04 21:37:58 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,10 +57,11 @@
       
 
       character :: random_char
-      character (5) :: random_string, msg_string
+      character (9) :: random_string, msg_string
+      character (5) :: random_chars
 
 !     !LOCAL VARIABLES:
-      integer :: rc2, ran_num, i, input_status, my_pet
+      integer :: rc2, ran_num, i, j, input_status, my_pet
       real :: r1
       logical :: is_error
       type(ESMF_Log) :: log1, log2
@@ -314,22 +315,28 @@
       call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
       ! Loop according to Pet Number so each PET has a different time
-      do i=1, (((my_pet+1)*5) * 100000)
+      do i=1, (((my_pet+1)*7) * 116931)
          ! This call put here to waste time
      	 call date_and_time(date=my_todays_date, time=my_time)
       end do
       ! Generate a random string using clock as seed and write it to log file
       call date_and_time(values=v(:))
       rndseed(1)=v(8)*v(7)+1
+      print *, "rndseed= " , rndseed(1)
       call random_seed(put=rndseed)
       do i=1, 5
       	call random_number(r1)
       	ran_num = int(26.0*r1) + 65
       	random_char  = achar(ran_num)
-	random_string(i:i) = random_char
+	random_chars(i:i) = random_char
       end do
-	print *, "Random string is ", random_string
+	print *, "Random string is ", random_chars
 
+      ! Convert PET to character
+      pet_char  = achar(my_pet + 48)
+      ! Append to "PET"
+      my_pet_char = "PET" // pet_char
+      random_string = my_pet_char // random_chars
 
       !NEX_UTest
       ! Test Log Write 
@@ -399,10 +406,6 @@
       call ESMF_Test((msg_type.eq."INFO"), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! Convert PET to character
-      pet_char  = achar(my_pet + 48)
-      ! Append to "PET"
-      my_pet_char = "PET" // pet_char
       !EX_UTest
       ! Verify correct PET was written into log file
       write(failMsg, *) "PET number in file is wrong"
