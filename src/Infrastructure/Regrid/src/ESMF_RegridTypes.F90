@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.20 2004/01/08 23:39:00 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.21 2004/01/20 23:15:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -52,6 +52,7 @@
       use ESMF_PhysGridMod  ! ESMF physical grid class
       use ESMF_DistGridMod  ! ESMF distributed grid class
       use ESMF_GridMod      ! ESMF grid   class
+      use ESMF_GridTypesMod      ! ESMF grid   class
       use ESMF_DataMapMod
       use ESMF_FieldMod     ! ESMF field  class
       use ESMF_BundleMod    ! ESMF bundle class
@@ -155,7 +156,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.20 2004/01/08 23:39:00 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.21 2004/01/20 23:15:53 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -347,7 +348,6 @@
 
 ! !INTERFACE:
       function ESMF_RegridRouteConstruct(numDims, srcGrid, dstGrid, &
-                                         srcRelLoc, dstRelLoc, &
                                          recvDomainList, total, rc)
 !
 ! !RETURN VALUE:
@@ -358,8 +358,6 @@
       integer, intent(in) :: numDims
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_Grid), intent(in) :: dstGrid
-      type(ESMF_RelLoc), intent(inout) :: srcRelLoc
-      type(ESMF_RelLoc), intent(inout) :: dstRelLoc
       type(ESMF_DomainList), intent(inout) :: recvDomainList
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
@@ -423,10 +421,10 @@
       endif
 
       ! From each grid get the bounding box information on this DE
-      call ESMF_GridGetPhysGrid(srcGrid, relloc=srcRelLoc, localMin=srcMin, &
-                                localMax=srcMax, rc=status)
-      call ESMF_GridGetPhysGrid(dstGrid, relloc=dstRelLoc, localMin=dstMin, &
-                                localMax=dstMax, rc=status)
+      call ESMF_GridGet(srcGrid, minLocalCoordPerDim=srcMin, &
+                        maxLocalCoordPerDim=srcMax, rc=status)
+      call ESMF_GridGet(dstGrid, minLocalCoordPerDim=dstMin, &
+                        maxLocalCoordPerDim=dstMax, rc=status)
 
       ! calculate intersections
       call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
