@@ -1,6 +1,8 @@
-% $Id: ESMF_install.tex,v 1.12 2002/09/09 21:56:36 cdeluca Exp $
+% $Id: ESMF_install.tex,v 1.13 2003/01/24 00:12:53 flanigan Exp $
 
 \section{Installation}
+
+\subsection{Procedures}
 
 Currently the following environment variables need to be set:
 \begin{verbatim}
@@ -8,7 +10,7 @@ Currently the following environment variables need to be set:
   ESMF_ARCH     platform and compiler configuration
 \end{verbatim}
 
-\noindent The following configurations are supported:
+The following configurations are supported:
 
 \begin{tabular}{lll}
 {\tt ESMF\_ARCH}  & {\tt alpha}      &  OSF1, Native compilers. \\
@@ -22,14 +24,19 @@ Currently the following environment variables need to be set:
                   & {\tt solaris\_hpc}   &  SunOs, SUNWhpc compilers. \\
 \end{tabular}
 
-\smallskip
 
-The library requires {\tt gmake} to build.  Simultaneous multiple architecture builds are supported, with
+GNU make is required to build the library.  On some
+systems this will be just the command \texttt{make}.  On others 
+it might be installed as \texttt{gmake} or even \texttt{gnumake}.
+In any event, use the --version option with the make command
+to determine if it is GNU make.
+
+Simultaneous multiple architecture builds are supported, with
 one restriction; the test cases may only be run on one platform at a time. 
 
 \smallskip
 
-\noindent Build the library with the command:
+Build the library with the command:
 \begin{verbatim}
   gmake BOPT=g  
 \end{verbatim}
@@ -133,6 +140,11 @@ an additional argument to the the above make commands.  (Alternatively the varia
 {\tt ESMF\_BUILD} can be set in the environment (using setenv or export) and then it 
 need not be passed to any make calls).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  Make System
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Make System}
 For most users the description of the build above should be sufficient.  Some
 users, however, may wish to have a more detailed knowledge of the make system
