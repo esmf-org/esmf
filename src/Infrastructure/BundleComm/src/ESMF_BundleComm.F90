@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.7 2004/03/08 16:03:22 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.8 2004/03/09 21:33:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.7 2004/03/08 16:03:22 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.8 2004/03/09 21:33:17 svasquez Exp $'
 
 !==============================================================================
 !
@@ -222,7 +222,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -356,7 +355,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -429,7 +427,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -539,7 +536,6 @@
 !           blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -591,7 +587,6 @@
 !           {\tt ESMF\_RouteHandle} associated with this Bundle Halo.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -638,7 +633,6 @@
 !           specified, the default is blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -731,7 +725,6 @@
 !           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -787,7 +780,6 @@
 !           {\tt ESMF\_RouteHandle} associated with this Bundle Redist.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -845,7 +837,6 @@
 !           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -945,7 +936,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -993,7 +983,6 @@
 !           {\tt ESMF\_RouteHandle} associated with this Bundle Regridding.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1044,7 +1033,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP

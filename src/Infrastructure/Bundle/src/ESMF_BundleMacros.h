@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleMacros.h,v 1.2 2004/03/03 18:09:30 jwolfe Exp $
+! $Id: ESMF_BundleMacros.h,v 1.3 2004/03/09 21:30:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -121,21 +121,17 @@
 !  \begin{description} @\
 !  \item[bundle] @\
 !   The {\tt ESMF\_Bundle} to query. @\
-! @\
 !  \item[fieldname] @\
 !   The name of the {\tt ESMF\_Field} inside the {\tt ESMF\_Bundle} @\
 !   to return.  The {\tt ESMF\_Bundle} cannot have packed data. @\
-! @\
 !  \item[f90ptr] @\
 !   An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data @\
 !   in the Bundle.  When this call returns successfully, the pointer will now reference @\
 !   the data in the Bundle.  This is either a reference or a copy, depending on the @\
 !   setting of the following argument.  The default is to return a reference. @\
-! @\
 !  \item[{[copyflag]}] @\
 !   Defaults to {\tt ESMF\_DATA\_REF}.  If set to {\tt ESMF\_DATA\_COPY}, a separate @\
 !   copy of the data will be made and the pointer will point at the copy. @\
-! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.26 2004/03/08 16:03:22 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.27 2004/03/09 21:30:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -407,16 +407,12 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} to add {\tt ESMF\_Field} to.
-!
 !     \item [field]
 !           The {\tt ESMF\_Field} to add.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -470,22 +466,17 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           {\tt ESMF\_Bundle} to add {\tt ESMF\_Field}s into.
-!
 !     \item [fieldCount]
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
 !           {\tt ESMF\_Field}s in the following argument.
-!
 !     \item [fields]
 !           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 ! 
 !EOP
@@ -542,32 +533,25 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [fieldCount]
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
 !           {\tt ESMF\_Field}s in the following argument.
-!
 !     \item [fields]
 !           Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
-!
 !     \item [{[packflag]}]
 !           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
 !           data in individual {\tt ESMF\_Array}s will be collected
 !           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
 !           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
-!
 !     \item [{[name]}]
 !           {\tt ESMF\_Bundle} name.  A default name will be generated if
 !           one is not specified.
-!
 !     \item [{[iospec]}]
 !           I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -638,23 +622,18 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [{[grid]}]
 !           The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
 !           {\tt ESMF\_Bundle} must have.  If not specified now, the 
 !           grid associated with the first {\tt ESMF\_Field} added will be
 !           used as the {\tt ESMF\_Grid} for this {\tt ESMF\_Bundle}.
-!
 !     \item [{[name]}]
 !           {\tt ESMF\_Bundle} name.  A default name will be generated if
 !           one is not specified.
-!
 !     \item [{[iospec]}]
 !           I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -732,12 +711,9 @@ end function
 !     \begin{description}
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
-!
 !
 !
 !EOP
@@ -806,19 +782,14 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
-!
 !     \item [fieldptrs]
 !           {\tt ESMF\_Field} pointer array.
-!
 !     \item [{[count]}]
 !           Number of fields in the bundle.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -912,22 +883,16 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The integer values of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -983,21 +948,15 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [value]
 !           The real value of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
-!
 !
 !EOP
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
@@ -1045,22 +1004,16 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The real values of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1116,19 +1069,14 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [value]
 !           The logical value of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1178,22 +1126,16 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The logical values of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1252,18 +1194,13 @@ end function
 !
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [value]
 !           The character value of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
-!
 !
 !EOP
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
@@ -1308,18 +1245,13 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [count]
 !           The number of attributes on this object.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
-!
 !
 !EOP
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
@@ -1366,25 +1298,18 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to query.
-!
 !     \item [type]
 !           The type of the Attribute.
-!
 !     \item [count]
 !           The number of items in this Attribute.  For character types,
 !           the length of the character string.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
-!
 !
 !EOP
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
@@ -1438,26 +1363,19 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [num]
 !           The number of the Attribute to query.
-!
 !     \item [name]
 !           Returns the name of the Attribute.
-!
 !     \item [type]
 !           Returns the type of the Attribute.
-!
 !     \item [count]
 !           Returns the number of items in this Attribute.  For character types,
 !           the length of the character string.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1512,16 +1430,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt Bundle} object to query.
-!
 !     \item [datamap]
 !           The current order/interleaf.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -1654,19 +1568,14 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
-!
 !     \item [index]
 !           {\tt ESMF\_Field} index number; first {\tt ESMF\_Field} index is 1.
-!
 !     \item [field]
 !           Returned {\tt ESMF\_Field}.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -1738,16 +1647,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           {\tt ESMF\_Bundle} to query.
-!
 !     \item [count]
 !           Returned {\tt ESMF\_Field} count.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 ! 
 !EOP
@@ -1805,23 +1710,17 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [namelist]
 !           An array of character strings where each {\tt ESMF\_Field} name
 !           is returned. 
-!
 !     \item [{[namecount]}]
 !           A count of how many {\tt ESMF\_Field} names were returned.  Same as
 !           the number of {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
-!
 !
 !EOP
 ! !REQUIREMENTS:  FLD2.6.2
@@ -1850,17 +1749,13 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [grid]
 !           The {\tt ESMF\_Grid} associated with all {\tt ESMF\_Field}s in this 
 !           {\tt ESMF\_Bundle}.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -1920,22 +1815,16 @@ end function
 !      For both the local decomposition and the global grid, return the 
 !       number of items in each.
 !
-!
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} object to query.
-!
 !     \item [{[localcount]}]
 !           The local cell count.
-!
 !     \item [{[globalcount]}]
 !           The global cell count.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -1963,16 +1852,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object to query.
-!
 !     \item [dimcount]
 !           The number of dimensions.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2006,19 +1891,14 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} object to query.
-!
 !     \item [{[locallist]}]
 !           The size of the local list.
-!
 !     \item [{[globallist]}]
 !           The size of the global list.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2049,16 +1929,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} object to query.
-!
 !     \item [indexorder]
 !           The description of ordering.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -2088,22 +1964,16 @@ end function
 !      For both the local decomposition and the global grid, return the 
 !      number of items in each.
 !
-!
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} object to query.
-!
 !     \item [{[localcount]}]
 !           The local point/vertex count.
-!
 !     \item [{[globalcount]}]
 !           The global point/vertex count.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -2135,16 +2005,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt Bundle} object to query.
-!
 !     \item [name]
 !           A character string where the {\tt Bundle} name is returned.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2209,16 +2075,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           Existing {\tt ESMF\_Bundle}.
-!
 !     \item [{[datamap]}]
 !           Ordering and Interleaving information.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2281,20 +2143,16 @@ end function
 !      Print information about a {\tt ESMF\_Bundle}.  The options control the
 !      type of information and level of detail.
 !
-!
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [{[options]}]
 !           The print options.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
+!
 !EOP
 ! !REQUIREMENTS:  
 
@@ -2349,19 +2207,14 @@ end function
 ! !DESCRIPTION:
 !      Used to read data from persistent storage in a variety of formats.
 !
-!
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [{[iospec]}]
 !           The file I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 
 !EOP
@@ -2400,16 +2253,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [{[iospec]}]
 !           The I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -2446,16 +2295,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} to remove {\tt ESMF\_Field} from.
-!
 !     \item [name]
 !           Name of {\tt ESMF\_Field} to remove.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2491,16 +2336,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} to operate on.
-!
 !     \item [datamap]
 !           The new interleave/order.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2535,21 +2376,15 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} to operate on.
-!     
 !     \item [index]
 !           Index values to change.
-!
 !     \item [value]
 !           Data value(s) to set.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      
 !     \end{description}
-!
 !
 !
 !EOPI
@@ -2582,19 +2417,14 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [value]
 !           The integer value of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -2644,22 +2474,16 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The integer values of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -2715,19 +2539,14 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [value]
 !           The real value of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -2777,22 +2596,16 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The real values of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -2848,19 +2661,14 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [value]
 !           The logical true/false value of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -2910,22 +2718,16 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The logical true/false values of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -2981,19 +2783,14 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [value]
 !           The character value of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -3040,17 +2837,13 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [grid]
 !           The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
 !           {\tt ESMF\_Bundle} must have.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -3119,19 +2912,14 @@ end function
 !      Validates that the {\tt ESMF\_Bundles} is internally consistent.
 !      Returns error code if problems are found.
 !
-!
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [{[options]}]
 !           The validate options.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 
 !EOP
@@ -3184,22 +2972,16 @@ end function
 !      Used to write data to persistent storage in a variety of formats.  
 !      (see WriteRestart/ReadRestart for quick data dumps.)
 !
-!
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [{[subarray]}]
 !           The subset to write.
-!
 !     \item [{[iospec]}]
 !           The I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -3232,16 +3014,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
-!
 !     \item [{[iospec]}]
 !           The I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -3273,22 +3051,17 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [btype]
 !           {\tt ESMF\_BundleType} to add {\tt ESMF\_Field}s into.
-!
 !     \item [fieldCount]
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
 !           {\tt ESMF\_Field}s in the following argument.
-!
 !     \item [fields]
 !           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 ! 
 !EOPI
@@ -3412,16 +3185,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [btype]
 !           {\tt ESMF\_BundleType} pointer.
-!
 !     \item [{[datamap]}]
 !           Ordering and Interleaving information.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -3482,35 +3251,27 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [btype]
 !           Pointer to a {\tt ESMF\_Bundle} object.
-!
 !     \item [fieldCount]
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of
 !           {\tt ESMF\_Field}s in the following argument.
-!
 !     \item [fields]
 !           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
-!
 !     \item [{[packflag]}]
 !           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
 !           data in individual {\tt ESMF\_Array}s will be collected
 !           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
 !           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
-!
 !     \item [{[name]}]
 !           {\tt ESMF\_Bundle} name.  A default name will be generated if
 !           one is not specified.
-!
 !     \item [{[iospec]}]
 !           I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -3568,20 +3329,15 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [btype]
 !           An existing {\tt ESMF\_Bundle} to be initialized.
-!
 !     \item [{[name]}]
 !           {\tt ESMF\_Bundle} name.  A default name will be generated if
 !           one is not specified.
-!
 !     \item [{[iospec]}]
 !           I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -3642,13 +3398,10 @@ end function
 !     Releases all resources except the {\tt ESMF\_Bundle} itself.
 !
 !     \begin{description}
-!
 !     \item [btype]
 !           Pointer to a {\tt ESMF\_Bundle} object.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
