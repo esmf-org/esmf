@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.2 2004/07/07 19:18:41 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.3 2004/08/23 17:57:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,6 +40,19 @@
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
     integer :: result = 0
+
+    ! Internal State Variables
+    type testData
+        integer :: testNumber
+    end type
+
+    type dataWrapper
+        type(testData), pointer :: p
+    end type
+
+    type (dataWrapper) :: wrap1, wrap2
+    type(testData), target :: data1, data2
+
 
 !-------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -135,22 +148,37 @@
     call ESMF_Test((bname.eq."Atmosphere"), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
-!   Emailed Nancy about theses tests.
 !   !  Set Internal State
+    !EX_UTest
+    data1%testnumber=4567
+    wrap1%p=>data1
 
-!    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    !write(name, *) "Set Internal State Test"
-    !call ESMF_GridCompSetInternalState(comp1, dataPointer=pointer, rc=rc)
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set Internal State Test"
+    call ESMF_GridCompSetInternalState(comp1, wrap1, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
 !   !  Get Internal State
+    !EX_UTest
 
-    !write(failMsg, *) "Did not return ESMF_SUCCESS"
-    !write(name, *) "Get Internal State Test"
-    !call ESMF_GridCompGetInternalState(comp1, dataPointer=pointer, rc=rc)
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    wrap2%p=>data2
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get Internal State Test"
+    call ESMF_GridCompGetInternalState(comp1, wrap2, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Verify Internal State
+    !EX_UTest
+    write(failMsg, *) "Did not return correct data"
+    write(name, *) "Verify Internal State Test"
+    call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
+    print *, "data2%testnumber = ", data2%testnumber
+
 
 !-------------------------------------------------------------------------
 !   !
