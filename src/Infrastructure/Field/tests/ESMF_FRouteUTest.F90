@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.2 2003/03/17 22:22:42 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.3 2003/03/21 23:14:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.2 2003/03/17 22:22:42 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.3 2003/03/21 23:14:31 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -137,10 +137,11 @@
       allocate(f90ptr1(20,20))
       !f90ptr1 = reshape( (/ (i,i=1,400) /), (/ 20, 20 /) )
       !f90ptr1 = reshape( (/ (i,i=(400*myde)+1,400*(myde+1)) /), (/ 20, 20 /) )
-      f90ptr1 = myde
+      f90ptr1 = myde+10
       arr1 = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a src Test Array"
+      call ESMF_ArrayPrint(arr1)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -148,10 +149,11 @@
       allocate(f90ptr2(10,40))
       !f90ptr2 = reshape( (/ (i,i=401,800) /), (/ 10, 40 /) )
       !f90ptr2 = reshape( (/ (i,i=2001+(400*myde),2000*(myde+1)) /), (/ 10, 40 /) )
-      f90ptr2 = 100*myde
+      f90ptr2 = 100*(myde+1)
       arr2 = ESMF_ArrayCreate(f90ptr2, ESMF_NO_COPY, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a src Test Array"
+      write(name, *) "Creating a dst Test Array"
+      call ESMF_ArrayPrint(arr2)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -161,7 +163,6 @@
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f1)
       !------------------------------------------------------------------------
 
       ! second field
@@ -170,7 +171,6 @@
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
       ! route test
@@ -178,7 +178,12 @@
       write(failMsg, *) ""
       write(name, *) "Calling Field Route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! results
       call ESMF_FieldPrint(f2)
+      call ESMF_ArrayPrint(arr1)
+      call ESMF_ArrayPrint(arr2)
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
