@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.10 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.11 2003/09/10 03:32:12 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalEx.F90,v 1.10 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_TimeIntervalEx.F90,v 1.11 2003/09/10 03:32:12 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate some time intervals
@@ -49,12 +49,10 @@
       call ESMF_FrameworkInitialize(rc)
 
       ! initialize time interval1 to 1 day, 1800 seconds (0.5 hour)
-      call ESMF_TimeIntervalSet(timeInterval1, d=1, &
-                                s=1800, rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval1, d=1, s=1800, rc=rc)
 
       ! initialize time interval2 to 4 days, 5400 seconds (1.5 hours)
-      call ESMF_TimeIntervalSet(timeInterval2, d=4, &
-                                s=5400, rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval2, d=4, s=5400, rc=rc)
 
       call ESMF_TimeIntervalGet(timeInterval1, d=D, h=H, m=M, rc=rc)
       print *, "Time Interval1 = ", D, " days, ", H, " hours, ", M, " minutes."
