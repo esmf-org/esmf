@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.14 2004/04/02 18:36:34 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.15 2004/04/13 22:56:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
-      use ESMF_DELayoutMod
+      use ESMF_newDELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayMod
       use ESMF_RHandleMod
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.14 2004/04/02 18:36:34 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.15 2004/04/13 22:56:11 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -248,9 +248,9 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType), pointer :: btypep     ! bundle type info
+      type(ESMF_BundleType), pointer :: btypep    ! bundle type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_DELayout) :: layout               ! layout
+      type(ESMF_newDELayout) :: delayout          ! layout
       integer :: i, datarank, thisdim, thislength, numDims
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
@@ -327,10 +327,10 @@
       endif 
 
       ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(btypep%grid, layout, status)
-      call ESMF_ArrayGather(btypep%flist(1)%ftypep%localfield%localdata, layout, decompids, &
-                            global_dimlengths, local_maxlengths, destinationDE, &
-                            array, status)
+      call ESMF_GridGetDELayout(btypep%grid, delayout, status)
+      call ESMF_ArrayGather(btypep%flist(1)%ftypep%localfield%localdata, delayout, &
+                            decompids, & global_dimlengths, local_maxlengths, &
+                            destinationDE, array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleGather: Array Gather returned failure"
         return
@@ -471,9 +471,9 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: btypep              ! bundle type info
+      type(ESMF_BundleType) :: btypep             ! bundle type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_DELayout) :: layout               ! layout
+      type(ESMF_newDELayout) :: delayout          ! layout
       type(ESMF_Array) :: dstarray                ! Destination array
       integer :: i, datarank, thisdim, thislength, numDims
       integer :: dimorder(ESMF_MAXDIM)   
@@ -520,8 +520,8 @@
       enddo
 
       ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(btypep%grid, layout, status)
-      call ESMF_ArrayScatter(array, layout, decompids, sourceDE, dstarray, &
+      call ESMF_GridGetDELayout(btypep%grid, delayout, status)
+      call ESMF_ArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
                              status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleScatter: Array Scatter returned failure"
@@ -719,18 +719,18 @@
 ! !IROUTINE: ESMF_BundleRedist - Data Redistribution operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedist(srcBundle, dstBundle, parentLayout, &
+      subroutine ESMF_BundleRedist(srcBundle, dstBundle, parentDElayout, &
                                    routehandle, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcBundle
       type(ESMF_Bundle), intent(inout) :: dstBundle
-      type(ESMF_DELayout), intent(in) :: parentLayout
+      type(ESMF_newDELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Perform a {\tt Redistribution} operation over the data
@@ -749,8 +749,8 @@
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstbundle] 
 !           {\tt ESMF\_Bundle} containing destination grid.
-!     \item [parentlayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Bundle}s, 
+!     \item [parentDElayout]
+!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Bundle}s, 
 !           most commonly the layout
 !           of the Coupler if the redistribution is inter-component, 
 !           but could also be the individual layout for a component if the 
@@ -838,16 +838,16 @@
 ! !IROUTINE: ESMF_BundleRedistStore - Data Redistribution operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentLayout, &
+      subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentDElayout, &
                                         routehandle, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcBundle                 
-      type(ESMF_Bundle), intent(inout) :: dstBundle                 
-      type(ESMF_DELayout), intent(in) :: parentLayout
+      type(ESMF_Bundle), intent(in) :: srcBundle
+      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_newDELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Precompute a {\tt Redistribution} operation over the data
@@ -866,8 +866,8 @@
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstBundle]
 !           {\tt ESMF\_Bundle} containing destination grid.
-!     \item [parentlayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Bundle}s, 
+!     \item [parentDElayout]
+!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Bundle}s, 
 !           most commonly the layout
 !           of the Coupler if the redistribution is inter-component, 
 !           but could also be the individual layout for a component if the 
@@ -923,7 +923,7 @@
                                  dtypep%flist(1)%ftypep%localfield%localdata, &
                                  dtypep%grid, &
                                  dtypep%flist(1)%ftypep%mapping, &
-                                 parentLayout, &
+                                 parentDElayout, &
                                  routehandle, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleRedistStore: ArrayRedistStore returned failure"
@@ -940,17 +940,17 @@
 ! !IROUTINE: ESMF_BundleRegrid - Execute a Regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegrid(srcbundle, dstbundle, parentlayout, &
+      subroutine ESMF_BundleRegrid(srcbundle, dstbundle, parentDElayout, &
                                    blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcbundle                 
-      type(ESMF_Bundle), intent(inout) :: dstbundle                 
-      type(ESMF_DELayout), intent(in) :: parentlayout
+      type(ESMF_Bundle), intent(in) :: srcbundle
+      type(ESMF_Bundle), intent(inout) :: dstbundle
+      type(ESMF_newDELayout), intent(in) :: parentDElayout
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Perform a {\tt ESMF\_Regrid} operation over the data
@@ -966,8 +966,8 @@
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstbundle] 
 !           {\tt ESMF\_Bundle} containing destination grid and data map.
-!     \item [parentlayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Bundle}s, 
+!     \item [parentDElayout]
+!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Bundle}s, 
 !           most commonly the layout
 !           of the Coupler if the regridding is inter-component, but could 
 !           also be the individual layout for a component if the 
@@ -1048,14 +1048,14 @@
 ! !IROUTINE: ESMF_BundleRegridStore - Precompute Regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentlayout, rc)
+      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentDElayout, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcbundle                 
-      type(ESMF_Bundle), intent(inout) :: dstbundle                 
-      type(ESMF_DELayout), intent(in) :: parentlayout
-      integer, intent(out), optional :: rc               
+      type(ESMF_Bundle), intent(in) :: srcbundle
+      type(ESMF_Bundle), intent(inout) :: dstbundle
+      type(ESMF_newDELayout), intent(in) :: parentDElayout
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Perform a {\tt ESMF\_Regrid} operation over the data
@@ -1071,8 +1071,8 @@
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstbundle] 
 !           {\tt ESMF\_Bundle} containing destination grid and data map.
-!     \item [parentlayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Bundle}s, 
+!     \item [parentDElayout]
+!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Bundle}s, 
 !           most commonly the layout
 !           of the Coupler if the regridding is inter-component, but could 
 !           also be the individual layout for a component if the 

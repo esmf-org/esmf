@@ -40,10 +40,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
-      use ESMF_DELayoutMod
-#ifdef ESMF_ENABLE_VM
       use ESMF_newDELayoutMod
-#endif      
       implicit none
 
 !------------------------------------------------------------------------------
@@ -149,10 +146,7 @@
         type (ESMF_Base) :: base          ! standard ESMF base object
         integer :: dimCount               ! Number of dimensions
         integer :: gridBoundaryWidth      ! # of exterior cells/edge
-        type (ESMF_DELayout) :: layout    ! the layout for this grid
-#ifdef ESMF_ENABLE_VM      
         type(ESMF_newDELayout) :: delayout    ! the delayout for this grid
-#endif        
 
       ! 1 per dimension of the Grid
 
@@ -218,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.109 2004/04/09 14:36:40 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.110 2004/04/13 22:56:33 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -367,14 +361,11 @@
 ! !IROUTINE: ESMF_DistGridCreateInternal - Create a new DistGrid internally
 
 ! !INTERFACE:
-      function ESMF_DistGridCreateInternal(dimCount, counts, layout, decompIDs, &
+      function ESMF_DistGridCreateInternal(dimCount, counts, delayout, &
+                                           decompIDs, &
                                            countsPerDEDim1, countsPerDEDim2, &
                                            periodic, coversDomain, &
-                                           name, rc &
-#ifdef ESMF_ENABLE_VM      
-                                           , delayout &
-#endif
-                                           )
+                                           name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DistGrid) :: ESMF_DistGridCreateInternal
@@ -382,7 +373,7 @@
 ! !ARGUMENTS:
       integer, intent(in) :: dimCount
       integer, dimension(dimCount), intent(in) :: counts
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_newDELayout), intent(in), optional :: delayout
       integer, dimension(dimCount), intent(in) :: decompIDs
       integer, dimension(:), intent(in) :: countsPerDEDim1
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
@@ -390,9 +381,6 @@
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: coversDomain
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc       
-#ifdef ESMF_ENABLE_VM      
-      type(ESMF_newDELayout), intent(in), optional :: delayout
-#endif
 
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_DistGrid} object, constructs its
@@ -405,7 +393,7 @@
 !          Number of dimensions described by this DistGrid.
 !     \item[counts]
 !          Array of number of computational cells in each direction.
-!     \item[layout]
+!     \item[delayout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
 !          Identifier for which Grid axes are decomposed.
@@ -455,15 +443,11 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstruct(dgtype, dimCount, layout, decompIDs, counts, &
-                                  countsPerDEDim1, countsPerDEDim2, &
+      call ESMF_DistGridConstruct(dgtype, dimCount, delayout, decompIDs, &
+                                  counts, countsPerDEDim1, countsPerDEDim2, &
                                   periodic=periodic, &
                                   coversDomain=coversDomain, &
-                                  name=name, rc=rc &
-#ifdef ESMF_ENABLE_VM      
-                                  , delayout=delayout &
-#endif
-                                  )
+                                  name=name, rc=rc)
 
 !     Set return values.
       ESMF_DistGridCreateInternal%ptr => dgtype
@@ -639,20 +623,16 @@
 ! !IROUTINE: ESMF_DistGridConstructInternal - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstructInternal(dgtype, dimCount, layout, &
+      subroutine ESMF_DistGridConstructInternal(dgtype, dimCount, delayout, &
                                                 decompIDs, counts, &
                                                 countsPerDEDim1, countsPerDEDim2, &
                                                 gridBoundaryWidth, periodic, &
-                                                coversDomain, name, rc &
-#ifdef ESMF_ENABLE_VM      
-                                                , delayout &
-#endif
-                                                )
+                                                coversDomain, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
       integer, intent(in) :: dimCount
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_newDELayout), intent(in) :: delayout
       integer, dimension(dimCount), intent(in) :: decompIDs
       integer, dimension(dimCount), intent(in) :: counts
       integer, dimension(:), intent(in) :: countsPerDEDim1
@@ -662,9 +642,6 @@
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: coversDomain
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
-#ifdef ESMF_ENABLE_VM      
-      type(ESMF_newDELayout), intent(in) :: delayout
-#endif
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
@@ -680,7 +657,7 @@
 !          Pointer to a {\tt ESMF\_DistGrid}.
 !     \item[dimCount]
 !          Number of dimensions described by this DistGrid.
-!     \item[layout]
+!     \item[delayout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
 !          Identifier for which Grid axes are decomposed by the layout.
@@ -714,10 +691,8 @@
                                                nDEsUse
       type(ESMF_DistGridLocal),  pointer :: me
       type(ESMF_DistGridGlobal), pointer :: glob
-#ifdef ESMF_ENABLE_VM
       integer:: ndim
       type(ESMF_Logical):: otoFlag, lrFlag
-#endif
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -728,7 +703,7 @@
       endif
 
 !     Error checking for required input   TODO: complete
-!     call ESMF_DELayoutValidate(layout, rc=status)
+!     call ESMF_DELayoutValidate(delayout, rc=status)
 !     if (status .ne. ESMF_SUCCESS) then
 !       print *, "ERROR in ESMF_DistGridConstructInternal: unassociated layout"
 !       return
@@ -742,9 +717,8 @@
       endif
 
       ! Allocate resources based on number of DE's
-#ifdef ESMF_ENABLE_VM
       call ESMF_newDELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
-        logRectFlag=lrFlag, rc=status)
+                               logRectFlag=lrFlag, rc=status)
       if (otoFlag /= ESMF_TRUE) stop    ! ensure this is 1-to-1 layout
       if (ndim /= 2) stop               ! ensure this is 2D Layout
       if (lrFlag /= ESMF_TRUE) stop     ! ensure this is logical rectangular l.
@@ -754,10 +728,6 @@
       nDEs(1) = nDEs(0)
       nDEs(0) = 1
       print *, 'newDELayout: ', nDEs(0), nDEs(1), nDEs(2)
-#else
-      nDEs(0) = 1
-      call ESMF_DELayoutGetSize(layout, nDEs(1), nDEs(2), status)
-#endif      
       nDE = nDEs(1) * nDEs(2)
       if((status .NE. ESMF_SUCCESS) .or. (nDE .le. 0)) then
         print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
@@ -771,7 +741,7 @@
 
       ! Fill in distgrid derived type with input
       dgtype%dimCount = dimCount
-      dgtype%layout  = layout
+      dgtype%delayout = delayout
       do i = 1,dimCount
         dgtype%decompIDs(i) = decompIDs(i)
       enddo
@@ -782,12 +752,6 @@
           dgtype%coversDomain(i) = coversDomain(i)
         enddo
       endif
-
-#ifdef ESMF_ENABLE_VM
-      dgtype%delayout  = delayout
-      print *, 'ESMF_DistGridConstructInternal: Insert DELayout into DistGrid'
-      call ESMF_newDELayoutPrint(delayout)
-#endif
 
       ! Calculate values for computational cells
       glob => dgtype%globalComp
@@ -902,7 +866,7 @@
       ! TODO: Agree that this is correct.  The Grid is passed in a layout
       !  created outside this grid (and perhaps shared amongst many grids)
       !  so it seems that it should not be destroyed here.)
-      !call ESMF_DELayoutDestroy(distgrid%ptr%layout, status)
+      !call ESMF_DELayoutDestroy(distgrid%ptr%delayout, status)
       !if(status .NE. ESMF_SUCCESS) then
       !  print *, "ERROR in ESMF_DistGridDestruct: DELayout destroy"
       !  return
@@ -920,12 +884,8 @@
       subroutine ESMF_DistGridGet(distgrid, coversDomain, &
                                   globalCellCount, globalCellCountPerDim, &
                                   globalStartPerDEPerDim, maxLocalCellCount, &
-                                  maxLocalCellCountPerDim, &
-                                  name, total, rc &
-#ifdef ESMF_ENABLE_VM
-                                  , delayout &
-#endif
-                                  )
+                                  maxLocalCellCountPerDim, delayout, &
+                                  name, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGrid), target, intent(in) :: distgrid
@@ -935,13 +895,10 @@
       integer, dimension(:,:), intent(inout), optional :: globalStartPerDEPerDim
       integer, intent(inout), optional :: maxLocalCellCount
       integer, dimension(:), intent(inout), optional :: maxLocalCellCountPerDim
+      type(ESMF_newDELayout), intent(out), optional :: delayout
       character (len = *), intent(out), optional :: name
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc              
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(out), optional :: delayout
-#endif      
-
 !
 ! !DESCRIPTION:
 !     Returns information from the {\tt ESMF\_DistGrid} object.
@@ -1015,12 +972,7 @@
       if(present(globalStartPerDEPerDim)) then
                  ! TODO: add check that globalStartPerDEPerDim is large enough
                  !       or use the size of the array for the loop limit
-#ifdef ESMF_ENABLE_VM
         call ESMF_newDELayoutGet(dgtype%delayout, deCount=nndes, rc=rc)
-#else              
-        call ESMF_DELayoutGetSize(dgtype%layout, nDEs(1), nDEs(2), rc)
-        nndes = nDEs(1)*nDEs(2)
-#endif        
         do i = 1, nndes
           do j = 1,dgtype%dimCount
             globalStartPerDEPerDim(i,j) = glob%globalStartPerDEPerDim(i,j)
@@ -1046,9 +998,7 @@
          endif
       endif
 
-#ifdef ESMF_ENABLE_VM
       if(present(delayout)) delayout = dgtype%delayout
-#endif
 
       if(rcpresent) rc = ESMF_SUCCESS
  
@@ -1756,9 +1706,8 @@
       integer :: DEID, localCellCount, localCellCountForDim
       integer :: compCellCount, compCellCountForDim
       integer :: i, myDEx, myDEy, nDEx, nDEy
-#ifdef ESMF_ENABLE_VM
       integer :: localDe, deCountPerDim(2), coord(2)
-#endif
+
 !     Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
@@ -1767,34 +1716,15 @@
         rc = ESMF_FAILURE
       endif
 
-#ifdef ESMF_ENABLE_VM
       call ESMF_newDELayoutGet(dgtype%delayout, localDe=localDe, &
-        deCountPerDim=deCountPerDim, rc=status)
+                               deCountPerDim=deCountPerDim, rc=status)
       call ESMF_newDELayoutGetDE(dgtype%delayout, de=localDe, coord=coord, &
-        rc=status)
+                                 rc=status)
       ! bring things into the form that the local code expects them in
       nDEx = deCountPerDim(1)
       nDEy = deCountPerDim(2)
       myDEx = coord(1)+1
       myDEy = coord(2)+1
-#else
-!      call ESMF_DELayoutGetDEid(dgtype%layout, DEID, status)
-!      if((status .NE. ESMF_SUCCESS) .or. (DEID .lt. 0)) then
-!        print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DEid"
-!        return
-!      endif
-!      DEID = DEID + 1    ! TODO:  have to add one to go from C
-      call ESMF_DELayoutGetSize(dgtype%layout, nDEx, nDEy, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridSetDEInternal: layout get size"
-        return
-      endif
-      call ESMF_DELayoutGetDEPosition(dgtype%layout, myDEx, myDEy, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DE position"
-        return
-      endif
-#endif
 
       DEID = (myDEy-1)*nDEx + myDEx
 
@@ -1957,12 +1887,7 @@
 
       ! Get information from distgrid derived type
       ! TODO:  add check for array size or use size for loop limit
-#ifdef ESMF_ENABLE_VM
       call ESMF_newDELayoutGet(dgtype%delayout, deCount=nndes, rc=rc)
-#else              
-      call ESMF_DELayoutGetSize(dgtype%layout, nDEs(1), nDEs(2), rc)
-      nndes = nDEs(1)*nDEs(2)
-#endif        
       do i = 1,nndes
         do j = 1,dgtype%dimCount
           cellCountPerDEPerDim(i,j) = glob%cellCountPerDEPerDim(i,j)
@@ -1978,11 +1903,11 @@
 ! !IROUTINE: ESMF_DistGridGetDELayout - Get pointer to a DELayout for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetDELayout(dgtype, layout, rc)
+      subroutine ESMF_DistGridGetDELayout(dgtype, delayout, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: delayout
       integer, intent(out), optional :: rc            
 
 !
@@ -1993,7 +1918,7 @@
 !     \begin{description}
 !     \item[dgtype]
 !          Class to be modified.
-!     \item[layout]
+!     \item[delayout]
 !          The {\tt ESMF\_DELayout} corresponding to the {\tt ESMF\_DistGrid}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2016,7 +1941,7 @@
       ! Get information from distgrid derived type
       !  Note this needs to use = and not => to return the actual layout
       !  and not a pointer.
-      layout = dgtype%layout
+      delayout = dgtype%delayout
 
       if(rcpresent) rc = ESMF_SUCCESS
 

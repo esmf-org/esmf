@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.25 2004/04/02 18:36:33 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.26 2004/04/13 22:54:11 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 // 
 // !USES:
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
-#include <ESMC_DELayout.h>    // communications code
+#include <ESMC_newDELayout.h>    // communications code
 #include <ESMC_LocalArray.h>  // functions to interoperate F90/C++ arrays
 
 // !PUBLIC TYPES:
@@ -170,22 +170,22 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     char *ESMC_ArrayGetName(void) { return ESMC_BaseGetName(); }
 
     // most important array methods
-    int ESMC_ArrayRedist(ESMC_DELayout *layout, int global_start[], 
+    int ESMC_ArrayRedist(ESMC_newDELayout *delayout, int global_start[], 
                          int global_dimlengths[], int rank_trans[], 
                          int size_rank_trans, int olddecompids[], 
                          int decompids[], int size_decomp,
                           ESMC_Array *RedistArray);
-    int ESMC_ArrayHalo(ESMC_DELayout *layout,
+    int ESMC_ArrayHalo(ESMC_newDELayout *delayout,
                        ESMC_AxisIndex *ai_global, int global_dimlengths[],
                        int decompids[], int size_decomp, ESMC_Logical periodic[]);
-    int ESMC_ArrayAllGather(ESMC_DELayout *layout, int decompids[],
+    int ESMC_ArrayAllGather(ESMC_newDELayout *delayout, int decompids[],
                             int size_decomp, int localAxisCounts[],
                             int global_dimlengths[],
                             int local_maxlength[], ESMC_Array **Array_out);
-    int ESMC_ArrayGather(ESMC_DELayout *layout, int decompids[], 
+    int ESMC_ArrayGather(ESMC_newDELayout *delayout, int decompids[], 
                             int size_decomp, int global_dimlengths[],
                             int local_maxlength[], int deid, ESMC_Array **Array_out);
-    int ESMC_ArrayScatter(ESMC_DELayout *layout,
+    int ESMC_ArrayScatter(ESMC_newDELayout *delayout,
                             int decompids[], int size_decomp,
                             int deid, ESMC_Array **Array_out);
     

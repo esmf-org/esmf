@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.159 2004/04/09 17:44:06 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.160 2004/04/13 22:57:37 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,10 +39,7 @@
       use ESMF_IOSpecMod      ! ESMF I/O class
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_DataMapMod     ! ESMF data map class
-      use ESMF_DELayoutMod    ! ESMF layout class
-#ifdef ESMF_ENABLE_VM
-      use ESMF_newDELayoutMod    ! ESMF layout class
-#endif
+      use ESMF_newDELayoutMod ! ESMF layout class
       use ESMF_ArrayMod
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_PhysCoordMod   ! ESMF physical coord class
@@ -95,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.159 2004/04/09 17:44:06 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.160 2004/04/13 22:57:37 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -931,12 +928,12 @@
 ! !IROUTINE: ESMF_GridDistribute - Distribute a grid that has already been initialized
 
 ! !INTERFACE:
-      subroutine ESMF_GridDistribute(grid, layout, countsPerDEDim1, &
+      subroutine ESMF_GridDistribute(grid, delayout, countsPerDEDim1, &
                                      countsPerDEDim2, decompIds, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_newDELayout), intent(in) :: delayout
       integer, dimension(:), intent(in), optional :: countsPerDEDim1
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
       integer, dimension(:), intent(in), optional :: decompIds
@@ -950,7 +947,7 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be distributed.
-!     \item[layout]
+!     \item[delayout]
 !         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[countsPerDEDim1]}]
 !          Array of number of grid increments per DE in the x-direction.
@@ -992,7 +989,7 @@
       !-------------
       ! ESMF_GridStructure_LogRect
       case(1)
-        call ESMF_LRGridDistribute(grid%ptr, layout, countsPerDEDim1, &
+        call ESMF_LRGridDistribute(grid%ptr, delayout, countsPerDEDim1, &
                                    countsPerDEDim2, decompIds, name, status)
 
       !-------------
@@ -1044,11 +1041,8 @@
                               coordOrder, dimCount, minGlobalCoordPerDim, &
                               maxGlobalCoordPerDim, globalCellCountPerDim, &
                               globalStartPerDEPerDim, maxLocalCellCountPerDim, &
-                              cellCountPerDEPerDim, periodic, name, rc &
-#ifdef ESMF_ENABLE_VM                                
-                              , delayout &
-#endif
-                              )
+                              cellCountPerDEPerDim, periodic, delayout, &
+                              name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -1071,11 +1065,9 @@
       integer, intent(out), dimension(:), optional :: maxLocalCellCountPerDim
       integer, intent(out), dimension(:,:), optional :: cellCountPerDEPerDim
       type(ESMF_Logical), intent(out), dimension(:), optional :: periodic
+      type(ESMF_newDELayout), intent(out), optional :: delayout
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM                                
-      type(ESMF_newDELayout), intent(out), optional:: delayout
-#endif
 !
 ! !DESCRIPTION:
 !     This version sets a variety of information about a {\tt ESMF\_Grid}, depending
@@ -1166,11 +1158,8 @@
                             coordOrder, dimCount, minGlobalCoordPerDim, &
                             maxGlobalCoordPerDim, globalCellCountPerDim, &
                             globalStartPerDEPerDim, maxLocalCellCountPerDim, &
-                            cellCountPerDEPerDim, periodic, name, status &
-#ifdef ESMF_ENABLE_VM
-                            , delayout &       
-#endif
-                            )
+                            cellCountPerDEPerDim, periodic, delayout, &
+                            name, status)
 
       !-------------
       ! ESMF_GridStructure_LogRectBlock

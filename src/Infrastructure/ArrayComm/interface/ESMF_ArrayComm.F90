@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.34 2004/04/12 19:10:47 theurich Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.35 2004/04/13 22:54:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,10 +44,9 @@
       use ESMF_IOSpecMod
       use ESMF_LocalArrayMod
       use ESMF_DataMapMod
-      use ESMF_DELayoutMod
-#ifdef ESMF_ENABLE_VM
+      use ESMF_DELayoutMod       ! TODO:  move CommHandle out of old layout
+                                 !        and get rid of this
       use ESMF_newDELayoutMod    ! ESMF layout class
-#endif
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
       use ESMF_GridTypesMod
@@ -79,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.34 2004/04/12 19:10:47 theurich Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.35 2004/04/13 22:54:48 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -173,7 +172,7 @@
       logical :: rcpresent      ! did user specify rc?
       integer :: gridrank, datarank
       integer :: i, j, nDEs
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDElayout) :: delayout
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
       integer, dimension(ESMF_MAXDIM) :: decompids
       integer, dimension(:,:), pointer :: localAxisLengths, tempCCPDEPD
@@ -192,8 +191,8 @@
  
 ! extract necessary information from the grid
       call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
-      call ESMF_GridGetDELayout(grid, layout, status)
-      call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
+      call ESMF_GridGet(grid, delayout=delayout, rc=status)
+      call ESMF_newDELayoutGet(delayout, deCount=nDEs, status)
       allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
       allocate( tempMLCCPD(     gridrank), stat=status)
       allocate(  tempGCCPD(     gridrank), stat=status)
@@ -250,7 +249,7 @@
 
 
 ! call c routine to allgather
-        call c_ESMC_ArrayAllGather(array, layout, decompids, datarank, &
+        call c_ESMC_ArrayAllGather(array, delayout, decompids, datarank, &
                                    localAxisLengths, globalCellDim, &
                                    localMaxDimCount, array_out, status)
 
@@ -275,13 +274,13 @@
 ! !IROUTINE: ESMF_ArrayAllGatherList - gather a distributed Array
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayAllGatherList(array, layout, decompids, &
+      subroutine ESMF_ArrayAllGatherList(array, delayout, decompids, &
                                          localAxisLengths, globalDimLengths, &
                                          local_maxlengths, array_out, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_newDELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
       integer, dimension(:,:), intent(in) :: localAxisLengths
       integer, dimension(:), intent(in) :: globalDimLengths
@@ -310,7 +309,7 @@
 ! call c routine to allgather
         size_decomp = size(decompids)
         size_axislengths = size(localAxisLengths,1) * size(localAxisLengths,2)
-        call c_ESMC_ArrayAllGather(array, layout, decompids, size_decomp, &
+        call c_ESMC_ArrayAllGather(array, delayout, decompids, size_decomp, &
                                    localAxisLengths, &
                                    globalDimLengths, local_maxlengths, &
                                    array_out, status)
@@ -330,13 +329,13 @@
 ! !IROUTINE: ESMF_ArrayGather - Gather a distributed Array
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayGather(array, layout, decompids, &
+      subroutine ESMF_ArrayGather(array, delayout, decompids, &
                                   global_dimlengths, local_maxlengths, deid, &
                                   array_out, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_newDELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: local_maxlengths
@@ -365,7 +364,7 @@
  
 ! call c routine to allgather
         size_decomp = size(decompids)
-        call c_ESMC_ArrayGather(array, layout, decompids, size_decomp, &
+        call c_ESMC_ArrayGather(array, delayout, decompids, size_decomp, &
                                 global_dimlengths, local_maxlengths, deid, &
                                 array_out, status)
 
@@ -408,23 +407,14 @@
       integer, dimension(:), allocatable :: dimOrder
       type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
-      type(ESMF_DELayout) :: layout
-      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
-#ifdef ESMF_ENABLE_VM
       type (ESMF_newDELayout) :: delayout
-#endif
+      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
       ! get layout from the grid in order to get the number of DEs
       call ESMF_ArrayGet(array, rank=datarank, rc=status)
       call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
-#ifdef ESMF_ENABLE_VM
       call ESMF_GridGet(grid, delayout=delayout, rc=status)
       call ESMF_newDELayoutGet(delayout, nDEs, rc=status)
-#else
-      call ESMF_GridGetDELayout(grid, layout, status)
-      call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
-#endif
-      
 
       ! allocate dimOrder array and get from datamap
       allocate(dimOrder(datarank), stat=status)
@@ -513,13 +503,13 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayHalo()
-      subroutine ESMF_ArrayHaloDeprecated(array, layout, &
+      subroutine ESMF_ArrayHaloDeprecated(array, delayout, &
                                           AI_global, global_dimlens, &
                                           decompids, periodic, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: delayout
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_global
       integer, dimension(:), intent(in) :: global_dimlens
       integer, dimension(:), intent(in) :: decompids
@@ -546,7 +536,7 @@
  
 ! call c routine to halo
         size_decomp = size(decompids)
-        call c_ESMC_ArrayHalo(array, layout, AI_global, global_dimlens, &
+        call c_ESMC_ArrayHalo(array, delayout, AI_global, global_dimlens, &
                               decompids, size_decomp, periodic, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "c_ESMC_ArrayHalo returned error"
@@ -706,7 +696,7 @@
 ! !REQUIREMENTS:
       integer :: status         ! local error status
       logical :: rcpresent      ! did user specify rc?
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: delayout
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
@@ -720,9 +710,6 @@
       integer :: gridrank, datarank
       integer :: i, dimCount
       logical :: hascachedroute    ! can we reuse an existing route?
-#ifdef ESMF_ENABLE_VM
-      type (ESMF_newDELayout) :: delayout
-#endif
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -739,20 +726,11 @@
       routehandle = ESMF_RouteHandleCreate(status)
     
       ! Extract layout information from the Grid
-#ifdef ESMF_ENABLE_VM
       call ESMF_GridGet(grid, delayout=delayout, rc=status)
-#else
-      call ESMF_GridGetDELayout(grid, layout, status)
-#endif
       call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
-#ifdef ESMF_ENABLE_VM
-      call ESMF_newDELayoutGet(delayout, deCount=nDEs, localDe=my_DE, rc=status)
-#else
-      call ESMF_DELayoutGetDEid(layout, my_DE, status)
-      call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
-#endif
+      call ESMF_newDELayoutGet(delayout, deCount=nDEs, localDE=my_DE, rc=status)
 
       ! Allocate temporary arrays
       allocate(              periodic(      gridrank), stat=status)
@@ -820,31 +798,19 @@
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
       call ESMF_RouteGetCached(datarank, my_DE, gl_dst_AI, gl_dst_AI, &
-                               nDEs, layout, my_DE, gl_src_AI, gl_src_AI, &
-                               nDEs, layout, periodic, hascachedroute, &
-                               route, status &
-#ifdef ESMF_ENABLE_VM
-                               , delayout, delayout &
-#endif
-                               )
+                               nDEs, delayout, my_DE, gl_src_AI, gl_src_AI, &
+                               nDEs, delayout, periodic, hascachedroute, &
+                               route, status)
 
       if (.not. hascachedroute) then
           ! Create the route object.
-          route = ESMF_RouteCreate(layout, rc &
-#ifdef ESMF_ENABLE_VM
-               , delayout &
-#endif
-          )
+          route = ESMF_RouteCreate(delayout, rc)
 
           call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
                                         gl_dst_AI, nDEs, &
                                         globalStartPerDEPerDim, &
-                                        globalCellCountPerDim, layout, &
-                                        periodic, status &
-#ifdef ESMF_ENABLE_VM
-                                        , delayout &
-#endif
-                                        )
+                                        globalCellCountPerDim, delayout, &
+                                        periodic, status)
       endif
 
       ! and set route into routehandle object
@@ -872,13 +838,13 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayRedist()
-      subroutine ESMF_ArrayRedistDeprecated(array, layout, globalStart, &
+      subroutine ESMF_ArrayRedistDeprecated(array, delayout, globalStart, &
                                   global_dimlengths, rank_trans, olddecompids, &
                                   decompids, redistarray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: delayout
       integer, dimension(:), intent(in) :: globalStart
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: rank_trans
@@ -909,7 +875,7 @@
 ! call c routine to query index
         size_rank_trans = size(rank_trans)
         size_decomp = size(decompids)
-        call c_ESMC_ArrayRedist(array, layout, globalStart, global_dimlengths, &
+        call c_ESMC_ArrayRedist(array, delayout, globalStart, global_dimlengths, &
                                 rank_trans, size_rank_trans, olddecompids, &
                                 decompids, size_decomp, redistarray, status)
         if (status .ne. ESMF_SUCCESS) then
@@ -1035,11 +1001,7 @@
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistStore(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
-                                       parentLayout, routehandle, rc &
-#ifdef ESMF_ENABLE_VM
-                                       , parentDelayout &
-#endif
-                                       )
+                                       parentDElayout, routehandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
@@ -1048,12 +1010,9 @@
       type(ESMF_Array), intent(inout) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DataMap), intent(in) :: dstDataMap
-      type(ESMF_DELayout), intent(in) :: parentLayout
+      type(ESMF_newDELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(in), optional :: parentDelayout
-#endif
 !
 ! !DESCRIPTION:
 !  Compute and store information about this redistribute operation.
@@ -1072,7 +1031,7 @@
 !    {\tt ESMF\_Grid} describing the grid on which the destination data is arranged.
 !   \item[dstDataMap]
 !    {\tt ESMF\_DataMap} describing how the destination data maps onto the grid.
-!   \item[parentLayout]
+!   \item[parentDElayout]
 !    {\tt ESMF\_DELayout} object which includes all {\tt DE}s in both the
 !    source and destination grids.
 !   \item [routehandle]
@@ -1087,7 +1046,7 @@
 ! !REQUIREMENTS:
       integer :: status         ! local error status
       logical :: rcpresent      ! did user specify rc?
-      type(ESMF_DELayout) :: dstLayout, srcLayout
+      type(ESMF_newDELayout) :: dstDElayout, srcDElayout
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI, srcCompAI, &
                                                      dstTotalAI, srcTotalAI, &
@@ -1105,9 +1064,6 @@
       integer :: gridrank, datarank
       integer :: i, dimCount
       logical :: hascachedroute     ! can we reuse an existing route?
-#ifdef ESMF_ENABLE_VM
-      type (ESMF_newDELayout) :: dstDelayout, srcDElayout
-#endif
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -1121,28 +1077,14 @@
       routehandle = ESMF_RouteHandleCreate(status)
 
       ! Extract layout information from the Grids
-#ifdef ESMF_ENABLE_VM
-      call ESMF_GridGet(dstGrid, delayout=dstDelayout, rc=status)
-#else
-      call ESMF_GridGetDELayout(dstGrid, dstLayout, status)
-#endif
-#ifdef ESMF_ENABLE_VM
-      call ESMF_GridGet(srcGrid, delayout=srcDelayout, rc=status)
-#else
-      call ESMF_GridGetDELayout(srcGrid, srcLayout, status)
-#endif
+      call ESMF_GridGet(dstGrid, delayout=dstDElayout, rc=status)
+      call ESMF_GridGet(srcGrid, delayout=srcDElayout, rc=status)
       call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
-#ifdef ESMF_ENABLE_VM
-      call ESMF_newDELayoutGet(dstDelayout, deCount=nDEs, localDe=dstMyDE, &
-        rc=status)
-      call ESMF_newDELayoutGet(srcDelayout, localDe=srcMyDE, rc=status)
-#else
-      call ESMF_DELayoutGetDEid(dstLayout, dstMyDE, status)
-      call ESMF_DELayoutGetDEid(srcLayout, srcMyDE, status)
-      call ESMF_DElayoutGetNumDEs(srcLayout, nDEs, rc=status)
-#endif
+      call ESMF_newDELayoutGet(dstDElayout, deCount=nDEs, localDe=dstMyDE, &
+                               rc=status)
+      call ESMF_newDELayoutGet(srcDElayout, localDE=srcMyDE, rc=status)
 
       ! Allocate temporary arrays
       allocate(           periodic(      gridrank), stat=status)
@@ -1257,32 +1199,20 @@
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
       call ESMF_RouteGetCached(datarank, &
-                               dstMyDE, dstCompAI, dstTotalAI, nDEs, dstLayout, &
-                               srcMyDE, srcCompAI, srcTotalAI, nDEs, srcLayout, &
-                               periodic, hascachedroute, route, status &
-#ifdef ESMF_ENABLE_VM
-                               , dstDelayout, srcDelayout &
-#endif
-                               )
+                               dstMyDE, dstCompAI, dstTotalAI, nDEs, dstDElayout, &
+                               srcMyDE, srcCompAI, srcTotalAI, nDEs, srcDElayout, &
+                               periodic, hascachedroute, route, status)
 
       if (.not. hascachedroute) then
           ! Create the route object.
-          route = ESMF_RouteCreate(parentLayout, rc &
-#ifdef ESMF_ENABLE_VM
-               , parentDelayout &
-#endif
-          )
+          route = ESMF_RouteCreate(parentDElayout, rc)
 
           call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstCompAI, &
                                           dstTotalAI, dstStartPerDEPerDim, &
-                                          dstCellCountPerDim, dstLayout, &
+                                          dstCellCountPerDim, dstDElayout, &
                                           srcMyDE, srcCompAI, srcTotalAI, &
                                           srcStartPerDEPerDim, &
-                                          srcCellCountPerDim, srcLayout, status&
-#ifdef ESMF_ENABLE_VM
-                                          , dstDelayout, srcDelayout &
-#endif
-                                          )
+                                          srcCellCountPerDim, srcDElayout, status)
       endif
 
       ! and set route into routehandle object
@@ -1314,11 +1244,11 @@
 ! !IROUTINE: ESMF_ArrayScatter - Scatter a single Array
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayScatter(array, layout, decompids, deid, array_out, rc)
+      subroutine ESMF_ArrayScatter(array, delayout, decompids, deid, array_out, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_newDELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
       integer, intent(in) :: deid
       type(ESMF_Array), intent(out) :: array_out
@@ -1345,7 +1275,7 @@
  
 ! call c routine to allgather
         size_decomp = size(decompids)
-        call c_ESMC_ArrayScatter(array, layout, decompids, size_decomp, &
+        call c_ESMC_ArrayScatter(array, delayout, decompids, size_decomp, &
                                  deid, array_out, status)
 
         if (status .ne. ESMF_SUCCESS) then

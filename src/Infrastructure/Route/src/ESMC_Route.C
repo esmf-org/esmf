@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.86 2004/04/12 16:07:22 theurich Exp $
+// $Id: ESMC_Route.C,v 1.87 2004/04/13 22:59:55 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.86 2004/04/12 16:07:22 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.87 2004/04/13 22:59:55 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -60,11 +60,7 @@ static int maxroutes = 10;
 //     pointer to newly allocated ESMC_Route
 //
 // !ARGUMENTS:
-#ifdef ESMF_ENABLE_VM
-          ESMC_newDELayout *delayout,
-#else
-          ESMC_DELayout *layout,
-#endif
+      ESMC_newDELayout *delayout,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -81,11 +77,7 @@ static int maxroutes = 10;
 
     ESMC_Route *newr = new ESMC_Route;
 
-#ifdef ESMF_ENABLE_VM
     *rc = newr->ESMC_RouteConstruct(delayout);
-#else
-    *rc = newr->ESMC_RouteConstruct(layout);
-#endif
 
     if (*rc == ESMF_FAILURE)
         return NULL;
@@ -137,11 +129,7 @@ static int maxroutes = 10;
 //    int error return code 
 //
 // !ARGUMENTS:
-#ifdef ESMF_ENABLE_VM
-          ESMC_newDELayout *delayout
-#else
-          ESMC_DELayout *layout
-#endif
+      ESMC_newDELayout *delayout
       ) {          // in
 //
 // !DESCRIPTION:
@@ -159,15 +147,9 @@ static int maxroutes = 10;
     int myde, rc;
     int decount;         // total number of DE/PEs in src + dst layouts
 
-#ifdef ESMF_ENABLE_VM
     this->delayout = delayout;
     delayout->ESMC_newDELayoutGet(&decount, NULL, NULL, NULL, NULL, &myde,
       NULL, NULL, NULL, NULL);
-#else
-    this->layout = layout;
-    rc = layout->ESMC_DELayoutGetNumDEs(&decount);
-    rc = layout->ESMC_DELayoutGetDEID(&myde);
-#endif
         
     routeid = rseqnum++;
     sendRT = ESMC_RTableCreate(myde, decount, &rc);
@@ -284,11 +266,7 @@ static int maxroutes = 10;
       int AI_rcv_count,            // in  - number of sets of AI's in the rcv
                                    //       array (should be the same as the 
                                    //       number of DE's in the rcv layout)
-#ifdef ESMF_ENABLE_VM
       ESMC_newDELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
-#else
-      ESMC_DELayout *layout_rcv,   // in  - pointer to the rcv DELayout
-#endif
       int my_DE_snd,               // in  - my DE identifier in the DELayout 
                                    //       where I'm the sending Field
       ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
@@ -300,11 +278,7 @@ static int maxroutes = 10;
       int AI_snd_count,            // in  - number of sets of AI's in the snd
                                    //       array (should be the same as the
                                    //       number of DE's in the snd layout)
-#ifdef ESMF_ENABLE_VM
       ESMC_newDELayout *delayout_snd,   // in  - pointer to the snd DELayout 
-#else
-      ESMC_DELayout *layout_snd,   // in  - pointer to the snd DELayout 
-#endif
       ESMC_Logical *periodic) {    // in - if halo'ing, per/axis flag
 
 //
@@ -347,11 +321,7 @@ static int maxroutes = 10;
         ep->theroute = this; 
         ep->entrystatus = 1;
         ep->rank = rank; 
-#ifdef ESMF_ENABLE_VM
         ep->snd_delayout = delayout_snd;
-#else
-        ep->snd_layout = layout_snd;
-#endif
         ep->snd_DE = my_DE_snd; 
         ep->snd_AI_count = AI_snd_count; 
         if (AI_snd_count > 0) {
@@ -361,11 +331,7 @@ static int maxroutes = 10;
             memcpy(ep->snd_AI_exc, AI_snd_exc, bytes);
             memcpy(ep->snd_AI_tot, AI_snd_tot, bytes);
         }
-#ifdef ESMF_ENABLE_VM
         ep->rcv_delayout = delayout_rcv;
-#else
-        ep->rcv_layout = layout_rcv;
-#endif
         ep->rcv_DE = my_DE_rcv; 
         ep->rcv_AI_count = AI_rcv_count; 
         if (AI_rcv_count > 0) {
@@ -460,11 +426,7 @@ static int maxroutes = 10;
       int AI_rcv_count,            // in  - number of sets of AI's in the rcv
                                    //       array (should be the same as the 
                                    //       number of DE's in the rcv layout)
-#ifdef ESMF_ENABLE_VM
       ESMC_newDELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
-#else      
-      ESMC_DELayout *layout_rcv,   // in  - pointer to the rcv DELayout
-#endif
       int my_DE_snd,               // in  - DE identifier in the DELayout of
                                    //       the sending Field
       ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
@@ -476,11 +438,7 @@ static int maxroutes = 10;
       int AI_snd_count,            // in  - number of sets of AI's in the snd
                                    //       array (should be the same as the
                                    //       number of DE's in the snd layout)
-#ifdef ESMF_ENABLE_VM
       ESMC_newDELayout *delayout_snd,   // in  - pointer to the snd DELayout 
-#else
-      ESMC_DELayout *layout_snd,   // in  - pointer to the snd DELayout 
-#endif
       ESMC_Logical *periodic,      // in - if halo'ing, per/axis flag
       ESMC_Logical *hascachedroute,  // out - ESMF_TRUE, ESMF_FALSE
       ESMC_Route **route) {        // out - if true, cached route
@@ -506,13 +464,8 @@ static int maxroutes = 10;
         // see if we find a match.  try the simplest comparisons first.
         if (ep->entrystatus != 1) continue;    // make this a type, and flag
         if (rank != ep->rank) continue;
-#ifdef ESMF_ENABLE_VM
         if (delayout_snd != ep->snd_delayout) continue;
         if (delayout_rcv != ep->rcv_delayout) continue;
-#else
-        if (layout_snd != ep->snd_layout) continue;
-        if (layout_rcv != ep->rcv_layout) continue;
-#endif
         if (my_DE_snd != ep->snd_DE) continue; 
         if (my_DE_rcv != ep->rcv_DE) continue; 
         if (AI_snd_count != ep->snd_AI_count) continue; 
@@ -728,12 +681,8 @@ static int maxroutes = 10;
     char *srcptr, *rcvptr;
     int nbytes;
 
-#ifdef ESMF_ENABLE_VM
     rc = delayout->ESMC_newDELayoutGet(NULL, NULL, NULL, NULL, NULL, &mydeid,
-      NULL, NULL, NULL, NULL);
-#else    
-    rc = layout->ESMC_DELayoutGetDEID(&mydeid);
-#endif
+                                       NULL, NULL, NULL, NULL);
     rc = ct->ESMC_CommTableGetCount(&ccount);
     
     printf("ESMC_RouteRun: %p, %p\n", srcaddr, dstaddr);
@@ -871,14 +820,9 @@ static int maxroutes = 10;
            if(mydeid == theirdeid)
 	      rcvbuf = srcbufstart;
 	   else
-#ifdef ESMF_ENABLE_VM
               delayout->ESMC_newDELayoutCopyCopy((void **)srcbufstart, NULL,
                 (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes, 
                  mydeid, theirdeid, ESMF_TRUE);
-#else             
-              rc = layout->ESMC_DELayoutSendRecv(srcbufstart, rcvbufstart,
-                         srctcount, rcvtcount, theirdeid, theirdeid, dk);
-#endif
 
            // copy out of the recv buffer
 	   if(rcvtcount > 0) {
@@ -951,11 +895,7 @@ static int maxroutes = 10;
                                    //       DE's in the DELayout
       int *global_count,           // in  - array of global stride information
                                    //       in each dimension
-#ifdef ESMF_ENABLE_VM
       ESMC_newDELayout *delayout,       // in  - pointer to the DELayout 
-#else
-      ESMC_DELayout *layout,       // in  - pointer to the DELayout 
-#endif
       ESMC_Logical *periodic) {    // in  - array of flags, one per dim
 //
 // !DESCRIPTION:
@@ -981,12 +921,8 @@ static int maxroutes = 10;
 
     // Calculate the sending table.  If this DE is not part of the sending
     // TODO: this assumes a 2D layout?  (certainly < 3D)
-#ifdef ESMF_ENABLE_VM
         delayout->ESMC_newDELayoutGet(&decount, NULL, NULL, NULL, NULL, NULL,
-          NULL, NULL, nde, ESMF_MAXGRIDDIM);
-#else
-        layout->ESMC_DELayoutGetSize(&nde[0], &nde[1]);
-#endif
+                                      NULL, NULL, nde, ESMF_MAXGRIDDIM);
 
     // Calculate the sending table.
  
@@ -1007,21 +943,11 @@ static int maxroutes = 10;
                                    &my_XPcount);
 
     // loop over DE's from receiving layout to calculate send table
-#ifdef ESMF_ENABLE_VM
     // already obtained "decount" during last call
-#else
-    layout->ESMC_DELayoutGetNumDEs(&decount);
-#endif
     for (k=0; k<decount; k++) {
       their_de = k;
-#ifdef ESMF_ENABLE_VM
       delayout->ESMC_newDELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
-        NULL, NULL, NULL, NULL, NULL);
-#else      
-      layout->ESMC_DELayoutGetDE(their_de, &their_deid);
-      layout->ESMC_DELayoutGetDEPosition(their_deid, &their_DE_pos[0],
-                                        &their_DE_pos[1], &dummy);
-#endif
+                                      NULL, NULL, NULL, NULL, NULL);
       // get "their" AI out of the AI_tot array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_tot[their_de + j*AI_count];
@@ -1078,14 +1004,8 @@ static int maxroutes = 10;
     // loop over DE's from layout to calculate receive table
     for (k=0; k<decount; k++) {
       their_de = k;
-#ifdef ESMF_ENABLE_VM
       delayout->ESMC_newDELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
-        NULL, NULL, NULL, NULL, NULL);
-#else      
-      layout->ESMC_DELayoutGetDE(their_de, &their_deid);
-      layout->ESMC_DELayoutGetDEPosition(their_deid, &their_DE_pos[0],
-                                        &their_DE_pos[1], &dummy);
-#endif
+                                      NULL, NULL, NULL, NULL, NULL);
       // get "their" AI out of the AI_exc array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_exc[their_de + j*AI_count];
@@ -1135,15 +1055,9 @@ static int maxroutes = 10;
 
 
     // add this route to the cache table
-#ifdef ESMF_ENABLE_VM
         ESMC_RouteAddCache(rank, my_DE, AI_exc, AI_tot, AI_count, delayout, 
-                             my_DE, AI_exc, AI_tot, AI_count, delayout, 
-                             periodic);
-#else
-        ESMC_RouteAddCache(rank, my_DE, AI_exc, AI_tot, AI_count, layout, 
-                             my_DE, AI_exc, AI_tot, AI_count, layout, 
-                             periodic);
-#endif
+                           my_DE, AI_exc, AI_tot, AI_count, delayout, 
+                           periodic);
 
     return rc;
 
@@ -1180,11 +1094,7 @@ static int maxroutes = 10;
                                   //       Field
       int *dstGlobalCount,        // in  - array of global strides for each
                                   //       direction for the receiving Field
-#ifdef ESMF_ENABLE_VM
       ESMC_newDELayout *dstdeLayout,   // in  - pointer to the rcv DELayout
-#else
-      ESMC_DELayout *dstLayout,   // in  - pointer to the rcv DELayout
-#endif
       int srcMyDE,                // in  - DE identifier in the DELayout of
                                   //       the source Field
       ESMC_AxisIndex *srcCompAI,  // in  - array of axis indices for all DE's
@@ -1203,11 +1113,7 @@ static int maxroutes = 10;
                                   //       Field
       int *srcGlobalCount,        // in  - array of global strides for each
                                   //       direction for the source Field
-#ifdef ESMF_ENABLE_VM
       ESMC_newDELayout *srcdeLayout) { // in  - pointer to the src DELayout 
-#else
-      ESMC_DELayout *srcLayout) { // in  - pointer to the src DELayout 
-#endif
 //
 // !DESCRIPTION:
 //      Initializes a Route with send and receive RouteTables.
@@ -1252,24 +1158,15 @@ static int maxroutes = 10;
                                      NULL, &myXP, &myXPCount);
 
       // loop over DE's from receiving layout to calculate send table
-#ifdef ESMF_ENABLE_VM
       dstdeLayout->ESMC_newDELayoutGet(&theirDECount, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL, NULL, NULL);
-#else
-      dstLayout->ESMC_DELayoutGetNumDEs(&theirDECount);
-#endif
+                                       NULL, NULL, NULL, NULL, NULL);
       for (i=0; i<theirDECount; i++) {
           theirDE = i;
 
           // get the parent DE identifier for this DE in the rcv layout
-#ifdef ESMF_ENABLE_VM
           dstdeLayout->ESMC_newDELayoutGetDEMatch(theirDE, *delayout, NULL,
-            &theirDEParent, 1);
+                                                  &theirDEParent, 1);
           printf("Match1: %d, %d\n", theirDE, theirDEParent);
-#else
-          dstLayout->ESMC_DELayoutGetParentDEID(theirDE, layout, 
-                                                &theirDEParent);
-#endif
           //theirDEParent = theirDE;     // temporarily
           if (theirDEParent != theirDE) 
 	     cout << "theirDE = " << theirDE << ", parentDE = " 
@@ -1332,14 +1229,9 @@ static int maxroutes = 10;
           theirDE = i;
 
           // get the parent DE identifier for this DE in the src layout
-#ifdef ESMF_ENABLE_VM
           dstdeLayout->ESMC_newDELayoutGetDEMatch(theirDE, *delayout, NULL,
-            &theirDEParent, 1);
+                                                  &theirDEParent, 1);
           printf("Match2: %d, %d\n", theirDE, theirDEParent);
-#else
-          dstLayout->ESMC_DELayoutGetParentDEID(theirDE, layout, 
-                                                &theirDEParent);
-#endif
           //theirDEParent = theirDE;     // temporarily
           if (theirDEParent != theirDE) 
 	     cout << "theirDE = " << theirDE << ", parentDE = " 
@@ -1378,18 +1270,11 @@ static int maxroutes = 10;
     }
 
     // add this route to the cache table
-#ifdef ESMF_ENABLE_VM
     if (didsomething)
         ESMC_RouteAddCache(rank, 
                   dstMyDE, dstCompAI, dstTotalAI, dstAICount, dstdeLayout,
                   srcMyDE, srcCompAI, srcTotalAI, srcAICount, srcdeLayout,
                            NULL);
-#else
-            ESMC_RouteAddCache(rank, 
-                  dstMyDE, dstCompAI, dstTotalAI, dstAICount, dstLayout,
-                  srcMyDE, srcCompAI, srcTotalAI, srcAICount, srcLayout,
-                           NULL);
-#endif
 
     //printf("end of RoutePrecomputeRedist:\n");
     //this->ESMC_RoutePrint("");
@@ -1428,11 +1313,7 @@ static int maxroutes = 10;
                                    //       Field
       int *global_count_rcv,       // in  - array of global strides for each
                                    //       direction for the receiving Field
-#ifdef ESMF_ENABLE_VM
       ESMC_newDELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
-#else
-      ESMC_DELayout *layout_rcv,   // in  - pointer to the rcv DELayout
-#endif
       int my_DE_snd,               // in  - DE identifier in the DELayout of
                                    //       the sending Field
       ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
@@ -1450,11 +1331,7 @@ static int maxroutes = 10;
                                    //       Field
       int *global_count_snd,       // in  - array of global strides for each
                                    //       direction for the sending Field
-#ifdef ESMF_ENABLE_VM
       ESMC_newDELayout *delayout_snd) { // in  - pointer to the snd DELayout 
-#else
-      ESMC_DELayout *layout_snd) { // in  - pointer to the snd DELayout 
-#endif
 //
 // !DESCRIPTION:
 //      Initializes a Route with send and receive RouteTables.
@@ -1502,24 +1379,15 @@ static int maxroutes = 10;
                                      NULL, &my_XP, &my_XPcount);
 
       // loop over DE's from receiving layout to calculate send table
-#ifdef ESMF_ENABLE_VM
       delayout_rcv->ESMC_newDELayoutGet(&their_decount, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL, NULL, NULL);
-#else
-      layout_rcv->ESMC_DELayoutGetNumDEs(&their_decount);
-#endif
+                                        NULL, NULL, NULL, NULL, NULL);
       for (i=0; i<their_decount; i++) {
           their_de = i;
 
           // get the parent DE identifier for this DE in the rcv layout
-#ifdef ESMF_ENABLE_VM
           delayout_rcv->ESMC_newDELayoutGetDEMatch(their_de, *delayout, NULL,
-            &their_de_parent, 1);
+                                                   &their_de_parent, 1);
           printf("Match1: %d, %d\n", their_de, their_de_parent);
-#else
-          layout_rcv->ESMC_DELayoutGetParentDEID(their_de, layout, 
-                                                 &their_de_parent);
-#endif
           //their_de_parent = their_de;     // temporarily
           if (their_de_parent != their_de) 
 	     cout << "their_de = " << their_de << ", parent_de = " 
@@ -1583,14 +1451,9 @@ static int maxroutes = 10;
           their_de = i;
 
           // get the parent DE identifier for this DE in the snd layout
-#ifdef ESMF_ENABLE_VM
           delayout_snd->ESMC_newDELayoutGetDEMatch(their_de, *delayout, NULL,
-            &their_de_parent, 1);
+                                                   &their_de_parent, 1);
           printf("Match2: %d, %d\n", their_de, their_de_parent);
-#else
-          layout_snd->ESMC_DELayoutGetParentDEID(their_de, layout, 
-                                                 &their_de_parent);
-#endif
           //their_de_parent = their_de;     // temporarily
           if (their_de_parent != their_de) 
 	     cout << "their_de = " << their_de << ", parent_de = " 
@@ -1635,17 +1498,10 @@ static int maxroutes = 10;
 
     // add this route to the cache table
     if (didsomething)
-#ifdef ESMF_ENABLE_VM
         ESMC_RouteAddCache(rank, 
                  my_DE_rcv, AI_rcv_exc, AI_rcv_tot, AI_rcv_count, delayout_rcv,
                  my_DE_snd, AI_snd_exc, AI_snd_tot, AI_snd_count, delayout_snd,
                  NULL);
-#else
-        ESMC_RouteAddCache(rank, 
-                 my_DE_rcv, AI_rcv_exc, AI_rcv_tot, AI_rcv_count, layout_rcv,
-                 my_DE_snd, AI_snd_exc, AI_snd_tot, AI_snd_count, layout_snd,
-                 NULL);
-#endif
         
     //printf("end of RoutePrecomputeRegrid:\n");
     //this->ESMC_RoutePrint("");
@@ -1756,13 +1612,8 @@ static int maxroutes = 10;
     //ESMC_RoutePrint("");
  
     // add this route to the cache table
-#ifdef ESMF_ENABLE_VM
     ESMC_RouteAddCache(rank, my_DE, NULL, NULL, 0, delayout,
                              my_DE, NULL, NULL, 0, delayout, NULL);
-#else
-    ESMC_RouteAddCache(rank, my_DE, NULL, NULL, 0, layout,
-                             my_DE, NULL, NULL, 0, layout, NULL);
-#endif
 
     return rc;
 

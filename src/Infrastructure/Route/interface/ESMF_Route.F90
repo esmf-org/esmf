@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.49 2004/04/12 16:07:21 theurich Exp $
+! $Id: ESMF_Route.F90,v 1.50 2004/04/13 22:59:36 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,10 +34,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
-      use ESMF_DELayoutMod
-#ifdef ESMF_ENABLE_VM
       use ESMF_newDELayoutMod    ! ESMF layout class
-#endif
       use ESMF_LocalArrayMod
       use ESMF_XPacketMod
       implicit none
@@ -97,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.49 2004/04/12 16:07:21 theurich Exp $'
+      '$Id: ESMF_Route.F90,v 1.50 2004/04/13 22:59:36 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -135,21 +132,14 @@
 ! !IROUTINE: ESMF_RouteCreate - Create a new Route
 
 ! !INTERFACE:
-      function ESMF_RouteCreate(layout, rc &
-#ifdef ESMF_ENABLE_VM
-                 , delayout &
-#endif
-            )
+      function ESMF_RouteCreate(delayout, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Route) :: ESMF_RouteCreate
 !
 ! !ARGUMENTS:
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_newDELayout), intent(in) :: delayout
       integer, intent(out), optional :: rc               
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(in), optional :: delayout
-#endif
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Route} object and constructs its
@@ -157,7 +147,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[layout] 
+!     \item[delayout] 
 !          A Layout object which encompasses all DEs involved in the
 !          route operation.  This is the union of the layouts
 !          for the source and destination Fields.
@@ -185,11 +175,7 @@
         endif
 
         ! Call C++ create code
-#ifdef ESMF_ENABLE_VM
         call c_ESMC_RouteCreate(route, delayout, status)
-#else
-        call c_ESMC_RouteCreate(route, layout, status)
-#endif        
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route create error"
           return  
@@ -564,13 +550,9 @@
 
 ! !INTERFACE:
       subroutine ESMF_RouteGetCached(rank, &
-                 my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
-                 my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, &
-                 periodic, hascachedroute, route, rc &
-#ifdef ESMF_ENABLE_VM
-                 , delayout_dst, delayout_src &
-#endif
-                 )
+                 my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, dstDElayout, &
+                 my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, srcDElayout, &
+                 periodic, hascachedroute, route, rc)
 !
 ! !ARGUMENTS:
       integer, intent(in) :: rank
@@ -578,21 +560,16 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
       integer, intent(in) :: AI_dst_count
-      type(ESMF_DELayout), intent(in) :: layout_dst
+      type(ESMF_newDELayout), intent(in) :: dstDElayout
       integer, intent(in) :: my_DE_src
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
-      type(ESMF_DELayout), intent(in) :: layout_src
+      type(ESMF_newDELayout), intent(in) :: srcDElayout
       type(ESMF_Logical), dimension(:), intent(in) :: periodic
       logical, intent(out) :: hascachedroute
       type(ESMF_Route), intent(out) :: route
       integer, intent(out), optional :: rc            
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(in), optional :: delayout_dst
-      type(ESMF_newDELayout), intent(in), optional :: delayout_src
-#endif
-
 !
 ! !DESCRIPTION:
 !     Search for an appropriate precomputed Route.
@@ -660,17 +637,10 @@
         enddo
 
         ! Call C++  code
-#ifdef ESMF_ENABLE_VM
         call c_ESMC_RouteGetCached(rank, &
-               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, delayout_dst, &
-               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, delayout_src, &
+               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, dstDElayout, &
+               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, srcDElayout, &
                periodic, lcache, lroute, status)
-#else
-        call c_ESMC_RouteGetCached(rank, &
-                 my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
-                 my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, &
-                 periodic, lcache, lroute, status)
-#endif
 
         ! Translate AxisIndices back to  F90 from C++
         do j=1,rank
@@ -1061,11 +1031,7 @@
 ! !INTERFACE:
       subroutine ESMF_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
                                           AI_count, global_start, global_count, &
-                                          layout, periodic, rc &
-#ifdef ESMF_ENABLE_VM
-                                          , delayout &
-#endif
-                                          )
+                                          delayout, periodic, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -1076,12 +1042,9 @@
       integer, intent(in) :: AI_count
       integer, dimension(:,:), intent(in) :: global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: global_count
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_newDELayout), intent(in) :: delayout
       type(ESMF_Logical), intent(in) :: periodic(:)
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(in), optional :: delayout
-#endif
 
 !
 ! !DESCRIPTION:
@@ -1125,15 +1088,9 @@
         enddo
 
         ! Call C++  code
-#ifdef ESMF_ENABLE_VM
         call c_ESMC_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
                                         AI_count, global_start, global_count, &
                                         delayout, periodic, status)
-#else
-        call c_ESMC_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
-                                        AI_count, global_start, global_count, &
-                                        layout, periodic, status)
-#endif
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Precompute Halo error"
           ! don't return before adding 1 back to AIs
@@ -1160,14 +1117,10 @@
 ! !INTERFACE:
       subroutine ESMF_RoutePrecomputeRedist(route, rank, dstMyDE, dstCompAI, &
                                             dstTotalAI, dstGlobalStart, &
-                                            dstGlobalCount, dstLayout, &
+                                            dstGlobalCount, dstDElayout, &
                                             srcMyDE, srcCompAI, &
                                             srcTotalAI, srcGlobalStart, &
-                                            srcGlobalCount, srcLayout, rc &
-#ifdef ESMF_ENABLE_VM
-                                            , dstDelayout, srcDelayout &
-#endif
-                                            )
+                                            srcGlobalCount, srcDElayout, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -1177,17 +1130,14 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstTotalAI
       integer, dimension(:,:), intent(in) :: dstGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
-      type(ESMF_DELayout), intent(in) :: dstLayout
+      type(ESMF_newDELayout), intent(in) :: dstDElayout
       integer, intent(in) :: srcMyDE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcCompAI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcTotalAI
       integer, dimension(:,:), intent(in) :: srcGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
-      type(ESMF_DELayout), intent(in) :: srcLayout
+      type(ESMF_newDELayout), intent(in) :: srcDElayout
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(in), optional :: dstDelayout, srcDelayout
-#endif
 
 !
 ! !DESCRIPTION:
@@ -1242,23 +1192,13 @@
         enddo
 
         ! Call C++  code
-#ifdef ESMF_ENABLE_VM
         call c_ESMC_RoutePrecomputeRedist(route, rank, &
                                           dstMyDE, dstCompAI, dstTotalAI, &
                                           dstAICount, dstGlobalStart, &
-                                          dstGlobalCount, dstDelayout, &
+                                          dstGlobalCount, dstDElayout, &
                                           srcMyDE, srcCompAI, srcTotalAI, &
                                           srcAICount, srcGlobalStart, &
-                                          srcGlobalCount, srcDelayout, status)
-#else
-        call c_ESMC_RoutePrecomputeRedist(route, rank, &
-                                          dstMyDE, dstCompAI, dstTotalAI, &
-                                          dstAICount, dstGlobalStart, &
-                                          dstGlobalCount, dstLayout, &
-                                          srcMyDE, srcCompAI, srcTotalAI, &
-                                          srcAICount, srcGlobalStart, &
-                                          srcGlobalCount, srcLayout, status)
-#endif
+                                          srcGlobalCount, srcDElayout, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route PrecomputeRedist error"
           ! don't return before adding 1 back to AIs
@@ -1291,13 +1231,9 @@
 ! !INTERFACE:
       subroutine ESMF_RoutePrecomputeRegrid(route, rank, &
                my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
-               dst_global_start, dst_global_count, layout_dst, &
+               dst_global_start, dst_global_count, dstDElayout, &
                my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-               src_global_start, src_global_count, layout_src, rc &
-#ifdef ESMF_ENABLE_VM
-               , delayout_dst, delayout_src &
-#endif
-                                            )
+               src_global_start, src_global_count, srcDElayout, rc)
 
 
 ! !ARGUMENTS:
@@ -1309,19 +1245,15 @@
       integer, intent(in) :: AI_dst_count
       integer, dimension(:,:), intent(in) :: dst_global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_count
-      type(ESMF_DELayout), intent(in) :: layout_dst
+      type(ESMF_newDELayout), intent(in) :: dstDElayout
       integer, intent(in) :: my_DE_src
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
       integer, dimension(:,:), intent(in) :: src_global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
-      type(ESMF_DELayout), intent(in) :: layout_src
+      type(ESMF_newDELayout), intent(in) :: srcDElayout
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(in), optional :: delayout_dst, delayout_src
-#endif
-
 !
 ! !DESCRIPTION:
 !     Execute the communications a Route represents.
@@ -1370,19 +1302,11 @@
         enddo
 
         ! Call C++  code
-#ifdef ESMF_ENABLE_VM
         call c_ESMC_RoutePrecomputeRegrid(route, rank, &
            my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
-           dst_global_start, dst_global_count, delayout_dst, &
+           dst_global_start, dst_global_count, dstDElayout, &
            my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-           src_global_start, src_global_count, delayout_src, status)
-#else
-        call c_ESMC_RoutePrecomputeRegrid(route, rank, &
-           my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
-           dst_global_start, dst_global_count, layout_dst, &
-           my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-           src_global_start, src_global_count, layout_src, status)
-#endif
+           src_global_start, src_global_count, srcDElayout, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route PrecomputeRegrid error"
           ! don't return before adding 1 back to AIs

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.25 2004/04/09 19:55:35 theurich Exp $
+// $Id: ESMC_Route_F.C,v 1.26 2004/04/13 22:59:23 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,13 +21,7 @@
 #include <string.h>
 #include "ESMC.h"
 #include "ESMC_Base.h"
-
-#ifdef ESMF_ENABLE_VM
 #include "ESMC_newDELayout.h"
-#else
-#include "ESMC_DELayout.h"
-#endif
-
 #include "ESMC_LocalArray.h"
 #include "ESMC_Route.h"
 //------------------------------------------------------------------------------
@@ -45,12 +39,7 @@ extern "C" {
 
        // keep these for deep classes, or see init below for shallow
        void FTN(c_esmc_routecreate)(ESMC_Route **ptr, 
-#ifdef ESMF_ENABLE_VM
-                ESMC_newDELayout **layout,
-#else
-                ESMC_DELayout **layout, 
-#endif
-                                                   int *status) {
+                                    ESMC_newDELayout **layout, int *status) {
            *ptr = ESMC_RouteCreate(*layout, status);
        }
 
@@ -114,20 +103,12 @@ extern "C" {
                      ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
                      int *AI_rcv_count, int *global_start_rcv,
                      int *global_count_rcv, 
-#ifdef ESMF_ENABLE_VM
                      ESMC_newDELayout **layout_rcv,
-#else
-                     ESMC_DELayout **layout_rcv,
-#endif
                      int *my_DE_snd, 
                      ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot, 
                      int *AI_snd_count, int *global_start_snd,
                      int *global_count_snd, 
-#ifdef ESMF_ENABLE_VM
                      ESMC_newDELayout **layout_snd,
-#else
-                     ESMC_DELayout **layout_snd, 
-#endif
                      int *status) {
 
            *status = (*ptr)->ESMC_RoutePrecomputeRegrid(*rank, 
@@ -143,19 +124,11 @@ extern "C" {
                      int *dstMyDE, ESMC_AxisIndex *dstCompAI,
                      ESMC_AxisIndex *dstTotalAI, int *dstAICount,
                      int *dstGlobalStart, int *dstGlobalCount,
-#ifdef ESMF_ENABLE_VM
                      ESMC_newDELayout **dstLayout,
-#else
-                     ESMC_DELayout **dstLayout,
-#endif
                      int *srcMyDE, ESMC_AxisIndex *srcCompAI,
                      ESMC_AxisIndex *srcTotalAI, int *srcAICount,
                      int *srcGlobalStart, int *srcGlobalCount,
-#ifdef ESMF_ENABLE_VM
                      ESMC_newDELayout **srcLayout, 
-#else
-                     ESMC_DELayout **srcLayout, 
-#endif
                      int *status) {
 
            *status = (*ptr)->ESMC_RoutePrecomputeRedist(*rank, 
@@ -168,11 +141,7 @@ extern "C" {
        void FTN(c_esmc_routeprecomputehalo)(ESMC_Route **ptr, int *rank, 
                   int *my_DE, ESMC_AxisIndex *AI_exc, ESMC_AxisIndex *AI_tot,
                   int *AI_count, int *global_start, int *global_count,
-#ifdef ESMF_ENABLE_VM
                   ESMC_newDELayout **layout, 
-#else
-                  ESMC_DELayout **layout, 
-#endif
                   ESMC_Logical *periodic, int *status) {
 
            *status = (*ptr)->ESMC_RoutePrecomputeHalo(*rank, *my_DE, AI_exc,
@@ -192,19 +161,11 @@ extern "C" {
                 int *my_DE_rcv, 
                 ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot, 
                 int *AI_rcv_count, 
-#ifdef ESMF_ENABLE_VM
                 ESMC_newDELayout **layout_rcv,
-#else
-                ESMC_DELayout **layout_rcv,
-#endif
                 int *my_DE_snd, 
                 ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot, 
                 int *AI_snd_count, 
-#ifdef ESMF_ENABLE_VM
                 ESMC_newDELayout **layout_snd,
-#else
-                ESMC_DELayout **layout_snd,
-#endif
                 ESMC_Logical *periodic, 
                 ESMC_Logical *hascachedroute, ESMC_Route **route, int *status) {
 

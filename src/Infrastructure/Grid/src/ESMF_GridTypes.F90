@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.22 2004/04/09 17:44:43 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.23 2004/04/13 22:57:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
       use ESMF_IOSpecMod      ! ESMF I/O class
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_DataMapMod     ! ESMF data map class
-      use ESMF_DELayoutMod    ! ESMF layout class
+      use ESMF_newDELayoutMod ! ESMF layout class
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_PhysCoordMod   ! ESMF physical coord class
       use ESMF_PhysGridMod    ! ESMF physical grid class
@@ -430,7 +430,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.22 2004/04/09 17:44:43 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.23 2004/04/13 22:57:54 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -567,11 +567,11 @@
 ! !IROUTINE: ESMF_GridGetDELayout - Get pointer to a DELayout from a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDELayout(grid, layout, rc)
+      subroutine ESMF_GridGetDELayout(grid, delayout, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: delayout
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -581,7 +581,7 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[layout]
+!     \item[delayout]
 !          Pointer to the {\tt ESMF\_DELayout} corresponding to the
 !          {\tt ESMF\_Grid}.
 !     \item[{[rc]}]
@@ -605,7 +605,7 @@
       ! call DistGrid method to retrieve information otherwise not available
       ! to the application level -- does not matter which one since they all share
       ! the same layout    !TODO: move layout to Grid class?
-      call ESMF_DistGridGetDELayout(grid%ptr%distgrids(1)%ptr, layout, status)
+      call ESMF_DistGridGetDELayout(grid%ptr%distgrids(1)%ptr, delayout, status)
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDELayout: distgrid get delayout"
         return

@@ -40,10 +40,7 @@
       use ESMF_IOSpecMod      ! ESMF I/O class
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_DataMapMod     ! ESMF data map class
-      use ESMF_DELayoutMod    ! ESMF layout class
-#ifdef ESMF_ENABLE_VM
-      use ESMF_newDELayoutMod    ! ESMF layout class
-#endif
+      use ESMF_newDELayoutMod ! ESMF layout class
       use ESMF_ArrayMod
       use ESMF_ArrayCreateMod
       use ESMF_ArrayGetMod
@@ -104,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.57 2004/04/09 22:34:08 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.58 2004/04/13 22:58:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -237,13 +234,9 @@
                                              horzCoordSystem, vertCoordSystem, &
                                              dimNames, dimUnits, &
                                              coordOrder, coordIndex, periodic, &
-                                             layout, decompIds, &
+                                             delayout, decompIds, &
                                              countsPerDEDecomp1, countsPerDEDecomp2, &
-                                             name, rc &
-#ifdef ESMF_ENABLE_VM
-                                             , delayout &
-#endif
-                                             )
+                                             name, rc)
                                              
 !
 ! !RETURN VALUE:
@@ -267,15 +260,12 @@
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
       type(ESMF_CoordIndex), intent(in), optional :: coordIndex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
-      type(ESMF_DELayout), intent(in), optional :: layout
+      type(ESMF_newDELayout), intent(in), optional :: delayout
       integer, dimension(:), intent(in), optional :: decompIds
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(in), optional :: delayout
-#endif
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
@@ -326,7 +316,7 @@
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
-!     \item[{[layout]}]
+!     \item[{[delayout]}]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[decompIds]}]
 !          Identifier for which Grid axes are decomposed.
@@ -385,16 +375,12 @@
       endif
 
       ! if layout information available, call grid distribute method
-      if (present(layout)) then
-        call ESMF_LRGridDistribute(grid, layout, &
+      if (present(delayout)) then
+        call ESMF_LRGridDistribute(grid, delayout, &
                                    countsPerDEDecomp1=countsPerDEDecomp1, &
                                    countsPerDEDecomp2=countsPerDEDecomp2, &
                                    decompIds=decompIds, name=name, &
-                                   rc=status &
-#ifdef ESMF_ENABLE_VM
-                                   , delayout=delayout &
-#endif
-                                   )
+                                   rc=status)
         if (status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridCreateLogRectUniform: Grid distribute"
           return
@@ -420,13 +406,9 @@
                                       horzCoordSystem, vertCoordSystem, &
                                       dimNames, dimUnits, &
                                       coordOrder, coordIndex, periodic, &
-                                      layout, decompIds, &
+                                      delayout, decompIds, &
                                       countsPerDEDecomp1, countsPerDEDecomp2, &
-                                      name, rc &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout &
-#endif
-                                      )
+                                      name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateLogRect
@@ -453,15 +435,12 @@
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
       type(ESMF_CoordIndex), intent(in), optional :: coordIndex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
-      type(ESMF_DELayout), intent(in), optional :: layout
+      type(ESMF_newDELayout), intent(in), optional :: delayout
       integer, dimension(dimCount), intent(in), optional :: decompIds
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(in), optional :: delayout
-#endif
 
 !
 ! !DESCRIPTION:
@@ -521,7 +500,7 @@
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
-!     \item[{[layout]}]
+!     \item[{[delayout]}]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[decompIds]}]
 !          Identifier for which Grid axes are decomposed.
@@ -583,16 +562,12 @@
       endif
 
       ! if layout information available, call grid distribute method
-      if (present(layout)) then
-        call ESMF_LRGridDistribute(grid, layout, &
+      if (present(delayout)) then
+        call ESMF_LRGridDistribute(grid, delayout, &
                                    countsPerDEDecomp1=countsPerDEDecomp1, &
                                    countsPerDEDecomp2=countsPerDEDecomp2, &
                                    decompIds=decompIds, name=name, &
-                                   rc=status &
-#ifdef ESMF_ENABLE_VM
-                                   , delayout=delayout &
-#endif
-                                   )
+                                   rc=status)
         if (status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridCreateLogRect: Grid distribute"
           return
@@ -1546,25 +1521,18 @@
 ! !IROUTINE: ESMF_LRGridDistribute - Distribute a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridDistribute(grid, layout, &
+      subroutine ESMF_LRGridDistribute(grid, delayout, &
                                        countsPerDEDecomp1, countsPerDEDecomp2, &
-                                       decompIds, name, rc &
-#ifdef ESMF_ENABLE_VM
-                                       , delayout &
-#endif
-                                       )
+                                       decompIds, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_newDELayout), intent(in) :: delayout
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
       integer, dimension(:), intent(in), optional :: decompIds
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM
-      type(ESMF_newDELayout), intent(in), optional :: delayout
-#endif
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
@@ -1578,7 +1546,7 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid}
-!     \item[layout]
+!     \item[delayout]
 !         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[countsPerDEDecomp1]}]
 !          Array of number of grid increments per DE in the first decomposition axis.
@@ -1600,7 +1568,7 @@
       character(len=ESMF_MAXSTR) :: distGridName, physGridName
       character(len=ESMF_MAXSTR), dimension(:), allocatable :: dimNames, dimUnits
       integer :: distGridId, physGridId, nDEs(0:2)
-      integer :: i, dimCount, dimCountGrid, size
+      integer :: i, dimCount, dimCountGrid, size, ndim
       integer, dimension(:), allocatable :: decompIdsUse, counts
       integer, dimension(:), allocatable :: countsPerDEDecomp1Use, &
                                             countsPerDEDecomp2Use
@@ -1609,14 +1577,10 @@
       real(ESMF_KIND_R8) :: delta
       real(ESMF_KIND_R8), dimension(:), allocatable :: min, max
       real(ESMF_KIND_R8), dimension(:), pointer :: coord1, coord2, coord3
+      type(ESMF_Logical):: otoFlag, lrFlag
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_LocalArray), dimension(:), pointer :: coords
       type(ESMF_RelLoc) :: relloc
-
-#ifdef ESMF_ENABLE_VM
-      integer:: ndim
-      type(ESMF_Logical):: otoFlag, lrFlag
-#endif
 
       ! Initialize return code
       status = ESMF_SUCCESS
@@ -1626,15 +1590,12 @@
         rc = ESMF_FAILURE
       endif
 
-#ifdef ESMF_ENABLE_VM
-#else
       ! validate the layout before going any furthe
-      call ESMF_DELayoutValidate(layout, rc=status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_LogRectGridDistribute: bad layout, cannot distribute grid"
-          return
-      endif
-#endif
+  !jw    call ESMF_newDELayoutValidate(delayout, rc=status)
+  !jw    if (status .ne. ESMF_SUCCESS) then
+  !jw        print *, "ESMF_LogRectGridDistribute: bad delayout, cannot distribute grid"
+  !jw        return
+  !jw    endif
       
       ! Extract some information from the Grid
       dimCount = grid%dimCount
@@ -1700,7 +1661,6 @@
         enddo
       endif
 
-#ifdef ESMF_ENABLE_VM
       call ESMF_newDELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
         logRectFlag=lrFlag, rc=status)
       if (otoFlag /= ESMF_TRUE) stop    ! ensure this is 1-to-1 layout
@@ -1711,11 +1671,6 @@
       nDEs(2) = nDEs(1)
       nDEs(1) = nDEs(0)
       nDEs(0) = 1
-      print *, 'newDELayout: ', nDEs(0), nDEs(1), nDEs(2)
-#else
-      nDEs(0) = 1
-      call ESMF_DELayoutGetSize(layout, nDEs(1), nDEs(2), status)
-#endif      
 
       ! if there is an axis to decompose, either grab the specfied countsPerDE
       ! or parse the global count
@@ -1726,12 +1681,7 @@
           if (present(countsPerDEDecomp1)) then
             countsPerDEDecomp1Use = countsPerDEDecomp1
           else
-#ifdef ESMF_ENABLE_VM
             call ESMF_LRGridDecompose(nDEs(1), counts(i), countsPerDEDecomp1Use)
-#else
-            call ESMF_DELayoutParse(layout, 1, counts(i), &
-                                    countsPerDEDecomp1Use, rc)
-#endif                                    
           endif
         endif
         if (decompIdsUse(i).eq.2) then
@@ -1740,12 +1690,7 @@
           if (present(countsPerDEDecomp2)) then
             countsPerDEDecomp2Use = countsPerDEDecomp2
           else
-#ifdef ESMF_ENABLE_VM
             call ESMF_LRGridDecompose(nDEs(2), counts(i), countsPerDEDecomp2Use)
-#else
-            call ESMF_DELayoutParse(layout, 2, counts(i), &
-                                    countsPerDEDecomp2Use, rc)
-#endif
           endif
         endif
       enddo
@@ -1794,14 +1739,10 @@
       physGridName = 'cell_center'
       relloc = ESMF_CELL_CENTER
       call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                  layout, decompIdsUse(1:2), periodic, &
+                                  delayout, decompIdsUse(1:2), periodic, &
                                   countsPerDEDim1=countsPerDE1, &
                                   countsPerDEDim2=countsPerDE2, &
-                                  distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                  , delayout=delayout &
-#endif
-                                  )
+                                  distGridName=distGridName, rc=status)
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
         return
@@ -1832,14 +1773,10 @@
           physGridName = 'cell_necorner'
           relloc = ESMF_CELL_NECORNER
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                  distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                  , delayout=delayout &
-#endif
-                                  )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -1862,14 +1799,10 @@
           physGridName = 'cell_swcorner'
           relloc = ESMF_CELL_SWCORNER
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -1892,14 +1825,10 @@
           physGridName = 'cell_secorner'
           relloc = ESMF_CELL_SECORNER
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -1922,14 +1851,10 @@
           physGridName = 'cell_nwcorner'
           relloc = ESMF_CELL_NWCORNER
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -1953,14 +1878,10 @@
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -1980,14 +1901,10 @@
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -2011,14 +1928,10 @@
           physGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -2038,14 +1951,10 @@
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -2069,14 +1978,10 @@
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -2096,14 +2001,10 @@
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -2127,14 +2028,10 @@
           physGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -2154,14 +2051,10 @@
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, dimCountGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
+                                      delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                      , delayout=delayout &
-#endif
-                                      )
+                                      distGridName=distGridName, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
@@ -2186,14 +2079,10 @@
         physGridName = 'vertical center'
         relloc = ESMF_CELL_CELL    ! TODO: right relloc?
         call ESMF_LRGridAddDistGrid(grid, distGridId, 1, counts(3:3), &
-                                    layout, decompIdsUse(3:3), &
+                                    delayout, decompIdsUse(3:3), &
                                     periodic(3:3), &
                                     countsPerDEDim1=countsPerDE3, &
-                                    distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                    , delayout=delayout &
-#endif
-                                    )
+                                    distGridName=distGridName, rc=status)
         if (status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
           return
@@ -2219,14 +2108,10 @@
             physGridName = 'vertical top face'
             relloc = ESMF_CELL_TOPFACE
             call ESMF_LRGridAddDistGrid(grid, distGridId, 1, counts(3:3), &
-                                        layout, decompIdsUse(3:3), &
+                                        delayout, decompIdsUse(3:3), &
                                         periodic(3:3), &
                                         countsPerDEDim1=countsPerDE3, &
-                                        distGridName=distGridName, rc=status &
-#ifdef ESMF_ENABLE_VM
-                                        , delayout=delayout &
-#endif 
-                                        )
+                                        distGridName=distGridName, rc=status)
             if (status .NE. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
               return
@@ -2373,21 +2258,17 @@
 
 ! !INTERFACE:
       subroutine ESMF_LRGridAddDistGrid(grid, distGridId, dimCount, counts, &
-                                        layout, decompIds, periodic, &
+                                        delayout, decompIds, periodic, &
                                         coversDomain, &
                                         countsPerDEDim1, countsPerDEDim2, &
-                                        distGridName, rc &
-#ifdef ESMF_ENABLE_VM
-                                        , delayout &
-#endif
-                                        )
+                                        distGridName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), target :: grid
       integer, intent(out) :: distGridId
       integer, intent(in) :: dimCount 
       integer, dimension(dimCount), intent(in) :: counts
-      type (ESMF_DELayout), intent(in) :: layout
+      type (ESMF_newDELayout), intent(in) :: delayout
       integer, dimension(dimCount), intent(in), optional :: decompIds
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: periodic
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: &
@@ -2396,9 +2277,6 @@
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
       character (len=*), intent(in), optional :: distGridName
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM
-      type (ESMF_newDELayout), intent(in), optional :: delayout
-#endif
 
 !
 ! !DESCRIPTION:
@@ -2414,7 +2292,7 @@
 !          Number of grid dimensions.
 !     \item[counts]
 !          Array of number of computational cells in each direction.
-!     \item[layout]
+!     \item[delayout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
 !          Identifier for which Grid axes are decomposed.
@@ -2453,16 +2331,12 @@
 
       ! Create the DistGrid
       distGrid = ESMF_DistGridCreate(dimCount=dimCount, counts=counts, &
-                                     layout=layout, decompIds=decompIds, &
+                                     delayout=delayout, decompIds=decompIds, &
                                      periodic=periodic, &
                                      coversDomain=coversDomain, &
                                      countsPerDEDim1=countsPerDEDim1, &
                                      countsPerDEDim2=countsPerDEDim2, &
-                                     rc=status &
-#ifdef ESMF_ENABLE_VM
-                                     , delayout=delayout &
-#endif
-                                     )
+                                     rc=status)
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridAddDistGrid: Distgrid create"
         return
@@ -2542,6 +2416,7 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       integer :: i, j, i1, i2, j1, j2, gridBoundWidth, myDE(2), myDEDecomp(0:2)
+      integer :: localDe, coord(2)
       integer, dimension(dimCount) :: counts, compCount, localStart
       integer, dimension(:), allocatable :: cellType1, cellType2
       character(len=ESMF_MAXSTR), dimension(dimCount) :: coordNames, coordUnits
@@ -2550,17 +2425,10 @@
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse1, coordUse2
       type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_CoordType), dimension(dimCount) :: coordType
-#ifdef ESMF_ENABLE_VM
       type(ESMF_newDELayout) :: delayout
-#else
-      type(ESMF_DELayout) :: layout
-#endif      
       type(ESMF_Grid) :: gridp
       type(ESMF_PhysGrid) :: physGrid
       type(ESMF_PhysCoord) :: tempCoord
-#ifdef ESMF_ENABLE_VM
-      integer :: localDe, coord(2)
-#endif
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -2575,27 +2443,12 @@
 
       ! figure out the position of myDE to get local counts
       gridp%ptr => grid
-#ifdef ESMF_ENABLE_VM
       call ESMF_LRGridGet(gridp, delayout=delayout)
       call ESMF_newDELayoutGet(delayout, localDe=localDe, rc=status)
       call ESMF_newDELayoutGetDE(delayout, de=localDe, coord=coord, rc=status)
       myDEDecomp(0) = 1
       myDEDecomp(1) = coord(1) + 1
       myDEDecomp(2) = coord(2) + 1
-#else
-      call ESMF_GridGetDELayout(gridp, layout, status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGrid: get delayout"
-        return
-      endif
-      myDEDecomp(0) = 1
-      call ESMF_DELayoutGetDEPosition(layout, myDEDecomp(1), myDEDecomp(2), &
-                                      status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGrid: delayout get position"
-        return
-      endif
-#endif      
 
       ! print *, 'myDEDecomp: ', myDEDecomp
      
@@ -2836,7 +2689,7 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: i, i1, i2, gridBoundWidth, myDE(2)
+      integer :: i, i1, i2, gridBoundWidth, myDE(0:2)
       character(len=ESMF_MAXSTR) :: coordName, coordUnit
       logical :: coordAligned, coordEqualSpaced, coordCyclic
       integer :: count, compCount, localStart
@@ -2845,7 +2698,7 @@
       real(ESMF_KIND_R8) :: localMinCoord, localMaxCoord
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse
       type(ESMF_CoordType) :: coordType
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: delayout
       type(ESMF_PhysCoord) :: tempCoord
       type(ESMF_Grid) :: gridp
       type(ESMF_PhysGrid) :: physGrid
@@ -2866,16 +2719,20 @@
 ! gjt: I took this out because it seems that it is not used...
       ! figure out the position of myDE to get local counts
       gridp%ptr => grid
-      call ESMF_GridGetDELayout(gridp, layout, status)
+      call ESMF_GridGetDELayout(gridp, delayout, status)
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridAddPhysGrid: get delayout"
         return
       endif
-      call ESMF_DELayoutGetDEPosition(layout, myDE(1), myDE(2), status)
+      call ESMF_newDELayoutGet(layout, deCountPerDim=myDE, status)
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridAddPhysGrid: delayout get position"
         return
       endif
+     ! TODO: make Fortran interface get come back in F90 style
+      nDEs(2) = nDEs(1)                        
+      nDEs(1) = nDEs(0)
+      nDEs(0) = 1
 #endif
 
       localMinCoord = 0.0
@@ -3355,9 +3212,7 @@
       real(ESMF_KIND_R8), dimension(3) :: minLCPDUse, maxLCPDUse
       type(ESMF_AxisIndex), dimension(3) :: globalAIPerDimUse
       type(ESMF_PhysCoord) :: coord
-#ifdef ESMF_ENABLE_VM
       type(ESMF_newDELayout) :: delayout
-#endif
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -3424,12 +3279,8 @@
       ! use DELayout call instead of DistGrid to get myDE to avoid zero-based
       ! vs. 1-based issues.  note: layout the same for all distgrids, so use 1
       if (present(myDE)) then
-#ifdef ESMF_ENABLE_VM
         call ESMF_LRGridGet(grid, delayout=delayout)
-        call ESMF_newDELayoutGet(delayout, localDe=myDE, rc=status)
-#else
-        call ESMF_DELayoutGetDEid(grid%ptr%distgrids(1)%ptr%layout, myDE, status) 
-#endif
+        call ESMF_newDELayoutGet(delayout, localDE=myDE, rc=status)
       endif
 
       ! make DistGrid calls first
@@ -4664,11 +4515,8 @@
                                 coordOrder, dimCount, minGlobalCoordPerDim, &
                                 maxGlobalCoordPerDim, globalCellCountPerDim, &
                                 globalStartPerDEPerDim, maxLocalCellCountPerDim, &
-                                cellCountPerDEPerDim, periodic, name, rc &
-#ifdef ESMF_ENABLE_VM                                
-                                , delayout &
-#endif
-                                )
+                                cellCountPerDEPerDim, periodic, delayout, &
+                                name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4691,11 +4539,9 @@
       integer, intent(out), dimension(:), optional :: maxLocalCellCountPerDim
       integer, intent(out), dimension(:,:), optional :: cellCountPerDEPerDim
       type (ESMF_Logical), intent(out), optional :: periodic(:)
+      type(ESMF_newDELayout), intent(out), optional:: delayout
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
-#ifdef ESMF_ENABLE_VM                                
-      type(ESMF_newDELayout), intent(out), optional:: delayout
-#endif
 !
 ! !DESCRIPTION:
 !     This version gets a variety of information about a {\tt ESMF\_Grid}, depending
@@ -4976,11 +4822,9 @@
         endif
       endif
 
-#ifdef ESMF_ENABLE_VM
       if (present(delayout)) then
         call ESMF_DistGridGet(gridp%distgrids(1), delayout=delayout, rc=status)
       endif
-#endif
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -6305,11 +6149,6 @@
 !      end subroutine ESMF_LRGridSearchPoint
 !
 !------------------------------------------------------------------------------
-
-
-#ifdef ESMF_ENABLE_VM
-
-!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_LRGridDecompose - 
 
@@ -6353,6 +6192,5 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridDecompose
-#endif
       
-       end module ESMF_LogRectGridMod
+      end module ESMF_LogRectGridMod

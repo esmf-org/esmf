@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.37 2004/04/09 17:01:26 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.38 2004/04/13 22:58:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod       ! ESMF base   class
-      use ESMF_DELayoutMod
+      use ESMF_newDELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_DataMapMod
       use ESMF_ArrayMod      ! ESMF array  class
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.37 2004/04/09 17:01:26 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.38 2004/04/13 22:58:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -390,7 +390,7 @@
       type(ESMF_AxisIndex), dimension(:), allocatable :: myAI, myArrayAI, &
                                                          myArrayLocalAI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI, allLocalAI
-      type(ESMF_DELayout) :: srcDELayout
+      type(ESMF_newDELayout) :: srcDELayout
       type(ESMF_DomainList) :: sendDomainList
       type(ESMF_RelLoc) :: horzRelLoc
       type(ESMF_Route) :: route
@@ -413,9 +413,9 @@
                  "returned failure"
         return
       endif
-      call ESMF_DELayoutGetDEID(srcDELayout, myDE, status)
+      call ESMF_newDELayoutGet(srcDELayout, localDE=myDE, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridRouteConstruct: DELayoutGetDEID ", &
+        print *, "ERROR in RegridRouteConstruct: DELayoutGet ", &
                  "returned failure"
         return
       endif
@@ -505,7 +505,7 @@
         enddo
 
       ! recvDomainList next
-        call ESMF_DELayoutGetNumDEs(srcDELayout, nDEs, status)
+        call ESMF_newDELayoutGet(srcDELayout, deCount=nDEs, status)
         allocate(allAI(nDEs,dimCount))
         allocate(allLocalAI(nDEs,dimCount))
         if (totalUse) then

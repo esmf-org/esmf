@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.63 2004/04/09 16:58:12 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.64 2004/04/13 22:58:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 ! !USES:
       use ESMF_BaseMod         ! ESMF base   class
       use ESMF_DataMapMod      ! ESMF datamap class
-      use ESMF_DELayoutMod     ! ESMF DE layout class
+      use ESMF_newDELayoutMod  ! ESMF DE layout class
       use ESMF_ArrayMod        ! ESMF array  class
       use ESMF_ArrayGetMod     ! ESMF array  class
       use ESMF_DistGridMod     ! ESMF distributed grid class
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.63 2004/04/09 16:58:12 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.64 2004/04/13 22:58:25 jwolfe Exp $'
 
 !==============================================================================
 
@@ -868,7 +868,7 @@
 !BOP
 ! !INTERFACE:
       subroutine ESMF_ArrayRegridStore(srcarray, srcgrid, srcdatamap, &
-                                       dstgrid, dstdatamap, parentlayout, &
+                                       dstgrid, dstdatamap, parentDElayout, &
                                        routehandle, regridtype, &
                                        srcmask, dstmask, rc) 
 !
@@ -878,7 +878,7 @@
       type(ESMF_DataMap), intent(in) :: srcdatamap
       type(ESMF_Grid), intent(inout) :: dstgrid
       type(ESMF_DataMap), intent(in) :: dstdatamap
-      type(ESMF_DELayout) :: parentlayout
+      type(ESMF_newDELayout) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(in), optional :: regridtype
       type(ESMF_Mask), intent(in), optional :: srcmask
@@ -903,8 +903,8 @@
 !     \item [dstdatamap]
 !           {\tt ESMF\_DataMap} which describes how the array should map to
 !           the specified destination grid.
-!     \item [parentlayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s,
+!     \item [parentDElayout]
+!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s,
 !           most commonly the layout
 !           of the Coupler if the regridding is inter-component, but could
 !           also be the individual layout for a component if the

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.136 2004/03/26 20:34:21 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.137 2004/04/13 22:56:56 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.136 2004/03/26 20:34:21 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.137 2004/04/13 22:56:56 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2975,7 +2975,7 @@
         logical :: rcpresent
         type(ESMF_Array) :: outarray
         type(ESMF_Grid) :: grid
-        type(ESMF_DELayout) :: layout
+        type(ESMF_newDELayout) :: delayout
         character(len=ESMF_MAXSTR) :: filename
 
 
@@ -3004,8 +3004,8 @@
 
         ! Collect results on DE 0 and output to a file
         call ESMF_FieldGet(field, grid=grid, rc=status)
-        call ESMF_GridGetDELayout(grid, layout, rc=status)
-        call ESMF_DELayoutGetDEID(layout, de_id, status)
+        call ESMF_GridGetDELayout(grid, delayout, rc=status)
+        call ESMF_newDELayoutGet(delayout, localde=de_id, status)
 
         ! Output to file
         call ESMF_ArrayAllGather(field%ftypep%localfield%localdata, &
@@ -3723,7 +3723,7 @@
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
-      type(ESMF_DELayout) :: parentlayout, srclayout, dstlayout
+      type(ESMF_newDELayout) :: parentDelayout, srcDelayout, dstDelayout
       type(ESMF_FieldType) :: stypep, dtypep      ! field type info
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
@@ -3746,8 +3746,8 @@
       !                                           DEs of the coupler layout and a
       !                                           different method for determining
       !                                           if my_DE is part of a layout
-      call ESMF_GridGetDELayout(stypep%grid, parentlayout, status)
-      call ESMF_DELayoutGetDEID(parentlayout, my_DE, status)
+      call ESMF_GridGetDELayout(stypep%grid, parentDelayout, status)
+      call ESMF_newDELayoutGet(parentDelayout, localDe=my_DE, status)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -3759,13 +3759,13 @@
       !  in this communication.
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
+      call ESMF_GridGetDELayout(stypep%grid, srcDelayout, status)
+  !jw    call ESMF_DELayoutGetDEExists(parentDelayout, my_DE, srcDelayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE)
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
         ! don't ask for our de number if this de isn't part of the layout
-        call ESMF_DELayoutGetDEID(srclayout, my_src_DE, status)
+        call ESMF_newDELayoutGet(srcDelayout, localDe=my_src_DE, status)
         call ESMF_GridGet(stypep%grid, dimCount=gridrank, rc=status)
         call ESMF_FieldGetRelLoc(srcField, horzRelLoc, vertRelLoc, rc)
         call ESMF_GridGetDE(stypep%grid, horzRelLoc=horzRelLoc, &
@@ -3774,13 +3774,13 @@
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
+      call ESMF_GridGetDELayout(dtypep%grid, dstDelayout, status)
+   !jw   call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE)
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
         ! don't ask for our de number if this de isn't part of the layout
-        call ESMF_DELayoutGetDEID(dstlayout, my_dst_DE, status)
+        call ESMF_newDELayoutGet(dstDelayout, localDe=my_dst_DE, status)
       endif
 
       ! if neither are true this DE cannot be involved in the communication
