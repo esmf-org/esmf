@@ -1,15 +1,15 @@
-# $Id: makefile,v 1.2 2001/11/28 18:30:19 dneckels Exp $ 
+# $Id: makefile,v 1.3 2002/10/22 22:15:05 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    =
 FFLAGS    =
-SOURCEC	  = ESMC_Machine.c ESMC_MachineF.c
-SOURCEF	  = ESMF_MachineMod.F
-SOURCEH	  = ESMC_Machine.h
+SOURCEC	  = 
+SOURCEF	  = 
+SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
-MANSEC	  = Timeobj
+MANSEC	  = Machineobj
 LIBBASE	  = libesmf
 DIRS	  = doc
 LOCDIR	  = src/Infrastructure/Machine/
