@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/03/26 18:02:03 nscollins Exp $ 
+# $Id: makefile,v 1.2 2003/03/28 16:35:21 nscollins Exp $ 
 
 ALL:  tests
 
@@ -22,7 +22,7 @@ TESTS_RUN     = RUN_ESMF_BaseUTest \
 		RUN_ESMF_StringTest
 
 TESTS_RUN_UNI = RUN_ESMF_BaseUTestUNI \
-		RUN_ESMF_StringTest
+		RUN_ESMF_StringTestUNI
 
 TESTS_RM      = ESMF_BaseUTest.rm \
 		ESMF_StringTest.rm
