@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.34 2003/09/05 19:38:50 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.35 2003/09/05 21:13:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.34 2003/09/05 19:38:50 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.35 2003/09/05 21:13:55 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -113,6 +113,7 @@
 
       !NEX_UTest
       ! Test Setting the Start Time
+      write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Set Start Time Initialization Test"
       call ESMF_TimeSet(startTime, yr=2003, mm=3, dd=13, &
                                    calendar=gregorianCalendar, rc=rc)
@@ -232,6 +233,7 @@
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Stop Time Initialization Test"
       call ESMF_TimeSet(stopTime, yr=2003, mm=3, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
@@ -273,6 +275,7 @@
       ! ----------------------------------------------------------------------------
  
       !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Clock Initialization Test"
       call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -283,6 +286,7 @@
       !NEX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Calendar Print Test"
       call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -291,6 +295,7 @@
       ! ----------------------------------------------------------------------------
  
       !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Time Interval Print Test"
       call ESMF_TimeIntervalPrint(timeStep, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -299,6 +304,7 @@
       ! ----------------------------------------------------------------------------
  
       !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Start Time Print Test"
       call ESMF_TimePrint(startTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -307,6 +313,7 @@
       ! ----------------------------------------------------------------------------
  
       !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Stop Time Print Test"
       call ESMF_TimePrint(stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -315,6 +322,7 @@
       ! ----------------------------------------------------------------------------
  
       !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Clock Print Test"
       call ESMF_ClockPrint(clock, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -322,6 +330,7 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE and/or bool not False"
       write(name, *) "ClockIsStopTime Test"
       bool = ESMF_ClockIsStopTime(clock, rc)
       call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and.(.not.bool)), &
@@ -340,23 +349,32 @@
 
       bool = ESMF_ClockIsStopTime(clock, rc)
       print *, "bool = ", bool
+      write(failMsg, *) " Returned ESMF_FAILURE and/or bool not True"
       write(name, *) "Clock Advance Test"
       call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(bool)), &
                       name, failMsg, result, ESMF_SRCLINE)
-
       ! print out ending clock state
       call ESMF_ClockPrint(clock, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+#ifdef ESMF_EXHAUSTIVE
+
+      !NEX
+      call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
       print *, "Print Clock after advancing 4 times"
-
+      write(failMsg, *) " Returned ESMF_FAILURE and/or bool not True"
+      write(name, *) "Clock Advanced beyond stopTime Test"
       call ESMF_ClockPrint(clock, rc=rc)
       bool = ESMF_ClockIsStopTime(clock, rc)
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(bool)), &
+                      name, failMsg, result, ESMF_SRCLINE)
       print *, "bool = ", bool
 
 
-#ifdef ESMF_EXHAUSTIVE
 
       ! ----------------------------------------------------------------------------
  
@@ -364,9 +382,9 @@
       write(name, *) "Clock Initialization with stop time set before start time Test"
       call ESMF_TimeSet(stopTime, yr=2002, mm=3, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
-      write(failMsg, *) "Should return ESMF_SUCCESS"
+      write(failMsg, *) "Should return ESMF_FAILURE because timestep is positive."
       call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
 #endif
