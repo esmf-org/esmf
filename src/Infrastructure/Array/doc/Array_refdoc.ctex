@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.1 2003/09/18 17:15:34 cdeluca Exp $
+% $Id: Array_refdoc.ctex,v 1.2 2003/09/18 17:21:27 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,14 +45,14 @@
 % #ifdef STANDALONE
 % \input{Data_syn}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Data/doc/Data_syn}
+% \input{../Infrastructure/Array/doc/Data_syn}
 % #endif
 
 %\section{Architecture}
 % #ifdef STANDALONE
 % \input{Data_arch}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Data/doc/Data_arch}
+% \input{../Infrastructure/Array/doc/Data_arch}
 % #endif
 
 \section{Array Class}
@@ -61,35 +61,35 @@
 #ifdef STANDALONE
 \input{Array_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Data/doc/Array_desc}
+\input{../Infrastructure/Array/doc/Array_desc}
 #endif
 
 %\subsection{Usage}
 %#ifdef STANDALONE
 %\input{Array_usage}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Data/doc/Array_usage}
+%\input{../Infrastructure/Array/doc/Array_usage}
 %#endif
 
 % \subsection{Restrictions}
 % #ifdef STANDALONE
 % \input{class_rest}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Data/doc/class_rest}
+% \input{../Infrastructure/Array/doc/class_rest}
 % #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_Array_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Data/doc/ESMF_Array_fapi}
+\input{../Infrastructure/Array/doc/ESMF_Array_fapi}
 #endif
 
 % \subsection{Use and Examples}
 % #ifdef STANDALONE
 % %\input{class_ex} 
 % #elif defined(CONSTITUENT)
-% %\input{../Infrastructure/Data/doc/class_ex} 
+% %\input{../Infrastructure/Array/doc/class_ex} 
 % #endif
 
 %\newpage
@@ -131,12 +131,10 @@
 #ifdef STANDALONE
 %\input{}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Data/doc/}
+%\input{../Infrastructure/Array/doc/}
 #endif
 
-\subsection{Private Classes}
 
-%\input{<Name2>}
 #endif
 
 #ifdef STANDALONE
