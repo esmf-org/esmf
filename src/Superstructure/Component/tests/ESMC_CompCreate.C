@@ -1,4 +1,4 @@
-// $Id: ESMC_CompCreate.C,v 1.6 2004/04/23 22:13:00 nscollins Exp $
+// $Id: ESMC_CompCreate.C,v 1.7 2004/04/26 15:29:29 nscollins Exp $
 //
 // Test code which creates a new Component.
 
@@ -39,8 +39,7 @@ int main(int argc, char **argv)
     // TODO: query framework for default layout here
 
     cname = "Atmosphere";
-    delayout = NULL;
-    comp1 = ESMC_GridCompCreate(cname, delayout, ESMF_ATM, NULL, "grid.rc", &rc);
+    comp1 = ESMC_GridCompCreate(cname, ESMF_ATM, NULL, "grid.rc", &rc);
 
     printf("Grid Comp Create returned, name = '%s'\n", cname);
 
