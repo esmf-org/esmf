@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.23 2004/03/20 03:55:02 cdeluca Exp $
+! $Id: ESMF_GridUTest.F90,v 1.24 2004/03/24 22:24:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.23 2004/03/20 03:55:02 cdeluca Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.24 2004/03/24 22:24:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -132,10 +132,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! The following code is commented out because it crashes. 
-      ! (Because the layout being passed in is uninitialized.)
+      ! The following code works ok because the layout is explicitly 
+      ! destroyed first before being used in the grid create (which is 
+      ! expected to fail).  but this still crashes randomly if the layout
+      ! object is left completely uninitialized.  this should be addressed.
       ! Bug report 796975 has been filed
       !NEX_UTest
+      layout2 = ESMF_DELayoutCreate(status)
+      call ESMF_DELayoutDestroy(layout2, status)
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
