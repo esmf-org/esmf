@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.3 2003/10/08 21:36:51 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.4 2003/12/10 00:40:16 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -969,89 +969,183 @@
     //   wants data written (ascii, binary, multifile, singlefile).
     switch (this->type) {
       case ESMF_DATA_REAL:
-        switch (this->rank) {
-          case 1:
-            imax = this->counts[0];
-            tcount = imax;
-            for (i=0; i<tcount; i++) {
-                fprintf(ffile, "%lg\n", *((float *)(this->base_addr) + i));
-            }
-            break;
-          case 2:
-            imax = this->counts[0];
-            jmax = this->counts[1];
-            tcount = imax * jmax;
-            rcount = 0;
-            for (j=0; j<jmax; j++) {
-                for (i=0; i<imax; i++) {
-                    fprintf(ffile, "%lg ",  
-                               *((float *)(this->base_addr) + i + j*imax) );
+        switch (this->kind) {
+         case ESMF_R4:
+            switch (this->rank) {
+              case 1:
+                imax = this->counts[0];
+                tcount = imax;
+                for (i=0; i<tcount; i++) {
+                    fprintf(ffile, "%lg\n", *((float *)(this->base_addr) + i));
                 }
-                fprintf(ffile, "\n");
-            }
-            break;
-          case 3:
-            imax = this->counts[0];
-            jmax = this->counts[1];
-            kmax = this->counts[2];
-            tcount = imax * jmax * kmax;
-            rcount = 0; 
-            for (k=0; k<kmax; k++) {
-              for (j=0; j<jmax; j++) {
-                for (i=0; i<imax; i++) {
-                    fprintf(ffile, "%lg ",
-                     *((float *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                break;
+              case 2:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                tcount = imax * jmax;
+                rcount = 0;
+                for (j=0; j<jmax; j++) {
+                    for (i=0; i<imax; i++) {
+                        fprintf(ffile, "%lg ",  
+                                   *((float *)(this->base_addr) + i + j*imax) );
+                    }
+                    fprintf(ffile, "\n");
                 }
-                fprintf(ffile, "\n");
-              }
+                break;
+              case 3:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                tcount = imax * jmax * kmax;
+                rcount = 0; 
+                for (k=0; k<kmax; k++) {
+                  for (j=0; j<jmax; j++) {
+                    for (i=0; i<imax; i++) {
+                        fprintf(ffile, "%lg ",
+                         *((float *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                    }
+                    fprintf(ffile, "\n");
+                  }
+                }
+                break;
+              default:
+                fprintf(ffile, "no code to handle real rank %d yet\n", this->rank);
+                break;    
             }
             break;
-          default:
-            fprintf(ffile, "no code to handle real rank %d yet\n", this->rank);
-            break;    
+          case ESMF_R8:
+            switch (this->rank) {
+              case 1:
+                imax = this->counts[0];
+                tcount = imax;
+                for (i=0; i<tcount; i++) {
+                    fprintf(ffile, "%lg\n", *((double *)(this->base_addr) + i));
+                }
+                break;
+              case 2:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                tcount = imax * jmax;
+                rcount = 0;
+                for (j=0; j<jmax; j++) {
+                    for (i=0; i<imax; i++) {
+                        fprintf(ffile, "%lg ",  
+                                   *((double *)(this->base_addr) + i + j*imax) );
+                    }
+                    fprintf(ffile, "\n");
+                }
+                break;
+              case 3:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                tcount = imax * jmax * kmax;
+                rcount = 0; 
+                for (k=0; k<kmax; k++) {
+                  for (j=0; j<jmax; j++) {
+                    for (i=0; i<imax; i++) {
+                        fprintf(ffile, "%lg ",
+                         *((double *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                    }
+                    fprintf(ffile, "\n");
+                  }
+                }
+                break;
+              default:
+                fprintf(ffile, "no code to handle real rank %d yet\n", this->rank);
+                break;    
+            }
+            break;
         }
         break;
       case ESMF_DATA_INTEGER:
-        switch (this->rank) {
-          case 1:
-            imax = this->counts[0];
-            tcount = imax;
-            for (i=0; i<imax; i++) {
-                fprintf(ffile, "%d\n", *((int *)(this->base_addr) + i));
-            }
-            break;
-          case 2:
-            imax = this->counts[0];
-            jmax = this->counts[1];
-            tcount = imax * jmax;
-            rcount = 0; 
-            for (j=0; j<jmax; j++) {
+        switch (this->kind) {
+          case ESMF_I4:
+            switch (this->rank) {
+              case 1:
+                imax = this->counts[0];
+                tcount = imax;
                 for (i=0; i<imax; i++) {
-                    fprintf(ffile, "%d ",
-                                *((int *)(this->base_addr) + i + j*imax) );
+                    fprintf(ffile, "%d\n", *((int *)(this->base_addr) + i));
                 }
-                fprintf(ffile, "\n");
+                break;
+              case 2:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                tcount = imax * jmax;
+                rcount = 0; 
+                for (j=0; j<jmax; j++) {
+                    for (i=0; i<imax; i++) {
+                        fprintf(ffile, "%d ",
+                                    *((int *)(this->base_addr) + i + j*imax) );
+                    }
+                    fprintf(ffile, "\n");
+                }
+                break;
+              case 3:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                tcount = imax * jmax * kmax;
+                rcount = 0; 
+                for (k=0; k<kmax; k++) {
+                  for (j=0; j<jmax; j++) {
+                    for (i=0; i<imax; i++) {
+                        fprintf(ffile, "%d ", 
+                           *((int *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                    }
+                    fprintf(ffile, "\n");
+                  }
+                }
+                break;
+              default:
+                fprintf(ffile, "no code to handle integer rank %d yet\n", this->rank);
+                break;    
             }
             break;
-          case 3:
-            imax = this->counts[0];
-            jmax = this->counts[1];
-            kmax = this->counts[2];
-            tcount = imax * jmax * kmax;
-            rcount = 0; 
-            for (k=0; k<kmax; k++) {
-              for (j=0; j<jmax; j++) {
+          case ESMF_I8:
+            switch (this->rank) {
+              case 1:
+                imax = this->counts[0];
+                tcount = imax;
                 for (i=0; i<imax; i++) {
-                    fprintf(ffile, "%d ", 
-                       *((int *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                    fprintf(ffile, "%ld\n", *((long *)(this->base_addr) + i));
                 }
-                fprintf(ffile, "\n");
-              }
+                break;
+              case 2:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                tcount = imax * jmax;
+                rcount = 0; 
+                for (j=0; j<jmax; j++) {
+                    for (i=0; i<imax; i++) {
+                        fprintf(ffile, "%ld ",
+                                    *((long *)(this->base_addr) + i + j*imax) );
+                    }
+                    fprintf(ffile, "\n");
+                }
+                break;
+              case 3:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                tcount = imax * jmax * kmax;
+                rcount = 0; 
+                for (k=0; k<kmax; k++) {
+                  for (j=0; j<jmax; j++) {
+                    for (i=0; i<imax; i++) {
+                        fprintf(ffile, "%ld ", 
+                           *((long *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                    }
+                    fprintf(ffile, "\n");
+                  }
+                }
+                break;
+              default:
+                fprintf(ffile, "no code to handle integer rank %d yet\n", this->rank);
+                break;    
             }
             break;
-          default:
-            fprintf(ffile, "no code to handle integer rank %d yet\n", this->rank);
-            break;    
         }
         break;
       default:
