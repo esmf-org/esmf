@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.7 2004/02/11 19:05:07 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.8 2004/02/12 18:11:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -307,15 +307,15 @@
     base_addr = base;
     for (i=0; i<rank; i++) {
         counts[i]     = icounts ? icounts[i] : 1;        
-//        lbound[i] = lbounds ? lbounds[i] : 1;
-//        ubound[i] = ubounds ? ubounds[i] : counts[i];
+        lbound[i] = lbounds ? lbounds[i] : 1;
+        ubound[i] = ubounds ? ubounds[i] : counts[i];
         bytestride[i] = 1;
         offset[i]     = offsets ? offsets[i] : 0;
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
         counts[i]     = 1;
-//        lbound[i] = 1;
-//        ubound[i] = 1;
+        lbound[i] = 1;
+        ubound[i] = 1;
         bytestride[i] = 1;
         offset[i]     = 0;
     }
@@ -329,7 +329,7 @@
     if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
             aptr = this;
             FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &type, &kind, 
-                                                      counts, &status);
+                                              counts, lbound, ubound, &status);
     } 
 
     // call base class routine to set name 
@@ -443,7 +443,7 @@
         counts[i]     = icounts ? icounts[i] : 0;
         offset[i]     = offsets ? offsets[i] : 0;
         bytestride[i] = 0;
-        lbound[i] = lbounds ? lbounds[i] : 0;
+        lbound[i] = lbounds ? lbounds[i] : 1;
         ubound[i] = ubounds ? ubounds[i] : counts[i];
     }
     // filler for unused ranks
