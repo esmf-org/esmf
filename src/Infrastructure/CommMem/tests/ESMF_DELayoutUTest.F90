@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.1 2003/03/17 17:32:14 cdeluca Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.2 2003/06/05 16:42:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.1 2003/03/17 17:32:14 cdeluca Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.2 2003/06/05 16:42:22 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,6 +57,16 @@
       ! number of DEs in default 1D layout
       integer :: numDEs
 
+!--------------------------------------------------------------------------------
+!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!     to OFF, then only the sanity unit tests.
+!     Special strings (Non-exhaustive and exhaustive) have been
+!     added to allow a script to count the number and types of unit tests.
+!--------------------------------------------------------------------------------
+
+      !NEX
       ! test dynamic allocation of default 1D ESMF_DELayout
       layout1D = ESMF_DELayoutCreate(rc)
       write(name, *) "ESMF_DELayoutCreateDefault1D"
@@ -64,6 +74,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       ! test getting of number of DEs discovered in creating 1D layout
       call ESMF_DELayoutGetNumDEs(layout1D, numDEs, rc)
       !print *, "layout1D numDEs = ", numDEs
@@ -73,6 +84,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef EXHAUSTIVE
+      !EX
       ! test print method via option string
       call ESMF_DELayoutPrint(layout1D, rc=rc)
       write(name, *) "ESMF_DELayoutPrint"
@@ -81,12 +93,14 @@
                       name, failMsg, result, ESMF_SRCLINE)
 #endif
 
+      !NEX
       layout0 = ESMF_DELayoutCreate(2,4, layout1D, ESMF_XFAST, rc)
       write(name, *) "ESMF_DELayoutCreate2D non-exclusive"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       ! test getting of number of DEs in creating 2D layout
       call ESMF_DELayoutGetNumDEs(layout0, numDEs, rc)
       !print *, "layout0 numDEs = ", numDEs
@@ -95,12 +109,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       layout1 = ESMF_DELayoutCreate(2,2, layout1D, ESMF_XFAST, ESMF_EXCL, rc)
       write(name, *) "ESMF_DELayoutCreate2D exclusive -- 1st call"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       ! test getting of number of DEs in creating 2D layout
       call ESMF_DELayoutGetNumDEs(layout1, numDEs, rc)
       !print *, "layout1 numDEs = ", numDEs
@@ -109,12 +125,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       layout2 = ESMF_DELayoutCreate(1,3, layout1D, ESMF_YFAST, ESMF_EXCL, rc)
       write(name, *) "ESMF_DELayoutCreate2D exclusive -- 2nd call"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       ! test getting of number of DEs in creating 2D layout
       call ESMF_DELayoutGetNumDEs(layout2, numDEs, rc)
       !print *, "layout2 numDEs = ", numDEs
@@ -123,12 +141,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       layout3 = ESMF_DELayoutCreate(1,1, layout1D, ESMF_XFAST, ESMF_EXCL, rc)
       write(name, *) "ESMF_DELayoutCreate2D exclusive -- 3rd call"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       ! test getting of number of DEs in creating 2D layout
       call ESMF_DELayoutGetNumDEs(layout3, numDEs, rc)
       !print *, "layout3 numDEs = ", numDEs
@@ -138,6 +158,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef EXHAUSTIVE
+      !EX
       ! test print method via option string
       call ESMF_DELayoutPrint(layout1D, rc=rc)
       write(name, *) "ESMF_DELayoutPrint"
@@ -146,6 +167,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 #endif
 
+      !NEX
       ! test dynamic deallocation of ESMF_DELayout
       !   also tests destructor
       call ESMF_DELayoutDestroy(layout1D, rc)
@@ -154,24 +176,28 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       call ESMF_DELayoutDestroy(layout0, rc)
       write(name, *) "ESMF_DELayoutDestroy layout0"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       call ESMF_DELayoutDestroy(layout1, rc)
       write(name, *) "ESMF_DELayoutDestroy layout1"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       call ESMF_DELayoutDestroy(layout2, rc)
       write(name, *) "ESMF_DELayoutDestroy layout2"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       call ESMF_DELayoutDestroy(layout3, rc)
       write(name, *) "ESMF_DELayoutDestroy layout3"
       write(failMsg, *) "rc =", rc
@@ -181,6 +207,7 @@
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
 
+      !NEX
       ! entire test pass/fail result
       write(name, *) "ESMF_DELayoutCreateTest"
       write(failMsg, *) "ESMF_DELayoutCreateTest failed one or more tests" 
