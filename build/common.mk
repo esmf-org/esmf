@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.22 2003/10/21 23:47:27 cdeluca Exp $
+#  $Id: common.mk,v 1.23 2003/10/22 22:26:53 slswift Exp $
 #===============================================================================
 #  common.mk
 #
@@ -207,7 +207,7 @@ endif
 ifeq ($(ESMF_BOPT),O)
 
 
-CXXF90LD       = ${C_CXXF90LINKER}
+CXXF90LD       = ${C_CXXF90LD}
 F90CXXLD       = ${C_F90CXXLD}
 FLINKER	       = ${C_FLINKER} 
 COPTFLAGS      = ${O_COPTFLAGS}
