@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2003/10/20 22:40:06 nscollins Exp $
+# $Id: build_rules.mk,v 1.3 2004/03/04 22:34:15 nscollins Exp $
 #
 # SunOs.default.default.mk
 #
@@ -133,7 +133,7 @@ SL_LINKOPTS =
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
-SL_LIBS_TO_MAKE = libesmf liboldworld
+SL_LIBS_TO_MAKE = libesmf 
 
 
 

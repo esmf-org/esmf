@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.5 2004/02/24 14:05:30 theurich Exp $
+#  $Id: build_rules.mk,v 1.6 2004/03/04 22:34:15 nscollins Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -153,7 +153,7 @@ SL_LINKOPTS =
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
-SL_LIBS_TO_MAKE = libesmf liboldworld
+SL_LIBS_TO_MAKE = libesmf 
 
 ############################################################
 #

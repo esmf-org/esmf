@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.8 2003/12/02 16:27:58 nscollins Exp $
+#  $Id: build_rules.mk,v 1.9 2004/03/04 22:34:14 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -198,7 +198,7 @@ SL_LIB_LINKER = mpCC_r -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 #SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
-SL_LIBS_TO_MAKE = libesmf liboldworld
+SL_LIBS_TO_MAKE = libesmf
 
 # SL_SUFFIX   =
 # SL_LIBOPTS  =
@@ -323,7 +323,7 @@ SL_LIB_LINKER = mpCC_r -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 #SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 SL_F_LINKER = $(F90CXXLD) -bloadmap:loadmap.txt
 SL_C_LINKER = $(CXXF90LD) -bloadmap:loadmap.txt
-SL_LIBS_TO_MAKE = libesmf liboldworld
+SL_LIBS_TO_MAKE = libesmf 
 
 
 endif

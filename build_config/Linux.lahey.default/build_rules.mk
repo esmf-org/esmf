@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2004/02/07 15:29:38 nscollins Exp $
+# $Id: build_rules.mk,v 1.4 2004/03/04 22:34:15 nscollins Exp $
 #
 # Linux.default.default.mk
 #
@@ -167,7 +167,7 @@ SL_LINKOPTS =
 SL_F_LINKER = $(F90CXXLD) -rpath $(ESMF_LIBDIR) -rpath /usr/local/lf9560/lib
 SL_C_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR) -Wl,-rpath /usr/local/lf9560/lib
 SL_LIB_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR)
-SL_LIBS_TO_MAKE = libesmf liboldworld
+SL_LIBS_TO_MAKE = libesmf 
 
 ############################################################
 #

@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.3 2003/11/24 18:14:31 jwolfe Exp $
+#  $Id: build_rules.mk,v 1.4 2004/03/04 22:34:15 nscollins Exp $
 #
 #  Darwin.nag.default.mk
 #
@@ -164,7 +164,7 @@ SL_LINKOPTS =
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
-SL_LIBS_TO_MAKE = libesmf liboldworld
+SL_LIBS_TO_MAKE = libesmf 
 
 ############################################################
 #
