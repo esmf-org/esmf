@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/10/09 20:56:10 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2004/01/29 23:59:38 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -28,6 +28,9 @@ SYSTEM_TESTS_RUN     = RUN_CompCreate
 SYSTEM_TESTS_RUN_UNI = RUN_CompCreateUNI
 
 SYSTEM_TESTS_RM      = CompCreate.rm
+
+ESMF_CompCreateSTest.o : user_model.o
+
 
 include $(ESMF_DIR)/makefile
 
