@@ -1,4 +1,4 @@
-! $Id: ESMF_Alloc.F90,v 1.8 2003/02/13 15:10:36 nscollins Exp $
+! $Id: ESMF_Alloc.F90,v 1.9 2003/06/19 19:51:28 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 !BOP
 ! !MODULE: ESMF_AllocMod - One line general statement about this class
 !
-! !DESCRIPTION:
+! !DESCRIPTION: 
 !
 ! The code in this file implements a uniform interface for allocating,
 !  deallocating, validating, and printing Fortran 90 pointers, which
@@ -72,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alloc.F90,v 1.8 2003/02/13 15:10:36 nscollins Exp $'
+      '$Id: ESMF_Alloc.F90,v 1.9 2003/06/19 19:51:28 rstaufer Exp $'
 
 !==============================================================================
 !
