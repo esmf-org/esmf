@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 2004/04/15 17:36:45 nscollins Exp $
+# $Id: makefile,v 1.45 2004/04/23 23:26:25 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -28,7 +28,8 @@ include $(ESMF_BUILD_DIR)/build/common.mk
 
 DIRS = src
 
-CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_TESTDIR) $(ESMF_EXDIR) doc 
+CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_TESTDIR) $(ESMF_EXDIR) doc \
+	    $(ESMF_BUILD)/src/include
 CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/test \
               $(ESMF_BUILD)/quick_start $(ESMF_BUILD)/release \
 	      $(ESMF_BUILD)/examples
