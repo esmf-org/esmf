@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.2 2004/11/17 23:30:32 svasquez Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.3 2004/11/17 23:38:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.2 2004/11/17 23:30:32 svasquez Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.3 2004/11/17 23:38:31 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -102,6 +102,7 @@
       write(name, *) "Verify local data Test"
       call ESMF_Test((localData(1).eq.(localPet+100)), name, failMsg, result, ESMF_SRCLINE)
 
+      print *, "LocalData is ", localData(1)
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
       ! dst receives local data from src
@@ -124,6 +125,7 @@
       else
       	call ESMF_Test((localData(1).eq.(localPet+100)), name, failMsg, result, ESMF_SRCLINE)
       endif
+      print *, "LocalData is ", localData(1)
 
 10    print *, "end of VM Send Receive test"
 
