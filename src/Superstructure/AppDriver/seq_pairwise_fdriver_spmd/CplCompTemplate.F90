@@ -1,4 +1,4 @@
-! $Id: CplCompTemplate.F90,v 1.1 2004/06/16 08:24:40 nscollins Exp $
+! $Id: CplCompTemplate.F90,v 1.2 2004/06/16 12:16:56 nscollins Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -39,9 +39,9 @@
     end subroutine UserCpl_SetServices
 
 
-    subroutine my_init(ccomp, statelist, externalclock, rc)
+    subroutine my_init(ccomp, importstate, exportstate, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      type(ESMF_State) :: statelist
+      type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
@@ -49,17 +49,17 @@
 
       if (ESMF_LogWrite("Coupler Initialize routine called", ESMF_LOG_INFO)) continue
 
-      call ESMF_StateGetState(statelist,  "statename1", state1, rc)
-      call ESMF_StateGetState(statelist,  "statename2", state2, rc)
+      call ESMF_StateGetState(importstate,  "GComp1 Import", state1, rc)
+      call ESMF_StateGetState(importstate,  "GComp2 Import", state2, rc)
 
       if (ESMF_LogWrite("Coupler Initialize routine returning", ESMF_LOG_INFO)) continue
 
     end subroutine my_init
 
 
-    subroutine my_run(ccomp, statelist, externalclock, rc)
+    subroutine my_run(ccomp, importstate, exportstate, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      type(ESMF_State) :: statelist
+      type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
@@ -70,9 +70,9 @@
     end subroutine my_run
 
 
-    subroutine my_final(ccomp, statelist, externalclock, rc)
+    subroutine my_final(ccomp, importstate, exportstate, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      type(ESMF_State) :: statelist
+      type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: externalclock
       integer :: rc
      

@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.1 2004/06/16 08:24:40 nscollins Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.2 2004/06/16 12:17:05 nscollins Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -38,6 +38,7 @@
     type(ESMF_CplComp), save :: compCoupler
     character(len=ESMF_MAXSTR), save :: gname1, gname2, cname
     type(ESMF_State), save :: G1imp, G1exp, G2imp, G2exp
+    type(ESMF_State), save :: Cplimp, Cplexp
 
     contains
 
@@ -105,11 +106,18 @@
       G2imp = ESMF_StateCreate("GComp2 Import", ESMF_STATE_IMPORT)
       G2exp = ESMF_StateCreate("GComp2 Export", ESMF_STATE_EXPORT)
 
+      Cplimp = ESMF_StateCreate("Coupler Import", ESMF_STATE_IMPORT)
+      Cplexp = ESMF_StateCreate("Coupler Export", ESMF_STATE_EXPORT)
+      call ESMF_StateAddState(Cplimp, G1imp, rc)
+      call ESMF_StateAddState(Cplimp, G2imp, rc)
+      call ESMF_StateAddState(Cplexp, G1exp, rc)
+      call ESMF_StateAddState(Cplexp, G2exp, rc)
+
       ! Now give each of the subcomponents a chance to initialize themselves.
       call ESMF_GridCompInitialize(comp1Grid, G1imp, G1exp, parentclock, rc=rc)
       call ESMF_GridCompInitialize(comp2Grid, G2imp, G2exp, parentclock, rc=rc)
 
-      call ESMF_CplCompInitialize(compCoupler, G1exp, G2imp, parentclock, rc=rc)
+      call ESMF_CplCompInitialize(compCoupler, Cplexp, Cplimp, parentclock, rc=rc)
 
       ! call ESMF_LogErrMsg("Parent Component Initialize finished")
       dummy=ESMF_LogWrite("Parent Component Initialize finished", ESMF_LOG_INFO)
