@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.4 2004/03/08 16:03:25 nscollins Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.5 2004/03/08 22:51:37 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -186,7 +186,7 @@
 !
 
     !! Call transpose method here, output ends up in array2
-    call ESMF_FieldRedist(field1, field2, layout1, rh12, rc=status)
+    call ESMF_FieldRedist(field1, field2, rh12, rc=status)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
@@ -196,7 +196,7 @@
     !! Transpose back so we can compare contents
     !! Call transpose method again here, output ends up in field3
 
-    call ESMF_FieldRedist(field2, field3, layout1, rh23, rc=status)
+    call ESMF_FieldRedist(field2, field3, rh23, rc=status)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after second Transpose, should match original:"
