@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.11 2004/04/08 15:15:51 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.12 2004/04/09 19:48:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.11 2004/04/08 15:15:51 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.12 2004/04/09 19:48:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -562,6 +562,44 @@ int ESMC_newDELayout::ESMC_newDELayoutPrint(){
     printf("%d\n", des[i].coord[j]);
   }
   printf("--- ESMC_newDELayoutPrint end ---\n");
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutCopyCopy
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutCopyCopy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcData1,  // input array
+  void **srcData2,  // input array
+  void **dstData1,  // output array
+  void **dstData2,  // output array
+  int len1,         // size in bytes to copy from srcData1 to dstData2
+  int len2,         // size in bytes to copy from srcData2 to dstData1
+  int de1,          // de for data1
+  int de2,          // de for data2
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (de1<=de2){
+    ESMC_newDELayoutCopy(srcData1, dstData2, len1, de1, de2, oneToOneFlag);
+    ESMC_newDELayoutCopy(srcData2, dstData1, len2, de2, de1, oneToOneFlag);
+  }else{
+    ESMC_newDELayoutCopy(srcData2, dstData1, len2, de2, de1, oneToOneFlag);
+    ESMC_newDELayoutCopy(srcData1, dstData2, len1, de1, de2, oneToOneFlag);
+  }
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.h,v 1.10 2004/04/08 15:15:50 theurich Exp $
+// $Id: ESMC_newDELayout.h,v 1.11 2004/04/09 19:48:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,6 +85,9 @@ class ESMC_newDELayout : public ESMC_Base {    // inherits from ESMC_Base class
     // IO
     int ESMC_newDELayoutPrint(void);
     // Communication
+    int ESMC_newDELayoutCopyCopy(void **srcData1, void **srcData2, 
+      void **dstData1, void **dstData2, int len1, int len2, int de1, int de2,
+      ESMC_Logical oneToOneFlag);
     int ESMC_newDELayoutCopy(void **srcdata, void **destdata, 
       int len, int srcDE, int destDE, ESMC_Logical oneToOneFlag);
     int ESMC_newDELayoutScatter(void **srcdata, void **destdata, 
