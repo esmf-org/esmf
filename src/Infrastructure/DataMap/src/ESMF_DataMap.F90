@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.8 2004/02/17 19:43:39 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.9 2004/02/18 18:03:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -224,7 +224,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.8 2004/02/17 19:43:39 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.9 2004/02/18 18:03:33 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -244,7 +244,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_DataMapCreateNew
-       module procedure ESMF_DataMapCreateFastest
+       module procedure ESMF_DataMapCreateExplicit
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for {\tt ESMF\_DataMap}
@@ -263,7 +263,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_DataMapConstructNew
-!       module procedure ESMF_DataMapConstructFastest
+!       module procedure ESMF_DataMapConstructExplicit
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for {\tt ESMF\_DataMap}
@@ -426,36 +426,92 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      function ESMF_DataMapCreateFastest(rc);
-
+      function ESMF_DataMapCreateExplicit(iorder, horizRelloc, vertRelloc, &
+                                     gridrank, counts, rc)
+!
 ! !RETURN VALUE:
-      type(ESMF_DataMap) :: ESMF_DataMapCreateFastest  
+      type(ESMF_DataMap) :: ESMF_DataMapCreateExplicit
+!
 !
 ! !ARGUMENTS:
-      integer, intent(out), optional :: rc           ! return code
+      integer, dimension(:), intent(in) :: iorder
+      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
+      integer, intent(in), optional :: gridrank
+      integer, dimension(:), intent(in), optional :: counts
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns rc=OK if the {\tt ESMF\_DataMap} was created without error.
-!      Returns an {\tt ESMF\_DataMap} which should allow the data array to be
-!      iterated in the fastest access method possible on this hardware
-!      and in this language.
+!    Allocates space for and initializes an {\tt ESMF\_DataMap} object.
+!
+!    This version assumes the data is scalar and matches the {\tt ESMF\_Grid}
+!    in order of {\tt ESMF\_Grid} index vs. {\tt ESMF\_Array} rank.  This creates a map
+!    suitable for a {\tt ESMF\_Field} and not for a Packed Array associated with
+!    a Bundle.
+!
+!    \begin{description}
+!    \item[iorder]
+!       Array of indices.  0 means this index does not correspond to
+!       a grid index, and the size must be specified in the {\tt counts}
+!       argument.  Otherwise it must be the index number of the corresponding
+!       grid index.
+!    \item [{[horizRelloc]}] 
+!       Relative location of data per grid cell/vertex in the horizontal grid.
+!    \item [{[vertRelloc]}] 
+!       Relative location of data per grid cell/vertex in the vertical grid.
+!    \item[{[relloc]}]
+!       Relative location of data per cell/vertex.
+!    \item[{[gridrank]}]
+!       Number of dimensions in the Grid.  Default is the same as the 
+!       number of dimensions implied by the iorder input.
+!    \item[{[counts]}]
+!       If array rank is larger than the grid rank, the counts for the
+!       additional dimensions.  
+!    \item[{[rc]}] 
+!       Return code equals {\tt ESMF\_SUCCESS} if the method
+!       executes without errors.
+!    \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        type (ESMF_DataMapType), pointer :: dmp
- 
-        allocate(dmp)
+        ! Local vars
+        type (ESMF_DataMapType), pointer :: dmp    ! pointer to new DataMap
+        integer :: status                     ! local error status
+        logical :: rcpresent                  ! did user specify rc?
 
-        dmp%datarank = 0
+        ! Initialize pointers
+        nullify(dmp) 
+        nullify(ESMF_DataMapCreateExplicit%dmp)
 
-        ESMF_DataMapCreateFastest%dmp => dmp
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        else
+          rcpresent = .FALSE.
+        endif
 
-        end function ESMF_DataMapCreateFastest
+        ! Allocate space for DM object and call Construct method to initialize
+        allocate(dmp, stat=status)
+        if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
+          print *, "DataMap allocation error"
+          return
+        endif
+    
+        call ESMF_DataMapConstructExplicit(dmp, iorder, horizRelloc, vertRelloc, &
+                                      gridrank, counts, status)
+        if (status .ne. ESMF_SUCCESS) then
+           print *, "DataMap construction error"
+           return
+        endif
 
+        ! Set return values
+        ESMF_DataMapCreateExplicit%dmp => dmp
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_DataMapCreateExplicit
 
 
 !------------------------------------------------------------------------------
@@ -627,10 +683,97 @@ end function
           datamap%vertRelloc = ESMF_CELL_CELL
         endif
 
+        datamap%interleave%il_type = ESMF_IL_ITEM
+        datamap%interleave%il_start = 0
+        datamap%interleave%il_end = 0
+        datamap%interleave%il_strides = 1
+
 !       if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_DataMapConstructNew
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      subroutine ESMF_DataMapConstructExplicit(datamap, iorder, horizRelloc, &
+                                          vertRelloc, gridrank, counts, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DataMapType), pointer :: datamap
+      integer, dimension(:), intent(in) :: iorder
+      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
+      integer, intent(in), optional :: gridrank
+      integer, dimension(:), intent(in), optional :: counts
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!      ESMF routine to initialize the contents of a {\tt ESMF\_DataMap} type.
+!      The corresponding internal routine is {\tt ESMF\_Destruct}.
+!
+!EOPI
+! !REQUIREMENTS: internal
+
+!       local vars
+        integer :: rank, i
+        integer :: status                     ! local error status
+        logical :: rcpresent                  ! did user specify rc?
+
+!       init return code
+        status = ESMF_FAILURE
+        if (present(rc)) then
+            rcpresent=.TRUE.
+            rc = ESMF_FAILURE    
+        else
+          rcpresent = .FALSE.
+        endif
+
+!       initialize the contents of the datamap
+
+!       set up the mapping of grid indicies to array indicies
+        datamap%dim_order(:) = 0
+        datamap%gridrank = 0
+
+        do i=1, size(iorder)
+          datamap%dim_order(i) = iorder(i)
+          if (iorder(i) .ne. 0) datamap%gridrank = datamap%gridrank + 1
+        enddo
+
+!       set the sense to undefined
+        datamap%sense = 0
+   
+      ! if specified, use the real gridrank
+        if (present(gridrank)) datamap%gridrank = gridrank
+
+        datamap%counts(:) = 1
+        if (present(counts)) datamap%counts(1:size(counts)) = counts(:)
+
+!       in this interface assume scalar data and use the relloc the caller gave
+        datamap%datarank = 0
+        datamap%ranklength = 0
+        if (present(horizRelloc)) then
+          datamap%horizRelloc = horizRelloc
+        else
+          datamap%horizRelloc = ESMF_CELL_CENTER
+        endif
+
+        if (present(vertRelloc)) then
+          datamap%vertRelloc = vertRelloc
+        else
+          datamap%vertRelloc = ESMF_CELL_CELL
+        endif
+
+        datamap%interleave%il_type = ESMF_IL_ITEM
+        datamap%interleave%il_start = 0
+        datamap%interleave%il_end = 0
+        datamap%interleave%il_strides = 1
+
+!       if user asked for it, return error code
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_DataMapConstructExplicit
 
 
 !------------------------------------------------------------------------------
