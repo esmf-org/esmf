@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.34 2003/08/06 23:06:01 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.35 2003/08/13 21:53:02 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.34 2003/08/06 23:06:01 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.35 2003/08/13 21:53:02 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -309,7 +309,7 @@
                                   //       per dimension
       int *memory_stride,         // in  - array of global strides per
                                   //       dimension
-      ESMC_Logical *periodic,     // in  - for each dim, is it periodic?
+      ESMC_Logical (*boundary)[2],// in  - for each dim, is it periodic?
       ESMC_XPacket **xp_list,     // out - list of xp's created
       int *xp_count) {            // out - count of xp's created
 //
@@ -321,7 +321,8 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    int i, nxp, nextxp, trans_l, trans_r;
+    int i, j, nxp, nextxp;
+    ESMC_AxisIndex global_ai;
     ESMC_XPacket *xps;
     int rc = ESMF_FAILURE;
 
@@ -329,8 +330,9 @@
     switch (size_axisindex) {
       case 2:
         {
-          int global_l[2];
-          int global_r[2];
+          ESMC_AxisIndex global_ai[2];
+          int boundary_l[2];
+          int boundary_r[2];
 
           // printf("incoming AxisIndex:\n");
           // for (i=0; i<size_axisindex; i++) 
@@ -338,21 +340,22 @@
                // i, indexlist[i].min, indexlist[i].max, indexlist[i].stride);
 
           // calculate global offsets and contig_lengths for the index space
+          // TODO:  the ai's could come in global space and the following code
+          //        moved.  Then we wouldn't need indexlist, global_start,
+          //        global_count -- memory stride replaced by ai.stride?
           for (i=0; i<size_axisindex; i++) {
-            global_l[i] = indexlist[i].min + global_start[i];
-            global_r[i] = indexlist[i].max + global_start[i];
+            global_ai[i].min = indexlist[i].min + global_start[i];
+            global_ai[i].max = indexlist[i].max + global_start[i];
+            global_ai[i].stride = global_count[i];
           }
 
           nxp = 1;
-          if (periodic[0] == ESMF_TF_TRUE) { 
-             if (global_start[0] <= 0) nxp++;
-             if (global_r[0] >= global_count[0]) nxp++;
-          }
-          if (periodic[1] == ESMF_TF_TRUE) {
-             if (global_start[1] <= 0) nxp++;
-             if (global_r[1] >= global_count[1]) nxp++;
+          for (i=0; i<size_axisindex; i++) {
+            if (boundary[i][0] == ESMF_TF_TRUE) nxp++;
+            if (boundary[i][1] == ESMF_TF_TRUE) nxp++;
           }
 
+          printf("Incoming: %d XPackets\n", nxp);
           xps = new ESMC_XPacket[nxp];
         
            *xp_list = xps; 
@@ -362,78 +365,57 @@
           nextxp = 0;
 
           xps[nextxp].rank = 2;
-          xps[nextxp].offset  = global_l[1]*memory_stride[0] + global_l[0];
-          xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
+          xps[nextxp].offset  = global_ai[1].min * memory_stride[0]
+                              + global_ai[0].min;
+          xps[nextxp].contig_length = global_ai[0].max - global_ai[0].min + 1;
           xps[nextxp].stride[0] = memory_stride[0];
-          xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+          xps[nextxp].rep_count[0] = global_ai[1].max - global_ai[1].min + 1;
 
           // if periodic along the first axis and this piece along boundary:
-          if (periodic[0] == ESMF_TF_TRUE) {
-            if (global_start[0] <= 0) {
+          for (i=0; i<size_axisindex; i++) {
+            if (boundary[i][0] == ESMF_TF_TRUE) {
  
               nextxp++;
 
               xps[nextxp].rank = 2;
 
-              trans_l = global_l[0] + memory_stride[0];
-              trans_r = global_r[0] + memory_stride[0];
+              boundary_l[0] = global_ai[0].min;
+              boundary_l[1] = global_ai[1].min;
+              boundary_r[0] = global_ai[0].max;
+              boundary_r[1] = global_ai[1].max;
+              boundary_l[i] = boundary_l[i] + global_ai[i].stride;
+              boundary_r[i] = boundary_r[i] + global_ai[i].stride;
     
-              xps[nextxp].offset  = global_l[1]*memory_stride[0] + trans_l;
-              xps[nextxp].contig_length = trans_r - trans_l + 1;
+              xps[nextxp].offset  = boundary_l[1]*memory_stride[0] 
+                                  + boundary_l[0];
+              xps[nextxp].contig_length = boundary_r[0] - boundary_l[0] + 1;
               xps[nextxp].stride[0] = memory_stride[0];
-              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+              xps[nextxp].rep_count[0] = global_ai[1].max - global_ai[1].min + 1;
             }
-            if (global_r[0] >= global_count[0]) {
+            if (boundary[i][1] == ESMF_TF_TRUE) {
  
               nextxp++;
 
               xps[nextxp].rank = 2;
 
-              trans_l = global_l[0] - memory_stride[0];
-              trans_r = global_r[0] - memory_stride[0];
+              boundary_l[0] = global_ai[0].min;
+              boundary_l[1] = global_ai[1].min;
+              boundary_r[0] = global_ai[0].max;
+              boundary_r[1] = global_ai[1].max;
+              boundary_l[i] = boundary_l[i] - global_ai[i].stride;
+              boundary_r[i] = boundary_r[i] - global_ai[i].stride;
     
-              xps[nextxp].offset  = global_l[1]*memory_stride[0] + trans_l;
-              xps[nextxp].contig_length = trans_r - trans_l + 1;
+              xps[nextxp].offset  = boundary_l[1]*memory_stride[0] 
+                                  + boundary_l[0];
+              xps[nextxp].contig_length = boundary_r[0] - boundary_l[0] + 1;
               xps[nextxp].stride[0] = memory_stride[0];
-              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+              xps[nextxp].rep_count[0] = global_ai[1].max - global_ai[1].min + 1;
             }
           }
 
-          // if periodic along the second axis and this piece along boundary:
-          if (periodic[1] == ESMF_TF_TRUE) {
-            if (global_start[1] <= 0) {
-
-              nextxp++;
-
-              xps[nextxp].rank = 2;
-
-              trans_l = global_l[1] + global_count[1];
-              trans_r = global_r[1] + global_count[1];
-    
-              xps[nextxp].offset  = trans_l*memory_stride[0] + global_l[0];
-              xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
-              xps[nextxp].stride[0] = memory_stride[0];
-              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
-            }
-            if (global_r[1] >= global_count[1]) {
- 
-              nextxp++;
-
-              xps[nextxp].rank = 2;
-
-              trans_l = global_l[1] - global_count[1];
-              trans_r = global_r[1] - global_count[1];
-    
-              xps[nextxp].offset  = trans_l*memory_stride[0] + global_l[0];
-              xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
-              xps[nextxp].stride[0] = memory_stride[0];
-              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
-            }
-          }
-
- //    printf("outgoing ");
- //    for (j=0; j<nxp; j++)
- //        xps[j].ESMC_XPacketPrint();
+//     printf("outgoing ");
+//     for (j=0; j<nxp; j++)
+//         xps[j].ESMC_XPacketPrint();
 
         }
       break;
