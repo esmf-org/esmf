@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2003/03/25 00:18:30 flanigan Exp $ 
+# $Id: makefile,v 1.15 2003/04/01 23:59:23 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    = 
@@ -43,17 +43,17 @@ ESMC_Clock_F.o:	ESMC.h ESMC_Base.h ESMC_Clock.h makefile
 
 ESMF_Fraction.o:	makefile
 
-ESMF_BaseTime.o:	ESMF_Base.o makefile
+ESMF_BaseTime.o:	makefile
 
-ESMF_Calendar.o:	ESMF_Base.o ESMF_BaseTime.o makefile
+ESMF_Calendar.o:	ESMF_BaseTime.o makefile
 
-ESMF_TimeInterval.o:	ESMF_Base.o ESMF_Fraction.o \
+ESMF_TimeInterval.o:	ESMF_Fraction.o \
 			ESMF_BaseTime.o ESMF_Calendar.o makefile
 
 ESMF_Time.o:	ESMF_BaseTime.o ESMF_TimeInterval.o makefile
 
-ESMF_Alarm.o:	ESMF_Base.o ESMF_TimeInterval.o ESMF_Time.o \
+ESMF_Alarm.o:	ESMF_TimeInterval.o ESMF_Time.o \
 		makefile
 
-ESMF_Clock.o:	ESMF_Base.o ESMF_TimeInterval.o ESMF_Time.o \
+ESMF_Clock.o:	ESMF_TimeInterval.o ESMF_Time.o \
 		ESMF_Alarm.o makefile
