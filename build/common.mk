@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.94 2005/02/08 23:49:35 svasquez Exp $
+#  $Id: common.mk,v 1.95 2005/02/23 05:13:49 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -77,20 +77,24 @@ ifndef ESMF_SITE
 export ESMF_SITE = default
 endif
 
-# For IRIX64 the default is MPI_Comm_c2f not supported
-ifeq ($(ESMF_ARCH),IRIX64)
-CPPFLAGS       += -DVM_DONT_HAVE_MPI_COMM_C2F
-endif
-
 # Comment out the following lines if you want to include the IO code
 FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
 CPPFLAGS       += -DESMF_NO_IOCODE
 export ESMF_NO_IOCODE = true
 
-PTHREAD_STUB_INCLUDE=
-# Uncomment the following line if you do not want to use PTHREADs (may be done in build_rules.mk)
-#PTHREAD_STUB_INCLUDE=-I${ESMF_DIR}/src/Infrastructure/stubs/pthread
+# For IRIX64 the default is MPI_Comm_c2f not supported
+ifeq ($(ESMF_ARCH),IRIX64)
+CPPFLAGS       += -DESMF_DONT_HAVE_MPI_COMM_C2F
+endif
 
+# Conditionally turn off ESMF's pthread feature set and use pthread_stubs
+ifndef ESMF_PTHREADS
+export ESMF_PTHREADS = on
+endif
+ifeq ($(ESMF_PTHREADS),off)
+CPPFLAGS       += -DESMF_NO_PTHREADS
+endif
+PTHREAD_STUB_INCLUDE=-I${ESMF_DIR}/src/Infrastructure/stubs/pthread
 
 
 # if PREC not already set, default to 64.  architectures which
