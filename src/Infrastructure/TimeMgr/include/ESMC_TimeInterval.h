@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.37 2004/07/02 20:17:41 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.38 2004/09/14 22:23:15 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -255,6 +255,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // reduce time interval to smallest and least number of units
     int ESMC_TimeIntervalReduce(void);
 
+    friend class ESMC_Time;
     friend class ESMC_Calendar;
                                                         // (TMG 2.5.5)
 //
