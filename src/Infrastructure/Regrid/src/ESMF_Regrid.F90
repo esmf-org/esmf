@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.17 2003/06/19 16:56:50 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.18 2003/07/15 20:19:55 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.17 2003/06/19 16:56:50 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.18 2003/07/15 20:19:55 pwjones Exp $'
 
 !==============================================================================
 !
@@ -161,7 +161,8 @@
 ! !IROUTINE: ESMF_RegridCreateFromField - Creates Regrid structure for a field pair
 
 ! !INTERFACE:
-      function ESMF_RegridCreateFromField(src_field, dst_field, method, name, rc)
+      function ESMF_RegridCreateFromField(src_field, dst_field, method, name, &
+                                          src_mask , dst_mask, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Regrid) :: ESMF_RegridCreateFromField
@@ -170,6 +171,8 @@
       type (ESMF_Field), intent(in) :: src_field
       type (ESMF_Field), intent(in) :: dst_field 
       integer, intent(in) :: method
+      type (ESMF_Array), intent(in), optional :: &
+         src_mask, dst_mask
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -191,12 +194,20 @@
 !          Method to use for regridding.
 !     \item[{[name]}]
 !          {\tt Regrid} name.
+!     \item[{[src\_mask]}]
+!          Mask to exclude points on source grid from regridding operation.
+!          True values denote which points on the source grid will participate.
+!     \item[{[dst\_mask]}]
+!          Mask to exclude points on destination grid from regridding operation.
+!          True values denote which points on the source grid will participate.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !   The supported regridding methods for this create function are currently:
 !   \begin{description}
+!   \item[ESMF\_RegridMethod\_FieldCopy] same Grid, just copy the field
+!   \item[ESMF\_RegridMethod\_Redist  ] same PhysGrid just redistribute field
 !   \item[ESMF\_RegridMethod\_Bilinear] bilinear (logically-rectangular grids)
 !   \item[ESMF\_RegridMethod\_Bicubic ] bicubic  (logically-rectangular grids)
 !   \item[ESMF\_RegridMethod\_Conserv1] first-order conservative
@@ -238,51 +249,97 @@
       nullify(ESMF_RegridCreateFromField%ptr)
 
 !     Call the appropriate create routine based on method choice
+
       select case(method)
+
+      !-------------
+      case(ESMF_RegridMethod_FieldCopy) ! copy field
+         !*** no regrid type required
+         print *, "ERROR in ESMF_RegridCreateFromField: ", &
+                  "Field copy not yet supported"
+         stat = ESMF_FAILURE
+
+      !-------------
+      case(ESMF_RegridMethod_Redist)   ! redistribution of field
+         print *, "ERROR in ESMF_RegridCreateFromField: ", &
+                  "Redistribution not yet supported"
+         stat = ESMF_FAILURE
+
+      !-------------
       case(ESMF_RegridMethod_Bilinear) ! bilinear
-         regrid = ESMF_RegridConstructBilinear(src_field, dst_field, &
-                                            regrid_name, rc=stat)
+
+         if (present(src_mask) .and. present(dst_mask)) then
+            regrid = ESMF_RegridConstructBilinear(src_field, dst_field, &
+                                                  regrid_name, stat,    &
+                                                  src_mask = src_mask,  &
+                                                  dst_mask = dst_mask)
+         if (present(src_mask) .and. .not. present(dst_mask)) then
+            regrid = ESMF_RegridConstructBilinear(src_field, dst_field, &
+                                                  regrid_name, stat,    &
+                                                  src_mask = src_mask)
+         if (.not. present(src_mask) .and. present(dst_mask)) then
+            regrid = ESMF_RegridConstructBilinear(src_field, dst_field, &
+                                                  regrid_name, stat,    &
+                                                  dst_mask = dst_mask)
+         else
+            regrid = ESMF_RegridConstructBilinear(src_field, dst_field, &
+                                                  regrid_name, stat)
+         endif
+
+      !-------------
       case(ESMF_RegridMethod_Bicubic)  ! bicubic
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Bicubic not yet supported"
          stat = ESMF_FAILURE
+
+      !-------------
       case(ESMF_RegridMethod_Conserv1)
          regrid = ESMF_RegridConstructConserv(src_field, dst_field, &
                                               regrid_name, order=1, rc=stat)
+      !-------------
       case(ESMF_RegridMethod_Conserv2) ! 2nd-order conservative
          regrid = ESMF_RegridConstructConserv(src_field, dst_field, &
                                               regrid_name, order=2, rc=stat)
+      !-------------
       case(ESMF_RegridMethod_Raster) ! regrid by rasterizing domain
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Raster method not yet supported"
          stat = ESMF_FAILURE
+      !-------------
       case(ESMF_RegridMethod_NearNbr) ! nearest-neighbor dist-weighted avg
          regrid = ESMF_RegridConstructNearNbr(src_field, dst_field, &
                                               regrid_name, rc=stat)
+      !-------------
       case(ESMF_RegridMethod_Fourier) ! Fourier transform
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Fourier transforms not yet supported"
          stat = ESMF_FAILURE
+      !-------------
       case(ESMF_RegridMethod_Legendre) ! Legendre transform
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Legendre transforms not yet supported"
          stat = ESMF_FAILURE
+      !-------------
       case(ESMF_RegridMethod_Index) ! index-space regridding (shift, stencil)
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Index-space methods not yet supported"
          stat = ESMF_FAILURE
+      !-------------
       case(ESMF_RegridMethod_Linear) ! linear for 1-d regridding
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "1-d linear methods not yet supported"
          stat = ESMF_FAILURE
+      !-------------
       case(ESMF_RegridMethod_Spline) ! cubic spline for 1-d regridding
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "1-d cubic splines not yet supported"
          stat = ESMF_FAILURE
+      !-------------
       case(ESMF_RegridMethod_User) ! cubic spline for 1-d regridding
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "User-defined regridding not yet supported"
          stat = ESMF_FAILURE
+      !-------------
       case default
          print *, "ERROR in ESMF_RegridCreateFromField: Invalid method"
          stat = ESMF_FAILURE
@@ -304,7 +361,9 @@
 ! !IROUTINE: ESMF_RegridCreateFromBundle - Creates Regrid structure for a bundle pair
 
 ! !INTERFACE:
-      function ESMF_RegridCreateFromBundle(src_bundle, dst_bundle, method, name, rc)
+      function ESMF_RegridCreateFromBundle(src_bundle, dst_bundle, &
+                                           method, name,           &
+                                           src_mask ,  dst_mask , rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Regrid) :: ESMF_RegridCreateFromBundle
@@ -318,6 +377,9 @@
       integer, intent(in) :: method   ! method to use for regridding
 
       character (len = *), intent(in), optional :: name
+
+      type (ESMF_Array), intent(in), optional :: &
+         src_mask, dst_mask
 
       integer, intent(out), optional :: rc
 
@@ -340,12 +402,20 @@
 !          Resultant field bundle where regridded source bundle will be stored.
 !     \item[method]
 !          Method to use for regridding.
+!     \item[{[src\_mask]}]
+!          Mask to exclude points on source grid from regridding operation.
+!          True values denote which points on the source grid will participate.
+!     \item[{[dst\_mask]}]
+!          Mask to exclude points on destination grid from regridding operation.
+!          True values denote which points on the source grid will participate.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !   The supported regridding methods for this create routine are currently:
 !   \begin{description}
+!   \item[ESMF\_RegridMethod\_FieldCopy] same Grid, just copy the fields
+!   \item[ESMF\_RegridMethod\_Redist  ] same PhysGrid just redistribute fields
 !   \item[ESMF\_RegridMethod\_Bilinear] bilinear (logically-rectangular grids)
 !   \item[ESMF\_RegridMethod\_Bicubic ] bicubic  (logically-rectangular grids)
 !   \item[ESMF\_RegridMethod\_Conserv1] first-order conservative
@@ -436,6 +506,15 @@
          print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
                   "User-defined regridding not yet supported"
          stat = ESMF_FAILURE
+      case(ESMF_RegridMethod_FieldCopy) ! copy field
+         !*** no regrid type required - fill mostly empty regrid
+         print *, "ERROR in ESMF_RegridCreateFromField: ", &
+                  "Field copy not yet supported"
+         stat = ESMF_FAILURE
+      case(ESMF_RegridMethod_Redist)   ! redistribution of field
+         print *, "ERROR in ESMF_RegridCreateFromField: ", &
+                  "Redistribution not yet supported"
+         stat = ESMF_FAILURE
       case default
          print *, "ERROR in ESMF_RegridCreateFromBundle: Invalid method"
          stat = ESMF_FAILURE
@@ -502,7 +581,7 @@
 !
 !   The supported methods for creating a regridding from an existing regrid are:
 !   \begin{description}
-!   \item[ESMF\_RegridMethod\_Copy   ] simple copy of old regrid
+!   \item[ESMF\_RegridMethod\_RegridCopy] simple copy of old regrid
 !   \item[ESMF\_RegridMethod\_Shift  ] simple shift of addresses
 !   \item[ESMF\_RegridMethod\_Adjoint] creates adjoint of existing regrid
 !   \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.6 2003/06/13 22:39:06 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.7 2003/07/15 20:19:55 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.6 2003/06/13 22:39:06 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.7 2003/07/15 20:19:55 pwjones Exp $'
 
 !==============================================================================
 !
@@ -90,8 +90,8 @@
 ! !IROUTINE: ESMF_RegridConsByFieldBilinear - Constructs bilinear Regrid structure for a field pair
 
 ! !INTERFACE:
-      function ESMF_RegridConsByFieldBilinear(src_field, dst_field, &
-                                                     name, rc)
+      function ESMF_RegridConsByFieldBilinear(src_field, dst_field, name, rc, &
+                                              src_mask,  dst_mask)
 !
 ! !RETURN VALUE:
       type(ESMF_RegridType) :: ESMF_RegridConsByFieldBilinear
@@ -101,6 +101,10 @@
       type (ESMF_Field), intent(in) :: &
          src_field,          &! field to be regridded
          dst_field            ! destination (incl grid) of resulting regridded field
+
+      type (ESMF_Array), intent(in), optional :: &
+         src_mask,           &! optional masks to specify which points
+         dst_mask             !   take part in regridding
 
       character (len = *), intent(in) :: name
 
@@ -119,10 +123,16 @@
 !          Field to be regridded.
 !     \item[dst\_field]
 !          Resultant field where regridded source field will be stored.
-!     \item[[name]]
+!     \item[name]
 !          {\tt Regrid} name.
-!     \item[[rc]]
+!     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \item[[src\_mask]]
+!          Optional mask to specify or eliminate source points from
+!          regridding.  Default is that all source points participate. 
+!     \item[[dst\_mask]]
+!          Optional mask to specify or eliminate destination points from
+!          regridding.  Default is that all destination points participate. 
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
@@ -624,7 +634,7 @@
 
 ! !INTERFACE:
       function ESMF_RegridConsByBundleBilinear(src_bundle, dst_bundle, &
-                                                      name, rc)
+                                               name, rc, src_mask,  dst_mask)
 !
 ! !RETURN VALUE:
       type(ESMF_RegridType) :: ESMF_RegridConsByBundleBilinear
@@ -634,6 +644,10 @@
       type (ESMF_Bundle), intent(in) :: &
          src_bundle,          &! field bundle to be regridded
          dst_bundle            ! destination (incl grid) of resulting regridded bundle
+
+      type (ESMF_Array), intent(in), optional :: &
+         src_mask,           &! optional masks to specify which points
+         dst_mask             !   take part in regridding
 
       character (len = *), intent(in) :: name
 
@@ -655,6 +669,12 @@
 !          {\tt Regrid} name.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \item[[src\_mask]]
+!          Optional mask to specify or eliminate source points from
+!          regridding.  Default is that all source points participate. 
+!     \item[[dst\_mask]]
+!          Optional mask to specify or eliminate destination points from
+!          regridding.  Default is that all destination points participate. 
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO

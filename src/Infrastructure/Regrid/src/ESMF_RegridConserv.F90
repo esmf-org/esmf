@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.4 2003/06/12 19:17:06 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.5 2003/07/15 20:19:55 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.4 2003/06/12 19:17:06 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.5 2003/07/15 20:19:55 pwjones Exp $'
 
 !==============================================================================
 !
@@ -91,7 +91,9 @@
 
 ! !INTERFACE:
       function ESMF_RegridConsByFieldConserv(src_field, dst_field, &
-                                                     name, order, rc)
+                                             name, order, rc,      &
+                                             src_mask,  dst_mask)
+                                             !dst_frac)
 !
 ! !RETURN VALUE:
       type(ESMF_RegridType) :: ESMF_RegridConsByFieldConserv
@@ -107,6 +109,17 @@
       integer, intent(in) :: order ! order (numerical accuracy) of regrid
 
       integer, intent(out) :: rc
+
+      type (ESMF_Array), intent(in) :: &
+         src_mask,          &! logical masks to determine which points
+         dst_mask            !   take part in regridding
+
+      !type (ESMF_Array), intent(out) :: &
+      !   dst_frac            ! area fraction of destination grid cell 
+      !                       !   covered by unmasked source grid cells
+      !                       !   (eg ocean fraction in each atm cell for an
+      !                       !   ocean to atmosphere regridding)
+
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
@@ -126,8 +139,14 @@
 !     \item[order]
 !          Order of conservative scheme.  The algorithm supports both
 !          first (1) and second (2) order accurate schemes.
-!     \item[[rc]]
+!     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \item[[src\_mask]]
+!          Logical mask to denote which source grid points take part in 
+!          regridding.
+!     \item[[dst\_mask]]
+!          Logical mask to denote which destination grid points take part 
+!          in regridding.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
