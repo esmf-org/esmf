@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/11/15 21:37:55 jwolfe Exp $ 
+# $Id: makefile,v 1.2 2002/11/26 18:26:27 jwolfe Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -36,7 +36,7 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF))) \
             $(addsuffix .tex, $(basename $(SOURCEH)))
 MANSEC	  = Timeobj
-LIBBASE	  = libesmf
+LIBBASE	  = liboldworld
 DIRS	  = examples doc
 LOCDIR	  = src/Infrastructure/TimeMgmt/src
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))

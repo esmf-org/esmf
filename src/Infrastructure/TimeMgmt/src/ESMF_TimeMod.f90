@@ -1,11 +1,11 @@
-! $Id: ESMF_TimeMod.f90,v 1.1 2002/11/15 21:37:32 jwolfe Exp $
+! $Id: ESMF_TimeMod.f90,v 1.2 2002/11/26 18:26:13 jwolfe Exp $
       module ESMF_TimeMod
 !===============================================================================
 !BOP
 ! !MODULE: ESMF_TimeMod
 ! !USES:
 !jw	use ESMF_BasicUtilMod
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 	use ESMF_TODMod
 !
 ! !PUBLIC TYPES:
