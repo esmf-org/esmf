@@ -1,7 +1,8 @@
-# $Id: makefile,v 1.1 2003/09/18 13:34:38 cdeluca Exp $
+# $Id: makefile,v 1.2 2004/02/13 15:35:30 nscollins Exp $
 
 # leave alone.
-ALL: lib 
+ALL: build_here
+
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_DataMap.C
 # if you have F90 files in this directory, list them all on the line below.

@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.1 2004/01/26 17:43:59 nscollins Exp $
+# $Id: makefile,v 1.2 2004/02/13 15:34:58 nscollins Exp $
 
 # makefile template for the examples directory.
 
-ALL: 
+ALL:  build_examples
 
 CFLAGS    =
 FFLAGS    =

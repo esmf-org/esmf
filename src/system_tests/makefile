@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.4 2003/10/09 20:56:09 cdeluca Exp $ 
+# $Id: makefile,v 1.5 2004/02/13 15:38:43 nscollins Exp $ 
 
-all: system_tests
+ALL: build_system_tests
 
 LOCDIR   = src/system_tests
 

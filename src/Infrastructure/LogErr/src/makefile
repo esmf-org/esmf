@@ -1,7 +1,8 @@
-# $Id: makefile,v 1.3 2003/04/15 20:21:40 nscollins Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.4 2004/02/13 15:37:08 nscollins Exp $ 
 
-CFLAGS    = ${MPI_INCLUDE}
+ALL: build_here 
+
+CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    =
 
 SOURCEC	  = ESMC_LogErr.C

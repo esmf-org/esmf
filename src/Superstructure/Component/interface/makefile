@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.19 2003/10/22 21:00:50 cdeluca Exp $
+# $Id: makefile,v 1.20 2004/02/13 15:38:09 nscollins Exp $
 
 # Leave alone.
-ALL: lib 
+ALL: build_here 
 
 # Don't set these unless absolutely necessary - they've got to be
 # architecture and compiler independent and should be inherited
 # from the upper level makefile if possible.
-CFLAGS    = ${MPI_INCLUDE}
+CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.

@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.1 2003/09/19 17:00:03 cdeluca Exp $
+# $Id: makefile,v 1.2 2004/02/13 15:35:36 nscollins Exp $
 
 # leave alone.
-ALL: lib 
+ALL: build_here 
 
 # don't set these unless absolutely necessary - they've got to be
 #  architecture and compiler independent and should be inherited

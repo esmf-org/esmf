@@ -1,5 +1,6 @@
-# $Id: makefile,v 1.1 2003/09/17 21:26:29 cdeluca Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.2 2004/02/13 15:34:53 nscollins Exp $ 
+
+ALL: build_here 
 
 CFLAGS    =
 FFLAGS    =

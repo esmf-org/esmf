@@ -1,13 +1,13 @@
-# $Id: makefile,v 1.2 2003/09/19 22:13:45 cdeluca Exp $
+# $Id: makefile,v 1.3 2004/02/13 15:37:15 nscollins Exp $
 
 # leave alone.
-ALL: lib 
+ALL: build_here 
 
 # don't set these unless absolutely necessary - they've got to be
 #  architecture and compiler independent and should be inherited
 #  from the upper level makefile if possible.
 #  TODO:  move platform define to central esmf/build
-CFLAGS    = -D${ESMF_ARCH} ${MPI_INCLUDE}
+CFLAGS    += -D${ESMF_ARCH} ${MPI_INCLUDE}
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
