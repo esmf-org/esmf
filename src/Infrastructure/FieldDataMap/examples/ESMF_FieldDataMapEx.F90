@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapEx.F90,v 1.1 2004/06/04 08:20:34 nscollins Exp $
+! $Id: ESMF_FieldDataMapEx.F90,v 1.2 2004/06/08 13:15:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,6 +31,8 @@
       type(ESMF_FieldDataMap) :: fieldDM
       type(ESMF_IndexOrder) :: indexOrder
       type(ESMF_RelLoc) :: relativeLocation
+      integer :: dataRank, dataIndices(ESMF_MAXDIM), counts(ESMF_MAXDIM)
+
 
 
       ! return code
@@ -73,6 +75,21 @@
 
 
 !BOC
+      relativeLocation = ESMF_CELL_NECORNER
+      call ESMF_FieldDataMapSetDefault(fieldDM, ESMF_INDEX_IJK, &
+                                       horzRelloc=relativeLocation, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      print *, "FieldDataMap after set = "
+      call ESMF_FieldDataMapPrint(fieldDM, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
       call ESMF_FieldDataMapSetInvalid(fieldDM, rc=rc)
 !EOC
 
@@ -92,7 +109,9 @@
 !EOP
 
 !BOC
-      call ESMF_FieldDataMapSet(fieldDM, rc=rc)
+      relativeLocation = ESMF_CELL_CENTER
+      call ESMF_FieldDataMapSet(fieldDM, dataRank=2, &
+                                horzRelloc=relativeLocation, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -111,8 +130,11 @@
 !EOP
 
 !BOC
-      call ESMF_FieldDataMapGet(fieldDM, rc=rc)
-      ! print *, "Returned values from Field DataMap:"
+      call ESMF_FieldDataMapGet(fieldDM, dataRank, dataIndices, &
+                                horzRelloc=relativeLocation, rc=rc)
+      print *, "Returned values from Field DataMap:"
+      print *, "data rank: ", dataRank
+      print *, "mapping of grid to data indices: ", dataIndices
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
