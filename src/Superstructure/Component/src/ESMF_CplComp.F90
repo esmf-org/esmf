@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.28 2004/04/23 17:25:17 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.29 2004/04/30 14:01:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.28 2004/04/23 17:25:17 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.29 2004/04/30 14:01:38 theurich Exp $'
 
 !==============================================================================
 !
@@ -297,25 +297,25 @@
     
 
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp with VM enabled
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateVM(vm, name, config, configFile, &
-                                      clock, petList, rc)
+      function ESMF_CplCompCreateVM(vm, &
+        name, config, configFile, clock, petList, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CplComp) :: ESMF_CplCompCreateVM
 !
 ! !ARGUMENTS:
-      type(ESMF_VM),        intent(in)              :: vm
-      character(len=*), intent(in), optional :: name
-      type(ESMF_Config), intent(in), optional :: config
-      character(len=*), intent(in), optional :: configFile
-      type(ESMF_Clock), intent(in), optional :: clock
-      integer,              intent(in),    optional :: petList(:)
-      integer, intent(out), optional :: rc 
+      type(ESMF_VM),     intent(in)            :: vm
+      character(len=*),  intent(in),  optional :: name
+      type(ESMF_Config), intent(in),  optional :: config
+      character(len=*),  intent(in),  optional :: configFile
+      type(ESMF_Clock),  intent(in),  optional :: clock
+      integer,           intent(in),  optional :: petList(:)
+      integer,           intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
@@ -324,6 +324,9 @@
 !    
 !  The arguments are:
 !  \begin{description}
+!   \item[vm]
+!    VM of the component out of which this ESMF_CplCompCreate call is issued.
+!    This will become the parent VM of the created Coupler Component.
 !   \item[{[name]}]
 !    CplComp name.
 !   \item[{[config]}]
@@ -333,6 +336,10 @@
 !    CplComp-specific configuration filename. 
 !   \item[{[clock]}]
 !    CplComp-specific clock.
+!   \item[{[petList]}]
+!    List of PET in vm that the parent component is giving to the created child 
+!    component. If petList is not provided all of the parent's PETs will be 
+!    given to the child component.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -367,7 +374,7 @@
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
-                                vm=vm, petList=petList, clock=clock, rc=status)
+                                clock=clock, vm=vm, petList=petList, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "CplComp construction error"
           return

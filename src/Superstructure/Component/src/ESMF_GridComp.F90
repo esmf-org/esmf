@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.38 2004/04/23 17:25:17 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.39 2004/04/30 14:01:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.38 2004/04/23 17:25:17 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.39 2004/04/30 14:01:39 theurich Exp $'
 
 !==============================================================================
 !
@@ -305,29 +305,28 @@
     
 
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GridCompCreate - Create a new GridComp with VM enabled
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
       function ESMF_GridCompCreateVM(vm, &
-        name, gridcomptype, grid, clock, config, configFile, &
-        petList, rc)
+        name, gridcomptype, grid, clock, config, configFile, petList, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateVM
 !
 ! !ARGUMENTS:
       !external :: services
-      type(ESMF_VM),        intent(in)              :: vm
-      character(len=*),     intent(in),    optional :: name
+      type(ESMF_VM),           intent(in)              :: vm
+      character(len=*),        intent(in),    optional :: name
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
-      type(ESMF_Grid),      intent(in),    optional :: grid
-      type(ESMF_Clock),     intent(inout), optional :: clock
-      type(ESMF_Config),    intent(in),    optional :: config
-      character(len=*),     intent(in),    optional :: configFile
-      integer,              intent(in),    optional :: petList(:)
-      integer,              intent(out),   optional :: rc 
+      type(ESMF_Grid),         intent(in),    optional :: grid
+      type(ESMF_Clock),        intent(inout), optional :: clock
+      type(ESMF_Config),       intent(in),    optional :: config
+      character(len=*),        intent(in),    optional :: configFile
+      integer,                 intent(in),    optional :: petList(:)
+      integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_GridComp} and set the decomposition characteristics.
@@ -336,8 +335,9 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[name]
-!    GridComp name.
+!   \item[vm]
+!    VM of the component out of which this ESMF_GridCompCreate call is issued.
+!    This will become the parent VM of the created Gridded Component.
 !   \item[{[name]}]
 !    GridComp name.
 !   \item[{[gridcomptype]}]
@@ -352,11 +352,15 @@
 !    priority over filename.
 !   \item[{[configFile]}]
 !    GridComp-specific configuration filename. 
+!   \item[{[petList]}]
+!    List of PET in vm that the parent component is giving to the created child 
+!    component. If petList is not provided all of the parent's PETs will be 
+!    given to the child component.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 ! !REQUIREMENTS:
 
         ! local vars
