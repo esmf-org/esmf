@@ -1,0 +1,281 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: ESMF\_LogErr.F90,  Date: Thu Mar 27 16:05:15 EST 2003
+}
+
+ 
+%/////////////////////////////////////////////////////////////
+
+  ============================================================================\subsection{Fortran:  Module Interface Fortran Interface to Log class.  (Source File: ESMF\_LogErr.F90)}
+
+
+  
+  
+   The Fortran interface to the Log class is written in both Fortran and C/C++.
+   This file contains the interface code written in Fortran.  It also contains
+   some utility functions used by the Log class.
+  
+  ============================================================================
+  
+\bigskip{\sf PRIVATE TYPES:}
+\begin{verbatim} private
+ type:: ESMF_Log
+     sequence
+     integer oneLogErrFile     !An ESMF_Log object will write to one file if
+ 			      !oneLogErrFile is set to ESMF_LOG_TRUE.
+ 
+     integer standardOut       !An ESMF_Log object will write to the screen if
+ 			      !standardOut is set to ESMF_LOG_TRUE.
+ 
+     integer fortIsOpen        !If fortIsOpen is set to ESMF_LOG_TRUE, an 
+ 			      !ESMF_Log object has a fortran file open.
+ 
+     integer unitNumber        !Fortran unit number for output
+ 
+     integer numFilePtr        !Index into global array of Fortran unit numbers 
+ 
+     integer verboseSet        !An ESMF_Log object will write output only if
+ 			      !verbose is set to ESMF_LOG_TRUE.
+     
+     integer flushSet          !An ESMF_Log object will have its output flushed
+ 			      !if flushSet is set to ESMF_LOG_TRUE.
+ 
+     integer haltOnWarn        !An ESMF_Log object will halt on encountering
+ 			      !a warning if haltOnWarn is set to ESMF_LOG_TRUE. 
+ 
+     integer haltOnErr         !An ESMF_Log object will halt on encountering
+ 			      !an error if haltOnErr is set to ESMF_LOG_TRUE. 
+ 
+     character(len=32) nameLogErrFile !Name of an ESMF_Log objects's output file 
+ 
+ end type ESMF_Log\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+   !PUBLIC MEMBER Functions\subsubsection [ESMF\_LogInit] {ESMF\_LogInit - initialize an error object.}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} subroutine ESMF_LogInit(aLog,verbose, flush,standardOut,haltOnErr,haltOnWarn)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}  type(ESMF_Log), intent(in) :: aLog
+  integer, intent(inout),optional::verbose, flush, standardOut,haltOnErr,haltOnWarn \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+     Most of the Fortran wrapper routines for the C/C++ ESMC\_Log class are
+     written in C. This is the only routine that isn't. See the class design
+     section for the rational for doing this. 
+  
+     With the exception of the ESMF\_Log object, all the arguments are optional.
+     See the Examples section of the document for a discussion of how to use the
+     routine.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogCloseFortran] {ESMF\_LogCloseFortran}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} subroutine ESMF_LogCloseFortran(unitNumber)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     integer, intent(in) :: unitNumber\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This routine closes any log files that have been written to using
+   the Fortran interface.  It is called by by the C/C++ Log
+   method ESMC\_LogFinalize().
+   Note: This routine is not a module procedure
+   because it needs to be called from Log's C++ method and
+   F90 mangles the names of functions
+   inside modules.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogOpenFortran] {ESMF\_LogOpenFortran}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
+   implicit none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}   integer, intent(inout) ::  unitNumber !standard Fortran unit number for I/O
+ 
+   integer, intent(inout) ::  isOpen     !if file successfully opened
+ 				        !isOpen set to ESMF_LOG_TRUE	
+ 					!otherwise set to ESMF_LOG_FALSE
+ 
+   character (len=32), intent(in) :: nameLogFile
+      \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This routine opens the log file and is called by ESMC\_LogWrite.
+   See the ESMC\_LogErr.C file for more details.
+   This routine is not a module procedure because F90 mangles
+   the names of functions
+   inside modules and this routine is called by ESMC\_LogWrite() - a C++
+   method.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogPrintChar] {ESMF\_LogPrintChar - Prints a character and an optional }
+
+
+                                   message
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}  subroutine ESMF_LogPrintChar(unitNumber,charData,flushSet,msg,length)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+\bigskip{\em ARGUMENTS:}
+\begin{verbatim}   integer, intent(in)::unitNumber,flushSet !See ESMF_Log data type
+ 
+   character, intent(in)::charData          !character to be printed out
+ 
+   character(len=32), intent(in):: msg      !optional message; only
+ 					   !printed out if length is
+ 					   !greater than zero.\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This routine, and the routines that follow it, are used by ESMC\_LogPrint()
+   ESMC\_LogPrintHeader() in the Log class.  Ordinarily, these Log routines would
+   have just used fprintf.  However, because we needed to use the Fortran I/O 
+   libraries when calling Log from a Fortran code
+   (see the discussion about the class design), we had to make 
+   calls to ESMF\_LogPrintChar() and the subroutines below, in addition to
+   C's fprintf() (We still have to support C/C++, so we still need fprintf() ).
+   ESMF\_LogPrintChar() and the routines below are not particularly general,
+   but do the trick. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+   \subsubsection [ESMF\_LogPrintNewLine] {ESMF\_LogPrintNewLine - prints a newline character}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}  subroutine ESMF_LogPrintNewLine(unitNumber,flushSet)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+\bigskip{\em ARGUMENTS:}
+\begin{verbatim}   integer, intent(in)::unitNumber,flushSet  !see above\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Prints a newline character.  See ESMF\_LogPrintChar for more 
+   discussion 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMF\_LogPrintString] {ESMF\_LogPrintString - prints a string}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}  subroutine ESMF_LogPrintString(unitNumber,stringData,len1,flushSet,msg,len2)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+\bigskip{\em ARGUMENTS:}
+\begin{verbatim}   integer, intent(in)::unitNumber,flushSet,len1,len2
+   character(len=32), intent(in)::msg,stringData\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Prints a string; see ESMF\_LogPrintChar() for a fuller discussion 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogPrintInt] {ESMF\_LogPrintInt - prints an int}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}  subroutine ESMF_LogPrintInt(unitnumber,intData,flushSet,msg,length)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+\bigskip{\em ARGUMENTS:}
+\begin{verbatim}   integer, intent(in)::unitNumber,flushSet,intData
+   character(len=32), intent(in):: msg
+   !DESCRIPTION
+   Prints an integer; see ESMF\_LogPrintChar() for more details\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+\bigskip{\em ARGUMENTS:}
+\begin{verbatim}   integer, intent(in)::unitNumber,flushSet
+   real, intent(in):: floatData
+   character(len=32), intent(in):: msg\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Prints a real number; see ESMF\_LogPrintChar() for a longer discussion
+  
+%...............................................................

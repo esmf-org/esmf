@@ -1,0 +1,368 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: ESMC\_LogErrInterface.C,  Date: Fri Mar 28 13:11:41 EST 2003
+}
+
+ 
+%/////////////////////////////////////////////////////////////
+\subsubsection [ESMF\_LogCloseFile] {ESMF\_LogCloseFile - closes a file from Fortran code}
+
+
+  
+   !INTERFACE 
+   subroutine ESMF\_LogCloseFile(aLog)
+  
+\bigskip{\em ARGUMENTS:}
+\begin{verbatim}     typdef(ESMF\_Log) :: aLog
+   \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   Calls the method ESMC\_LogCloseFileForWrite to close aLog's 
+   log file.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMF\_LogOpenFile] {ESMF\_LogOpenFile - opens a log file}
+
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}   subroutine ESMF_LogOpenFile(aLog, numFile, name)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}    typdef(ESMF\_Log) :: aLog
+    integer :: numFile           !! set to either ESMF_SINGLE_FILE
+                                 !! or ESMF_MULTIPLE_FILE 
+    characlter(len=*) :: name    !! name of file\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+   This routine finds the first space in the array name and inserts a
+   a null character. It then calls ESMC\_LogOpenFileForWrote an ESMC\_Log method
+   for opening files.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogInfo] {ESMF\_LogInfo - writes miscellaneous information to }
+
+
+               a log file
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}     
+    ESMF\_LogInfo(aLog, fmt, ...)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}    typedef(ESMF\_LogInfo) :: aLog   ! log object
+    character(len=*) :: fmt         !c-style character descriptior\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+    This routine allows the user to write miscellaneous information the
+    Log file. It uses a printf style character descriptor, e.g. 
+    ESMF\_LogInfo(aLog,"Hi there, %s ", shep), where shep here would be
+    a character string. The routine takes a variable number of arguments,
+    so that any number of data items can be written to the Log file.
+    Currently, only character, strings, integers, and reals are supported.
+    However, field widths, precisions, and flags are ignored.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMF\_LogWarnMsg] {ESMF\_LogWarnMsg - writes a warning message to the log file}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}    subroutine ESMF\_LogWarnMsg(aLog, errCode, line,file,dir,msg)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      typdef(ESMF\_Log)::aLog
+      integer :: errCode         !integer value for error code         
+      character(len=*) :: msg    !msg written to log file
+      integer :: line            !line number of warning; argument
+                                 !supplied by macro
+      character(len=*) :: file   !file where warning occurred in;
+                                 !argument supplied by macro
+      character(len=*) :: dir    !directory where warning occurred in;
+                                 !argument supplied by macro\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine writes a warning message to the log file.  This warning
+      message consists of the erroCode, a description of the warning, the 
+      line number, file, and directory of the error, and a message. A 
+      preprocessor macro adds the predefined preprocessor symbolic
+      constants \_\_LINE\_\_, \_\_FILE\_\_, and \_\_DIR\_\_.
+      The macro operates on
+      the file from which these routines are called.  Note,
+      the value of \_\_DIR\_\_ 
+      must be suppliled by the user (usually done in
+      the makefile.).  By default, execution continues after encountering
+      a warning, but by calling the routine ESMF\_LogWarnHalt(), the user
+      can halt on warnings.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogWarn] {ESMF\_LogWarn - writes a warnng message to log file}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      ESMF\_LogWarn(aLog, errCode)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     typdef(ESMF\_Log) :: aLog
+     integer :: errCode\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+     This routine is identical to ESMF\_LogWarnMsg, except a msg is
+     not written to the log file.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogFlush] {ESMF\_LogFlush - flushes output}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      ESMF\_logflush(aLog)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      typdef(ESMF\_Log) :: aLog\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine calls the Log method ESMC\_LogFlush() which sets a flag
+      that causes all output from the buffers.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogNotFlush] {ESMF\_LogNotFlush - prevents output from being flushed}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      ESMF\_LogNotFlush(aLog)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      typdef(ESMF\_Log) :: aLog\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine calls the Log method ESMC\_LogNotFlush() which sets a flag
+      that turns off flushing. By default, this flag is set.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogVerbose] {ESMF\_LogVerbose - causes output to be written to the Log}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}     ESMF\_LogVerbose(aLog)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      typdef(ESMF\_Log) :: aLog\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine sets a flag that causes all output associated with
+      the aLog ESMC\_Log handle to be written. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogNotVerbose] {ESMF\_LogNotVerbose - causes output not to be written to the Log}
+
+
+                         
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}     ESMF\_LogVerbose(aLog)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      typdef(ESMF\_Log) :: aLog\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine sets a flag that forces all output associated with
+      the aLog ESMC\_Log handle from being written. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [LogWrite] {LogWrite - Fortran style method to write to log file.}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      LogWrite(aLog)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     typdef(ESMF\_Log) :: aLog\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This function called from with a Fortran write statement, e.g.
+      write(LogWrite(aLog),*)"Hi".  The LogWrite function appends some
+      header information (time,date etc.) to what ever is printed out
+      from the write, e.g. Hi. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMF\_LogErrMsg] {ESMF\_LogErrMsg - writes a err message to the log file}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}    subroutine ESMF\_LogErrMsg(aLog, errCode, line,file,dir,msg)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      typdef(ESMF\_Log)::aLog
+      integer :: errCode         !integer value for error code
+      character(len=*) :: msg    !msg written to log file
+      integer :: line            !line number of warning; argument
+                                 !supplied by macro
+      character(len=*) :: file   !file where warning occurred in;
+                                 !argument supplied by macro
+      character(len=*) :: dir    !directory where warning occurred in;
+                                 !argument supplied by macro\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine writes a warning message to the log file.  This warning
+      message consists of the erroCode, a description of the warning, the
+      line number, file, and directory of the error, and a message. A
+      preprocessor macro adds the predefined preprocessor symbolic
+      constants \_\_LINE\_\_, \_\_FILE\_\_, and \_\_DIR\_\_.
+      The macro operates on
+      the file from which these routines are called.  Note,
+      the value of \_\_DIR\_\_
+      must be suppliled by the user (usually done in
+      the makefile).  By default, execution continues after encountering
+      a warning, but by calling the routine ESMF\_LogWarnHalt(), the user
+      can halt on warnings.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection [ESMF\_LogErr] {ESMF\_LogErr - writes a warnng message to log file}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      ESMF\_LogErr(aLog, errCode)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}     typdef(ESMF\_Log) :: aLog
+     integer :: errCode\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+     This routine is identical to ESMF\_LogErrMsg, except a msg is
+     not written to the log file.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMF\_LogHaltOnErr] {ESMF\_LogHaltOnErr - program halts on encountering an error}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      subroutine ESMF_LogHaltOnErr(aLog)
+   !ARGUMENTS;
+      typdef(ESMF\_Log) :: aLog\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine calls a Log method that sets a flag to stop execution on
+      reaching an error. This is the default behavior of the Log class. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMF\_LogNotHaltOnErr] {ESMF\_LogNotHaltOnErr - program does not halt}
+
+
+                                     on encountering an error
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      subroutine ESMF\_LogNotHaltOnErr(aLog)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      typdef(ESMF\_Log) :: aLog\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine calls a Log method that sets a flag to prevent the program
+      from stopping reaching an error.  
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMF\_LogHaltOnWarn] {ESMF\_LogHaltOnWarn - program halts on encountering a warning}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}      subroutine ESMF\_LogHaltOnWarn(aLog)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      typdef(ESMF\_Log) :: aLog\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      This routine calls a Log method that sets a flag to stop execution on
+      reaching a warning. 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection [ESMF\_LogNotHaltOnWarn] {ESMF\_LogNotHaltOnWarn - program does not halt}
+
+
+                                     on encountering a warning
+  
+   !INTERFACE;
+      subroutine ESMF\_LogNotHaltOnWarn(aLog)             
+\bigskip{\em ARGUMENTS:}
+\begin{verbatim}      typdef(ESMF\_Log) :: aLog                                        
+                                \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+ 
+      This routine calls a Log method that sets a flag to prevent the program
+      from stopping reaching an error.                            
+%...............................................................

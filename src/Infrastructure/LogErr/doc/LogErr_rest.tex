@@ -1,0 +1,25 @@
+% $Id: LogErr_rest.tex,v 1.1 2003/03/28 21:33:09 shep_smith Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+%\subsubsection{Restrictions}
+
+<List class restrictions due to design or implementation strategies.>
+
+There are a few restrictions to keep in mind.  First, the error handling and
+warning routines, ESMF\_LogErr(), ESMF\_LogErrMsg(), ESMF\_LogWarn(),
+and ESMF\_LogWarnErr(),
+are expanded using the standard fortran and C/C++ preprocessing  macro's the
+predefined symbolic constants \_\_LINE\_\_ and \_\_FILE\_\_.  If
+your preprocessor is not working properly, this expansion will not be done properly and
+the line and file names will not appear correctly when writing out error and warning
+information. We also rely on the C and the Fortran preprocessor
+to set a variety of symbolic constants (defined in ESMF\_LogConstants.inc and 
+ESMF\_ErrConstants.inc).  Again, if your preocessor is not working properly, these
+constants will not be set properly. 

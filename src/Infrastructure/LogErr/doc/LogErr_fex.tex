@@ -1,0 +1,94 @@
+% $Id: LogErr_fex.tex,v 1.1 2003/03/28 21:33:09 shep_smith Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+%\subsection{F90 Use and Examples}
+
+%<Detailed examples of F90 usage of the class.>
+
+
+\subsubsection{Example 1. Simple Example.}
+
+In this example we initialize a Log object (aLog) and write a simple message
+to standard out.
+
+{\tt
+\begin{verbatim}
+#include "ESMF_LogMacros.inc"
+#include "ESMF_LogConstants.inc"
+#include "ESMF_ErrConstants.inc"
+type(ESMF_Log) :: aLog
+intger int_num=86
+call ESMF_LogInit(aLog)
+call ESMF_LogInfo(aLog,"Hi there agent %d , int_num)
+\end{verbatim}
+}\tt
+
+\subsubsection{Example 2. Simple Error Handling.}
+
+Here we illustrate simple error handling.  Error output goes to the
+file anErr.txt.
+
+{\tt
+\begin{verbatim}
+#include "ESMF_LogMacros.inc"
+#include "ESMF_LogConstants.inc"
+#include "ESMF_ErrConstants.inc"
+type(ESMF_Log) :: anErr
+integer returnCode 
+call ESMF_LogInit(anErr)
+call ESMF_LogOpenFile(anErr,ESMF_SINGLE_LOG_FILE,"anErr.txt")
+returnCode=foo()
+if (returnCode == ESMF_FATAL) call ESMF_LogErr(anErr, ESMF_FATAL) 
+call ESMF_LogCloseFile(anErr)
+\end{verbatim}
+}\tt
+
+\subsubsection{Example 3. More error handling.}
+
+This example combines writing
+to a log file
+and error handling.
+All output to anErr.txt is flushed. 
+Initially, we halt execution on
+warnings, continue
+execution on errors.  Later in the code we reverse this.
+
+{\tt
+\begin{verbatim}
+#include "ESMF_LogMacros.inc"
+#include "ESMF_LogConstants.inc"
+#include "ESMF_ErrConstants.inc"
+type(ESMF_Log) :: anErr,aLog
+integer returnCode 
+call ESMF_LogInit(anErr,haltOnErr=ESMF_LOG_FALSE,haltOnWarn=ESMF_TRUE, &
+                  flush_ESMF_LOG_TRUE)
+call ESMF_LogInit(aLog)
+call ESMF_LogOpenFile(anErr,ESMF_SINGLE_LOG_FILE,"anErr.txt")
+write(LogWrite(aLog),*)'We are about to execute foo.'
+returnCode=foo()
+if (returnCode == ESMF_FATAL) then
+  call ESMF_LogErrMsg(anErr, ESMF_FATAL,"Encountered an error, but keep  &
+                      going!")
+end if
+returnCode=foo2()
+if(returnCode == ESMF_WARNING) then
+  call ESMF_LogWarnMsg(anErr,ESMC_WARNING,"Encountered a warning, but we  &
+                       stop execution!")
+end if
+call ESMF_LogHaltOnErr(anErr)
+call ESMF_LogNotHaltOnWarn(anErr)
+returnCode=foo()
+if (returnCode == ESMF_FATAL) call ESMF_LogErr(anErr, ESMF_FATAL,)
+returnCode=foo2()  !we never get here
+if(returnCode == ESMF_WARNING) call ESMF_LogWarn(anErr,ESMC_WARNING)
+call ESMF_LogCloseFile(anErr)
+\end{verbatim}
+}\tt
+
