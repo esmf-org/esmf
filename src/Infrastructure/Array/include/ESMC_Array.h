@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.17 2003/10/22 02:20:52 cdeluca Exp $
+// $Id: ESMC_Array.h,v 1.18 2003/10/25 04:03:04 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,17 +41,10 @@
 #include <ESMC_LocalArray.h>  // functions to interoperate F90/C++ arrays
 
 // !PUBLIC TYPES:
- class ESMC_ArrayConfig;
  class ESMC_Array;
 
 
 // !PRIVATE TYPES:
-
-// class configuration type
-class ESMC_ArrayConfig {
-   private:
-//   < insert resource items here >
-};
 
 // private static data - address of fortran callback funcs
 extern "C" {
@@ -89,10 +82,6 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
             int *lbounds, int *ubounds, int *offsets,
             int halo_widths);
     int ESMC_ArrayDestruct(void);
-
- // optional configuration methods
-    int ESMC_ArrayGetConfig(ESMC_ArrayConfig *config) const;
-    int ESMC_ArraySetConfig(const ESMC_ArrayConfig *config);
 
  // optional index values for subsetting and handling arrays standalone
     int ESMC_ArrayGetAxisIndex(ESMC_DomainType dt, struct ESMC_AxisIndex *index) const;

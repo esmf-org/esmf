@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.3 2003/10/08 21:36:51 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.4 2003/10/25 04:03:04 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,6 @@
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
 
 // !PUBLIC TYPES:
- class ESMC_LocalArrayConfig;
  class ESMC_LocalArray;
 
  // dummy structure which is at least as big as an F90 pointer on

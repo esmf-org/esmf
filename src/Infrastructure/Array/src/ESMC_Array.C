@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.19 2003/10/10 17:59:29 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.20 2003/10/25 04:03:04 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -453,61 +453,6 @@
 
  } // end ESMC_ArrayDestruct
 
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArrayGetConfig - get configuration info from a Array
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_ArrayConfig *config) const {  // out - resources
-//
-// !DESCRIPTION:
-//    Returns the set of resources the {\tt ESMC\_Array} object was configured with.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-    int rc = ESMF_FAILURE;
-
-    return rc;
- } // end ESMC_ArrayGetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArraySetConfig - set configuration info for a Array
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArraySetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const ESMC_ArrayConfig *config) {     // in - resources
-//
-// !DESCRIPTION:
-//    Configures the {\tt ESMC\_Array} object with set of resources given.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-    int rc = ESMF_FAILURE;
-
-    return rc;
-
- } // end ESMC_ArraySetConfig
 
 //-----------------------------------------------------------------------------
 //BOP
