@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2003/04/18 17:18:32 flanigan Exp $
+# $Id: makefile,v 1.26 2003/04/23 17:47:07 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -185,6 +185,13 @@ ranlib:
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
 	-${RM} -f $(ESMF_LIBDIR)/*
+
+# esmf_coupled_wave/demo target.
+demo: esmf_coupled_wave
+
+esmf_coupled_wave: chkopts build_libs chkdir_tests
+	$(MAKE) BOPT=$(BOPT) SYSTEM_TEST=74558 system_tests
+
 
 # ------------------------------------------------------------------
 # All remaining actions are intended for ESMF developers only.
