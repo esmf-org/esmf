@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.1 2001/11/13 18:35:48 dneckels Exp $"
+"$Id: conf.h,v 1.2 2001/12/21 21:03:36 dneckels Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -23,7 +23,7 @@
 #define ESMC_USE_SHARED_MEMORY
 
 #define ESMC_HAVE_OMP_THREADS 1
-#define ESMC_HAVE_PCL 1
+#undef ESMC_HAVE_PCL 
 
 #define ESMC_HAVE_MPI 1
 
