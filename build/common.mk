@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.9 2003/09/17 17:05:40 svasquez Exp $
+#  $Id: common.mk,v 1.10 2003/09/17 20:42:47 flanigan Exp $
 #
 #  common.mk
 #
@@ -575,10 +575,24 @@ build_examples: chkopts chkdir_examples
 
 tree_build_examples: $(EXAMPLES_BUILD) 
 
-$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(EXAMPLES_DEPEND) 
+#
+#  Examples Link commands
+#
+$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o 
 	-$(SL_F_LINKER) -o $@ $^ -lesmf  ${F90CXXLIBS} \
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
+	rm -f  $^
+	@echo ""
+	@echo "****************************************"
+	@echo ""
+
+
+$(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o  
+	-${SL_C_LINKER} -g -o $@ $^ \
+        -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+        $(SL_LINKOPTS)
+	rm -f $^
 	@echo ""
 	@echo "****************************************"
 	@echo ""
