@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.16 2003/04/24 22:30:46 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.17 2003/04/25 15:42:15 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -125,6 +125,8 @@ typedef int ESMC_CommType;
     int ESMC_DELayoutGetDEPosition(ESMC_DE *de, int *x, int *y, int *z) const;
     int ESMC_DELayoutGetDEPosition(int *x, int *y) const;
     int ESMC_DELayoutGetDEID(int *deid) const;
+    int ESMC_DELayoutGetDEIDat(int x, int y, int *deid) const;
+    int ESMC_DELayoutGetDEIDat(int x, int y, int z, int *deid) const;
     int ESMC_DELayoutGetParentDEID(int childdeid, ESMC_DELayout *parent, 
                                                         int *parentdeid) const;
     int ESMC_DELayoutGetChildDEID(int parentdeid, ESMC_DELayout *child, 
@@ -160,6 +162,8 @@ typedef int ESMC_CommType;
 
     int ESMC_DELayoutAllGatherVI(int *sndArray, int  sndLen, 
 				 int *rcvArray, int *rcvLen, int *rcvDispls);
+    int ESMC_DELayoutAllGatherVF(float *sndArray, int  sndLen, 
+				 float *rcvArray, int *rcvLen, int *rcvDispls);
     int ESMC_DELayoutAllReduce(int *dataArray, int *result, int arrayLen,
 			       ESMC_Op op);
     int ESMC_DELayoutSendRecv(void *sbuf, void *rbuf, int snum, int rnum, 

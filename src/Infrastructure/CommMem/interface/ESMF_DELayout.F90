@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.16 2003/04/24 22:30:49 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.17 2003/04/25 15:42:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,12 +87,12 @@
       !public ESMF_DELayoutGet
       public ESMF_DELayoutGetSize
       public ESMF_DELayoutGetDEPosition
-      public ESMF_DELayoutGetDEID
+      public ESMF_DELayoutGetDEID, ESMF_DELayoutGetDEIDat
       public ESMF_DELayoutGetParentDEID, ESMF_DELayoutGetChildDEID
       public ESMF_DELayoutGetDEExists
       public ESMF_DELayoutGetNumDEs
       public ESMF_DELayoutSetAxisIndex
-      public ESMF_DELayoutGatherArrayI
+      public ESMF_DELayoutGatherArrayI, ESMF_DELayoutGatherArrayR
  
       public ESMF_DELayoutCheckpoint
       public ESMF_DELayoutRestore
@@ -104,13 +104,13 @@
       public ESMF_DELayoutSendRecv
       public ESMF_DELayoutBcast
       public ESMF_DELayoutAllReduce
-      public ESMF_DELayoutAllGatherVI
+      public ESMF_DELayoutAllGatherVI, ESMF_DELayoutAllGatherVR
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.16 2003/04/24 22:30:49 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.17 2003/04/25 15:42:16 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -444,6 +444,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutDestroy
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutDestroy(layout, rc)
 !
@@ -494,6 +496,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutSetData - < desc here >
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutSetData(layout, rc)
 !
@@ -533,6 +537,8 @@
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGet - <desc here>
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutGet(layout, rc)
 !
@@ -569,6 +575,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGetNumDEs - return number of DEs in layout
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutGetNumDEs(layout, nDEs, rc)
 !
@@ -607,6 +615,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGetSize - return the Nx, Ny counts in a layout
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutGetSize(layout, nx, ny, rc)
 !
@@ -648,6 +658,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGetDEPosition
 ! !INTERFACE:
       subroutine ESMF_DELayoutGetDEPosition(layout, x, y, rc)
 !
@@ -688,6 +699,52 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGetDEIDat
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutGetDEIDat(layout, x, y, id, rc)
+!
+! TODO: overload this with a real 3d layout version that takes z
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      integer, intent(in) :: x, y             
+      integer, intent(out) :: id
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!      Returns information about the {\tt DELayout}. 
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutGetDEIDat(layout, x, y, 0, id, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutGetDEIDat error"
+        return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DELayoutGetDEIDat
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutGetDEID
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutGetDEID(layout, id, rc)
 !
@@ -728,6 +785,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGetParentDEID
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutGetParentDEID(child, childid, parent, parentid, rc)
 !
@@ -772,6 +831,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGetChildDEID
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutGetChildDEID(parent, parentid, child, childid, rc)
 !
@@ -816,6 +877,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGetDEExists
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutGetDEExists(layout, deid, other, exists, rc)
 !
@@ -860,9 +923,11 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutSetAxisIndex
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutSetAxisIndex(layout, global_counts, decompids, &
-                                         AIPtr, rc)
+                                           AIPtr, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
@@ -872,9 +937,8 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!     Returns information about the layout.  For queries where the caller
-!     only wants a single value, specify the argument by name.
-!     All the arguments after the layout input are optional to facilitate this.
+!    Set local/global information
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -911,9 +975,11 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGatherArrayI
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutGatherArrayI(layout, DistArray, decompids, &
-                                         AIPtr, AIPtr2, GlobalArray, rc)
+                                           AIPtr, AIPtr2, GlobalArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
@@ -925,9 +991,7 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!     Returns information about the layout.  For queries where the caller
-!     only wants a single value, specify the argument by name.
-!     All the arguments after the layout input are optional to facilitate this.
+!     Performs an MPI-like Array Gather to a single processor for an int array.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -960,11 +1024,11 @@
 !       Routine which interfaces to the C++ routine.
         size_decomp = size(decompids)
         call c_ESMC_DELayoutGatherArrayI(layout, DistArray, decompids, &
-                                       size_decomp, AIPtr, AIPtr2, &
-                                       GlobalArray, status)
+                                         size_decomp, AIPtr, AIPtr2, &
+                                         GlobalArray, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutGatherArrayI error"
-          return
+          ! Do *NOT* return before we put the +1 back.
         endif
 
 ! add one back to location parts of indices to translate from C++
@@ -976,9 +1040,81 @@
         enddo
 
 !       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (rcpresent) rc = status
 
         end subroutine ESMF_DELayoutGatherArrayI
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutGatherArrayR
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutGatherArrayR(layout, DistArray, decompids, &
+                                           AIPtr, AIPtr2, GlobalArray, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      real(ESMF_IKIND_R4), dimension(:), intent(in) :: DistArray
+      integer, dimension(:), intent(in) :: decompids
+      type(ESMF_AxisIndex), dimension(:) :: AIPtr
+      type(ESMF_AxisIndex), dimension(:) :: AIPtr2
+      real(ESMF_IKIND_R4), dimension(:), intent(out) :: GlobalArray
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!     Performs an MPI-like Array Gather to a single processor for a real array.
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+!       Local variables.
+        integer :: size_decomp              ! size of the decompids array
+        integer :: size_AI                  ! size of the axis indices arrays
+        integer :: i
+
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+! subtract one from location parts of indices to translate to C++
+        size_AI = size(AIPtr)
+        do i = 1,size_AI
+          AIPtr(i)%l  = AIPtr(i)%l  - 1
+          AIPtr(i)%r  = AIPtr(i)%r  - 1
+          AIPtr2(i)%l = AIPtr2(i)%l - 1
+          AIPtr2(i)%r = AIPtr2(i)%r - 1
+        enddo
+
+!       Routine which interfaces to the C++ routine.
+        size_decomp = size(decompids)
+        call c_ESMC_DELayoutGatherArrayR(layout, DistArray, decompids, &
+                                       size_decomp, AIPtr, AIPtr2, &
+                                       GlobalArray, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutGatherArrayR error"
+          ! Do *NOT* return before we put the +1 back.
+        endif
+
+! add one back to location parts of indices to translate from C++
+        do i = 1,size_AI
+          AIPtr(i)%l  = AIPtr(i)%l  + 1
+          AIPtr(i)%r  = AIPtr(i)%r  + 1
+          AIPtr2(i)%l = AIPtr2(i)%l + 1
+          AIPtr2(i)%r = AIPtr2(i)%r + 1
+        enddo
+
+!       set return code if user specified it
+        if (rcpresent) rc = status
+
+        end subroutine ESMF_DELayoutGatherArrayR
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -987,6 +1123,8 @@
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutCheckpoint
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutCheckpoint(layout, iospec, rc)
 !
@@ -1023,6 +1161,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutRestore
+!
 ! !INTERFACE:
       function ESMF_DELayoutRestore(name, iospec, rc)
 !
@@ -1070,6 +1210,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutWrite
+!
 ! !INTERFACE:
       subroutine ESMF_DELayoutWrite(layout, iospec, rc)
 !
@@ -1107,6 +1249,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutRead
+!
 ! !INTERFACE:
       function ESMF_DELayoutRead(name, iospec, rc)
 !
@@ -1150,7 +1294,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-!
+! !IROUTINE: ESMF_DELayoutPrint
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutPrint(layout, options, rc)
@@ -1199,11 +1343,11 @@
 
 !------------------------------------------------------------------------------
 !BOP
-!
+! !IROUTINE: ESMF_DELayoutAllReduce
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutAllReduce(layout, dataArray, result, arrayLen, &
-                                      op, rc)
+                                        op, rc)
 
 ! TODO: rename to ESMF_DELayoutAllReduceI for "integer" version ?
 !
@@ -1245,14 +1389,16 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutSendRecv
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutSendRecv(layout, sarray, rarray, snum, &
                                       	rnum, sde_index, rde_index, rc)
 !
+!  TODO: rename SendRecvR for real
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(4), intent(in) :: sarray(:), rarray(:)
+      real(ESMF_IKIND_R4), intent(in) :: sarray(:), rarray(:)
       integer, intent(in) :: snum
       integer, intent(in) :: rnum
       integer, intent(in) :: sde_index, rde_index
@@ -1290,6 +1436,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutBcast
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutBcast(layout, array, num, &
@@ -1297,7 +1444,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(4), intent(in) :: array
+      real(ESMF_IKIND_R4), intent(in) :: array
       integer, intent(in) :: num
       integer, intent(in) :: rootde_index
       integer, intent(out), optional :: rc 
@@ -1334,7 +1481,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-!
+! !IROUTINE: ESMF_DELayoutAllGatherVI - Perform an "all-gather" for int arrays
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutAllGatherVI(layout, sndArray, sndLen, &
@@ -1378,6 +1525,53 @@
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
       end subroutine ESMF_DELayoutAllGatherVI
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGatherVR - Perform an "all-gather" for real arrays
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutAllGatherVR(layout, sndArray, sndLen, &
+                                        rcvArray, rcvLen, rcvDispls, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      real, intent(in) :: sndArray(:)
+      integer, intent(in) :: sndLen
+      real, intent(out) :: rcvArray(:)
+      integer, intent(in) :: rcvLen(:)
+      integer, intent(in) :: rcvDispls(:)
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!     Perform an MPI-like Allgatherv for real arrays across a layout.
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutAllGatherVR(layout, sndArray, sndLen, &
+                                      rcvArray, rcvLen, rcvDispls, status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutAllGatherVR error"
+          return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutAllGatherVR
 
       end module ESMF_DELayoutMod
 

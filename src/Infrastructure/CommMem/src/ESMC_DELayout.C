@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.28 2003/04/24 23:23:15 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.29 2003/04/25 15:42:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.28 2003/04/24 23:23:15 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.29 2003/04/25 15:42:17 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1399,6 +1399,80 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_DELayoutGetDEIDat - get DE ID at position (x,y,z)
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetDEIDat(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int x,               // in - x position of DE in layout
+      int y,               // in - y position of DE in layout
+      int z,               // in - z position of DE in layout
+      int *deid) const   { // out - DE ID at (x,y,z)
+//
+// !DESCRIPTION:
+//    returns DE at position (x,y,z) in layout
+//
+//EOP
+// !REQUIREMENTS:  
+
+  if (x >= 0 && x < length[0] &&
+      y >= 0 && y < length[1] &&
+      z >= 0 && z < length[2] &&
+      deid != NULL) {
+    *deid = layout[x][y][z].ESMC_DEGetESMFID(deid);
+    return(ESMF_SUCCESS);
+  }
+  else {
+    // TODO: log error
+    if(deid != NULL)  
+       *deid = -1; 
+    return(ESMF_FAILURE);
+  }
+
+ } // end ESMC_DELayoutGetDEIDat
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetDEIDat - get DE ID at position (x,y)
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetDEIDat(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int x,               // in - x position of DE in layout
+      int y,               // in - y position of DE in layout
+      int *deid) const   { // out - DE ID at (x,y)
+//
+// !DESCRIPTION:
+//    returns DE at position (x,y) in layout
+//
+//EOP
+// !REQUIREMENTS:  
+
+  if (x >= 0 && x < length[0] &&
+      y >= 0 && y < length[1] &&
+      deid != NULL) {
+    *deid = layout[x][y][0].ESMC_DEGetESMFID(deid);
+    return(ESMF_SUCCESS);
+  }
+  else {
+    // TODO: log error
+    if(deid != NULL)  
+       *deid = -1; 
+    return(ESMF_FAILURE);
+  }
+
+ } // end ESMC_DELayoutGetDEIDat
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_DELayoutGetDEID - get ID of our DE
 //
 // !INTERFACE:
@@ -2365,6 +2439,45 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   return(rc);
 
  } // end ESMC_DELayoutAllGatherVI
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutAllGatherVF - Perform MPI-like Allgatherv of equally-sized integer data arrays across a layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutAllGatherVF(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      float *sndArray,         // in  - integer send data array
+      int  sndLen,             // in  - length of send data array
+      float *rcvArray,         // out - gathered data array
+      int *rcvLen,             // in  - array of receive data array lengths
+      int *rcvDispls) {        // in  - array of rcvArray displacements
+//
+// !DESCRIPTION:
+//    Perform MPI-like Allgatherv of integer data arrays
+//    across all DEs in a layout
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+  // TODO: make comm public and invoke directly rather than at DELayout level ?
+  //       (does not depend on any DELayout knowledge)
+
+  // perform Allgatherv operation across all DEs in the layout
+  int rc;
+  rc = comm.ESMC_CommAllGatherV(sndArray, sndLen, rcvArray, rcvLen, rcvDispls,
+                                ESMC_FLOAT);
+  if (rc != ESMF_SUCCESS) {
+    cout << "ESMC_DELayoutAllGatherVF() error" << endl;
+  }
+
+  return(rc);
+
+ } // end ESMC_DELayoutAllGatherVF
 
 //-----------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.17 2003/04/24 22:30:48 nscollins Exp $
+// $Id: ESMC_DELayout_F.C,v 1.18 2003/04/25 15:42:16 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,6 +77,11 @@ extern "C" {
            *status = (*ptr)->ESMC_DELayoutGetDEID(id);
        }
 
+       void FTN(c_esmc_delayoutgetdeidat)(ESMC_DELayout **ptr, int *x,
+                                  int *y, int *z, int *id, int *status) {
+           *status = (*ptr)->ESMC_DELayoutGetDEIDat(*x, *y, *z, id);
+       }
+
        void FTN(c_esmc_delayoutgetparentdeid)(ESMC_DELayout **child, int *cid, 
                                             ESMC_DELayout **parent, int *pid,
                                             int *status) {
@@ -117,6 +122,17 @@ extern "C" {
                                                        AIPtr2, GlobalArray);
        }
 
+       void FTN(c_esmc_delayoutgatherarrayr)(ESMC_DELayout **ptr,
+                                             float *DistArray, int *decompids, 
+                                             int *size_decomp, 
+                                             ESMC_AxisIndex *AIPtr, 
+                                             ESMC_AxisIndex *AIPtr2, 
+                                             float *GlobalArray, int *status) {
+           *status = (*ptr)->ESMC_DELayoutGatherArrayF(DistArray, decompids, 
+                                                       *size_decomp, AIPtr,
+                                                       AIPtr2, GlobalArray);
+       }
+
        void FTN(c_esmc_delayoutprint)(ESMC_DELayout **ptr, char *opts,
                                       int *status){
            *status = (*ptr)->ESMC_DELayoutPrint();
@@ -146,6 +162,14 @@ extern "C" {
                                  int *rcvarray, int *rlen, int *rcvdispls, 
                                  int *status) {
            *status = (*ptr)->ESMC_DELayoutAllGatherVI(sndarray, *slen,
+                                                    rcvarray,  rlen, rcvdispls);
+       }
+
+       void FTN(c_esmc_delayoutallgathervr)(ESMC_DELayout **ptr,
+                                 float *sndarray, int *slen, 
+                                 float *rcvarray, int *rlen, int *rcvdispls, 
+                                 int *status) {
+           *status = (*ptr)->ESMC_DELayoutAllGatherVF(sndarray, *slen,
                                                     rcvarray,  rlen, rcvdispls);
        }
 };
