@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.24 2003/02/21 14:59:45 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.25 2003/02/21 21:17:59 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,6 +81,18 @@ extern "C" {
          *status = ESMF_SUCCESS;
      }
 
+     void FTN(c_esmc_arraygettype)(ESMC_Array **ptr, int *type, int *status) {
+      
+         *type = (*ptr)->ESMC_ArrayGetType();
+         *status = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_arraygetkind)(ESMC_Array **ptr, int *kind, int *status) {
+      
+         *kind = (*ptr)->ESMC_ArrayGetKind();
+         *status = ESMF_SUCCESS;
+     }
+
      void FTN(c_esmc_arraydestroy)(ESMC_Array **ptr, int *status) {
          *status = ESMC_ArrayDestroy(*ptr);
      }
@@ -100,6 +112,14 @@ extern "C" {
           *status = (*ptr)->ESMC_ArrayRedist(*layout, rank_trans, *size_rank_trans,
                                              olddecompids, decompids, *size_decomp,
                                              *RedistArray);
+     }
+
+     void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_Layout **layout,
+                                int *decompids,  int *size_decomp,
+                                ESMC_AxisIndex **AI_exc, ESMC_AxisIndex **AI_tot,
+                                int *status) {
+          *status = (*ptr)->ESMC_ArrayHalo(*layout, decompids, *size_decomp,
+                                           *AI_exc, *AI_tot);
      }
 
      void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
