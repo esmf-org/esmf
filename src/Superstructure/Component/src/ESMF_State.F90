@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.44 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.45 2003/08/01 15:12:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -259,7 +259,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.44 2003/07/17 20:02:47 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.45 2003/08/01 15:12:15 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1127,7 +1127,7 @@ end function
         endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, bname, dataitem, bindex, status)
+        exists = ESMF_StateTypeFindData(stypep, bname, .false., dataitem, bindex, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_StateTypeAddBundleList: looking for preexisting entry"
           return
@@ -1182,7 +1182,7 @@ end function
               return
             endif
     
-            exists = ESMF_StateTypeFindData(stypep, fname, dataitem, &
+            exists = ESMF_StateTypeFindData(stypep, fname, .false., dataitem, &
                                                               findex, status)
             if (status .ne. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
@@ -1347,7 +1347,7 @@ end function
           !  found.  We just added the bundle above, so bindex is the
           !  value to set.
           else if (ftodo(fruncount) .eq. -2) then
-            exists = ESMF_StateTypeFindData(stypep, fname, dataitem, &
+            exists = ESMF_StateTypeFindData(stypep, fname, .true., dataitem, &
                                                               findex, status)
 
             if (.not. exists) then
@@ -1526,7 +1526,7 @@ end function
         endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, fname, dataitem, findex, status)
+        exists = ESMF_StateTypeFindData(stypep, fname, .false., dataitem, findex, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_StateTypeAddFieldList: looking for preexisting entry"
           deallocate(ftodo, stat=status)
@@ -1769,7 +1769,7 @@ end function
         endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, aname, dataitem, aindex, status)
+        exists = ESMF_StateTypeFindData(stypep, aname, .false., dataitem, aindex, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_StateTypeAddArrayList: looking for preexisting entry"
           deallocate(atodo, stat=status)
@@ -1997,7 +1997,7 @@ end function
         endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, sname, dataitem, sindex, status)
+        exists = ESMF_StateTypeFindData(stypep, sname, .false., dataitem, sindex, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_StateTypeAddStateList: looking for preexisting entry"
           return
@@ -2223,7 +2223,7 @@ end function
       do i=1, ncount
 
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, namelist(i), dataitem, nindex, status)
+        exists = ESMF_StateTypeFindData(stypep, namelist(i), .false., dataitem, nindex, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_StateTypeAddNameList: looking for preexisting entry"
           return
@@ -2574,7 +2574,8 @@ end function
 ! !IROUTINE: ESMF_StateTypeFindData - internal routine to find data item by name
 !
 ! !INTERFACE:
-      function ESMF_StateTypeFindData(stypep, dataname, dataitem, index, rc)
+      function ESMF_StateTypeFindData(stypep, dataname, expected, dataitem, &
+                                                                     index, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_StateTypeFindData
@@ -2582,6 +2583,7 @@ end function
 ! !ARGUMENTS:
       type(ESMF_StateType), pointer :: stypep
       character (len=*), intent(in) :: dataname
+      logical, intent(in) :: expected
       type(ESMF_StateData), pointer, optional :: dataitem
       integer, intent(out), optional :: index
       integer, intent(out), optional :: rc             
@@ -2589,13 +2591,20 @@ end function
 ! !DESCRIPTION:
 !    Returns {\tt TRUE} if a data item with this name is found, and returns
 !    a pointer to it in the {\tt dataitem} argument.  Returns {\tt FALSE}
-!    (without setting the error code) if this name is not found.
+!    if this name is not found.  If {\tt expected} is true and the name is
+!    not found, sets error code on return.  Otherwise does NOT set error code
+!    and the return value is simply the answer to a query.  Sets error code
+!    in either case if true error conditions are found.
 !
 !  \begin{description}     
 !  \item[stypep]
 !    {\tt StateType} to query.
 !   \item[dataname]
 !    Name of the data item to query.
+!   \item[expected]
+!    Logical.  If set to {\tt true} the name must be found or an error code 
+!    is set. The default is {\tt false} and the error code is not set if 
+!    the name is not found.
 !   \item[{[dataitem]}]
 !    Pointer to the corresponding {\tt ESMF\_StateData} item if one is
 !    found with the right name.
@@ -2651,12 +2660,18 @@ end function
         ESMF_StateTypeFindData = .TRUE.
         if (present(dataitem)) dataitem => stypep%datalist(itemindex) 
         if (present(index)) index = itemindex
+        status = ESMF_SUCCESS
       else   ! item not found
         ESMF_StateTypeFindData = .FALSE.
         nullify(dataitem)
+        if (expected) then 
+          status = ESMF_FAILURE
+        else
+          status = ESMF_SUCCESS
+        endif
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(rcpresent) rc = status
 
       end function ESMF_StateTypeFindData
 
@@ -2680,7 +2695,8 @@ end function
 !      Returns true if the status of the {\tt needed} flag for the data item
 !      named by {\tt dataname} in the {\tt State} is 
 !      {\tt ESMF\_STATEDATAISNEEDED}.  Returns false for no state found 
-!      with the specified name or state unknown or not needed.
+!      with the specified name or state unknown or not needed.  Sets error
+!      code tt {\tt ESMF\_FAILURE} if name not found.
 !
 !  \begin{description}     
 !  \item[state]
@@ -2707,7 +2723,11 @@ end function
       ESMF_StateIsNeeded = .FALSE.
       if (present(rc)) rc=ESMF_FAILURE
 
-      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, rc=status)
+      ! TODO: decide on the behavior:
+      ! should it be an error to ask about a state which doesn't exist?
+      ! if the 3rd arg below is .true. then it's an error, if it's .false.
+      ! then it's not.  for now, it's an error.
+      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., dataitem, rc=status)
       if (.not. exists) then
           if (present(rc)) rc = status
           return
@@ -2765,7 +2785,7 @@ end function
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
 
-      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., dataitem, rc=status)
       if (.not. exists) then
           if (present(rc)) rc = status
           return
@@ -2820,7 +2840,7 @@ end function
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
 
-      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., dataitem, rc=status)
       if (.not. exists) then
           if (present(rc)) rc = status
           return
@@ -2877,7 +2897,7 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty bundle to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, name, .true., dataitem, rc=status)
       if (.not. exists) then
           if (present(rc)) rc = status
           return
@@ -2935,7 +2955,7 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty field to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, name, .true., dataitem, rc=status)
       if (.not. exists) then
           if (present(rc)) rc = status
           return
@@ -2997,7 +3017,7 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty array to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, name, .true., dataitem, rc=status)
       if (.not. exists) then
           if (present(rc)) rc = status
           return
@@ -3055,7 +3075,7 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty state to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, name, .true., dataitem, rc=status)
       if (.not. exists) then
           if (present(rc)) rc = status
           return
