@@ -89,15 +89,16 @@ This will create a new component directory tree if it does not already exist:
    <comp>/src         - for your implementation source code files
    <comp>/interface   - for your interface (wrapper) source code files
 
-Prologued code template files will be placed in the appropriate directories.
-If you choose F90 as you implementation language, then an F90 code template
-is placed in the src directory and a C++ .C template placed in the interface
-directory.  Also a corresponding C++ .h file is placed in the include directory.
-Similarly, if you choose C++ as your implementation language, a .h template
-is placed in the include directory, a corresponding .C template is placed
-in the src directory, and a corresponding F90 template is placed in the
-interface directory.  The templates created by do_newcomp are generic,
-non-class specific.  See do_newclass below for class-specific templates.
+Prologued code template files as well as makefile templates will be placed
+in the appropriate directories.  If you choose F90 as you implementation
+language, then an F90 code template is placed in the src directory and a
+C++ .C template placed in the interface directory.  Also a corresponding
+C++ .h file is placed in the include directory.  Similarly, if you choose
+C++ as your implementation language, a .h template is placed in the
+include directory, a corresponding .C template is placed in the src
+directory, and a corresponding F90 template is placed in the interface
+directory.  The templates created by do_newcomp are generic, non-class
+specific.  See do_newclass below for class-specific templates.  
 
 To start coding a new class, execute the following script in a source
 code directory (src or interface):
