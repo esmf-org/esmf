@@ -1,10 +1,11 @@
-! $Id: ESMF_VectorStorageSTest.F90,v 1.2 2005/01/05 20:03:15 jwolfe Exp $
+! $Id: ESMF_VectorStorageSTest.F90,v 1.3 2005/02/01 23:34:11 svasquez Exp $
 !
 ! System test VectorStorage
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !

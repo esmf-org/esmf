@@ -1,10 +1,11 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.18 2004/06/11 02:13:00 cdeluca Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.19 2005/02/01 23:32:30 svasquez Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !
