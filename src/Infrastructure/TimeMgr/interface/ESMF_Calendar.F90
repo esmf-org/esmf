@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.38 2003/11/10 18:43:42 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.39 2003/11/10 19:20:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@
         integer(ESMF_KIND_I4) :: daysD ! fractional days per year denominator
                                        ! e.g. for Venus,
                                        !   days=0, daysN=926, daysD=1000
-        integer               :: pad1  ! to match halem C++ alignment
+        integer               :: pad1  ! to match C++ alignment
       end type
 !
 !------------------------------------------------------------------------------
@@ -136,7 +136,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.38 2003/11/10 18:43:42 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.39 2003/11/10 19:20:21 eschwab Exp $'
 
 !==============================================================================
 
