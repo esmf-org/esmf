@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.15 2005/01/05 16:54:04 jwolfe Exp $
+% $Id: Grid_options.tex,v 1.16 2005/01/10 21:39:00 jwolfe Exp $
 
 
  \subsubsection{ESMF\_CoordOrder}
@@ -281,7 +281,7 @@
  \begin{description}
     \item [ESMF\_GRID\_STORAGE\_BLOCK]
           Grid is distributed as single rectangular blocks on any, but not
-          necessarily all, PEs.  All high level communication methods are
+          necessarily all, DEs.  All high level communication methods are
           supported for this storage option.
 
 %    \item [ESMF\_GRID\_STORAGE\_MULTIBLOCK]
@@ -291,7 +291,7 @@
 
     \item [ESMF\_GRID\_STORAGE\_VECTOR]
           Grid is distributed as 1D arbitrary vectors on any, but not
-          necessarily all, PEs.  This storage option is intended for
+          necessarily all, DEs.  This storage option is intended for
           column based computations, so the only high level communication
           method that is supported is redistribution back and forth with
           its underlying grid.

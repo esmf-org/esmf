@@ -1,4 +1,4 @@
-% $Id: Grid_usage.tex,v 1.10 2005/01/03 23:38:36 jwolfe Exp $
+% $Id: Grid_usage.tex,v 1.11 2005/01/10 21:42:01 jwolfe Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -22,12 +22,12 @@ The default decomposition distributes the Grid cells as evenly as possible acros
 the DEs in the attached delayout.  The user can define a specified distribution
 in the {\tt ESMF\_GridDistribute()} call through optional arguments.  ESMF
 currently supports two different basic distribution patterns.  In the first,
-logically-rectangular blocks of data are distributed, one per PE.  Here, any two
+logically-rectangular blocks of data are distributed, one per DE.  Here, any two
 dimensions of a 3D grid may be distributed.  By default, the first grid
 dimension is distributed by the first delayout dimension and the second grid
 dimension is distributed by the second delayout dimension.  Users can specify
 other distributions via another optional argument to the {\tt ESMF\_GridDistribute()}
-call.  The second distribution pattern assigns arbitrary points to different PEs
+call.  The second distribution pattern assigns arbitrary points to different DEs
 and is intended for vertical column calculations where horizontal communication
 is not necessary.  Please see the {\tt ESMF\_GridDistribute()} interface
 description for further details.
