@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.54 2005/01/13 04:53:46 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.55 2005/01/13 06:25:57 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,15 +93,13 @@ private:
     bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int LINE,char FILE[],
          char method[],int *rcToReturn);
     void ESMC_LogOpen(char filename[]);
-    void ESMC_LogOpen(char filename[],int logtype);
     bool ESMC_LogWrite(char msg[],int msgtype);
     bool ESMC_LogWrite(char msg[],int msgtype,int LINE,char FILE[],
          char method[]);       
 // !PUBLIC Variables:          
     FILE *ESMC_LogFile;
     char nameLogErrFile[32];
-	char pet_num[7];
-	int pn;
+    int *pet_num;
 
   private:
 // !PRIVATE MEMBER FUNCIONS:

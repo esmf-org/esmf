@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.69 2005/01/13 05:07:29 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.70 2005/01/13 06:25:57 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.69 2005/01/13 05:07:29 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.70 2005/01/13 06:25:57 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -194,44 +194,8 @@ void ESMC_Log::ESMC_LogOpen(
 //EOP
 // 
 {
-    ESMC_LogOpen(filename,ESMC_LOG_SINGLE);
+    strcpy(nameLogErrFile,filename);
 }   
-
-//----------------------------------------------------------------------------
-//
-//
-//BOP
-// !IROUTINE:  ESMC_LogOpen -  opens a Log object specifying single or multi log
-//
-// !INTERFACE:
-
-void ESMC_Log::ESMC_LogOpen(
-//
-// !RETURN VALUE:
-//   none
-//
-// !ARGUMENTS:
-
-     char filename[],     //string to form name of log file (input)
-     int logtype           //Single or Multi file
-   )
-//
-// !DESCRIPTION:
-// {\tt ESMC\_LogOpen} opens a new log file and sets the deafult filename
-//
-//EOP
-// 
-{
-    if (logtype==ESMC_LOG_SINGLE)
-    {
-        strcpy(nameLogErrFile,filename);
-    }
-    else
-    {
-        //sprintf(nameLogErrFile,"PET%d.%s",*pet_number,filename);
-		strcpy(nameLogErrFile,filename);
-    }
-}
 
 //----------------------------------------------------------------------------
 //
@@ -352,16 +316,16 @@ bool ESMC_Log::ESMC_LogWrite(
 	  switch(msgtype)
 	  {
 		  case ESMC_LOG_INFO:
-			    fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %s\n",
-	  		  y,mn,d,h,m,s,ms,"INFO","PET0",msg);
+			    fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s PET%d %s\n",
+	  		  y,mn,d,h,m,s,ms,"INFO     ",*pet_num,msg);
 			    break;
 		  case ESMC_LOG_WARN:
-			    fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %s\n",
-	  		  y,mn,d,h,m,s,ms,"WARNING","PET0",msg);
+			    fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s PET%d %s\n",
+	  		  y,mn,d,h,m,s,ms,"WARNING  ",*pet_num,msg);
 			    break;
 		  case ESMC_LOG_ERROR:
-			    fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %s\n",
-	  		  y,mn,d,h,m,s,ms,"ERROR","PET0",msg);
+			    fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s PET%d %s\n",
+	  		  y,mn,d,h,m,s,ms,"ERROR    ",*pet_num,msg);
 			break;
 	  }		
     fclose(ESMC_LogFile);
@@ -394,6 +358,7 @@ bool ESMC_Log::ESMC_LogWrite(
     int y,mn,d,h,m,s,ms;
     int ok=0;
     int i=0;
+    
     ESMC_TimeStamp(&y,&mn,&d,&h,&m,&s,&ms);
 	do
 	{
@@ -411,16 +376,16 @@ bool ESMC_Log::ESMC_LogWrite(
 	switch(msgtype)
 	{
 		case ESMC_LOG_INFO:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %s %d %s %s\n",
-	  		y,mn,d,h,m,s,ms,"INFO","PET0",FILE,LINE,method,msg);
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s PET%d %s %d %s %s\n",
+	  		y,mn,d,h,m,s,ms,"INFO     ",*pet_num,FILE,LINE,method,msg);
 			break;
 		case ESMC_LOG_WARN:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %s %d %s %s\n",
-	  		y,mn,d,h,m,s,ms,"WARNING","PET0",FILE,LINE,method,msg);
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s PET%d %s %d %s %s\n",
+	  		y,mn,d,h,m,s,ms,"WARNING  ",*pet_num,FILE,LINE,method,msg);
 			break;
 		case ESMC_LOG_ERROR:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s % s %s %d %s %s\n",
-	  		y,mn,d,h,m,s,ms,"ERROR","PET0",FILE,LINE,method,msg);
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s PET%d %s %d %s %s\n",
+	  		y,mn,d,h,m,s,ms,"ERROR    ",*pet_num,FILE,LINE,method,msg);
 			break;
 	}		
     fclose(ESMC_LogFile);
