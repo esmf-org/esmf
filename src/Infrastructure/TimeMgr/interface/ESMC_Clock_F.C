@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.21 2004/01/30 01:28:09 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.22 2004/01/30 19:57:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ extern "C" {
                                  ESMC_TimeInterval *currSimTime,
                                  ESMC_TimeInterval *prevSimTime,
                                  ESMF_KIND_I8 *advanceCount,
-                                 int *numAlarms,
+                                 int *alarmCount,
                                  int *status) {
           int rc = (*ptr)->ESMC_ClockGet(
                  *nameLen,      // always present internal argument.
@@ -153,8 +153,8 @@ extern "C" {
                                           ESMC_NULL_POINTER : prevSimTime),
                  ((void*) advanceCount == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : advanceCount),
-                 ((void*) numAlarms    == (void*)ESMC_BAD_POINTER ?
-                                          ESMC_NULL_POINTER : numAlarms) );
+                 ((void*) alarmCount   == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : alarmCount) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
@@ -164,7 +164,7 @@ extern "C" {
                                    char *ringingAlarmList1stElementPtr,
                                    char *ringingAlarmList2ndElementPtr,
                                    int *sizeofRingingAlarmList,
-                                   int *numRingingAlarms, int *status) {
+                                   int *ringingAlarmCount, int *status) {
           int rc = (*ptr)->ESMC_ClockAdvance(
              ((void*) timeStep         == (void*)ESMC_BAD_POINTER ?
                             ESMC_NULL_POINTER : timeStep),
@@ -174,8 +174,8 @@ extern "C" {
                             ESMC_NULL_POINTER : ringingAlarmList2ndElementPtr),
              sizeofRingingAlarmList,  // always present internal argument.
 
-             ((void*) numRingingAlarms == (void*)ESMC_BAD_POINTER ?
-                            ESMC_NULL_POINTER : numRingingAlarms) );
+             ((void*) ringingAlarmCount == (void*)ESMC_BAD_POINTER ?
+                            ESMC_NULL_POINTER : ringingAlarmCount) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
@@ -215,14 +215,14 @@ extern "C" {
                                           char *AlarmList1stElementPtr,
                                           char *AlarmList2ndElementPtr,
                                           int *sizeofAlarmList,
-                                          int *numAlarms,
+                                          int *alarmCount,
                                           ESMC_TimeInterval *timeStep,
                                           int *status) {
           int rc = (*ptr)->ESMC_ClockGetAlarmList(*type,
                                                   AlarmList1stElementPtr,
                                                   AlarmList2ndElementPtr,
                                                   sizeofAlarmList,
-                                                  numAlarms,
+                                                  alarmCount,
                           ((void*) timeStep == (void*)ESMC_BAD_POINTER ?
                               ESMC_NULL_POINTER : timeStep));
           if (status != ESMC_NULL_POINTER &&

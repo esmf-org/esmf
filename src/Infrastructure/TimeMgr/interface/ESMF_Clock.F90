@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.38 2004/01/30 01:28:09 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.39 2004/01/30 19:57:14 eschwab Exp $'
 
 !==============================================================================
 !
@@ -322,7 +322,7 @@
       subroutine ESMF_ClockGet(clock, name, timeStep, startTime, stopTime, &
                                runDuration, runTimeStepCount, refTime, &
                                currTime, prevTime, currSimTime, prevSimTime, &
-                               advanceCount, numAlarms, rc)
+                               advanceCount, alarmCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
@@ -338,7 +338,7 @@
       type(ESMF_TimeInterval), intent(out), optional :: currSimTime
       type(ESMF_TimeInterval), intent(out), optional :: prevSimTime
       integer(ESMF_KIND_I8),   intent(out), optional :: advanceCount
-      integer,                 intent(out), optional :: numAlarms
+      integer,                 intent(out), optional :: alarmCount
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -376,7 +376,7 @@
 !          the previous time step.
 !     \item[{[advanceCount]}]
 !          The number of times the {\tt ESMF\_Clock} has been advanced.
-!     \item[{[numAlarms]}]
+!     \item[{[alarmCount]}]
 !          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s
 !          {\tt ESMF\_Alarm} list.
 !     \item[{[rc]}]
@@ -404,7 +404,7 @@
                            timeStep, startTime, stopTime, &
                            runDuration, runTimeStepCount, refTime, &
                            currTime, prevTime, currSimTime, prevSimTime, &
-                           advanceCount, numAlarms, rc)
+                           advanceCount, alarmCount, rc)
 
       ! copy temp name back to given name to restore native F90 storage style
       if (present(name)) then
@@ -419,13 +419,13 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockAdvance(clock, timeStep, ringingAlarmList, &
-                                   numRingingAlarms, rc)
+                                   ringingAlarmCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),               intent(inout)         :: clock
       type(ESMF_TimeInterval),        intent(in),  optional :: timeStep
       type(ESMF_Alarm), dimension(:), intent(out), optional :: ringingAlarmList
-      integer,                        intent(out), optional :: numRingingAlarms
+      integer,                        intent(out), optional :: ringingAlarmCount
       integer,                        intent(out), optional :: rc
 !   
 ! !DESCRIPTION:
@@ -446,7 +446,7 @@
 !     \item[{[ringingAlarmList]}]
 !          Returns the array of alarms that are ringing after the
 !          time step.
-!     \item[{[numRingingAlarms]}]
+!     \item[{[ringingAlarmCount]}]
 !          The number of alarms ringing after the time step.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -470,17 +470,17 @@
         ! pass address of 2nd element for C++ to calculate array step size
         call c_ESMC_ClockAdvance(clock, timeStep, &
                                  ringingAlarmList(1), ringingAlarmList(2), &
-                                 sizeofRingingAlarmList, numRingingAlarms, rc)
+                                 sizeofRingingAlarmList, ringingAlarmCount, rc)
       else if (sizeofRingingAlarmList == 1) then
         ! array has only one element
         call c_ESMC_ClockAdvance(clock, timeStep, &
                                  ringingAlarmList(1), ESMF_NULL_POINTER, &
-                                 sizeofRingingAlarmList, numRingingAlarms, rc)
+                                 sizeofRingingAlarmList, ringingAlarmCount, rc)
       else
         ! array is not present
         call c_ESMC_ClockAdvance(clock, timeStep, &
                                  ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
-                                 sizeofRingingAlarmList, numRingingAlarms, rc)
+                                 sizeofRingingAlarmList, ringingAlarmCount, rc)
       endif
     
       end subroutine ESMF_ClockAdvance
@@ -606,13 +606,13 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockGetAlarmList(clock, alarmListType, &
-                                        alarmList, numAlarms, timeStep, rc)
+                                        alarmList, alarmCount, timeStep, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),               intent(in)            :: clock
       type(ESMF_AlarmListType),       intent(in)            :: alarmListType
       type(ESMF_Alarm), dimension(:), intent(out)           :: alarmList
-      integer,                        intent(out)           :: numAlarms
+      integer,                        intent(out)           :: alarmCount
       type(ESMF_TimeInterval),        intent(in),  optional :: timeStep
       integer,                        intent(out), optional :: rc
 !   
@@ -648,7 +648,7 @@
 !                {\tt ESMF\_AlarmWasPrevRinging()} for checking a single alarm.
 !     \item[alarmList]
 !          The array of returned alarms. 
-!     \item[numAlarms]
+!     \item[alarmCount]
 !          The number of {\tt ESMF\_Alarm}s in the returned list.
 !     \item[{[timeStep]}]
 !          Optional time step to be used instead of the {\tt clock}'s.
@@ -672,12 +672,12 @@
         ! pass address of 2nd element for C++ to calculate array step size
         call c_ESMC_ClockGetAlarmList(clock, alarmListType, &
                                       alarmList(1), alarmList(2), &
-                                      sizeofAlarmList, numAlarms, timeStep, rc)
+                                      sizeofAlarmList, alarmCount, timeStep, rc)
       else
         ! array has only one element
         call c_ESMC_ClockGetAlarmList(clock, alarmListType, &
                                       alarmList(1), ESMF_NULL_POINTER, &
-                                      sizeofAlarmList, numAlarms, timeStep, rc)
+                                      sizeofAlarmList, alarmCount, timeStep, rc)
       endif
     
       end subroutine ESMF_ClockGetAlarmList
@@ -896,7 +896,7 @@
 !          "prevTime"     - print the previous clock time. \\
 !          "advanceCount" - print the number of times the clock has been
 !                           advanced. \\
-!          "numAlarms"    - print the number of alarms in the clock's list. \\
+!          "alarmCount"   - print the number of alarms in the clock's list. \\
 !          "alarmList"    - print the clock's alarm list. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.

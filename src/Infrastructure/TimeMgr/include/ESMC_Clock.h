@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.27 2004/01/30 01:28:08 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.28 2004/01/30 19:57:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
                                                 //   ESMC_ClockAdvance has
                                                 //   been called (number of
                                                 //   time steps taken so far)
-    int               numAlarms;                // number of defined alarms
+    int               alarmCount;               // number of defined alarms
     ESMC_Alarm       *alarmList[MAX_ALARMS];    // associated alarms
 
     int               id;         // unique identifier. used for equality
@@ -142,13 +142,13 @@
                       ESMC_TimeInterval *currSimTime=0, 
                       ESMC_TimeInterval *prevSimTime=0, 
                       ESMF_KIND_I8      *advanceCount=0, 
-                      int               *numAlarms=0);
+                      int               *alarmCount=0);
 
     int ESMC_ClockAdvance(ESMC_TimeInterval *timeStep=0,
                           char *ringingAlarmList1stElementPtr=0, 
                           char *ringingAlarmList2ndElementPtr=0, 
                           int *sizeofRingingAlarmList=0, 
-                          int *numRingingAlarms=0);
+                          int *ringingAlarmCount=0);
 
     // TMG3.4.1  after increment, for each alarm,
     //           calls ESMC_Alarm::CheckActive()
@@ -164,7 +164,7 @@
                                char *AlarmList1stElementPtr, 
                                char *AlarmList2ndElementPtr,
                                int *sizeofAlarmList, 
-                               int *numAlarms,
+                               int *alarmCount,
                                ESMC_TimeInterval *timeStep=0);
 
     int ESMC_ClockSyncToRealTime(void); // TMG3.4.5

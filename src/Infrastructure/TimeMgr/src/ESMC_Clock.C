@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.42 2004/01/30 01:28:09 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.43 2004/01/30 19:57:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.42 2004/01/30 01:28:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.43 2004/01/30 19:57:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -258,7 +258,7 @@ int ESMC_Clock::count=0;
       ESMC_TimeInterval *currSimTime,      // out
       ESMC_TimeInterval *prevSimTime,      // out
       ESMF_KIND_I8      *advanceCount,     // out
-      int               *numAlarms) {      // out
+      int               *alarmCount) {     // out
 
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_Clock}'s property values
@@ -308,7 +308,7 @@ int ESMC_Clock::count=0;
     }
 
     if (advanceCount != ESMC_NULL_POINTER) *advanceCount = this->advanceCount;
-    if (numAlarms    != ESMC_NULL_POINTER) *numAlarms    = this->numAlarms;
+    if (alarmCount   != ESMC_NULL_POINTER) *alarmCount   = this->alarmCount;
 
     return(rc);
 
@@ -334,7 +334,7 @@ int ESMC_Clock::count=0;
                                                  //        size
       int               *sizeofRingingAlarmList, // in  - size of given array
                                                  //       of ringing alarms
-      int               *numRingingAlarms) {     // out - number of ringing
+      int               *ringingAlarmCount) {    // out - number of ringing
                                                  //       alarms
 //
 // !DESCRIPTION:
@@ -357,7 +357,7 @@ int ESMC_Clock::count=0;
 
     // TODO: validate (range check) new time against its calendar ?
 
-    if (numRingingAlarms != ESMC_NULL_POINTER) *numRingingAlarms = 0;
+    if (ringingAlarmCount != ESMC_NULL_POINTER) *ringingAlarmCount = 0;
 
     // Calculate element size of F90 array of ESMC_Alarm pointers since we
     // cannont depend on C++ element size to be the same as F90's across all
@@ -376,7 +376,7 @@ int ESMC_Clock::count=0;
     }
 
     // traverse alarm list (i) for ringing alarms (j)
-    for(int i=0, j=0; i<numAlarms; i++) {
+    for(int i=0, j=0; i<alarmCount; i++) {
       int rc;
       bool ringing;
 
@@ -386,7 +386,7 @@ int ESMC_Clock::count=0;
       // report ringing alarms if requested
       if (ringing) {
         // report number of ringing alarms
-        if (numRingingAlarms != ESMC_NULL_POINTER) (*numRingingAlarms)++;
+        if (ringingAlarmCount != ESMC_NULL_POINTER) (*ringingAlarmCount)++;
 
         // report ringing alarm list
         if (ringingAlarmList1stElementPtr != ESMC_NULL_POINTER) {
@@ -517,7 +517,7 @@ int ESMC_Clock::count=0;
     alarmName[nameLen] = '\0';  // null terminate
 
     // linear search for alarm name
-    for(int i=0; i<numAlarms; i++) {
+    for(int i=0; i<alarmCount; i++) {
       if (strcmp(alarmName, alarmList[i]->name) == 0) {
         // found, return alarm
         *alarm = alarmList[i];
@@ -550,7 +550,7 @@ int ESMC_Clock::count=0;
                                                  //        size
       int               *sizeofAlarmList,        // in  - size of given array
                                                  //       of alarms
-      int               *numAlarms,              // out - number of alarms
+      int               *alarmCount,             // out - number of alarms
       ESMC_TimeInterval *timeStep) {             // in  - optional time step to
                                                  //         use instead of the
                                                  //         clock's (only use
@@ -565,7 +565,7 @@ int ESMC_Clock::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    *numAlarms = 0;
+    *alarmCount = 0;
 
     // Calculate element size of F90 array of ESMC_Alarm pointers since we
     // cannont depend on C++ element size to be the same as F90's across all
@@ -584,7 +584,7 @@ int ESMC_Clock::count=0;
 
     // traverse clock's alarm list (i) for alarms to return in
     //   requested list (j)
-    for(int i=0, j=0; i < this->numAlarms; i++) {
+    for(int i=0, j=0; i < this->alarmCount; i++) {
       int rc;
       bool returnAlarm;
 
@@ -622,7 +622,7 @@ int ESMC_Clock::count=0;
       // copy alarm pointers to be returned into given F90 array
       if (returnAlarm) {
         // count and report number of returned alarms
-        (*numAlarms)++;
+        (*alarmCount)++;
 
         // copy if there's space in the given F90 array
         if (j < *sizeofAlarmList) {
@@ -657,7 +657,7 @@ int ESMC_Clock::count=0;
 //
 // !ARGUMENTS:
       ESMC_Alarm ***alarmList,            // out - alarm list
-      int          *numAlarms) const {    // out - number of alarms in list
+      int          *alarmCount) const {   // out - number of alarms in list
 //
 // !DESCRIPTION:
 //     Get a clock's alarm list and number of alarms
@@ -666,17 +666,17 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  TMG 4.3
 
     // validate inputs
-    if (alarmList == ESMC_NULL_POINTER || numAlarms == ESMC_NULL_POINTER) {
+    if (alarmList == ESMC_NULL_POINTER || alarmCount == ESMC_NULL_POINTER) {
       return(ESMF_FAILURE);
     }
 
     // copy the list of alarm pointers
-    for(int i=0; i<this->numAlarms; i++) {
+    for(int i=0; i<this->alarmCount; i++) {
       (*alarmList)[i] = this->alarmList[i];  
     }
 
     // return number of alarms
-    *numAlarms = this->numAlarms;
+    *alarmCount = this->alarmCount;
 
     return(ESMF_SUCCESS);
 
@@ -703,12 +703,12 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  TMG 4.1, 4.2
 
     // validate inputs
-    if (i < 1 || i > numAlarms || alarm == ESMC_NULL_POINTER) {
+    if (i < 1 || i > alarmCount || alarm == ESMC_NULL_POINTER) {
       return(ESMF_FAILURE);
     }
 
     int rc;
-    for (int j=0, r=0; j < numAlarms; j++) {
+    for (int j=0, r=0; j < alarmCount; j++) {
       if (alarmList[j]->ESMC_AlarmIsRinging(&rc)) {
         if (++r == i) *alarm = alarmList[j];
         return(ESMF_SUCCESS);
@@ -731,7 +731,7 @@ int ESMC_Clock::count=0;
 //
 // !ARGUMENTS:
       ESMC_Alarm **alarmList,            // out - alarm list
-      int         *numAlarms) const {    // out - number of alarms in list
+      int         *alarmCount) const {   // out - number of alarms in list
 //
 // !DESCRIPTION:
 //     Get a clock's alarm list and number of alarms
@@ -740,17 +740,17 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  TMG 4.3
 
     // validate inputs
-    if (alarmList == ESMC_NULL_POINTER || numAlarms == ESMC_NULL_POINTER) {
+    if (alarmList == ESMC_NULL_POINTER || alarmCount == ESMC_NULL_POINTER) {
       return(ESMF_FAILURE);
     }
 
     // copy the list of alarms
-    for(int i=0; i<this->numAlarms; i++) {
+    for(int i=0; i<this->alarmCount; i++) {
       (*alarmList)[i] = *(this->alarmList[i]);  
     }
 
     // return number of alarms
-    *numAlarms = this->numAlarms;
+    *alarmCount = this->alarmCount;
 
     return(ESMF_SUCCESS);
 
@@ -989,11 +989,11 @@ int ESMC_Clock::count=0;
         cout << "advanceCount = " << advanceCount << endl;
       }
       else if (strncmp(opts, "numalarms", 9) == 0) {
-        cout << "numAlarms = " << numAlarms << endl;
+        cout << "alarmCount = " << alarmCount << endl;
       }
       else if (strncmp(opts, "alarmlist", 9) == 0) {
         cout << "alarmList = " << endl;
-        for (int i=0; i<numAlarms; i++) {
+        for (int i=0; i<alarmCount; i++) {
           cout << alarmList[i]->ESMC_AlarmPrint(&opts[9]);
         }
       }
@@ -1010,9 +1010,9 @@ int ESMC_Clock::count=0;
       cout << "currTime = "  << endl; currTime.ESMC_TimePrint(options);
       cout << "prevTime = "  << endl; prevTime.ESMC_TimePrint(options);
       cout << "advanceCount = " << advanceCount << endl;
-      cout << "numAlarms = "    << numAlarms << endl;
+      cout << "alarmCount = "   << alarmCount   << endl;
       cout << "alarmList = " << endl;
-      for (int i=0; i<numAlarms; i++) {
+      for (int i=0; i<alarmCount; i++) {
         cout << alarmList[i]->ESMC_AlarmPrint(options);
       }
     }
@@ -1045,7 +1045,7 @@ int ESMC_Clock::count=0;
 
     name[0] = '\0';
     advanceCount = 0;
-    numAlarms = 0;
+    alarmCount = 0;
     id = ++count;  // TODO: inherit from ESMC_Base class
 
  } // end ESMC_Clock
@@ -1102,12 +1102,12 @@ int ESMC_Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     // validate inputs
-    if (numAlarms == MAX_ALARMS || alarm == ESMC_NULL_POINTER) {
+    if (alarmCount == MAX_ALARMS || alarm == ESMC_NULL_POINTER) {
       return(ESMF_FAILURE);
     }
 
     // append to list and count
-    alarmList[numAlarms++] = alarm;
+    alarmList[alarmCount++] = alarm;
 
     // check new alarm to see if it's time to ring
     alarm->ESMC_AlarmCheckRingTime(&rc);
