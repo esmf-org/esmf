@@ -528,7 +528,7 @@ end subroutine ESMF_LogSet
 end subroutine ESMF_LogGet
 
 !--------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LogInitialize - Initializes Log file(s)
 
 ! !INTERFACE: 
@@ -550,7 +550,7 @@ end subroutine ESMF_LogGet
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
-!EOP
+!EOPI
 	
 	integer 				:: status, i, rc2	
 	if (present(rc)) rc=ESMF_FAILURE
@@ -573,7 +573,7 @@ end subroutine ESMF_LogGet
 end subroutine ESMF_LogInitialize
 
 !--------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LogFinalize - Finalizes the Log file(s)
 
 ! !INTERFACE: 
@@ -592,7 +592,7 @@ end subroutine ESMF_LogInitialize
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
-!EOP
+!EOPI
 	if (present(rc)) then
 	  	rc=ESMF_FAILURE
 	endif
