@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.15 2004/12/23 18:10:03 theurich Exp $
+// $Id: ESMC_VM.h,v 1.16 2005/01/06 01:10:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,6 +42,15 @@
 #include <ESMC_Base.h>  
 #include <ESMC_VMKernel.h>   // inherit from ESMC_VMK class
 
+
+typedef struct{
+  char *vmKey;    // bit-pattern that identifies VM VAS context
+  int localID;    // local ID of the VM within VAS context
+}ESMC_VMId;
+
+void ESMC_VMIdPrint(ESMC_VMId *vmID);
+
+
 class ESMC_VM;
 class ESMF_VMPlan;
 
@@ -77,7 +86,7 @@ class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
 // external ESMC_VM methods:
 ESMC_VM *ESMC_VMGetGlobal(int *rc);   // Return pointer to global VM
 ESMC_VM *ESMC_VMGetCurrent(int *rc);  // Return pointer to VM of current context
-int      ESMC_VMGetCurrentID(int *rc);// Return ID of the current VM context.
+ESMC_VMId *ESMC_VMGetCurrentID(int *rc);// Return ID of the current VM context.
 ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global ESMC_VMK
 void     ESMC_VMFinalize(int *rc);    // Shut down and clean up global ESMC_VMK
 
@@ -88,5 +97,6 @@ class ESMC_VMPlan : public ESMC_VMKPlan {   // inherits from ESMC_VMKPlan class
     ESMC_VM **myvms;      // pointer array of ESMC_VM instances for this PET
     ESMC_VMK **myvmachs;  // pointer array of ESMC_VMK instances for this PET
 };// end class ESMC_VMPlan
+
 
 #endif  // ESMC_VM_H

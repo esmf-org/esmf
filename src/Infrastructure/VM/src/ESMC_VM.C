@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.22 2004/12/27 18:44:16 theurich Exp $
+// $Id: ESMC_VM.C,v 1.23 2005/01/06 01:10:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.22 2004/12/27 18:44:16 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.23 2005/01/06 01:10:46 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -58,7 +58,9 @@ static ESMC_VM *GlobalVM = NULL;
 #define ESMC_VM_MAXTIDS 1000
 static pthread_t matchArray_tid[ESMC_VM_MAXTIDS];
 static ESMC_VM *matchArray_vm[ESMC_VM_MAXTIDS];
-static int matchArray_vmID[ESMC_VM_MAXTIDS];
+static ESMC_VMId matchArray_vmID[ESMC_VM_MAXTIDS];
+static int vmKeyWidth = 0;        // in units of 8-bit chars
+static int vmKeyOff = 0;          // extra bits in last char
 static int matchArray_count = 0;
 //-----------------------------------------------------------------------------
 
@@ -68,6 +70,17 @@ static int matchArray_count = 0;
 // This section includes all the VM routines
 //
 //-----------------------------------------------------------------------------
+
+
+static int ESMC_VMKeyCompare(char *vmKey1, char *vmKey2){
+  int i;
+  for (i=0; i<vmKeyWidth; i++)
+    if (vmKey1[i] != vmKey2[i]) break;
+  if (i==vmKeyWidth) return ESMF_TRUE;
+  return ESMF_FALSE;
+}
+
+
 
 
 //-----------------------------------------------------------------------------
@@ -94,26 +107,37 @@ void *ESMC_VM::ESMC_VMStartup(
   // startup the VM
   void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, NULL);
   
+  // now take care of book keeping for ESMF...
+  int i, pid, m, n;
+  int matchArray_count_old = matchArray_count;
   // enter information for all threads of this new VM into the matchArray
   // TODO: make this thread-safe for when we allow ESMF-threading!
-  for (int i=0; i<vmp->nspawn; i++){
-    matchArray_tid[matchArray_count]  = vmp->myvms[i]->vmk_mypthid(); // pthid
-    matchArray_vm[matchArray_count]   = vmp->myvms[i];
-    // TODO: unique ID, for now use the (int) cast of the MPI communicator for
-    //       an ID. This will not hold up for more complicated VM hierarchies
-    //       where communicators are going to be defined in subsets of the
-    //       globalVM's pets. In fact it is not even guranteed that a
-    //       communicator has the same handle on all of the PETs its defined on.
-    //    -> Yup, I tested it across my Linux cluster and found that you only
-    //       get identical IDs out of communicators that are on the same SMP
-    //       box, otherwise you don't!!!!
-#ifdef VM_DONT_HAVE_MPI_COMM_C2F
-    matchArray_vmID[matchArray_count] = (int)(vmp->myvms[i]->vmk_mypthid());
-#else
-    matchArray_vmID[matchArray_count] = 
-      (int)MPI_Comm_c2f(vmp->myvms[i]->vmk_mypthid());
-#endif
-    ++matchArray_count;
+  for (int j=0; j<vmp->nspawn; j++){
+    matchArray_tid[matchArray_count]  = vmp->myvms[j]->vmk_mypthid(); // pthid
+    matchArray_vm[matchArray_count]   = vmp->myvms[j];
+
+    matchArray_vmID[matchArray_count].vmKey = new char[vmKeyWidth];
+    for (i=0; i<vmKeyWidth; i++)
+      matchArray_vmID[matchArray_count].vmKey[i] = 0x00;  // zero out all bits
+    for (i=0; i<vmp->myvms[j]->vmk_npets(); i++){
+      // loop through all the pets in the VM
+      pid = vmp->myvms[j]->vmk_pid(i);
+      m = pid / 8;
+      n = pid % 8;
+      matchArray_vmID[matchArray_count].vmKey[m] |= 0x80>>n;  // set the bits
+    }
+    matchArray_vmID[matchArray_count].localID = 0;  // assume this is first
+    for (i=matchArray_count_old-1; i>=0; i--){
+      if (ESMC_VMKeyCompare(matchArray_vmID[i].vmKey,
+        matchArray_vmID[matchArray_count].vmKey) == ESMF_TRUE){
+        matchArray_vmID[matchArray_count].localID = 
+          matchArray_vmID[i].localID + 1; // overwrite the previous default
+        break;
+      }
+    }
+
+    ++matchArray_count;         // done
+    
   }
   
   // return pointer to info structure
@@ -319,7 +343,7 @@ ESMC_VM *ESMC_VMGetCurrent(
 // !IROUTINE:  ESMC_VMGetCurrentID - Get ID of current VM
 //
 // !INTERFACE:
-int ESMC_VMGetCurrentID(
+ESMC_VMId *ESMC_VMGetCurrentID(
 //
 // !RETURN VALUE:
 //    ID of current VM
@@ -339,10 +363,10 @@ int ESMC_VMGetCurrentID(
   for (i=0; i<matchArray_count; i++)
     if (matchArray_tid[i] == mytid) break;
   if (i == matchArray_count)
-    return -1;
+    return NULL;
   // found a match
   *rc = ESMF_SUCCESS;
-  return matchArray_vmID[i];
+  return &matchArray_vmID[i];
 }
 //-----------------------------------------------------------------------------
 
@@ -371,10 +395,26 @@ ESMC_VM *ESMC_VMInitialize(
   GlobalVM->vmk_init();      // set up default ESMC_VMK (all MPI)
   *rc = ESMF_SUCCESS;        // TODO: Do some real error handling here...
   
+  matchArray_count = 0;       // reset
   matchArray_tid[matchArray_count]  = pthread_self();
   matchArray_vm[matchArray_count]   = GlobalVM;
-  matchArray_vmID[matchArray_count] = 0;              // global VM's id is zero
-  matchArray_count = 1;
+  
+  // set vmID
+  vmKeyWidth = GlobalVM->vmk_npets()/8;
+  vmKeyOff   = GlobalVM->vmk_npets()%8;
+  if (vmKeyOff){
+    ++vmKeyWidth;               // correction for extra bits
+    vmKeyOff = 8 - vmKeyOff;    // number of extra bits in last char
+  }
+//printf("gjt in ESMC_VMInitialize, vmKeyWidth = %d\n", vmKeyWidth);
+  matchArray_vmID[matchArray_count].vmKey = new char[vmKeyWidth];
+  for (int i=0; i<vmKeyWidth; i++)
+    matchArray_vmID[matchArray_count].vmKey[i] = 0xff;  // globalVM in all VASs
+  matchArray_vmID[matchArray_count].vmKey[vmKeyWidth-1] =
+    matchArray_vmID[matchArray_count].vmKey[vmKeyWidth-1]<<vmKeyOff; // shift
+  matchArray_vmID[matchArray_count].localID = 0;        // globalVM is first
+
+  ++matchArray_count;         // done
 
                              // totalview cannot handle events during the init
                              // call - it freezes or crashes or ignores input.
@@ -409,3 +449,34 @@ void ESMC_VMFinalize(
   *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
 }
 //-----------------------------------------------------------------------------
+
+
+
+
+// - - brand new stuff for ESMC_VMId - -
+
+void ESMC_VMIdPrint(ESMC_VMId *vmID){
+  printf("ESMC_VMIdPrint:\n");
+  printf("vmID located at: %p\n", vmID);
+  printf("  vmKey=0x");
+  int bitmap=0;
+  int k=0;
+  for (int i=0; i<vmKeyWidth; i++){
+    bitmap |= vmID->vmKey[i];
+    bitmap = bitmap << 8;
+    ++k;
+    if (k==4){
+      printf("%X", bitmap);
+      bitmap=0;
+      k=0;
+    }
+  }
+  if (k!=0){
+    bitmap = bitmap << (3-k)*8;
+    printf("%X\n", bitmap);
+  }
+  printf("  localID: %d\n", vmID->localID);
+  
+}
+
+
