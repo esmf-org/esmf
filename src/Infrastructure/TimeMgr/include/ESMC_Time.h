@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.34 2004/03/05 00:53:02 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.35 2004/03/10 03:06:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMC_BaseTime.h>       // inherited BaseTime class
  #include <ESMC_Calendar.h>       // associated Calendar class
- #include <ESMC_TimeInterval.h> 
+ class ESMC_TimeInterval;
 
 // !PUBLIC TYPES:
  class ESMC_Time;
