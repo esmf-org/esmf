@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.8 2001/12/13 18:10:20 dneckels Exp $
+% $Id: ESMF_install.tex,v 1.9 2002/01/09 22:40:44 dneckels Exp $
 
 \section{Installation}
 
@@ -111,3 +111,57 @@ an additional argument to the the above make commands.  (Alternatively the varia
 {\tt ESMF\_BUILD} can be set in the environment (using setenv or export) and then it 
 need not be passed to any make calls).
 
+\subsection{Make System}
+For most users the description of the build above should be sufficient.  Some
+users, however, may wish to have a more detailed knowledge of the make system
+that is used by the library either for configuring different build options or
+other reasons.
+\subsubsection{General Structure}
+The main components of the make system are:
+\begin{itemize}
+\item{Build directories}
+
+The {\tt build} directory contains some generic makefiles that are included by
+the Makefiles in the source tree.  In addition, for each supported
+configuration there is a directory which contains the makefiles defining
+compilers, compiler flags, and the various other defintions that are necessary
+to make each configuration work.  Examples include {\tt build/IRIX64,
+build/rs6000\_sp, ...}
+
+\item{Top level Makefile}
+
+All of the make targets described installation directions above originate in
+this Makefile.  This makefile includes the common makefiles from the {\tt
+build} directory.  Many of the commands in this Makefile spawn a recursive make
+through the directory structure.
+
+\item{Source tree Makefiles}
+
+Each directory contains a Makefile which includes the {\tt build} common
+makefiles.  These local Makefiles include defintions that allow the local files
+and documents to be built.
+\end{itemize}
+
+\subsubsection{Configuration}
+
+Each configuration is defined in the {\tt build/ESMF\_ARCH} directory.  There
+are several files in each configuration that may be hand edited to modify the
+build:
+
+\begin{itemize}
+
+\item{{\tt base.site}}
+
+This file contains variables which define the location of includes and
+libraries such as MPI, openMP, BLAS, PCL, etc...
+
+\item{{\tt base\_variables}}
+
+Contains the basic definitions for compilers and compiler flags.
+
+\item{{\tt conf.h}}
+
+Lists compiler defines that are used to enable/disable certain options at
+compiler time.  Examples include pthreads, omp, fortran\_underscore...
+
+\end{itemize}
