@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMapEx.F90,v 1.1 2004/06/04 12:09:36 nscollins Exp $
+! $Id: ESMF_ArrayDataMapEx.F90,v 1.2 2004/06/08 10:46:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,8 @@
 
       ! local variables 
       type(ESMF_ArrayDataMap) :: arrayDM
-      type(ESMF_IndexOrder) :: indexOrder
+      integer :: drank
+      integer :: dlist(ESMF_MAXDIM), dcounts(ESMF_MAXDIM)
 
 
       ! return code
@@ -91,7 +92,10 @@
 !EOP
 
 !BOC
-      call ESMF_ArrayDataMapSet(arrayDM, rc=rc)
+      dlist(1:3) = (/ 1, 2, 0 /)
+      dcounts(1) = 4
+      call ESMF_ArrayDataMapSet(arrayDM, dataRank=3, dataIndices=dlist, &
+                                counts=dcounts, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -110,8 +114,12 @@
 !EOP
 
 !BOC
+      call ESMF_ArrayDataMapSet(arrayDM, drank, dlist, dcounts, rc=rc)
       call ESMF_ArrayDataMapGet(arrayDM, rc=rc)
-      ! print *, "Returned values from Array DataMap:"
+      print *, "Returned values from Array DataMap:"
+      print *, "rank =", drank
+      print *, "correspondance to grid indices = ", dlist
+      print *, "counts for non-grid dimensions =", dcounts
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
