@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/10/10 05:31:32 cdeluca Exp $
+# $Id: makefile,v 1.7 2004/03/18 00:10:36 cdeluca Exp $
 ALL: alldoc
 
 CFLAGS    =
@@ -12,16 +12,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/LogErr/doc
 
-DVIFILES  = 	LogErr_desdoc.dvi \
-		LogErr_refdoc.dvi 
+DVIFILES  =	LogErr_refdoc.dvi 
 #		LogErr_reqdoc.dvi
 
-PDFFILES  =     ${ESMC_DOCDIR}/LogErr_desdoc.pdf \
-		${ESMC_DOCDIR}/LogErr_refdoc.pdf 
+PDFFILES  =	${ESMC_DOCDIR}/LogErr_refdoc.pdf 
 #		${ESMC_DOCDIR}/LogErr_reqdoc.pdf
 
-HTMLFILES = 	${ESMC_DOCDIR}/LogErr_desdoc \
-		${ESMC_DOCDIR}/LogErr_refdoc 
+HTMLFILES =	${ESMC_DOCDIR}/LogErr_refdoc 
 #		${ESMC_DOCDIR}/LogErr_reqdoc
 
 
@@ -62,9 +59,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = LogErr_desdoc LogErr_refdoc $(HTMLFILES)
+CLEANDIRS   = LogErr_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
-              *.ORIG LogErr_reqdoc.tex LogErr_desdoc.tex \
+              *.ORIG LogErr_reqdoc.tex \
               $(PDFFILES)
 
 CLOBBERDIRS =
