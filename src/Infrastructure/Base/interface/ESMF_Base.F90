@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.74 2004/01/28 20:24:52 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.75 2004/01/29 23:30:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -344,6 +344,7 @@
 !  Print methods for calling by higher level print functions
 !  (they have little formatting other than the actual values)
       public ESMF_StatusString, ESMF_DataTypeString
+      public ESMF_DataKindString, ESMF_LogicalString
 
 !  Overloaded = operator functions
       public operator(.eq.), operator(.ne.), assignment(=)
@@ -378,7 +379,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.74 2004/01/28 20:24:52 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.75 2004/01/29 23:30:30 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -774,13 +775,13 @@ end function
 ! !IROUTINE:  ESMF_AttributeSet - set attribute on an ESMF type
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeSet(anytype, name, value, rc)
+      subroutine ESMF_AttributeSet(base, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
-      character (len = *), intent(in) :: name            ! attribute name
-      type(ESMF_DataValue), intent(in) :: value              ! attribute value
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base), intent(in) :: base              ! any ESMF type
+      character (len = *), intent(in) :: name          ! attribute name
+      type(ESMF_DataValue), intent(in) :: value        ! attribute value
+      integer, intent(out), optional :: rc             ! return code
 
 !
 ! !DESCRIPTION:
@@ -790,6 +791,12 @@ end function
 !EOP
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
+      integer :: status 
+
+      status = ESMF_FAILURE
+      !call c_ESMC_AttributeSet(base, name, value, status) 
+      if (present(rc)) rc = status
+
       end subroutine ESMF_AttributeSet
 
 
@@ -798,14 +805,13 @@ end function
 ! !IROUTINE:  ESMF_AttributeGet - get attribute from an ESMF type
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeGet(anytype, name, type, value, rc)
+      subroutine ESMF_AttributeGet(base, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype           ! any ESMF type
-      character (len = *), intent(in) :: name          ! attribute name
-      type(ESMF_DataType), intent(out) :: type             ! all possible data types
-      type(ESMF_DataValue), intent(out) :: value           ! attribute value
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_Base), intent(in) :: base             ! any ESMF type
+      character (len = *), intent(in) :: name         ! attribute name
+      type(ESMF_DataValue), intent(out) :: value      ! attribute value
+      integer, intent(out), optional :: rc            ! return code
 
 !
 ! !DESCRIPTION:
@@ -813,6 +819,12 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5.1, FLD1.5.3
+
+      integer :: status 
+
+      status = ESMF_FAILURE
+      !call c_ESMC_AttributeGet(base, name, value, status) 
+      if (present(rc)) rc = status
 
       end subroutine ESMF_AttributeGet
 
@@ -1517,6 +1529,66 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DataTypeString
+
+!------------------------------------------------------------------------- 
+!BOP 
+!  !IROUTINE:  ESMF_DataKindString - Return DataKind as a string
+!  
+! !INTERFACE: 
+      subroutine ESMF_DataKindString(datakind, string, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DataKind), intent(in) :: datakind
+      character(len=*), intent(out) :: string
+      integer, intent(out), optional :: rc  
+
+!
+! !DESCRIPTION:
+!   Return a datakind variable as a string.
+
+!
+!EOP
+! !REQUIREMENTS:
+
+      if (datakind .eq. ESMF_I1)  string = "Integer*1"
+      if (datakind .eq. ESMF_I2)  string = "Integer*2"
+      if (datakind .eq. ESMF_I4)  string = "Integer*4"
+      if (datakind .eq. ESMF_I8)  string = "Integer*8"
+      if (datakind .eq. ESMF_R4)  string = "Real*4"
+      if (datakind .eq. ESMF_R8)  string = "Real*8"
+      if (datakind .eq. ESMF_C8)  string = "Complex*8"
+      if (datakind .eq. ESMF_C16) string = "Complex*16"
+ 
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DataKindString
+
+!------------------------------------------------------------------------- 
+!BOP 
+!  !IROUTINE:  ESMF_LogicalString - Return Logical as a string
+!  
+! !INTERFACE: 
+      subroutine ESMF_LogicalString(tf, string, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Logical), intent(in) :: tf
+      character(len=*), intent(out) :: string
+      integer, intent(out), optional :: rc  
+
+!
+! !DESCRIPTION:
+!   Return a tf variable as a string.
+
+!
+!EOP
+! !REQUIREMENTS:
+
+      if (tf .eq. ESMF_TRUE)  string = "True"
+      if (tf .eq. ESMF_FALSE) string = "False"
+ 
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LogicalString
 
 !-------------------------------------------------------------------------
 !
