@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.37 2003/08/27 23:07:23 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.38 2003/08/28 14:33:23 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.37 2003/08/27 23:07:23 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.38 2003/08/28 14:33:23 pwjones Exp $'
 
 !==============================================================================
 !
@@ -2792,15 +2792,15 @@
 ! !IROUTINE: ESMF_PhysGridPointInCell - Checks whether cell contains point
 !
 ! !INTERFACE:
-      function ESMF_PhysGridPointInCell(point, corner_x, corner_y, rc)
+      function ESMF_PhysGridPointInCell(xpoint, ypoint, corner_x, corner_y, rc)
 
 !
 ! !RETURN VALUE:
       logical :: ESMF_PhysGridPointInCell ! true if point located in cell
 !
 ! !ARGUMENTS:
-      real(kind=ESMF_IKIND_R8), dimension(2), intent(in) :: &
-         point          ! x,y coordinates of search point 
+      real(kind=ESMF_IKIND_R8), intent(in) :: &
+         xpoint, ypoint  ! x,y coordinates of search point 
 
       real(kind=ESMF_IKIND_R8), dimension(:), intent(in) :: &
          corner_x,     & ! x coordinates of cell corners
@@ -2817,8 +2817,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[point]
-!          Coordinates of search point.
+!     \item[xpoint]
+!          x coordinate of search point.
+!     \item[ypoint]
+!          y coordinate of search point.
 !     \item[corner\_x]
 !          x-coordinate of grid cell corners.
 !     \item[corner\_y]
@@ -2875,8 +2877,8 @@
 
          vec1_x = corner_x(next_n) - corner_x(ncorn)
          vec1_y = corner_y(next_n) - corner_y(ncorn)
-         vec2_x = point(1) - corner_x(ncorn)
-         vec2_y = point(2) - corner_y(ncorn)
+         vec2_x = xpoint - corner_x(ncorn)
+         vec2_y = ypoint - corner_y(ncorn)
 
 !
 !        if search point coincident with vertex
