@@ -1,5 +1,11 @@
 
-This configuration is untested.  If someone who has the IBM xlf compilers
-installed on a Mac could try this out and give us feedback, that would
-be great.
+
+The IBM xlf compiler is available now from Absoft for the Mac OS X
+platform.  You can compile the ESMF libraries with either a mix of
+xlf and gcc/g++ (the gnu C compilers), or with xlf and xlc/xlc++ 
+(the IBM product C/C++ compilers).
+
+If you want to compile with gcc, leave ESMF_C_COMPILER unset.
+If you want to compile with xlc/xlc++ set the ESMF_C_COMPILER 
+environment variable to 'xlc' before compiling.
 
