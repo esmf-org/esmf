@@ -1,6 +1,8 @@
-% $Id: Alarm_desc.tex,v 1.3 2003/08/12 14:14:17 cdeluca Exp $
+% $Id: Alarm_desc.tex,v 1.4 2003/08/15 17:14:10 eschwab Exp $
 
 \label{sec:Alarm}
 The {\tt Alarm} class encapsulates the required alarm behavior, triggering
-its ringing state on either a one-shot or repeating interval basis.
-
+its ringing state on either a one-shot or repeating interval basis.  Multiple
+alarms can be associated with a clock, which checks the ringing state of each
+of its alarms after every time step. Users check for and process ringing
+alarms after each time step of the associated clock.
