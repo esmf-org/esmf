@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.12 2004/02/10 23:16:06 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.13 2004/02/10 23:42:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.12 2004/02/10 23:16:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.13 2004/02/10 23:42:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -76,12 +76,14 @@ extern "C" {
   char *scname = NULL;
 
   // copy and convert F90 strings to null terminated ones
-  scname = ESMC_F90toCstring(superclass, sclen);
-  if (!scname) {
-      *rc = ESMF_FAILURE;
-      return;
+  if (superclass && (sclen > 0) && (superclass[0] != '\0')) {
+      scname = ESMC_F90toCstring(superclass, sclen);
+      if (!scname) {
+          *rc = ESMF_FAILURE;
+          return;
+      }
   }
-  if ((name != ESMC_NULL_POINTER) && (name[0] != '\0')) {
+  if (name && (nlen > 0) && (name[0] != '\0')) {
       cname = ESMC_F90toCstring(name, nlen);
       if (!cname) {
           delete [] scname;
@@ -96,8 +98,8 @@ extern "C" {
   else
       *rc = ESMF_FAILURE;
 
-  delete [] scname;
-  if (cname) delete [] cname;
+  if (scname) delete [] scname;
+  if (cname)  delete [] cname;
   return;
 
 }  // end c_ESMC_BaseCreate
@@ -122,8 +124,9 @@ extern "C" {
 //EOP
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
-  if (*base)
+  if (base && *base)
       delete (*base);
+
   *rc = ESMF_SUCCESS;
   return;
 
@@ -152,7 +155,7 @@ extern "C" {
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
-  char *copts;
+  char *copts = NULL;
 
   if (!base) {
     printf("uninitialized Base object\n");
@@ -161,15 +164,18 @@ extern "C" {
   }
 
   // copy and convert F90 string to null terminated one
-  copts = ESMC_F90toCstring(opts, nlen);
-  if (!copts) {
-      *rc = ESMF_FAILURE;
-      return;
+  if (opts && (nlen > 0) && (opts[0] != '\0')) {
+      copts = ESMC_F90toCstring(opts, nlen);
+      if (!copts) {
+          *rc = ESMF_FAILURE;
+          return;
+      }
   }
 
   *rc = (*base)->ESMC_Print(copts);
 
-  delete [] copts;
+  if (copts)
+      delete [] copts;
   return;
 
 }  // end c_ESMC_BasePrint
@@ -245,7 +251,7 @@ extern "C" {
     return;
   }
  
-  if (classname && (clen > 0)) {
+  if (classname && (clen > 0) && (classname[0] != '\0')) {
       // copy and convert F90 string to null terminated one
       cname = ESMC_F90toCstring(classname, clen);
       if (!cname) {
@@ -254,7 +260,7 @@ extern "C" {
       }
   }
 
-  if (objname && (olen > 0)) {
+  if (objname && (olen > 0) && (objname[0] != '\0')) {
       // copy and convert F90 string to null terminated one
       oname = ESMC_F90toCstring(objname, olen);
       if (!oname) {
@@ -352,7 +358,7 @@ extern "C" {
   }
 
   // simple sanity check before doing any more work
-  if ((!name) || (name[0] == '\0')) {
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
       printf("ESMF_AttributeSet: bad attribute name\n");
       *rc = ESMF_FAILURE;
       return;
@@ -409,13 +415,13 @@ extern "C" {
   }
 
   // simple sanity checks before doing any more work
-  if ((!name) || (name[0] == '\0')) {
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
       printf("ESMF_AttributeSet: bad attribute name\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
-  if ((!value) || (value[0] == '\0')) {
+  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
       printf("ESMF_AttributeSet: bad attribute value\n");
       *rc = ESMF_FAILURE;
       return;
@@ -480,7 +486,7 @@ extern "C" {
   }
 
   // simple sanity check before doing any more work
-  if ((!name) || (name[0] == '\0')) {
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
       printf("ESMF_AttributeGetValue: bad attribute name\n");
       *rc = ESMF_FAILURE;
       return;
@@ -558,7 +564,7 @@ extern "C" {
   }
 
   // simple sanity check before doing any more work
-  if ((!name) || (name[0] == '\0')) {
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
       printf("ESMF_AttributeGet: bad attribute name\n");
       *rc = ESMF_FAILURE;
       return;
@@ -645,7 +651,7 @@ extern "C" {
   }
 
   // simple sanity check before doing any more work
-  if ((!name) || (name[0] == '\0')) {
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
       printf("ESMF_AttributeGetValue: bad attribute name\n");
       *rc = ESMF_FAILURE;
       return;

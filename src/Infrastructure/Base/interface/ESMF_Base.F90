@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.79 2004/02/10 23:16:06 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.80 2004/02/10 23:42:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -381,7 +381,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.79 2004/02/10 23:16:06 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.80 2004/02/10 23:42:07 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -617,8 +617,8 @@ end function
       if (present(name)) then
           call c_ESMC_BaseCreate(base, superclass, name, allocNattrs, status)
       else
-          call c_ESMC_BaseCreate(base, superclass, ESMF_NULL_POINTER, &
-                                                    allocNattrs, status)
+          !!call c_ESMC_BaseCreate(base, superclass, ESMF_NULL_POINTER, &
+          call c_ESMC_BaseCreate(base, superclass, "", allocNattrs, status)
       endif
 
       if (rcpresent) rc = status
@@ -1090,7 +1090,7 @@ end function
       if (present(options)) then
           opts = options
       else
-          opts = ""
+          opts = ''
       endif
 
       if (base%this .eq. ESMF_NULL_POINTER) then

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.30 2004/02/10 18:54:49 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.31 2004/02/10 23:42:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.30 2004/02/10 18:54:49 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.31 2004/02/10 23:42:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -869,7 +869,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen <= 0)) {
-        printf("Bad input parameters: either bad count or NULL pointer\n");
+        printf("Bad input parameters: 1 either bad count or NULL pointer\n");
         return NULL;
     }
 
@@ -909,7 +909,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen <= 0) ||
         (dst == NULL) || (dlen <= 0)) {
-        printf("Bad input parameters: either bad count or NULL pointer\n");
+        printf("Bad input parameters: 2 either bad count or NULL pointer\n");
         return ESMF_FAILURE;
     }
 
@@ -953,7 +953,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (dst == NULL) || (dlen <= 0)) {
-        printf("Bad input parameters: either bad count or NULL pointer\n");
+        printf("Bad input parameters: 3 either bad count or NULL pointer\n");
         return ESMF_FAILURE;
     }
 
@@ -1002,7 +1002,7 @@ extern "C" {
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||
         (dst == NULL) || (*dlen <= 0)) {
-        printf("Bad input parameters: either bad count or NULL pointer\n");
+        printf("Bad input parameters: 4 either bad count or NULL pointer\n");
         if (rc) *rc = ESMF_FAILURE;
         return;
     }
@@ -1056,7 +1056,7 @@ extern "C" {
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||
         (dst == NULL) || (*dlen <= 0)) {
-        printf("Bad input parameters: either bad count or NULL pointer\n");
+        printf("Bad input parameters: 5 either bad count or NULL pointer\n");
         if (rc) *rc = ESMF_FAILURE;
         return;
     }
