@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.61 2004/07/21 22:31:09 jwolfe Exp $
+! $Id: ESMF_Bundle.F90,v 1.62 2004/07/22 22:22:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1842,7 +1842,7 @@ end function
       integer :: i                                ! temp var
       logical :: found                            ! did we find a match?
       character (len=ESMF_MAXSTR) :: temp_name
-      type(ESMF_Field) :: temp_field
+      !type(ESMF_Field) :: temp_field
       type(ESMF_BundleType), pointer :: btype
 
 !     Initialize return code.  Assume failure until success assured.
@@ -2262,8 +2262,8 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: i                                ! temp var
-      type(ESMF_Array) :: pkarray                 ! Array for packed data
+      !integer :: i                                ! temp var
+      !type(ESMF_Array) :: pkarray                 ! Array for packed data
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
 !     Initialize return code.  Assume failure until success assured.
@@ -2332,9 +2332,9 @@ end function
 
 
       character(len=ESMF_MAXSTR) :: bname, fname
-      character(len=ESMF_MAXSTR) :: msgbuf
+      !character(len=ESMF_MAXSTR) :: msgbuf
       type(ESMF_BundleType), pointer :: btype
-      type(ESMF_Field) :: field
+      !type(ESMF_Field) :: field
       integer :: i
       integer :: status
 
@@ -3604,8 +3604,8 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: i                                ! temp var
-      type(ESMF_Array) :: pkarray                 ! Array for packed data
+      !integer :: i                                ! temp var
+      !type(ESMF_Array) :: pkarray                 ! Array for packed data
 
 !     Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
@@ -3689,7 +3689,7 @@ end function
 !
 !EOPI
       
-      integer :: i                                ! temp var
+      !integer :: i                                ! temp var
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -3758,7 +3758,7 @@ end function
       
       integer :: status                            ! Error status
       logical :: rcpresent                         ! Return code present
-      character (len = ESMF_MAXSTR) :: defaultname ! Bundle name if not given
+      !character (len = ESMF_MAXSTR) :: defaultname ! Bundle name if not given
 
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
