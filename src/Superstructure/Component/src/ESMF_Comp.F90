@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.102 2004/07/26 17:55:24 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.103 2004/07/26 18:36:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -219,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.102 2004/07/26 17:55:24 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.103 2004/07/26 18:36:07 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1743,9 +1743,9 @@ end function
                          compp%vm_cargo, callrc, status)
     ! TODO: what is the relationship between callrc and status and rc
     ! if (ESMF_LogPassFoundError(status, rc)) return
-    !  if (ESMF_LogMsgFoundError(status, &
-    !                              ESMF_ERR_PASSTHRU, &
-    !                              ESMF_CONTEXT, rc)) return
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (rcpresent) rc = callrc

@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.16 2004/04/23 22:11:47 nscollins Exp $
+// $Id: ESMC_FTable_F.C,v 1.17 2004/07/26 18:36:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -244,6 +244,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   cargotype *cargo = new cargotype;
   strcpy(cargo->name, name);   // copy trimmed type string
   cargo->ftable = &ftable;     // reference to function table
+  cargo->rc = ESMF_SUCCESS;    // initialize return code to SUCCESS for all PETs
   *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
          
   *vm_info = vm_parent.vmachine_enter(vmplan, ESMC_FTableCallEntryPointVMHop,
