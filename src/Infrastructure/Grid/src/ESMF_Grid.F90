@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.153 2004/03/22 23:51:08 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.154 2004/03/24 15:59:59 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.153 2004/03/22 23:51:08 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.154 2004/03/24 15:59:59 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1405,7 +1405,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
-                                   cornerCoord, faceCoord, total, rc)
+                                   cornerCoord, faceCoord, reorder, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -1414,6 +1414,7 @@
       type(ESMF_Array), dimension(:), pointer, optional :: centerCoord
       type(ESMF_Array), dimension(:,:), pointer, optional :: cornerCoord
       type(ESMF_Array), optional :: faceCoord
+      logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -1444,6 +1445,10 @@
 !          be defined first, followed by the face index.  Faces should
 !          be numbered consistently with corners.  For example, face 1 should
 !          correspond to the face between corners 1,2.
+!     \item[{[reorder]}]
+!          Logical.  If TRUE, reorder any results using the GridOrder before
+!          returning.  If FALSE do not reorder.  The default value is TRUE
+!          and users should not need to reset this for most applications.
 !     \item[{[total]}]
 !          Logical. If TRUE, return the total coordinates including internally
 !          generated boundary cells. If FALSE return the
@@ -1481,7 +1486,7 @@
       ! ESMF_GridStructure_LogRect
       case(1)
         call ESMF_LRGridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
-                                 cornerCoord, faceCoord, total, status)
+                                 cornerCoord, faceCoord, reorder, total, status)
 
       !-------------
       ! ESMF_GridStructure_LogRectBlock
@@ -1528,7 +1533,8 @@
       subroutine ESMF_GridGetDE(grid, horzRelLoc, vertRelLoc, &
                                 myDE, localCellCount, localCellCountPerDim, &
                                 minLocalCoordPerDim, maxLocalCoordPerDim, &
-                                globalStartPerDim, globalAIPerDim, total, rc)
+                                globalStartPerDim, globalAIPerDim, reorder, &
+                                total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -1544,6 +1550,7 @@
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
       type(ESMF_AxisIndex), dimension(:), intent(inout), &
                         optional :: globalAIPerDim
+      logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -1580,6 +1587,10 @@
 !          Global index of starting counts for each dimension.
 !     \item[{[globalAIPerDim]}]
 !          Global axis indices for each dimension.
+!     \item[{[reorder]}]
+!          Logical.  If TRUE, reorder any results using the GridOrder before
+!          returning.  If FALSE do not reorder.  The default value is TRUE
+!          and users should not need to reset this for most applications.
 !     \item[{[total]}]
 !          Logical flag to indicate getting DistGrid information for total cells.
 !          The default is the computational regime.
@@ -1618,7 +1629,8 @@
         call ESMF_LRGridGetDE(grid, horzRelLoc, vertRelLoc, &
                               myDE, localCellCount, localCellCountPerDim, &
                               minLocalCoordPerDim, maxLocalCoordPerDim, &
-                              globalStartPerDim, globalAIPerDim, total, status)
+                              globalStartPerDim, globalAIPerDim, reorder, &
+                              total, status)
 
       !-------------
       ! ESMF_GridStructure_LogRectBlock
