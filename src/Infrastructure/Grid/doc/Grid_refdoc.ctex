@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.4 2003/05/07 04:42:05 cdeluca Exp $
+% $Id: Grid_refdoc.ctex,v 1.5 2003/10/21 03:56:51 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,27 +47,13 @@
 %\input{../Infrastructure/Grid/doc/Grid_syn}
 %#endif
 
-%\section{Algorithmic Description}
-%#ifdef STANDALONE
-%\input{Grid_alg}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_alg}
-%#endif
-
 %\section{Object Model}
 %#ifdef STANDALONE
 %\input{Grid_obj}
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/Grid/doc/Grid_obj}
 %#endif
-
-% \section{Global Parameters and Definitions}
-% #ifdef STANDALONE
-% \input{Grid_param}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Grid/doc/Grid_param}
-% #endif
-
+e
 \section{Grid Class}
 
 \subsection{Description}
@@ -77,34 +63,28 @@
 \input{../Infrastructure/Grid/doc/Grid_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Grid_usage}
+\input{ESMF_GridCreateEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Grid/doc/Grid_usage}
+\input{../Infrastructure/Grid/doc/ESMF_GridCreateEx_fapi}
 #endif
 
-%\subsubsection{Class Definition}
-%#ifdef STANDALONE
-%\input{Grid_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_def}
-%#endif
+\subsection{Restrictions}
+#ifdef STANDALONE
+\input{Grid_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Grid/doc/Grid_rest}
+#endif
 
-%\subsubsection{Restrictions}
-%#ifdef STANDALONE
-%\input{Grid_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_rest}
-%#endif
-
-
-%\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{Gridex_fapi}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_fex}
-%#endif
+%\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{Grid_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Grid/doc/Grid_rest}
+#endif
 
 %\subsection{Parameters and Definitions}
 %#ifdef STANDALONE
