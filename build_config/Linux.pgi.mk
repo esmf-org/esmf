@@ -1,4 +1,4 @@
-# $Id: Linux.pgi.mk,v 1.4 2003/09/09 21:35:10 nscollins Exp $ 
+# $Id: Linux.pgi.mk,v 1.5 2003/09/10 17:58:58 flanigan Exp $ 
 #
 ESMF_PREC = 32
 
@@ -96,10 +96,10 @@ SL_LIBS_TO_MAKE = libesmf liboldworld
 #########
 
 .F90.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mfreeform ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mfreeform ${ESMC_INCLUDE} $<
 
 .F.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -Mfreeform ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} -Mfreeform ${ESMC_INCLUDE} $<
 
 .f90.o:
 	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mnofreeform ${ESMC_INCLUDE} $<
@@ -114,12 +114,12 @@ SL_LIBS_TO_MAKE = libesmf liboldworld
 	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mfreeform ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mfreeform ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .F.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -Mfreeform ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} -Mfreeform ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
