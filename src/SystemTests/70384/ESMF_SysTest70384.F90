@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.26 2003/09/04 18:57:57 cdeluca Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.27 2003/09/04 19:55:28 nscollins Exp $
 !
 ! System test code #70384
 
@@ -121,7 +121,7 @@
 
     ! Get our position in the layout
     do i = 1,3
-      de_pos(i) = 0
+      de_pos(i) = 1
     enddo
     call ESMF_DELayoutGetDEPosition(layout1, de_pos(1), de_pos(2), rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
