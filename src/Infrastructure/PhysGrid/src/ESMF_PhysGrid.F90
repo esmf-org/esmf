@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.47 2003/10/09 23:17:11 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.48 2003/10/13 22:35:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.47 2003/10/09 23:17:11 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.48 2003/10/13 22:35:54 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1347,7 +1347,6 @@
             print *, "ERROR in ESMF_PhysGridSetMask: mask allocate"
             return
          endif
-
 !
 !     if not first mask, resize mask array to make room for new mask
 !
@@ -1388,7 +1387,6 @@
             return
          endif
       endif
-
 !
 !     reset number of masks and add new mask
 !
