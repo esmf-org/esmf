@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.32 2004/12/07 22:31:28 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.33 2004/12/17 19:39:35 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -139,6 +139,30 @@ extern "C" {
                              dstGlobalStart, dstGlobalCount, *dstLayout,
                              *srcMyDE, srcCompAI, srcTotalAI, *srcAICount,
                              srcGlobalStart, srcGlobalCount, *srcLayout);
+       }
+
+       void FTN(c_esmc_routeprecomputeredistv)(ESMC_Route **ptr, int *rank, 
+                     int *dstMyDE, ESMC_Logical *dstVector, 
+                     ESMC_AxisIndex *dstCompAI, ESMC_AxisIndex *dstTotalAI,
+                     int *dstAICount, int *dstAICountPerDE,
+                     int *dstGlobalStart, int *dstGSCount,
+                     int *dstGlobalCount, ESMC_DELayout **dstLayout,
+                     int *srcMyDE, ESMC_Logical *srcVector,
+                     ESMC_AxisIndex *srcCompAI, ESMC_AxisIndex *srcTotalAI,
+                     int *srcAICount, int *srcAICountPerDE,
+                     int *srcGlobalStart, int *srcGSCount,
+                     int *srcGlobalCount, ESMC_DELayout **srcLayout, 
+                     int *status) {
+
+           *status = (*ptr)->ESMC_RoutePrecomputeRedistV(*rank, 
+                             *dstMyDE, *dstVector, dstCompAI, dstTotalAI,
+                             *dstAICount, dstAICountPerDE,
+                             dstGlobalStart, *dstGSCount,
+                             dstGlobalCount, *dstLayout,
+                             *srcMyDE, *srcVector, srcCompAI, srcTotalAI,
+                             *srcAICount, srcAICountPerDE,
+                             srcGlobalStart, *srcGSCount,
+                             srcGlobalCount, *srcLayout);
        }
 
        void FTN(c_esmc_routeprecomputehalo)(ESMC_Route **ptr, int *rank, 
