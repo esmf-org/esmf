@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.8 2002/12/12 23:50:28 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.9 2003/01/16 22:29:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,6 +44,14 @@
  class ESMC_ArrayConfig;
  class ESMC_Array;
 
+ // dummy structure which is the right size for an F90 pointer on
+ //  each architcture.  ESMF_F90_PTR_SIZE is defined in conf.h in
+ //  the build directories for each architecture
+struct c_F90ptr {
+   char pad[ESMF_F90_PTR_SIZE];   
+};
+
+
 // !PRIVATE TYPES:
 
 // class configuration type
@@ -71,7 +79,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int length[ESMF_MAXDIM];       // number of elements/dim
     int stride[ESMF_MAXDIM];       // byte spacing between elements/dim
     enum ESMC_Logical iscontig;    // optimization possible if all contig
-    void *f90dopev;                // opaque object which is real f90 ptr
+    struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
                                    // potentially these could be needed... 
  // int lbounds[ESMF_MAXDIM];      // real lower indicies
  // int ubounds[ESMF_MAXDIM];      // real upper indicies
@@ -122,17 +130,21 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     void ESMC_ArraySetLengths(int ni) { this->length[0] = ni; }
     void ESMC_ArraySetLengths(int ni, int nj) { 
            this->length[0] = ni; this->length[1] = nj; }
+    void ESMC_ArraySetLengths(int ni, int nj, int nk) { 
+           this->length[0] = ni; this->length[1] = nj; this->length[2] = nk; }
 
     void ESMC_ArraySetBaseAddr(void *base_addr) { this->base_addr = base_addr; }
+    void ESMC_ArrayGetBaseAddr(void *base_addr) { base_addr = this->base_addr; }
+
+    // copy the contents using an assignment
+    void ESMC_ArraySetF90Ptr(struct c_F90ptr *p) { this->f90dopev = *p; }
+    void ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) { *p = this->f90dopev; }
 
     //int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
     //int stride[ESMF_MAXDIM];       // byte spacing between elements/dim
     //enum ESMC_Logical iscontig;    // optimization possible if all contig
-    //void *f90dopev;                // opaque object which is real f90 ptr
-                                   // potentially these could be needed... 
     // int lbounds[ESMF_MAXDIM];      // real lower indicies
     // int ubounds[ESMF_MAXDIM];      // real upper indicies
-    // void *first_element;           // memory address of the first element
     
  // < declare the rest of the public interface methods here >
   

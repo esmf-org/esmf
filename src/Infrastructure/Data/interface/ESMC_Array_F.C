@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.13 2003/01/09 16:59:48 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.14 2003/01/16 22:29:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,12 +32,6 @@
 //
 //EOP
 
- // dummy structure which is the right size for an F90 pointer on
- //  each architcture
-struct c_F90ptr {
-   char pad[ESMF_F90_PTR_SIZE];  
-};
-
 // the interface subroutine names MUST be in lower case
 extern "C" {
      void FTN(c_esmc_storeallocfunc)(void (*func)(struct c_F90ptr *, int *, int *, int *), int *status) {
@@ -58,38 +52,12 @@ extern "C" {
      void FTN(c_esmc_arrayconstructbyspec)() {
      }
 
-     void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array **ptr, 
+     void FTN(c_esmc_arraycreatebyptr)(ESMC_Array **ptr, 
                                  enum ESMC_DataType *dt, enum ESMC_DataKind *dk,
                                  int *rank, int *lengths, int *status) {
              
              (*ptr) = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, lengths,
                                       NULL, NULL, status);
-
-     }
- 
-     void FTN(c_esmc_arraycreatebyptr1d)(ESMC_Array **ptr, 
-                                 enum ESMC_DataType *dt, enum ESMC_DataKind *dk,
-                                 int *rank, int *length, int *status) {
-             
-             *ptr = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, length,
-                                      NULL, NULL, status);
-
-     }
- 
-     void FTN(c_esmc_arraycreatemtptr2d)(ESMC_Array **ptr, int *ni, int *nj, int *status) {
-             int lengths[2];
-             enum ESMC_DataType dt;
-             enum ESMC_DataKind dk;
-
-             lengths[0] = *ni;
-             lengths[1] = *nj;
-
-             dt = ESMF_DATA_REAL;
-             dk = ESMF_KIND_4;
-             
-             (*ptr) = ESMC_ArrayCreate_F(2, dt, dk, NULL, NULL, lengths,
-                                      NULL, NULL, status);
-
 
      }
  
@@ -99,6 +67,21 @@ extern "C" {
 
      void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
           (*ptr)->ESMC_ArraySetBaseAddr((void *)(base));
+          *status = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_arraygetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
+          (*ptr)->ESMC_ArrayGetBaseAddr((void *)(base));
+          *status = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_arraysetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
+          (*ptr)->ESMC_ArraySetF90Ptr(p);
+          *status = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_arraygetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
+          (*ptr)->ESMC_ArrayGetF90Ptr(p);
           *status = ESMF_SUCCESS;
      }
 

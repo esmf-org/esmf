@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayTest.F90,v 1.1 2003/01/10 19:01:30 nscollins Exp $
+! $Id: ESMF_ArrayTest.F90,v 1.2 2003/01/16 22:29:26 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -65,6 +65,28 @@
  
 !   ! Allocate and set initial data values
     ni = 35 
+    allocate(intptr(ni))
+    do i=1,ni
+       intptr(i) = i
+    enddo
+
+    array1 = ESMF_ArrayCreate(intptr, ESMF_NO_COPY, rc)
+    print *, "array 1 create returned"
+
+    call ESMF_ArrayPrint(array1, "foo", rc)
+    print *, "array 1 print returned"
+
+    call ESMF_ArrayDestroy(array1)
+    print *, "array 1 destroy returned"
+
+
+!-------------------------------------------------------------------------------
+!   ! Test 2a:
+!   !  Create based on an existing, allocated F90 pointer. 
+!   !  Data is type Integer, 1D.
+ 
+!   ! Allocate and set initial data values
+    ni = 22 
     allocate(intptr(ni))
     do i=1,ni
        intptr(i) = i

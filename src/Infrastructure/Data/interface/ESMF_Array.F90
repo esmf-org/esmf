@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.20 2003/01/09 21:22:04 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.21 2003/01/16 22:29:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
         integer :: docopy
       end type
 
-      type(ESMF_CopyFlag), parameter :: &
+      type(ESMF_CopyFlag), parameter :: & 
                             ESMF_DO_COPY = ESMF_CopyFlag(1), &
                             ESMF_NO_COPY = ESMF_CopyFlag(2)
 
@@ -92,12 +92,38 @@
       sequence
       private
         type(ESMF_Pointer) :: this       ! opaque pointer to the C++ class data
-        integer (ESMF_IKIND_I4),dimension(:),pointer :: int4ptr1d
-        integer (ESMF_IKIND_I4),dimension(:,:),pointer :: int4ptr2d
-        integer (ESMF_IKIND_I8),dimension(:,:),pointer :: int8ptr2d
-        real (ESMF_IKIND_R8),dimension(:),pointer :: real8ptr1d
-        real (ESMF_IKIND_R8),dimension(:,:),pointer :: real8ptr2d
       end type
+
+!------------------------------------------------------------------------------
+!     ! Internal wrapper structures for passing f90 pointers to C++ and
+!     ! guaranteeing they are passed by reference on all compilers and all
+!     ! platforms.  These are never seen outside this module.
+!
+      type ESMF_ArrWrapI41D
+        integer (ESMF_IKIND_I4),dimension(:),pointer :: int4ptr1d
+      end type ESMF_ArrWrapI41D
+
+      type ESMF_ArrWrapI42D
+        integer (ESMF_IKIND_I4),dimension(:,:),pointer :: int4ptr2d
+      end type ESMF_ArrWrapI42D
+
+      type ESMF_ArrWrapI81D
+        integer (ESMF_IKIND_I8),dimension(:,:),pointer :: int8ptr1d
+      end type ESMF_ArrWrapI81D
+
+      type ESMF_ArrWrapI82D
+        integer (ESMF_IKIND_I8),dimension(:,:),pointer :: int8ptr2d
+      end type ESMF_ArrWrapI82D
+
+      type ESMF_ArrWrapR81D
+        real (ESMF_IKIND_R8),dimension(:),pointer :: real8ptr1d
+      end type ESMF_ArrWrapR81D
+
+      type ESMF_ArrWrapR82D
+        real (ESMF_IKIND_R8),dimension(:,:),pointer :: real8ptr2d
+      end type ESMF_ArrWrapR82D
+
+      ! TODO: make 1 of these for every supported T/K/R
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -129,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.20 2003/01/09 21:22:04 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.21 2003/01/16 22:29:26 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -494,41 +520,48 @@ end function
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
+        type (ESMF_ArrWrapR82D) :: wrap     ! for passing f90 ptr to C++
         integer :: rank, lengths(2)         ! size info for the array
 
 !       !TODO: need a null pointer to assign to initialize ptr
         array%this = ESMF_NULL_POINTER
 
-!       initialize return code; assume failure until success is certain
+!       ! initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
-!       call create routine
+!       ! call create routine
         lengths(1) = size(f90ptr, 1)
         lengths(2) = size(f90ptr, 2)
 
-        call c_ESMC_ArrayCreateByPtr2D(array, ESMF_DATA_REAL, ESMF_KIND_R8, &
+        call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_REAL, ESMF_KIND_R8, &
                                              2, lengths, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array initial construction error"
           return
         endif
 
-!      !TODO: add code to handle copyflag.  For now, default to NO_COPY
+!       !TODO: add code to handle copyflag.  For now, default to NO_COPY
 
-!       set base address
+!       ! set base address
         call c_ESMC_ArraySetBaseAddr(array, f90ptr(1,1), status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array base address construction error"
           return
         endif
 
+!       ! save an (uninterpreted) copy of the f90 array information
+        wrap%real8ptr2d => f90ptr
+        call c_ESMC_ArraySetF90Ptr(array, wrap, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Array internal info save error"
+          return
+        endif
 
-!       return value set by c_ESMC func above
+!       ! return value set by c_ESMC func above
         ESMF_ArrayCreateByPtr2DR8 = array
-        ESMF_ArrayCreateByPtr2DR8%real8ptr2d => f90ptr
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayCreateByPtr2DR8  
@@ -581,6 +614,7 @@ end function
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
+        type (ESMF_ArrWrapI41D) :: wrap     ! for passing f90 ptr to C++
         integer :: rank, length             ! size info for the array
 
 !       ! assume failure
@@ -595,7 +629,7 @@ end function
 !       !call create routine
         length = size(f90ptr, 1)
 
-        call c_ESMC_ArrayCreateByPtr1D(array, ESMF_DATA_INTEGER, ESMF_KIND_I4, &
+        call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_INTEGER, ESMF_KIND_I4, &
                                              1, length, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array initial construction error"
@@ -611,10 +645,17 @@ end function
           return
         endif
 
+!       ! save an (uninterpreted) copy of the f90 array information
+        wrap%int4ptr1d => f90ptr
+        call c_ESMC_ArraySetF90Ptr(array, wrap, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Array internal info save error"
+          return
+        endif
+
 
 !       return value set by c_ESMC func above
         ESMF_ArrayCreateByPtr1DI4 = array
-        ESMF_ArrayCreateByPtr1DI4%int4ptr1d => f90ptr
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayCreateByPtr1DI4 
@@ -666,7 +707,7 @@ end function
 ! !REQUIREMENTS:
 
 !       local vars
-        type (ESMF_Array) :: array   ! what C++ is going to return
+        type (ESMF_Array) :: array          ! what C++ is going to return
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
@@ -683,7 +724,7 @@ end function
         call c_ESMC_StoreAllocFunc(ESMF_Allocate2DR4, status);
 
 !       call create routine
-        call c_ESMC_ArrayCreateMTPtr2D(array, ni, nj, status)
+        !call c_ESMC_ArrayCreateMTPtr2D(array, ni, nj, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array initial construction error"
           return
@@ -812,14 +853,16 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
+        type (ESMF_ArrWrapR82D) :: wrap     ! for passing f90 ptr to C++
 !
 ! TODO: code goes here
 !
         ! check copyflag to see if we are making a reference
         ! or making a new array and a copy
 
-
-        f90ptr => array%real8ptr2d
+        
+        wrap%real8ptr2d => f90ptr
+        call c_ESMC_ArrayGetF90Ptr(array, wrap, rc)
 
         end subroutine ESMF_ArrayGetData2DR8
 
@@ -843,6 +886,7 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+        type (ESMF_ArrWrapI41D) :: wrap     ! for passing f90 ptr to C++
 
 !
 ! TODO: code goes here
@@ -851,7 +895,8 @@ end function
         ! or making a new array and a copy
 
 
-        f90ptr => array%int4ptr1d
+        wrap%int4ptr1d => f90ptr
+        call c_ESMC_ArrayGetF90Ptr(array, wrap, rc)
 
         end subroutine ESMF_ArrayGetData1DI4
 

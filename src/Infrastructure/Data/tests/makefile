@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/01/10 19:00:14 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/01/16 22:29:26 nscollins Exp $ 
 
 ALL: 
 
@@ -14,6 +14,8 @@ MANSEC	  =
 LIBBASE	  = 
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Data/tests
+
+tests:    ESMF_ArrayTest
 
 TESTEXAMPLES_3  = \
 	ESMF_ArrayTest RUN_ESMF_ArrayTest ESMF_ArrayTest.rm
