@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $
+// $Id: ESMC_Layout.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,8 +22,9 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
-#include <iostream>  // cout
-//using std::cout;  // TODO: use when namespaces consistently implemented
+#include <iostream.h>  // cout
+//#include <iostream> // TODO: use when namespaces consistently implemented
+//using std::cout;
 //using std::cerr;
 //using std::endl;
 #include <new>       // new, bad_alloc
@@ -35,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -75,6 +76,9 @@
 
   ESMC_Layout *layout;
 
+#if 0
+// use this section if exception handling not supported
+// TODO:  IBM (blackforest) doesn't support "new (nothrow)"
   if ((layout = new (nothrow) ESMC_Layout) == 0) {
 // TODO:  call ESMF log/err handler
     cerr << "ESMC_LayoutCreate() memory allocation failed\n";
@@ -85,16 +89,18 @@
 //cout << "ESMC_LayoutCreate() succesful\n";
   *rc = layout->ESMC_LayoutConstruct(nx, ny, nz, pelist, commhint);
   return(layout);
+#endif
 
 // TODO: ?? use exception handling when universally supported (pgCC doesn't)
-#if 0
+#if 1
   try {
     layout = new ESMC_Layout;
 //cout << "ESMC_LayoutCreate() succesful\n";
     *rc = layout->ESMC_LayoutConstruct(nx, ny, nz, pelist, commhint);
     return(layout);
   }
-  catch (bad_alloc) {
+//  catch (bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
+  catch (...) {
 // TODO:  call ESMF log/err handler
     cerr << "ESMC_LayoutCreate() memory allocation failed\n";
     *rc = ESMF_FAILURE;
@@ -165,6 +171,9 @@
 
   // construct 3D array of ESMC_DE's
 
+#if 0
+// use this section if exception handling not supported
+// TODO:  IBM (blackforest) doesn't support "new (nothrow)"
   // first, create array of (nx) pointers to ESMC_DE pointers
   if((layout = new (nothrow) ESMC_DE**[nx]) == 0) {
 // TODO:  call ESMF log/err handler
@@ -189,9 +198,10 @@
       }
     }
   }
+#endif
 
 // TODO: ?? use exception handling when universally supported (pgCC doesn't)
-#if 0
+#if 1
   try {
     // construct 2D array of ESMC_DE's
 
@@ -207,7 +217,8 @@
       }
     }
   }
-  catch(bad_alloc) {
+//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
+  catch(...) {
 // TODO:  call ESMF log/err handler
     cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
     return(ESMF_FAILURE);

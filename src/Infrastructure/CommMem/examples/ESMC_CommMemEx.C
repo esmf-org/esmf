@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMemEx.C,v 1.1 2002/12/13 21:09:41 eschwab Exp $
+// $Id: ESMC_CommMemEx.C,v 1.2 2002/12/17 02:23:44 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,8 +28,9 @@
 #include <ESMC_PEList.h>
 #include <ESMC_Comm.h>
 #include <ESMC_Layout.h>
-#include <iostream>
-//using std::cout;  // TODO: use when namespaces consistently implemented
+#include <iostream.h>
+//#include <iostream> // TODO: use when namespaces consistently implemented
+//using std::cout; 
 //using std::endl;
 #include <pthread.h>
 #include <math.h>    // pow()

@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $
+// $Id: ESMC_PEList.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,8 +22,9 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
- #include <iostream>
-//using std::cout;  // TODO: use when namespaces consistently implemented
+ #include <iostream.h>
+//#include <iostream> // TODO: use when namespaces consistently implemented
+//using std::cout;
 //using std::cerr;
  #include <stdlib.h>   // qsort
 // #include <cstdlib>   // qsort
@@ -36,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PEList.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_PEList.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -74,6 +75,9 @@
 
   ESMC_PEList *pelist;
 
+#if 0
+// use this section if exception handling not supported
+// TODO:  IBM (blackforest) doesn't support "new (nothrow)"
   if ((pelist = new (nothrow) ESMC_PEList) == 0) {
 // TODO:  call ESMF log/err handler
     cerr << "ESMC_PEListCreate() memory allocation failed\n";
@@ -84,16 +88,18 @@
 //cout << "ESMC_PEListCreate() succesful\n";
   *rc = pelist->ESMC_PEListConstruct(numpes);
   return(pelist);
+#endif
 
 // TODO: ?? use exception handling when universally supported (pgCC doesn't)
-#if 0
+#if 1
   try {
     pelist = new ESMC_PEList;
 //cout << "ESMC_PEListCreate() succesful\n";
     *rc = pelist->ESMC_PEListConstruct(numpes);
     return(pelist);
   }
-  catch (bad_alloc) {
+//  catch (bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
+  catch (...) {
 // TODO:  call ESMF log/err handler
     cerr << "ESMC_PEListCreate() memory allocation failed\n";
     *rc = ESMF_FAILURE;
@@ -198,6 +204,9 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+#if 0
+// use this section if exception handling not supported
+// TODO:  IBM (blackforest) doesn't support "new (nothrow)"
   if (numpes > 0) {
     if ((peList = new (nothrow) ESMC_PE[numpes]) == 0) {
   // TODO:  call ESMF log/err handler
@@ -211,9 +220,10 @@
   }
 
   return(ESMF_FAILURE);
+#endif
 
 // TODO: ?? use exception handling when universally supported (pgCC doesn't)
-#if 0
+#if 1
   if (numpes > 0) {
     try {
       peList = new ESMC_PE[numpes];
@@ -221,7 +231,8 @@
   //cout << "ESMC_PEListConstruct() successful\n";
       return(ESMF_SUCCESS);
     }
-    catch(bad_alloc) {
+//    catch(bad_alloc) { // TODO: use when IBM supports it (blackforest doesn't)
+    catch(...) {
   // TODO:  call ESMF log/err handler
       cerr << "ESMC_PEListConstruct() memory allocation failed\n";
       return(ESMF_FAILURE);

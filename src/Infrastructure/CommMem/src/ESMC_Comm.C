@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.4 2002/12/13 21:13:38 eschwab Exp $
+// $Id: ESMC_Comm.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,8 +22,9 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
-#include <iostream>
-//using std::cout;  // TODO: use when namespaces consistently implemented
+#include <iostream.h>
+//#include <iostream>  // TODO: use when namespaces consistently implemented
+//using std::cout;
 //using std::endl;
 #include <ESMC.h>
 #include <string.h>  // memset TODO:  ?? remove -test only
@@ -41,7 +42,7 @@ extern pthread_t ESMC_Comm_tid[];
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.4 2002/12/13 21:13:38 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
