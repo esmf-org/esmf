@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/03/02 00:01:49 jwolfe Exp $ 
+# $Id: makefile,v 1.5 2004/03/02 18:15:14 jwolfe Exp $ 
 
 ALL: build_system_tests
 
@@ -12,9 +12,9 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/system_tests/ESMF_FieldRedist
+LOCDIR	  = src/system_tests/ESMF_ArrayRedist
 
-SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldRedistSTest
+SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest
 
 # Object files other than %STest.o that the
 # system tests executable will depend on.
@@ -22,11 +22,11 @@ SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldRedistSTest
 # are to be compiled/created.
 SYSTEM_TESTS_OBJ     =
 
-SYSTEM_TESTS_RUN     = RUN_FieldRedist  
+SYSTEM_TESTS_RUN     = RUN_ArrayRedist  
 
-SYSTEM_TESTS_RUN_UNI = RUN_FieldRedistUNI
+SYSTEM_TESTS_RUN_UNI = RUN_ArrayRedistUNI
 
-SYSTEM_TESTS_RM      = FieldRedist.rm
+SYSTEM_TESTS_RM      = ArrayRedist.rm
 
 include $(ESMF_DIR)/makefile
 
@@ -36,16 +36,16 @@ CLEANDIRS   = coredir.*
 CLEANFILES  = *.o *.mod *.txt core $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
-RUN_FieldRedist:
-	-@rm -f testlog stdlog.* logfile.* FieldRedist.tmps
-	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldRedistSTest > $(ESMC_TESTDIR)/ESMF_FieldRedistSTest.stdout
+RUN_ArrayRedist:
+	-@rm -f testlog stdlog.* logfile.* ArrayRedist.tmps
+	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest > $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest.stdout
 
-RUN_FieldRedistUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldRedistSTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldRedistSTest > $(ESMC_TESTDIR)/ESMF_FieldRedistSTest.stdout
+RUN_ArrayRedistUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayRedistSTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest > $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest.stdout
 
-FieldRedist.rm:
-	echo "FieldRedist.rm target called here."
+ArrayRedist.rm:
+	echo "ArrayRedist.rm target called here."
 
 
 
