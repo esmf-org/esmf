@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.8 2003/05/02 19:26:02 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.9 2003/05/02 19:41:29 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -532,16 +532,14 @@
               sie(i,j-1) = sie(i,j)
               v(i,j-1) = v(i,j)
               rho(i,j-1) = rho(i,j)
-            else
-              rhoi(i,j) = rho(i,j)*sie(i,j)
-              rhov(i,j) = rho(i,j)*v(i,j)
-              rhou(i,j) = 0.0
-              u(i,j) = 0.0
             endif
+            rhoi(i,j) = rho(i,j)*sie(i,j)
+            rhov(i,j) = rho(i,j)*v(i,j)
+            rhou(i,j) = 0.0
+            u(i,j) = 0.0
           endif
         enddo
       enddo
-
       !
       ! calculate RHOU's and RHOV's
       !
