@@ -157,8 +157,7 @@ remove fields and data from {\tt State}s.
 A {\tt Coupler Component} produces a specification of the sequence of 
 transforms that are necessary to effect communication between components, 
 both scientific and computational, generic and user-defined.  The {\tt Coupler} 
-returns these to the application or parent in the form of a 
-{\tt Transform Specification} object.  This consists of a set of {\tt Transforms} 
+returns these to the application or parent in the form of a set of {\tt Transforms} 
 along with associated sequencing restrictions.  Each {\tt Transform} has a
 function pointer to a transform operation and may be bundled with 
 associated data.
@@ -204,9 +203,13 @@ data from a source component is sent to a distinct set of {\tt Coupler}
 Figure~\ref{fig:1waycoupling} shows the sequence of actions involved
 in coupling an atmosphere to an ocean.  The vertical axis is time, positive
 downward, and the horizontal axis shows the objects that are involved in the
-exchange.  In this example, the coupling is one-way, so that the ocean 
+exchange.  Arrow'd lines to text boxes mean that the source of the arrow has 
+created the object that is pointed to.  Solid lines to the start of a vertical
+box indicate that a method has been called.  Dashed lines indicate a return.  
+In this example, the coupling is one-way, so that the ocean 
 receives data from the atmosphere but does not send any data back.  Atmosphere
 and ocean components are configured for concurrent execution.
+<Add more explanation.>
 
 \begin{figure}
 \caption[{Coupling Sequence}]{One-way coupling between an atmosphere and
@@ -267,10 +270,6 @@ ESMF data.  It contains a function pointer to the transformation method
 and any data necessary to perform the transform.  It may relocate data, 
 redistribute data, regrid data, change units, or any combination of these.  
 
-\subsubsection{Transform Specification (ESMF\_XFormSpec)} 
-A {\tt Transform Specification} is a set of {\tt Transform} objects
-together with a specification of any sequencing restrictions that apply to 
-the {\tt Transform}s.
 
 
 
