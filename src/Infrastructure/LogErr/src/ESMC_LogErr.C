@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.7 2003/04/14 16:41:56 shep_smith Exp $
+// $Id: ESMC_LogErr.C,v 1.8 2003/04/15 15:14:59 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.7 2003/04/14 16:41:56 shep_smith Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.8 2003/04/15 15:14:59 nscollins Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
@@ -1020,7 +1020,7 @@ void ESMC_Log:: ESMC_LogPrint(
   len1=7;
   FTN(esmf_logprintint)(&unitNumber,&line,&flush,"Line: ",&len1);
   FTN(esmf_logprintnewline)(&unitNumber,&flush);
-  if (msg[0] != NULL) {
+  if ((msg != NULL) && (msg[0] != '\0')) {
      len1=10;
      len2=strlen(msg);
      FTN(esmf_logprintstring)(&unitNumber,msg, &len2,&flush,"Comments: ",&len1);
@@ -1039,7 +1039,7 @@ void ESMC_Log:: ESMC_LogPrint(
   if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   fprintf(logErrCFilePtr[numFilePtr],"Line: %d\n",line);
   if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
-  if (msg[0] != NULL) {
+  if ((msg != NULL) && (msg[0] != '\0')) {
     fprintf(logErrCFilePtr[numFilePtr],"Comments: %s\n",msg);
     if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   }
