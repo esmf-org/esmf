@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.2 2003/09/22 17:50:32 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.3 2003/10/07 22:37:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -65,7 +65,9 @@
       type(ESMF_CopyFlag), parameter :: & 
                             ESMF_DATA_COPY  = ESMF_CopyFlag(1), &
                             ESMF_DATA_REF   = ESMF_CopyFlag(2), &
-                            ESMF_DATA_SPACE = ESMF_CopyFlag(3)  ! private
+                            ESMF_DATA_DEFER = ESMF_CopyFlag(3), &
+                            ESMF_DATA_SPACE = ESMF_CopyFlag(4), &
+                            ESMF_DATA_NONE  = ESMF_CopyFlag(5)  ! private
 
 !------------------------------------------------------------------------------
 !     ! ESMF_LocalArrayOrigin
@@ -180,7 +182,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.2 2003/09/22 17:50:32 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.3 2003/10/07 22:37:10 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1331,7 +1333,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !BOP
 ! !INTERFACE:
       subroutine ESMF_LocalArrayGet(array, rank, type, kind, counts, &
-                               lbounds, ubounds, strides, base, name, rc)
+                                    lbounds, ubounds, base, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocalArray), intent(in) :: array
@@ -1341,7 +1343,6 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, dimension(:), intent(out), optional :: counts
       integer, dimension(:), intent(out), optional :: lbounds
       integer, dimension(:), intent(out), optional :: ubounds
-      integer, dimension(:), intent(out), optional :: strides
       type(ESMF_Pointer), intent(out), optional :: base
       character(len=ESMF_MAXSTR), intent(out), optional :: name
       integer, intent(out), optional :: rc             
@@ -1391,7 +1392,6 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       ! TODO: add these methods
       !integer, dimension(:), intent(out), optional :: lbounds
       !integer, dimension(:), intent(out), optional :: ubounds
-      !integer, dimension(:), intent(out), optional :: strides
       !type(ESMF_Pointer), intent(out), optional :: base
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -1561,7 +1561,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
  
     integer :: status                               ! local error status 
     integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds
-    integer, dimension(ESMF_MAXDIM) :: strides, offsets
+    integer, dimension(ESMF_MAXDIM) :: offsets
     integer :: localkind, localtype
 
     !! local variables, expanded by macro

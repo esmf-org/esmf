@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.3 2003/09/26 20:30:06 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.4 2003/10/07 22:37:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,10 +38,10 @@ extern "C" {
      void FTN(c_esmc_localarraycreateall)(ESMC_LocalArray **ptr, int *rank, 
                                      ESMC_DataType *dt, ESMC_DataKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
-                                     int *strides, int *status)  {
+                                     int *status)  {
          (*ptr) = ESMC_LocalArrayCreate_F(*rank, *dt, *dk, counts, 
                                     NULL, NULL, ESMC_DATA_NONE, 
-                                    lbounds, ubounds, strides, NULL, status);
+                                    lbounds, ubounds, NULL, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
@@ -57,8 +57,7 @@ extern "C" {
  
      void FTN(c_esmc_localarraysetinfo)(ESMC_LocalArray **ptr, 
                                struct c_F90ptr *fptr, void *base, int *counts,
-                               int *lbounds, int *ubounds,
-                               int *strides, int *offsets,
+                               int *lbounds, int *ubounds, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
                                int *status) {
       
@@ -67,7 +66,7 @@ extern "C" {
               return;
           }
          *status = (*ptr)->ESMC_LocalArraySetInfo(fptr, base, counts, 
-                                            lbounds, ubounds, strides, offsets, 
+                                            lbounds, ubounds, offsets, 
                                             *contig, *dealloc);
      }
 

@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.1 2003/09/18 15:57:07 cdeluca Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.2 2003/10/07 22:37:10 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -97,7 +97,7 @@
                                           ESMC_FROM_CPLUSPLUS,
                                           NULL, ESMC_ARRAY_DO_ALLOCATE, 
                                           docopy, ESMF_TRUE, 
-                                          NULL, NULL, NULL, NULL); 
+                                          NULL, NULL, NULL); 
      
      if (rc != NULL)
          *rc = status;
@@ -169,7 +169,7 @@
      status = a->ESMC_LocalArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
                             ESMC_DATA_NONE, ESMF_FALSE, 
-                            NULL, NULL, NULL, NULL);
+                            NULL, NULL, NULL);
 
      if (rc != NULL)
          *rc = status;
@@ -198,7 +198,6 @@
     ESMC_DataCopy docopy,      // if base is null and this is Copy, alloc here
     int *lbounds,              // lower index number per dim
     int *ubounds,              // upper index number per dim
-    int *strides,              // number of bytes between successive items/dim
     int *offsets,              // number of bytes to start of data/dim
     int *rc) {                 // return code
 //
@@ -244,13 +243,13 @@
                                               ESMC_FROM_FORTRAN, f90ptr, 
                                               ESMC_ARRAY_DO_ALLOCATE,
                                               ESMC_DATA_NONE, ESMF_TRUE, 
-                                              lbounds, ubounds, strides, offsets); 
+                                              lbounds, ubounds, offsets); 
      else
          status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
                                               ESMC_FROM_FORTRAN, f90ptr, 
                                               ESMC_ARRAY_NO_ALLOCATE, 
                                               docopy, ESMF_FALSE, 
-                                              lbounds, ubounds, strides, offsets); 
+                                              lbounds, ubounds, offsets); 
 
      if (rc != NULL)
          *rc = status;
@@ -282,7 +281,6 @@
     ESMC_Logical dflag,        // do we deallocate space or not?
     int *lbounds,              // lower index number per dim
     int *ubounds,              // upper index number per dim
-    int *strides,              // number of bytes between successive items/dim
     int *offsets) {            // offset in bytes to start of each dim
 //
 // !DESCRIPTION:
@@ -307,7 +305,7 @@
         counts[i]     = icounts ? icounts[i] : 1;        
 //        lbound[i] = lbounds ? lbounds[i] : 1;
 //        ubound[i] = ubounds ? ubounds[i] : counts[i];
-        bytestride[i] = strides ? strides[i] : 1;
+        bytestride[i] = 1;
         offset[i]     = offsets ? offsets[i] : 0;
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
@@ -405,7 +403,6 @@
     int *icounts,             // in - counts along each dim
     int *lbounds,             // in - lowest valid index
     int *ubounds,             // in - highest valid index
-    int *strides,             // in - numbytes between consecutive items/dim
     int *offsets,             // in - numbytes from base to 1st item/dim
     ESMC_Logical contig,      // in - is memory chunk contiguous?
     ESMC_Logical dealloc) {   // in - do we need to deallocate at delete?
@@ -434,7 +431,7 @@
     for (i=0; i<rank; i++) {
         counts[i]     = icounts ? icounts[i] : 0;
         offset[i]     = offsets ? offsets[i] : 0;
-        bytestride[i] = strides ? strides[i] : 0;
+        bytestride[i] = 0;
 //        lbound[i] = lbounds ? lbounds[i] : 0;
 //        ubound[i] = ubounds ? ubounds[i] : counts[i];
     }

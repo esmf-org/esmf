@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.1 2003/09/18 15:57:06 cdeluca Exp $
+// $Id: ESMC_LocalArray.h,v 1.2 2003/10/07 22:37:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,12 +45,8 @@
  // dummy structure which is at least as big as an F90 pointer on
  //  each architcture.  ESMF_F90_PTR_xxx are defined in conf.h in
  //  the build directories for each architecture
- // THIS IS NO LONGER TRYING TO MATCH THE SIZE EXACTLY BECAUSE IT CAN
- // BE RANK DEPENDENT ON MANY PLATFORMS.  this is used to reserve space
- // in our array struct.  it may need to be scrapped and computed on the
- // fly for each case.
- //  TODO: check if we can simply save the wrapper and save that and not
- //        have to save the full pointer/dopev
+ // on most platforms, there is a bump in size for each additional rank.
+ //  so far no platform has a data-type dependency.
 #define MAX_F90_RANK_POSSIBLE 7
 struct c_F90ptr {
    unsigned char basepad[ESMF_F90_PTR_BASE_SIZE];      // one of these
@@ -72,6 +68,8 @@ typedef enum {
 typedef enum { 
     ESMC_DATA_COPY = 1, 
     ESMC_DATA_REF,
+    ESMC_DATA_DEFER,
+    ESMC_DATA_SPACE,
     ESMC_DATA_NONE
 } ESMC_DataCopy;
 
@@ -85,7 +83,8 @@ typedef enum {
 typedef enum { 
     ESMC_ARRAY_NO_ALLOCATE = 0, 
     ESMC_ARRAY_DO_ALLOCATE,
-    ESMC_ARRAY_ALLOC_IF_BASE_NULL 
+    ESMC_ARRAY_ALLOC_IF_BASE_NULL,
+    ESMF_ARRAY_ALLOC_DEFERRED
 } ESMC_ArrayDoAllocate;
 
 
@@ -110,6 +109,8 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     ESMC_Logical iscontig;         // optimization possible if all contig
     void *base_addr;               // real start of memory
     int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
+    int lbounds[ESMF_MAXDIM];      // used for fortran indexing
+    int ubounds[ESMF_MAXDIM];      // used for fortran indexing
     int counts[ESMF_MAXDIM];       // number of elements/dim
     int bytestride[ESMF_MAXDIM];   // byte spacing between elements/dim
     struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
@@ -129,7 +130,7 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
             ESMC_ArrayOrigin oflag, struct c_F90ptr *f90ptr, 
             ESMC_ArrayDoAllocate aflag, 
             ESMC_DataCopy docopy, ESMC_Logical dflag, 
-            int *lbounds, int *ubounds, int *strides, int *offsets);
+            int *lbounds, int *ubounds, int *offsets);
     int ESMC_LocalArrayDestruct(void);
 
  // accessor methods for class members
@@ -196,8 +197,7 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 
     // get and set useful combinations of values that fortran cares about
     int ESMC_LocalArraySetInfo(struct c_F90ptr *fptr, void *base, int *counts, 
-                          int *lbounds, int *ubounds, 
-                          int *strides, int *offsets, 
+                          int *lbounds, int *ubounds, int *offsets, 
                           ESMC_Logical contig, ESMC_Logical dealloc);
     // TODO: add Get method
 
@@ -236,7 +236,7 @@ ESMC_LocalArray *ESMC_LocalArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKi
                     void *base = NULL, 
                     ESMC_DataCopy docopy = ESMC_DATA_REF,
                     int *lbounds = NULL, int *ubounds = NULL, 
-                    int *strides = NULL, int *offsets = NULL, int *rc = NULL);
+                    int *offsets = NULL, int *rc = NULL);
 ESMC_LocalArray *ESMC_LocalArrayCreateNoData(int rank, ESMC_DataType dt, 
                                    ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
                                    int *rc = NULL);
