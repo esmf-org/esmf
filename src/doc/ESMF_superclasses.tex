@@ -240,7 +240,7 @@ components for transporting and translating data between gridded components.
 \caption[{Application Component Create}]
 {The UML sequence for application component creation}
 \label{fig:ApplicationComponentCreate}
-\scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
+\scalebox{1.0}{\includegraphics{CreateAppDiagram.eps}}
 \end{figure}
 
 \subsubsection{Coupler Component Creation}
@@ -253,8 +253,10 @@ internal, coupler component specific initialization.
 \begin{figure}
 \caption[{Coupler Component Create}]
 {The UML sequence for coupler component creation}
+\begin{center}
 \label{fig:CouplerComponentCreate}
-\scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
+\scalebox{1.0}{\includegraphics{CreateCouplerDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsubsection{Gridded Component Creation}
@@ -266,8 +268,10 @@ data to and from other components.
 \begin{figure}
 \caption[{Gridded Component Create}]
 {The UML sequence for gridded component creation}
+\begin{center}
 \label{fig:GriddedComponentCreate}
-\scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
+\scalebox{1.0}{\includegraphics{CreateComponentDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsection{Configure Sequences}
@@ -290,8 +294,10 @@ configuration in invoked.
 \begin{figure}
 \caption[{Application Component Configuration}]
 {The UML sequence for application component configuration}
+\begin{center}
 \label{fig:ApplicationComponentConfigure}
-\scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
+\scalebox{1.0}{\includegraphics{ConfigureAppDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsubsection{Coupler Component Configuration}
@@ -307,8 +313,10 @@ coupler component, may also be included.
 \begin{figure}
 \caption[{Coupler Component Configuration}]
 {The UML sequence for coupler component configuration}
+\begin{center}
 \label{fig:CouplerComponentConfigure}
-\scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
+\scalebox{1.0}{\includegraphics{ConfigureCouplerDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsubsection{Gridded Component Configuration}
@@ -325,8 +333,10 @@ parent component.
 \begin{figure}
 \caption[{Gridded Component Configuration}]
 {The UML sequence for gridded component configuration}
+\begin{center}
 \label{fig:GriddedComponentConfigure}
-\scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
+\scalebox{1.0}{\includegraphics{ConfigureComponentDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsection{Run sequences}
@@ -345,7 +355,7 @@ configured for concurrent execution.
 \begin{figure}
 \caption[{Basic Run Application}]{Sequence for basic Run Application process.\\}
 \label{fig:RunApplicationDiagram}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{runApplicationDiagram.eps}}
 \end{figure}
 
 Following {\tt Apllication Component} startup (and coupler and component
@@ -375,8 +385,10 @@ case only one event is active at any time.
 \begin{figure}
 \caption[{Sequential Component Run}]{Sequence for serial multi-component
 application.\\}
+\begin{center}
 \label{fig:SequentialComponentsRunSequence}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{RunAppSequencialDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsubsection{Subcomponent Run Sequence}
@@ -394,10 +406,11 @@ and not by the application component.
 \begin{figure}
 \caption[{Subcomponent Run}]{Sequence for component and subcomponent
 application.\\}
+\begin{center}
 \label{fig:SubcomponentRunSequence}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{subcomponentCoupling.eps}}
+\end{center}
 \end{figure}
-
 
 \subsubsection{Ensemble Run Sequence}
 Figre \ref{fig:EnsembleComponentsRunSequence} shows an ensemble scenario
@@ -412,8 +425,10 @@ atmosphere component import state.
 \begin{figure}
 \caption[{Ensemble component Run}]{Sequence for ensemble components
 application scenario.\\}
+\begin{center}
 \label{fig:EnsembleComponentsRunSequence}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{runMergedApplicationDiagrams.eps}}
+\end{center}
 \end{figure}
 
 \subsubsection{Ensemble Coupler Component Run Sequence}
@@ -424,10 +439,12 @@ first merging two ocean import states into a composite form. The composite
 form then serves to update a merged ocean export state that is
 configured for import into an ocean to atmosphere coupler component.
 \begin{figure}
-\caption[{Ensemble component Run}]{Sequence for ensemble components
-application scenario.\\}
+\caption[{Ensemble Coupler Run}]{Sequence for ensemble coupler
+scenario.\\}
+\begin{center}
 \label{fig:EnsembleComponentsCouplerRunSequence}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{runMergedCouplerDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsubsection{Gridded Component Run Sequence}
@@ -441,8 +458,10 @@ state processing and advancing within a component may entail iteration.
 \begin{figure}
 \caption[{Sequence in a Component Run}]{Sequence for a component
 run stage.\\}
+\begin{center}
 \label{fig:GriddedComponentsRunSequence}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{RunComponentDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsubsection{Coupler Component Run Sequence}
@@ -456,8 +475,10 @@ for another component and flow returns to the parent component.
 \begin{figure}
 \caption[{Coupler Component Run Sequence}]{Sequence for a coupler component
 run stage.\\}
+\begin{center}
 \label{fig:CouplerComponentsRunSequence}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{RunCouplerDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsection{Termination Sequence}
@@ -480,8 +501,10 @@ also destroyed.
 \begin{figure}
 \caption[{Application Finalize}]{Sequence for finalizing an application
 component.\\}
+\begin{center}
 \label{fig:ApplicationFinalizeSequence}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{FinalizeAppDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsubsection{Coupler Finalize Sequence}
@@ -494,8 +517,10 @@ also perform standard file and network I/O cleanup operations.
 Flow then returns to the parent component.
 \begin{figure}
 \caption[{Coupler Finalize}]{Sequence for finalizing a coupler component}
+\begin{center}
 \label{fig:CouplerFinalizeSequence}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{FinalizeCouplerDiagram.eps}}
+\end{center}
 \end{figure}
 
 \subsubsection{Gridded Component Finalize Sequence}
@@ -507,8 +532,10 @@ internal structures it has created. Then file and network I/O objects
 are closed. Fiannly flow returns to the parent component.
 \begin{figure}
 \caption[{Gridded Component Finalize}]{Sequence for finalizing a gridded component}
+\begin{center}
 \label{fig:GriddedComponentFinalizeSequence}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\scalebox{1.0}{\includegraphics{FinalizeComponentDiagram.eps}}
+\end{center}
 \end{figure}
 
 \section{Superstructure Class Descriptions}
