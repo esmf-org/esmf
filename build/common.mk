@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.47 2004/03/24 14:54:00 nscollins Exp $
+#  $Id: common.mk,v 1.48 2004/04/14 17:49:55 jwolfe Exp $
 #===============================================================================
 #   common.mk
 #
@@ -96,9 +96,6 @@ endif
 # ESMF_LIB_INSTALL - Directory for install target to place libs.
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
 #-------------------------------------------------------------------------------
-
-# Enable the following flag in order to activate VM features
-#CPPFLAGS        = -DESMF_ENABLE_VM
 
 ifndef ESMF_BUILD
 export ESMF_BUILD := $(ESMF_TOP_DIR)
