@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.6 2004/01/29 04:51:37 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.7 2004/06/16 20:31:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,17 +28,11 @@
 
 !------------------------------------------------------------------------------
 
-      ! Instantiate a calendar
-      type(ESMF_Calendar) :: gregorianCalendar
-
       ! Instantiate some times
       type(ESMF_Time) :: time
       type(ESMF_Time) :: midMonth
-      type(ESMF_Time) :: wallClock
 
       ! Temp variables for Get functions
-      integer :: mm, dd, h, m
-      integer(ESMF_KIND_I8) :: s
       type(ESMF_Calendar) :: cal
       character (len=ESMF_MAXSTR) :: tS
       integer :: dayOfYear, dayOfWeek, dayOfMonth
@@ -46,14 +40,11 @@
       ! Result code
       integer :: rc
 
-      ! Initialize calendar to be Gregorian type
-      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+      ! initialize ESMF framework
+      call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
 
       ! Initialize time to 5/12/2003 2:24:45
-      call ESMF_TimeSet(time, yy=2003, &
-                       mm=5, dd=12, h=2, m=24, s=45, &
-                       calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(time, yy=2003, mm=5, dd=12, h=2, m=24, s=45, rc=rc)
 
       call ESMF_TimePrint(time, "string", rc)
 
@@ -77,14 +68,9 @@
       call ESMF_TimeGet(time, timeString=tS, rc=rc)
       print *, "Time in string format = ", tS
 
-      ! Get wall clock time
-      call ESMF_TimeSet(wallClock, calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimeSyncToRealTime(wallClock, rc)
-      print *, "Wall Clock Time = "
-      call ESMF_TimePrint(wallClock, "string", rc)
-
-      call ESMF_CalendarDestroy(gregorianCalendar, rc)
-
       print *, "ESMF_Time Example completed successfully"
+
+      ! finalize ESMF framework
+      call ESMF_Finalize(rc)
 
       end program ESMF_TimeEx
