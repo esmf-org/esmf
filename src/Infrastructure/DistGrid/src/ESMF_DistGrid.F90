@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.99 2004/03/04 23:51:45 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.100 2004/03/06 00:00:10 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -684,9 +684,10 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       integer :: globalCellCount
-      integer :: i, j, nDE, bnd
+      integer :: i, j, nDE, nDEs(0:2), bnd
       integer, dimension(ESMF_MAXDECOMPDIM) :: decompCount, &
-               globalCellCountPerDim, nDEs
+                                               globalCellCountPerDim, &
+                                               nDEsUse
       type(ESMF_DistGridLocal),  pointer :: me
       type(ESMF_DistGridGlobal), pointer :: glob
 
@@ -713,6 +714,7 @@
       endif
 
       ! Allocate resources based on number of DE's
+      nDEs(0) = 1
       call ESMF_DELayoutGetSize(layout, nDEs(1), nDEs(2), status)
       nDE = nDEs(1) * nDEs(2)
       if((status .NE. ESMF_SUCCESS) .or. (nDE .le. 0)) then
@@ -731,7 +733,8 @@
       do i = 1,numDims
         dgtype%decompIDs(i) = decompIDs(i)
       enddo
-      if (present(gridBoundaryWidth)) dgtype%gridBoundaryWidth = gridBoundaryWidth
+      if (present(gridBoundaryWidth)) &
+        dgtype%gridBoundaryWidth = gridBoundaryWidth
       if (present(coversDomain)) then
         do i = 1,numDims
           dgtype%coversDomain(i) = coversDomain(i)
@@ -751,9 +754,16 @@
         print *, "ERROR in ESMF_DistGridConstructInternal: globalCellCount le 0"
         return
       endif
-      ! call internal routine to set counts per DE
 
-      call ESMF_DistGridSetCounts(dgtype, numDims, nDEs, &
+      ! indirect addressing for nDEs due to decompIds -- nDEs should match
+      ! the ordering of countsPerDE arrays, which have beed changed due to
+      ! the decompositions
+      do i = 1,size(decompIds)
+        nDEsUse(i) = nDEs(decompIds(i))
+      enddo
+
+      ! call internal routine to set counts per DE
+      call ESMF_DistGridSetCounts(dgtype, numDims, nDEsUse, &
                                   countsPerDEDim1, countsPerDEDim2, &
                                   periodic, total=.FALSE., rc=status)
       glob%globalCellCount   = globalCellCount 
@@ -778,7 +788,7 @@
         return
       endif
       ! call internal routine to set counts per DE
-      call ESMF_DistGridSetCounts(dgtype, numDims, nDEs, &
+      call ESMF_DistGridSetCounts(dgtype, numDims, nDEsUse, &
                                   countsPerDEDim1, countsPerDEDim2, &
                                   periodic, total=.TRUE., rc=status)
       glob%globalCellCount   = globalCellCount 
