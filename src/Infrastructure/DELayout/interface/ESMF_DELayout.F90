@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.27 2004/06/07 19:14:04 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.28 2004/06/07 21:19:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,6 +10,7 @@
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_DELayout.F90"
+!==============================================================================
 !
 !     ESMF DELayout Module
       module ESMF_DELayoutMod
@@ -139,7 +140,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.27 2004/06/07 19:14:04 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.28 2004/06/07 21:19:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -763,14 +764,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutAllGlobalReduce()
   subroutine ESMF_DELayoutAllGlobReduceGenI4(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
+    dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)              :: delayout
     type(ESMF_DELayoutData),  intent(in)              :: srcData
     integer,                  intent(out)             :: dstData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: operation
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle    
     integer,                  intent(out),  optional  :: rc
@@ -789,7 +790,7 @@ contains
 !          Destination data.
 !     \item[count] 
 !          Number of elements per DE to be considered.
-!     \item[operation] 
+!     \item[reduceFlag] 
 !          Reduction operation.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
@@ -809,7 +810,7 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_I4, operation, ESMF_FALSE, localrc)
+      count, ESMF_I4, reduceFlag, ESMF_FALSE, localrc)
       
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -828,14 +829,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutAllGlobalReduce()
   subroutine ESMF_DELayoutAllGlobReduceGenR4(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
+    dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)              :: delayout
     type(ESMF_DELayoutData),  intent(in)              :: srcData
     real(ESMF_KIND_R4),       intent(out)             :: dstData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: operation
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -854,7 +855,7 @@ contains
 !          Destination data.
 !     \item[count] 
 !          Number of elements per DE to be considered.
-!     \item[operation] 
+!     \item[reduceFlag] 
 !          Reduction operation.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
@@ -874,7 +875,7 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_R4, operation, ESMF_FALSE, localrc)
+      count, ESMF_R4, reduceFlag, ESMF_FALSE, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -893,14 +894,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutAllGlobalReduce()
   subroutine ESMF_DELayoutAllGlobReduceGenR8(delayout, srcData, &
-    dstData, count, operation,  blockingFlag, commHandle, rc)
+    dstData, count, reduceFlag,  blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)              :: delayout
     type(ESMF_DELayoutData),  intent(in)              :: srcData
     real(ESMF_KIND_R8),       intent(out)             :: dstData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: operation
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -919,7 +920,7 @@ contains
 !          Destination data.
 !     \item[count] 
 !          Number of elements per DE to be considered.
-!     \item[operation] 
+!     \item[reduceFlag] 
 !          Reduction operation.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
@@ -939,7 +940,7 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_R8, operation, ESMF_FALSE, localrc)
+      count, ESMF_R8, reduceFlag, ESMF_FALSE, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -958,14 +959,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutAllGlobalReduce()
   subroutine ESMF_DELayoutAllGlobReduceI4(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
+    dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)              :: delayout
     integer(ESMF_KIND_I4),    intent(in)              :: srcData(:)
     integer,                  intent(out)             :: dstData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: operation
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle    
     integer,                  intent(out),  optional  :: rc
@@ -984,7 +985,7 @@ contains
 !          Destination data.
 !     \item[count] 
 !          Number of elements per DE to be considered.
-!     \item[operation] 
+!     \item[reduceFlag] 
 !          Reduction operation.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
@@ -1004,7 +1005,7 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_I4, operation, ESMF_TRUE, localrc)
+      count, ESMF_I4, reduceFlag, ESMF_TRUE, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1023,14 +1024,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutAllGlobalReduce()
   subroutine ESMF_DELayoutAllGlobReduceR4(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
+    dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)              :: delayout
     real(ESMF_KIND_R4),       intent(in)              :: srcData(:)
     real(ESMF_KIND_R4),       intent(out)             :: dstData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: operation
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle    
     integer,                  intent(out),  optional  :: rc
@@ -1049,7 +1050,7 @@ contains
 !          Destination data.
 !     \item[count] 
 !          Number of elements per DE to be considered.
-!     \item[operation] 
+!     \item[reduceFlag] 
 !          Reduction operation.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
@@ -1068,7 +1069,7 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_R4, operation, ESMF_TRUE, localrc)
+      count, ESMF_R4, reduceFlag, ESMF_TRUE, localrc)
       
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1087,14 +1088,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutAllGlobalReduce()
   subroutine ESMF_DELayoutAllGlobReduceR8(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
+    dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)              :: delayout
     real(ESMF_KIND_R8),       intent(in)              :: srcData(:)
     real(ESMF_KIND_R8),       intent(out)             :: dstData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: operation
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle    
     integer,                  intent(out),  optional  :: rc
@@ -1113,7 +1114,7 @@ contains
 !          Destination data.
 !     \item[count] 
 !          Number of elements per DE to be considered.
-!     \item[operation] 
+!     \item[reduceFlag] 
 !          Reduction operation.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
@@ -1133,7 +1134,7 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_R8, operation, ESMF_TRUE, localrc)
+      count, ESMF_R8, reduceFlag, ESMF_TRUE, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
