@@ -1,12 +1,28 @@
-# $Id: makefile,v 1.5 2003/03/21 17:57:55 flanigan Exp $
+# $Id: makefile,v 1.6 2003/03/24 20:55:10 ekluz Exp $ 
+ALL: lib 
 
-All:
-	do_latex CommMem des
-	do_l2h CommMem des
-	dvipdf CommMem_desdoc.dvi
+CFLAGS    =
+FFLAGS    =
+SOURCEC	  = 
+SOURCEF	  = 
+SOURCEH	  = 
+OBJSC     = 
+OBJSF     = 
+MANSEC	  = 
+LIBBASE	  = 
+LOCDIR	  = src/Infrastructure/CommMem/doc
 
-LOCDIR = src/Infrastructure/CommMem/doc
+DVIFILES  = \
+		${ESMC_DOCDIR}/CommMem_reqdoc.dvi \
+		${ESMC_DOCDIR}/CommMem_desdoc.dvi 
+#		${ESMC_DOCDIR}/CommMem_refdoc.dvi
 
+PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+
+HTMLFILES = \
+		${ESMC_DOCDIR}/CommMem_reqdoc \
+		${ESMC_DOCDIR}/CommMem_desdoc 
+#		${ESMC_DOCDIR}/CommMem_refdoc
 
 #
 # Tex Files to make
@@ -24,9 +40,43 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
-
 include $(ESMF_DIR)/makefile
 
 DIRS = 
 
+# Dvi files
+${ESMC_DOCDIR}/CommMem_desdoc.dvi:
+	${DO_LATEX} CommMem des
+	mv -f CommMem_desdoc.dvi ${ESMC_DOCDIR}
 
+${ESMC_DOCDIR}/CommMem_reqdoc.dvi:
+	${DO_LATEX} CommMem req
+	mv -f CommMem_reqdoc.dvi ${ESMC_DOCDIR}
+
+${ESMC_DOCDIR}/CommMem_refdoc.dvi:
+	${DO_LATEX} CommMem ref
+	mv -f CommMem_refdoc.dvi ${ESMC_DOCDIR}
+
+
+# Pdf files
+${ESMC_DOCDIR}/CommMem_desdoc.pdf: ${ESMC_DOCDIR}/CommMem_desdoc.dvi
+	dvipdf ${ESMC_DOCDIR}/CommMem_desdoc.dvi ${ESMC_DOCDIR}/CommMem_desdoc.pdf
+
+${ESMC_DOCDIR}/CommMem_reqdoc.pdf: ${ESMC_DOCDIR}/CommMem_reqdoc.dvi
+	dvipdf ${ESMC_DOCDIR}/CommMem_reqdoc.dvi ${ESMC_DOCDIR}/CommMem_reqdoc.pdf
+
+${ESMC_DOCDIR}/CommMem_refdoc.pdf: ${ESMC_DOCDIR}/CommMem_refdoc.dvi
+	dvipdf ${ESMC_DOCDIR}/CommMem_refdoc.dvi ${ESMC_DOCDIR}/CommMem_refdoc.pdf
+
+# Html Files
+${ESMC_DOCDIR}/CommMem_desdoc: 
+	${DO_L2H} CommMem des
+	mv -f CommMem_desdoc ${ESMC_DOCDIR}
+
+${ESMC_DOCDIR}/CommMem_reqdoc: 
+	${DO_L2H} CommMem req
+	mv -f CommMem_reqdoc ${ESMC_DOCDIR}
+
+${ESMC_DOCDIR}/CommMem_refdoc: 
+	${DO_L2H} CommMem ref
+	mv -f CommMem_refdoc ${ESMC_DOCDIR}
