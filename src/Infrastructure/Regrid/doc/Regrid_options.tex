@@ -6,9 +6,9 @@ General Regrid methods supported by ESMF.
 
 Valid values are:
 \begin{description}
-\item [ESMF\_REGRIDMETHOD\_NONE]
+\item [ESMF\_REGRID\_METHOD\_NONE]
      No regridding or undefined regrid.
-\item [ESMF\_REGRIDMETHOD\_BILINEAR]
+\item [ESMF\_REGRID\_METHOD\_BILINEAR]
      The bilinear regridding methods uses a local bilinear approximation
      to interpolate to a point in a quadrilateral grid.  This is applicable
      only for logically-rectangular or block-structured logically-rectangular
@@ -121,7 +121,7 @@ A = \left[\begin{array}{cc}
      the exception that instead of using cell corners, the relevant box is
      formed by neighbor cell centers as shown in Fig.~\ref{fig:quad}.
 
-\item[ESMF\_REGRIDMETHOD\_BICUBIC ] not implemented yet
+\item[ESMF\_REGRID\_METHOD\_BICUBIC ] not implemented yet
 
      Like the bilinear remapping, bicubic remapping is applicable
      only for logically-rectangular or block-structured logically-rectangular
@@ -170,8 +170,8 @@ f_P & = &
      gradient with respect to $i$, the weight multiplying the gradient with
      respect to $j$, and the weight multiplying the cross gradient in that order.
 
-%\item[ESMF\_REGRIDMETHOD\_CONSERV1 and ESMF\_REGRIDMETHOD\_CONSERV2]
-\item[ESMF\_REGRIDMETHOD\_CONSERV1]
+%\item[ESMF\_REGRID\_METHOD\_CONSERV1 and ESMF\_REGRID\_METHOD\_CONSERV2]
+\item[ESMF\_REGRID\_METHOD\_CONSERV1]
      First-order and second-order conservative remapping share a common
      algorithm, though currently only first-order has been implemented.
      ESMF implements a conservative remapping scheme described in detail
@@ -467,31 +467,31 @@ Y &=& 2\sin\left({\pi \over 4} - {\theta \over 2}\right)\sin\phi
      are detected and used as a normal grid intersection to provide a clean break
      between the two coordinate systems.
 
-%  \item [ESMF\_REGRIDMETHOD\_RASTER]
+%  \item [ESMF\_REGRID\_METHOD\_RASTER]
 %        Regrid by rasterizing domain.
-%  \item [ESMF\_REGRIDMETHOD\_NEARNBR]
+%  \item [ESMF\_REGRID\_METHOD\_NEARNBR]
 %        Nearest-neighbor dist-weighted avg
-%  \item [ESMF\_REGRIDMETHOD\_FOURIER]
+%  \item [ESMF\_REGRID\_METHOD\_FOURIER]
 %        Fourier transform.
-%  \item [ESMF\_REGRIDMETHOD\_LEGENDRE]
+%  \item [ESMF\_REGRID\_METHOD\_LEGENDRE]
 %        Legendre transform.
-%  \item [ESMF\_REGRIDMETHOD\_INDEX]
+%  \item [ESMF\_REGRID\_METHOD\_INDEX]
 %        Index-space regrid (shift, stencil).
-\item[ESMF\_REGRIDMETHOD\_LINEAR  ]
+\item[ESMF\_REGRID\_METHOD\_LINEAR  ]
      This is a standard linear regridding algorithm for 1-d grids only.  In ESMF,
      it is used to regrid between vertical grids.
 
-%  \item [ESMF\_REGRIDMETHOD\_SPLINE]
+%  \item [ESMF\_REGRID\_METHOD\_SPLINE]
 %        Cubic spline for 1-d regridding
-%  \item [ESMF\_REGRIDMETHOD\_REGRIDCOPY]
+%  \item [ESMF\_REGRID\_METHOD\_REGRIDCOPY]
 %        Copy existing regrid
-%  \item [ESMF\_REGRIDMETHOD\_SHIFT]
+%  \item [ESMF\_REGRID\_METHOD\_SHIFT]
 %        Shift addresses of existing regrid
-%  \item [ESMF\_REGRIDMETHOD\_ADJOINT]
+%  \item [ESMF\_REGRID\_METHOD\_ADJOINT]
 %        Create adjoint of existing regrid
-%  \item [ESMF\_REGRIDMETHOD\_FILE]
+%  \item [ESMF\_REGRID\_METHOD\_FILE]
 %        Read a regrid from a file
-%  \item [ESMF\_REGRIDMETHOD\_USER]
+%  \item [ESMF\_REGRID\_METHOD\_USER]
 %        User-supplied method
 \end{description}
 
