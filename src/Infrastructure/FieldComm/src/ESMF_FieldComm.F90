@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.58 2004/10/05 22:47:27 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.59 2004/10/18 16:53:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.58 2004/10/05 22:47:27 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.59 2004/10/18 16:53:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -226,36 +226,46 @@
 ! !IROUTINE: ESMF_FieldGather - Data gather operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldGather(field, dstDe, array, blockingflag, &
+      subroutine ESMF_FieldGather(field, dstPET, array, blockingflag, &
                                   commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field                 
-      integer, intent(in) :: dstDe
+      integer, intent(in) :: dstPET
       type(ESMF_Array), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a gather operation
-!     over the data in an {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is
-!     decomposed over N DEs, this routine returns a copy of the
-!     entire collected data as an {\tt ESMF\_Array} 
-!     on the specified destination
-!     DE number.  On all other DEs there is no return {\tt array} value.
+!     Collect all local data associated with a distributed {\tt ESMF\_Field}
+!     into a new {\tt ESMF\_Array} which is created only on a single PET.
+!     This routine must be called collectively, that is, on all PETs in 
+!     an {\tt ESMF\_VM}.  The framework will create a new 
+!     {\tt ESMF\_Array} to hold the resulting data only on the specified 
+!     destination PET.  After this call returns the {\tt array} argument
+!     will be valid only on the {\tt dstPET} and invalid on all other PETs.
+!     The input {\tt field} will be unchanged; the routine creates a copy of
+!     the collected data.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be gathered.
-!     \item [dstDe] 
-!           Destination DE number where the gathered data is to be returned.
+!     \item [dstPET] 
+!           Destination PET number where the gathered data is to be returned.
 !     \item [array] 
-!           Newly created {\tt ESMF\_Array} containing the collected data on the
-!           specified DE.  It is the size of the entire undecomposed grid.
-!           On all other DEs this argument returns an invalid object.
+!           Newly created {\tt ESMF\_Array} containing the collected data on 
+!           the specified PET.  It is the size of the entire undecomposed grid.
+!           On all other PETs this argument returns an invalid object.
+!           Note that the user should not create an {\tt ESMF\_Array} before
+!           making this call; the {\tt ESMF\_Array} should be an uninitialized
+!           variable.  When this routine returns, there will be a valid 
+!           {\tt ESMF\_Array} only on
+!           the specified PET number, so code which will access the 
+!           {\tt ESMF\_Array} should check the current PET number and only
+!           try to access it from a single PET.
 !     \item [{[blockingflag]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
@@ -291,7 +301,7 @@
       ftypep => field%ftypep
 
       call ESMF_ArrayGather(ftypep%localfield%localdata, &
-                            ftypep%grid, ftypep%mapping, dstDe, &
+                            ftypep%grid, ftypep%mapping, dstPET, &
                             array, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
