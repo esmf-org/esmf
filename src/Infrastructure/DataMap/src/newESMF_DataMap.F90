@@ -1,4 +1,4 @@
-a $Id: newESMF_DataMap.F90,v 1.2 2004/02/25 18:31:16 svasquez Exp $
+a $Id: newESMF_DataMap.F90,v 1.3 2004/03/05 18:21:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -167,7 +167,7 @@ a $Id: newESMF_DataMap.F90,v 1.2 2004/02/25 18:31:16 svasquez Exp $
         integer, dimension(ESMF_MAXDIM) :: rankLength   ! len if > scalar
         type(ESMF_Interleave) :: interleave             ! if > scalar
         ! data location relative to an individual grid cell
-        type(ESMF_RelLoc) :: horizRelloc                ! data item loc/cell
+        type(ESMF_RelLoc) :: horzRelloc                ! data item loc/cell
         type(ESMF_RelLoc) :: vertRelloc                 ! data item loc/cell
       end type
 
@@ -218,7 +218,7 @@ a $Id: newESMF_DataMap.F90,v 1.2 2004/02/25 18:31:16 svasquez Exp $
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: newESMF_DataMap.F90,v 1.2 2004/02/25 18:31:16 svasquez Exp $'
+             '$Id: newESMF_DataMap.F90,v 1.3 2004/03/05 18:21:14 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -337,13 +337,13 @@ end function
 ! !INTERFACE:
       ! Call as ESMF_DataMapInit()
       subroutine ESMF_DataMapInitIndex(datamap, dataIorder, counts, &
-                                       horizRelloc, vertRelloc, rc)
+                                       horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMap) :: datamap
       type(ESMF_IndexOrder), intent(in) :: dataIorder
       integer, dimension(:), intent(in), optional :: counts 
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(out), optional :: rc  
 !
@@ -371,8 +371,8 @@ end function
 !           is unneeded.  If the ranks of the grid and array are the same, 
 !           this is also unneeded.
 !
-!     \item [{[horizRelloc]}]
-!           Relative location of data per grid cell/vertex in the horizontal
+!     \item [{[horzRelloc]}]
+!           Relative location of data per grid cell/vertex in the horzontal
 !           grid.
 !
 !     \item [{[vertRelloc]}]
@@ -466,16 +466,16 @@ end function
           datamap%dataNonGridCounts(1:size(counts)) = counts(:)
         endif
 
-        if (present(horizRelloc)) then
-          datamap%horizRelloc = horizRelloc
+        if (present(horzRelloc)) then
+          datamap%horzRelloc = horzRelloc
         else
-          datamap%horizRelloc = ESMF_CELL_CENTER
+          datamap%horzRelloc = ESMF_CELL_CENTER
         endif
 
         if (present(vertRelloc)) then
           datamap%vertRelloc = vertRelloc
         else
-          datamap%vertRelloc = ESMF_CELL_CELL
+          datamap%vertRelloc = ESMF_CELL_UNDEFINED
         endif
 
         ! mark object as initialized and ready to be used
@@ -491,14 +491,14 @@ end function
 !BOPI
 ! !INTERFACE:
       subroutine ESMF_DataMapInitExplicit(datamap, dataRank, dataIndices, &
-                                          counts, horizRelloc, vertRelloc, rc)
+                                          counts, horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMap) :: datamap
       integer, intent(in) :: dataRank
       integer, dimension(:), intent(in) :: dataIndices
       integer, dimension(:), intent(in), optional :: counts
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(out), optional :: rc  
 !
@@ -526,8 +526,8 @@ end function
 !           is unneeded.  If the ranks of the grid and array are the same,
 !           this is also unneeded.
 !
-!     \item [{[horizRelloc]}]
-!           Relative location of data per grid cell/vertex in the horizontal
+!     \item [{[horzRelloc]}]
+!           Relative location of data per grid cell/vertex in the horzontal
 !           grid.
 !
 !     \item [{[vertRelloc]}]
@@ -573,10 +573,10 @@ end function
           datamap%dataNonGridCounts(1:size(counts)) = counts(:)
         endif
 
-        datamap%horizRelloc = ESMF_CELL_CENTER
-        if (present(horizRelloc)) datamap%horizRelloc = horizRelloc
+        datamap%horzRelloc = ESMF_CELL_CENTER
+        if (present(horzRelloc)) datamap%horzRelloc = horzRelloc
 
-        datamap%vertRelloc = ESMF_CELL_CELL
+        datamap%vertRelloc = ESMF_CELL_UNDEFINED
         if (present(vertRelloc)) datamap%vertRelloc = vertRelloc
 
         ! mark object as initialized and ready to be used
@@ -631,14 +631,14 @@ end function
 !BOP
 ! !INTERFACE:
       subroutine ESMF_DataMapGet(datamap, dataRank, dataIorder, counts, &
-                                 horizRelloc, vertRelloc, rc)
+                                 horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMap), intent(in) :: datamap  
       integer, intent(out), optional :: dataRank    
       integer, dimension (:), intent(out), optional :: dataIorder
       integer, dimension(:), intent(out), optional :: counts 
-      type(ESMF_RelLoc), intent(out), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       integer, intent(out), optional :: rc       
 !
@@ -670,8 +670,8 @@ end function
 !           is unneeded.  If the ranks of the grid and array are the same,
 !           this is also unneeded.
 !       
-!     \item [{[horizRelloc]}]
-!           Relative location of data per grid cell/vertex in the horizontal
+!     \item [{[horzRelloc]}]
+!           Relative location of data per grid cell/vertex in the horzontal
 !           grid.
 !
 !     \item [{[vertRelloc]}]
@@ -721,7 +721,7 @@ end function
            enddo
         endif
 
-        if (present(horizRelloc)) horizRelloc = datamap%horizRelloc
+        if (present(horzRelloc)) horzRelloc = datamap%horzRelloc
         if (present(vertRelloc)) vertRelloc = datamap%vertRelloc
 
         if (rcpresent) rc = ESMF_SUCCESS
@@ -733,14 +733,14 @@ end function
 !BOP
 ! !INTERFACE:
       subroutine ESMF_DataMapSet(datamap, dataRank, dataIorder, counts,  &
-                                 horizRelloc, vertRelloc, rc)
+                                 horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMap), intent(inout) :: datamap  
       integer, intent(in), optional :: dataRank    
       integer, dimension (:), intent(in), optional :: dataIorder
       integer, dimension(:), intent(in), optional :: counts 
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(out), optional :: rc       
 !
@@ -772,8 +772,8 @@ end function
 !           is unneeded.  If the ranks of the grid and array are the same,
 !           this is also unneeded.
 !
-!     \item [{[horizRelloc]}]
-!           Relative location of data per grid cell/vertex in the horizontal
+!     \item [{[horzRelloc]}]
+!           Relative location of data per grid cell/vertex in the horzontal
 !           grid.
 !
 !     \item [{[vertRelloc]}]
@@ -824,7 +824,7 @@ end function
            enddo
         endif
 
-        if (present(horizRelloc)) datamap%horizRelloc = horizRelloc
+        if (present(horzRelloc)) datamap%horzRelloc = horzRelloc
         if (present(vertRelloc)) datamap%vertRelloc = vertRelloc
 
         if (rcpresent) rc = ESMF_SUCCESS
@@ -1117,7 +1117,7 @@ end function
           enddo
         endif
 
-        call ESMF_RelLocString(datamap%horizRelloc, str, rc)
+        call ESMF_RelLocString(datamap%horzRelloc, str, rc)
         print *, "  Horizontal Relative location = ", trim(str)
         call ESMF_RelLocString(datamap%vertRelloc, str, rc)
         print *, "  Vertical Relative location = ", trim(str)
