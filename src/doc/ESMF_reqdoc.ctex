@@ -173,7 +173,7 @@
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/TimeMgmt/doc/TimeMgmt_reqdoc.ctex"
+#include "../Infrastructure/TimeMgr/doc/TimeMgr_reqdoc.ctex"
 %====================================================================================================
 \newpage
 \begin{htmlonly}
