@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.69.2.1 2005/02/09 21:42:48 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.69.2.2 2005/02/10 18:05:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -1090,8 +1090,8 @@ end subroutine ESMF_LogOpen
 	if (present(rootOnly)) alog%rootOnly=rootOnly
 	if (present(halt)) alog%halt=halt
 	if (present(stream)) alog%stream=stream
-	if (present(maxElements) .and. maxElements .gt. 0) then
-	    if (alog%maxElements .ne. maxElements) then
+	if (present(maxElements)) then
+            if (maxElements.gt.0 .AND. alog%maxElements.ne.maxElements) then
 	        allocate(localbuf(maxElements), &
                      stat=status)
                 ! TODO: copy old contents over, or flush first!!
