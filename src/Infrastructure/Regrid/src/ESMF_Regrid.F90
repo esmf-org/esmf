@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.2 2002/11/03 19:43:00 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.3 2002/11/04 06:13:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,83 +8,90 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
 !
-! ESMF Regrid Module
+!==============================================================================
+!
+!     ESMF Regrid Module
+      module ESMF_RegridMod
+!
+!==============================================================================
+!
+! This file contains the Regrid class definition and all Regrid class 
+! methods.
 !
 !------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-! put any constants or macros which apply to the whole component in this 
-!  include file.  anything public or esmf-wide should be up higher at
-!  the top level include files.
-
+! INCLUDES
 #include <ESMF_Regrid.h>
-
-
-!------------------------------------------------------------------------------
-! module definition
-
-      module ESMF_RegridMod
-
+!==============================================================================
 !BOP
-! !MODULE: ESMF_RegridMod - one line general statement about this class
+! !MODULE: ESMF_RegridMod - One line general statement about this class
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements ...
+! The code in this file implements the {\tt Class> class ...
 !
-! < insert a paragraph or two explaining what you'll find in this file >
-!
-!
+! < Insert a paragraph or two explaining the function of this class. >
 !
 !------------------------------------------------------------------------------
 ! !USES:
-!      use ESMF_Base    ! ESMF base class
-!     use ESMF_XXXMod  < if needed >
+      use ESMF_BaseMod    ! ESMF base class
+!     use ESMF_<XXX>Mod   ! any other dependencies
       implicit none
-!
+
+!------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
+!------------------------------------------------------------------------------
+!     ! ESMF_RegridConfig
+!
+!     ! Description of ESMF_RegridConfig
 
-!      type ESMF_RegridConfig
-!      private
-!      sequence
-!       < insert resource items here >
-!      end type
-
-      type ESMF_Regrid
-      private
+      type ESMF_RegridConfig
       sequence
-!        type (ESMF_Base) :: base
-        integer :: basestate
+      private
+        integer :: dummy
 !       < insert other class members here >
       end type
 
+!------------------------------------------------------------------------------
+!     !  ESMF_Regrid
+!
+!     ! Description of ESMF_Regrid. 
+
+      type ESMF_Regrid
+      sequence
+      private
+!       type (ESMF_Base) :: base
+        integer :: dummy
+!       < insert other class members here >
+      end type
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-!      public ESMF_RegridConfig
+      public ESMF_RegridConfig
       public ESMF_Regrid
-
-
+!------------------------------------------------------------------------------
+!
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-! pick one or the other of the init/create sections depending on
+!  Pick one or the other of the init/create sections depending on
 !  whether this is a deep class (the class/derived type has pointers to
 !  other memory which must be allocated/deallocated) or a shallow class
 !  (the class/derived type is self-contained) and needs no destroy methods
 !  other than deleting the memory for the object/derived type itself.
 
 ! the following routines apply to deep classes only
-    public ESMF_RegridCreate                 ! (interface only, deep class)
-    public ESMF_RegridDestroy                ! (interface only, deep class)
-    public ESMF_RegridConstruct              ! (internal only, deep class)
-    public ESMF_RegridDestruct               ! (internal only, deep class)
+    public ESMF_RegridCreate                 ! interface only, deep class
+    public ESMF_RegridDestroy                ! interface only, deep class
+    public ESMF_RegridConstruct              ! internal only, deep class
+    public ESMF_RegridDestruct               ! internal only, deep class
 
 ! the following routine applies to a shallow class
-    public ESMF_RegridInit                   ! (shallow class)
+    public ESMF_RegridInit                   ! shallow class
 
-    public ESMF_RegridGetconfig
-    public ESMF_RegridSetconfig
-    public ESMF_RegridGet
-    public ESMF_RegridSet
+    public ESMF_RegridGetConfig
+    public ESMF_RegridSetConfig
+    public ESMF_RegridGetValue               ! Get<Value>
+    public ESMF_RegridSetValue               ! Set<Value>
  
     public ESMF_RegridValidate
     public ESMF_RegridPrint
@@ -94,17 +101,17 @@
 !
 !EOP
 
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_Regrid.F90,v 1.3 2002/11/04 06:13:42 cdeluca Exp $'
 
-!------------------------------------------------------------------------------
-! leave the following line as-is; it will insert the cvs ident string
-! into the object file for tracking purposes.
-      character(*), parameter, private :: &
-      version = '$Id: ESMF_Regrid.F90,v 1.2 2002/11/03 19:43:00 cdeluca Exp $'
-!------------------------------------------------------------------------------
+!==============================================================================
 !
+! INTERFACE BLOCKS
+!
+!==============================================================================
 !BOP
-! !IROUTINE: ESMF_RegridCreate - Generic interface to create a new Regrid object
-
 ! !INTERFACE:
       interface ESMF_RegridCreate 
 
@@ -112,29 +119,28 @@
          module procedure ESMF_RegridCreateNew
 
 ! !DESCRIPTION:
-! This interface provides a single entry point for the various
-!  types of XXX subprogram. ...
+!     This interface provides a single entry point for Regrid create
+!     methods.
+!
 !EOP
-
       end interface 
-
-! < add other interfaces here>
-
+!
 !------------------------------------------------------------------------------
+
+!    < add other interfaces here>
+
+!==============================================================================
 
       contains
 
+!==============================================================================
 !
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+! This section includes the Regrid Create and Destroy methods.
 !
-! This section includes all the Regrid routines
-!
-!
-
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridCreateNew - Create a new Regrid
+! !IROUTINE: 
+!     ESMF_RegridCreateNew - Create a new Regrid
 
 ! !INTERFACE:
       function ESMF_RegridCreateNew(arg1, arg2, arg3, rc)
@@ -143,24 +149,25 @@
       type(ESMF_Regrid) :: ESMF_RegridCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        ! arg1
-      integer, intent(in) :: arg2                        ! arg2
-      character (len = *), intent(in), optional :: arg3  ! arg3
-      integer, intent(out), optional :: rc               ! return code
-
+      integer, intent(in) :: arg1                        
+      integer, intent(in) :: arg2                        
+      character (len = *), intent(in), optional :: arg3  
+      integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!   Create a new Regrid from ... Allocates memory for a new Regrid
-!   object and uses the internal routine ESMF_RegridContruct to
-!   initialize it.  Define for deep classes only, for shallow classes only
-!   define and use ESMF_RegridInit
+!     Allocates memory for a new {\tt Regrid} object and constructs its
+!     internals.
 !
-!   The arguments are:
-!   \begin{description}
-!   \item[arg1] The arg is  ...
-!   \item[arg2] The arg is  ...
-!   \item[arg3] The arg is  ...
-!   \item[rc] The optional return code.
+!     The arguments are:
+!     \begin{description}
+!     \item[arg1] 
+!          Argument 1.
+!     \item[arg2]
+!          Argument 2.         
+!     \item[[arg3]] 
+!          Argument 3.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
@@ -171,27 +178,29 @@
 !
       end function ESMF_RegridCreateNew
 
-
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridDestroy - free a Regrid created with Create
+! !IROUTINE: 
+!     ESMF_RegridDestroy - Free all resources associated with a Regrid 
 
 ! !INTERFACE:
       subroutine ESMF_RegridDestroy(regrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid   ! regrid to be destroyed
-      integer, intent(out), optional :: rc        ! return code
+      type(ESMF_Regrid), intent(in) :: regrid   
+      integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
-!   ESMF routine which destroys a Regrid object previously allocated
-!   via an ESMF_RegridCreate routine.  Define for deep classes only.
+!     Destroys a {\tt Regrid} object previously allocated
+!     via an {\tt ESMF_RegridCreate routine}.
 !
-!   The arguments are:
-!   \begin{description}
-!   \item[regrid] The class to be destroyed.
-!   \item[rc] The optional return code.
-!   \end{description}
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid] 
+!          The class to be destroyed.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -203,7 +212,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridConstruct - fill in an already allocated Regrid
+! !IROUTINE: 
+!     ESMF_RegridConstruct - Construct the internals of an allocated Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridConstruct(regrid, arg1, arg2, arg3, rc)
@@ -216,12 +226,26 @@
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      ESMF routine which fills in the contents of an already
-!      allocated Regrid object.  May need to do additional allocations
-!      as needed.  Must call the corresponding ESMF_RegridDestruct
-!      routine to free the additional memory.  Intended for internal
-!      ESMF use only; end-users use ESMF_RegridCreate, which calls
-!      ESMF_RegridConstruct.  Define for deep classes only.
+!     ESMF routine which fills in the contents of an already
+!     allocated {\tt Regrid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding ESMF_RegridDestruct
+!     routine to free the additional memory.  Intended for internal
+!     ESMF use only; end-users use {\tt ESMF\_RegridCreate}, which calls
+!     {\tt ESMF\_RegridConstruct}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid] 
+!          The class to be constructed.
+!     \item[arg1]
+!          Argument 1.
+!     \item[arg2]
+!          Argument 2.         
+!     \item[[arg3]] 
+!          Argument 3.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -233,25 +257,33 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridDestruct - Release resources associated with Regrid
+! !IROUTINE: 
+!     ESMF_RegridDestruct - Free any Regrid memory allocated internally
 
 ! !INTERFACE:
       subroutine ESMF_RegridDestruct(regrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid     ! Regrid to be dismantled
-      integer, intent(out), optional :: rc          ! return code
-
+      type(ESMF_Regrid), intent(in) :: regrid    
+      integer, intent(out), optional :: rc         
 !
 ! !DESCRIPTION:
-!      ESMF routine which deallocates any space allocated by
-!      ESMF_RegridConstruct, does any additional cleanup before the
-!      original Regrid object is freed.  Intended for internal ESMF
-!      use only; end-users use ESMF_RegridDestroy, which calls
-!      ESMF_RegridDestruct.  Define for deep classes only.
+!     ESMF routine which deallocates any space allocated by
+!    {\tt  ESMF\_RegridConstruct}, does any additional cleanup before the
+!     original Regrid object is freed.  Intended for internal ESMF
+!     use only; end-users use {\tt ESMF\_RegridDestroy}, which calls
+!     {\tt ESMF_RegridDestruct}.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid] 
+!          The class to be destructed.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
-! !REQUIREMENTS
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -260,28 +292,42 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridInit - Initialize a Regrid object
+! !IROUTINE: 
+!     ESMF_RegridInit - Initialize a Regrid 
 
 ! !INTERFACE:
       subroutine ESMF_RegridInit(regrid, arg1, arg2, arg3, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid   ! Regrid to be initialized
-      integer, intent(in) :: arg1                        ! arg1
-      integer, intent(in) :: arg2                        ! arg2
-      character (len = *), intent(in), optional :: arg3  ! arg3
-      integer, intent(out), optional :: rc               ! return code
-
+      type(ESMF_Regrid), intent(in) :: regrid   
+      integer, intent(in) :: arg1                       
+      integer, intent(in) :: arg2                       
+      character (len = *), intent(in), optional :: arg3 
+      integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
-!      ESMF routine which only initializes Regrid values; it does not
-!      allocate any resources.  Define for shallow classes only, 
-!      for deep classes define and use routines Create/Destroy and 
-!      Construct/Destruct.  Can be overloaded like ESMF_RegridCreate
-!      via interface blocks.
+!     ESMF routine which only initializes {\tt Regrid} values; it does not
+!     allocate any resources.  Define for shallow classes only, 
+!     for deep classes define and use routines Create/Destroy and 
+!     Construct/Destruct.  Can be overloaded like ESMF_RegridCreate
+!     via interface blocks.
+!
+!  The arguments are:
+!     \begin{description}
+!     \item[regrid]
+!          Class to be initialized.
+!     \item[arg1] 
+!          Argument 1.
+!     \item[arg2]
+!          Argument 2.         
+!     \item[[arg3]] 
+!          Argument 3.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -290,22 +336,32 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridGetConfig - Get configuration information from a Regrid
+! !IROUTINE: 
+!     ESMF_RegridGetConfig - Get configuration information from a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridGetConfig(regrid, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Regrid), intent(in) :: regrid
-      integer, intent(out) :: config    ! resources
-      integer, intent(out), optional :: rc               ! return code
-
+      integer, intent(out) :: config   
+      integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
 !     Returns the set of resources the Regrid object was configured with.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid] 
+!          Class to be queried.
+!     \item[config]
+!          Configuration information.         
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -314,22 +370,33 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridSetConfig - Set configuration information for a Regrid
+! !IROUTINE: 
+!     ESMF_RegridSetConfig - Set configuration information for a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridSetConfig(regrid, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Regrid), intent(in) :: regrid
-      integer, intent(in) :: config    ! resources
-      integer, intent(out), optional :: rc              ! return code
+      integer, intent(in) :: config   
+      integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !     Configures the Regrid object with set of resources given.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid] 
+!          Class to be configured.
+!     \item[config]
+!          Configuration information.         
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -338,69 +405,101 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridGet - get <Value> for a Regrid
+! !IROUTINE: 
+!     ESMF_RegridGetValue - Get <Value> for a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridGet(regrid, value, rc)
+      subroutine ESMF_RegridGetValue(regrid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Regrid), intent(in) :: regrid
       integer, intent(out) :: value
-      integer, intent(out), optional :: rc              ! return code
+      integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!     Returns the value of Regrid member <Value>.
-!     Can be multiple routines, one per value
+!     Returns the value of Regrid attribute <Value>.
+!     May be multiple routines, one per attribute.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid] 
+!          Class to be queried.
+!     \item[value]
+!          Value to be retrieved.         
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
 !
-      end subroutine ESMF_RegridGet
+      end subroutine ESMF_RegridGetValue
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridSet - set <Value> for a Regrid
+! !IROUTINE: 
+!     ESMF_RegridSetValue - Set <Value> for a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridSet(regrid, value, rc)
+      subroutine ESMF_RegridSetValue(Regrid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Regrid), intent(in) :: regrid
       integer, intent(in) :: value
-      integer, intent(out), optional :: rc              ! return code
+      integer, intent(out), optional :: rc            
 
 !
 ! !DESCRIPTION:
-!     Sets the Regrid member <Value> with the given value.
-!     Can be multiple routines, one per value
+!     Set a Regrid attribute with the given value.
+!     May be multiple routines, one per attribute.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid] 
+!          Class to be modified.
+!     \item[value]
+!          Value to be set.         
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
+
 !
 !  code goes here
 !
-      end subroutine ESMF_RegridSet
+      end subroutine ESMF_RegridSetValue
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridValidate - internal consistency check for a Regrid
+! !IROUTINE: 
+!     ESMF_RegridValidate - Check internal consistency of a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridValidate(regrid, options, rc)
+      subroutine ESMF_RegridValidate(regrid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid        ! regrid to be checked
-      character (len=*), intent(in) :: options         ! validate options
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_Regrid), intent(in) :: regrid       
+      character (len=*), intent(in), optional :: opt    
+      integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!      Validates that a Regrid is internally consistent.
-!      Returns error code if problems are found.  ESMF_Base class
-!      method.
+!     Validates that a Regrid is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid] 
+!          Class to be queried.
+!     \item[[opt]]
+!          Validation options.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -412,20 +511,30 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridPrint - print contents of a Regrid
+! !IROUTINE: 
+!     ESMF_RegridPrint - Print the contents of a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridPrint(regrid, options, rc)
+      subroutine ESMF_RegridPrint(regrid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid        ! regrid to be printed
-      character (len=*), intent(in) :: options         ! print options
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_Regrid), intent(in) :: regrid      
+      character (len=*), intent(in) :: opt      
+      integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!      Print information about a Regrid.  The options control the
-!      type of information and level of detail.  ESMF_Base class
-!      method.
+!      Print information about a Regrid.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid] 
+!          Class to be queried.
+!     \item[[opt]]
+!          Print ptions that control the type of information and level of 
+!          detail.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n

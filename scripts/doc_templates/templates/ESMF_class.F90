@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.10 2002/11/04 05:51:01 cdeluca Exp $
+! $Id: ESMF_class.F90,v 1.11 2002/11/04 06:13:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
       type ESMF_<Class>Config
       sequence
       private
-!      integer :: dummy
+        integer :: dummy
 !       < insert other class members here >
       end type
 
@@ -61,6 +61,7 @@
       sequence
       private
 !       type (ESMF_Base) :: base
+        integer :: dummy
 !       < insert other class members here >
       end type
 
@@ -103,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_class.F90,v 1.10 2002/11/04 05:51:01 cdeluca Exp $'
+      '$Id: ESMF_class.F90,v 1.11 2002/11/04 06:13:42 cdeluca Exp $'
 
 !==============================================================================
 !

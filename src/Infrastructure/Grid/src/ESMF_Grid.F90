@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.4 2002/11/03 19:54:56 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.5 2002/11/04 06:13:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,81 +8,90 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
 !
-! ESMF Grid Module
+!==============================================================================
+!
+!     ESMF Grid Module
+      module ESMF_GridMod
+!
+!==============================================================================
+!
+! This file contains the Grid class definition and all Grid class 
+! methods.
 !
 !------------------------------------------------------------------------------
-! put any constants or macros which apply to the whole component in this 
-!  include file.  anything public or esmf-wide should be up higher at
-!  the top level include files.
-
+! INCLUDES
 #include <ESMF_Grid.h>
-
-
-!------------------------------------------------------------------------------
-! module definition
-
-      module ESMF_GridMod
-
+!==============================================================================
 !BOP
-! !MODULE: ESMF_GridMod - one line general statement about this class
+! !MODULE: ESMF_GridMod - One line general statement about this class
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements ...
+! The code in this file implements the {\tt Class> class ...
 !
-! < insert a paragraph or two explaining what you'll find in this file >
-!
-!
+! < Insert a paragraph or two explaining the function of this class. >
 !
 !------------------------------------------------------------------------------
 ! !USES:
-!      use ESMF_Base    ! ESMF base class
-!     use ESMF_XXXMod  < if needed >
+      use ESMF_BaseMod    ! ESMF base class
+!     use ESMF_<XXX>Mod   ! any other dependencies
       implicit none
-!
+
+!------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
+!------------------------------------------------------------------------------
+!     ! ESMF_GridConfig
+!
+!     ! Description of ESMF_GridConfig
 
-!      type ESMF_GridConfig
-!      private
-!      sequence
-!       < insert resource items here >
-!      end type
-
-      type ESMF_Grid
-      private
+      type ESMF_GridConfig
       sequence
-!        type (ESMF_Base) :: base
-        integer :: basestate
+      private
+        integer :: dummy
 !       < insert other class members here >
       end type
 
+!------------------------------------------------------------------------------
+!     !  ESMF_Grid
+!
+!     ! Description of ESMF_Grid. 
+
+      type ESMF_Grid
+      sequence
+      private
+!       type (ESMF_Base) :: base
+        integer :: dummy
+!       < insert other class members here >
+      end type
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-!      public ESMF_GridConfig
+      public ESMF_GridConfig
       public ESMF_Grid
-
-
+!------------------------------------------------------------------------------
+!
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-! pick one or the other of the init/create sections depending on
+!  Pick one or the other of the init/create sections depending on
 !  whether this is a deep class (the class/derived type has pointers to
 !  other memory which must be allocated/deallocated) or a shallow class
 !  (the class/derived type is self-contained) and needs no destroy methods
 !  other than deleting the memory for the object/derived type itself.
 
 ! the following routines apply to deep classes only
-    public ESMF_GridCreate                 ! (interface only, deep class)
-    public ESMF_GridDestroy                ! (interface only, deep class)
-    public ESMF_GridConstruct              ! (internal only, deep class)
-    public ESMF_GridDestruct               ! (internal only, deep class)
+    public ESMF_GridCreate                 ! interface only, deep class
+    public ESMF_GridDestroy                ! interface only, deep class
+    public ESMF_GridConstruct              ! internal only, deep class
+    public ESMF_GridDestruct               ! internal only, deep class
 
 ! the following routine applies to a shallow class
-    public ESMF_GridInit                   ! (shallow class)
+    public ESMF_GridInit                   ! shallow class
 
     public ESMF_GridGetConfig
     public ESMF_GridSetConfig
-    public ESMF_GridGet
-    public ESMF_GridSet
+    public ESMF_GridGetValue               ! Get<Value>
+    public ESMF_GridSetValue               ! Set<Value>
  
     public ESMF_GridValidate
     public ESMF_GridPrint
@@ -92,17 +101,17 @@
 !
 !EOP
 
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_Grid.F90,v 1.5 2002/11/04 06:13:42 cdeluca Exp $'
 
-!------------------------------------------------------------------------------
-! leave the following line as-is; it will insert the cvs ident string
-! into the object file for tracking purposes.
-      character(*), parameter, private :: &
-      version = '$Id: ESMF_Grid.F90,v 1.4 2002/11/03 19:54:56 cdeluca Exp $'
-!------------------------------------------------------------------------------
+!==============================================================================
 !
+! INTERFACE BLOCKS
+!
+!==============================================================================
 !BOP
-! !IROUTINE: ESMF_GridCreate - Generic interface to create a new Grid object
-
 ! !INTERFACE:
       interface ESMF_GridCreate 
 
@@ -110,29 +119,28 @@
          module procedure ESMF_GridCreateNew
 
 ! !DESCRIPTION:
-! This interface provides a single entry point for the various
-!  types of XXX subprogram. ...
+!     This interface provides a single entry point for Grid create
+!     methods.
+!
 !EOP
-
       end interface 
-
-! < add other interfaces here>
-
+!
 !------------------------------------------------------------------------------
+
+!    < add other interfaces here>
+
+!==============================================================================
 
       contains
 
+!==============================================================================
 !
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+! This section includes the Grid Create and Destroy methods.
 !
-! This section includes all the Grid routines
-!
-!
-
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCreateNew - Create a new Grid
+! !IROUTINE: 
+!     ESMF_GridCreateNew - Create a new Grid
 
 ! !INTERFACE:
       function ESMF_GridCreateNew(arg1, arg2, arg3, rc)
@@ -141,24 +149,25 @@
       type(ESMF_Grid) :: ESMF_GridCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        ! arg1
-      integer, intent(in) :: arg2                        ! arg2
-      character (len = *), intent(in), optional :: arg3  ! arg3
-      integer, intent(out), optional :: rc               ! return code
-
+      integer, intent(in) :: arg1                        
+      integer, intent(in) :: arg2                        
+      character (len = *), intent(in), optional :: arg3  
+      integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!   Create a new Grid from ... Allocates memory for a new Grid
-!   object and uses the internal routine ESMF_GridContruct to
-!   initialize it.  Define for deep classes only, for shallow classes only
-!   define and use ESMF_GridInit
+!     Allocates memory for a new {\tt Grid} object and constructs its
+!     internals.
 !
-!   The arguments are:
-!   \begin{description}
-!   \item[arg1] The arg is  ...
-!   \item[arg2] The arg is  ...
-!   \item[arg3] The arg is  ...
-!   \item[rc] The optional return code.
+!     The arguments are:
+!     \begin{description}
+!     \item[arg1] 
+!          Argument 1.
+!     \item[arg2]
+!          Argument 2.         
+!     \item[[arg3]] 
+!          Argument 3.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
@@ -169,27 +178,29 @@
 !
       end function ESMF_GridCreateNew
 
-
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridDestroy - free a Grid created with Create
+! !IROUTINE: 
+!     ESMF_GridDestroy - Free all resources associated with a Grid 
 
 ! !INTERFACE:
       subroutine ESMF_GridDestroy(grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid   ! grid to be destroyed
-      integer, intent(out), optional :: rc        ! return code
+      type(ESMF_Grid), intent(in) :: grid   
+      integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
-!   ESMF routine which destroys a Grid object previously allocated
-!   via an ESMF_GridCreate routine.  Define for deep classes only.
+!     Destroys a {\tt Grid} object previously allocated
+!     via an {\tt ESMF_GridCreate routine}.
 !
-!   The arguments are:
-!   \begin{description}
-!   \item[grid] The class to be destroyed.
-!   \item[rc] The optional return code.
-!   \end{description}
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          The class to be destroyed.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -201,7 +212,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridConstruct - fill in an already allocated Grid
+! !IROUTINE: 
+!     ESMF_GridConstruct - Construct the internals of an allocated Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridConstruct(grid, arg1, arg2, arg3, rc)
@@ -214,12 +226,26 @@
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      ESMF routine which fills in the contents of an already
-!      allocated Grid object.  May need to do additional allocations
-!      as needed.  Must call the corresponding ESMF_GridDestruct
-!      routine to free the additional memory.  Intended for internal
-!      ESMF use only; end-users use ESMF_GridCreate, which calls
-!      ESMF_GridConstruct.  Define for deep classes only.
+!     ESMF routine which fills in the contents of an already
+!     allocated {\tt Grid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding ESMF_GridDestruct
+!     routine to free the additional memory.  Intended for internal
+!     ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
+!     {\tt ESMF\_GridConstruct}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          The class to be constructed.
+!     \item[arg1]
+!          Argument 1.
+!     \item[arg2]
+!          Argument 2.         
+!     \item[[arg3]] 
+!          Argument 3.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -231,22 +257,30 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridDestruct - release resources associated w/a Grid
+! !IROUTINE: 
+!     ESMF_GridDestruct - Free any Grid memory allocated internally
 
 ! !INTERFACE:
       subroutine ESMF_GridDestruct(grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid     ! Grid to be dismantled
-      integer, intent(out), optional :: rc          ! return code
-
+      type(ESMF_Grid), intent(in) :: grid    
+      integer, intent(out), optional :: rc         
 !
 ! !DESCRIPTION:
-!      ESMF routine which deallocates any space allocated by
-!      ESMF_GridConstruct, does any additional cleanup before the
-!      original Grid object is freed.  Intended for internal ESMF
-!      use only; end-users use ESMF_GridDestroy, which calls
-!      ESMF_GridDestruct.  Define for deep classes only.
+!     ESMF routine which deallocates any space allocated by
+!    {\tt  ESMF\_GridConstruct}, does any additional cleanup before the
+!     original Grid object is freed.  Intended for internal ESMF
+!     use only; end-users use {\tt ESMF\_GridDestroy}, which calls
+!     {\tt ESMF_GridDestruct}.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          The class to be destructed.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -258,25 +292,39 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridInit - initialize a Grid object
+! !IROUTINE: 
+!     ESMF_GridInit - Initialize a Grid 
 
 ! !INTERFACE:
       subroutine ESMF_GridInit(grid, arg1, arg2, arg3, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid   ! Grid to be initialized
-      integer, intent(in) :: arg1                        ! arg1
-      integer, intent(in) :: arg2                        ! arg2
-      character (len = *), intent(in), optional :: arg3  ! arg3
-      integer, intent(out), optional :: rc               ! return code
-
+      type(ESMF_Grid), intent(in) :: grid   
+      integer, intent(in) :: arg1                       
+      integer, intent(in) :: arg2                       
+      character (len = *), intent(in), optional :: arg3 
+      integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
-!      ESMF routine which only initializes Grid values; it does not
-!      allocate any resources.  Define for shallow classes only, 
-!      for deep classes define and use routines Create/Destroy and 
-!      Construct/Destruct.  Can be overloaded like ESMF_GridCreate
-!      via interface blocks.
+!     ESMF routine which only initializes {\tt Grid} values; it does not
+!     allocate any resources.  Define for shallow classes only, 
+!     for deep classes define and use routines Create/Destroy and 
+!     Construct/Destruct.  Can be overloaded like ESMF_GridCreate
+!     via interface blocks.
+!
+!  The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be initialized.
+!     \item[arg1] 
+!          Argument 1.
+!     \item[arg2]
+!          Argument 2.         
+!     \item[[arg3]] 
+!          Argument 3.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -288,19 +336,29 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetConfig - Get configuration information from a Grid
+! !IROUTINE: 
+!     ESMF_GridGetConfig - Get configuration information from a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGetConfig(grid, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(out) :: config    ! resources
-      integer, intent(out), optional :: rc               ! return code
-
+      integer, intent(out) :: config   
+      integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
 !     Returns the set of resources the Grid object was configured with.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Class to be queried.
+!     \item[config]
+!          Configuration information.         
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -312,19 +370,30 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridSetConfig - set configuration information for a Grid
+! !IROUTINE: 
+!     ESMF_GridSetConfig - Set configuration information for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridSetConfig(grid, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: config    ! resources
-      integer, intent(out), optional :: rc              ! return code
+      integer, intent(in) :: config   
+      integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !     Configures the Grid object with set of resources given.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Class to be configured.
+!     \item[config]
+!          Configuration information.         
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -336,20 +405,31 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGet - get <Value> for a Grid
+! !IROUTINE: 
+!     ESMF_GridGetValue - Get <Value> for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGet(grid, value, rc)
+      subroutine ESMF_GridGetValue(grid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       integer, intent(out) :: value
-      integer, intent(out), optional :: rc              ! return code
+      integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!     Returns the value of Grid member <Value>.
-!     Can be multiple routines, one per value
+!     Returns the value of Grid attribute <Value>.
+!     May be multiple routines, one per attribute.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Class to be queried.
+!     \item[value]
+!          Value to be retrieved.         
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -357,24 +437,35 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_GridGet
+      end subroutine ESMF_GridGetValue
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridSet - set <Value> for a Grid
+! !IROUTINE: 
+!     ESMF_GridSetValue - Set <Value> for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSet(grid, value, rc)
+      subroutine ESMF_GridSetValue(Grid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       integer, intent(in) :: value
-      integer, intent(out), optional :: rc        
+      integer, intent(out), optional :: rc            
 
 !
 ! !DESCRIPTION:
-!     Sets the Grid member <Value> with the given value.
-!     Can be multiple routines, one per value.
+!     Set a Grid attribute with the given value.
+!     May be multiple routines, one per attribute.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Class to be modified.
+!     \item[value]
+!          Value to be set.         
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -382,24 +473,33 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_GridSet
+      end subroutine ESMF_GridSetValue
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridValidate - internal consistency check for a Grid
+! !IROUTINE: 
+!     ESMF_GridValidate - Check internal consistency of a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridValidate(grid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid        
-      character (len=*), intent(in) :: opt   
-      integer, intent(out), optional :: rc       
+      type(ESMF_Grid), intent(in) :: grid       
+      character (len=*), intent(in), optional :: opt    
+      integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!      Validates that a Grid is internally consistent.
-!      Returns error code if problems are found.  ESMF_Base class
-!      method.
+!     Validates that a Grid is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Class to be queried.
+!     \item[[opt]]
+!          Validation options.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -411,20 +511,30 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridPrint - Print contents of a Grid
+! !IROUTINE: 
+!     ESMF_GridPrint - Print the contents of a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridPrint(grid, options, rc)
+      subroutine ESMF_GridPrint(grid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid        ! grid to be printed
-      character (len=*), intent(in) :: options         ! print options
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_Grid), intent(in) :: grid      
+      character (len=*), intent(in) :: opt      
+      integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!      Print information about a Grid.  The options control the
-!      type of information and level of detail.  ESMF_Base class
-!      method.
+!      Print information about a Grid.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Class to be queried.
+!     \item[[opt]]
+!          Print ptions that control the type of information and level of 
+!          detail.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
