@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.tex,v 1.3 2002/08/08 17:47:28 cdeluca Exp $
+% $Id: ESMF_archdoc.tex,v 1.4 2002/08/19 17:38:15 cdeluca Exp $
 
 %
 \documentclass[]{article}
@@ -43,15 +43,18 @@
 \tableofcontents
 
 \newpage
+%section{Synopsis}
+%\input{ESMF_syn}
 
-%\section{Overview}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Overview}
+\end{htmlonly}
+\part{Overview}
+\label{part:Overview}
+
+%\section{Introduction}
 \input{ESMF_overview}
-
-%\section{Requirements}
-%\input{ESMF_req}
-
-%\section{Architecture}
-%\input{ESMF_arch}
 
 %\section{Scope}
 \input{ESMF_shortscope}
@@ -65,8 +68,36 @@
 %\section{Implementation Language and Language Interoperability Strategy}
 \input{ESMF_language}
 
-%\section{Classes}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Superstructure}
+\end{htmlonly}
+\part{Superstructure}
+\label{part:Superstructure}
+
+%\subsection{Components and Control}
+
+%\subsection{Coupling}
+\input{ESMF_coupling.tex}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure:  Fields and Grids}
+\end{htmlonly}
+\part{Infrastructure:  Fields and Grids}
+\label{part:Infrastructure_Fields_and_Grids}
+
+%\section{Fields and Grids}
 \input{ESMF_classes}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure:  Utilities}
+\end{htmlonly}
+\part{Infrastructure:  Utilities}
+\label{part:Infrastructure_Utilities}
+
+%\input{ESMF_utils}
 
 \section{Review Status}
 
