@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.15 2003/09/04 22:24:21 cdeluca Exp $
+// $Id: ESMC_LogErr.C,v 1.16 2003/10/09 16:26:31 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,8 +14,8 @@
 //
 // !DESCRIPTION:
 //
-// The LogErr class (defined in ESMC_Log.C and declared in
-// the companion file ESMC_LogErr.h) provides the user a way to write {\tt ESMC\_Log} data.
+// The LogErr class (defined in ESMC\_Log.C and declared in
+// the companion file ESMC\_LogErr.h) provides the user a way to write {\tt ESMC\_Log} data.
 //
 // insert any higher level, 3rd party or system includes here
 
@@ -35,14 +35,14 @@
 FILE* logErrCFilePtr[10];
 int numCFiles=0;
 int logErrFortFile[10];
-int numFortFiles=1;
+int numFortFiles=0;
 char listOfCFileNames[20][32];
 char listOfFortFileNames[20][32];
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.15 2003/09/04 22:24:21 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.16 2003/10/09 16:26:31 shep_smith Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
@@ -51,11 +51,11 @@ char listOfFortFileNames[20][32];
 //
 //
 //BOP
-// !IROUTINE:  ESMC_LogOpenCFile -  opens a Log object
+// !IROUTINE:  ESMC_LogOpenFile -  opens a Log object
 //
 // !INTERFACE:
 
-void ESMC_Log::ESMC_LogOpenCFile(
+void ESMC_Log::ESMC_LogOpenFile(
 //
 // !RETURN VALUE:
 //   none
@@ -63,19 +63,19 @@ void ESMC_Log::ESMC_LogOpenCFile(
 // !ARGUMENTS:
 
      int numLogFile, //number of log files written (input). Set
-		     // to either ESMF_SINGLE_LOG_FILE or
-		     // ESMF_MULT_LOG_FILE .
+                     // to either ESMF\_SINGLE\_LOG\_FILE or
+                     // ESMF\_MULT\_LOG\_FILE .
 
      char name[]     //string to form name of log file (input)
 
    )
 //
-// !DESCRIPTION
+// !DESCRIPTION:
 // {\tt ESMC\_LogErrOpenFile} takes two
 // arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
 // ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
 // ESMF\_LogConstants.h, set whether one file should be written for all 
-// processes (ESMF_SINGLE\_LOG\_FILE), or whether one file per process should
+// processes (ESMF\_SINGLE\_LOG\_FILE), or whether one file per process should
 // be written (ESMF\_MULT\_LOG\_FILE).
 //
 // The second argument is a string and is used to form the name of the
@@ -109,7 +109,9 @@ void ESMC_Log::ESMC_LogOpenCFile(
      ESMC_LogExit();
   }
   if (oneLogErrFile == ESMF_FALSE) ESMC_LogFormName();
-  logErrCFilePtr[numFilePtr]=fopen(nameLogErrFile,"a+");
+  logErrCFilePtr[numCFiles]=fopen(nameLogErrFile,"a+");
+  numFilePtr=numCFiles;
+  numCFiles++;
   if (logErrCFilePtr[numCFiles] == NULL) {
      printf("Could not open file.");
      ESMC_LogExit();
@@ -131,19 +133,19 @@ void ESMC_Log::ESMC_LogOpenFortFile(
 // !ARGUMENTS:
 
      int numLogFile, //number of log files written (input). Set
-		     // to either ESMF_SINGLE_LOG_FILE or
-		     // ESMF_MULT_LOG_FILE .
+                     // to either ESMF\_SINGLE\_LOG\_FILE or
+                     // ESMF_MULT_LOG_FILE .
 
      char name[]     //string to form name of log file (input)
 
    )
 //
-// !DESCRIPTION
+// !DESCRIPTION:
 // {\tt ESMC\_LogErrOpenFile} takes two
 // arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
 // ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
 // ESMF\_LogConstants.h, set whether one file should be written for all 
-// processes (ESMF_SINGLE\_LOG\_FILE), or whether one file per process should
+// processes (ESMF\_SINGLE\_LOG\_FILE), or whether one file per process should
 // be written (ESMF\_MULT\_LOG\_FILE).
 //
 // The second argument is a string and is used to form the name of the
@@ -187,6 +189,7 @@ void ESMC_Log::ESMC_LogOpenFortFile(
      ESMC_LogExit();
   }
   logErrFortFile[numFortFiles]=unitNumber;
+  numFortFiles++;
 }
 
 //----------------------------------------------------------------------
@@ -195,18 +198,18 @@ void ESMC_Log::ESMC_LogOpenFortFile(
 //
 // !INTERFACE:
 bool ESMC_Log::ESMC_LogNameValid(
-// !RETURN VALUE
+// !RETURN VALUE:
 //    none
-// !ARGUMENTS
+// !ARGUMENTS:
       char name[],          // name of file
       int FortIO            //are we doing FortIO?
       )
-// !DESCRIPTION
+// !DESCRIPTION:
 //    Checks to see if a file of the name name has been opened by {\tt ESMC\_Log}.
 //    If it has the function returns a false value.  Note: this function
 //    use a global array that all {\tt ESMC\_Log} objects have access to.
 //
-// EOP
+//EOP
 {
   int i;
   if (FortIO == ESMF_FALSE) {
@@ -258,7 +261,6 @@ void ESMC_Log::ESMC_LogInfo(
 // ignores them.
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 //
 
 
@@ -347,7 +349,6 @@ void ESMC_Log::ESMC_LogInfoFortran(
 //
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 //
 
 {
@@ -460,7 +461,132 @@ void ESMC_Log::ESMC_LogInfoFortran(
   } 
 #endif
 }
-//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LogGet - get value of verbose, flush, haltOnErr, and/or haltOnWarn
+//
+// !INTERFACE:
+   void ESMC_LogGet(
+//
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS:
+//  An arbitrary number of "option, value" pairs
+
+   char* option, ESMC_Logical value,...)
+// 
+// !DESCRIPTION:
+//  This method returns the value of the argument option in the variable value.
+//  Option may be set tot he string verbose, flush,haltOnErr or haltOnWarn
+//EOP
+{
+  char flushOption[]="flush";
+  char verboseOption[]="verbose";
+  char haltOnErrOption[] = "haltOnErr";
+  char haltOnWarnOption[] = "haltOnWarn";
+  char* optionPtr
+  int aValue;
+  va_list argp;
+  va_start(argp,value);
+  for (;;)
+  {
+    if (strcmp(option,flushOption) == 0) {
+      value=flush;
+    } else if (strcmp(option,verboseOption) == 0) {
+      value=verbose;
+    } else if (strcmp(option,haltOnErrOption) == 0) {
+      value=haltOnErr;
+    } else if (strcmp(option,haltOnWarnOption) == 0) {
+      value=haltOnWarn;
+    } else {
+      printf("Error using ESMC_Set");
+      ESMC_LogExit();
+    }
+    option= va_arg(ap, char*);
+    if (!(*option)) break;
+    value = va_arg(ap, int);
+  }
+} 
+
+//---------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogSet - sets the value of verbose, flush, haltOnWarn and/or haltOnErr
+//
+// !INTERFACE:
+   void ESMC_LogSet(
+
+// !RETURN VALUE 
+//   none
+//
+// !ARGUMENTS
+//  An arbitrary number of "option, value" pairs
+//
+    char* option,ESMC_Logical value, ...) 
+// !DESCRIPTION:
+// This method returns the value of the argument option in the variable value.
+// Option may be set tot he string verbose, flush,haltOnErr or haltOnWarn
+//EOP
+// 
+{ 
+  char flushOption[]="flush";
+  char verboseOption[]="verbose";
+  char haltOnErrOption[] = "haltOnErr";
+  char haltOnWarnOption[] = "haltOnWarn";
+  char* optionPtr
+  int aValue;
+  va_list argp;
+  va_start(argp,value);
+  for (;;) 
+  {
+    if (strcmp(option,flushOption) == 0) {
+      flush=value;
+    } else if (strcmp(option,verboseOption) == 0) { 
+      verbose=value;
+    } else if (strcmp(option,haltOnErrOption) == 0) { 
+      haltOnErr=value;
+    } else if (strcmp(option,haltOnWarnOption) == 0) { 
+      haltOnWarn=value;
+    } else {
+      printf("Error using ESMC_Set");
+      ESMC_LogExit();
+    }
+    option= va_arg(ap, char*);
+    if (!(*option)) break;
+    value = va_arg(ap, int);
+  }
+}    
+   
+
+//-------------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_GetFileHandle - used in conjunction with fprintf to write
+// data to the log file.
+//
+// !INTERFACE:
+   FILE* ESMC_Log::ESMC_GetFileHandle(
+//
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+//  none
+   )
+//
+// !DESCRIPTION:
+// This method is used in conjunction with fprintf 
+// to write data to the log file, eg. fprintf(aLog.ESMC\_Getit(),"Hi")
+// The routine writes header data, and
+// then returns a point to a file structure to fprintf
+//
+//EOP
+{
+  int fortIO=ESMF_FALSE;
+  ESMC_LogPrintHeader(fortIO);
+  return logErrCFilePtr[numFilePtr];
+
+//
+//------------------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LogGetUnit - used in conjunction with standard Fortran write
 // to write data to log file. 
@@ -476,11 +602,10 @@ int ESMC_Log::ESMC_LogGetUnit(
 
    )
 //
-// !Description:
-// This is method is used in conjunction with esmf\_logwrite (defined in
-// ESMC\_LogInterface.C) to write data to the log file.  This routine
-// is used with the standard Fortran write function, eg.
-// write(logwrite(aLog),*) 'Hi '. 
+// !DESCRIPTION:
+// This is method is
+// used with the standard Fortran write function, eg.
+// write(ESMC\_LogGetUnitNumber(aLog),*) 'Hi '. 
 // The routine writes header data, and
 // then returns a unit number to the Fortran write function.
 //
@@ -517,7 +642,7 @@ void ESMC_Log::ESMC_LogFormName(
 
    )
 //
-// !Description:
+// !DESCRIPTION:
 // This routine forms the names the LogErr files by appending the
 // PE number to base name specified in the Open method.  This method
 // is used only when running in parallel on multiple PEs.
@@ -577,10 +702,10 @@ void ESMC_Log::ESMC_LogCloseFortFile(
 }
 //-----------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogCloseCFile - closes log file. 
+// !IROUTINE: ESMC_LogCloseFile - closes log file. 
 //
 // !INTERFACE:
-void ESMC_Log::ESMC_LogCloseCFile(
+void ESMC_Log::ESMC_LogCloseFile(
 //
 // ! RETURN VALUE:
 //    none
@@ -648,6 +773,7 @@ ESMC_Log::ESMC_Log(
  numFilePtr=numCFiles;
  unitNumber=50;
  flush=ESMF_FALSE;
+ logErrCFilePtr[numFilePtr]=stdout;
 }
 
 //----------------------------------------------------------------------
@@ -683,7 +809,7 @@ void ESMC_Log::ESMC_LogErr_(
    ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
    if (haltOnErr==ESMF_TRUE) {
-    ESMC_LogCloseCFile();
+    ESMC_LogCloseFile();
     ESMC_LogExit();
    }
  }
@@ -721,7 +847,7 @@ void ESMC_Log::ESMC_LogErrMsg_(
    ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
    if (haltOnErr==ESMF_TRUE) {
-    ESMC_LogCloseCFile();
+    ESMC_LogCloseFile();
     ESMC_LogExit();
    }
 }
@@ -758,7 +884,7 @@ void ESMC_Log::ESMC_LogErrMsg_(
  ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
  if (haltOnWarn == ESMF_TRUE) {
-    ESMC_LogCloseCFile();
+    ESMC_LogCloseFile();
     ESMC_LogExit();
  }
 
@@ -793,7 +919,7 @@ void ESMC_Log::ESMC_LogErrMsg_(
  ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
  if (haltOnWarn == ESMF_TRUE) {
-    ESMC_LogCloseCFile();
+    ESMC_LogCloseFile();
     ESMC_LogExit();
  }
 
@@ -803,16 +929,15 @@ void ESMC_Log::ESMC_LogErrMsg_(
 //BOP
 //
 // !IROUTINE: ESMC_LogExit() - private routine uses by Log to stop program
-//                             execution
+//
 // !INTERFACE:
-
+//
 void ESMC_Log::ESMC_LogExit(
-
+// !RETURN VALUE:
+//  none
 // !ARGUMENTS:
 //  none
-
   )
-
 // !DESCRIPTION:
 // Used by {\tt ESMC\_Log} to exit program.
 //
@@ -834,8 +959,8 @@ void ESMC_Log::ESMC_LogExit(
 //------------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMC_LogErrFortran - called by fortran wrapper to write error
-//                                 message
+// !IROUTINE: ESMC_LogErrFortran - called by fortran wrapper to write error msg
+//
 // !INTERFACE:
 
 void ESMC_Log::ESMC_LogErrFortran(
@@ -876,13 +1001,13 @@ void ESMC_Log::ESMC_LogErrFortran(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogWarnFortran - called by fortran wrapper
-// to write warnings
+// !IROUTINE: ESMC_LogWarnFortran - called by fortran wrapper to write warnings
 //
 // !INTERFACE:
 
 void ESMC_Log::ESMC_LogWarnFortran(
-
+// !RETURN VALUE:
+//  none
 // !ARGUMENTS:
 
      int errCode,
@@ -992,9 +1117,8 @@ void ESMC_Log:: ESMC_LogPrint(
 //
 // !INTERFACE:
       void ESMC_Log::ESMC_LogGetErrMsg(
-
-//
-//
+// !RETURN VALUE:
+//  none
 // !ARGUMENTS:
 //
      int errCode,
