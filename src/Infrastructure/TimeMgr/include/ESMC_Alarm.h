@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.9 2003/04/15 16:47:33 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.10 2003/04/25 21:14:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -95,13 +95,12 @@ class ESMC_Alarm {
     ESMC_Time         PrevRingTime;
     ESMC_Time         StopTime;
 
-    bool              Ringing;    // (TMG 4.4)
-    bool              Enabled;    // able to ring (TMG 4.5.3)
-
     int               ID;         // used to distinguish among
                                   //   multiple clock alarms
-
 //    pthread_mutex_t   AlarmMutex; // (TMG 7.5)
+
+    bool              Ringing;    // (TMG 4.4)
+    bool              Enabled;    // able to ring (TMG 4.5.3)
 
 // !PUBLIC MEMBER FUNCTIONS:
 
