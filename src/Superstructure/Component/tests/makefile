@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/02/27 17:55:08 flanigan Exp $ 
+# $Id: makefile,v 1.5 2003/03/20 23:27:30 svasquez Exp $ 
 
 ALL:  tests
 
@@ -14,78 +14,85 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Component/tests
 
-TESTEXAMPLES_3  = \
-	ESMF_CompCreate RUN_ESMF_CompCreate ESMF_CompCreate.rm \
-	ESMF_StateCreate RUN_ESMF_StateCreate ESMF_StateCreate.rm
+TESTS_BUILD   =	$(ESMC_TESTDIR)/ESMF_CompCreate \
+		$(ESMC_TESTDIR)/ESMF_StateCreate \
+		$(ESMC_TESTDIR)/ESMF_StateUTest
 
-TESTEXAMPLES_9  = \
-	ESMF_CompCreate RUN_ESMF_CompCreateUNI ESMF_CompCreate.rm \
-	ESMF_StateCreate RUN_ESMF_StateCreateUNI ESMF_StateCreate.rm
+TESTS_RUN     =	RUN_ESMF_ESMF_CompCreate \
+		RUN_ESMF_StateCreate \
+		RUN_ESMF_StateUTest
 
-TESTSF       = ESMF_CompCreate.F90  ESMF_StateCreate.F90
+TESTS_RUN_UNI =	RUN_ESMF_CompCreateUNI \
+		RUN_ESMF_StateCreateUNI \
+		RUN_ESMF_StateUTestUNI
 
-test tests:  ESMF_CompCreate ESMF_StateCreate
+TESTS_RM      =	ESMF_CompCreate.rm \
+		ESMF_StateCreate.rm \
+		ESMF_StateUTest.rm
 
 include $(ESMF_DIR)/makefile
 
-DIRS	  = 
+#
+# Components
+#
 
-
-ESMF_CompCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMF_CompCreate: ESMF_CompCreate.o  chkopts
-	${F90CXXLD} -g -o ESMF_CompCreate ESMF_CompCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+$(ESMC_TESTDIR)/ESMF_CompCreate: ESMF_CompCreate.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_CompCreate ESMF_CompCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_CompCreate.o
 
 RUN_ESMF_CompCreate:
 	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreate.tmps
-	${MPIRUN} -np 4 ESMF_CompCreate > ESMF_CompCreate.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_CompCreate.tmp
-	#@if (diff ESMF_CompCreate.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_CompCreate.out) then \
-	#echo "PASS CompCreate test" > ${ESMC_TESTDIR}/ESMF_CompCreate.log; else \
-	#echo "FAIL CompCreate test" > ${ESMC_TESTDIR}/ESMF_CompCreate.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_CompCreate.tmp optlog
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompCreate > $(ESMC_TESTDIR)/ESMF_CompCreate.stdout
 
 RUN_ESMF_CompCreateUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreate.tmps
-	${MPIRUN} -np 1 ESMF_CompCreate > ESMF_CompCreate.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_CompCreate.tmp
-	#@if (diff ESMF_CompCreate.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_CompCreate.outuni) then \
-	#echo "PASS CompCreate test" > ${ESMC_TESTDIR}/ESMF_CompCreate.log; else \
-	#echo "FAIL CompCreate test" > ${ESMC_TESTDIR}/ESMF_CompCreate.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_CompCreate.tmp optlog
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompCreate > $(ESMC_TESTDIR)/ESMF_CompCreate.stdout
 
 ESMF_CompCreate.rm:
 	echo "ESMF_CompCreate.rm target called here."
 
 
-ESMF_StateCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
+#       
+# State Create
+#
 
-ESMF_StateCreate: ESMF_StateCreate.o  chkopts
-	${F90CXXLD} -g -o ESMF_StateCreate ESMF_StateCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+$(ESMC_TESTDIR)/ESMF_StateCreate: ESMF_StateCreate.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StateCreate ESMF_StateCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_StateCreate.o
 
 RUN_ESMF_StateCreate:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StateCreate.tmps
-	${MPIRUN} -np 4 ESMF_StateCreate > ESMF_StateCreate.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_StateCreate.tmp
-	#@if (diff ESMF_StateCreate.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_StateCreate.out) then \
-	#echo "PASS StateCreate test" > ${ESMC_TESTDIR}/ESMF_StateCreate.log; else \
-	#echo "FAIL StateCreate test" > ${ESMC_TESTDIR}/ESMF_StateCreate.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_StateCreate.tmp optlog
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_StateCreate > $(ESMC_TESTDIR)/ESMF_StateCreate.stdout
 
 RUN_ESMF_StateCreateUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StateCreate.tmps
-	${MPIRUN} -np 1 ESMF_StateCreate > ESMF_StateCreate.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_StateCreate.tmp
-	#@if (diff ESMF_StateCreate.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_StateCreate.outuni) then \
-	#echo "PASS StateCreate test" > ${ESMC_TESTDIR}/ESMF_StateCreate.log; else \
-	#echo "FAIL StateCreate test" > ${ESMC_TESTDIR}/ESMF_StateCreate.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_StateCreate.tmp optlog
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_StateCreate > $(ESMC_TESTDIR)/ESMF_StateCreate.stdout
 
 ESMF_StateCreate.rm:
 	echo "ESMF_StateCreate.rm target called here."
+
+
+
+
+#       
+# State Unit Test
+#
+
+$(ESMC_TESTDIR)/ESMF_StateUTest: ESMF_StateUTest.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StateUTest ESMF_StateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_StateUTest.o
+
+RUN_ESMF_StateUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_StateUTest.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_StateUTest > $(ESMC_TESTDIR)/ESMF_StateUTest.stdout
+
+RUN_ESMF_StateUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_StateUTest.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_StateUTest > $(ESMC_TESTDIR)/ESMF_StateUTest.stdout
+
+ESMF_StateUTest.rm:
+	echo "ESMF_StateUTest.rm target called here."
+
+
 
 
