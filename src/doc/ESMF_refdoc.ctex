@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.49 2004/05/11 12:12:30 nscollins Exp $
+% $Id: ESMF_refdoc.ctex,v 1.50 2004/05/12 14:03:22 nscollins Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -33,6 +33,10 @@
 \setlength{\textheight}{8.5truein}
 \setlength{\oddsidemargin}{0in}
 \setlength{\unitlength}{1truecm}
+
+% test?
+\hbadness = 10000
+\tolerance = 10000
 
 \begin{document}
 
