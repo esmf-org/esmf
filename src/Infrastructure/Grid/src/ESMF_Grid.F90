@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.40 2003/04/14 14:51:38 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.41 2003/04/16 21:44:45 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,6 +134,7 @@
     public ESMF_GridHalo
     public ESMF_GridValidate
     public ESMF_GridPrint
+    !public ESMF_GridSearch
 
 !------------------------------------------------------------------------------
 !
@@ -149,9 +150,10 @@
       ESMF_GridType_DataStream        =  6, &! Data stream
       ESMF_GridType_PhysFourier       =  7, &! Mixed Fourier Space/Phys Space grid
       ESMF_GridType_LatLonGauss       =  8, &! lat/lon grid with Gaussian latitudes
-      ESMF_GridType_SphericalSpectral =  9, &! spectral space for spherical harmonics
-      ESMF_GridType_Geodesic          = 10, &! spherical geodesic grid
-      ESMF_GridType_CubedSphere       = 11   ! cubed sphere grid
+      ESMF_GridType_Reduced           =  9, &! reduced grid
+      ESMF_GridType_SphericalSpectral = 10, &! spectral space for spherical harmonics
+      ESMF_GridType_Geodesic          = 11, &! spherical geodesic grid
+      ESMF_GridType_CubedSphere       = 12   ! cubed sphere grid
 
    integer, parameter, public ::            &! recognized staggering types
       ESMF_GridStagger_Unknown        =  0, &! unknown or undefined staggering
@@ -202,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.40 2003/04/14 14:51:38 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.41 2003/04/16 21:44:45 pwjones Exp $'
 
 !==============================================================================
 !
@@ -334,6 +336,22 @@
 !EOP
       end interface
 !
+!------------------------------------------------------------------------------
+!!BOP
+!! !INTERFACE:
+!      interface ESMF_GridSearch
+!
+!! !PRIVATE MEMBER FUNCTIONS:
+!         module procedure ESMF_GridSearchPoint
+!         module procedure ESMF_GridSearchList
+!
+!! !DESCRIPTION:
+!!     This interface provides a single entry point for methods that
+!!     search a grid for point(s).
+!!
+!!EOP
+!      end interface
+!!
 !------------------------------------------------------------------------------
 
 !    < add other interfaces here>
@@ -2784,6 +2802,96 @@
 
       end subroutine ESMF_GridPrint
 
+!------------------------------------------------------------------------------
+!!BOP
+!! !IROUTINE: ESMF_GridSearchPoint - Search the grid for a cell containing point
+!
+! !INTERFACE:
+!      subroutine ESMF_GridSearchPoint(dst_add, x, y, DEid, search_grid, &
+!                                      phys_grid_id, rc)
+!!
+!! !ARGUMENTS:
+!
+!      integer, dimension(?) ::
+!         dst_add      ! location in grid of grid cell containing search point
+!
+!      real (kind=?), intent(in) :: &
+!         x,y          ! x,y coordinates of search point 
+!
+!      integer, intent(in) :: &
+!         DEid         ! DE which owns the search point
+!
+!      type(ESMF_Grid), intent(in) :: &
+!         search_grid  ! grid to search for location of point
+!
+!      integer, intent(in), optional :: &
+!         phys_grid_id ! id of the subgrid to search (if more than one subgrid)
+!
+!      integer, intent(out), optional :: rc  ! return code
+!
+!!
+!! !DESCRIPTION:
+!!     This routine searches for the location in the grid of a grid cell 
+!!     containing the point given by the input x,y coordinates.
+!!
+!!     The arguments are:
+!!     \begin{description}
+!!     \item[dst\_add]
+!!          Address of grid cell containing the search point.
+!!     \item[x,y]
+!!          Coordinates of search point.
+!!     \item[DEid]
+!!          id of DE that owns search point.
+!!     \item[search\_grid]
+!!          ESMF Grid to search for location.
+!!     \item[[phys\_grid\_id]]
+!!          If more than one PhysGrid is contained in Grid, choose which
+!!          grid to search (default is 1st PhysGrid?).
+!!     \item[[rc]]
+!!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!!     \end{description}
+!!
+!!EOP
+!! !REQUIREMENTS:  SSSn.n, GGGn.n
+!
+!!
+!!     extract appropriate PhysGrid and DistGrid to search
+!!     extract various other grid properties
+!!
+!      if (.not. present(phys_grid_id)) phys_grid_id = 1 (or whatever default)
+!      ! combine these queries?  format of query functions?
+!      call ESMF_GridGet(search_grid, phys_grid=phys_grid_id) ??? 
+!      call ESMF_GridGet(search_grid, dist_grid = ??)
+!      call ESMF_GridGet(search_grid, horis_gridtype = search_grid_type)
+!!
+!!     Call appropriate search routine based on coordinate system and
+!!     grid type.
+!!
+! 
+!      select case (srch_grid_type)
+!      case(ESMF_GridType_LatLon, ESMF_GridType_Mercator, ESMF_GridType_LatLonGauss, &
+!           ESMF_GridType_Reduced)
+!         !*** simple search adequate for these cases
+!         call ESMF_PhysGridSearchBboxSpherical(dst_add, x, y, DEid, phys_grid, &
+!                                               dist_grid, status)
+!
+!      case(ESMF_GridType_Dipole, ESMF_GridType_Tripole, ESMF_GridType_Geodesic, &
+!           ESMF_GridType_CubedSphere)
+!         !*** must use more general algorithm for these cases
+!         call ESMF_PhysGridSearchGeneralSpherical(dst_add, x, y, DEid, phys_grid, &
+!                                                  dist_grid, status)
+!
+!      case(ESMF_GridType_XY)
+!         call ESMF_PhysGridSearchBboxCartesian(dst_add, x, y, DEid, phys_grid, &
+!                                               dist_grid, status)
+!
+!      case default
+!         print *,'GridSearchPoint: search of this grid type not supported'
+!         status = ESMF_Failure
+!      end select
+!
+!      end subroutine ESMF_GridSearchPoint
+!
 !------------------------------------------------------------------------------
 
       end module ESMF_GridMod
