@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.106 2004/02/17 21:26:37 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.107 2004/02/23 22:16:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.106 2004/02/17 21:26:37 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.107 2004/02/23 22:16:44 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1048,9 +1048,12 @@
 !           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
 !     \item [{[horizRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
+!           If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
@@ -1315,7 +1318,9 @@
 
       call ESMF_GridGet(grid, numDims=gridRank, rc=status)
       if (present(datamap)) then
-        ftype%mapping = datamap   ! copy, datamap can be deleted by user afterwards
+        ftype%mapping = datamap   ! copy, datamap can be deleted by user now
+        call ESMF_DataMapSet(ftype%mapping, horizRelloc=horizRelloc, &
+                             vertRelloc=vertRelloc, rc=status)
       else
         if (gridRank .eq. 1) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, horizRelloc, &
@@ -1434,8 +1439,15 @@
 
       call ESMF_GridGet(grid, numDims=gridRank, rc=status)
       if (present(datamap)) then
-        ftype%mapping = datamap   ! copy, datamap can be deleted by user afterwards
+        ! this does a copy, datamap ok for user to delete now
+        ftype%mapping = datamap   
+
+        ! take care of override horiz and vert rellocs.  if specified both in
+        ! the datamap and as explicit args, the arguments take priority.
+        call ESMF_DataMapSet(ftype%mapping, horizRelloc=horizRelloc, &
+                             vertRelloc=vertRelloc, rc=status)
       else
+        ! create default datamap with 1-for-1 correspondence to grid
         if (gridRank .eq. 1) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, horizRelloc, &
                                                vertRelloc, gridRank, rc=status)
