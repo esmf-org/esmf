@@ -1,4 +1,4 @@
-!  $Id: ESMF_Base_C.F90,v 1.2 2003/10/22 03:37:13 nscollins Exp $
+!  $Id: ESMF_Base_C.F90,v 1.3 2003/10/22 13:15:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Base_C.F90,v 1.2 2003/10/22 03:37:13 nscollins Exp $'
+!      '$Id: ESMF_Base_C.F90,v 1.3 2003/10/22 13:15:22 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -42,12 +42,25 @@
    subroutine f_esmf_domainlistgetde(domlist, dnum, DE, rc)
        use ESMF_BaseMod    ! ESMF base class
 
-       type(ESMF_DomainList), pointer :: domlist
+       type(ESMF_DomainList) :: domlist
+       !type(ESMF_DomainList) :: domlist_t
+       !type(ESMF_Domain) :: dd
        integer :: dnum     
+       !integer :: dnum_t
        integer :: DE
+       !integer :: DE_t
        integer :: rc     
+       !integer :: rc_t
 
-       DE = domlist%domains(dnum)%DE
+       !domlist_t = domlist
+       !dnum_t = dnum
+       !DE_t = DE
+       !rc_t = rc
+
+       !dd = domlist%domains(dnum+1)
+       !DE_t = dd%DE
+       
+       DE = domlist%domains(dnum+1)%DE
        rc = ESMF_SUCCESS
 
    end subroutine f_esmf_domainlistgetde
@@ -55,13 +68,13 @@
    subroutine f_esmf_domainlistgetai(domlist, dnum, ainum, AI, rc);
        use ESMF_BaseMod    ! ESMF base class
 
-       type(ESMF_DomainList), pointer :: domlist
+       type(ESMF_DomainList) :: domlist
        integer :: dnum     
        integer :: ainum
        type(ESMF_AxisIndex) :: AI
        integer :: rc     
 
-       AI = domlist%domains(dnum)%ai(ainum)
+       AI = domlist%domains(dnum+1)%ai(ainum+1)
 
    end subroutine f_esmf_domainlistgetai
 
