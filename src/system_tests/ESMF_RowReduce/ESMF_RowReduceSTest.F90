@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.2 2003/10/10 14:30:42 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.3 2003/10/10 17:18:23 jwolfe Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -35,7 +35,7 @@
     integer :: horz_stagger, vert_stagger
     type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
     integer :: status
-    real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
+    real(ESMF_KIND_R8) :: min(2), max(2)
     integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
     type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
     character(len=ESMF_MAXSTR) :: cname, gname, fname
@@ -91,18 +91,17 @@
 
       counts(1) = 41
       counts(2) = 20
-      x_min = 0.0
-      x_max = 20.5
-      y_min = 0.0
-      y_max = 5.0
+      min(1) = 0.0
+      max(1) = 20.5
+      min(2) = 0.0
+      max(2) = 5.0
       horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
       gname = "test grid 1"
 
       grid1 = ESMF_GridCreate(2, counts=counts, &
-                              x_min=x_min, x_max=x_max, &
-                              y_min=y_min, y_max=y_max, &
+                              min=min, max=max, &
                               layout=layout1, &
                               horz_gridtype=horz_gridtype, &
                               horz_stagger=horz_stagger, &

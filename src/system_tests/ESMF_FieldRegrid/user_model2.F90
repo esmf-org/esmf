@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2003/10/09 20:56:13 cdeluca Exp $
+! $Id: user_model2.F90,v 1.2 2003/10/10 17:18:05 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -93,7 +93,8 @@
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2)
       integer :: de_id
-      integer :: horz_gridtype, horz_stagger, horz_coord_system
+      integer :: horz_gridtype, horz_stagger
+      type(ESMF_CoordSystem) :: horz_coord_system
       integer :: status, myde
 
       print *, "User Comp Init starting"
@@ -119,7 +120,7 @@
       horz_stagger = ESMF_GridStagger_D
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
-      grid1 = ESMF_GridCreate(countsPerDE1=countsPerDE1, &
+      grid1 = ESMF_GridCreate(2, countsPerDE1=countsPerDE1, &
                               countsPerDE2=countsPerDE2, &
                               min=min, delta1=delta1, delta2=delta2, &
                               layout=layout, &

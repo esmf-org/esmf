@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.1 2003/10/09 20:56:12 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.2 2003/10/10 17:17:07 jwolfe Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -219,8 +219,8 @@
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
-      integer :: horz_coord_system, vert_coord_system
-      real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
+      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
+      real(ESMF_KIND_R8) :: min(2), max(2)
       character(len=ESMF_MAXSTR) :: gname, fname
 
       print *, "Entering Initialization routine"
@@ -235,21 +235,21 @@
 
       counts(1) = 30
       counts(2) = 36
-      x_min = 0.0
-      x_max = 15.0
-      y_min = 0.0
-      y_max = 12.0
+      min(1) = 0.0
+      max(1) = 15.0
+      min(2) = 0.0
+      max(2) = 12.0
       horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreate(counts=counts, x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, layout=layout1, &
-                             horz_gridtype=horz_gridtype, &
-                             horz_stagger=horz_stagger, &
-                             horz_coord_system=horz_coord_system, &
-                             name=gname, rc=rc)
+      grid1 = ESMF_GridCreate(2, counts=counts, min=min, max=max, &
+                              layout=layout1, &
+                              horz_gridtype=horz_gridtype, &
+                              horz_stagger=horz_stagger, &
+                              horz_coord_system=horz_coord_system, &
+                              name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       print *, "Grid Create returned"
