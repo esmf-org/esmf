@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayMap.h,v 1.1 2002/11/04 22:16:08 nscollins Exp $
+// $Id: ESMC_ArrayMap.h,v 1.2 2003/01/23 20:20:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,6 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Data.h> 
 
 //-----------------------------------------------------------------------------
 //BOP
