@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.51 2004/03/24 19:10:40 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.52 2004/03/24 23:58:52 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2969,7 +2969,7 @@
    !                "defined vertical relloc but only a 2D grid"
    !       return
    !     endif
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridGetCoord: get PhysGrid id"
@@ -3245,7 +3245,7 @@
   !                 "defined vertical relloc but only a 2D grid"
   !        return
   !      endif
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridGetCoord: get PhysGrid id"
@@ -3532,7 +3532,7 @@
    !                "defined vertical relloc but only a 2D grid"
    !       return
    !     endif
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridGetAllAxisIndex: get PhysGrid id"
@@ -3752,7 +3752,7 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: get PhysGrid id"
@@ -4035,14 +4035,14 @@
       endif
 
       if (present(vertRelLoc)) then
-       if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
-        call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
-        if (status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: get PhysGrid id"
-          return
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
+          if (status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: get PhysGrid id"
+            return
+          endif
+          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
         endif
-        vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
-       endif
       endif
 
       hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
