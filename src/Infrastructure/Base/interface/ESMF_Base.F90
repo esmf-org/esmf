@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.39 2003/06/19 19:35:19 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.40 2003/06/26 23:08:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -316,7 +316,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.39 2003/06/19 19:35:19 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.40 2003/06/26 23:08:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -643,7 +643,8 @@ end function
 !EOP
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
-      name = anytype%name
+      !print *, "name about to be returned is", anytype%name
+      name = trim(anytype%name)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GetName
