@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.65 2003/08/22 21:34:51 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.66 2003/08/22 21:53:04 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@
         type (ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT
         type (ESMF_LocalField) :: localfield ! this differs per DE
         type (ESMF_Status) :: datastatus = ESMF_STATE_UNINIT
-        type (ESMF_DataMap) :: mapping       ! mapping of array indicies to grid
+        type (ESMF_DataMap) :: mapping       ! mapping of array indices to grid
         type (ESMF_IOSpec) :: iospec         ! iospec values
         type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
 
@@ -219,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.65 2003/08/22 21:34:51 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.66 2003/08/22 21:53:04 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2130,7 +2130,7 @@
       ftypep => field%ftypep
 
       ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
+      !  match up the array indices and the grid indices.
       call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
                            dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
@@ -2265,7 +2265,7 @@
       ftypep => field%ftypep
 
       ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
+      !  match up the array indices and the grid indices.
       call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, dimlist=dimorder, &
                            rc=status)
       if(status .NE. ESMF_SUCCESS) then 
@@ -2402,7 +2402,7 @@
       ftypep = field%ftypep
 
       ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
+      !  match up the array indices and the grid indices.
       call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
                            dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
@@ -2529,7 +2529,7 @@
       call ESMF_DELayoutGetDEid(layout, my_DE, status)
 
       ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
+      !  match up the array indices and the grid indices.
       call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
                            dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
@@ -2945,7 +2945,7 @@
       ! if src field exists on this DE, query it for information
       if (hassrcdata) then
           ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indicies and the grid indicies.
+          !  match up the array indices and the grid indices.
           call ESMF_DataMapGet(stypep%mapping, gridrank=gridrank, &
                                                dimlist=dimorder, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
@@ -2965,7 +2965,7 @@
       ! if dst field exists on this DE, query it for information
       if (hasdstdata) then
           ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indicies and the grid indicies.
+          !  match up the array indices and the grid indices.
           call ESMF_DataMapGet(dtypep%mapping, gridrank=gridrank, &
                                                dimlist=dimorder, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
@@ -3661,7 +3661,7 @@
       ! if src field exists on this DE, query it for information
       if (hassrcdata) then
           ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indicies and the grid indicies.
+          !  match up the array indices and the grid indices.
           call ESMF_DataMapGet(stypep%mapping, gridrank=gridrank, &
                                                dimlist=dimorder, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
@@ -3681,7 +3681,7 @@
       ! if dst field exists on this DE, query it for information
       if (hasdstdata) then
           ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indicies and the grid indicies.
+          !  match up the array indices and the grid indices.
           call ESMF_DataMapGet(dtypep%mapping, gridrank=gridrank, &
                                                dimlist=dimorder, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
@@ -4279,15 +4279,17 @@
 ! !IROUTINE: ESMF_FieldBoxIntersect - Intersect bounding boxes
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBoxIntersect(src_field, clip_field, src_DE, &
-                                 de_list, domainlist, rc)
+      subroutine ESMF_FieldBoxIntersect(src_field, dst_field, parentlayout, &
+                                        recvDomainlist, sendDomainList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: src_field         ! field to cover
-      type(ESMF_Field), intent(in) :: clip_field        ! field to find a cover in
-      integer, intent(in), optional  :: src_DE          ! The DE to 'cover'
-      integer, intent(out), optional :: de_list         ! DE's that cover
-      type(ESMF_DomainList), optional :: domainlist     ! domain list hint
+      type(ESMF_Field), intent(in) :: dst_field         ! field to find a cover in
+      type(ESMF_DELayout), intent(in) :: parentlayout   ! DE's that cover
+      type(ESMF_DomainList), intent(inout) :: recvDomainlist
+                                                        ! receive domain list
+      type(ESMF_DomainList), intent(inout) :: sendDomainlist
+                                                        ! send domain list
       integer, intent(out), optional :: rc              ! return code
 !
 ! !DESCRIPTION:
@@ -4296,27 +4298,118 @@
 !      desired area in src_field.  This procedure is mostly an entry point;
 !      most of the work is done in the {\tt ESMF\_Grid} class.
 !
-! !REQUIREMENTS:
 !EOP
-        type(ESMF_Grid) :: src_grid, clip_grid
-        type(ESMF_RelLoc) :: src_relloc, clip_relloc
+! !REQUIREMENTS:
 
-        call ESMF_FieldGetGrid(src_field, src_grid, rc)
-        call ESMF_FieldGetGrid(clip_field, clip_grid, rc)
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: my_DE, my_dst_DE, my_src_DE
+      real, dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max, src_min, src_max
+      logical :: hassrcdata        ! does this DE contain localdata from src?
+      logical :: hasdstdata        ! does this DE contain localdata from dst?
+      type(ESMF_DELayout) :: srclayout, dstlayout
+      type(ESMF_FieldType) :: stypep, dtypep      ! field type info
+      type(ESMF_Grid) :: src_grid, dst_grid
+      type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
+      type(ESMF_RelLoc) :: src_relloc, dst_relloc
 
-        ! Retrieve the relative locations
-        call ESMF_FieldGetRelloc(src_field, src_relloc, rc)
-        call ESMF_FieldGetRelloc(clip_field, clip_relloc, rc)
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
 
-        ! Here is the main reason for this function in field.  To avoid
-        ! burdening the user with getting each grid and each RelLoc flag
-        print *, 'in fieldboxintersect, calling gridboxintersect'
-        !call ESMF_GridBoxIntersect(src_grid, clip_grid, &
-                         !src_relloc, clip_relloc, &
-                         !src_DE, de_list, &
-                         !domainlist, rc)
+      stypep = src_field%ftypep
+      dtypep = dst_field%ftypep
 
-        end subroutine ESMF_FieldBoxIntersect
+      ! Our DE number in the parent layout
+      call ESMF_DELayoutGetDEID(parentlayout, my_DE, status)
+
+      ! TODO: we need not only to know if this DE has data in the field,
+      !   but also the de id for both src & dest fields
+
+      ! This routine is called on every processor in the parent layout.
+      !  It is quite possible that the source and destination fields do
+      !  not completely cover every processor on that layout.  Make sure
+      !  we do not go lower than this on the processors which are uninvolved
+      !  in this communication.
+
+      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
+      call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
+      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
+      hassrcdata = (hasdata .eq. ESMF_TF_TRUE)
+      hassrcdata = .true.   ! temp for now
+      if (hassrcdata) then
+        ! don't ask for our de number if this de isn't part of the layout
+        call ESMF_DELayoutGetDEID(srclayout, my_src_DE, status)
+      endif
+
+      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
+      call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
+      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
+      hasdstdata = (hasdata .eq. ESMF_TF_TRUE)
+      hasdstdata = .true.   ! temp for now
+      if (hasdstdata) then
+        ! don't ask for our de number if this de isn't part of the layout
+        call ESMF_DELayoutGetDEID(dstlayout, my_dst_DE, status)
+      endif
+
+      ! if neither are true this DE cannot be involved in the communication
+      !  and it can just return now.
+      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
+        if (rcpresent) rc = ESMF_SUCCESS
+        return
+      endif
+
+      ! if src field exists on this DE, query it for information
+      if (hassrcdata) then
+        ! Query the datamap and set info for grid so it knows how to
+        ! match up the array indices and the grid indices.
+        call ESMF_FieldGetGrid(src_field, src_grid, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
+          return
+        endif
+        ! And get the relative location
+        call ESMF_FieldGetRelloc(src_field, src_relloc, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in FieldBoxIntersect: FieldGetRelloc returned failure"
+          return
+        endif
+        ! From the grid get the bounding box on this DE
+        call ESMF_GridGetPhysGrid(src_grid, src_relloc, local_min=src_min, &
+                                  local_max=src_max, rc=status)
+        call ESMF_GridBoxIntersect(dst_grid, src_min, src_max, sendDomainList, &
+                                   status)
+      endif
+
+      ! if dst field exists on this DE, query it for information
+      if (hasdstdata) then
+        ! Query the datamap and set info for grid so it knows how to
+        ! match up the array indices and the grid indices.
+        call ESMF_FieldGetGrid(dst_field, dst_grid, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
+          return
+        endif
+        ! Retrieve the relative location
+        call ESMF_FieldGetRelloc(dst_field, dst_relloc, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in FieldBoxIntersect: FieldGetRelloc returned failure"
+          return
+        endif
+        ! From the grid get the bounding box on this DE
+        call ESMF_GridGetPhysGrid(dst_grid, dst_relloc, local_min=dst_min, &
+                                  local_max=dst_max, rc=status)
+        call ESMF_GridBoxIntersect(src_grid, dst_min, dst_max, recvDomainList, &
+                                   status)
+      endif
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBoxIntersect
 
 
-        end module ESMF_FieldMod
+      end module ESMF_FieldMod
