@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.18 2003/06/06 14:19:51 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.19 2003/06/19 16:55:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.18 2003/06/06 14:19:51 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.19 2003/06/19 16:55:45 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,7 +57,8 @@
       real, dimension(:,:), pointer :: f90ptr1
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
-      character (len = 20) :: fname, fname1, fname2, gname3
+      character (len = 20) :: fname, fname1, fname2
+      character (len = 20) :: gname, gname3
       type(ESMF_IOSpec) :: ios
       type(ESMF_Mask) :: mask
       type(ESMF_Field) :: f1, f2, f3, f4, f5
@@ -98,10 +99,22 @@
       !EX_UTest
       ! Verifing that the Field name can be queried from a no data Field
       call ESMF_FieldGetName(f1, fname, rc=rc)
-      write(failMsg, *) "returned name not 'default_name'"
+      write(failMsg, *) "default name not generated"
       write(name, *) "Getting name of Field with no data Test"
-      call ESMF_Test((fname.eq."default_name"), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((fname.ne.""), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+      
+      !EX_UTest
+      ! default names unique
+      f2 = ESMF_FieldCreateNoData(rc=rc)
+      call ESMF_FieldGetName(f1, fname1, rc=rc)
+      call ESMF_FieldGetName(f2, fname2, rc=rc)
+      call ESMF_FieldPrint(f1)
+      call ESMF_FieldPrint(f2)
+      write(failMsg, *) "default name not unique"
+      write(name, *) "Getting name of field created with default name"
+      call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDestroy(f2, rc=rc)
 
 #endif
 
@@ -367,18 +380,19 @@
       ! no way to query the name of a Grid.
       ! It will be uncommented when the query function is written.
       ! Bug 705196 "Unable to query Grid name"
-      !grid =  ESMF_GridCreate("oceangrid", rc=rc)
-      !arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      !f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   !dm, "Field 0", ios, rc)
-      !call ESMF_FieldGetGrid(f3, grid3, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting a Grid from a Field created with no data Test"
-      !call ESMF_Getname(grid3, gname3, rc=rc)
-      !print *, "Grid (grid3) name = ", trim(gname3)
-      !call ESMF_GridPrint(grid, "", rc=rc)
-      !call ESMF_Test((grid%name.eq.grid3%name), name, failMsg, result, ESMF_SRCLINE)
-      !call ESMF_GridPrint(grid3, "", rc=rc)
+      gname="oceangrid"
+      grid =  ESMF_GridCreate(name=gname, rc=rc)
+      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
+      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+                                   dm, "Field 0", ios, rc)
+      call ESMF_FieldGetGrid(f3, grid3, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a Grid from a Field created with no data Test"
+      call ESMF_GridGet(grid3, name=gname3, rc=rc)
+      print *, "Grid (grid3) name = ", trim(gname3)
+      call ESMF_GridPrint(grid, "", rc=rc)
+      call ESMF_GridPrint(grid3, "", rc=rc)
+      call ESMF_Test((gname.eq.gname3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Requirement 1.2 Local memory layout 

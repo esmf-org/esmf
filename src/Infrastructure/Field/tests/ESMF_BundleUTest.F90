@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.17 2003/06/11 19:27:26 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.18 2003/06/19 16:55:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.17 2003/06/11 19:27:26 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.18 2003/06/19 16:55:45 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@
       type(ESMF_RelLoc) :: relativelocation
       character (len = ESMF_MAXSTR) :: bname1, bname2, fname1, fname2, fname3
       type(ESMF_IOspec) :: iospec
-      type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, returnedfield3, simplefield
+      type(ESMF_Field) :: fields(10), returnedfield1, returnedfield2, returnedfield3, simplefield
       type(ESMF_Bundle) :: bundle1, bundle2, bundle3, bundle4
       real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
 
@@ -94,10 +94,10 @@
       ! The following code is commented out because it crashes the program
       ! It will be uncommented when the bug is fixed
       !  Verify that the Field count query from an uninitialized Bundle is handled properly
-      !call ESMF_BundleGetFieldCount(bundle1, fieldcount, rc);
-      !write(failMsg, *) ""
-      !write(name, *) "Getting Field count from an uninitialized Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGetFieldCount(bundle1, fieldcount, rc);
+      write(failMsg, *) ""
+      write(name, *) "Getting Field count from an uninitialized Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -107,10 +107,10 @@
       ! I/O specification, and an identifier that specifies whether the bundle 
       ! is to be packed (contiguous data) or loose (noncontiguous data). 
       !  Create several empty Fields and add them to a new Bundle.
-      field(1) = ESMF_FieldCreateNoData(name="pressure", rc=rc)
-      field(2) = ESMF_FieldCreateNoData(name="temperature", rc=rc)
-      field(3) = ESMF_FieldCreateNoData(name="heat flux", rc=rc)
-      bundle1 = ESMF_BundleCreate(3, field, name="atmosphere data", rc=rc)
+      fields(1) = ESMF_FieldCreateNoData(name="pressure", rc=rc)
+      fields(2) = ESMF_FieldCreateNoData(name="temperature", rc=rc)
+      fields(3) = ESMF_FieldCreateNoData(name="heat flux", rc=rc)
+      bundle1 = ESMF_BundleCreate(3, fields, name="atmosphere data", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating Bundle with 3 No Data Fields Test Req. FLD2.1.1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -118,7 +118,7 @@
 
       !NEX_UTest
       ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACK_FIELD_DATA option
-      bundle1 = ESMF_BundleCreate(3, field, ESMF_PACK_FIELD_DATA, &
+      bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACK_FIELD_DATA, &
 				name="atmosphere data", rc=rc)
       write(name, *) "Creating Bundle with ESMF_PACK_FIELD_DATA Req. FLD2.1.1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -129,22 +129,24 @@
       ! Verify that adding a Field to an uninitialized Bundle is handled correctly
       ! This code is commented out because it crashes the program.
       !It will be uncommented when the bug is fixed
-      !call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
-      !write(failMsg, *) "Add Field to uncreated Bundle failed"
-      !write(name, *) "Adding a Field to an uncreated Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
+      write(failMsg, *) "Add Field to uncreated Bundle failed"
+      write(name, *) "Adding a Field to an uncreated Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !  Verify that a Field can be added to a Bundle
-      ! The following code s commented out because it crashes. Bug 703872
-      ! simplefield = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
-                                    ! name="rh", rc=rc)
+      ! The following code is commented out because it crashes. Bug 703872
+      simplefield = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                                     name="rh", rc=rc)
 
+      grid = ESMF_GridCreate(rc=rc)
+      fields(1) = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
       !  Verify that an empty Bundle can be created
-      ! bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
-      ! write(failMsg, *) ""
-      ! write(name, *) "Creating Empty Bundle Test"
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      bundle2 = ESMF_BundleCreate(1, fields, name="time step 1", rc=rc);
+      write(failMsg, *) ""
+      write(name, *) "Creating Empty Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -190,10 +192,10 @@
 
       !  Test Requirement FLD2.5.7 Return Grid
       ! Commented out until Bug 707065 is fixed 
-      !call ESMF_BundleGetGrid(bundle2, grid2, rc);
-      !write(failMsg, *) ""
-      !write(name, *) "Getting a Grid from a Bundle Test Req. FLD2.5.7"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGetGrid(bundle2, grid2, rc);
+      write(failMsg, *) ""
+      write(name, *) "Getting a Grid from a Bundle Test Req. FLD2.5.7"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -204,7 +206,7 @@
    
       !NEX_UTest
       !  Verify that multiple Fields can be added to a Bundle 
-      call ESMF_BundleAddFields(bundle3, 3, field, rc);
+      call ESMF_BundleAddFields(bundle3, 3, fields, rc);
       write(failMsg, *) ""
       write(name, *) "Adding multiple Fields to a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
