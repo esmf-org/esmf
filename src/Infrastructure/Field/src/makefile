@@ -1,12 +1,10 @@
-# $Id: makefile,v 1.15 2004/05/10 15:43:47 nscollins Exp $ 
+# $Id: makefile,v 1.16 2004/05/10 15:44:53 nscollins Exp $ 
 
 #
 ALL: build_here 
 
 CFLAGS    =
 FFLAGS    =
-GENC      =
-GENF      = ESMF_FieldGet.F90 ESMF_FieldSet.F90 ESMF_FieldCreate.F90
 SOURCEC	  = 
 SOURCEF	  = ESMF_Field.F90 ESMF_FieldGet.F90 ESMF_FieldSet.F90 ESMF_FieldCreate.F90
 SOURCEH	  = 
@@ -16,8 +14,6 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 MANSEC	  = Fieldobj
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/Field/src
-
-TEXFILES_TO_MAKE = ${GENF}
 
 include $(ESMF_DIR)/makefile
 
