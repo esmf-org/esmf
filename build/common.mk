@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.7 2003/09/09 22:17:25 flanigan Exp $
+#  $Id: common.mk,v 1.8 2003/09/12 18:05:56 flanigan Exp $
 #
 #  common.mk
 #
@@ -836,18 +836,28 @@ $(ESMC_DOCDIR)/%.pdf: %.dvi
 
 # Html Files
 $(ESMC_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
+	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
 	${DO_L2H} $* des
+	rm -f .latex2html-init
 	mv -f $(@F) $(ESMC_DOCDIR)
 
+
 $(ESMC_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
+	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
 	${DO_L2H} $* ref
+	rm -f .latex2html-init
 	mv -f $(@F) $(ESMC_DOCDIR)
 
 $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
+	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
 	${DO_L2H} $* req
+	rm -f .latex2html-init
 	mv -f $(@F) $(ESMC_DOCDIR)
 
 

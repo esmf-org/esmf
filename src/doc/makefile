@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 2003/09/09 17:27:38 flanigan Exp $ 
+# $Id: makefile,v 1.35 2003/09/12 18:05:39 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -83,15 +83,21 @@ ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 ${ESMC_DOCDIR}/ESMF_usrdoc: $(USRDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	-rm -r $(ESMC_DOCDIR)/ESMF_usrdoc
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
+	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
 	${DO_L2H} ESMF usr
+	rm -f .latex2html-init
 	mv -f ESMF_usrdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_refdoc: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	-rm -rf $(ESMC_DOCDIR)/ESMF_refdoc
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
+	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
 	${DO_L2H} ESMF ref
+	rm -f .latex2html-init
 	mv -f ESMF_refdoc ${ESMC_DOCDIR}
 
 
