@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.10 2004/05/27 22:50:21 jwolfe Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.11 2004/06/04 08:25:50 nscollins Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -31,9 +31,8 @@
     implicit none
     
     ! Local variables
-    integer :: de_id, ndes, rc, delist(4)
+    integer :: pet_id, npets, rc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cname3, cplname
-    type(ESMF_DELayout) :: layout1, layout2, layout3
     type(ESMF_VM) :: vm
     type(ESMF_State) :: c1exp, c2exp, c3imp, bothexp
     type(ESMF_GridComp) :: comp1, comp2, comp3
@@ -69,24 +68,16 @@
 !-------------------------------------------------------------------------
 !
 
-    ! Initialize framework
-    call ESMF_Initialize(rc=rc)
+    ! Initialize framework and get default global VM back
+    call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! get the default global VM
-    call ESMF_VMGetGlobal(vm, rc)
+    ! Query for the number of PETs we were started with
+    call ESMF_VMGet(vm, petCount=npets, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! Query for the default layout
-    layout1 = ESMF_DELayoutCreate(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_DELayoutPrint(layout1, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
-    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    if (ndes .lt. 4) then
-        print *, "This system test needs to run at least 4-way, current np = ", ndes
+    if (npets .lt. 4) then
+        print *, "This system test needs to run at least 4-way, current np = ", npets
         goto 10
     endif
 
@@ -94,35 +85,56 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
+<<<<<<< ESMF_MergeCouplingSTest.F90
+    comp1 = ESMF_GridCompCreate(vm, cname1, rc=rc)
+=======
     !delist = (/ 0, 1, 2, 3 /)
     layout2 = ESMF_DELayoutCreate(vm, (/ 4, 1 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
+>>>>>>> 1.9
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc
+<<<<<<< ESMF_MergeCouplingSTest.F90
+=======
     call ESMF_DELayoutPrint(layout2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
+>>>>>>> 1.9
 
     cname2 = "user model 2"
+<<<<<<< ESMF_MergeCouplingSTest.F90
+    comp2 = ESMF_GridCompCreate(vm, cname2, rc=rc)
+=======
     layout3 = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)
+>>>>>>> 1.9
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname2), "rc =", rc
+<<<<<<< ESMF_MergeCouplingSTest.F90
+=======
     call ESMF_DELayoutPrint(layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
+>>>>>>> 1.9
 
     cname3 = "user model 3"
+<<<<<<< ESMF_MergeCouplingSTest.F90
+    comp3 = ESMF_GridCompCreate(vm, cname3, rc=rc)
+=======
     layout3 = ESMF_DELayoutCreate(vm, (/ 1, 4 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp3 = ESMF_GridCompCreate(cname3, delayout=layout3, rc=rc)
+>>>>>>> 1.9
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname3), "rc =", rc
+<<<<<<< ESMF_MergeCouplingSTest.F90
+=======
     call ESMF_DELayoutPrint(layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
+>>>>>>> 1.9
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, delayout=layout1, rc=rc)
+    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cplname), ", rc =", rc
 
@@ -268,13 +280,13 @@
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_DELayoutGet(layout1, localDe=de_id, rc=rc)
+      call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 
       print *, "------------------------------------------------------------"
       print *, "------------------------------------------------------------"
-      print *, "Test finished, de_id = ", de_id
+      print *, "Test finished, pet_id = ", pet_id
       print *, "------------------------------------------------------------"
       print *, "------------------------------------------------------------"
 
@@ -311,17 +323,20 @@
       call ESMF_CplCompDestroy(cpl, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
+<<<<<<< ESMF_MergeCouplingSTest.F90
+=======
       call ESMF_DELayoutDestroy(layout2, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_DELayoutDestroy(layout3, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
+>>>>>>> 1.9
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 10    print *, "System Test MergeCoupling complete."
 
       ! Only output on processor 0, or if error anyplace
-      if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+      if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
 
         ! Standard ESMF Test output to log file
         write(failMsg, *)  "Component Coupling"
