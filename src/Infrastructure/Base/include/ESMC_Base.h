@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.62 2005/01/11 22:13:39 eschwab Exp $
+// $Id: ESMC_Base.h,v 1.63 2005/01/12 17:50:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,8 @@
  // include files.
 
 #include "stdio.h"
-#include <ESMC_Start.h>
+
+#include "ESMC_Start.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -193,10 +194,12 @@ class ESMC_DomainList {
 // !PRIVATE TYPES:
 
  // class declaration type.
+#include "ESMC_VM.h"
 class ESMC_Base
 {
   protected:
-    int           ID;           // unique ID for any object in the system
+    int           ID;           // unique ID for any object in this VM context
+    ESMC_VMId     *vmID;        // unique vmID for any VM in the system
     int           refCount;     // number of references to this instance
     int           classID;      // unique ID relative to this class
     ESMC_Status   baseStatus;   // status of an instance of Base derived class
