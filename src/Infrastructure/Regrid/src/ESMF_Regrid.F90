@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.50 2004/02/10 23:48:36 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.51 2004/02/12 23:54:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.50 2004/02/10 23:48:36 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.51 2004/02/12 23:54:34 jwolfe Exp $'
 
 !==============================================================================
 
@@ -435,7 +435,7 @@
      call ESMF_RouteGetRecvItems(rh, asize, status)
 
      call ESMF_ArrayGet(srcarray, rank=rank, type=type, kind=kind, rc=status)
-     gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc)
+     gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=status)
      srcLocalArray = srcarray
      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, status)
 
