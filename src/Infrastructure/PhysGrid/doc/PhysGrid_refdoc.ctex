@@ -121,21 +121,21 @@
 \input{../Infrastructure/PhysGrid/doc/ESMF_PhysGrid_fapi}
 #endif
 
-\section{PhysGrid C++ Interface}
+%\section{PhysGrid C++ Interface}
 
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{PhysGrid_ccex}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/PhysGrid/doc/PhysGrid_ccex}
-#endif
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{PhysGrid_ccex}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/PhysGrid/doc/PhysGrid_ccex}
+%#endif
 
-\subsection{Parameters and Definitions}
-#ifdef STANDALONE
-\input{PhysGrid_ccparam}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/PhysGrid/doc/PhysGrid_ccparam}
-#endif
+%\subsection{Parameters and Definitions}
+%#ifdef STANDALONE
+%\input{PhysGrid_ccparam}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/PhysGrid/doc/PhysGrid_ccparam}
+%#endif
 
 % %\subsection{Class API}
 % #ifdef STANDALONE
@@ -144,7 +144,7 @@
 % \input{../Infrastructure/PhysGrid/doc/PhysGrid_ccapi}
 % #endif
 
-\section{<Name2> Design}
+%\section{<Name2> Design}
 
 % Subsections same as PhysGrid Design ...
 
