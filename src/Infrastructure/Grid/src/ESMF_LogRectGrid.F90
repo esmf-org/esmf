@@ -39,7 +39,7 @@
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_IOSpecMod      ! ESMF I/O class
       use ESMF_LocalArrayMod  ! ESMF local array class
-      use ESMF_DataMapMod     ! ESMF data map class
+      use ESMF_ArrayDataMapMod     ! ESMF data map class
       use ESMF_DELayoutMod ! ESMF layout class
       use ESMF_ArrayMod
       use ESMF_ArrayCreateMod
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.65 2004/04/29 19:35:21 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.66 2004/05/10 15:46:11 nscollins Exp $'
 
 !==============================================================================
 !
