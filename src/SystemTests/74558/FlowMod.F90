@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.12 2003/08/01 14:55:37 nscollins Exp $
+! $Id: FlowMod.F90,v 1.13 2003/08/01 22:03:53 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -42,6 +42,8 @@
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
+
+        rc = ESMF_SUCCESS
 
     end subroutine FlowMod_register
 

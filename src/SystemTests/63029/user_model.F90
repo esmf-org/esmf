@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.11 2003/05/07 16:07:38 nscollins Exp $
+! $Id: user_model.F90,v 1.12 2003/08/01 22:03:53 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -75,6 +75,8 @@
         print *, " initial data =", mydatablock%index, &
                      mydatablock%scale_factor, mydatablock%flag
 
+        rc = ESMF_SUCCESS
+
     end subroutine
 
 !-------------------------------------------------------------------------
@@ -134,6 +136,8 @@
 
         print *, "User Comp Init returning"
    
+        rc = ESMF_SUCCESS
+
     end subroutine user_init2
 
 
@@ -222,6 +226,8 @@
  
         print *, "User Comp Final returning"
    
+        rc = ESMF_SUCCESS
+
     end subroutine user_final
 
 

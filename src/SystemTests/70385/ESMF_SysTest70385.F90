@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.25 2003/08/01 21:49:07 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.26 2003/08/01 22:03:53 nscollins Exp $
 !
 ! System test code #70385
 
@@ -188,6 +188,8 @@
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
   
+      rc = ESMF_SUCCESS
+
     end subroutine setserv
 
 !-------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.9 2003/07/24 00:16:47 nscollins Exp $
+! $Id: user_model1.F90,v 1.10 2003/08/01 22:03:53 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -73,6 +73,9 @@
         call ESMF_GridCompSetInternalState(comp, wrap, rc)
 
         print *, "Registered Private Data block for Internal State"
+
+        rc = ESMF_SUCCESS
+
     end subroutine
 
 !-------------------------------------------------------------------------
@@ -82,9 +85,9 @@
     
     subroutine user_init(comp, importstate, exportstate, clock, rc)
         type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout), optional :: importstate, exportstate
-        type(ESMF_Clock), intent(in), optional :: clock
-        integer, intent(out), optional :: rc
+        type(ESMF_State), intent(inout) :: importstate, exportstate
+        type(ESMF_Clock), intent(in) :: clock
+        integer, intent(out) :: rc
 
 !     ! Local variables
         type(ESMF_Field) :: humidity
@@ -104,15 +107,6 @@
         integer :: status, myde
 
         print *, "User Comp Init starting"
-
-        if (present(importstate)) print *, "importstate present"
-        if (.not.present(importstate)) print *, "importstate *not* present"
-        if (present(exportstate)) print *, "exportstate present"
-        if (.not.present(exportstate)) print *, "exportstate *not* present"
-        if (present(clock)) print *, "clock present"
-        if (.not.present(clock)) print *, "clock *not* present"
-        if (present(rc)) print *, "rc present"
-        if (.not.present(rc)) print *, "rc *not* present"
 
         ! query comp for layout
         call ESMF_GridCompGet(comp, layout=layout, rc=status)
@@ -166,6 +160,8 @@
 
         print *, "User Comp Init returning"
    
+        rc = ESMF_SUCCESS
+
     end subroutine user_init
 
 
@@ -175,9 +171,9 @@
  
     subroutine user_run(comp, importstate, exportstate, clock, rc)
         type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout), optional :: importstate, exportstate
-        type(ESMF_Clock), intent(in), optional :: clock
-        integer, intent(out), optional :: rc
+        type(ESMF_State), intent(inout) :: importstate, exportstate
+        type(ESMF_Clock), intent(in) :: clock
+        integer, intent(out) :: rc
 
 !     ! Local variables
         type(ESMF_Field) :: humidity
@@ -188,15 +184,6 @@
         type(wrapper) :: wrap
 
         print *, "User Comp Run starting"
-
-        if (present(importstate)) print *, "importstate present"
-        if (.not.present(importstate)) print *, "importstate *not* present"
-        if (present(exportstate)) print *, "exportstate present"
-        if (.not.present(exportstate)) print *, "exportstate *not* present"
-        if (present(clock)) print *, "clock present"
-        if (.not.present(clock)) print *, "clock *not* present"
-        if (present(rc)) print *, "rc present"
-        if (.not.present(rc)) print *, "rc *not* present"
 
         ! Get our local info
         call ESMF_GridCompGetInternalState(comp, wrap, status)
@@ -233,9 +220,9 @@
  
     subroutine user_final(comp, importstate, exportstate, clock, rc)
         type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout), optional :: importstate, exportstate
-        type(ESMF_Clock), intent(in), optional :: clock
-        integer, intent(out), optional :: rc
+        type(ESMF_State), intent(inout) :: importstate, exportstate
+        type(ESMF_Clock), intent(in) :: clock
+        integer, intent(out) :: rc
 
         ! Local variables
         integer :: status
@@ -244,15 +231,6 @@
 
         print *, "User Comp Final starting"
     
-        if (present(importstate)) print *, "importstate present"
-        if (.not.present(importstate)) print *, "importstate *not* present"
-        if (present(exportstate)) print *, "exportstate present"
-        if (.not.present(exportstate)) print *, "exportstate *not* present"
-        if (present(clock)) print *, "clock present"
-        if (.not.present(clock)) print *, "clock *not* present"
-        if (present(rc)) print *, "rc present"
-        if (.not.present(rc)) print *, "rc *not* present"
-
         ! Get our local info
         nullify(wrap%ptr)
         mydatablock => wrap%ptr
@@ -266,6 +244,8 @@
 
         print *, "User Comp Final returning"
    
+        rc = ESMF_SUCCESS
+
     end subroutine user_final
 
 

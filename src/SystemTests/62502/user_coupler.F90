@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.9 2003/08/01 14:45:21 nscollins Exp $
+! $Id: user_coupler.F90,v 1.10 2003/08/01 22:03:53 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -46,6 +46,8 @@
 
         print *, "Registered Initialize, Run, and Finalize routines"
 
+        rc = ESMF_SUCCESS
+
     end subroutine
 
 !-------------------------------------------------------------------------
@@ -57,7 +59,7 @@
         type(ESMF_CplComp) :: comp
         type(ESMF_State), optional :: statelist
         type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+        integer :: rc
 
 !     ! Local variables
         type(ESMF_Field) :: humidity
@@ -75,6 +77,8 @@
 
         print *, "User Coupler Init returning"
    
+        rc = ESMF_SUCCESS
+
     end subroutine user_init
 
 
@@ -84,9 +88,9 @@
  
     subroutine user_run(comp, statelist, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State), optional :: statelist
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+        type(ESMF_State) :: statelist
+        type(ESMF_Clock) :: clock
+        integer :: rc
 
       ! Local variables
         type(ESMF_State) :: mysource, mydest
@@ -137,9 +141,9 @@
  
     subroutine user_final(comp, statelist, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State), optional :: statelist
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+        type(ESMF_State) :: statelist
+        type(ESMF_Clock) :: clock
+        integer :: rc
 
       ! Local variables
         type(ESMF_State) :: state1, state2
@@ -153,6 +157,8 @@
     
         print *, "User Coupler Final returning"
    
+        rc = ESMF_SUCCESS
+
     end subroutine user_final
 
 

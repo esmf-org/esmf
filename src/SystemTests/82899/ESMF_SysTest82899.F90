@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.4 2003/08/01 21:49:07 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.5 2003/08/01 22:03:53 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -186,6 +186,8 @@
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
   
+      rc = ESMF_SUCCESS
+
     end subroutine setserv
 
 !-------------------------------------------------------------------------

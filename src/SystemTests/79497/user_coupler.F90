@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2003/08/01 15:45:26 nscollins Exp $
+! $Id: user_coupler.F90,v 1.4 2003/08/01 22:03:53 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -45,6 +45,8 @@
 
       print *, "Registered Initialize, Run, and Finalize routines"
 
+      rc = ESMF_SUCCESS
+
     end subroutine
 
 !-------------------------------------------------------------------------
@@ -81,12 +83,14 @@
       !!  (the current code does internal caching of precomputed regrids)
       !!regrid = ESMF_RegridCreateFromField(humidity1, humidity2, &
       !!                                    method=ESMF_RegridMethod_Bilinear, &
-      !!                                    name="humidity1_to_2", rc=status)
+      !!                                    name="humidity1_to_2", rc=rc)
 
 ! TODO:  send cpllayout to Regrid?  not in argument list
 
       print *, "User Coupler Init returning"
    
+      rc = ESMF_SUCCESS
+
     end subroutine user_init
 
 
@@ -169,6 +173,8 @@
 
       print *, "User Coupler Final returning"
    
+      rc = ESMF_SUCCESS
+
     end subroutine user_final
 
 

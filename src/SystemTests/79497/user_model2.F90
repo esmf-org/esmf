@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2003/08/01 15:45:26 nscollins Exp $
+! $Id: user_model2.F90,v 1.4 2003/08/01 22:03:53 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -67,6 +67,8 @@
 
         print *, "Registered Private Data block for Internal State"
 
+        rc = ESMF_SUCCESS
+
     end subroutine
 
 !--------------------------------------------------------------------------------
@@ -75,9 +77,9 @@
  
     subroutine user_init(comp, importstate, exportstate, clock, rc)
       type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout), optional :: importstate, exportstate
-      type(ESMF_Clock), intent(in), optional :: clock
-      integer, intent(out), optional :: rc
+      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out) :: rc
 
 !   ! Local variables
       type(ESMF_Field) :: humidity
@@ -149,6 +151,8 @@
 
       print *, "User Comp Init returning"
    
+      rc = ESMF_SUCCESS
+
     end subroutine user_init
 
 
@@ -158,9 +162,9 @@
  
     subroutine user_run(comp, importstate, exportstate, clock, rc)
       type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout), optional :: importstate, exportstate
-      type(ESMF_Clock), intent(in), optional :: clock
-      integer, intent(out), optional :: rc
+      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out) :: rc
 
 !   ! Local variables
       type(ESMF_Field) :: humidity
@@ -192,9 +196,9 @@
  
     subroutine user_final(comp, importstate, exportstate, clock, rc)
       type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout), optional :: importstate, exportstate
-      type(ESMF_Clock), intent(in), optional :: clock
-      integer, intent(out), optional :: rc
+      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out) :: rc
 
       ! Local variables
       integer :: status
@@ -217,6 +221,8 @@
 
       print *, "User Comp Final returning"
    
+      rc = ESMF_SUCCESS
+
     end subroutine user_final
 
 
