@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.4 2003/02/10 16:51:13 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.5 2003/04/04 15:27:56 nscollins Exp $
 !
 ! Example code for creating States.
 
@@ -15,15 +15,9 @@
 
     program ESMF_StateExample
     
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
 
-!   ! Other ESMF modules which are needed by States
-    use ESMF_IOMod
-    use ESMF_ArrayMod
-    use ESMF_FieldMod
-    use ESMF_BundleMod
-    use ESMF_StateMod
+!   ! ESMF Framework module
+    use ESMF_Mod
     
     implicit none
     
@@ -49,11 +43,6 @@
 
     ! Data would be added here and the State reused inside the run
     !  routine of a sequential application.
-
-    ! User code will probably get a handle to the state by querying
-    ! the component, maybe something like:
-    ! call ESMF_CompGetState(comp, ESMF_COMP_IMPORTSTATE, state1, rc)
-   
 
     print *, "State Example 1 finished"
 
