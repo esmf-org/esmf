@@ -52,7 +52,6 @@
 
     ! A clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
-    type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
@@ -69,7 +68,7 @@
 !!  Initialize the ESMF Framework
 !!------------------------------------------------------------------------------
 
-    call ESMF_Initialize(rc=rc)
+    call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
     if (rc .ne. ESMF_SUCCESS) stop 99 
 
 
@@ -134,16 +133,11 @@
      ! the config file.
 
 
-      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+      call ESMF_TimeIntervalSet(timeStep, s=2, rc=rc)
 
-      call ESMF_TimeIntervalSet(timeStep, S=2, rc=rc)
+      call ESMF_TimeSet(startTime, yy=2005, mm=1, dd=25, rc=rc)
 
-      call ESMF_TimeSet(startTime, yy=2005, mm=1, dd=25, &
-                         calendar=gregorianCalendar, rc=rc)
-
-      call ESMF_TimeSet(stopTime, yy=2005, mm=1, dd=26, &
-                         calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2005, mm=1, dd=26, rc=rc)
 
       clock = ESMF_ClockCreate("Application Clock", timeStep, startTime, &
                                 stopTime, rc=rc)
@@ -203,8 +197,6 @@
       ! Clean up
 
       call ESMF_ClockDestroy(clock, rc)
-
-      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
       call ESMF_StateDestroy(defaultstate, rc)
 
