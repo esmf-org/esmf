@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.48 2004/12/29 21:31:32 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.49 2004/12/30 23:56:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.48 2004/12/29 21:31:32 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.49 2004/12/30 23:56:13 theurich Exp $'
 
 !==============================================================================
 
@@ -167,26 +167,6 @@ module ESMF_VMMod
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-
-! -------------------------- ESMF-public method -------------------------------
-!BOPI
-! !IROUTINE: ESMF_VMBroadcast -- Generic interface
-
-! !INTERFACE:
-      interface ESMF_VMBroadcast
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_VMBroadcastI4
-      module procedure ESMF_VMBroadcastR4
-      module procedure ESMF_VMBroadcastR8
-      module procedure ESMF_VMBroadcastLogical
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_VMBroadcast} functions.   
-!EOPI 
-      end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
@@ -223,6 +203,26 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMAllReduce} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMBroadcast -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMBroadcast
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMBroadcastI4
+      module procedure ESMF_VMBroadcastR4
+      module procedure ESMF_VMBroadcastR8
+      module procedure ESMF_VMBroadcastLogical
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMBroadcast} functions.   
 !EOPI 
       end interface
 
@@ -359,9 +359,10 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs an
-!   AllFullReduce on contigous data of kind {\tt ESMF\_KIND\_I4} across the
-!   {\tt ESMF\_VM} object performing the specified operation.
+!   Collective {\tt ESMF\_VM} communication call that reduces a contigous data 
+!   array of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM} object 
+!   into a single value of the same type. The result is returned on all PETs.
+!   Different reduction operations can be specified.
 !
 !   The arguments are:
 !   \begin{description}
@@ -371,12 +372,13 @@ module ESMF_VMMod
 !        Contigous data arry holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
 !   \item[count] 
-!        Number of elements in sendData on each of the PETs.
+!        Number of elements in sendData. Must be the same on all PETs.
 !   \item[reduceflag] 
-!        Reduction operation.
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations.
 !   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
@@ -446,9 +448,10 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs an
-!   AllFullReduce on contigous data of kind {\tt ESMF\_KIND\_R4} across the
-!   {\tt ESMF\_VM} object performing the specified operation.
+!   Collective {\tt ESMF\_VM} communication call that reduces a contigous data 
+!   array of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM} object 
+!   into a single value of the same type. The result is returned on all PETs.
+!   Different reduction operations can be specified.
 !
 !   The arguments are:
 !   \begin{description}
@@ -458,12 +461,13 @@ module ESMF_VMMod
 !        Contigous data arry holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
 !   \item[count] 
-!        Number of elements in sendData on each of the PETs.
+!        Number of elements in sendData. Must be the same on all PETs.
 !   \item[reduceflag] 
-!        Reduction operation.
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations.
 !   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
@@ -533,9 +537,10 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs an
-!   AllFullReduce on contigous data of kind {\tt ESMF\_KIND\_R4} across the
-!   {\tt ESMF\_VM} object performing the specified operation.
+!   Collective {\tt ESMF\_VM} communication call that reduces a contigous data 
+!   array of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM} object 
+!   into a single value of the same type. The result is returned on all PETs.
+!   Different reduction operations can be specified.
 !
 !   The arguments are:
 !   \begin{description}
@@ -545,12 +550,13 @@ module ESMF_VMMod
 !        Contigous data arry holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
 !   \item[count] 
-!        Number of elements in sendData on each of the PETs.
+!        Number of elements in sendData. Must be the same on all PETs.
 !   \item[reduceflag] 
-!        Reduction operation.
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations.
 !   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
@@ -620,9 +626,10 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
-!   on contigous data of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM}
-!   object performing the specified operation.
+!   Collective {\tt ESMF\_VM} communication call that reduces a contigous data 
+!   array of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM} object 
+!   into a contigous data array of the same type. The result array is returned 
+!   on all PETs. Different reduction operations can be specified.
 !
 !   The arguments are:
 !   \begin{description}
@@ -632,12 +639,14 @@ module ESMF_VMMod
 !        Contigous data arry holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
 !   \item[count] 
-!        Number of elements in sendData on each of the PETs.
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
 !   \item[reduceflag] 
-!        Reduction operation.
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations.
 !   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
@@ -707,9 +716,10 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
-!   on contigous data of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM}
-!   object performing the specified operation.
+!   Collective {\tt ESMF\_VM} communication call that reduces a contigous data 
+!   array of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM} object 
+!   into a contigous data array of the same type. The result array is returned 
+!   on all PETs. Different reduction operations can be specified.
 !
 !   The arguments are:
 !   \begin{description}
@@ -722,9 +732,11 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements in sendData on each of the PETs.
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
 !   \item[reduceflag] 
-!        Reduction operation.
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations.
 !   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
@@ -794,9 +806,10 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
-!   on contigous data of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM}
-!   object performing the specified operation.
+!   Collective {\tt ESMF\_VM} communication call that reduces a contigous data 
+!   array of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM} object 
+!   into a contigous data array of the same type. The result array is returned 
+!   on all PETs. Different reduction operations can be specified.
 !
 !   The arguments are:
 !   \begin{description}
@@ -809,9 +822,11 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements in sendData on each of the PETs.
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
 !   \item[reduceflag] 
-!        Reduction operation.
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations.
 !   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
@@ -873,7 +888,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that blocks calling PET until
-!   all of the PETs have issued the call. 
+!   all PETs of the VM context have issued the call. 
 !
 !   The arguments are:
 !   \begin{description}
@@ -924,8 +939,9 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that broadcasts contigous data 
-!   of kind {\tt ESMF\_KIND\_I4} across the PETs of an {\tt ESMF\_VM} object.
+!   Collective {\tt ESMF\_VM} communication call that broadcasts a contigous 
+!   data array of kind {\tt ESMF\_KIND\_I4} from PET {\tt root} to all PETs
+!   of the {\tt ESMF\_VM} object (including {\tt root}).
 !
 !   The arguments are:
 !   \begin{description}
@@ -938,7 +954,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements to be sent from {\tt root} to each of the PETs.
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -1010,8 +1027,9 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that broadcasts contigous data 
-!   of kind {\tt ESMF\_KIND\_R4} across the PETs of an {\tt ESMF\_VM} object.
+!   Collective {\tt ESMF\_VM} communication call that broadcasts a contigous 
+!   data array of kind {\tt ESMF\_KIND\_R4} from PET {\tt root} to all PETs
+!   of the {\tt ESMF\_VM} object (including {\tt root}).
 !
 !
 !   The arguments are:
@@ -1025,7 +1043,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -1097,8 +1116,9 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that broadcasts contigous data 
-!   of kind {\tt ESMF\_KIND\_R8} across the PETs of an {\tt ESMF\_VM} object.
+!   Collective {\tt ESMF\_VM} communication call that broadcasts a contigous 
+!   data array of kind {\tt ESMF\_KIND\_R8} from PET {\tt root} to all PETs
+!   of the {\tt ESMF\_VM} object (including {\tt root}).
 !
 !
 !   The arguments are:
@@ -1112,7 +1132,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -1184,9 +1205,9 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that broadcasts contigous data 
-!   of type {\tt ESMF\_Logical} across the PETs of an {\tt ESMF\_VM} object.
-!
+!   Collective {\tt ESMF\_VM} communication call that broadcasts a contigous 
+!   data array of kind {\tt ESMF\_Logical} from PET {\tt root} to all PETs
+!   of the {\tt ESMF\_VM} object (including {\tt root}).
 !
 !   The arguments are:
 !   \begin{description}
@@ -1199,7 +1220,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -1272,7 +1294,8 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contigous data 
-!   of kind {\tt ESMF\_KIND\_I4} from the PETs of an {\tt ESMF\_VM} object.
+!   of kind {\tt ESMF\_KIND\_I4} from all PETs of an {\tt ESMF\_VM} object 
+!   (including {\tt root}) into an array on the {\tt root} PET.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1285,7 +1308,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. Only the {\tt recvData}
 !        array specified by the {\tt root} PET will be used by this method.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements to be send from each PET to {\tt root}. Must be the
+!        same on all PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -1358,7 +1382,8 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contigous data 
-!   of kind {\tt ESMF\_KIND\_R4} from the PETs of an {\tt ESMF\_VM} object.
+!   of kind {\tt ESMF\_KIND\_R4} from all PETs of an {\tt ESMF\_VM} object 
+!   (including {\tt root}) into an array on the {\tt root} PET.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1371,7 +1396,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. Only the {\tt recvData}
 !        array specified by the {\tt root} PET will be used by this method.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements to be send from each PET to {\tt root}. Must be the
+!        same on all PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -1444,7 +1470,8 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contigous data 
-!   of kind {\tt ESMF\_KIND\_R8} from the PETs of an {\tt ESMF\_VM} object.
+!   of kind {\tt ESMF\_KIND\_R8} from all PETs of an {\tt ESMF\_VM} object 
+!   (including {\tt root}) into an array on the {\tt root} PET.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1457,7 +1484,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. Only the {\tt recvData}
 !        array specified by the {\tt root} PET will be used by this method.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements to be send from each PET to {\tt root}. Must be the
+!        same on all PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -1530,7 +1558,8 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contigous data 
-!   of type {\tt ESMF\_Logical} from the PETs of an {\tt ESMF\_VM} object.
+!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
+!   (including {\tt root}) into an array on the {\tt root} PET.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1543,7 +1572,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. Only the {\tt recvData}
 !        array specified by the {\tt root} PET will be used by this method.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements to be send from each PET to {\tt root}. Must be the
+!        same on all PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -1619,8 +1649,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        Queried {\tt ESMF\_VM} object.
 !   \item[{[localPet]}]
-!        Upon return this holds the id of the PET that instantiates the local
-!        user code.
+!        Upon return this holds the id of the PET that issued this call.
 !   \item[{[petCount]}]
 !        Upon return this holds the number of PETs in the specified 
 !        {\tt ESMF\_VM} object.
@@ -1679,7 +1708,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Get the global default {\tt ESMF\_VM} object. This is the {\tt ESMF\_VM}
-!   object that was created during {\tt ESMF\_Initialize()} and is the ultimate
+!   object that is created during {\tt ESMF\_Initialize()} and is the ultimate
 !   parent of all {\tt ESMF\_VM} objects in an ESMF application.
 !
 !   The arguments are:
@@ -1718,7 +1747,7 @@ module ESMF_VMMod
     integer,       intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Get the {\tt ESMF\_VM} object of the current context.
+!   Get the {\tt ESMF\_VM} object of the current execution context.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1767,8 +1796,8 @@ module ESMF_VMMod
     integer,        intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Get internal information about the specified PET within the specified
-!   {\tt ESMF\_VM} object.
+!   Get internal information about a specific PET within an {\tt ESMF\_VM} 
+!   object.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1787,7 +1816,7 @@ module ESMF_VMMod
 !        thread group.
 !   \item[{[threadId]}]
 !        Upon return this holds the thread id of the specified PET within the 
-!        {\tt ESMF\_VM} object.
+!        PET's thread group.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1826,7 +1855,7 @@ module ESMF_VMMod
     integer,        intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Prints internal information about the specified {\tt ESMF\_VM} to
+!   Print internal information about the specified {\tt ESMF\_VM} to
 !   {\tt stdout}.
 !
 !   The arguments are:
@@ -2280,7 +2309,8 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contigous data 
-!   of kind {\tt ESMF\_KIND\_I4} across the PETs of an {\tt ESMF\_VM} object.
+!   of kind {\tt ESMF\_KIND\_I4} from the {\tt root} PET to all PETs of an 
+!   {\tt ESMF\_VM} object (including {\tt root}).
 !
 !   The arguments are:
 !   \begin{description}
@@ -2293,7 +2323,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements to be send from {\tt root} to each of the PETs. Must
+!        be the same on all PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -2366,8 +2397,8 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contigous data 
-!   of kind {\tt ESMF\_KIND\_R4} across the PETs of an {\tt ESMF\_VM} object.
-!
+!   of kind {\tt ESMF\_KIND\_R4} from the {\tt root} PET to all PETs of an 
+!   {\tt ESMF\_VM} object (including {\tt root}).
 !
 !   The arguments are:
 !   \begin{description}
@@ -2380,7 +2411,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements to be send from {\tt root} to each of the PETs. Must
+!        be the same on all PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -2453,8 +2485,8 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contigous data 
-!   of kind {\tt ESMF\_KIND\_R8} across the PETs of an {\tt ESMF\_VM} object.
-!
+!   of kind {\tt ESMF\_KIND\_R8} from the {\tt root} PET to all PETs of an 
+!   {\tt ESMF\_VM} object (including {\tt root}).
 !
 !   The arguments are:
 !   \begin{description}
@@ -2467,7 +2499,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements to be send from {\tt root} to each of the PETs. Must
+!        be the same on all PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -2540,8 +2573,8 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contigous data 
-!   of type {\tt ESMF\_Logical} across the PETs of an {\tt ESMF\_VM} object.
-!
+!   of kind {\tt ESMF\_Logical} from the {\tt root} PET to all PETs of an 
+!   {\tt ESMF\_VM} object (including {\tt root}).
 !
 !   The arguments are:
 !   \begin{description}
@@ -2554,7 +2587,8 @@ module ESMF_VMMod
 !        Contigous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs.
+!        Number of elements to be send from {\tt root} to each of the PETs. Must
+!        be the same on all PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
 !   \item[{[blockingflag]}] 
@@ -3075,7 +3109,6 @@ module ESMF_VMMod
     ! Flag not implemented features
 !    if (present(blockingflag)) then
 !      if (blockingflag == ESMF_NONBLOCKING) then
-!print *, 'gjt in ESMF_VMSendRecvI4: ESMF_NONBLOCKING'
 !        call ESMF_LogWrite('Non-blocking not yet implemented', &
 !          ESMF_LOG_WARNING, &
 !          ESMF_CONTEXT)
@@ -3182,15 +3215,32 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
+    logical :: blocking
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
+!    if (present(blockingflag)) then
+!      if (blockingflag == ESMF_NONBLOCKING) then
+!        call ESMF_LogWrite('Non-blocking not yet implemented', &
+!          ESMF_LOG_WARNING, &
+!          ESMF_CONTEXT)
+!        return
+!      endif
+!    endif
+
+    ! decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
     if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
-          ESMF_LOG_WARNING, &
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    ! check that we have a commHandle
+    if (.not.blocking) then
+      if (.not.present(commhandle)) then
+        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
         return
       endif
@@ -3199,8 +3249,13 @@ module ESMF_VMMod
     sendSize = sendCount * 4 ! 4 bytes
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
-      recvData, recvSize, src, localrc)
+    if (blocking) then
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, localrc)
+    else
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, commhandle, localrc)
+    endif
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3274,15 +3329,32 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
+    logical :: blocking
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
+!    if (present(blockingflag)) then
+!      if (blockingflag == ESMF_NONBLOCKING) then
+!        call ESMF_LogWrite('Non-blocking not yet implemented', &
+!          ESMF_LOG_WARNING, &
+!          ESMF_CONTEXT)
+!        return
+!      endif
+!    endif
+
+    ! decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
     if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
-          ESMF_LOG_WARNING, &
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    ! check that we have a commHandle
+    if (.not.blocking) then
+      if (.not.present(commhandle)) then
+        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
         return
       endif
@@ -3291,8 +3363,13 @@ module ESMF_VMMod
     sendSize = sendCount * 8 ! 8 bytes
     recvSize = recvCount * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
-      recvData, recvSize, src, localrc)
+    if (blocking) then
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, localrc)
+    else
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, commhandle, localrc)
+    endif
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3366,15 +3443,32 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
+    logical :: blocking
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
+!    if (present(blockingflag)) then
+!      if (blockingflag == ESMF_NONBLOCKING) then
+!        call ESMF_LogWrite('Non-blocking not yet implemented', &
+!          ESMF_LOG_WARNING, &
+!          ESMF_CONTEXT)
+!        return
+!      endif
+!    endif
+
+    ! decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
     if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
-          ESMF_LOG_WARNING, &
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    ! check that we have a commHandle
+    if (.not.blocking) then
+      if (.not.present(commhandle)) then
+        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
         return
       endif
@@ -3383,8 +3477,13 @@ module ESMF_VMMod
     sendSize = sendCount * 4 ! 4 bytes
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
-      recvData, recvSize, src, localrc)
+    if (blocking) then
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, localrc)
+    else
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, commhandle, localrc)
+    endif
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3458,15 +3557,32 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
+    logical :: blocking
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
+!    if (present(blockingflag)) then
+!      if (blockingflag == ESMF_NONBLOCKING) then
+!        call ESMF_LogWrite('Non-blocking not yet implemented', &
+!          ESMF_LOG_WARNING, &
+!          ESMF_CONTEXT)
+!        return
+!      endif
+!    endif
+
+    ! decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
     if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
-          ESMF_LOG_WARNING, &
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    ! check that we have a commHandle
+    if (.not.blocking) then
+      if (.not.present(commhandle)) then
+        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
         return
       endif
@@ -3475,8 +3591,13 @@ module ESMF_VMMod
     sendSize = sendCount ! 1 byte
     recvSize = recvCount ! 1 byte
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
-      recvData, recvSize, src, localrc)
+    if (blocking) then
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, localrc)
+    else
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, commhandle, localrc)
+    endif
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3489,7 +3610,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMThreadBarrier()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMThreadBarrier - PET thread group wide barrier
 
 ! !INTERFACE:
@@ -3512,7 +3633,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -3547,14 +3668,16 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Wait for non-blocking VM communication to complete.
+!   Wait for non-blocking VM communication specified by the {\tt commhandle} to
+!   complete.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[commhandle] 
-!        Handle specifying a previous non-blocking communication request.
+!        Handle specifying a previously issued non-blocking communication 
+!        request.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3579,8 +3702,6 @@ module ESMF_VMMod
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-!    if (ESMF_LogMsgFoundError(localrc, "Method not implemented", &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMWait
 !------------------------------------------------------------------------------
@@ -3601,7 +3722,8 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   Wait for non-blocking VM communication to complete.
+!   Wait for {\em all} pending non-blocking VM communication within the 
+!   specified VM context to complete.
 !
 !   The arguments are:
 !   \begin{description}
@@ -3625,8 +3747,6 @@ module ESMF_VMMod
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-!    if (ESMF_LogMsgFoundError(localrc, "Method not implemented", &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMWaitQueue
 !------------------------------------------------------------------------------
