@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.6 2004/11/19 20:37:15 svasquez Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.7 2004/11/24 16:16:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.6 2004/11/19 20:37:15 svasquez Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.7 2004/11/24 16:16:02 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -72,10 +72,10 @@
       call ESMF_TestStart(petCount, ESMF_SRCLINE)
 
       ! exit early if we have less than 4 procs
-      if (petCount .lt. 4) then
-        print *, "This test cannot run with less than 4 processors"
-        goto 10
-      endif
+!      if (petCount .lt. 4) then
+!        print *, "This test cannot run with less than 4 processors"
+!        goto 10
+!      endif
  
       ! Allocate localData
       count = 1
@@ -83,19 +83,19 @@
       localData(1) = localPet+100 
       
 
-      src = 0
-      dst = petCount - 1
+      src = localPet - 1
+      if (src < 0) src = petCount - 1
+      
+      dst = localPet + 1
+      if (dst > petCount -1) dst = 0
+      
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      ! Send local data from src to dst
+      ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
-      if (localPet==src) then
-      	call ESMF_VMSend(vm, sendData=localData, count=count, dst=dst, rc=rc)
-      else
-      	rc = ESMF_SUCCESS
-      endif
+      call ESMF_VMSend(vm, sendData=localData, count=count, dst=dst, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -111,11 +111,7 @@
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
-      if (localPet==dst) then
-      	call ESMF_VMRecv(vm, recvData=localData, count=count, src=src, rc=rc)
-      else
-      	rc = ESMF_SUCCESS
-      endif
+      call ESMF_VMRecv(vm, recvData=localData, count=count, src=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -123,13 +119,8 @@
       ! Verify localData after VM Receive
       write(failMsg, *) "Wrong Local Data"
       write(name, *) "Verify local data after receive Test"
-      if (localPet==dst) then
-        print *, "LocalData is ", localData(1)
-      	call ESMF_Test((localData(1).eq.src + 100), name, failMsg, result, ESMF_SRCLINE)
-      else
-      	call ESMF_Test((localData(1).eq.(localPet+100)), name, failMsg, result, ESMF_SRCLINE)
-      endif
       print *, "LocalData is ", localData(1)
+      call ESMF_Test((localData(1).eq.src + 100), name, failMsg, result, ESMF_SRCLINE)
 
 10    print *, "end of VM Send Receive test"
 
