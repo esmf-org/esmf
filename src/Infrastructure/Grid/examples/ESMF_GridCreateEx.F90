@@ -12,7 +12,8 @@
 ! Also see the Programming Model section of this document.
 !
 !
-!\begin{verbatim}
+!EOP
+!BOC
 
 !     ! Example program showing various ways to create a Grid object
       program ESMF_GridCreateEx
@@ -33,24 +34,20 @@
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       character (len = ESMF_MAXSTR) :: name
-!\end{verbatim}
-!EOP
+!EOC
 
       integer :: finalrc
       finalrc = ESMF_SUCCESS
 
-!BOP
-!\begin{verbatim}
+!BOC
       call ESMF_Initialize(rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
@@ -71,15 +68,13 @@
       ! Create a 2 x 2 layout for the Grid
       delist = (/ 0, 1, 2, 3 /)
       layout = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc=status)
-!\end{verbatim}
-!EOP
+!EOC
  
       if (status.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       grid = ESMF_GridCreateLogRectUniform(numDims=2, counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
@@ -88,32 +83,27 @@
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
                               name=name, rc=status)
-!\end{verbatim}
-!EOP
+!EOC
  
       if (status.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       print *, "Grid example 1 returned"
 
       call ESMF_GridDestroy(grid, rc)
 
       print *, "Grid example 1 destroyed"
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       call ESMF_Finalize(rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
@@ -125,8 +115,6 @@
         print *, "FAIL: ESMF_GridCreateEx.F90"
      end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       end program ESMF_GridCreateEx
-!\end{verbatim}
-!EOP   
+!EOC   
