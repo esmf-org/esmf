@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.7 2003/08/05 20:16:25 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.8 2003/08/05 20:29:11 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -451,7 +451,7 @@
       endif
       pattern(2, 1) = target
       do j=1,halo_width
-        do i=1+halo_width,nx-halo_width
+        do i=1+halo_width,ni-halo_width
           if (ldata(i,j) .ne. target) then
              mismatch = mismatch + 1
           endif
