@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "conf.h"
+#include "ESMC_Conf.h"
 
 typedef void (*FUNC)(int *, int *, int *, int *);
 typedef void (*FUNC2)(int *, int *, char *, int *, int *, int);
