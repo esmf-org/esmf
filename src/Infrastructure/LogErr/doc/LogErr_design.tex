@@ -1,10 +1,14 @@
-% $Id: LogErr_design.tex,v 1.6 2004/12/22 21:45:07 cpboulder Exp $
+% $Id: LogErr_design.tex,v 1.7 2005/01/10 18:09:51 cpboulder Exp $
 
-
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
 
 %\subsection{Design/Implementation}
-
-
 
 ACTIONS
 
@@ -19,11 +23,11 @@ ACTIONS
 
 5. The user can flush the array via ESMF_LogFlush.
 
-6. Pet numbers will be automnatically added to the log entries.
+6. PET numbers will be automnatically added to the log entries.
 
 7. The user can specify {\tt ESMF\_LOG\_SINGLE} which writes all entries from
-all pet numbers to a single file or {\tt ESMF\_LOG\_MULTI} which writes 
-entries to multiple files according to its pet number.
+all PET numbers to a single file or {\tt ESMF\_LOG\_MULTI} which writes 
+entries to multiple files according to its PET number.
 
 8. The log closes automatically when ESMF shuts down.
 
