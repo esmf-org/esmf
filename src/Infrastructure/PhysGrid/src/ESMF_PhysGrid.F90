@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.35 2003/08/07 18:21:59 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.36 2003/08/22 21:56:47 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,6 +38,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_LocalArrayMod
+      use ESMF_DataMapMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -54,6 +55,9 @@
       private
 
         type (ESMF_Base) :: base
+
+        type (ESMF_RelLoc) :: relloc
+                                   ! relative location
 
         integer :: dim_num         ! number of dimensions
 
@@ -178,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.35 2003/08/07 18:21:59 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.36 2003/08/22 21:56:47 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -981,8 +985,8 @@
 ! !IROUTINE: ESMF_PhysGridGet - Get information from a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridGet(physgrid,                &
-                                  name       , dim_num   , &
+      subroutine ESMF_PhysGridGet(physgrid   , name      , &
+                                  dim_num    , relloc    , &
                                   num_corners, num_faces , &
                                   dim_names  , dim_units , &
                                   global_min , global_max, &
@@ -994,17 +998,19 @@
 
       character (*), intent(inout), optional :: name ! name of grid
 
+      type(ESMF_RelLoc), intent(inout), optional :: relloc  
+                                  ! relative location of physgrid
+
       integer, intent(out), optional :: &
          dim_num,                &! number of physical dimensions
          num_corners,            &! number of corners in each cell
          num_faces                ! number of faces for each cell
 
-      character (*), dimension(ESMF_MAXGRIDDIM), intent(inout), optional :: &
+      character (*), dimension(:), intent(inout), optional :: &
          dim_names,              &! names for each dimension
          dim_units                ! units for each dimension
 
-      real, dimension(ESMF_MAXGRIDDIM), &
-         intent(inout), optional :: &
+      real, dimension(:), intent(inout), optional :: &
          local_min,              &! local minimum in each coord direction
          local_max,              &! local maximum in each coord direction
          global_min,             &! global minimum in each coord direction
