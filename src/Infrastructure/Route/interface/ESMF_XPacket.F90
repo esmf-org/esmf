@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.12 2004/06/08 16:01:40 cdeluca Exp $
+! $Id: ESMF_XPacket.F90,v 1.13 2005/03/01 18:06:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.12 2004/06/08 16:01:40 cdeluca Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.13 2005/03/01 18:06:42 jwolfe Exp $'
 
 !==============================================================================
 
@@ -304,7 +304,7 @@
 !EOPI
 
         ! local variables
-        integer :: status                  ! local error status
+        integer :: status, i               ! local error status
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
@@ -317,11 +317,15 @@
           rc = ESMF_FAILURE
         endif
  
-        xpacket%rank = rank
-        xpacket%offset = offset
+        xpacket%rank          = rank
+        xpacket%offset        = offset
         xpacket%contig_length = contig_length
-        xpacket%stride = stride
-        xpacket%rep_count = rep_count
+        xpacket%stride        = 0
+        xpacket%rep_count     = 0
+        do i = 1,rank
+          xpacket%stride(i)    = stride(i)
+          xpacket%rep_count(i) = rep_count(i)
+        enddo
 
         if (rcpresent) rc = ESMF_SUCCESS
 
