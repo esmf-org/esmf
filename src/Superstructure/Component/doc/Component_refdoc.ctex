@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.13 2003/10/22 21:00:44 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.14 2003/10/23 15:10:11 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,20 +52,6 @@
 \input{../Superstructure/Component/doc/Component_syn}
 #endif
 
-%
-% Component_obj.tex includes the graphic
-% comp_obj.eps.  When this file is processed
-% as constituent, that eps file cannot be found.
-%
-% \section{Object Model}
-% #ifdef STANDALONE
-% \input{Component_obj}
-% #elif defined(CONSTITUENT)
-% \input{../Superstructure/Component/doc/Component_obj}
-% #endif
-
-
-%%%%%%%%%%%%% Component Superclass %%%%%%%%%
 \section{Component Class}
 
 \subsection{Description}

@@ -1,4 +1,4 @@
-% $Id: Component_syn.tex,v 1.5 2003/05/07 19:23:00 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.1 2003/10/23 15:10:15 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the GPL.
 
-%\section{Synopsis}
+%\section{Overview of Superstructure}
 
 Component, State, and Transform objects are part of the Superstructure 
 layer of the Earth System Modeling Framework (ESMF).  They encapsulate
@@ -67,4 +67,16 @@ performed on a {\tt State} object.  For Components where it is not
 feasible to return to the calling routine each time Coupling is
 required, the Transform method can be called from within the
 Component to perform the proper data transformations.
+
+\subsection{Object Model}
+
+The following is a simplified UML diagram showing the relationships among
+ESMF superstructure classes.  See Appendix A, {\it A Brief 
+Introduction to UML},
+for a translation table that lists the symbols in the diagram and their 
+meaning.
+
+\begin{center}
+\includegraphics{Comp_obj.eps}   
+\end{center}
 
