@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F2Ex.F90,v 1.2 2003/10/20 20:13:55 cdeluca Exp $
+! $Id: ESMF_DELayout_F2Ex.F90,v 1.3 2003/12/02 17:14:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@ program ESMF_DELayout_FEx2
   type(ESMF_DELayout) :: layout
   integer, dimension(6) :: delist
   integer, dimension(2) :: layoutDims, layoutCommTypes
-  integer :: nx, ny, x, y, id, rc
+  integer :: nx, ny, x, y, id, rc, finalrc
   integer(ESMF_KIND_I4), dimension(20) :: sArray1I4, sArray2I4, sArray3I4, &
                                            sArray4I4, sArray5I4, sArray6I4
   integer(ESMF_KIND_I4), dimension(180) :: rArrayI4
@@ -44,6 +44,7 @@ program ESMF_DELayout_FEx2
 
   integer, dimension(6) :: rlen, rdispls
   integer :: i, slen
+  finalrc = ESMF_SUCCESS
 
   ! 6 DEs: DE 0 - DE 5
   delist = (/ 0, 1, 2, 3, 4, 5 /)
@@ -73,19 +74,43 @@ program ESMF_DELayout_FEx2
   ! Initialize ESMF
   call ESMF_Initialize(rc)
 
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   ! create 2x3 layout of DEs in X-direction
   layout = ESMF_DELayoutCreate(delist, 2, layoutDims, layoutCommTypes, rc)
 
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
+
   ! verify size of layout
   call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "ESMF_DELayoutGetSize(nx, ny) = ", nx, ny
 
   ! get our DE's position within the layout
   call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "ESMF_DELayoutGetDEPosition(x, y) = ", x, y
 
   ! get our DE id
   call ESMF_DELayoutGetDEid(layout, id, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "ESMF_DELayoutGetDEid(id) = ", id
 
   ! each DE populates its send array and sends it 
@@ -103,10 +128,25 @@ program ESMF_DELayout_FEx2
 
     call ESMF_DELayoutAllGatherV(layout, sArray1I4, slen, &
                                          rArrayI4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray1R4, slen, &
                                          rArrayR4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray1R8, slen, &
                                          rArrayR8,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
   else if (id .eq. 1) then
     do i=1,slen
       sArray2I4(i) = i * 2
@@ -121,10 +161,25 @@ program ESMF_DELayout_FEx2
 
     call ESMF_DELayoutAllGatherV(layout, sArray2I4, slen, &
                                          rArrayI4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray2R4, slen, &
                                          rArrayR4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray2R8, slen, &
                                          rArrayR8,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
   else if (id .eq. 2) then
     do i=1,slen
       sArray3I4(i) = i * 3
@@ -139,10 +194,25 @@ program ESMF_DELayout_FEx2
 
     call ESMF_DELayoutAllGatherV(layout, sArray3I4, slen, &
                                          rArrayI4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray3R4, slen, &
                                          rArrayR4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray3R8, slen, &
                                          rArrayR8,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
   else if (id .eq. 3) then
     do i=1,slen
       sArray4I4(i) = i * 4
@@ -157,10 +227,25 @@ program ESMF_DELayout_FEx2
 
     call ESMF_DELayoutAllGatherV(layout, sArray4I4, slen, &
                                          rArrayI4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray4R4, slen, &
                                          rArrayR4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray4R8, slen, &
                                          rArrayR8,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
   else if (id .eq. 4) then
     do i=1,slen
       sArray5I4(i) = i * 5
@@ -175,10 +260,25 @@ program ESMF_DELayout_FEx2
 
     call ESMF_DELayoutAllGatherV(layout, sArray5I4, slen, &
                                          rArrayI4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray5R4, slen, &
                                          rArrayR4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray5R8, slen, &
                                          rArrayR8,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
   else if (id .eq. 5) then
     do i=1,slen
       sArray6I4(i) = i * 6
@@ -193,10 +293,25 @@ program ESMF_DELayout_FEx2
 
     call ESMF_DELayoutAllGatherV(layout, sArray6I4, slen, &
                                          rArrayI4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray6R4, slen, &
                                          rArrayR4,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     call ESMF_DELayoutAllGatherV(layout, sArray6R8, slen, &
                                          rArrayR8,  rlen, rdispls, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
   endif
 
   ! ... and the result is ...
@@ -206,7 +321,24 @@ program ESMF_DELayout_FEx2
 
   call ESMF_DELayoutDestroy(layout, rc)
 
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   ! Finalize ESMF
   call ESMF_Finalize(rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
+  if (finalrc.EQ.ESMF_SUCCESS) then
+     print *, "PASS: ESMF_BundleCreateEx.F90"
+  else
+     print *, "FAIL: ESMF_BundleCreateEx.F90"
+  end if
+
+
 
 end program ESMF_DELayout_FEx2
