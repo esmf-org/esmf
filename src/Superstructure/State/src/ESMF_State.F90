@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.18 2004/03/01 20:10:38 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.19 2004/03/01 21:26:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -248,17 +248,17 @@
       public ESMF_StateAddState, ESMF_StateAddDataName
       public ESMF_StateGetBundle, ESMF_StateGetField, ESMF_StateGetArray
       public ESMF_StateGetState
-      !public ESMF_StateQueryData       ! returns ESMF type for this entry
+      !public ESMF_StateQueryData         ! returns ESMF type for this entry
       !public ESMF_StateGetFromList
 
       public ESMF_StateGetInfo, ESMF_StateGetName
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
       public ESMF_StateIsNeeded
 
-      !public ESMF_StateGetNeededList   ! returns an array of values
-      !public ESMF_State{Get/Set}Ready  ! is data ready
-      !public ESMF_State{Get/Set}Valid  ! has data been validated?
-      !public ESMF_State{Get/Set}CompName  ! normally set at create time
+      !public ESMF_StateGetNeededList     ! returns an array of values
+      !public ESMF_State{Get/Set}Ready    ! is data ready
+      !public ESMF_State{Get/Set}Valid    ! has data been validated?
+      !public ESMF_State{Get/Set}CompName ! normally set at create time
 
       public ESMF_StateTransform          ! execute xform on a state
       !public ESMF_StateTransformComplete ! is export state ok to update?
@@ -268,7 +268,7 @@
       public ESMF_StateSetAttribute       ! Set and Get Attributes
       public ESMF_StateGetAttribute       !  
 
-      public ESMF_StateGetAttributeCount  ! number of attribs
+      public ESMF_StateGetAttributeCount  ! number of Attributes
       public ESMF_StateGetAttributeInfo   ! get type, length by name or number
 
       public ESMF_StateWriteRestart
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.18 2004/03/01 20:10:38 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.19 2004/03/01 21:26:22 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -293,7 +293,74 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddData -- Add Bundles, Fields, and Arrays to a State
+! !IROUTINE: ESMF_StateAddData -- Add Data to a State
+
+! !INTERFACE:
+     interface ESMF_StateAddData
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+        module procedure ESMF_StateAddArray
+        module procedure ESMF_StateAddArrayList
+        module procedure ESMF_StateAddField
+        module procedure ESMF_StateAddFieldList
+        module procedure ESMF_StateAddBundle
+        module procedure ESMF_StateAddBundleList
+        module procedure ESMF_StateAddState
+        module procedure ESMF_StateAddStateList
+        module procedure ESMF_StateAddDataName
+        module procedure ESMF_StateAddDataNameList
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StateAddArrays} functions.   
+!  
+!EOPI 
+end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateAddArrays -- Add Arrays to a State
+
+! !INTERFACE:
+     interface ESMF_StateAddArrays
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+        module procedure ESMF_StateAddArray
+        module procedure ESMF_StateAddArrayList
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StateAddArrays} functions.   
+!  
+!EOPI 
+end interface
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateAddFields -- Add Fields to a State
+
+! !INTERFACE:
+     interface ESMF_StateAddData
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+        module procedure ESMF_StateAddField
+        module procedure ESMF_StateAddFieldList
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StateAddFields} functions.   
+!  
+!EOPI 
+end interface
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateAddBundles -- Add Bundles to a State
 
 ! !INTERFACE:
      interface ESMF_StateAddData
@@ -302,18 +369,50 @@
 !
         module procedure ESMF_StateAddBundle
         module procedure ESMF_StateAddBundleList
-        module procedure ESMF_StateAddField
-        module procedure ESMF_StateAddFieldList
-        module procedure ESMF_StateAddArray
-        module procedure ESMF_StateAddArrayList
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StateAddBundles} functions.   
+!  
+!EOPI 
+end interface
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateAddStates -- Add States to a State
+
+! !INTERFACE:
+     interface ESMF_StateAddData
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
         module procedure ESMF_StateAddState
         module procedure ESMF_StateAddStateList
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StateAddStates} functions.   
+!  
+!EOPI 
+end interface
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateAddDataNames -- Add Names to a State
+
+! !INTERFACE:
+     interface ESMF_StateAddDataNames
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
         module procedure ESMF_StateAddDataName
         module procedure ESMF_StateAddDataNameList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddData} functions.   
+!  types of {\tt ESMF\_StateAddDataNames} functions.   
 !  
 !EOPI 
 end interface
@@ -510,11 +609,11 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddData - Add an Array to a State
+! !IROUTINE: ESMF_StateAddArrays - Add an Array to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
-      subroutine ESMF_StateAddData(state, array, rc)
+      ! Private name; call using ESMF_StateAddArrays()   
+      subroutine ESMF_StateAddArray(state, array, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
@@ -552,10 +651,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddData - Add a list of Arrays to a State
+! !IROUTINE: ESMF_StateAddArrays - Add a list of Arrays to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
+      ! Private name; call using ESMF_StateAddArrays()   
       subroutine ESMF_StateAddArrayList(state, acount, arrays, rc)
 !
 ! !ARGUMENTS:
@@ -593,93 +692,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddData - Add a Field to a State
+! !IROUTINE: ESMF_StateAddBundles - Add a Bundle to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
-      subroutine ESMF_StateAddField(state, field, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_Field), intent(in) :: field
-      integer, intent(out), optional :: rc
-!     
-! !DESCRIPTION:
-!      Add a single {\tt Field} reference to an existing {\tt State}.
-!      The {\tt Field} name must be unique within the {\tt State}
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item[state]
-!       {\tt ESMF\_State} object.
-!
-!     \item[field]
-!       The {\tt ESMF\_Field} to be added.
-!
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      type(ESMF_Field) :: temp_list(1)
-
-      temp_list(1) = field
-
-      call ESMF_StateTypeAddFieldList(state%statep, 1, temp_list, rc)      
-
-      end subroutine ESMF_StateAddField
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddData - Add a list of Fields to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
-      subroutine ESMF_StateAddFieldList(state, fcount, fields, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state 
-      integer, intent(in) :: fcount
-      type(ESMF_Field), dimension(:), intent(in) :: fields
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Add multiple fields to a {\tt ESMF\_State}.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item[state]
-!       {\tt ESMF\_State} object.
-!
-!     \item[fcount]
-!       The number of {\tt ESMF\_Fields} to be added.
-!
-!     \item[fields]
-!       The array {\tt ESMF\_Fields} to be added.
-!
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-      call ESMF_StateTypeAddFieldList(state%statep, fcount, fields, rc)
-
-      end subroutine ESMF_StateAddFieldList
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddData - Add a Bundle to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
+      ! Private name; call using ESMF_StateAddBundles()   
       subroutine ESMF_StateAddBundle(state, bundle, rc)
 !
 ! !ARGUMENTS:
@@ -718,10 +734,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddData - Add a list of Bundles to a State
+! !IROUTINE: ESMF_StateAddBundles - Add a list of Bundles to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
+      ! Private name; call using ESMF_StateAddBundles()   
       subroutine ESMF_StateAddBundleList(state, bcount, bundles, rc)
 !
 ! !ARGUMENTS:
@@ -759,93 +775,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddData - Add a State to a State
+! !IROUTINE: ESMF_StateAddDataNames - Add a name to a State as a placeholder
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
-      subroutine ESMF_StateAddState(state, nestedstate, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_State), intent(in) :: nestedstate
-      integer, intent(out), optional :: rc
-!     
-! !DESCRIPTION:
-!      Add a single {\tt State} reference to an existing {\tt State}.
-!      The {\tt State} name must be unique within the {\tt State}
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item[state]
-!       {\tt ESMF\_State} object.
-!
-!     \item[nestedstate]
-!       The {\tt ESMF\_State} to be added.
-!
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      type(ESMF_State) :: temp_list(1)
-
-      temp_list(1) = nestedstate
-
-      call ESMF_StateTypeAddStateList(state%statep, 1, temp_list, rc)      
-
-      end subroutine ESMF_StateAddState
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddData - Add a list of States to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
-      subroutine ESMF_StateAddStateList(state, scount, nestedstates, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state 
-      integer, intent(in) :: scount
-      type(ESMF_State), dimension(:), intent(in) :: nestedstates
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Add multiple states to a {\tt ESMF\_State}.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item[state]
-!       {\tt ESMF\_State} object.
-!
-!     \item[scount]
-!       The number of {\tt ESMF\_States} to be added.
-!
-!     \item[nestedstate]
-!       The array of {\tt ESMF\_States} to be added.
-!
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_StateTypeAddStateList(state%statep, scount, nestedstates, rc)
-
-        end subroutine ESMF_StateAddStateList
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddData - Add a name to a State as a placeholder
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
+      ! Private name; call using ESMF_StateAddDataNames()   
       subroutine ESMF_StateAddDataName(state, name, rc)
 !
 ! !ARGUMENTS:
@@ -888,10 +821,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddData - Add a list of names to a State 
+! !IROUTINE: ESMF_StateAddDataNames - Add a list of names to a State 
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
+      ! Private name; call using ESMF_StateAddDataNames()   
       subroutine ESMF_StateAddDataNameList(state, namecount, namelist, rc)
 !
 ! !ARGUMENTS:
@@ -933,6 +866,172 @@ end function
       call ESMF_StateTypeAddDataNameList(state%statep, namecount, namelist, rc)      
 
       end subroutine ESMF_StateAddDataNameList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddFields - Add a Field to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddFields()   
+      subroutine ESMF_StateAddField(state, field, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_Field), intent(in) :: field
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a single {\tt Field} reference to an existing {\tt State}.
+!      The {\tt Field} name must be unique within the {\tt State}
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[state]
+!       {\tt ESMF\_State} object.
+!
+!     \item[field]
+!       The {\tt ESMF\_Field} to be added.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      type(ESMF_Field) :: temp_list(1)
+
+      temp_list(1) = field
+
+      call ESMF_StateTypeAddFieldList(state%statep, 1, temp_list, rc)      
+
+      end subroutine ESMF_StateAddField
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddFields - Add a list of Fields to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddFields()   
+      subroutine ESMF_StateAddFieldList(state, fcount, fields, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state 
+      integer, intent(in) :: fcount
+      type(ESMF_Field), dimension(:), intent(in) :: fields
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple fields to a {\tt ESMF\_State}.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[state]
+!       {\tt ESMF\_State} object.
+!
+!     \item[fcount]
+!       The number of {\tt ESMF\_Fields} to be added.
+!
+!     \item[fields]
+!       The array {\tt ESMF\_Fields} to be added.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      call ESMF_StateTypeAddFieldList(state%statep, fcount, fields, rc)
+
+      end subroutine ESMF_StateAddFieldList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddStates - Add a State to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddData()   
+      subroutine ESMF_StateAddState(state, nestedstate, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_State), intent(in) :: nestedstate
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a single {\tt State} reference to an existing {\tt State}.
+!      The {\tt State} name must be unique within the {\tt State}
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[state]
+!       {\tt ESMF\_State} object.
+!
+!     \item[nestedstate]
+!       The {\tt ESMF\_State} to be added.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      type(ESMF_State) :: temp_list(1)
+
+      temp_list(1) = nestedstate
+
+      call ESMF_StateTypeAddStateList(state%statep, 1, temp_list, rc)      
+
+      end subroutine ESMF_StateAddState
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddStates - Add a list of States to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddData()   
+      subroutine ESMF_StateAddStateList(state, scount, nestedstates, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state 
+      integer, intent(in) :: scount
+      type(ESMF_State), dimension(:), intent(in) :: nestedstates
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple states to a {\tt ESMF\_State}.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[state]
+!       {\tt ESMF\_State} object.
+!
+!     \item[scount]
+!       The number of {\tt ESMF\_States} to be added.
+!
+!     \item[nestedstate]
+!       The array of {\tt ESMF\_States} to be added.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_StateTypeAddStateList(state%statep, scount, nestedstates, rc)
+
+        end subroutine ESMF_StateAddStateList
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1048,7 +1147,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateDestroy -- Release resources for a State
+! !IROUTINE: ESMF_StateDestroy - Release resources for a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateDestroy(state, rc)
@@ -1120,7 +1219,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateGetArray -- Retrieve a data Array from a State
+! !IROUTINE: ESMF_StateGetArray - Retrieve a data Array from a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetArray(state, arrayname, array, statename, rc)
@@ -1224,7 +1323,653 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateGetBundle -- Retrieve a data Bundle from a State
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer Attribute 
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetIntAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an integer attribute from a {\tt ESMF\_State}.
+!
+! 
+!     \begin{description}
+!     \item [state]
+!           {\tt ESMF\_State} object.
+!
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!
+!     \item [value]
+!           The integer value of the named Attribute.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+                                    ESMF_DATA_INTEGER, 1, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetIntAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer list Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetIntListAttr(state, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer, dimension(:), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an integer list attribute from a {\tt ESMF\_State}.
+!
+! 
+!     \begin{description}
+!     \item [state]
+!           A {\tt ESMF\_State} object.
+!
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!
+!     \item [count]
+!           The number of values to be retrieved.
+!
+!     \item [value]
+!           The integer values of the named Attribute.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_StateGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, count, &
+                                    ESMF_DATA_INTEGER, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetIntListAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetRealAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      real, intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a real attribute from a {\tt ESMF\_State}.
+!
+!     \begin{description}
+!     \item [state]
+!           A {\tt ESMF\_State} object.
+!
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!
+!     \item [value]
+!           The real value of the named Attribute.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, 1, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetRealAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real list Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetRealListAttr(state, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real, dimension(:), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a real attribute from a {\tt ESMF\_State}.
+! 
+!     \begin{description}
+!     \item [state]
+!           A {\tt ESMF\_State} object.
+!
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!
+!     \item [count]
+!           The number of values to be set.
+!
+!     \item [value]
+!           The real values of the named Attribute.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_StateGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetRealListAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetLogicalAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an logical attribute from a {\tt ESMF\_State}.
+! 
+!     \begin{description}
+!     \item [state]
+!           A {\tt ESMF\_State} object.
+!
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!
+!     \item [value]
+!           The logical value of the named Attribute.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+                                    ESMF_DATA_LOGICAL, 1, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetLogicalAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical list Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetLogicalListAttr(state, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an logical list attribute from a {\tt ESMF\_State}.
+! 
+!     \begin{description}
+!     \item [state]
+!           A {\tt ESMF\_State} object.
+!
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!
+!     \item [count]
+!           The number of values to be set.
+!
+!     \item [value]
+!           The logical values of the named Attribute.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_StateGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+                                    ESMF_DATA_LOGICAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetLogicalListAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a character Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldGetAttribute()
+      subroutine ESMF_StateGetCharAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an integer attribute from a {\tt ESMF\_State}.
+!
+! 
+!     \begin{description}
+!     \item [state]
+!           A {\tt ESMF\_State} object.
+!
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!
+!     \item [value]
+!           The character value of the named Attribute.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetChar(state%statep%base, name, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetCharAttr
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttributeCount - Query the number of Attributes
+!
+! !INTERFACE:
+      subroutine ESMF_StateGetAttributeCount(state, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      integer, intent(out) :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of values associated with the given attribute.
+! 
+!     \begin{description}
+!     \item [state]
+!           A {\tt ESMF\_State} object.
+!
+!     \item [count]
+!           The number of attributes on this object.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetCount(state%statep%base, count, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttributeCount"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetAttributeCount
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttributeInfo - Query State Attributes by name
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttributeInfo()
+      subroutine ESMF_StateGetAttrInfoByName(state, name, type, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character(len=*), intent(in) :: name
+      type(ESMF_DataType), intent(out), optional :: type
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of values associated with the given attribute.
+! 
+!     \begin{description}
+!     \item [state]
+!           A {\tt ESMF\_State} object.
+!
+!     \item [name]
+!           The name of the Attribute to query.
+!
+!     \item [type]
+!           The  data type of the Attribute, which includes ESMF\_DATA\_INTEGER,
+!            ESMF\_DATA\_REAL, ESMF\_DATA\_LOGICAL, ESMF\_DATA\_CHARACTER.
+!
+!     \item [count]
+!           The number of items in this Attribute.  For character types,
+!           the length of the character string.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_DataType) :: localDt
+      integer :: localCount
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetAttrInfoName(state%statep%base, name, &
+                                           localDt, localCount, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttributeInfo"
+        return
+      endif 
+
+      if (present(type)) type = localDt
+      if (present(count)) count = localCount
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetAttrInfoByName
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttributeInfo - Query State Attributes by number
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttributeInfo()
+      subroutine ESMF_StateGetAttrInfoByNum(state, num, name, type, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      integer, intent(in) :: num
+      character(len=*), intent(out), optional :: name
+      type(ESMF_DataType), intent(out), optional :: type
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of values associated with the given attribute.
+! 
+!     \begin{description}
+!     \item [state]
+!           A {\tt ESMF\_State} object.
+!
+!     \item [num]
+!           The number of the Attribute to query.
+!
+!     \item [name]
+!           Returns the name of the Attribute.
+!
+!     \item [type]
+!           Returns the type of the Attribute.
+!
+!     \item [count]
+!           Returns the number of items in this Attribute.  For character types,
+!           this is the length of the character string.
+!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      character(len=ESMF_MAXSTR) :: localName
+      type(ESMF_DataType) :: localDt
+      integer :: localCount
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, num, &
+                                         localName, localDt, localCount, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateGetAttributeInfo"
+        return
+      endif 
+
+      if (present(name)) name = localName
+      if (present(type)) type = localDt
+      if (present(count)) count = localCount
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetAttrInfoByNum
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetBundle - Retrieve a data Bundle from a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetBundle(state, bundlename, bundle, statename, rc)
@@ -1327,7 +2072,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateGetField -- Retrieve a data Field from a State
+! !IROUTINE: ESMF_StateGetField - Retrieve a data Field from a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetField(state, fieldname, field, statename, rc)
@@ -1433,7 +2178,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateGetInfo -- Get information about a State
+! !IROUTINE: ESMF_StateGetInfo - Get information about a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetInfo(state, statename, statetype, compname, &
@@ -1539,7 +2284,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateGetName -- Get the name of a State
+! !IROUTINE: ESMF_StateGetName - Get the name of a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetName(state, statename, rc)
@@ -1594,7 +2339,7 @@ end function
 
 
 #if 0
-!! FIXME - remove this code when we finalize on nested State objects.
+!! TODO - remove this code when we finalize on nested State objects.
 !!  but this has shifted around so many times, i'm not removing this code
 !!  until we're sure...
 !------------------------------------------------------------------------------
@@ -1680,75 +2425,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateIsNeeded -- Return logical true if state needed
-!
-! !INTERFACE:
-      function ESMF_StateIsNeeded(state, dataname, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_StateIsNeeded
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: dataname
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Returns true if the status of the {\tt needed} flag for the data item
-!      named by {\tt dataname} in the {\tt State} is 
-!      {\tt ESMF\_STATEDATAISNEEDED}.  Returns false for no state found 
-!      with the specified name or state unknown or not needed.  Sets error
-!      code tt {\tt ESMF\_FAILURE} if name not found.
-!
-!  \begin{description}     
-!  \item[state]
-!    {\tt ESMF\_State} to query.
-!
-!   \item[dataname]
-!    Name of the data item to query.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!  \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!
-      type(ESMF_StateData), pointer :: dataitem
-      logical :: exists
-      integer :: status
-
-      status = ESMF_FAILURE
-      ! Assume no unless we find it and it is needed.
-      ESMF_StateIsNeeded = .FALSE.
-      if (present(rc)) rc=ESMF_FAILURE
-
-      ! TODO: decide on the behavior:
-      ! should it be an error to ask about a state which doesn't exist?
-      ! if the 3rd arg below is .true. then it's an error, if it's .false.
-      ! then it's not.  for now, it's an error.
-      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., dataitem, rc=status)
-      if (.not. exists) then
-          if (present(rc)) rc = status
-          return
-      endif
-
-      if (dataitem%needed .eq. ESMF_STATEDATAISNEEDED) then
-        ESMF_StateIsNeeded = .TRUE.
-      endif
-  
-      if (present(rc)) rc=ESMF_SUCCESS
-
-      end function ESMF_StateIsNeeded
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetNeeded -- Query whether a data item is needed
+! !IROUTINE: ESMF_StateGetNeeded - Query whether a data item is needed
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetNeeded(state, dataname, needed, rc)
@@ -1807,7 +2484,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateGetState -- Retrieve a data State from a State
+! !IROUTINE: ESMF_StateGetState - Retrieve a State nested in a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetState(state, statename, nestedstate, rc)
@@ -1875,32 +2552,33 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetNeeded - Set if a data item is needed
+! !IROUTINE: ESMF_StateIsNeeded -- Return logical true if data item needed
 !
 ! !INTERFACE:
-      subroutine ESMF_StateSetNeeded(state, dataname, needed, rc)
+      function ESMF_StateIsNeeded(state, dataname, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_StateIsNeeded
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
+      type(ESMF_State), intent(in) :: state
       character (len=*), intent(in) :: dataname
-      type(ESMF_StateDataNeeded), intent(in) :: needed
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Sets the status of the {\tt needed} flag for the data item
-!      named by {\tt dataname} in the {\tt State}.
+!      Returns true if the status of the {\tt needed} flag for the data item
+!      named by {\tt dataname} in the {\tt State} is 
+!      {\tt ESMF\_STATEDATAISNEEDED}.  Returns false for no state found 
+!      with the specified name or state unknown or not needed.  Sets error
+!      code tt {\tt ESMF\_FAILURE} if name not found.
 !
 !  \begin{description}     
 !  \item[state]
-!    {\tt ESMF\_State} to set.
+!    {\tt ESMF\_State} to query.
 !
 !   \item[dataname]
-!    Name of the data item to set.
-!
-!   \item[needed]
-!    Set status of data item to this.  Valid values are 
-!    {\tt ESMF\_STATEDATAISNEEDED}, or {\tt ESMF\_STATEDATANOTNEEDED}. 
+!    Name of the data item to query.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1910,668 +2588,39 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
+!
+! TODO: code goes here
+!
       type(ESMF_StateData), pointer :: dataitem
       logical :: exists
       integer :: status
 
       status = ESMF_FAILURE
-
-      ! Assume failure until we know we will succeed
+      ! Assume no unless we find it and it is needed.
+      ESMF_StateIsNeeded = .FALSE.
       if (present(rc)) rc=ESMF_FAILURE
 
+      ! TODO: decide on the behavior:
+      ! should it be an error to ask about a state which doesn't exist?
+      ! if the 3rd arg below is .true. then it's an error, if it's .false.
+      ! then it's not.  for now, it's an error.
       exists = ESMF_StateTypeFindData(state%statep, dataname, .true., dataitem, rc=status)
       if (.not. exists) then
           if (present(rc)) rc = status
           return
       endif
 
-      dataitem%needed = needed
-
+      if (dataitem%needed .eq. ESMF_STATEDATAISNEEDED) then
+        ESMF_StateIsNeeded = .TRUE.
+      endif
+  
       if (present(rc)) rc=ESMF_SUCCESS
 
-      end subroutine ESMF_StateSetNeeded
+      end function ESMF_StateIsNeeded
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateGetIntAttr - Retrieve an Attribute from a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetIntAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_State}.
-!
-! 
-!     \begin{description}
-!     \item [state]
-!           {\tt ESMF\_State} object.
-!
-!     \item [name]
-!           The name of the Attribute to retrieve.
-!
-!     \item [value]
-!           The integer value of the named Attribute.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetIntAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetIntListAttr - Retrieve an Attribute from a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetIntListAttr(state, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer, dimension(:), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns an integer list attribute from a {\tt ESMF\_State}.
-!
-! 
-!     \begin{description}
-!     \item [state]
-!           A {\tt ESMF\_State} object.
-!
-!     \item [name]
-!           The name of the Attribute to retrieve.
-!
-!     \item [count]
-!           The number of values to be retrieved.
-!
-!     \item [value]
-!           The integer values of the named Attribute.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeGetValue(state%statep%base, name, count, &
-                                    ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetIntListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetRealAttr - Retrieve an Attribute from a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetRealAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      real, intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_State}.
-!
-!     \begin{description}
-!     \item [state]
-!           A {\tt ESMF\_State} object.
-!
-!     \item [name]
-!           The name of the Attribute to retrieve.
-!
-!     \item [value]
-!           The real value of the named Attribute.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetRealAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetRealListAttr - Retrieve an Attribute from a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetRealListAttr(state, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real, dimension(:), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_State}.
-! 
-!     \begin{description}
-!     \item [state]
-!           A {\tt ESMF\_State} object.
-!
-!     \item [name]
-!           The name of the Attribute to retrieve.
-!
-!     \item [count]
-!           The number of values to be set.
-!
-!     \item [value]
-!           The real values of the named Attribute.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetRealListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetLogicalAttr - Retrieve an Attribute from a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetLogicalAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns an logical attribute from a {\tt ESMF\_State}.
-! 
-!     \begin{description}
-!     \item [state]
-!           A {\tt ESMF\_State} object.
-!
-!     \item [name]
-!           The name of the Attribute to retrieve.
-!
-!     \item [value]
-!           The logical value of the named Attribute.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetLogicalAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetLogicalListAttr - Retrieve an Attribute from a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetLogicalListAttr(state, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns an logical list attribute from a {\tt ESMF\_State}.
-! 
-!     \begin{description}
-!     \item [state]
-!           A {\tt ESMF\_State} object.
-!
-!     \item [name]
-!           The name of the Attribute to retrieve.
-!
-!     \item [count]
-!           The number of values to be set.
-!
-!     \item [value]
-!           The logical values of the named Attribute.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetLogicalListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetCharAttr - Retrieve an Attribute from a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetCharAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      character (len = *), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_State}.
-!
-! 
-!     \begin{description}
-!     \item [state]
-!           A {\tt ESMF\_State} object.
-!
-!     \item [name]
-!           The name of the Attribute to retrieve.
-!
-!     \item [value]
-!           The character value of the named Attribute.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeGetChar(state%statep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetCharAttr
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetAttributeCount - Query the number of attrs
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetAttributeCount(state, count, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      integer, intent(out) :: count   
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
-! 
-!     \begin{description}
-!     \item [state]
-!           A {\tt ESMF\_State} object.
-!
-!     \item [count]
-!           The number of attributes on this object.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeGetCount(state%statep%base, count, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttributeCount"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetAttributeCount
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetAttrInfoByName - Query info about an attrs
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetAttrInfoByName(state, name, type, count, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character(len=*), intent(in) :: name
-      type(ESMF_DataType), intent(out), optional :: type
-      integer, intent(out), optional :: count   
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
-! 
-!     \begin{description}
-!     \item [state]
-!           A {\tt ESMF\_State} object.
-!
-!     \item [name]
-!           The name of the Attribute to query.
-!
-!     \item [type]
-!           The  data type of the Attribute, which includes ESMF\_DATA\_INTEGER,
-!            ESMF\_DATA\_REAL, ESMF\_DATA\_LOGICAL, ESMF\_DATA\_CHARACTER.
-!
-!     \item [count]
-!           The number of items in this Attribute.  For character types,
-!           the length of the character string.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_DataType) :: localDt
-      integer :: localCount
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeGetAttrInfoName(state%statep%base, name, &
-                                           localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttributeInfo"
-        return
-      endif 
-
-      if (present(type)) type = localDt
-      if (present(count)) count = localCount
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetAttrInfoByName
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetAttrInfoByNum - Query info about an attrs
-!
-! !INTERFACE:
-      subroutine ESMF_StateGetAttrInfoByNum(state, num, name, type, count, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      integer, intent(in) :: num
-      character(len=*), intent(out), optional :: name
-      type(ESMF_DataType), intent(out), optional :: type
-      integer, intent(out), optional :: count   
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
-! 
-!     \begin{description}
-!     \item [state]
-!           A {\tt ESMF\_State} object.
-!
-!     \item [num]
-!           The number of the Attribute to query.
-!
-!     \item [name]
-!           Returns the name of the Attribute.
-!
-!     \item [type]
-!           Returns the type of the Attribute.
-!
-!     \item [count]
-!           Returns the number of items in this Attribute.  For character types,
-!           this is the length of the character string.
-!
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      character(len=ESMF_MAXSTR) :: localName
-      type(ESMF_DataType) :: localDt
-      integer :: localCount
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, num, &
-                                         localName, localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttributeInfo"
-        return
-      endif 
-
-      if (present(name)) name = localName
-      if (present(type)) type = localDt
-      if (present(count)) count = localCount
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetAttrInfoByNum
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StatePrint -- Print the internal data for a State
+! !IROUTINE: ESMF_StatePrint - Print the internal data for a State
 !
 ! !INTERFACE:
       subroutine ESMF_StatePrint(state, options, rc)
@@ -2691,9 +2740,58 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetIntAttr - Set an Attribute on a State
+! !IROUTINE: ESMF_StateReadRestart -- ReadRestart the internal data from a State
 !
 ! !INTERFACE:
+      function ESMF_StateReadRestart(name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_State) :: ESMF_StateReadRestart
+!
+!
+! !ARGUMENTS:
+      character (len = *), intent(in) :: name              
+      type(ESMF_IOSpec), intent(in), optional :: iospec   
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!      Used to reinitialize
+!      all data associated with a State from the last call to WriteRestart.
+!
+!  \begin{description}
+!  \item[name]
+!    Name of {\tt ESMF\_State} to reinitialize.
+!
+!  \item[iospec]
+!    {\tt IOSpec} to restart from.
+!
+!  \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        type (ESMF_State) :: a 
+
+!       this is just to shut the compiler up
+        type (ESMF_StateType), target :: b 
+        a%statep => b
+        nullify(a%statep)
+
+        ESMF_StateReadRestart = a 
+ 
+        end function ESMF_StateReadRestart
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set an integer Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
       subroutine ESMF_StateSetIntAttr(state, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2704,11 +2802,11 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer attribute to a {\tt ESMF\_State}.
+!      Attaches an integer attribute to an {\tt ESMF\_State}.
 ! 
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -2749,9 +2847,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetIntListAttr - Set an Attribute on a State
+! !IROUTINE: ESMF_StateSetAttribute - Set an integer list Attribute
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
       subroutine ESMF_StateSetIntListAttr(state, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -2763,11 +2862,11 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer list attribute to a {\tt ESMF\_State}.
+!      Attaches an integer list attribute to an {\tt ESMF\_State}.
 !
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -2818,9 +2917,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetRealAttr - Set an Attribute on a State
+! !IROUTINE: ESMF_StateSetAttribute - Set a real Attribute
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
       subroutine ESMF_StateSetRealAttr(state, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2835,7 +2935,7 @@ end function
 ! 
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -2876,9 +2976,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetRealListAttr - Set an Attribute on a State
+! !IROUTINE: ESMF_StateSetAttribute - Set a real list Attribute
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
       subroutine ESMF_StateSetRealListAttr(state, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -2895,7 +2996,7 @@ end function
 ! 
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -2946,9 +3047,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetLogicalAttr - Set an Attribute on a State
+! !IROUTINE: ESMF_StateSetAttribute - Set a logical Attribute 
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
       subroutine ESMF_StateSetLogicalAttr(state, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -2964,7 +3066,7 @@ end function
 ! 
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -3005,9 +3107,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetLogicalListAttr - Set an Attribute on a State
+! !IROUTINE: ESMF_StateSetLogicalListAttr - Set a logical list Attribute
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
       subroutine ESMF_StateSetLogicalListAttr(state, name, count, value, rc)
 !
 ! !ARGUMENTS:
@@ -3024,7 +3127,7 @@ end function
 ! 
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -3075,9 +3178,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetAttribute - Set an Attribute on a State
+! !IROUTINE: ESMF_StateSetAttribute - Set a character Attribute
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
       subroutine ESMF_StateSetCharAttr(state, name, value, rc)
 !
 ! !ARGUMENTS:
@@ -3092,7 +3196,7 @@ end function
 !
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -3131,156 +3235,62 @@ end function
       end subroutine ESMF_StateSetCharAttr
 
 !------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section is for State Transform routines.
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_StateTransform - Apply a Transform to State Data
+!BOP
+! !IROUTINE: ESMF_StateSetNeeded - Set if a data item is needed
 !
 ! !INTERFACE:
-      subroutine ESMF_StateTransform(state, xformname, xform, rc)
+      subroutine ESMF_StateSetNeeded(state, dataname, needed, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state 
-      character(len=*), intent(in) :: xformname
-      type(ESMF_Xform), dimension(:), intent(in) :: xform
-      integer, intent(out), optional :: rc            
+      type(ESMF_State), intent(inout) :: state
+      character (len=*), intent(in) :: dataname
+      type(ESMF_StateDataNeeded), intent(in) :: needed
+      integer, intent(out), optional :: rc             
+
 !
 ! !DESCRIPTION:
-!  Apply a {\tt Transform} to a {\tt State}.  
-!  This routine is intended to be called
-!  from within a {\tt Component} when it is not practical to return to the
-!  calling layer in order to do the coupling directly.  This call 
-!  passes through the framework back into user-written coupling code
-!  to allow exchange of data between {\tt Component}s.  It returns back to
-!  the calling location and allows the {\tt Component} to continue 
-!  executionfrom that place.  
-!  {\tt Component}s which run in sequential mode have no need to use
-!  this routine; Coupling code is called directly from the Application
-!  level code.
+!      Sets the status of the {\tt needed} flag for the data item
+!      named by {\tt dataname} in the {\tt State}.
 !
 !  \begin{description}     
 !  \item[state]
-!    {\tt State} to apply {\tt ESMF\_Xform} to.
+!    {\tt ESMF\_State} to set.
 !
-!  \item[xformname]
-!    {\tt Xform} name to be called.
+!   \item[dataname]
+!    Name of the data item to set.
 !
-!  \item[xform]
-!    {\tt Xform} object to be called.
+!   \item[needed]
+!    Set status of data item to this.  Valid values are 
+!    {\tt ESMF\_STATEDATAISNEEDED}, or {\tt ESMF\_STATEDATANOTNEEDED}. 
 !
-!  \item[{[rc]}]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!  \end{description}
 !
-!
-!EOPI
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!
-
-        ! This is a wrapper which turns around and calls into the
-        ! transform code to execute the callback.
-
-        end subroutine ESMF_StateTransform
-
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section is I/O for States
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateWriteRestart -- Save the internal data for a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateWriteRestart(state, iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State):: state 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc            
-!
-! !DESCRIPTION:
-!      Used to save all data to disk as quickly as possible.  
-!      (see Read/Write for other options).  Internally this routine uses the
-!      same I/O interface as Read/Write, but the default options are to
-!      select the fastest way to save data to disk.
-!
-!  \begin{description}
-!  \item[state]
-!    {\tt ESMF\_State} to save contents of.
-!
-!  \item[{[iospec]}]
-!    {\tt ESMF\_IOSpec} to be used.
-!
-!  \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_StateWriteRestart
+      type(ESMF_StateData), pointer :: dataitem
+      logical :: exists
+      integer :: status
 
+      status = ESMF_FAILURE
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateReadRestart -- ReadRestart the internal data from a State
-!
-! !INTERFACE:
-      function ESMF_StateReadRestart(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_State) :: ESMF_StateReadRestart
-!
-!
-! !ARGUMENTS:
-      character (len = *), intent(in) :: name              
-      type(ESMF_IOSpec), intent(in), optional :: iospec   
-      integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-!      Used to reinitialize
-!      all data associated with a State from the last call to WriteRestart.
-!
-!  \begin{description}
-!  \item[name]
-!    Name of {\tt ESMF\_State} to reinitialize.
-!
-!  \item[iospec]
-!    {\tt IOSpec} to restart from.
-!
-!  \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!  \end{description}
-!
-!EOP
-! !REQUIREMENTS:
+      ! Assume failure until we know we will succeed
+      if (present(rc)) rc=ESMF_FAILURE
 
-!
-! TODO: code goes here
-!
-        type (ESMF_State) :: a 
+      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., dataitem, rc=status)
+      if (.not. exists) then
+          if (present(rc)) rc = status
+          return
+      endif
 
-!       this is just to shut the compiler up
-        type (ESMF_StateType), target :: b 
-        a%statep => b
-        nullify(a%statep)
+      dataitem%needed = needed
 
-        ESMF_StateReadRestart = a 
- 
-        end function ESMF_StateReadRestart
+      if (present(rc)) rc=ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetNeeded
 
 !------------------------------------------------------------------------------
 !BOP
@@ -3348,6 +3358,60 @@ end function
        end subroutine ESMF_StateValidate
 
 !------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateTransform - Apply a Transform to State Data
+!
+! !INTERFACE:
+      subroutine ESMF_StateTransform(state, xformname, xform, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state 
+      character(len=*), intent(in) :: xformname
+      type(ESMF_Xform), dimension(:), intent(in) :: xform
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!  Apply a {\tt Transform} to a {\tt State}.  
+!  This routine is intended to be called
+!  from within a {\tt Component} when it is not practical to return to the
+!  calling layer in order to do the coupling directly.  This call 
+!  passes through the framework back into user-written coupling code
+!  to allow exchange of data between {\tt Component}s.  It returns back to
+!  the calling location and allows the {\tt Component} to continue 
+!  executionfrom that place.  
+!  {\tt Component}s which run in sequential mode have no need to use
+!  this routine; Coupling code is called directly from the Application
+!  level code.
+!
+!  \begin{description}     
+!  \item[state]
+!    {\tt State} to apply {\tt ESMF\_Xform} to.
+!
+!  \item[xformname]
+!    {\tt Xform} name to be called.
+!
+!  \item[xform]
+!    {\tt Xform} object to be called.
+!
+!  \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOPI
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+
+        ! This is a wrapper which turns around and calls into the
+        ! transform code to execute the callback.
+
+        end subroutine ESMF_StateTransform
+
+
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_StateWrite -- Write all or part of a State
 !
@@ -3389,6 +3453,44 @@ end function
   
 
         end subroutine ESMF_StateWrite
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateWriteRestart -- Save the internal data for a State
+!
+! !INTERFACE:
+      subroutine ESMF_StateWriteRestart(state, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State):: state 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!      Used to save all data to disk as quickly as possible.  
+!      (see Read/Write for other options).  Internally this routine uses the
+!      same I/O interface as Read/Write, but the default options are to
+!      select the fastest way to save data to disk.
+!
+!  \begin{description}
+!  \item[state]
+!    {\tt ESMF\_State} to save contents of.
+!
+!  \item[{[iospec]}]
+!    {\tt ESMF\_IOSpec} to be used.
+!
+!  \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        end subroutine ESMF_StateWriteRestart
 
 
 !------------------------------------------------------------------------------
