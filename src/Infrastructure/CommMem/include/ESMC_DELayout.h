@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.23 2003/07/31 21:51:42 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.24 2003/07/31 22:24:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ enum ESMC_AsyncFlag {ESMC_ASYNCHRONOUS=1, ESMC_SYNCHRONOUS};
 enum ESMC_Complete {ESMC_TEST_COMPLETE=1, ESMC_WAIT_COMPLETE};
 
 class ESMC_Async {
-  enum ESMC_Asyncflag aflag;
+  enum ESMC_AsyncFlag aflag;
   int mpi_handle;
   enum ESMC_Complete cflag;
 };
