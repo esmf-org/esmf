@@ -1,4 +1,4 @@
-! $Id: ESMF_XformEx.F90,v 1.3 2004/06/18 17:40:37 svasquez Exp $
+! $Id: ESMF_XformEx.F90,v 1.4 2005/01/06 20:43:59 jwolfe Exp $
 !
 ! Example code for creating Xforms.
 
@@ -33,6 +33,8 @@
     integer :: A2OCPLxform, O2ACPLxform
 !   !Set finalrc to success
     integer:: finalrc = ESMF_SUCCESS
+
+    call ESMF_Initialize(rc=rc)
 
 !-------------------------------------------------------------------------
 !   ! Example 1:
@@ -70,13 +72,13 @@
 
     print *, "Xform Example 2 finished"
 
+    call ESMF_Finalize(rc)
 
     if (finalrc.EQ.ESMF_SUCCESS) then
         print *, "PASS: ESMF_XformEx.F90"
     else
         print *, "FAIL: ESMF_XformEx.F90"
     end if
-
 
 
     end program ESMF_XformExample
