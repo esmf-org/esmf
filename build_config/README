@@ -1,4 +1,4 @@
- $Id: README,v 1.10 2003/09/25 21:21:53 flanigan Exp $
+ $Id: README,v 1.11 2003/10/10 16:38:35 flanigan Exp $
 
 ================================================================================
 
@@ -67,8 +67,10 @@ Current site files for unsupported platforms:
                    Darwin.absoft.default.mk
                    SunOS.default.default.mk
 
-Notice that there is no default compiler value for Linux machines.
-This is because there are a number of Fortran90 Linux compilers.
+Notice that there is no default compiler value for Linux or Darwin
+(Mac) machines.  This is because there are a number of Fortran90 Linux
+compilers.  If ESMF_COMPILER is left unset then the default value
+for Linux machines will be lahey and for Darwin machines absoft.
 
 The build system can be ported to other Unix platforms by adding new
 site and conf.h files.  The new site file has to follow the naming
@@ -105,7 +107,9 @@ Environment Variables
                    can be default, absoft, intel, lahey or nag. 
                    If the value is default or ESMF_COMPILER is 
                    left unset, then the default compiler 
-                   will be used.
+                   will be used.  Exceptions for default values:
+                   On Linux machines the default value is lahey and
+                   on Darwin machines it is absoft.
 
  ESMF_PREC         Variable specifying the precision.  Value 
                    can be 32 or 64.  When possible the default 

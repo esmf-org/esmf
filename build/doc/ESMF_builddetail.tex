@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.8 2003/09/26 22:02:46 flanigan Exp $
+%  $Id: ESMF_builddetail.tex,v 1.9 2003/10/10 16:38:34 flanigan Exp $
 
 
 \subsection{Make System}
@@ -83,10 +83,11 @@ ESMF\_ARCH to be set by a user.
 
 \item{ESMF\_COMPILER}
 
-Variable specifying which compiler to use.  Value can be
-default, absoft, intel, lahey or nag.  If the value is default or
-the ESMF\_COMPILER is left unset, then the default compiler 
-will be used.
+Variable specifying which compiler to use.  Value can be default,
+absoft, intel, lahey or nag.  If the value is default or the
+ESMF\_COMPILER is left unset, then the default compiler will be
+used. Exceptions for default values: On Linux machines the default
+value is lahey and on Darwin machines it is absoft.
 
 \item{ESMF\_PREC}
 
@@ -162,7 +163,7 @@ system. ESMF\_ARCH is the current architecture and will have the value
 returned by the command uname -s.  ESMF\_COMPILER is the compiler
 name.  ESMF\_SITE is the current machine name. If there are no site
 specific files for a particular architecture, then ESMF\_COMPILER and
-ESMF\_SITE will be set to default.  Examples:
+ESMF\_SITE will be set to default values.  Examples:
 
 \begin{verbatim}
     AIX.default.default.mk      ! Default configuation for RS6000.
@@ -191,7 +192,6 @@ environment variables set by the user or given default values be the
 build system.  Based on the settings of these environment variables,
 the build system provides a path to the correct conf.h file during
 source code compiles.
-
 
 \subsubsection{Building on New Platforms}
 

@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.32 2003/09/25 21:22:39 flanigan Exp $
+% $Id: ESMF_install.tex,v 1.33 2003/10/10 16:38:35 flanigan Exp $
 
 \subsection{ESMF Download Options}
 
@@ -54,7 +54,9 @@ environment variables are:
                    can be default, absoft, intel, lahey or nag. 
                    If the value is default or ESMF\_COMPILER is 
                    left unset, then the default compiler 
-                   will be used.      
+                   will be used.  Exceptions for default values:  
+                   On Linux machines the default value 
+                   is lahey and on Darwin machines it is absoft.
 
   \item[ESMF\_PREC] Precision value of 32 or 64.  When possible the
                  default value will be 64, otherwise it will be 32.
