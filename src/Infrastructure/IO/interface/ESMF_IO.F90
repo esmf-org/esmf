@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.2 2002/10/16 20:37:50 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.3 2002/10/25 20:10:13 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -53,7 +53,8 @@
           type (ESMF_Status) :: iostatus
           type (ESMF_IOType) :: iotype
           integer :: current_status
-          type (ESMF_Flag) :: async_io
+          ! should be a derived type or enum
+          logical :: async_io
       end type
 
       private ESMF_IOSpecCreateNew, ESMF_IOSpecCreateCopy
