@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.26 2003/08/29 05:31:58 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.27 2003/09/03 20:47:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.26 2003/08/29 05:31:58 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.27 2003/09/03 20:47:23 cdeluca Exp $'
 
 !==============================================================================
 
@@ -146,7 +146,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSet - Initializes the calendar type
+! !IROUTINE: ESMF_CalendarSet - Initialize or set the Calendar type
 
 ! !INTERFACE:
       subroutine ESMF_CalendarSet(calendar, type, rc)
@@ -157,15 +157,17 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes a {\tt ESMF\_Calendar} to the given {\tt ESMF\_Calendar} type.
+!     Initialize or set {\tt calendar} to the given {\tt ESMF_CalendarType}.  
+!     Valid values for {\tt type} are:  {\tt ESMF\_CAL\_GREGORIAN}, 
+!     {\tt ESMF\_CAL\_JULIANDAY},
+!     {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GENERIC}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
 !          The object instance to initialize.
 !     \item[type]
-!          The {\tt CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIANDAY,
-!          etc.
+!          The {\tt CalendarType}, e.g. {\tt ESMF\_CAL\_GREGORIAN}
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -181,7 +183,7 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSetGeneric - Initialize calendar to user-type
+! !IROUTINE: ESMF_CalendarSetGeneric - Set a custom Calendar
 
 ! !INTERFACE:
       subroutine ESMF_CalendarSetGeneric(calendar, daysPerMonth, &
@@ -197,7 +199,7 @@
       integer,                             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes a {\tt ESMF\_Calendar} to a user-specified type.
+!     Sets values in a custom {\tt ESMF\_Calendar}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -230,7 +232,7 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarGet - Get calendar properties
+! !IROUTINE: ESMF_CalendarGet - Get Calendar properties
 
 ! !INTERFACE:
       subroutine ESMF_CalendarGet(calendar, type, &
@@ -248,7 +250,7 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Gets a {\tt ESMF\_Calendar}'s properties.
+!     Gets an {\tt ESMF\_Calendar}'s properties.
 !
 !     The arguments are:
 !     \begin{description}
@@ -291,7 +293,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarReadRestart - Restore a calendar's properties
+! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar
 
 ! !INTERFACE:
       subroutine ESMF_CalendarReadRestart(calendar, type, daysPerMonth, &
@@ -311,7 +313,7 @@
       integer,                             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a restore on a {\tt ESMF\_Calendar}'s properties.
+!     Restores the contents of an {\tt ESMF\_Calendar} for restart.
 !
 !     The arguments are:
 !     \begin{description}
@@ -350,7 +352,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarWriteRestart - Save a calendar's properties
+! !IROUTINE:  ESMF_CalendarWriteRestart - Save the contents of a Calendar
 
 ! !INTERFACE:
       subroutine ESMF_CalendarWriteRestart(calendar, type, daysPerMonth, &
@@ -370,7 +372,7 @@
       integer,                             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a save on a {\tt ESMF\_Calendar}'s properties.
+!     Saves the contents of an {\tt ESMF\_Calendar} for restart.
 !
 !     The arguments are:
 !     \begin{description}
@@ -409,7 +411,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarValidate - Validate a calendar's properties
+! !IROUTINE:  ESMF_CalendarValidate - Validate a Calendar's properties
 
 ! !INTERFACE:
       subroutine ESMF_CalendarValidate(calendar, options, rc)
@@ -420,7 +422,7 @@
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt ESMF\_Calendar}'s properties
+!     Check whether a {\tt calendar} is valid.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -443,7 +445,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarPrint - Print out a calendar's properties
+! !IROUTINE:  ESMF_CalendarPrint - Print the contents of a Calendar
 
 ! !INTERFACE:
       subroutine ESMF_CalendarPrint(calendar, options, rc)
@@ -454,8 +456,8 @@
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out a {\tt ESMF\_Calendar}'s  
-!     properties.
+!     To support testing and debugging, this method prints out 
+!     the contents of an {\tt ESMF\_Calendar}.
 !
 !     The arguments are:
 !     \begin{description}
