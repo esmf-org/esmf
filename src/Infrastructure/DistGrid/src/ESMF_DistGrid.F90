@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.10 2002/12/20 19:22:34 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.11 2002/12/31 16:31:37 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@
 
       type ESMF_DecompAxis
       sequence
-      private
+!     private
         integer :: start
         integer :: end
         integer :: size
@@ -94,7 +94,7 @@
 
       type ESMF_MyDE
       sequence
-      private
+!     private
         integer :: MyDE      ! identifier for this DE
         integer :: DE_East   ! identifier for DE to the east
         integer :: DE_West   ! identifier for DE to the west
@@ -117,7 +117,7 @@
 
       type ESMF_DistGridType
       sequence
-      private
+!     private
         type (ESMF_Base) :: base
 !       type (ESMF_Layout), dimension(:), pointer :: layouts
         type (ESMF_Decomp) :: decomp       ! DE decomposition object
@@ -145,7 +145,7 @@
 
       type ESMF_DistGrid
       sequence
-      private
+!     private
         type (ESMF_DistGridType), pointer :: ptr     ! pointer to a distgrid
                                                      ! type
       end type
@@ -166,6 +166,9 @@
     public ESMF_DistGridDestroy
     public ESMF_DistGridGetConfig
     public ESMF_DistGridSetConfig
+    public ESMF_DistGridGetInfo
+    public ESMF_DistGridSetInfo
+    public ESMF_DistGridGetCounts
     public ESMF_DistGridSetCounts
     public ESMF_DistGridSetDecomp
     public ESMF_DistGridGetValue
@@ -178,7 +181,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.10 2002/12/20 19:22:34 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.11 2002/12/31 16:31:37 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -207,7 +210,7 @@
       interface ESMF_DistGridConstruct
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_DistGridConstructEmpty
+         module procedure ESMF_DistGridConstructNew
          module procedure ESMF_DistGridConstructInternal
 
 ! !DESCRIPTION:
@@ -309,7 +312,7 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstruct(distgrid, name, status)
+      call ESMF_DistGridConstructNew(distgrid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridCreateEmpty: DistGrid construct"
         return
@@ -432,13 +435,13 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
-!     ESMF_DistGridConstructEmpty - Construct the internals of an allocated DistGrid
+!     ESMF_DistGridConstructNew - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstructEmpty(distgrid, name, rc)
+      subroutine ESMF_DistGridConstructNew(distgrid, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), intent(in) :: distgrid 
+      type(ESMF_DistGridType) :: distgrid 
       character (len = *), intent(in), optional :: name  ! name
       integer, intent(out), optional :: rc               ! return code
 !
@@ -463,8 +466,9 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status=ESMF_SUCCESS               ! Error status
+      logical :: rcpresent=.FALSE.                 ! Return code present
+      character (len = ESMF_MAXSTR) :: defaultname ! default distgrid name
 
 !     Initialize return code
       if(present(rc)) then
@@ -472,14 +476,73 @@
         rc = ESMF_FAILURE
       endif
 
+!     Set the DistGrid name if present, otherwise construct a default one
+      if(present(name)) then
+        call ESMF_SetName(distgrid%base, name, status)
+      else
+        defaultname = "default_distgrid_name"
+        call ESMF_SetName(distgrid%base, defaultname, status)
+      endif
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructEmpty: DistGrid construct"
+        print *, "ERROR in ESMF_DistGridConstructNew: Setname"
         return
       endif
 
+!     Initialize distgrid contents
+      distgrid%decomp%DEdir1%start = 0
+      distgrid%decomp%DEdir1%end = 0
+      distgrid%decomp%DEdir1%size = 0
+      distgrid%decomp%DEdir2%start = 0
+      distgrid%decomp%DEdir2%end = 0
+      distgrid%decomp%DEdir2%size = 0
+      distgrid%decomp%periodic_dir1 = .false.
+      distgrid%decomp%periodic_dir2 = .false.
+      distgrid%decomp%num_masks = 0
+      distgrid%MyDE%MyDE = 0
+      distgrid%MyDE%DE_East = 0
+      distgrid%MyDE%DE_West = 0
+      distgrid%MyDE%DE_North = 0
+      distgrid%MyDE%DE_South = 0
+      distgrid%MyDE%DE_NE = 0
+      distgrid%MyDE%DE_NW = 0
+      distgrid%MyDE%DE_SE = 0
+      distgrid%MyDE%DE_SW = 0
+      distgrid%MyDE%lsize = 0
+      distgrid%MyDE%n_dir1%start = 0
+      distgrid%MyDE%n_dir1%end = 0
+      distgrid%MyDE%n_dir1%size = 0
+      distgrid%MyDE%n_dir2%start = 0
+      distgrid%MyDE%n_dir2%end = 0
+      distgrid%MyDE%n_dir2%size = 0
+      distgrid%gsize = 0
+      distgrid%gsize_dir1 = 0
+      distgrid%gsize_dir2 = 0
+      distgrid%local_dir1%start = 0
+      distgrid%local_dir1%end = 0
+      distgrid%local_dir1%size = 0
+      distgrid%local_dir2%start = 0
+      distgrid%local_dir2%end = 0
+      distgrid%local_dir2%size = 0
+      distgrid%global_dir1%start = 0
+      distgrid%global_dir1%end = 0
+      distgrid%global_dir1%size = 0
+      distgrid%global_dir2%start = 0
+      distgrid%global_dir2%end = 0
+      distgrid%global_dir2%size = 0
+      distgrid%memory_dir1%start = 0
+      distgrid%memory_dir1%end = 0
+      distgrid%memory_dir1%size = 0
+      distgrid%memory_dir2%start = 0
+      distgrid%memory_dir2%end = 0
+      distgrid%memory_dir2%size = 0
+      distgrid%maxsize_dir1 = 0
+      distgrid%maxsize_dir2 = 0
+      distgrid%covers_domain_dir1 = .false.
+      distgrid%covers_domain_dir2 = .false.
+
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridConstructEmpty
+      end subroutine ESMF_DistGridConstructNew
 
 !------------------------------------------------------------------------------
 !BOP
@@ -529,8 +592,12 @@
 !EOP
 
       integer :: status=ESMF_SUCCESS              ! Error status
-      integer :: nDE_avail                        ! Number of DE's available
       logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: gsize_dir1
+      integer :: gsize_dir2
+      integer :: gsize
+      logical :: cover_domain_dir1
+      logical :: cover_domain_dir2
 
 !     Initialize return code
       if(present(rc)) then
@@ -538,13 +605,20 @@
         rc = ESMF_FAILURE
       endif
 
+!     Initialize the derived type contents
+      call ESMF_DistGridConstructNew(distgrid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: DistGrid construct"
+        return
+      endif
+
 !     Fill in distgrid derived type with input or default
 !     TODO:  temporary fix, also add defaults to objects
-      distgrid%gsize_dir1 = i_max
-      distgrid%gsize_dir2 = j_max
-      distgrid%gsize = i_max*j_max
-      distgrid%covers_domain_dir1 = .true.
-      distgrid%covers_domain_dir2 = .true.
+      call ESMF_DistGridSetInfo(distgrid, gsize_dir1=i_max, &
+                                gsize_dir2=j_max, &
+                                gsize=i_max*j_max, &
+                                covers_domain_dir1=.true., &
+                                covers_domain_dir2=.true., rc=status)
 
 !     Create layout with specified decomposition (assume 1 in 3rd direction)
       call ESMF_LayoutCreate(nDE_i, nDE_j, 1, status)
@@ -618,6 +692,142 @@
 !  code goes here
 !
       end subroutine ESMF_DistGridDestruct
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridGetInfo - Get information from a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGetInfo(distgrid, &
+                                      gsize_dir1, gsize_dir2, gsize, &
+                                      covers_domain_dir1, &
+                                      covers_domain_dir2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      integer, intent(inout), optional :: gsize_dir1
+      integer, intent(inout), optional :: gsize_dir2
+      integer, intent(inout), optional :: gsize
+      logical, intent(inout), optional :: covers_domain_dir1
+      logical, intent(inout), optional :: covers_domain_dir2
+      integer, intent(out), optional :: rc              
+!
+! !DESCRIPTION:
+!     Returns information from the DistGrid object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be queried.
+!     \item[[gsize\_dir1]]
+!          Global number of cells in 1st direction.
+!     \item[[gsize\_dir2]]
+!          Global number of cells in 2nd direction.
+!     \item[[gsize]]
+!          Global total number of cells.
+!     \item[[covers\_domain\_dir1]]
+!          Logical identifier if distgrid covers the entire physical domain
+!          in the 1st direction.
+!     \item[[covers\_domain\_dir2]]
+!          Logical identifier if distgrid covers the entire physical domain
+!          in the 2nd direction.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     if present, get information from distgrid derived type
+      if(present(gsize_dir1)) gsize_dir1 = distgrid%gsize_dir1
+      if(present(gsize_dir2)) gsize_dir2 = distgrid%gsize_dir2
+      if(present(gsize)) gsize = distgrid%gsize
+      if(present(covers_domain_dir1)) &
+                 covers_domain_dir1 = distgrid%covers_domain_dir1
+      if(present(covers_domain_dir2)) &
+                 covers_domain_dir2 = distgrid%covers_domain_dir2
+
+      if(rcpresent) rc = ESMF_SUCCESS
+!
+      end subroutine ESMF_DistGridGetInfo
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridSetInfo - Set information about a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridSetInfo(distgrid, gsize_dir1, gsize_dir2, &
+                                      gsize, covers_domain_dir1, &
+                                      covers_domain_dir2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      integer, intent(in), optional :: gsize_dir1
+      integer, intent(in), optional :: gsize_dir2
+      integer, intent(in), optional :: gsize
+      logical, intent(in), optional :: covers_domain_dir1
+      logical, intent(in), optional :: covers_domain_dir2
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!     Sets the DistGrid object with information given.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be set.
+!     \item[[gsize\_dir1]]
+!          Global number of cells in 1st direction.
+!     \item[[gsize\_dir2]]
+!          Global number of cells in 2nd direction.
+!     \item[[gsize]]
+!          Global total number of cells.
+!     \item[[covers\_domain\_dir1]]
+!          Logical identifier if distgrid covers the entire physical domain
+!          in the 1st direction.
+!     \item[[covers\_domain\_dir2]]
+!          Logical identifier if distgrid covers the entire physical domain
+!          in the 2nd direction.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     if present, set information filling in distgrid derived type
+      if(present(gsize_dir1)) distgrid%gsize_dir1 = gsize_dir1
+      if(present(gsize_dir2)) distgrid%gsize_dir2 = gsize_dir2
+      if(present(gsize)) distgrid%gsize = gsize
+      if(present(covers_domain_dir1)) &
+                 distgrid%covers_domain_dir1 = covers_domain_dir1
+      if(present(covers_domain_dir2)) &
+                 distgrid%covers_domain_dir2 = covers_domain_dir2
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridSetInfo
 
 !------------------------------------------------------------------------------
 !BOP
@@ -763,6 +973,86 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
+!     ESMF_DistGridGetCounts - Get extent counts for a DistGrid for a given DE
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGetCounts(distgrid, DE_id, &
+                                        size_dir1, &
+                                        global_start_dir1, &
+                                        global_end_dir1, &
+                                        size_dir2, &
+                                        global_start_dir2, &
+                                        global_end_dir2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      integer, intent(in) :: DE_id
+      integer, intent(inout), optional :: size_dir1
+      integer, intent(inout), optional :: global_start_dir1
+      integer, intent(inout), optional :: global_end_dir1
+      integer, intent(inout), optional :: size_dir2
+      integer, intent(inout), optional :: global_start_dir2
+      integer, intent(inout), optional :: global_end_dir2
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Get DistGrid extent counts for a given DE
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be modified.
+!     \item[[DE\_id]]
+!          Given DE's identifier.
+!     \item[[size\_dir1]]
+!          Extent count in the 1st direction.
+!     \item[[global\_start\_dir1]]
+!          Starting extent count in the 1st direction, in global index.
+!     \item[[global\_end\_dir1]]
+!          Ending extent count in the 1st direction, in global index.
+!     \item[[size\_dir2]]
+!          Extent count in the 2nd direction.
+!     \item[[global\_start\_dir2]]
+!          Starting extent count in the 2nd direction, in global index.
+!     \item[[global\_end\_dir2]]
+!          Ending extent count in the 2nd direction, in global index.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Retrieve extent counts for each axis from the de identifier
+!     TODO:  check validity of DE_id
+      if(present(size_dir1)) size_dir1 = distgrid%global_dir1(DE_id)%size
+      if(present(size_dir2)) size_dir2 = distgrid%global_dir2(DE_id)%size
+      if(present(global_start_dir1)) &
+                 global_start_dir1 = distgrid%global_dir1(DE_id)%start
+      if(present(global_end_dir1)) &
+                 global_end_dir1 = distgrid%global_dir1(DE_id)%end
+      if(present(global_start_dir2)) &
+                 global_start_dir2 = distgrid%global_dir2(DE_id)%start
+      if(present(global_end_dir2)) &
+                 global_end_dir2 = distgrid%global_dir2(DE_id)%end
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridGetCounts
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
 !     ESMF_DistGridSetCountsInternal - Set extent counts for a DistGrid
 
 ! !INTERFACE:
@@ -779,8 +1069,7 @@
 
 !
 ! !DESCRIPTION:
-!     Set a DistGrid attribute with the given value.
-!     May be multiple routines, one per attribute.
+!     Set DistGrid extent counts
 !
 !     The arguments are:
 !     \begin{description}
@@ -813,7 +1102,7 @@
         rc = ESMF_FAILURE
       endif
 
-!     Set extent counts for each axis from the number of pe's and number
+!     Set extent counts for each axis from the number of de's and number
 !     of cells
 !     TODO:  this is not quite the correct algorithm to distribute over a
 !            large number of DE's along an axis -- it loads up the residual

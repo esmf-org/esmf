@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.16 2002/12/20 19:18:42 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.17 2002/12/31 16:31:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,8 @@
 ! !PUBLIC TYPES:
 
       public ESMF_GridConfig
-      public ESMF_Grid, ESMF_GridType
+      public ESMF_Grid
+      public ESMF_GridType
 
 !------------------------------------------------------------------------------
 !
@@ -117,10 +118,13 @@
 
     public ESMF_GridCreate
     public ESMF_GridDestroy
+    public ESMF_GridAddPhysGrid
     public ESMF_GridGetConfig
     public ESMF_GridSetConfig
     !public ESMF_GridGetCoord
     public ESMF_GridSetCoord
+    !public ESMF_GridGetInfo
+    public ESMF_GridSetInfo
     !public ESMF_GridGetLMask
     public ESMF_GridSetLMask
     !public ESMF_GridGetMMask
@@ -178,12 +182,20 @@
       ! I'm sure there are more - I'm not sure
       ! what the atmospheric ESMF models are using for vertical coords
 
+   integer, parameter ::                    &! recognized coordinate orderings
+      ESMF_CoordOrder_Unknown         =  0, &! unknown or undefined coord ordering
+      ESMF_CoordOrder_XYZ             =  1, &! IJK maps to XYZ
+      ESMF_CoordOrder_XZY             =  2, &! IJK maps to XZY
+      ESMF_CoordOrder_YXZ             =  3, &! IJK maps to YXZ
+      ESMF_CoordOrder_YZX             =  4, &! IJK maps to YZX
+      ESMF_CoordOrder_ZXY             =  5, &! IJK maps to ZXY
+      ESMF_CoordOrder_ZYX             =  6   ! IJK maps to ZYX
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.16 2002/12/20 19:18:42 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.17 2002/12/31 16:31:14 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -252,7 +264,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridSetLMaskFromArray
          module procedure ESMF_GridSetLMaskFromBuffer
-         module procedure ESMF_GridSetLMaskCompute
          module procedure ESMF_GridSetLMaskCopy
 
 ! !DESCRIPTION:
@@ -270,7 +281,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridSetMMaskFromArray
          module procedure ESMF_GridSetMMaskFromBuffer
-         module procedure ESMF_GridSetMMaskCompute
          module procedure ESMF_GridSetMMaskCopy
 
 ! !DESCRIPTION:
@@ -306,7 +316,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridSetRegionIDFromArray
          module procedure ESMF_GridSetRegionIDFromBuffer
-         module procedure ESMF_GridSetRegionIDCompute
          module procedure ESMF_GridSetRegionIDCopy
 
 ! !DESCRIPTION:
@@ -1022,19 +1031,25 @@
         rc = ESMF_FAILURE
       endif
 
-!     Fill in grid derived type with subroutine arguments
-!     grid%base%name = name    ! TODO  base doesn't have name yet
-      grid%horz_gridtype = horz_gridtype
-      grid%vert_gridtype = vert_gridtype
-      grid%horz_stagger = horz_stagger
-      grid%vert_stagger = vert_stagger
-      grid%horz_coord_system = horz_coord_system
-      grid%vert_coord_system = vert_coord_system
+!     Initialize the derived type contents
+      call ESMF_GridConstructNew(grid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternal: Grid construct"
+        return
+      endif
 
+!     Fill in grid derived type with subroutine arguments
+      call ESMF_GridSetInfo(grid, horz_gridtype, vert_gridtype, &
+                            horz_stagger, vert_stagger, &
+                            horz_coord_system, vert_coord_system, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternal: Grid set info"
+        return
+      endif
+
+!     Create the DistGrid
 !     For time being, just set the number of DE
-      nDE_i = 1
-      nDE_j = 1
-      grid%distgrid = ESMF_DistGridCreate(nDE_i=nDE_i, nDE_j=nDE_j, &
+      grid%distgrid = ESMF_DistGridCreate(nDE_i=1, nDE_j=1, &
                                           i_max=i_max, j_max=j_max, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
@@ -1042,13 +1057,12 @@
       endif
 
 !     Create main physgrid
-      grid%num_physgrids = 1
       physgrid_name = 'base'
-      physgrid_id = 1
-      grid%physgrids(1) = ESMF_PhysGridCreate(physgrid_name, grid%distgrid, &
-                                              x_min, x_max, y_min, y_max, status)
+      call ESMF_GridAddPhysGrid(grid, physgrid_name, physgrid_id, &
+                                x_min, x_max, y_min, y_max, &
+                                i_max, j_max, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridConstructInternal: Physgrid create"
+        print *, "ERROR in ESMF_GridConstructInternal: Add physgrid"
         return
       endif
 
@@ -1096,10 +1110,6 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid}
-!     \item[arg1]
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.
 !     \item[[name]]
 !          {\tt Grid} name.
 !     \item[[rc]]
@@ -1109,8 +1119,9 @@
 ! !REQUIREMENTS: TODO
 !EOP
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status=ESMF_SUCCESS               ! Error status
+      logical :: rcpresent=.FALSE.                 ! Return code present
+      character (len = ESMF_MAXSTR) :: defaultname ! default grid name
 
 !     Initialize return code
       if(present(rc)) then
@@ -1118,10 +1129,30 @@
         rc = ESMF_FAILURE
       endif
 
+!     Set the Grid name if present, otherwise construct a default one
+      if(present(name)) then
+        call ESMF_SetName(grid%base, name, status)
+      else
+        defaultname = "default_grid_name"
+        call ESMF_SetName(grid%base, defaultname, status)
+      endif
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridConstructNew: Grid construct"
+        print *, "ERROR in ESMF_GridConstructNew: Setname"
         return
       endif
+
+!     Initialize grid contents
+      grid%gridstatus = ESMF_STATE_READY
+      grid%horz_gridtype = ESMF_GridType_Unknown
+      grid%vert_gridtype = ESMF_GridType_Unknown
+      grid%horz_stagger = ESMF_GridStagger_Unknown
+      grid%vert_stagger = ESMF_GridStagger_Unknown
+      grid%horz_coord_system = ESMF_CoordSystem_Unknown
+      grid%vert_coord_system = ESMF_CoordSystem_Unknown
+      grid%coord_order = ESMF_CoordOrder_Unknown
+      grid%num_physgrids = 0
+      nullify(grid%physgrids)
+      nullify(grid%distgrid)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1160,6 +1191,102 @@
 !  code goes here
 !
       end subroutine ESMF_GridDestruct
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridAddPhysGrid - Add a PhysGrid to a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridAddPhysGrid(grid, physgrid_name, physgrid_id, &
+                                      x_min, x_max, y_min, y_max, &
+                                      i_max, j_max, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType) :: grid
+      character (len=*), intent(in), optional :: physgrid_name
+      integer, intent(out) :: physgrid_id
+      real, intent(in), optional :: x_min
+      real, intent(in), optional :: x_max
+      real, intent(in), optional :: y_min
+      real, intent(in), optional :: y_max
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_max
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Adds a physgrid to a grid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be queried.
+!     \item [[physgrid\_name]]
+!          {\tt PhysGrid} name.
+!     \item [[physgrid\_id]]
+!          Integer identifier for {\tt PhysGrid}.
+!     \item[[x\_min]]
+!          Minimum physical coordinate in the x-direction.
+!     \item[[x\_max]]
+!          Maximum physical coordinate in the x-direction.
+!     \item[[y\_min]]
+!          Minimum physical coordinate in the y-direction.
+!     \item[[y\_max]]
+!          Maximum physical coordinate in the y-direction.
+!     \item[[i\_max]]
+!          Number of grid increments in the i-direction.
+!     \item[[j\_max]]
+!          Number of grid increments in the j-direction.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_SUCCESS          ! Error status
+      logical :: rcpresent=.FALSE.            ! Return code present
+      real :: delta1
+      real :: local_min_coord1
+      real :: local_max_coord1
+      integer :: local_nmax1
+      real :: delta2
+      real :: local_min_coord2
+      real :: local_max_coord2
+      integer :: local_nmax2
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Increment the number of physgrids in the grid
+      grid%num_physgrids = grid%num_physgrids + 1
+      physgrid_id = grid%num_physgrids 
+
+      delta1 = (x_max - x_min) / real(i_max)
+      local_min_coord1 = delta1 * real(grid%distgrid%ptr%MyDE%n_dir1%start)
+      local_max_coord1 = delta1 * real(grid%distgrid%ptr%MyDE%n_dir1%end)
+      local_nmax1 = grid%distgrid%ptr%MyDE%n_dir1%size
+      delta2 = (y_max - y_min) / real(j_max)
+      local_min_coord2 = delta2 * real(grid%distgrid%ptr%MyDE%n_dir2%start)
+      local_max_coord2 = delta2 * real(grid%distgrid%ptr%MyDE%n_dir2%end)
+      local_nmax2 = grid%distgrid%ptr%MyDE%n_dir2%size
+      grid%physgrids(1) = ESMF_PhysGridCreate(physgrid_name, &
+                                       local_min_coord1=local_min_coord1, &
+                                       local_max_coord1=local_max_coord1, &
+                                       local_nmax1=local_nmax1, &
+                                       local_min_coord2=local_min_coord2, &
+                                       local_max_coord2=local_max_coord2, &
+                                       local_nmax2=local_nmax2, &
+                                       global_min_coord1=x_min, &
+                                       global_max_coord1=x_max, &
+                                       global_nmax1=i_max, &
+                                       global_min_coord2=y_min, &
+                                       global_max_coord2=y_max, &
+                                       global_nmax2=j_max, rc=status)
+
+      end subroutine ESMF_GridAddPhysGrid
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1354,7 +1481,7 @@
 ! !IROUTINE: ESMF_GridSetCoordCompute - Compute coordinates for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetCoordCompute(Grid, physgrid_id, rc)
+      subroutine ESMF_GridSetCoordCompute(grid, physgrid_id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -1369,7 +1496,7 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item[[physgrid_id]]
+!     \item[[physgrid\_id]]
 !          Identifier of the {\tt PhysGrid} to be modified.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1381,6 +1508,21 @@
 ! !REQUIREMENTS:
 
       integer :: status=ESMF_SUCCESS              ! Error status
+      integer :: ncoord_locs
+      integer, dimension(6) :: coord_loc
+      integer :: DE_id
+      integer :: global_nmin1
+      integer :: global_nmax1
+      integer :: global_nmin2
+      integer :: global_nmax2
+      integer :: gsize_dir1
+      integer :: gsize_dir2
+      real :: delta1
+      real :: delta2
+      real :: global_min_coord1
+      real :: global_max_coord1
+      real :: global_min_coord2
+      real :: global_max_coord2
       logical :: rcpresent=.FALSE.                ! Return code present
 
 !     Initialize return code
@@ -1389,8 +1531,65 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id), status)
+!     Initialize local data
+      coord_loc = 0
+      ncoord_locs = 0
+      delta1 = 0.0
+      delta2 = 0.0
+     
+!     Get distgrid information, including global size in each direction and local
+!     grid size indexed globally
+      call ESMF_DistGridGetInfo(grid%distgrid%ptr, &
+                                gsize_dir1=gsize_dir1, &
+                                gsize_dir2=gsize_dir2, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridSetCoordCompute: Distgrid get info"
+        return
+      endif
+      DE_id = 1     ! TODO:  interface with layout to get DE identifier
+      call ESMF_DistGridGetCounts(grid%distgrid%ptr, DE_id, &
+                                  global_start_dir1=global_nmin1, &
+                                  global_end_dir1=global_nmax1, &
+                                  global_start_dir2=global_nmin2, &
+                                  global_end_dir2=global_nmax2, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridSetCoordCompute: Distgrid get counts"
+        return
+      endif
 
+!     Get physgrid info with global coordinate extents
+      call ESMF_PhysGridGetInfo(grid%physgrids(physgrid_id)%ptr, &
+                                global_min_coord1=global_min_coord1, &
+                                global_max_coord1=global_max_coord1, &
+                                global_min_coord2=global_min_coord2, &
+                                global_max_coord2=global_max_coord2, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridSetCoordCompute: PhysGrid get info"
+        return
+      endif
+
+!     Calculate global cell sizes
+      if (gsize_dir1.ne.0) then
+        delta1 = (global_max_coord1 - global_min_coord1) / real(gsize_dir1)
+      else
+        print *, "ERROR in ESMF_GridSetCoordCompute: gsize_dir1=0"
+        return
+      endif
+      if (gsize_dir2.ne.0) then
+        delta2 = (global_max_coord2 - global_min_coord2) / real(gsize_dir2)
+      else
+        print *, "ERROR in ESMF_GridSetCoordCompute: gsize_dir2=0"
+        return
+      endif
+
+!     For now, set coord_loc by hand.  TODO:  automate for the different grid types
+      coord_loc(1) = 1
+      coord_loc(2) = 2
+      call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id)%ptr, &
+                                 ncoord_locs, coord_loc, &
+                                 global_nmin1, global_nmax1, &
+                                 global_nmin2, global_nmax2, &
+                                 delta1, delta2, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordCompute: PhysGrid construct"
         return
@@ -1441,6 +1640,150 @@
 !  code goes here
 !
       end subroutine ESMF_GridSetCoordCopy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGetInfo - Gets a variety of information about the grid
+
+! !INTERFACE:
+      subroutine ESMF_GridGetInfo(grid, horz_gridtype, vert_gridtype, &
+                                  horz_stagger, vert_stagger, &
+                                  horz_coord_system, vert_coord_system, &
+                                  coord_order, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType) :: grid
+      integer, intent(inout), optional :: horz_gridtype
+      integer, intent(inout), optional :: vert_gridtype
+      integer, intent(inout), optional :: horz_stagger
+      integer, intent(inout), optional :: vert_stagger
+      integer, intent(inout), optional :: horz_coord_system
+      integer, intent(inout), optional :: vert_coord_system
+      integer, intent(inout), optional :: coord_order
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version sets a variety of information about a grid, depending
+!     on a list of optional arguments.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[[horz\_gridtype]]
+!          Integer specifier to denote horizontal gridtype
+!     \item[[vert\_gridtype]]
+!          Integer specifier to denote vertical gridtype
+!     \item[[horz\_stagger]]
+!          Integer specifier to denote horizontal grid stagger
+!     \item[[vert\_stagger]]
+!          Integer specifier to denote vertical grid stagger
+!     \item[[horz\_coord\_system]]
+!          Integer specifier to denote horizontal coordinate system
+!     \item[[vert\_coord\_system]]
+!          Integer specifier to denote vertical coordinate system
+!     \item[[coord\_order]]
+!          Integer specifier to denote coordinate ordering
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     if present, gets information from the grid derived type
+      if(present(horz_gridtype)) horz_gridtype = grid%horz_gridtype
+      if(present(vert_gridtype)) vert_gridtype = grid%vert_gridtype
+      if(present(horz_stagger)) horz_stagger = grid%horz_stagger
+      if(present(vert_stagger)) vert_stagger = grid%vert_stagger
+      if(present(horz_coord_system)) horz_coord_system = grid%horz_coord_system
+      if(present(vert_coord_system)) vert_coord_system = grid%vert_coord_system
+      if(present(coord_order)) coord_order = grid%coord_order
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetInfo
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridSetInfo - Sets a variety of information about the grid
+
+! !INTERFACE:
+      subroutine ESMF_GridSetInfo(grid, horz_gridtype, vert_gridtype, &
+                                  horz_stagger, vert_stagger, &
+                                  horz_coord_system, vert_coord_system, &
+                                  coord_order, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType) :: grid
+      integer, intent(in), optional :: horz_gridtype
+      integer, intent(in), optional :: vert_gridtype
+      integer, intent(in), optional :: horz_stagger
+      integer, intent(in), optional :: vert_stagger
+      integer, intent(in), optional :: horz_coord_system
+      integer, intent(in), optional :: vert_coord_system
+      integer, intent(in), optional :: coord_order
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version sets a variety of information about a grid, depending
+!     on a list of optional arguments.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[[horz\_gridtype]]
+!          Integer specifier to denote horizontal gridtype
+!     \item[[vert\_gridtype]]
+!          Integer specifier to denote vertical gridtype
+!     \item[[horz\_stagger]]
+!          Integer specifier to denote horizontal grid stagger
+!     \item[[vert\_stagger]]
+!          Integer specifier to denote vertical grid stagger
+!     \item[[horz\_coord\_system]]
+!          Integer specifier to denote horizontal coordinate system
+!     \item[[vert\_coord\_system]]
+!          Integer specifier to denote vertical coordinate system
+!     \item[[coord\_order]]
+!          Integer specifier to denote coordinate ordering
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     if present, set information filling in grid derived type
+      if(present(horz_gridtype)) grid%horz_gridtype = horz_gridtype
+      if(present(vert_gridtype)) grid%vert_gridtype = vert_gridtype
+      if(present(horz_stagger)) grid%horz_stagger = horz_stagger
+      if(present(vert_stagger)) grid%vert_stagger = vert_stagger
+      if(present(horz_coord_system)) grid%horz_coord_system = horz_coord_system
+      if(present(vert_coord_system)) grid%vert_coord_system = vert_coord_system
+      if(present(coord_order)) grid%coord_order = coord_order
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetInfo
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1515,42 +1858,6 @@
 !  code goes here
 !
       end subroutine ESMF_GridSetLMaskFromBuffer
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridSetLMaskCompute - Compute a logical mask for a Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridSetLMaskCompute(Grid, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set internally computes a logical mask for a Grid via a
-!     prescribed method.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
-!     \item [[name]]
-!           {\tt LMask} name.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!TODO: figure out the argument list necessary to completely describe the
-!      internal calculation of a logical mask for a simple grid.
-!EOP
-! !REQUIREMENTS:
-
-!
-!  code goes here
-!
-      end subroutine ESMF_GridSetLMaskCompute
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1664,42 +1971,6 @@
 !  code goes here
 !
       end subroutine ESMF_GridSetMMaskFromBuffer
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridSetMMaskCompute - Compute a multiplicative mask for a Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridSetMMaskCompute(Grid, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set internally computes a multiplicative mask for a
-!     Grid via a prescribed method.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
-!     \item [[name]]
-!           {\tt MMask} name.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!TODO: figure out the argument list necessary to completely describe the
-!      internal calculation of a multiplicative mask for a simple grid.
-!EOP
-! !REQUIREMENTS:
-
-!
-!  code goes here
-!
-      end subroutine ESMF_GridSetMMaskCompute
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1964,42 +2235,6 @@
 !  code goes here
 !
       end subroutine ESMF_GridSetRegionIDFromBuffer
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridSetRegionIDCompute - Compute a region identifier for a Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridSetRegionIDCompute(Grid, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set internally computes a region identifier for a
-!     Grid via a prescribed method.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
-!     \item [[name]]
-!           {\tt RegionID} name.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!TODO: figure out the argument list necessary to completely describe the
-!      internal calculation of a region identifier for a simple grid.
-!EOP
-! !REQUIREMENTS:
-
-!
-!  code goes here
-!
-      end subroutine ESMF_GridSetRegionIDCompute
 
 !------------------------------------------------------------------------------
 !BOP
