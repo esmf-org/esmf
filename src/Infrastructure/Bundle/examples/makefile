@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/02/11 22:09:19 nscollins Exp $ 
+# $Id: makefile,v 1.7 2004/02/18 21:04:37 nscollins Exp $ 
 
 ALL: build_examples
 
@@ -68,7 +68,7 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_BundleCreateEx
 EXAMPLES_RUN = run_ESMF_BundleCreateEx 
 
 
-EXAPMLES_RUN_UNI = run_ESMF_BundleCreateEx_uni 
+EXAMPLES_RUN_UNI = run_ESMF_BundleCreateEx_uni 
 
 
 include $(ESMF_DIR)/makefile
