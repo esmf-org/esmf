@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.190 2004/10/15 16:44:52 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.191 2004/11/23 00:38:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.190 2004/10/15 16:44:52 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.191 2004/11/23 00:38:23 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5030,8 +5030,8 @@
                                      vertRelLoc=vertRelLoc, &
                                      minLocalCoordPerDim=src_min, &
                                      maxLocalCoordPerDim=src_max, rc=status)
-        call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, src_min, src_max, &
-                                       myAI, sendDomainList, status)
+        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, src_min, src_max, &
+                                       myAI, sendDomainList, rc=status)
       endif
 
       ! if dst field exists on this DE, query it for information
@@ -5050,7 +5050,7 @@
                                      vertRelLoc=vertRelLoc, &
                                      minLocalCoordPerDim=dst_min, &
                                      maxLocalCoordPerDim=dst_max, rc=status)
-        call ESMF_GridBoxIntersectRecv(srcGrid, dst_min, dst_max, &
+        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, dst_min, dst_max, &
                                        recvDomainList, rc=status)
       endif
 
