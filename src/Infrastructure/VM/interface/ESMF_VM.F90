@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.42 2004/11/18 23:46:05 nscollins Exp $
+! $Id: ESMF_VM.F90,v 1.43 2004/11/24 21:34:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.42 2004/11/18 23:46:05 nscollins Exp $'
+      '$Id: ESMF_VM.F90,v 1.43 2004/11/24 21:34:34 theurich Exp $'
 
 !==============================================================================
 
@@ -1826,7 +1826,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: recvData(:)  
+    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1906,7 +1906,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: recvData(:)  
+    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1986,7 +1986,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: recvData(:)  
+    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -2066,7 +2066,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical),       intent(in)              :: recvData(:)  
+    type(ESMF_Logical),       intent(out)             :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -2146,7 +2146,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    character(*),             intent(in)              :: recvData
+    character(*),             intent(out)             :: recvData
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -2976,7 +2976,7 @@ module ESMF_VMMod
     integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)  
     integer,                  intent(in)              :: sendCount
     integer,                  intent(in)              :: dst
-    integer(ESMF_KIND_I4),    intent(in)              :: recvData(:)  
+    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3091,7 +3091,7 @@ module ESMF_VMMod
     real(ESMF_KIND_R4),       intent(in)              :: sendData(:)  
     integer,                  intent(in)              :: sendCount
     integer,                  intent(in)              :: dst
-    real(ESMF_KIND_R4),       intent(in)              :: recvData(:)  
+    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3183,7 +3183,7 @@ module ESMF_VMMod
     real(ESMF_KIND_R8),       intent(in)              :: sendData(:)  
     integer,                  intent(in)              :: sendCount
     integer,                  intent(in)              :: dst
-    real(ESMF_KIND_R8),       intent(in)              :: recvData(:)  
+    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3275,7 +3275,7 @@ module ESMF_VMMod
     type(ESMF_Logical),       intent(in)              :: sendData(:)  
     integer,                  intent(in)              :: sendCount
     integer,                  intent(in)              :: dst
-    type(ESMF_Logical),       intent(in)              :: recvData(:)  
+    type(ESMF_Logical),       intent(out)             :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3367,7 +3367,7 @@ module ESMF_VMMod
     character(*),             intent(in)              :: sendData
     integer,                  intent(in)              :: sendCount
     integer,                  intent(in)              :: dst
-    character(*),             intent(in)              :: recvData
+    character(*),             intent(out)             :: recvData
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
