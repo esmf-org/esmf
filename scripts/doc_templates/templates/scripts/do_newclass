@@ -1,6 +1,6 @@
 #!/bin/csh -f
 #
-# $Id: do_newclass,v 1.1 2002/10/07 16:35:44 eschwab Exp $
+# $Id: do_newclass,v 1.2 2002/10/08 22:16:33 eschwab Exp $
 #
 #===============================================================================
 # do_newclass
@@ -25,17 +25,21 @@
 if($#argv != 2) then
   echo "Usage:  do_newclass <class> <core language [c|f]>"
   exit
-else 
+endif 
+
   set class=$1
-  set classlow = `tolower $class`
   set lang=$2
-  set comppath = `cd ..;pwd`
-  set comp = `getfn $comppath`
-endif
+
+# make lowercase classname
+  set classlow = `echo $class | tr "[A-Z]" "[a-z]"`
+
+# get component name from parent path
+  set comppath = `cd ..; pwd`
+  set comp = `basename $comppath`
 
   set DOCT_DIR=$DOC_DIR/templates
 
-# get a copy of the source template file, rename as requested class
+# get a copy of the source template file, rename and edit as requested class
   switch ($lang) 
   case f:
       if(!(-r ESMF_$class.F90)) cat $DOCT_DIR/ESMF_class.F90 | \
