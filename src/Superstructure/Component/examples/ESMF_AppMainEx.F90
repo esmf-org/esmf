@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.16 2004/01/29 04:51:37 eschwab Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.17 2004/02/11 17:36:01 svasquez Exp $
 !
 ! Example code for a main Application program. 
 
@@ -17,11 +17,8 @@
 !   ! Gridded Component routines.
 
     module PHYS_mod
-
     use ESMF_Mod
-
     public PHYS_SetServices
-
     contains
 
     subroutine PHYS_SetServices(gcomp, rc)
@@ -36,7 +33,6 @@
                                                      ESMF_SINGLEPHASE, rc)
       
     end subroutine PHYS_SetServices
-      
       
     subroutine my_init(gcomp, importstate, exportstate, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
@@ -76,13 +72,10 @@
 
     end module
 
-
     module DYNM_mod
 
     use ESMF_Mod
-
     public DYNM_SetServices
-
     contains
 
     subroutine DYNM_SetServices(gcomp, rc)
@@ -97,7 +90,6 @@
                                                      ESMF_SINGLEPHASE, rc)
       
     end subroutine DYNM_SetServices
-      
       
     subroutine my_init(gcomp, importstate, exportstate, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
@@ -137,13 +129,11 @@
 
     end module
 
-
     module CPLR_mod
 
     use ESMF_Mod
 
     public CPLR_SetServices
-
     contains
 
     subroutine CPLR_SetServices(cpl, rc)
@@ -158,7 +148,6 @@
                                                      ESMF_SINGLEPHASE, rc)
       
     end subroutine CPLR_SetServices
-      
       
     subroutine my_init(cpl, importstatelist, exportstatelist, externalclock, rc)
       type(ESMF_CplComp) :: cpl
@@ -198,7 +187,6 @@
 
     end module
 
-
     program ESMF_AppMainEx
     
 !   ! The ESMF Framework module
@@ -227,9 +215,7 @@
         
 !-------------------------------------------------------------------------
 !   ! Initialize the Framework
-
     call ESMF_Initialize(rc=rc)
-
 !-------------------------------------------------------------------------
 !   !
 !   !  Create, Init, Run, Finalize, Destroy Components.
@@ -240,10 +226,8 @@
 
     cname = "Top Level Atmosphere Model Component"
     top = ESMF_GridCompCreate(cname, configfile="setup.rc", rc=rc)  
-
     delist1 = (/ (i, i=0,3) /)
     layout1 = ESMF_DELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
-
     cname1 = "Atmosphere Physics"
     gcomp1 = ESMF_GridCompCreate(cname1, layout1, ESMF_ATM, rc=rc)  
 
@@ -258,7 +242,6 @@
 
     delist2 = (/ (i, i=0,3) /)
     layout2 = ESMF_DELayoutCreate(delist1, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
-
     cname2 = "Atmosphere Dynamics"
     gcomp2 = ESMF_GridCompCreate(cname2, layout2, ESMF_ATM, rc=rc)
 
@@ -269,7 +252,6 @@
 
     delist3 = (/ (i, i=0,3) /)
     layout3 = ESMF_DELayoutCreate(delist1, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
-
     cname = "Atmosphere Coupler"
     cpl = ESMF_CplCompCreate(cname, layout3, rc=rc)
 
@@ -283,7 +265,6 @@
 
     states(1) = ESMF_StateCreate(cname1, ESMF_STATEEXPORT, rc=rc)
     states(2) = ESMF_StateCreate(cname2, ESMF_STATEIMPORT, rc=rc)
-
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type
@@ -312,24 +293,18 @@
     call ESMF_CplCompInitialize(cpl, states(1), states(2), clock=tclock, rc=rc)
     print *, "Comp Initialize complete"
 
-
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
-
         call ESMF_GridCompRun(gcomp1, exportstate=states(1), clock=tclock, rc=rc)
         call ESMF_CplCompRun(cpl, importstate=states(1), &
                                   exportstate=states(2), clock=tclock, rc=rc)
         call ESMF_GridCompRun(gcomp2, importstate=states(2), clock=tclock, rc=rc)
-   
         call ESMF_ClockAdvance(tclock, timestep)
-
         ! query clock for current time
         if (ESMF_ClockIsStopTime(tclock)) finished = .true.
-
     enddo
     print *, "Comp Run complete"
-
 
     ! Give each component a chance to write out final results, clean up.
     ! Call each Finalize routine in turn.  There is an optional index number
@@ -339,7 +314,6 @@
     call ESMF_CplCompFinalize(cpl, states(1), states(2), clock=tclock, rc=rc)
     print *, "Comp Finalize complete"
 
-
     ! Destroy components.
     call ESMF_ClockDestroy(tclock, rc)
     call ESMF_CalendarDestroy(gregorianCalendar, rc)
@@ -348,13 +322,11 @@
     call ESMF_CplCompDestroy(cpl, rc)
     print *, "Comp Destroy returned"
 
-
     print *, "Application Example 1 finished"
 
     call ESMF_Finalize(rc=rc)
 
     end program ESMF_AppMainEx
-    
 
     ! Each Component must supply a SetServices routine which makes the
     !  following types of calls:
