@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.11 2003/10/20 23:28:05 svasquez Exp $
+% $Id: ESMF_use.tex,v 1.12 2003/11/12 17:35:37 svasquez Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -7,7 +7,7 @@ To use ESMF from Fortran, add the directory that contains
 the ESMF {\tt *.mod} file(s),
 
 \begin{verbatim}
-$ESMF_DIR/mod/mod$ESMF_BOPT/$ESMF_ARCH.$ESMF_PREC.$ESMF_SITE
+$ESMF_DIR/mod/mod$ESMF_BOPT/$ESMF_ARCH.$ESMF_COMPILER.$ESMF_PREC.$ESMF_SITE
 \end{verbatim} 
 
 to your search path for {\tt *.mod} files.  For most compilers this path 
@@ -16,7 +16,7 @@ with the ESMF shared object library.  This is a file called
 {\tt libesmf.so} that is located in the following directory:
 
 \begin{verbatim}
-$ESMF_DIR/lib/lib$ESMF_BOPT/$ESMF_ARCH.$ESMF_PREC.$ESMF_SITE
+$ESMF_DIR/lib/lib$ESMF_BOPT/$ESMF_ARCH.$ESMF_COMPILER.$ESMF_PREC.$ESMF_SITE
 \end{verbatim} 
 
 The details of how to link on specific platforms are included in the 
@@ -51,79 +51,47 @@ the linker is important. Library routines must be called before they are
 defined. So, if a library {\bf A} uses functionality provided by library 
 {\bf B}, then library {\bf A} must appear before library {\bf B} on the link line. 
 
-The following example shows how to link a Fortran90 
-application with the ESMF shared library on a variety of platforms.  
-In the example, the Fortran90 application is called {\tt myModel}.
+To link a Fortran90 application to the ESMF shared libraries please refer to the
+{\tt link\_rules} files found in the following directories:
 
-\noindent We first define the following:
 
 \begin{verbatim}
-MODDIR = ${ESMF_DIR}/mod/mod${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
-LIBDIR = ${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
+	$ESMF_DIR/build_config/AIX.default.default
+	$ESMF_DIR/build_config/IRIX64.default.default
+	$ESMF_DIR/build_config/Linux.intel.default
+	$ESMF_DIR/build_config/OSF1.default.default
 \end{verbatim}
 
-\noindent{\it Linking using the SGI with 64-bit addressing:} 
+In an effort to provide platform specific information for building ESMF and linking the
+shared libraries with your application, a new sourceforge site, esmfcontrib, has been created.
+To locate the platforms makefiles for specific institutions checkout the build\_makefile\_fragments
+using the appropriate CVSROOT.
+
+Additionally, you may checkout all the platforms makefile fragments for a particular institution
+from the esmfcontrib. For example to checkout the makefile fragments for the platforms at the
+National Center for Atmospheric Research, ncar, change directories to
 
 \begin{verbatim}
-   f90 -freeform -64 -I${MODDIR} myModel.F  \
-   -L${LIBDIR}  -rpath ${LIBDIR} -lesmf -lC -lCio -lmpi -lmpi++ -o myModel  
+ 	$ESMF_DIR/build_config
 \end{verbatim}
 
-\noindent{\it Linking using the SGI with 32-bit addressing:} 
+and use the following CVS command:
 
 \begin{verbatim}
-   f90 -freeform -mips4 -I${MODDIR} myModel.F  \
-   -L${LIBDIR}  -rpath ${LIBDIR} -lesmf -lC -lCio -lmpi -lmpi++ -o myModel  
+	cvs -z3 -d:ext:$username@cvs.sourceforge.net:/cvsroot/esmfcontrib checkout ncar
 \end{verbatim}
 
-\noindent{\it Linking using the IBM with 64-bit addressing:}
+At the present time, we have files for the following institutions:
 
 \begin{verbatim}
-   mpxlf90_r -q64 -qsuffix=f=F90 -I${MODDIR} myModel.F -brtl \
-   -L${LIBDIR}  -lesmf -lC -o myModel
-\end{verbatim}
-
-\noindent{\it Linking using the IBM with 32-bit addressing:}
-
-\begin{verbatim}
-   mpxlf90_r -qsuffix=f=F90 -I${MODDIR} myModel.F \
-   -L${LIBDIR} -lesmf -brtl -lC -o myModel
-\end{verbatim}
-
-\noindent{\it Linking using the Compaq with 64-bit addressing:} 
-
-\begin{verbatim}
-   f90 -free -I${MODDIR} myModel.F \
-   -L${LIBDIR} -rpath ${LIBDIR}  -lesmf  -lcxx -lmpi -o myModel
+	anl  - Argonne National Labratories
+	cola - Center for Ocean Land and Atmosphere
+	gsfc - Goddard Space Flight Center
+        ncar - National Center for Atmospheric Research
 \end{verbatim}
 
 
-\noindent{\it Linking using the Linux Lahey Fortran compiler:}
-
-\begin{verbatim}
-    Define:
-    LD_LIBRARY_PATH=/usr/local/lf9560/lib:$LIBDIR
-
-    lf95 -I${MODDIR} -o myModel myModel.F \
-    -L${LIBDIR} -lesmf -lmpiuni
-
-\end{verbatim}
-   
-
-\noindent{\it Linking using the Linux Portland Fortran compiler:}
-
-\begin{verbatim}
-    Define:
-    LD_LIBRARY_PATH=/local/pgi/linux86/lib
-
-    pgf90 -I${MODDIR} -o myModel myModel.F \
-    -L${LIBDIR} -lesmf -lmpiuni -lpgc -lstd -lC
-
-\end{verbatim}
-
-
-
-
+Users are encouraged to contribute pertinent information to the esmfcontrib respository.
 
 
 
