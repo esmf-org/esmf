@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/18 22:32:11 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/19 21:42:39 jwolfe Exp $ 
 
 ALL:  system_tests
 
@@ -16,9 +16,9 @@ DIRS	  =
 LOCDIR	  = src/system_tests/FieldHaloPeriodic
 
 
-SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/FieldHaloPeriodic
+SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldHaloPerSTest
 
-# Object files other than ESMF_SysTest%.o that the
+# Object files other than ESMF_%STest.o that the
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
@@ -40,12 +40,12 @@ CLOBBERDIRS =
 
 
 RUN_FieldHaloPeriodic:
-	-@rm -f testlog stdlog.* logfile.* FieldHaloPeriodic.tmps
-	-${MPIRUN} -np 12 $(ESMC_TESTDIR)/FieldHaloPeriodic > $(ESMC_TESTDIR)/FieldHaloPeriodic.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_FieldHaloPerSTest.tmps
+	-${MPIRUN} -np 12 $(ESMC_TESTDIR)/ESMF_FieldHaloPerSTest > $(ESMC_TESTDIR)/ESMF_FieldHaloPerSTest.stdout
 
 RUN_FieldHaloPeriodicUNI:
-	-@rm -f testlog stdlog.* logfile.* FieldHaloPeriodic.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/FieldHaloPeriodic > $(ESMC_TESTDIR)/FieldHaloPeriodic.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_FieldHaloPerSTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldHaloPerSTest > $(ESMC_TESTDIR)/ESMF_FieldHaloPerSTest.stdout
 
 FieldHaloPeriodic.rm:
 	echo "FieldHaloPeriodic.rm target called here."
