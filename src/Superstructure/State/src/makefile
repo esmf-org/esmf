@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.2 2004/02/05 21:53:55 nscollins Exp $
+# $Id: makefile,v 1.3 2004/02/11 20:09:35 nscollins Exp $
 
 # Leave alone.
-ALL: lib 
+ALL: build_here 
 
 # Don't set these unless absolutely necessary - they've got to be
 # architecture and compiler independent and should be inherited
 # from the upper level makefile if possible.
-CFLAGS    = ${MPI_INCLUDE}
+CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
@@ -16,7 +16,7 @@ SOURCEF	  = ESMF_State.F90  ESMF_StateGet.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # If you have public .h files in this dir, list them here
-STOREH    =
+STOREH    = ESMC_State.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
