@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.31 2003/04/30 07:48:24 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.32 2003/04/30 21:59:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.31 2003/04/30 07:48:24 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.32 2003/04/30 21:59:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -560,7 +560,8 @@
       char *timeString) const {    // out - time value in string format
 //
 // !DESCRIPTION:
-//      Gets a {\tt Time}'s value in character format
+//      Gets a {\tt Time}'s value in ISO 8601 character format
+//      YYYY-MM-DDThh:mm:ss
 //
 //EOP
 // !REQUIREMENTS:  
@@ -580,8 +581,8 @@
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER);
 
-    // ISO 8601 format CCYY-MM-DD HH:MM:SS
-    sprintf(timeString, "%lld-%02d-%02d %02d:%02d:%02lld\0",
+    // ISO 8601 format YYYY-MM-DDThh:mm:ss
+    sprintf(timeString, "%lld-%02d-%02dT%02d:%02d:%02lld\0",
             YR, MM, DD, H, M, S);
 
     return(ESMF_SUCCESS);
@@ -708,7 +709,7 @@
       ESMC_TimeInterval *dayOfYear) const {   // out - time's day of year value
 //
 // !DESCRIPTION:
-//      Gets a {\tt Time}'s day of the year value as an {\tt ESMC_TimeInterval}
+//      Gets a {\tt Time}'s day of the year value as an {\tt ESMC\_TimeInterval}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -773,28 +774,81 @@
 
     // validate inputs
     if (dayOfWeek == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+
+    // this method is valid for any calendar which uses 7-day weeks
     if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
     if (Calendar->Type == ESMC_CAL_JULIAN ||
         Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
-    // get day of the year  
-    int dayOfYear;
-    if (ESMC_TimeGetDayOfYear(&dayOfYear) == ESMF_FAILURE) return(ESMF_FAILURE);
-
-    // get year of our (this) time
+    // date variables
     ESMF_IKIND_I8 YR;
-    // TODO: use native C++ Get, not F90 entry point
-    ESMC_TimeGet(&YR,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+    int MM, DD;
 
-    int YY = (YR-1) % 100;
-    *dayOfWeek = 1 + ((dayOfYear + ((((( ((YR-1)-YY) / 100) % 4) * 5) +
-                      (YY+YY/4) ) % 7) - 1) % 7);
+    //  The day of the week is simply modulo 7 from a reference date,
+    //  adjusted for a 1-based count and negative deltas.
+    //  The reference date is any known Monday (day of the week = 1),
+    //  either before or after the Gregorian Reformation of 9/3/1752,
+    //  depending on the date in question.  The Gregorian Reformation 
+    //  eliminated 10 days (9/4-9/13) from the calendar, thereby causing a 
+    //  re-alignment of the week timeline.
+
+    ESMC_Time referenceMonday = *this;
+                                // copy calendar & timezone from this time
+
+    // initialize Gregorian reformation date of September 3, 1752
+    ESMC_Time GregorianReformation = *this;  // copy calendar & timezone
+    YR=1752; MM=9; DD=3;
+    GregorianReformation.ESMC_TimeSet(&YR, &MM, &DD,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+
+    // Set the reference date to any Monday depending on whether the given
+    //   date is before or after the Gregorian Reformation.  Assume the
+    //   10 eliminated days fall on the post-reformation week alignment.
+    if (*this > GregorianReformation) {
+      YR=1796; MM=7; DD=4;    // America's 20th birthday
+    } else {
+      YR=1492; MM=10; DD=29;  // Christopher Columbus lands in Cuba
+    }
+    referenceMonday.ESMC_TimeSet(&YR, &MM, &DD,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+
+    // calculate the difference in days between the given date and
+    //  the reference date
+    ESMC_TimeInterval delta;
+    delta = *this - referenceMonday;
+    ESMF_IKIND_I8 diffDays;
+    // TODO: use native C++ Get() when ready
+    delta.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+
+                               &diffDays,
+
+                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                               ESMC_NULL_POINTER);
+
+    // calculate day of the week as simply modulo 7 from the reference date,
+    //  adjusted for a 1-based count and negative deltas
+    int weekDay = diffDays % 7;  // (-6 to 0) or (0 to 6)
+    *dayOfWeek = (weekDay >= 0) ? (weekDay + 1) : (weekDay + 7); // (1 to 7)
 
     return(ESMF_SUCCESS);
 
