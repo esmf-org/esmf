@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 2004/08/27 20:14:37 svasquez Exp $ 
+# $Id: makefile,v 1.30 2005/02/28 16:34:56 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -23,8 +23,9 @@ TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldUTest \
 TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FRouteUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI 
-# Don't run ESMF_FRouteUtest on one processor
+TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
+                RUN_ESMF_FRoute4UTestUNI \
+                RUN_ESMF_FRoute8UTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -40,23 +41,19 @@ ESMF_FRoute8UTest.F90:  ESMF_FRoute4UTest.F90
 # Field
 #
 RUN_ESMF_FieldUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
 
 RUN_ESMF_FieldUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
 
-ESMF_FieldUTest.rm:
-	echo "ESMF_FieldUTest.rm target called here."
 
 #
 # Field Route function
 #
 RUN_ESMF_FRouteUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FRoute4UTest > $(ESMC_TESTDIR)/ESMF_FRoute4UTest.stdout
 	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_FRoute8UTest > $(ESMC_TESTDIR)/ESMF_FRoute8UTest.stdout
+
 	# for now comment out the larger tests.  as far as i know, these
 	# run, but can cause problems for the automatic overnight builds.
 	#-${MPIRUN} -np 12 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest12.stdout
@@ -66,9 +63,6 @@ RUN_ESMF_FRouteUTest:
 	#-${MPIRUN} -np 32 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest24.stdout
 
 RUN_ESMF_FRouteUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
-
-
+	echo "PASS: ESMF_FRouteUTest not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FRouteUTest.stdout
 
 

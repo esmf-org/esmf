@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/09/23 20:44:47 jwolfe Exp $
+# $Id: makefile,v 1.7 2005/02/28 16:34:57 nscollins Exp $
 
 ALL:  build_tests
 
@@ -18,7 +18,8 @@ TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldGatherUTest
 
 TESTS_RUN     = RUN_ESMF_FieldGatherUTest
 
-TESTS_RM      = ESMF_FieldGatherUTest.rm
+TESTS_RUN_UNI = RUN_ESMF_FieldGatherUTestUNI
+
 
 include ${ESMF_DIR}/makefile
 
@@ -32,10 +33,9 @@ CLOBBERDIRS =
 # FieldComm unit tests
 #
 RUN_ESMF_FieldGatherUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldGatherUTest.tmps
 	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldGatherUTest > $(ESMC_TESTDIR)/ESMF_FieldGatherUTest.stdout
 
-ESMF_FieldGatherUTest.rm:
-	echo "ESMF_FieldGatherTest.rm target called here."
 
+RUN_ESMF_FieldGatherUTestUNI:
+	echo "PASS: ESMF_FieldGatherUTest not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldGatherUTest.stdout
 
