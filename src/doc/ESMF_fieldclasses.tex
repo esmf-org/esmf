@@ -10,7 +10,6 @@ how they relate to user-supplied code and other classes in the ESMF.
 
 \subsection{Design Goals and Considerations}
 
-<<<<<<< ESMF_fieldclasses.tex
 Many Earth system applications simulate the time evolution of physical 
 fields through numerical methods that discretize the fields on spatial 
 and/or spectral grids.  Often
@@ -38,36 +37,8 @@ communication patterns, the mapping between software tasks and
 One of the fundamental design considerations for the {\tt Field},
 {\tt Grid}, and related classes in the ESMF is to isolate 
 the hardware characteristics and the decomposition decisions from the
-=======
-It is a difficult software engineering problem
-to write efficient code which is portable across
-all current multiprocessor hardware platforms
-because the fundamental characteristics of the underlying
-systems vary so widely.
-
-Within most climate models, an single component (such as a
-land or ocean model) takes a data-parallel approach when 
-decomposing a large problem into smaller subproblems which can be 
-solved simultaneously.
-There is a fundamental tradeoff between a coarse decomposition
-of fewer subsets and a fine decomposition of many subsets;
-more subsets increase the potential for
-work to proceed in parallel, but unless there is 
-no communication between subsets (which is
-almost never the case), then as the
-decomposition becomes finer the communcation burden increases.
-There is typically a bend in the end-to-end performance
-curve as the number of decomposition elements is increased;
-at some point the performance drops as the number of subdivisions
-increases and the location of point can vary widely 
-depending on the machine.
-One of the fundamental design considerations for the data
-handling parts of the ESMF library is to isolate the hardware
-characteristics and the decomposition decisions from the
->>>>>>> 1.13
 user code and encapsulate them so the tradeoffs can be 
 weighed clearly and can be easily changed as the code is 
-<<<<<<< ESMF_fieldclasses.tex
 run on different systems.  The design of the {\tt Layout} object
 (see Section~\ref{sec:utilclasses}) allows users to indicate 
 expected communication patterns so the framework can optimize if possible.
@@ -75,24 +46,6 @@ expected communication patterns so the framework can optimize if possible.
 In order to efficiently compute numerically intensive equations on 
 each point on a grid, it can be useful to forego information about 
 the global grid and use local indices.  {\tt Field} routines
-=======
-run on different systems.
-
-Another issue in the design of the ESMF data routines is that
-many hardware platforms have asymmetric
-communications bandwidths and possibly non-uniform memory
-access times ({\it NUMA architecture}).
-Since many climate models are based on regular grids and
-have themselves non-uniform communication patterns, the
-mapping between subsets and processing elements can have
-important performance implications.  The design of the
-grid layout object allows for the user to indicate expected
-communication patterns so the library can optimize the
-mapping of data subsets to decomposition elements.
-
-Most simulation code involves solving numerically intensive
-equations on each point in a grid.  The data handling routines
->>>>>>> 1.13
 must supply an efficient interface for local access to a
 subset of the data, as well as interfaces for access to
 global information about the entire data set.
@@ -100,34 +53,11 @@ global information about the entire data set.
 Key features of the ESMF design which address the design goals
 mentioned above include:
 \begin{itemize}
-<<<<<<< ESMF_fieldclasses.tex
 \item The data object layer of ESMF provides abstractions which
 minimize the dependency of the user-supplied code on 
-how the decomposition maps to the underlying hardware and system
-software.  
-=======
-\item The data layer provides an abstraction which
-minimizes the dependency of the user-supplied code on 
 how the decomposition maps to the underlying hardware
-capabilities.  The user code queries for how the data
-is decomposed instead of having to specify the decomposition.
->>>>>>> 1.13
+and system software.
 \item Communication patterns often include sending multiple
-<<<<<<< ESMF_fieldclasses.tex
-variables from one component to another.  The design of the {\tt Bundle} 
-class allows these to be grouped for efficiency.
-\item {\tt Grid}s and data are
-logically separated into separate objects.  This allows multiple
-data items to share the same {\tt Grid}.  Likewise, the mathematical
-description of a {\tt Grid} is separate from the {\tt Grid} decomposition.  
-Thus calculations can be performed in a coordinate-free index space, or
-multiple decompositions can be associated with the same mathematical 
-{\tt Grid}.
-\item The actual memory ordering of multidimensional data can be
-queried by the user code and the code can adapt to what is present,
-or the user can direct the ESMF to apply a particular ordering 
-(e.g. Fortran array order vs. C order).
-=======
 variables from one decomposition subset to another.  
 The design of the Bundle object
 allows these to be grouped for efficiency.
@@ -143,7 +73,6 @@ the data directly without needing to go through the library.
 queried by the user code and the code can iterate the data in that
 order, or the memory can be reordered by the library to conform to what
 the user code specifies (e.g. Fortran array order vs C order).
->>>>>>> 1.13
 
 \end{itemize}
 
@@ -205,44 +134,18 @@ about the order of the {\tt Fields} in the single data array.
 data, returning a pointer to the start of the data
 array, and methods for reordering and subsetting the data.
 
-<<<<<<< ESMF_fieldclasses.tex
-=======
-
-% \subsection{Examples}
-%
-%<< to be written >>
-
->>>>>>> 1.13
 \subsection{Class Details}
 
-<<<<<<< ESMF_fieldclasses.tex
 {\tt Field}, {\tt Grid} and related classes form an hierarchy within 
 a {\tt Gridded Components}, as shown in Figure~\ref{fig:datastruct}.
-=======
-Gridded Components encapsulate the computational data and the
-grid on which it is located.  A Gridded Component contains
-the object hierarchy illustrated in Figure~\ref{fig:datahier}.
->>>>>>> 1.13
 
-<<<<<<< ESMF_fieldclasses.tex
 \begin{figure}
 \caption[{Hierarchy of Data Structures}]{{\tt Field}, {\tt Grid}, and 
 related data structures form an hierarchy within a {\tt Gridded Component}.}
-=======
-\begin{figure}
-\caption[{Data Object Hierarchy}]{Relationships between major 
-Data handling objects.}
-\label{fig:datahier}
->>>>>>> 1.13
-\scalebox{0.70}{\includegraphics{ESMF_DataStructureHierarchy.eps}}
-<<<<<<< ESMF_fieldclasses.tex
 \label{fig:datastruct}
-\end{figure}
-=======
+\scalebox{0.70}{\includegraphics{ESMF_DataStructureHierarchy.eps}}
 \end{figure}
 
-
->>>>>>> 1.13
 
 \subsubsection{Bundle (ESMF\_Bundle)}
 \label{sec:bundle} 
@@ -309,15 +212,10 @@ An Ordering object is associated with a single Data object.  It provides
 methods to query the current memory organization and methods to reorder the Data object.
 
 \subsubsection{Grid (ESMF\_Grid)}
-<<<<<<< ESMF_fieldclasses.tex
-\label{sec:ordering} 
-A Grid is the general representation of the coordinate information for
-=======
 \label{sec:grid} 
-\begin{description}
-\item [Description] A Grid is the general representation of the coordinate information for
->>>>>>> 1.13
-the computation.  It contains both the logical presentation of the grid as well as the
+A Grid is the general representation of the coordinate information for
+the computation.  It contains both the logical presentation of the grid 
+as well as the
 decomposition of the grid into sets of gridpoints for processing in parallel on a
 multiprocessor system.  The {\tt Grid} class provides methods to the
 {\tt Field} and {\tt Bundle} classes for obtaining coordinate, indexing, and 
