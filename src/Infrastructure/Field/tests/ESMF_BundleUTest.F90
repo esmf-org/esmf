@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.5 2003/03/18 20:10:18 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.6 2003/03/20 20:04:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,14 +41,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.5 2003/03/18 20:10:18 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.6 2003/03/20 20:04:58 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 !     ! Local variables
       integer :: i, x, y, rc, mycell, fieldcount
-      type(ESMF_Grid) :: grid
+      type(ESMF_Grid) :: grid, grid2
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: arraya, arrayb
       type(ESMF_DataMap) :: datamap
@@ -80,7 +80,7 @@
 
       !------------------------------------------------------------------------
 
-      ! Verify that getting the name  of an uninitialized Bundle is handled properly.
+      ! Verify that getting the name of an uninitialized Bundle is handled properly.
       call ESMF_BundleGetName(bundle1, bname1, rc)
       write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
       write(name, *) "Getting name of uninitalized Bundle Test"
@@ -146,7 +146,7 @@
 
       !  Verify that the Field count query from an empty Bundle is handled properly
       call ESMF_BundleGetFieldCount(bundle2, fieldcount, rc);
-      write(failMsg, *) ""
+      write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to zero"
       write(name, *) "Getting Field count from an empty Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.0), name, failMsg, result, ESMF_SRCLINE)
       print *, "Field count of empty Bundle = ", fieldcount
@@ -166,6 +166,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.1), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !  Test Requirement FLD2.5.7 Return Grid
+      ! Commented out until Bug 707065 is fixed 
+      !call ESMF_BundleGetGrid(bundle2, grid2, rc);
+      !write(failMsg, *) ""
+      !write(name, *) "Getting a Grid from a Bundle Test Req. FLD2.5.7"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       ! Create an empty Bundle and then add multiple fields to it.
       bundle3 = ESMF_BundleCreate(name="southern hemisphere", rc=rc);
       bundle3 = ESMF_BundleCreate(name="northern hemisphere", rc=rc);
@@ -179,7 +187,7 @@
 
       !  Verify that Fields count can be queried from a Bundle 
       call ESMF_BundleGetFieldCount(bundle3, fieldcount, rc);
-      write(failMsg, *) ""
+      write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to three"
       write(name, *) "Getting Field count from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -272,5 +280,12 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       print *, "rc = ", (rc)
       !------------------------------------------------------------------------
+
+      ! Requirement 2.5.2 Insert and remove Field
+      ! A Field can be inserted into or removed from a Bundle
+      ! The remove portion of this requirement cannot be tested until Bug 705849
+      ! ESMF_BundleDeleteField not implemented" is fixed.
+      !------------------------------------------------------------------------
+
 
       end program ESMF_BundleUTest
