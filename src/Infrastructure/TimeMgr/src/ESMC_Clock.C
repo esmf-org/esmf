@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.31 2003/09/04 18:57:57 cdeluca Exp $
+// $Id: ESMC_Clock.C,v 1.32 2003/09/10 03:36:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.31 2003/09/04 18:57:57 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.32 2003/09/10 03:36:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -106,6 +106,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // save current values to restore in case of failure;
+    ESMC_Clock saveClock = *this;
+
     if (timeStep  != ESMC_NULL_POINTER) this->timeStep  = *timeStep;
     if (startTime != ESMC_NULL_POINTER) this->startTime = *startTime;
     if (stopTime  != ESMC_NULL_POINTER) this->stopTime  = *stopTime;
@@ -118,7 +121,12 @@
 
     if (advanceCount != ESMC_NULL_POINTER) this->advanceCount = *advanceCount;
 
-    return(ESMC_ClockValidate());
+    if (ESMC_ClockValidate() == ESMF_SUCCESS) return(ESMF_SUCCESS);
+    else {
+      // restore original clock values
+      *this = saveClock;
+      return(ESMF_FAILURE);
+    }
 
  } // end ESMC_ClockSet
 
@@ -373,6 +381,8 @@
     currTime += this->timeStep;  // advance it!
     advanceCount++;
 
+    // TODO: validate (range check) new time against its calendar ?
+
     // TODO: call each alarm's CheckRingTime method;
     //   compile and return a list of ringing alarms
     //   ESMC_AlarmCheckRingTime(currTime, ...)
@@ -608,6 +618,10 @@
        refTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
        currTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
        prevTime.ESMC_TimeValidate()) return(ESMF_FAILURE);
+
+    // TODO:  if stoptime > startTime, then timeStep should be
+    //        positive and vice versa
+    // TODO:  if timeStep > 0, then currTime >= prevTime and vice versa
     
     return(ESMF_SUCCESS);
 

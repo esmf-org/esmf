@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.31 2003/09/04 18:57:57 cdeluca Exp $
+// $Id: ESMC_Calendar.C,v 1.32 2003/09/10 03:36:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.31 2003/09/04 18:57:57 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.32 2003/09/10 03:36:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -62,6 +62,10 @@
     // TODO: ensure initialization if called via F90 interface;
     //       cannot call constructor, because destructor is subsequently
     //       called automatically, returning initialized values to garbage.
+
+    // save current values to restore in case of failure;
+    ESMC_Calendar saveCalendar = *this;
+
     for (int i=0; i<MONTHS_PER_YEAR; i++) daysPerMonth[i] = 0;
     secondsPerDay  = 0;
     secondsPerYear = 0;
@@ -131,11 +135,14 @@
         case ESMC_CAL_GENERIC:
             // user defined; need more info; user must call
             //   SetGeneric() instead
+            // restore original calendar
+            *this = saveCalendar;
             rc = ESMF_FAILURE;
             break;
 
         default:
-            // unknown calendar type
+            // unknown calendar type; restore original
+            *this = saveCalendar; 
             rc = ESMF_FAILURE;
             break;
     }
@@ -411,6 +418,9 @@
 //
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
+
+// TODO: validate core values before conversion as they can go out-of-range
+//       during arithmetic operations
 
     int rc = ESMF_SUCCESS;
 

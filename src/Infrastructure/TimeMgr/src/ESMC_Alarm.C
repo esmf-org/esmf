@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.17 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.18 2003/09/10 03:36:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.17 2003/08/29 05:31:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.18 2003/09/10 03:36:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -141,6 +141,9 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+    // save current values to restore in case of failure
+    ESMC_Alarm saveAlarm = *this;
+
     if (ringTime != ESMC_NULL_POINTER) {
       this->ringTime = *ringTime;
     }
@@ -172,7 +175,12 @@
       this->sticky = *sticky;
     }
      
-    return(ESMC_AlarmValidate());
+    if (ESMC_AlarmValidate() == ESMF_SUCCESS) return (ESMF_SUCCESS);
+    else {
+      // restore original alarm values
+      *this = saveAlarm;
+      return(ESMF_FAILURE);
+    }
 
  } // end ESMC_AlarmSet
 
