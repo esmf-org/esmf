@@ -1,4 +1,4 @@
-% $Id: README_REF,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+% $Id: README_REF,v 1.2 2002/10/11 22:51:51 eschwab Exp $
 
 ================================================================================
                                  README_REF
@@ -25,7 +25,7 @@ design and architecture documents.
 --------------------------------------------------------------------------------
 Part		Template File	    Description
 --------------------------------------------------------------------------------
-document	<comp>_refdoc.tex   Document shell with software release number
+document	<comp>_refdoc.ctex   Document shell with software release number
 
 synopsis        <comp>_syn.tex      Brief description of the software 
                                     function  
@@ -40,7 +40,7 @@ description
 class           class_rest.tex      List of class restrictions due to design
 restrictions                        or implementation strategies
 
-fortran files   prologue.F          Contain code headers instrumented for
+fortran files   ESMF_class.F90      Contain code templates instrumented for
                                     ProTeX; not included in document but used 
                                     to create it
 
@@ -52,14 +52,14 @@ fapi            class_fapi.tex      Fortran application program interface;
 
 fexamples       class_fex.tex       Fortran examples
 
-[c/c++ files]   prologue.c          Contain code headers instrumented for
-                                    ProTeX; not included in document but used
+[c/c++ files]   ESMC_class.C        Contain code templates instrumented for
+                ESMC_class.h        ProTeX; not included in document but used
                                     to create it
 
 [cparameters]   class_cparam.tex    C/C++ flags and enum types, if any
 
-[capi]          class_capi.tex      C/C++ application program interface;
-                                    this file should be generated using ProTeX
+[ccapi]         class_ccapi.tex     C/C++ application program interface;
+                class_chapi.tex     this file should be generated using ProTeX
 
 [cexamples]     class_cex.tex       C/C++ examples
 
@@ -69,19 +69,23 @@ fexamples       class_fex.tex       Fortran examples
 
 --------------------------------------------------------------------------------
 
-To create a new reference manual, fill in the template files, duplicating and 
-renaming the class files for each class in your component.  In 
-<comp>_refdoc.tex, be sure to comment out the \input of any files you aren't 
-including and specify the \input filenames of files that you are including.
+To create a new reference manual, fill in the template files.  Use do_newclass
+to create new class file templates for each class in your component.
+In <comp>_refdoc.ctex, be sure to comment out the \input of any files you
+aren't including and specify the \input filenames of files that you are
+including.
 
 Process prologue files using ProTeX:
 
-	do_fprotex <class> <prologue.F[90]>
+	do_fprotex  <class> <ESMF_class.F90>
+	do_chprotex <class> <ESMC_class.h>
+	do_ccprotex <class> <ESMC_class.C>
 	
-	Here <prologue.F[90]> is the name of the Fortran file with the 
-        instrumented headers.
-        This script will produce a LaTeX file called <class>_fapi.tex.
-
+	Here ESMF_class.F90, ESMC_class.h, ESMC_class.C are the names of the
+        Fortran and C/C++ files, respectively, with the instrumented headers.
+        These scripts will produce LaTeX files called <class>_fapi.tex, 
+        <class_chapi.tex>, and <class_ccapi.tex>, respectively.
+	
 Build a dvi file from LaTeX documents:
 
 	do_latex <comp> ref
@@ -98,8 +102,3 @@ The dvipdf tool can be used to produce a pdf:
 
 ================================================================================
 C. DeLuca (cdeluca@ucar.edu)                                      March 13, 2000
-
-
-
-
-

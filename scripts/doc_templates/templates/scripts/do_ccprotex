@@ -1,6 +1,6 @@
 #!/bin/csh -f
 #
-# $Id: do_ccprotex,v 1.1 2002/07/25 16:54:31 eschwab Exp $
+# $Id: do_ccprotex,v 1.2 2002/10/11 22:52:40 eschwab Exp $
 #
 #===============================================================================
 # ccprotex
@@ -11,10 +11,10 @@
 # Usage: cprotex <class> <c++ filename>
 #
 #        <class> is the name of the class whose definition/methods
-#               are instrumented for ProTeX (e.g., TimeInstant)
+#               are instrumented for ProTeX (e.g., ESMC_TimeInstant)
 #
-#        <C++_filename.cc> is the name of the file that includes the 
-#             prologue(s) instrumented for ProTeX (e.g., TimeInstant.cc)
+#        <C++_filename.C> is the name of the file that includes the 
+#             prologue(s) instrumented for ProTeX (e.g., ESMC_TimeInstant.C)
 #
 # See the ProTeX documentation:
 # http://dao.gsfc.nasa.gov/software/protex
@@ -24,7 +24,7 @@
 #===============================================================================
 
 if ($#argv != 2 ) then
-  echo "Usage: ccprotex <class> <C++_filename.cc>"
+  echo "Usage: ccprotex <class> <C++_filename.C>"
   exit
 else
   set class=$1

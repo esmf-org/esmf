@@ -1,4 +1,4 @@
-% $Id: README_DES,v 1.2 2002/07/25 17:08:56 eschwab Exp $
+% $Id: README_DES,v 1.3 2002/10/11 22:51:51 eschwab Exp $
 
 ================================================================================
                                  README_DES
@@ -21,7 +21,7 @@ actually included.
 --------------------------------------------------------------------------------
 Part		Template File      Description
 --------------------------------------------------------------------------------
-document	    <comp>_desdoc.tex  Document shell, includes review status
+document	    <comp>_desdoc.ctex  Document shell, includes review status
 
 synopsis        <comp>_syn.tex	   Brief description of the software 
                                    function 
@@ -48,7 +48,7 @@ definition
 [class          class_rest.tes     List of class restrictions due to design
 restrictions]                       or implementation strategies
 
-fortran files   prologue.F         Code headers instrumented for
+fortran files   ESMF_class.F90     Code templates instrumented for
                                    ProTeX; not included in the document but 
                                    used to create it
 
@@ -60,14 +60,14 @@ fapi            class_fapi.tex     Fortran application program interface;
 
 [fexamples]     class_fex.tex      Fortran examples
 
-[c++ files]     prologue.cc        Code headers instrumented for
-                                   ProTeX; not included in the document but 
+[c++ files]     ESMC_class.h       Code templates instrumented for
+                ESMC_class.C       ProTeX; not included in the document but 
                                    used to create it
 
 [ccparameters]  class_ccparam.tex  C++ flags and enum types, if any
 
 [ccapi]         class_ccapi.tex    C++ application program interface;
-                                   this file should be generated using ProTeX
+                class_chapi.tex    these files should be generated using ProTeX
 
 [ccexamples]    class_ccex.tex     C++ examples
 
@@ -77,20 +77,21 @@ fapi            class_fapi.tex     Fortran application program interface;
 
 --------------------------------------------------------------------------------
 
-To create a new design document, fill in the template files, duplicating and 
-renaming the class files for each class in your component.  In 
-<comp>_desdoc.tex, be sure to comment out the \input of any files you aren't 
+To create a new design document, fill in the template files.  Use do_newclass
+to create new class file templates for each class in your component.  In 
+<comp>_desdoc.ctex, be sure to comment out the \input of any files you aren't 
 including and specify the \input filenames of files that you are including.
 
-Process prologue files for each class or module using ProTeX:
+Process protex-instrumented source files for each class or module using ProTeX:
 
-	do_fprotex  <class> <prologue.F[90]>
-	do_ccprotex <class> <prologue.cc>
+	do_fprotex  <class> <ESMF_class.F90>
+	do_chprotex <class> <ESMC_class.h>
+	do_ccprotex <class> <ESMC_class.C>
 	
-	Here <prologue.F[90]> and <prologue.cc> are the names of the Fortran and
-        C/C++ files, respectively, with the instrumented headers.
-        These scripts will produce LaTeX files called <class>_fapi.tex and
-        <class_ccapi.tex>, respectively.
+	Here ESMF_class.F90, ESMC_class.h, ESMC_class.C are the names of the
+        Fortran and C/C++ files, respectively, with the instrumented headers.
+        These scripts will produce LaTeX files called <class>_fapi.tex, 
+        <class_chapi.tex>, and <class_ccapi.tex>, respectively.
 
 Build a dvi file from LaTeX documents:
 
