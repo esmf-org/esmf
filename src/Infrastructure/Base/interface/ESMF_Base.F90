@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.54 2003/08/27 23:10:43 jwolfe Exp $
+! $Id: ESMF_Base.F90,v 1.55 2003/08/29 21:01:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -179,6 +179,7 @@
       sequence
           integer :: DE
           integer :: rank
+          ! TODO:  add an element for size in points (memory)
           type (ESMF_AxisIndex) :: ai(ESMF_MAXDIM)
       end type
 
@@ -188,7 +189,7 @@
       sequence
           integer :: num_domains     ! number of domains stored
           integer :: current_size    ! size of buffer, used in linked list
-          integer :: total_size      ! total size of domain (number of points)
+          integer :: total_points    ! total size of domain (number of points)
           type(ESMF_Domain), dimension(:), pointer :: domains
       end type
 
@@ -353,7 +354,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.54 2003/08/27 23:10:43 jwolfe Exp $'
+               '$Id: ESMF_Base.F90,v 1.55 2003/08/29 21:01:38 jwolfe Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -1001,11 +1002,16 @@ end function
 !
 !EOP
       integer :: status
+      type(ESMF_Domain), dimension(:), pointer :: domains
 
-! Allocate an amount of memory that will hopefully be sufficient.
-      allocate(ESMF_DomainListCreate%domains(num_domains), stat=status)
+! Allocate an array of domains of specified size
+      allocate(domains(num_domains), stat=status)
 
-      ESMF_DomainListCreate%num_domains = num_domains
+! Initialize values and attach domains to the list
+      ESMF_DomainListCreate%num_domains  = num_domains
+      ESMF_DomainListCreate%current_size = num_domains
+      ESMF_DomainListCreate%total_points = 0
+      ESMF_DomainListCreate%domains      => domains
 
       end function ESMF_DomainListCreate
 
@@ -1053,7 +1059,7 @@ end function
 
       print *, "DomainListPrint"
       print *, "Number stored domains:", domainlist%num_domains
-      print *, "Total size:", domainlist%total_size
+      print *, "Total points:", domainlist%total_points
 
 ! Now loop through domains and print them out
 
