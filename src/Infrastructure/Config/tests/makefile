@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/02/13 15:35:13 nscollins Exp $
+# $Id: makefile,v 1.3 2004/05/14 22:34:25 slswift Exp $
 
 ALL:  build_tests
 
@@ -56,7 +56,7 @@ ESMF_ConfigUTest.rm:
 # ESMC_ConfigUTest
 #
 $(ESMC_TESTDIR)/ESMC_ConfigUTest: chkopts ESMC_ConfigUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMC_ConfigUTest ESMC_ConfigUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMC_ConfigUTest ESMC_ConfigUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_ConfigUTest.o
 
 RUN_ESMC_ConfigUTest:

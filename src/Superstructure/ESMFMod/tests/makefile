@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/02/13 15:40:35 nscollins Exp $
+# $Id: makefile,v 1.3 2004/05/14 22:34:28 slswift Exp $
 
 ALL:  build_tests
 
@@ -54,7 +54,7 @@ ESMF_ESMFModUTest.rm:
 # C++ Unit tests
 #
 $(ESMC_TESTDIR)/ESMC_ESMFModUTest: chkopts ESMC_ESMFModUTest.o
-	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_ESMFModUTest ESMC_ESMFModUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_ESMFModUTest ESMC_ESMFModUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_ESMFModUTest.o
 
 RUN_ESMC_ESMFModUTest:

@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.7 2004/03/16 18:00:54 nscollins Exp $
+#  $Id: build_rules.mk,v 1.8 2004/05/14 22:34:23 slswift Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -134,7 +134,7 @@ OCOMP_FOPTFLAGS		= -O3
 PARCH			= alpha
 
 SL_SUFFIX   = so
-SL_LIBOPTS  = -shared -rpath .:$(ESMF_LIBDIR)  ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+SL_LIBOPTS  = -shared -rpath .:$(ESMF_LIBDIR)  ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} 
 SL_LINKOPTS = 
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)

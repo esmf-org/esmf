@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/05/03 16:12:58 nscollins Exp $
+# $Id: makefile,v 1.2 2004/05/14 22:34:24 slswift Exp $
 
 ALL:  build_tests
 
@@ -54,7 +54,7 @@ ESMF_ArrayDataMapUTest.rm:
 # C++ Unit tests
 #
 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest: chkopts ESMC_ArrayDataMapUTest.o
-	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest ESMC_ArrayDataMapUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest ESMC_ArrayDataMapUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_ArrayDataMapUTest.o
 
 RUN_ESMC_ArrayDataMapUTest:

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/02/13 15:40:13 nscollins Exp $
+# $Id: makefile,v 1.3 2004/05/14 22:34:27 slswift Exp $
 
 # makefile template for the examples directory.
 
@@ -32,7 +32,7 @@ ESMF_BaseDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_BaseEx: ESMF_BaseEx.o  chkopts
-	${F90CXXLD} -g -o ESMF_BaseEx ESMF_BaseEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${F90CXXLD} -g -o ESMF_BaseEx ESMF_BaseEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_BaseEx.o
 
 RUN_ESMF_BaseEx:

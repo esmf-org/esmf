@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/02/13 15:36:00 nscollins Exp $
+# $Id: makefile,v 1.3 2004/05/14 22:34:25 slswift Exp $
 
 # makefile template for the examples directory.
 
@@ -32,7 +32,7 @@ ESMF_FieldCommDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_FieldCommEx: ESMF_FieldCommEx.o  chkopts
-	${F90CXXLD} -g -o ESMF_FieldCommEx ESMF_FieldCommEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${F90CXXLD} -g -o ESMF_FieldCommEx ESMF_FieldCommEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_FieldCommEx.o
 
 RUN_ESMF_FieldCommEx:

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/05/03 16:12:41 nscollins Exp $
+# $Id: makefile,v 1.2 2004/05/14 22:34:24 slswift Exp $
 
 # makefile template for the examples directory.
 
@@ -32,7 +32,7 @@ ESMF_ArrayDataMapDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_ArrayDataMapEx: ESMF_ArrayDataMapEx.o  chkopts
-	${F90CXXLD} -g -o ESMF_ArrayDataMapEx ESMF_ArrayDataMapEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${F90CXXLD} -g -o ESMF_ArrayDataMapEx ESMF_ArrayDataMapEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_ArrayDataMapEx.o
 
 RUN_ESMF_ArrayDataMapEx:

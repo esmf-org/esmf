@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2004/02/13 15:37:48 nscollins Exp $
+# $Id: makefile,v 1.14 2004/05/14 22:34:26 slswift Exp $
 
 ALL:  build_tests
 
@@ -49,7 +49,7 @@ ESMF_XPacketUTest.rm:
 #  C++ Packet
 #
 $(ESMF_TESTDIR)/ESMC_XPacketUTest: chkopts ESMC_XPacketUTest.o
-	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_XPacketUTest ESMC_XPacketUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_XPacketUTest ESMC_XPacketUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_XPacketUTest.o
 
 RUN_ESMC_XPacketUTest:
@@ -79,7 +79,7 @@ ESMF_RouteUTest.rm:
 # C++ Route
 #
 $(ESMF_TESTDIR)/ESMC_RouteUTest: chkopts ESMC_RouteUTest.o
-	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_RouteUTest ESMC_RouteUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_RouteUTest ESMC_RouteUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_RouteUTest.o
 
 RUN_ESMC_RouteUTest:

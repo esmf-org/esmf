@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2004/04/21 19:56:16 svasquez Exp $
+# $Id: makefile,v 1.18 2004/05/14 22:34:26 slswift Exp $
 
 ALL:  build_tests
 
@@ -110,7 +110,7 @@ ESMF_CalendarUTest.rm:
 #
 #
 # $(ESMC_TESTDIR)/ESMC_ClockUTest: ESMC_ClockUTest.o
-#	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_ClockUTest ESMC_ClockUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+#	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_ClockUTest ESMC_ClockUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 #	${RM} ESMC_ClockUTest.o
 
 #RUN_ESMC_ClockUTest:

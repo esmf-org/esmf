@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2004/03/05 23:28:24 svasquez Exp $ 
+# $Id: makefile,v 1.17 2004/05/14 22:34:27 slswift Exp $ 
 
 ALL:  build_tests
 
@@ -50,7 +50,7 @@ CLOBBERDIRS =
 # Components
 #
 $(ESMC_TESTDIR)/ESMF_CompCreate: ESMF_CompCreate.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompCreate ESMF_CompCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompCreate ESMF_CompCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f ESMF_CompCreate.o
 
 RUN_ESMF_CompCreate:
@@ -65,7 +65,7 @@ ESMF_CompCreate.rm:
 	echo "ESMF_CompCreate.rm target called here."
 
 $(ESMC_TESTDIR)/ESMF_CompCreateUTest: ESMF_CompCreateUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompCreateUTest ESMF_CompCreateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompCreateUTest ESMF_CompCreateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f ESMF_CompCreateUTest.o
 
 RUN_ESMF_CompCreateUTest:
@@ -82,7 +82,7 @@ ESMF_CompCreateUTest.rm:
 
 
 $(ESMC_TESTDIR)/ESMC_CompCreate: ESMC_CompCreate.o
-	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_CompCreate ESMC_CompCreate.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_CompCreate ESMC_CompCreate.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f ESMC_CompCreate.o
 
 RUN_ESMC_CompCreate:
@@ -104,7 +104,7 @@ ESMF_UserRun.o: ESMF_UserGComp.o
 $(ESMC_TESTDIR)/ESMF_CompRun: ESMF_UserGComp.o ESMF_CompRun.o
 	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompRun ESMF_CompRun.o \
          ESMF_UserGComp.o -lesmf ${F90CXXLIBS} ${MPI_LIB} \
-         ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+         ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f ESMF_CompRun.o
 
 RUN_ESMF_CompRun:
@@ -128,7 +128,7 @@ ESMF_UserGComp_F.o : ESMF_UserGComp.o
 $(ESMC_TESTDIR)/ESMC_CompRun: ESMF_UserGComp.o ESMF_UserGComp_F.o ESMC_CompRun.o
 	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_CompRun ESMC_CompRun.o \
          ESMF_UserGComp.o ESMF_UserGComp_F.o -lesmf ${F90CXXLIBS} ${MPI_LIB} \
-         ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+         ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f ESMC_CompRun.o ESMF_UserGComp_F.o ESMF_UserGComp.o
 
 RUN_ESMC_CompRun:

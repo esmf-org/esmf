@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.52 2004/05/14 20:18:06 theurich Exp $
+#  $Id: common.mk,v 1.53 2004/05/14 22:34:23 slswift Exp $
 #===============================================================================
 #   common.mk
 #
@@ -431,7 +431,7 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 #
 $(ESMC_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 	-$(SL_F_LINKER) -o $@ $(SYSTEM_TESTS_OBJ) $< -lesmf \
-	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
 
@@ -507,7 +507,7 @@ tree_build_tests: $(TESTS_BUILD)
 
 $(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 	-$(SL_F_LINKER) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf \
-	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
 
@@ -586,14 +586,14 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #
 $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
 	-$(SL_F_LINKER) -o $@ $< -lesmf ${F90CXXLIBS} \
-	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
 	$(SL_LINKOPTS)
 	rm -f  $<
 
 
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
 	-${SL_C_LINKER} -g -o $@ $< -lesmf \
-        ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+        ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
         $(SL_LINKOPTS)
 	rm -f $<
 
@@ -649,7 +649,7 @@ tree_build_demo: $(DEMO_BUILD)
 
 $(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(ESMFLIB)
 	$(SL_F_LINKER) -o $@ $(DEMO_OBJ) $< -lesmf ${F90CXXLIBS} \
-	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
 

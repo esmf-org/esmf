@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/02/13 15:38:33 nscollins Exp $ 
+# $Id: makefile,v 1.3 2004/05/14 22:34:28 slswift Exp $ 
 
 ALL:  build_tests
 
@@ -39,7 +39,7 @@ CLOBBERDIRS =
 #
 
 $(ESMC_TESTDIR)/ESMF_StateCreate: ESMF_StateCreate.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StateCreate ESMF_StateCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StateCreate ESMF_StateCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f ESMF_StateCreate.o
 
 RUN_ESMF_StateCreate:
@@ -59,7 +59,7 @@ ESMF_StateCreate.rm:
 #
 
 $(ESMC_TESTDIR)/ESMF_StateUTest: ESMF_StateUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StateUTest ESMF_StateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StateUTest ESMF_StateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f ESMF_StateUTest.o
 
 RUN_ESMF_StateUTest:

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/11/10 23:08:55 nscollins Exp $ 
+# $Id: makefile,v 1.7 2004/05/14 22:34:26 slswift Exp $ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable
@@ -35,7 +35,7 @@ APPOBJS = CouplerComponentTemplate.o GridComponentTemplate.o GridComp2.o \
 
 # build the executable.
 executable: $(APPOBJS)
-	-$(SL_F_LINKER) -o Application $(APPOBJS) -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o Application $(APPOBJS) -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f $(CLEANFILES)
 
 # run the executable in parallel.

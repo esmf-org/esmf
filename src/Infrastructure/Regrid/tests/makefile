@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2004/02/13 15:37:35 nscollins Exp $
+# $Id: makefile,v 1.11 2004/05/14 22:34:26 slswift Exp $
 
 ALL:  build_tests
 
@@ -36,7 +36,7 @@ CLOBBERDIRS =
 #
 #
 $(ESMF_TESTDIR)/ESMF_RegridUTest: chkopts ESMF_RegridUTest.o
-	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMF_RegridUTest ESMF_RegridUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMF_RegridUTest ESMF_RegridUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_RegridTest.o
 
 RUN_ESMF_RegridUTest:
