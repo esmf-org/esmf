@@ -207,7 +207,7 @@
 %\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 % replace % with # below to uncomment
-%include "../Infrastructure/ConfigAttr/doc/ConfigAttr_reqdoc.ctex"
+%include "../Infrastructure/ConfigAttr/doc/ConfigAttr_refdoc.ctex"
 
 
 %====================================================================================================
@@ -253,35 +253,23 @@
 %\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 %\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%#include "../Infrastructure/IO/doc/IO_desdoc.ctex"
+%#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Configuration Attributes}
-%\label{part:Infrastructure_Utilities:_CA}
+%====================================================================================================
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Glossary}
+\end{htmlonly}
+\part{Glossary}
+\label{part:Glossary}
 
-%#include "../Infrastructure/ConfigAttr/doc/ConfigAttr_desdoc.ctex"
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Glossary}
-%\end{htmlonly}
-%\part{Glossary}
-%\label{part:Glossary}
-
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-%\section{Glossary}
+\section{Glossary}
 \input{ESMF_terms}
 
 \end{document}
