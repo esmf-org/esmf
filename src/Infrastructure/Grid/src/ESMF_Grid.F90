@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.68 2003/07/28 19:36:58 dneckels Exp $
+! $Id: ESMF_Grid.F90,v 1.69 2003/07/29 17:56:37 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.68 2003/07/28 19:36:58 dneckels Exp $'
+      '$Id: ESMF_Grid.F90,v 1.69 2003/07/29 17:56:37 dneckels Exp $'
 
 !==============================================================================
 !
@@ -2876,11 +2876,15 @@
 
       ! Print the Associated physgrids
 
+      print *, 'PhysGrids associated with this grid:'
       do i=1, gp%num_physgrids
         call ESMF_PhysGridPrint(gp%physgrids(i), 'no-opt')
       enddo
 
-      print *, "  (more details coming soon)"
+      ! Print the DistGrid
+      print *, 'DistGrid associated with this Grid:'
+      call ESMF_DistGridPrint(gp%distgrid, 'noopt')
+
 
       print *, "*********End Grid Print"
 
