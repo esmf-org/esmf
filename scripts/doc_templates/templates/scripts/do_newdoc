@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newdoc,v 1.8 2002/10/23 16:46:02 eschwab Exp $
+# $Id: do_newdoc,v 1.9 2002/10/24 17:06:21 eschwab Exp $
 #
 #===============================================================================
 # do_newdoc
@@ -63,8 +63,10 @@ endif
   switch ($type) 
   case req:
       if(!(-r $newdir/README_REQ)) cp $DOCT_DIR/README_REQ $newdir
-      if(!(-r $newdir/$1_reqdoc.ctex)) cat $DOCT_DIR/comp_reqdoc.ctex | \
+      if(!(-r $newdir/$1_reqdoc.ctex)) then
+       cat $DOCT_DIR/comp_reqdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_reqdoc.ctex
+      endif
       if(!(-r $newdir/$1_auth.tex)) cp $DOCT_DIR/comp_auth.tex $newdir/$1_auth.tex
       if(!(-r $newdir/$1_background.tex)) cp $DOCT_DIR/comp_background.tex $newdir/$1_background.tex
       if(!(-r $newdir/$1_abbr.tex)) cp $DOCT_DIR/comp_abbr.tex $newdir/$1_abbr.tex
@@ -75,8 +77,10 @@ endif
       breaksw
   case arch:
       if(!(-r $newdir/README_ARCH)) cp $DOCT_DIR/README_ARCH $newdir
-      if(!(-r $newdir/$1_archdoc.ctex)) cat $DOCT_DIR/comp_archdoc.ctex | \
+      if(!(-r $newdir/$1_archdoc.ctex)) then 
+       cat $DOCT_DIR/comp_archdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_archdoc.ctex
+      endif
       if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex
       if(!(-r $newdir/$1_alg.tex)) cp $DOCT_DIR/comp_alg.tex $newdir/$1_alg.tex
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
@@ -87,8 +91,10 @@ endif
       breaksw
   case des:
       if(!(-r $newdir/README_DES)) cp $DOCT_DIR/README_DES $newdir
-      if(!(-r $newdir/$1_desdoc.ctex)) cat $DOCT_DIR/comp_desdoc.ctex | \
+      if(!(-r $newdir/$1_desdoc.ctex)) then
+       cat $DOCT_DIR/comp_desdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_desdoc.ctex
+      endif
       if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex
       if(!(-r $newdir/$1_alg.tex)) cp $DOCT_DIR/comp_alg.tex $newdir/$1_alg.tex
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
@@ -107,8 +113,10 @@ endif
       breaksw
   case ref:
       if(!(-r $newdir/README_REF)) cp $DOCT_DIR/README_REF $newdir
-      if(!(-r $newdir/$1_refdoc.ctex)) cat $DOCT_DIR/comp_refdoc.ctex | \
+      if(!(-r $newdir/$1_refdoc.ctex)) then
+       cat $DOCT_DIR/comp_refdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_refdoc.ctex
+      endif
       if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex
       if(!(-r $newdir/$1_alg.tex)) cp $DOCT_DIR/comp_alg.tex $newdir/$1_alg.tex
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
@@ -122,8 +130,10 @@ endif
       breaksw
   case usr:
       if(!(-r $newdir/README_USR)) cp $DOCT_DIR/README_USR $newdir
-      if(!(-r $newdir/$1_usrdoc.ctex)) cat $DOCT_DIR/comp_usrdoc.ctex | \
+      if(!(-r $newdir/$1_usrdoc.ctex)) then
+       cat $DOCT_DIR/comp_usrdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_usrdoc.ctex
+      endif
       breaksw
   case phys:
       if(!(-r $newdir/README_PHYS)) cp $DOCT_DIR/README_PHYS $newdir
@@ -137,16 +147,26 @@ endif
       if(!(-r $newdir/README_REF)) cp $DOCT_DIR/README_REF $newdir
       if(!(-r $newdir/README_USR)) cp $DOCT_DIR/README_USR $newdir
       if(!(-r $newdir/README_PHYS)) cp $DOCT_DIR/README_PHYS $newdir
-      if(!(-r $newdir/$1_reqdoc.ctex)) cat $DOCT_DIR/comp_reqdoc.ctex | \
+      if(!(-r $newdir/$1_reqdoc.ctex)) then
+       cat $DOCT_DIR/comp_reqdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_reqdoc.ctex
-      if(!(-r $newdir/$1_archdoc.ctex)) cat $DOCT_DIR/comp_archdoc.ctex | \
+      endif
+      if(!(-r $newdir/$1_archdoc.ctex)) then
+       cat $DOCT_DIR/comp_archdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_archdoc.ctex
-      if(!(-r $newdir/$1_desdoc.ctex)) cat $DOCT_DIR/comp_desdoc.ctex | \
+      endif
+      if(!(-r $newdir/$1_desdoc.ctex)) then
+       cat $DOCT_DIR/comp_desdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_desdoc.ctex
-      if(!(-r $newdir/$1_refdoc.ctex)) cat $DOCT_DIR/comp_refdoc.ctex | \
+      endif
+      if(!(-r $newdir/$1_refdoc.ctex)) then
+       cat $DOCT_DIR/comp_refdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_refdoc.ctex
-      if(!(-r $newdir/$1_usrdoc.ctex)) cat $DOCT_DIR/comp_usrdoc.ctex | \
+      endif
+      if(!(-r $newdir/$1_usrdoc.ctex)) then 
+       cat $DOCT_DIR/comp_usrdoc.ctex | \
        sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_usrdoc.ctex
+      endif
       if(!(-r $newdir/$1_physdoc.ctex)) cp $DOCT_DIR/comp_physdoc.ctex $newdir/$1_physdoc.ctex
       if(!(-r $newdir/$1_auth.tex)) cp $DOCT_DIR/comp_auth.tex $newdir/$1_auth.tex
       if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex

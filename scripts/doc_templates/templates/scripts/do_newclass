@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newclass,v 1.4 2002/10/14 21:53:31 cdeluca Exp $
+# $Id: do_newclass,v 1.5 2002/10/24 17:06:21 eschwab Exp $
 #
 #===============================================================================
 # do_newclass
@@ -47,21 +47,26 @@ endif
 
   set DOCT_DIR=$DOC_DIR/templates
 
-# note: sleep used below prevents random 0-byte file output
-
 # get a copy of the source template file, rename and edit as requested class
   switch ($lang) 
   case f:
-      if(!(-r ESMF_$class.F90)) cat $DOCT_DIR/ESMF_class.F90 | \
+      if(!(-r ESMF_$class.F90)) then
+        cat $DOCT_DIR/ESMF_class.F90 | \
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
         sed 's/<Comp>/'$comp'/g' > ESMF_$class.F90
+      endif
       breaksw
   case c:
-      if(!(-r ESMC_$class.C)) cat $DOCT_DIR/ESMC_class.C | \
-        sed 's/<Class>/'$class'/g' > ESMC_$class.C; sleep 1
-      if(!(-r ../include/ESMC_$class.h)) cat $DOCT_DIR/ESMC_class.h | \
+      if(!(-r ESMC_$class.C)) then
+        cat $DOCT_DIR/ESMC_class.C | \
+        sed 's/<Class>/'$class'/g' > ESMC_$class.C
+      endif
+
+      if(!(-r ../include/ESMC_$class.h)) then
+        cat $DOCT_DIR/ESMC_class.h | \
         sed 's/<Class>/'$class'/g' | sed 's/<Comp>/'$comp'/g' \
            > ../include/ESMC_$class.h
+      endif
       breaksw
   default:
     echo "Valid options are: [ c | f]"

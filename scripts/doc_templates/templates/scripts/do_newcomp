@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newcomp,v 1.4 2002/10/14 21:53:31 cdeluca Exp $
+# $Id: do_newcomp,v 1.5 2002/10/24 17:06:20 eschwab Exp $
 #
 #===============================================================================
 # do_newcomp
@@ -60,50 +60,69 @@ endif
 
 # Fill the source directories with template files
 
-# note: sleeps & echos used below prevent random 0-byte file output
-
 # makefiles
-  if(!(-r $compdir/makefile)) cat $DOCT_DIR/makefile.comp | \
-      sed 's/<Comp>/'$comp'/g' > $compdir/makefile; sleep 1; echo -n '.'
+  if(!(-r $compdir/makefile)) then
+      cat $DOCT_DIR/makefile.comp | \
+      sed 's/<Comp>/'$comp'/g' > $compdir/makefile
+  endif
 
-  if(!(-r $exdir/makefile)) cat $DOCT_DIR/makefile.examp | \
-      sed 's/<Comp>/'$comp'/g' > $exdir/makefile; sleep 1; echo -n '.'
+  if(!(-r $exdir/makefile)) then
+      cat $DOCT_DIR/makefile.examp | \
+      sed 's/<Comp>/'$comp'/g' > $exdir/makefile
+  endif
 
-  if(!(-r $srcdir/makefile)) cat $DOCT_DIR/makefile.srcinter | \
-      sed 's/<Comp>/'$comp'/g' > $srcdir/makefile; sleep 1; echo -n '.'
+  if(!(-r $srcdir/makefile)) then
+      cat $DOCT_DIR/makefile.srcinter | \
+      sed 's/<Comp>/'$comp'/g' > $srcdir/makefile
+  endif
 
-  if(!(-r $intfdir/makefile)) cat $DOCT_DIR/makefile.srcinter | \
-      sed 's/<Comp>/'$comp'/g' > $intfdir/makefile; sleep 1; echo -n '.'
+  if(!(-r $intfdir/makefile)) then
+      cat $DOCT_DIR/makefile.srcinter | \
+      sed 's/<Comp>/'$comp'/g' > $intfdir/makefile
+  endif
 
 # include files
-  if(!(-r $incdir/ESMF_$comp.h)) cat $DOCT_DIR/ESMF_comp.h | \
-      sed 's/<Comp>/'$comp'/g' > $incdir/ESMF_$comp.h; sleep 1; echo -n '.'
+  if(!(-r $incdir/ESMF_$comp.h)) then
+      cat $DOCT_DIR/ESMF_comp.h | \
+      sed 's/<Comp>/'$comp'/g' > $incdir/ESMF_$comp.h
+  endif
 
-  if(!(-r $incdir/ESMC_class.h)) cat $DOCT_DIR/ESMC_class.h | \
-      sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_class.h; sleep 1; echo -n '.'
+  if(!(-r $incdir/ESMC_class.h)) then
+      cat $DOCT_DIR/ESMC_class.h | \
+      sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_class.h
+  endif
 
-  if(!(-r $incdir/ESMC_$comp.h)) cat $DOCT_DIR/ESMC_comp.h | \
-      sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_$comp.h; sleep 1; echo -n '.'
+  if(!(-r $incdir/ESMC_$comp.h)) then
+      cat $DOCT_DIR/ESMC_comp.h | \
+      sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_$comp.h
+  endif
 
 # src files
   switch ($lang) 
   case f:
-      if(!(-r $srcdir/ESMF_class.F90)) cat $DOCT_DIR/ESMF_class.F90 | \
-          sed 's/<Comp>/'$comp'/g' > $srcdir/ESMF_class.F90; sleep 1;
-                                                             echo -n '.'
+      if(!(-r $srcdir/ESMF_class.F90)) then
+          cat $DOCT_DIR/ESMF_class.F90 | \
+          sed 's/<Comp>/'$comp'/g' > $srcdir/ESMF_class.F90
+      endif
 
-      if(!(-r $intfdir/ESMC_class.C)) cp $DOCT_DIR/ESMC_class.C $intfdir
+      if(!(-r $intfdir/ESMC_class.C)) 
+          cp $DOCT_DIR/ESMC_class.C $intfdir
+          chmod 644 $intfdir/ESMC_class.C
+      endif
       breaksw
   case c:
-      if(!(-r $srcdir/ESMC_class.C)) cp $DOCT_DIR/ESMC_class.C $srcdir;
-                                                     sleep 1; echo -n '.'
+      if(!(-r $srcdir/ESMC_class.C)) then
+          cp $DOCT_DIR/ESMC_class.C $srcdir
+          chmod 644 $srcdir/ESMC_class.C
+      endif
 
-      if(!(-r $intfdir/ESMF_class.F90)) cat $DOCT_DIR/ESMF_class.F90 | \
+      if(!(-r $intfdir/ESMF_class.F90)) then
+          cat $DOCT_DIR/ESMF_class.F90 | \
           sed 's/<Comp>/'$comp'/g' > $intfdir/ESMF_class.F90
+      endif
       breaksw
   default:
     echo "Valid options are: [ c | f]"
     exit
   endsw
-  echo '.'
 endif
