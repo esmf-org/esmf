@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.12 2003/04/08 22:46:05 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.13 2003/04/24 16:38:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -82,7 +82,7 @@ enum ESMC_DataKind { ESMF_KIND_I1=1,
   typedef float     ESMF_IKIND_R4;
 #endif
 
-// general logical value
+// general logical value - MUST MATCH F90
 enum ESMC_Logical { ESMF_TF_UNKNOWN=1,
                     ESMF_TF_TRUE,
                     ESMF_TF_FALSE };
