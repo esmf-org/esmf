@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.6 2003/02/26 20:10:36 jwolfe Exp $
+// $Id: ESMC_Base.h,v 1.7 2003/03/12 18:17:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,6 +81,14 @@ enum ESMC_DataKind { ESMF_KIND_I1=1,
 enum ESMC_Logical { ESMF_TF_UNKNOWN=1,
                     ESMF_TF_TRUE,
                     ESMF_TF_FALSE };
+
+// max/min macros if they don't already exist
+#ifndef MAX
+#define MAX(a,b)  (((a)>(b))?(a):(b))
+#endif
+#ifndef MIN
+#define MIN(a,b)  (((a)<(b))?(a):(b))
+#endif
 
 // union to hold a value of any type
 struct ESMC_DataValue {
