@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.4 2003/03/18 04:32:09 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.5 2003/03/22 05:46:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.4 2003/03/18 04:32:09 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.5 2003/03/22 05:46:04 eschwab Exp $'
 
 !==============================================================================
 !
@@ -676,10 +676,11 @@
 ! !IROUTINE:  ESMF_BaseValidate - Validate an Alarm's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BaseValidate(alarm, rc)
+      subroutine ESMF_BaseValidate(alarm, opt, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout) :: alarm
+      character (len=*), intent(in), optional :: opt
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -689,6 +690,8 @@
 !     \begin{description}
 !     \item[alarm]
 !          Alarm to validate
+!     \item[{[opt]}]
+!          Validate options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 
@@ -697,7 +700,7 @@
 !     TMGn.n.n
 !EOP
       
-      call c_ESMC_BaseValidate(alarm, rc)
+      call c_ESMC_BaseValidate(alarm, opt, rc)
     
       end subroutine ESMF_BaseValidate
 
@@ -706,10 +709,11 @@
 ! !IROUTINE:  ESMF_BasePrint - Print out an Alarm's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BasePrint(alarm, rc)
+      subroutine ESMF_BasePrint(alarm, opt, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout) :: alarm
+      character (len=*), intent(in), optional :: opt
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -720,6 +724,8 @@
 !     \begin{description}
 !     \item[alarm]
 !          Alarm to print out
+!     \item[{[opt]}]
+!          Print options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -728,7 +734,7 @@
 !     TMGn.n.n
 !EOP
       
-      call c_ESMC_BasePrint(alarm, rc)   
+      call c_ESMC_BasePrint(alarm, opt, rc)   
 
       end subroutine ESMF_BasePrint
 

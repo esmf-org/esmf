@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.4 2003/03/18 04:32:09 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.5 2003/03/22 05:44:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.4 2003/03/18 04:32:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.5 2003/03/22 05:44:12 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -467,40 +467,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *RingInterval,
-      ESMC_Time         *RingTime,
-      ESMC_Time         *PrevRingTime,
-      ESMC_Time         *StopTime,
-      bool              *Ringing,
-      bool              *Enabled,
-      int               *ID) const {
-
-//
-// !DESCRIPTION:
-//      Print information about an {\tt Alarm}. For persistence/checkpointing
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here TODO: replace with checkpoint routine ?
-//
-    return(ESMF_SUCCESS);
-
- } // end ESMC_BasePrint
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BasePrint - print contents of an Alarm
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_BasePrint(void) const {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
+      const char *options) const {    // in - print options
 //
 // !DESCRIPTION:
 //      Print information about an {\tt Alarm}.  For testing/debugging
@@ -521,6 +488,39 @@
 
     // TODO print AlarmMutex ?
 
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_BasePrint
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BasePrint - print contents of an Alarm
+//
+// !INTERFACE:
+      int ESMC_Alarm::ESMC_BasePrint(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *RingInterval,
+      ESMC_Time         *RingTime,
+      ESMC_Time         *PrevRingTime,
+      ESMC_Time         *StopTime,
+      bool              *Ringing,
+      bool              *Enabled,
+      int               *ID) const {
+
+//
+// !DESCRIPTION:
+//      Print information about an {\tt Alarm}. For persistence/checkpointing
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here TODO: replace with checkpoint routine ?
+//
     return(ESMF_SUCCESS);
 
  } // end ESMC_BasePrint

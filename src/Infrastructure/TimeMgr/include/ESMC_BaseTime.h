@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.3 2003/03/18 04:33:09 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.4 2003/03/22 05:43:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -203,21 +203,21 @@ class ESMC_BaseTime {
 
     // increment, decrement methods (TMG 1.5.4, 2.4.4, 2.4.5, 2.4.6, 5.1, 5.2,
     //                                   7.2)
-    ESMC_BaseTime  operator+ (ESMC_BaseTime &);
-    ESMC_BaseTime& operator+=(ESMC_BaseTime &);
-    ESMC_BaseTime  operator- (ESMC_BaseTime &);
-    ESMC_BaseTime& operator-=(ESMC_BaseTime &);
+    ESMC_BaseTime  operator+ (const ESMC_BaseTime &) const;
+    ESMC_BaseTime  operator- (const ESMC_BaseTime &) const;
+    ESMC_BaseTime& operator+=(const ESMC_BaseTime &);
+    ESMC_BaseTime& operator-=(const ESMC_BaseTime &);
 
     // required methods inherited and overridden from the ESMC_Base class
 
     // internal validation
     int ESMC_BaseValidate(const char *options) const;
 
+    // for testing/debugging
+    int ESMC_BasePrint(const char *options) const;
+
     // for persistence/checkpointing
     int ESMC_BasePrint(ESMF_IKIND_I8 *S, int *Sn, int *Sd) const;
-
-    // for testing/debugging
-    int ESMC_BasePrint(void) const;
 
     // native C++ constructors/destructors
     ESMC_BaseTime(void);

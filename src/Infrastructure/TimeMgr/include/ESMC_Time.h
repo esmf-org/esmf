@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.6 2003/02/11 18:30:42 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.7 2003/03/22 05:43:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -80,7 +80,7 @@
 
   public:
     // Time is a shallow class, so only Init method are needed
-    int ESMC_TimeInit(ESMC_Calendar *Cal, const char *TimeList, ...);
+    int ESMC_TimeInit(ESMC_Calendar *cal, int tz, const char *timeList, ...);
 
     // Time doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -91,27 +91,27 @@
     // generic interface -- via variable argument lists
     //   can map to F90 named-optional-arguments interface
     // (TMG 2.1, 2.5.1, 2.5.6)
-    int ESMC_TimeGet(const char *TimeList, ...) const;
+    int ESMC_TimeGet(const char *timeList, ...) const;
     // e.g. ESMC_TimeGet("YY:MM:DD", (int *)YY,(int *)MM, (int *)DD);
 
-    int ESMC_TimeSet(const char *TimeList, ...);
+    int ESMC_TimeSet(const char *timeList, ...);
     // e.g. ESMC_TimeSet("s" , (double) s);
 
-    int ESMC_TimeGetCalendar(ESMC_Calendar *Calendar) const;
-    int ESMC_TimeSetCalendar(ESMC_Calendar  Calendar);
+    int ESMC_TimeGetCalendar(ESMC_Calendar *calendar) const;
+    int ESMC_TimeSetCalendar(ESMC_Calendar *calendar);
 
-    bool ESMC_TimeIsSameCal(ESMC_Time *Time);
+    bool ESMC_TimeIsSameCal(ESMC_Time *time, int *rc) const;
 
-    int ESMC_TimeGetTimeZone(int *Timezone) const;  // (TMG 2.5.1)
-    int ESMC_TimeSetTimeZone(int  Timezone);
+    int ESMC_TimeGetTimeZone(int *timezone) const;  // (TMG 2.5.1)
+    int ESMC_TimeSetTimeZone(int  timezone);
 
     // return in string format (TMG 2.4.7)
-    int ESMC_TimeGetString(char *Ts) const;
+    int ESMC_TimeGetString(char *timeString) const;
 
-    int ESMC_TimeGetDayOfYear(double *DayOfYear) const; // (TMG 2.5.2)
-    int ESMC_TimeGetDayOfWeek(int *DayOfWeek) const;    // (TMG 2.5.3)
-    int ESMC_TimeGetDayOfMonth(int *DayOfMonth) const;  // (TMG 2.5.4)
-    int ESMC_TimeGetMidMonth(ESMC_Time *MidMonth) const;
+    int ESMC_TimeGetDayOfYear(double *dayOfYear) const; // (TMG 2.5.2)
+    int ESMC_TimeGetDayOfWeek(int *dayOfWeek) const;    // (TMG 2.5.3)
+    int ESMC_TimeGetDayOfMonth(int *dayOfMonth) const;  // (TMG 2.5.4)
+    int ESMC_TimeGetMidMonth(ESMC_Time *midMonth) const;
                                                         // (TMG 2.5.5)
     // to support ESMC_Clock::SyncToWallClock() and TMG 2.5.7
     int ESMC_TimeGetRealTime(void);
@@ -121,16 +121,17 @@
     // internal validation
     int ESMC_BaseValidate(const char *options) const;
 
-    // for persistence/checkpointing
-    int ESMC_BasePrint(ESMF_IKIND_I8 *S, int *Sn, int *Sd) const;
-
     // for testing/debugging
-    int ESMC_BasePrint(void) const;
+    int ESMC_BasePrint(const char *options) const;
+
+    // for persistence/checkpointing
+    int ESMC_BasePrint(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
+                       ESMC_Calendar *cal, int *timeZone) const;
 
     // native C++ constructors/destructors
     ESMC_Time(void);
-    ESMC_Time(ESMF_IKIND_I8 S, int Sn, int Sd, ESMC_Calendar *Cal,
-              int Timezone);
+    ESMC_Time(ESMF_IKIND_I8 S, int Sn, int Sd, ESMC_Calendar *cal,
+              int timezone);
     ~ESMC_Time(void);
 
  // < declare the rest of the public interface methods here >

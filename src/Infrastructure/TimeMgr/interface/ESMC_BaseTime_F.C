@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime_F.C,v 1.2 2003/03/18 04:33:09 eschwab Exp $
+// $Id: ESMC_BaseTime_F.C,v 1.3 2003/03/22 05:46:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,10 +17,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <string.h>
 #include "ESMC.h"
-#include "ESMC_Base.h"
 #include "ESMC_BaseTime.h"
 //------------------------------------------------------------------------------
 //BOP
@@ -243,7 +240,8 @@ extern "C" {
            *status = (*ptr)->ESMC_BaseValidate(opts);
        }
 
-       void FTN(c_esmc_basetimeprint)(ESMC_BaseTime **ptr, int *status) {
-           *status = (*ptr)->ESMC_BasePrint();
+       void FTN(c_esmc_basetimeprint)(ESMC_BaseTime **ptr, const char *opts,
+                                      int *status) {
+           *status = (*ptr)->ESMC_BasePrint(opts);
        }
 };

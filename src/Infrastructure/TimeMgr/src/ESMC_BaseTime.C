@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.7 2003/03/21 19:09:46 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.8 2003/03/22 05:44:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.7 2003/03/21 19:09:46 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.8 2003/03/22 05:44:12 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1014,7 +1014,7 @@
 //    ESMC_BaseTime result
 //
 // !ARGUMENTS:
-      ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime increment
+      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime increment
 //
 // !DESCRIPTION:
 //      Increment current object's (this) {\tt BaseTime} with given
@@ -1055,7 +1055,7 @@
 //    ESMC_BaseTime result
 //
 // !ARGUMENTS:
-      ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime decrement
+      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime decrement
 //
 // !DESCRIPTION:
 //      Decrement current object's (this) {\tt BaseTime} with given
@@ -1097,7 +1097,7 @@
 //    ESMC_BaseTime& result
 //
 // !ARGUMENTS:
-      ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime increment
+      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime increment
 //
 // !DESCRIPTION:
 //      Increment current object's (this) {\tt BaseTime} with given
@@ -1135,7 +1135,7 @@
 //    ESMC_BaseTime& result
 //
 // !ARGUMENTS:
-      ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime decrement
+      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime decrement
 //
 // !DESCRIPTION:
 //      Decrement current object's (this) {\tt BaseTime} with given
@@ -1191,6 +1191,33 @@
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_BasePrint - print BaseTime state
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BasePrint(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options) const {    // in - print options
+//
+// !DESCRIPTION:
+//      print {\tt BaseTime} state for testing/debugging
+//
+//EOP
+// !REQUIREMENTS:  
+
+    cout << "S = "  << S  << endl;
+    cout << "Sn = " << Sn << endl;
+    cout << "Sd = " << Sd << endl << endl;
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_BasePrint
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_BasePrint - return BaseTime state
 //
 // !INTERFACE:
@@ -1221,33 +1248,6 @@
         return(ESMF_SUCCESS);
     }
     else return(ESMF_FAILURE);
-
-}  // end ESMC_BasePrint
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BasePrint - print BaseTime state
-//
-// !INTERFACE:
-      int ESMC_BaseTime::ESMC_BasePrint(void) const {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      print {\tt BaseTime} state for testing/debugging
-//
-//EOP
-// !REQUIREMENTS:  
-
-    cout << "S = "  << S  << endl;
-    cout << "Sn = " << Sn << endl;
-    cout << "Sd = " << Sd << endl << endl;
-
-    return(ESMF_SUCCESS);
 
 }  // end ESMC_BasePrint
 

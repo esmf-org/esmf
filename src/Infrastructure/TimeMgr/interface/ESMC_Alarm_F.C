@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.2 2003/03/18 04:32:09 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.3 2003/03/22 05:46:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,10 +17,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <string.h>
 #include "ESMC.h"
-#include "ESMC_Base.h"
 #include "ESMC_Alarm.h"
 //------------------------------------------------------------------------------
 //BOP
@@ -124,12 +121,13 @@ extern "C" {
            *esmf_alarmEQ = (int) (**alarm1 == **alarm2);
        }
 
-       void FTN(c_esmc_basevalidate)(ESMC_Alarm **ptr, const char *opts,
+       void FTN(c_esmc_alarmvalidate)(ESMC_Alarm **ptr, const char *opts,
                                      int *status) {
            *status = (*ptr)->ESMC_BaseValidate(opts);
        }
 
-       void FTN(c_esmc_baseprint)(ESMC_Alarm **ptr, int *status) {
-           *status = (*ptr)->ESMC_BasePrint();
+       void FTN(c_esmc_alarmprint)(ESMC_Alarm **ptr, const char *opts,
+                                  int *status) {
+           *status = (*ptr)->ESMC_BasePrint(opts);
        }
 };

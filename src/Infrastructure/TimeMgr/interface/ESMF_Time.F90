@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.4 2003/02/11 18:38:57 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.5 2003/03/22 05:46:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,6 +78,7 @@
       public ESMF_TimeGetString
       public ESMF_TimeGetDayOfYear
       public ESMF_TimeGetDayOfWeek
+      public ESMF_TimeGetDayOfMonth
       public ESMF_TimeGetMidMonth
       public ESMF_TimeGetRealTime
 
@@ -90,21 +91,21 @@
 
 ! Inherited and overloaded from ESMF_BaseTime
 
-      private ESMF_TimeInc
-      private ESMF_TimeDec
-      private ESMF_TimeDiff
       private ESMF_TimeEQ
       private ESMF_TimeNE
       private ESMF_TimeLT
       private ESMF_TimeGT
       private ESMF_TimeLE
       private ESMF_TimeGE
+      private ESMF_TimeInc
+      private ESMF_TimeDec
+      private ESMF_TimeDiff
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.4 2003/02/11 18:38:57 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.5 2003/03/22 05:46:04 eschwab Exp $'
 
 !==============================================================================
 
@@ -574,11 +575,11 @@
 ! !IROUTINE:  ESMF_TimeGetString - Get time instant value in string format
 
 ! !INTERFACE:
-      subroutine ESMF_TimeGetString(time, Ts, rc)
+      subroutine ESMF_TimeGetString(time, TimeString, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      character, dimension(ESMF_MAXSTR), intent(out) :: Ts
+      character, dimension(ESMF_MAXSTR), intent(out) :: TimeString
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -588,7 +589,7 @@
 !     \begin{description}
 !     \item[time]
 !          The object instance to convert
-!     \item[Ts]
+!     \item[TimeString]
 !          The string to return
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -598,7 +599,7 @@
 !     TMG2.4.7
 !EOP
 
-      call c_ESMC_TimeGetString(time, Ts, rc)
+      call c_ESMC_TimeGetString(time, TimeString, rc)
 
       end subroutine ESMF_TimeGetString
 
@@ -770,10 +771,230 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_TimeEQ - Compare two times for equality
+!
+! !INTERFACE:
+      function ESMF_TimeEQ(time1, time2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeEQ
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time1
+      type(ESMF_Time), intent(in) :: time2
+!
+! !DESCRIPTION:
+!     Return true if both given time instants are equal, false otherwise.
+!     Maps overloaded (==) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First time instant to compare
+!     \item[time2]
+!          Second time instant to compare
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+!     ! invoke C to C++ entry point for ESMF_BaseTime base class function
+      call c_ESMC_BaseTimeEQ(time1%basetime, time2%basetime, ESMF_TimeEQ)
+
+      end function ESMF_TimeEQ
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeNE - Compare two times for non-equality
+!
+! !INTERFACE:
+      function ESMF_TimeNE(time1, time2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeNE
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time1
+      type(ESMF_Time), intent(in) :: time2
+
+! !DESCRIPTION:
+!     Return true if both given time instants are not equal, false otherwise.
+!     Maps overloaded (/=) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First time instant to compare
+!     \item[time2]
+!          Second time instant to compare
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeNE(time1%basetime, time2%basetime, ESMF_TimeNE)
+
+      end function ESMF_TimeNE
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeLT - Time instant 1 less than time instant 2 ?
+!
+! !INTERFACE:
+      function ESMF_TimeLT(time1, time2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeLT
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time1
+      type(ESMF_Time), intent(in) :: time2
+!
+! !DESCRIPTION:
+!     Return true if first time instant is less than second time instant,
+!     false otherwise.
+!     Maps overloaded (<) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First time instant to compare
+!     \item[time2]
+!          Second time instant to compare
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeLT(time1%basetime, time2%basetime, ESMF_TimeLT)
+
+      end function ESMF_TimeLT
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeGT - Time instant 1 greater than time instant 2 ?
+!
+! !INTERFACE:
+      function ESMF_TimeGT(time1, time2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeGT
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time1
+      type(ESMF_Time), intent(in) :: time2
+!
+! !DESCRIPTION:
+!     Return true if first time instant is greater than second time instant,
+!     false otherwise.
+!     Maps overloaded (>) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First time instant to compare
+!     \item[time2]
+!          Second time instant to compare
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeGT(time1%basetime, time2%basetime, ESMF_TimeGT)
+
+      end function ESMF_TimeGT
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeLE - Time instant 1 less than or equal to time instant 2 ?
+!
+! !INTERFACE:
+      function ESMF_TimeLE(time1, time2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeLE
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time1
+      type(ESMF_Time), intent(in) :: time2
+!
+! !DESCRIPTION:
+!     Return true if first time instant is less than or equal to second time
+!     instant, false otherwise.
+!     Maps overloaded (<=) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First time instant to compare
+!     \item[time2]
+!          Second time instant to compare
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+!     ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeLE(time1%basetime, time2%basetime, ESMF_TimeLE)
+
+      end function ESMF_TimeLE
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeGE - Time instant 1 greater than or equal to time instant 2 ?
+!
+! !INTERFACE:
+      function ESMF_TimeGE(time1, time2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeGE
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time1
+      type(ESMF_Time), intent(in) :: time2
+!
+! !DESCRIPTION:
+!     Return true if first time instant is greater than or equal to second
+!     time instant, false otherwise.
+!     Maps overloaded (>=) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First time instant to compare
+!     \item[time2]
+!          Second time instant to compare
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+!     ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeGE(time1%basetime, time2%basetime, ESMF_TimeGE)
+
+      end function ESMF_TimeGE
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_TimeInc - Increment time instant with a time interval
 !
 ! !INTERFACE:
-      function ESMF_TimeInc(time, timeinterval, rc)
+      function ESMF_TimeInc(time, timeinterval)
 !
 ! !RETURN VALUE:
       type(ESMF_Time) :: ESMF_TimeInc
@@ -781,7 +1002,6 @@
 ! !ARGUMENTS:
       type(ESMF_Time), intent(in) :: time
       type(ESMF_TimeInterval), intent(in) :: timeinterval
-      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Increment {\tt Time} instant with a {\tt TimeInterval},
@@ -796,8 +1016,6 @@
 !          The given {\tt Time} to increment
 !     \item[timeinterval]
 !          The {\tt TimeInterval} to add to the given {\tt Time}
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 ! !REQUIREMENTS:
@@ -807,6 +1025,7 @@
       type(ESMF_BaseTime) :: basetime
       integer(ESMF_IKIND_I8) :: S
       integer :: Sn, Sd
+      integer :: rc
 
       ! get time from timeinterval (really need C++ "friend" feature TODO ?? )
       call c_ESMC_TimeIntervalGet_S_nd(timeinterval, S, Sn, Sd, rc)
@@ -814,10 +1033,10 @@
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeSum(time%basetime, basetime, &
-                              ESMF_TimeInc%basetime, rc)
+                              ESMF_TimeInc%basetime)
 
 !      call c_ESMC_BaseTimeSum(time%basetime, timeinterval%basetime, &
-!                               ESMF_TimeInc%basetime, rc)
+!                               ESMF_TimeInc%basetime)
 !  "Derived type "ESMF_TIMEINTERVAL" has private components, which means
 !  component name "BASETIME" must not be referenced."  TODO
 
@@ -827,7 +1046,7 @@
 ! !IROUTINE: ESMF_TimeDec - Decrement time instant with a time interval
 !
 ! !INTERFACE:
-      function ESMF_TimeDec(time, timeinterval, rc)
+      function ESMF_TimeDec(time, timeinterval)
 !
 ! !RETURN VALUE:
       type(ESMF_Time) :: ESMF_TimeDec
@@ -835,7 +1054,6 @@
 ! !ARGUMENTS:
       type(ESMF_Time), intent(in) :: time
       type(ESMF_TimeInterval), intent(in) :: timeinterval
-      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Decrement {\tt Time} instant with a {\tt TimeInterval},
@@ -850,8 +1068,6 @@
 !          The given {\tt Time} to decrement
 !     \item[timeinterval]
 !          The {\tt TimeInterval} to subtract from the given {\tt Time}
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !     
 ! !REQUIREMENTS:
@@ -861,6 +1077,7 @@
       type(ESMF_BaseTime) :: basetime
       integer(ESMF_IKIND_I8) :: S
       integer :: Sn, Sd
+      integer :: rc
 
 !     ! get time from timeinterval (really need C++ "friend" feature TODO ?? )
       call c_ESMC_TimeIntervalGet_S_nd(timeinterval, S, Sn, Sd, rc)
@@ -868,10 +1085,10 @@
 
 !     ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeDiff(time%basetime, basetime, &
-                               ESMF_TimeDec%basetime, rc)
+                               ESMF_TimeDec%basetime)
 
 !       call c_ESMC_BaseTimeDiff(time%basetime, timeinterval%basetime, &
-!                                ESMF_TimeDec%basetime, rc)
+!                                ESMF_TimeDec%basetime)
 !  "Derived type "ESMF_TIMEINTERVAL" has private components, which means
 !  component name "BASETIME" must not be referenced."  TODO
 
@@ -882,7 +1099,7 @@
 ! !IROUTINE:  ESMF_TimeDiff - Return the difference between two time instants
 !
 ! !INTERFACE:
-      function ESMF_TimeDiff(time1, time2, rc)
+      function ESMF_TimeDiff(time1, time2)
 !
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeDiff
@@ -890,7 +1107,6 @@
 ! !ARGUMENTS:
       type(ESMF_Time), intent(in) :: time1
       type(ESMF_Time), intent(in) :: time2
-      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Return the {\tt TimeInterval} difference between two {\tt Time} instants
@@ -904,261 +1120,23 @@
 !          The first {\tt Time} instant
 !     \item[time2]
 !          The second {\tt Time} instant
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 ! !REQUIREMENTS:
 !     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
 !EOP
+      integer :: rc
+
       ! silence compiler for now  TODO
       call c_ESMC_BaseTimeDummy(ESMF_TimeDiff, rc)
 
 !     ! call ESMC_BaseTime base class function
 !      call c_ESMC_BaseTimeDiff(time1%basetime, time2%basetime, &
-!                               ESMF_TimeDiff%basetime, rc)
+!                               ESMF_TimeDiff%basetime)
 !  "Derived type "ESMF_TIMEINTERVAL" has private components, which means
 !  component name "BASETIME" must not be referenced."  TODO
 
       end function ESMF_TimeDiff
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeEQ - Compare two times for equality
-!
-! !INTERFACE:
-      function ESMF_TimeEQ(time1, time2, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_TimeEQ
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time1
-      type(ESMF_Time), intent(in) :: time2
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Return true if both given time instants are equal, false otherwise.
-!     Maps overloaded (==) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First time instant to compare
-!     \item[time2]
-!          Second time instant to compare
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
-
-!     ! invoke C to C++ entry point for ESMF_BaseTime base class function
-      call c_ESMC_BaseTimeEQ(time1%basetime, time2%basetime, ESMF_TimeEQ, rc)
-
-      end function ESMF_TimeEQ
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeNE - Compare two times for non-equality
-!
-! !INTERFACE:
-      function ESMF_TimeNE(time1, time2, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_TimeNE
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time1
-      type(ESMF_Time), intent(in) :: time2
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Return true if both given time instants are not equal, false otherwise.
-!     Maps overloaded (/=) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First time instant to compare
-!     \item[time2]
-!          Second time instant to compare
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
-
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeNE(time1%basetime, time2%basetime, ESMF_TimeNE, rc)
-
-      end function ESMF_TimeNE
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeLT - Time instant 1 less than time instant 2 ?
-!
-! !INTERFACE:
-      function ESMF_TimeLT(time1, time2, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_TimeLT
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time1
-      type(ESMF_Time), intent(in) :: time2
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Return true if first time instant is less than second time instant,
-!     false otherwise.
-!     Maps overloaded (<) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First time instant to compare
-!     \item[time2]
-!          Second time instant to compare
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
-
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeLT(time1%basetime, time2%basetime, ESMF_TimeLT, rc)
-
-      end function ESMF_TimeLT
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGT - Time instant 1 greater than time instant 2 ?
-!
-! !INTERFACE:
-      function ESMF_TimeGT(time1, time2, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_TimeGT
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time1
-      type(ESMF_Time), intent(in) :: time2
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Return true if first time instant is greater than second time instant,
-!     false otherwise.
-!     Maps overloaded (>) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First time instant to compare
-!     \item[time2]
-!          Second time instant to compare
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
-
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeGT(time1%basetime, time2%basetime, ESMF_TimeGT, rc)
-
-      end function ESMF_TimeGT
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeLE - Time instant 1 less than or equal to time instant 2 ?
-!
-! !INTERFACE:
-      function ESMF_TimeLE(time1, time2, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_TimeLE
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time1
-      type(ESMF_Time), intent(in) :: time2
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Return true if first time instant is less than or equal to second time
-!     instant, false otherwise.
-!     Maps overloaded (<=) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First time instant to compare
-!     \item[time2]
-!          Second time instant to compare
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
-
-!     ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeLE(time1%basetime, time2%basetime, ESMF_TimeLE, rc)
-
-      end function ESMF_TimeLE
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGE - Time instant 1 greater than or equal to time instant 2 ?
-!
-! !INTERFACE:
-      function ESMF_TimeGE(time1, time2, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_TimeGE
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time1
-      type(ESMF_Time), intent(in) :: time2
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Return true if first time instant is greater than or equal to second
-!     time instant, false otherwise.
-!     Maps overloaded (>=) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First time instant to compare
-!     \item[time2]
-!          Second time instant to compare
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
-
-!     ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeGE(time1%basetime, time2%basetime, ESMF_TimeGE, rc)
-
-      end function ESMF_TimeGE
 
 !------------------------------------------------------------------------------
 !
@@ -1170,10 +1148,11 @@
 ! !IROUTINE:  ESMF_BaseValidate - Validate a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BaseValidate(time, rc)
+      subroutine ESMF_BaseValidate(time, opt, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
+      character (len=*), intent(in), optional :: opt
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1183,6 +1162,8 @@
 !     \begin{description}
 !     \item[time]
 !          Time instant to validate
+!     \item[{[opt]}]
+!          Validation options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1191,7 +1172,7 @@
 !     TMGn.n.n
 !EOP
    
-      call c_ESMC_BaseValidate(time, rc)
+      call c_ESMC_BaseValidate(time, opt, rc)
 
       end subroutine ESMF_BaseValidate
 
@@ -1200,10 +1181,11 @@
 ! !IROUTINE:  ESMF_BasePrint - Print out a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BasePrint(time, rc)
+      subroutine ESMF_BasePrint(time, opt, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
+      character (len=*), intent(in), optional :: opt
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1214,6 +1196,8 @@
 !     \begin{description}
 !     \item[time]
 !          Time instant to print out
+!     \item[{[opt]}]
+!          Print options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1222,7 +1206,7 @@
 !     TMGn.n.n
 !EOP
    
-      call c_ESMC_BasePrint(time, rc)
+      call c_ESMC_BasePrint(time, opt, rc)
 
       end subroutine ESMF_BasePrint
 
