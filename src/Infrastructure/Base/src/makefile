@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2004/12/14 15:38:18 theurich Exp $ 
+# $Id: makefile,v 1.28 2004/12/14 21:58:01 theurich Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -32,8 +32,4 @@ CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS = 
 
 ESMF_LogErr.o: ESMF_BaseTypes.o
-
-ESMF_VMTypes.o: ESMF_BaseTypes.o
-
-ESMF_VM.o: ESMF_VMTypes.o
 
