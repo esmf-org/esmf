@@ -7,9 +7,9 @@
 The Grid class contains two internal private classes: the DistGrid (Distributed
 Grid) class and the PhysGrid (Physical Grid) class.  The separation into two
 classes allows the code to differentiate between functions which define the
-local decomposition of data and the local representation of the grid.  The Grid
-class itself maintains general information about the global grid (e.g. the
-grid type, staggering, and coordinate system).  The Grid class is relatively
+DE-local decomposition of data and the DE-local representation of the grid.
+The Grid class itself maintains general information about the global grid (e.g.
+the grid type, staggering, and coordinate system).  The Grid class is relatively
 thin and otherwise presents a unified interface for DistGrid and PhysGrid
 functions.  Each Grid contains at least one subGrid, represented by a unique
 DistGrid and PhysGrid pair:
@@ -18,14 +18,14 @@ DistGrid and PhysGrid pair:
 a DELayout maps onto a Grid representation and how that Grid is distributed.
 DistGrids can represent the same Grid but have different mappings (staggerings)
 and can be contained by the same Grid object. The DistGrid class represents the
-mapping between the global Grid and the local data distribution;  it has
+mapping between the global Grid and the DE-local data distribution;  it has
 methods to aid in the collection and communication of global data.
-\item {\bf PhysGrid} The PhysGrid class maintains the local decomposed physical
-representation of a Grid, including all necessary coordinate data and masks.
-Separate PhysGrids are created for each relative location associated with the
-Grid's staggering (e.g. a Grid with Arakawa D staggering will have PhysGrids
-representing the cell centers and specified cell faces), as well as for any
-vertical grids.
+\item {\bf PhysGrid} The PhysGrid class maintains the DE-local decomposed
+physical representation of a Grid, including all necessary coordinate data and
+masks.  Separate PhysGrids are created for each relative location associated
+with the Grid's staggering (e.g. a Grid with Arakawa D staggering will have
+PhysGrids representing the cell centers and specified cell faces), as well as
+for any vertical subGrids.
 \end{itemize}
 
 Some methods which have a Grid interface are actually implemented

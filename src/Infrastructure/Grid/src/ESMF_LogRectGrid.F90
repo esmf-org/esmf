@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.133 2005/01/12 06:53:03 theurich Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.134 2005/01/12 22:08:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.133 2005/01/12 06:53:03 theurich Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.134 2005/01/12 22:08:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -247,7 +247,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
-!     metrics as part of a {\tt Grid}.
+!     metrics as part of an {\tt ESMF\_Grid}.
 
 !EOPI
       end interface
@@ -330,9 +330,9 @@
 !     \item[coord2]
 !          Array of physical coordinates in the second direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
-!          ESMF\_GRID\_HORZ\_STAGGER\_A.
+!          {\tt ESMF\_GRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -340,7 +340,7 @@
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
-!          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
+!          is specified, the default is {\tt ESMF\_COORD\_ORDER\_XYZ}.
 !     \item[{[periodic]}]
 !          Logical array denoting the periodicity of the coordinate axes.
 !          The default is FALSE for all axes.
@@ -447,9 +447,9 @@
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
-!          ESMF\_GRID\_HORZ\_STAGGER\_A.
+!          {\tt ESMF\_GRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -457,7 +457,7 @@
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
-!          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
+!          is specified, the default is {\tt ESMF\_COORD\_ORDER\_XYZ}.
 !     \item[{[periodic]}]
 !          Logical array denoting the periodicity of the coordinate axes.
 !          The default is FALSE for all axes.
@@ -577,9 +577,9 @@
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
-!          ESMF\_GRID\_HORZ\_STAGGER\_A.
+!          {\tt ESMF\_GRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -587,7 +587,7 @@
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
-!          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
+!          is specified, the default is {\tt ESMF\_COORD\_ORDER\_XYZ}.
 !     \item[{[periodic]}]
 !          Logical array denoting the periodicity of the coordinate axes.
 !          The default is FALSE for all axes.
@@ -689,9 +689,9 @@
 !     \item[coord2]
 !          Array of physical coordinates in the second direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
-!          ESMF\_GRID\_HORZ\_STAGGER\_A.
+!          {\tt ESMF\_GRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -699,7 +699,7 @@
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
-!          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
+!          is specified, the default is {\tt ESMF\_COORD\_ORDER\_XYZ}.
 !     \item[{[periodic]}]
 !          Logical array denoting the periodicity of the coordinate axes.
 !          The default is FALSE for all axes.
@@ -806,9 +806,9 @@
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
-!          ESMF\_GRID\_HORZ\_STAGGER\_A.
+!          {\tt ESMF\_GRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -816,7 +816,7 @@
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
-!          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
+!          is specified, the default is {\tt ESMF\_COORD\_ORDER\_XYZ}.
 !     \item[{[periodic]}]
 !          Logical array denoting the periodicity of the coordinate axes.
 !          The default is FALSE for all axes.
@@ -936,9 +936,9 @@
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
-!          ESMF\_GRID\_HORZ\_STAGGER\_A.
+!          {\tt ESMF\_GRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -946,7 +946,7 @@
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
-!          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
+!          is specified, the default is {\tt ESMF\_COORD\_ORDER\_XYZ}.
 !     \item[{[periodic]}]
 !          Logical array denoting the periodicity of the coordinate axes.
 !          The default is FALSE for all axes.
@@ -1001,7 +1001,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridAddVert"
 !BOPI
-! !IROUTINE: ESMF_LRGridAddVert - Add a vertical Grid to an existing Grid
+! !IROUTINE: ESMF_LRGridAddVert - Add a vertical subGrid to an existing Grid
 
 ! !INTERFACE:
       subroutine ESMF_LRGridAddVert(grid, minGlobalCoord, delta, coord, &
@@ -3584,7 +3584,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          {\tt Grid} to add {\tt DistGrid} to.
+!          {\tt ESMF\_Grid} to add {\tt DistGrid} to.
 !     \item[distGridId]
 !          Integer identifier for {\tt ESMF\_DistGrid}.
 !     \item[dimCount]
@@ -3672,7 +3672,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          {\tt Grid} to add {\tt DistGrid} to.
+!          {\tt ESMF\_Grid} to add {\tt DistGrid} to.
 !     \item[distGridId]
 !          Integer identifier for {\tt ESMF\_DistGrid}.
 !     \item[dimCount]
@@ -3755,12 +3755,12 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          {\tt Grid} to add {\tt PhysGrid} to.
+!          {\tt ESMF\_Grid} to add {\tt PhysGrid} to.
 !     \item[physGridId]
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
 !     \item[relloc]
 !          Relative location of data at the centers, faces, and vertices of
-!          the {\tt Grid}.
+!          the {\tt ESMF\_Grid}.
 !     \item[dimCount]
 !          Number of grid dimensions.
 !     \item[decompIds]
@@ -4088,12 +4088,12 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          {\tt Grid} to add {\tt PhysGrid} to.
+!          {\tt ESMF\_Grid} to add {\tt PhysGrid} to.
 !     \item[physGridId]
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
 !     \item[relloc]
 !          Relative location of data at the centers, faces, and vertices of
-!          the {\tt Grid}.
+!          the {\tt ESMF\_Grid}.
 !     \item[dimCount]
 !          Number of grid dimensions.
 !     \item[decompIds]
@@ -4312,7 +4312,7 @@
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
 !     \item[relloc]
 !          Relative location of data at the centers, faces, and vertices of
-!          the {\tt Grid}.
+!          the {\tt ESMF\_Grid}.
 !     \item[coord]
 !          Array of physical coordinates in the vertical direction.
 !     \item[countsPerDEDim]

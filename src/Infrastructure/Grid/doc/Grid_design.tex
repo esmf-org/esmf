@@ -1,4 +1,4 @@
-% $Id: Grid_design.tex,v 1.4 2004/08/16 22:52:50 jwolfe Exp $
+% $Id: Grid_design.tex,v 1.5 2005/01/12 22:10:20 jwolfe Exp $
 
 %\subsection{Design}
 
@@ -7,15 +7,15 @@
 Each Grid contains at least one Distributed Grid and one Physical Grid, both
 of which are private classes.
 The separation into two internal classes allows the code to differentiate
-between functions which define the local decomposition of data and
-the local representation of the grid.  The Grid class itself maintains
-general information about the global grid (e.g. the grid type, staggering,
+between functions which define the DE-local decomposition of data and
+the DE-local representation of the grid.  The Grid class itself maintains
+general information about the global Grid (e.g. the grid type, staggering,
 and coordinate system).  The Grid class is relatively thin and
 otherwise presents a unified interface for DistGrid and PhysGrid
 functions.
 
 The Grid class contains all information about the computational grid
-for a Component, and must provide access to any necessary grid information
+for a Component, and must provide access to any necessary Grid information
 to the rest of the ESMF.  A single Grid can have more than one related
 DistGrid and PhysGrid set, called a subGrid.  Each subGrid corresponds to
 a different representation of the Grid.  For example, a staggered Grid could

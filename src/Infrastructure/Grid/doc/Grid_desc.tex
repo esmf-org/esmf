@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.12 2005/01/10 21:35:30 jwolfe Exp $
+% $Id: Grid_desc.tex,v 1.13 2005/01/12 22:09:19 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,19 +35,20 @@ as one or more subGrids.  When an {\tt ESMF\_Field} is created, it must be
 assigned to one of the appropriate subGrids, represented by the identifier
 {\tt ESMF\_RelLoc} (or relative location), present in the {\tt ESMF\_Grid} it 
 is being created from.  Continuing the example above, an {\tt ESMF\_Field}
-created from the Arakawa C Grid would have to be defined at either the cell
-center or one of the prescribed cell faces. 
+created from a Grid with Arakawa C staggering would have to be defined at either
+the cell center or one of the prescribed cell faces. 
 
 ESMF differentiates between global data, which describes a complete set of data,
-and local data, which describes a distributed or decomposed chuck of data located
-on a single DE.  The Grid class plays an integral role in this concept.  A Grid
-is first instantiated, via a create call, on all DEs in its domain, but only in
-a global sense.  By that we mean it stores only information about the global grid,
-such as the number of grid cells and the grid extents, but has not generated all
-the information that will end up distributed, such as the cell coordinates.  The
-Grid is then decomposed onto a given DELayout via a Distribute call.  At that
-point, the local data types are created and computed, so that on each DE there
-resides necessary global Grid information as well as its own local Grid data.
-The local data represented by an {\tt ESMF\_Field} is defined by the decomposition
-of the underlying {\tt ESMF\_Grid}.
+and DE-local data, which describes a distributed or decomposed chuck of data
+located on a single DE.  The Grid class plays an integral role in this concept.
+A Grid is first instantiated, via a create call, on all DEs in its domain, but
+only in a global sense.  By that we mean it stores only information about the
+global Grid, such as the number of grid cells and the coordinate extents, but
+has not generated all the information that will end up distributed, such as the
+cell coordinates.  The Grid is then decomposed onto a given DELayout via an
+{\tt ESMF\_Distribute()} call.  At that point, the DE-local data types are
+created and computed, so that on each DE there resides necessary global Grid
+information as well as its own DE-local Grid data.  The DE-local data represented
+by an {\tt ESMF\_Field} is defined by the decomposition of the underlying
+{\tt ESMF\_Grid}.
 

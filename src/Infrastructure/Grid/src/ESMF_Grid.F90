@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.214 2005/01/05 16:54:33 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.215 2005/01/12 22:06:57 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 !
 ! The code in this file implements the {\tt ESMF\_Grid} class.  This class
 ! provides a unified interface for both {\tt ESMF\_PhysGrid} and 
-! {\tt ESMF\_DistGrid} information for model grids.  
+! {\tt ESMF\_DistGrid} information for model Grids.  
 ! Functions for defining and computing {\tt ESMF\_Grid}
 ! information are available through this class.
 !
@@ -48,11 +48,11 @@
       
       use ESMF_DELayoutMod ! ESMF layout class
       use ESMF_ArrayMod
-      use ESMF_DistGridMod    ! ESMF distributed grid class
-      use ESMF_PhysCoordMod   ! ESMF physical coord class
-      use ESMF_PhysGridMod    ! ESMF physical grid class
-      use ESMF_GridTypesMod   ! ESMF basic grid types and primitives
-      use ESMF_LogRectGridMod ! ESMF logically rectangular grid routines
+      use ESMF_DistGridMod    ! ESMF distributed Grid class
+      use ESMF_PhysCoordMod   ! ESMF physical Coord class
+      use ESMF_PhysGridMod    ! ESMF physical Grid class
+      use ESMF_GridTypesMod   ! ESMF basic Grid types and primitives
+      use ESMF_LogRectGridMod ! ESMF logically rectangular Grid routines
       implicit none
 
 !------------------------------------------------------------------------------
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.214 2005/01/05 16:54:33 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.215 2005/01/12 22:06:57 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -292,7 +292,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
-!     metrics as part of an {\tt Grid}.
+!     metrics as part of an {\tt ESMF\_Grid}.
 
 !EOPI
       end interface
@@ -325,7 +325,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddVertHeight"
 !BOP
-! !IROUTINE: ESMF_GridAddVertHeight - Add a vertical dimension to an existing Grid
+! !IROUTINE: ESMF_GridAddVertHeight - Add a vertical subGrid to an existing Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridAddVertHeight(grid, delta, coord, vertstagger, &
@@ -343,15 +343,17 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This routine adds a vertical subGrid to an already 
-!     allocated {\tt grid}.
-!     The {\tt ESMF\_GridAddVertHeight} interface only creates vertical subGrids
-!     with coordinate systems where the zero point is defined at the bottom.
-!     Only one vertical grid is allowed for any {\tt ESMF\_Grid}, though
-!     the vertical grid may have more than one related subGrid due to the
-!     the number of relative locations for a given staggering.  If a vertical
-!     grid already exists for the {\tt ESMF\_Grid} that is passed in, an error
-!     is returned.
+!     This routine adds a vertical subGrid (or subGrids) to an already
+!     allocated Grid.  The {\tt ESMF\_GridAddVertHeight} interface only
+!     creates vertical subGrids with coordinate systems where the zero point is
+!     defined at the bottom.  An {\tt ESMF\_GridAddVert<GridVertType>()} can
+!     only be called for any {\tt ESMF\_Grid} once;  if a vertical subGrid
+!     already exists for the {\tt ESMF\_Grid} that is passed in, an error
+!     is returned.  Please note that this subroutine may create more than one
+!     subGrid because some vertical staggerings infer more than one vertical
+!     relative location (for example, {\tt ESMF\_GRID\_VERT\_STAGGER\_BOTTOM}
+!     staggering indicates that some Fields are represented at the vertical cell
+!     centers and some at the cell bottom faces).  
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
 !     \begin{enumerate}
@@ -365,19 +367,20 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Existing {\tt ESMF\_Grid} the vertical grid is being added to.
+!          Existing {\tt ESMF\_Grid} the vertical subGrid(s) is being added to.
 !     \item[{[delta]}]
 !          Array of physical increments in the vertical direction.
 !     \item[{[coord]}]
 !          Array of physical coordinates in the vertical direction.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_GridVertStagger} specifier denoting vertical grid stagger.
+!          {\tt ESMF\_GridVertStagger} specifier denoting vertical subGrid
+!          stagger.
 !     \item[{[dimName]}]
 !          Dimension name.
 !     \item[{[dimUnit]}]
 !          Dimension unit.
 !     \item[{[name]}]
-!          Name for the vertical grid.
+!          Name for the vertical subGrid(s).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1164,25 +1167,25 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Sets the decomposition of the {\tt grid}.
+!     Sets the decomposition of an {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be distributed.
 !     \item[delayout]
-!         {\tt ESMF\_DELayout} on which the {\tt grid} is to be decomposed.
+!         {\tt ESMF\_DELayout} on which {\tt grid} is to be decomposed.
 !     \item[{[countsPerDEDim1]}]
 !          Array denoting the number of grid cells per DE in the first
 !          decomposition axis.  By default, the number of grid cells per DE
 !          in a decomposition is calculated internally by an algorithm
 !          designed to distribute the cells as evenly as possible.
 !          This optional argument is available to allow users to instead
-!          specify the decompostion of a grid axis by a related delayout
-!          axis.  The number of elements in this array must be greater than
-!          or equal to the number of DE's along the first axis of the
-!          attached {\tt delayout}.  The sum of this array must equal exactly
-!          the number of grid cells along related grid axis, which is the
+!          specify the decomposition of a Grid axis by a related
+!          DELayout axis.  The number of elements in this array must be
+!          greater than or equal to the number of DE's along the first axis of
+!          the attached DELayout.  The sum of this array must equal exactly
+!          the number of grid cells along a related Grid axis, which is the
 !          first axis by default but can also be set by the {\tt decompIds}
 !          argument in this call.
 !     \item[{[countsPerDEDim2]}]
@@ -1190,24 +1193,24 @@
 !          decomposition axis.  Please see the description of
 !          {\tt countsPerDEDim1} above for more details
 !     \item[{[decompIds]}]
-!          Integer array identifying which {\tt grid} axes are decomposed.
-!          This array describes the relationship between the {\tt grid} and the
-!          {\tt delayout}.  The elements of this array contains decompostion
-!          information for the corresponding grid axis.  The following is a
+!          Integer array identifying which Grid axes are decomposed.
+!          This array describes the relationship between the Grid and the
+!          DELayout.  The elements of this array contains decompostion
+!          information for the corresponding Grid axis.  The following is a
 !          list of valid values and the meaning of each:
 !          \begin{description}
-!            \item 0 \  the grid axis is not distributed;
-!            \item 1 \  the grid axis is distributed by the first 
-!                       decomposition axis in the {\tt delayout};
-!            \item 2 \  the grid axis is distributed by the second 
-!                       decomposition axis in the {\tt delayout}.
+!            \item 0 \  the Grid axis is not distributed;
+!            \item 1 \  the Grid axis is distributed by the first 
+!                       decomposition axis in the DELayout;
+!            \item 2 \  the Grid axis is distributed by the second 
+!                       decomposition axis in the DELayout.
 !          \end{description}
 !          The number of array elements should be greater or equal to the number
-!          of grid dimensions.  The default is that the first grid axis is
-!          distributed by the first decompostion axis, the second grid axis is
-!          distributed by the second decomposition axis, and the third grid axis
+!          of Grid dimensions.  The default is that the first Grid axis is
+!          distributed by the first decompostion axis, the second Grid axis is
+!          distributed by the second decomposition axis, and the third Grid axis
 !          (if applicable) is not distributed.  The relationship between data
-!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and grid
+!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and Grid
 !          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
 !          {\tt ESMF\_ArrayDataMap} interfaces.
 !     \item[{[rc]}]
@@ -1295,39 +1298,39 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Sets the decomposition of the {\tt grid}.
+!     Sets the decomposition of an {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be distributed.
 !     \item[delayout]
-!         {\tt ESMF\_DELayout} on which the {\tt grid} is to be decomposed.
+!         {\tt ESMF\_DELayout} on which {\tt grid} is to be decomposed.
 !     \item[myCount]
 !          Number of grid cells to be distributed to this DE.
 !     \item[myIndices]
-!          Array of grid indices to be distributed to this DE, as (i,j) pairs.
+!          Array of Grid indices to be distributed to this DE, as (i,j) pairs.
 !          The size of this array must be at least {\tt myCount} in the first
 !          dimension and 2 in the second.
 !     \item[{[decompIds]}]
-!          Integer array identifying which {\tt grid} axes are decomposed.
-!          This array describes the relationship between the {\tt grid} and the
-!          {\tt delayout}.  The elements of this array contains decompostion
-!          information for the corresponding grid axis.  The following is a
+!          Integer array identifying which Grid axes are decomposed.
+!          This array describes the relationship between the Grid and the
+!          DELayout.  The elements of this array contains decompostion
+!          information for the corresponding Grid axis.  The following is a
 !          list of valid values and the meaning of each:
 !          \begin{description}
-!            \item 0 \  the grid axis is not distributed;
-!            \item 1 \  the grid axis is distributed by the first 
-!                       decomposition axis in the {\tt delayout};
-!            \item 2 \  the grid axis is distributed by the second 
-!                       decomposition axis in the {\tt delayout}.
+!            \item 0 \  the Grid axis is not distributed;
+!            \item 1 \  the Grid axis is distributed by the first 
+!                       decomposition axis in the DELayout;
+!            \item 2 \  the Grid axis is distributed by the second 
+!                       decomposition axis in the DELayout.
 !          \end{description}
 !          The number of array elements should be greater or equal to the number
-!          of grid dimensions.  The default is that the first grid axis is
-!          distributed by the first decompostion axis, the second grid axis is
-!          distributed by the second decomposition axis, and the third grid axis
+!          of Grid dimensions.  The default is that the first Grid axis is
+!          distributed by the first decomposition axis, the second Grid axis is
+!          distributed by the second decomposition axis, and the third Grid axis
 !          (if applicable) is not distributed.  The relationship between data
-!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and grid
+!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and Grid
 !          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
 !          {\tt ESMF\_ArrayDataMap} interfaces.
 !     \item[{[rc]}]
@@ -1442,32 +1445,34 @@
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be queried.
 !     \item[{[horzgridtype]}]
-!          {\tt ESMF\_GridType} specifier denoting horizontal grid type.
+!          {\tt ESMF\_GridType} specifier denoting horizontal Grid type.
 !     \item[{[vertgridtype]}]
-!          {\tt ESMF\_GridVertType} specifier denoting vertical grid type.
+!          {\tt ESMF\_GridVertType} specifier denoting vertical subGrid type.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
+!          stagger.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting vertical grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting vertical subGrid
+!          stagger.
 !     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal grid.
+!          the horizontal Grid.
 !     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical grid.
+!          the vertical subGrid.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).
 !     \item[{[dimCount]}]
-!          Number of dimensions represented by this {\tt grid}.
+!          Number of dimensions represented by this Grid.
 !     \item[{[distDimCount]}]
-!          Number of dimensions represented by the distribution of this {\tt grid}.
-!          For grids distributed as a vector, this could be different than the rank
-!          of the underlying grid.
+!          Number of dimensions represented by the distribution of this Grid.
+!          For Grids distributed as a vector, this could be different than the
+!          rank of the underlying Grid.
 !     \item[{[gridstorage]}]
-!          {\tt ESMF\_GridStorage} specifier denoting grid storage.
+!          {\tt ESMF\_GridStorage} specifier denoting Grid storage.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -1475,7 +1480,7 @@
 !     \item[{[periodic]}]
 !          Logical array that returns the periodicity of the coordinate axes.
 !     \item[{[delayout]}]
-!          {\tt delayout} that this {\tt grid} was distributed over.
+!          {\tt delayout} that this Grid was distributed over.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -1636,25 +1641,27 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Gets information about an {\tt ESMF\_Grid}, depending on user-supplied
-!     relative locations, and a list of optional arguments.
+!     Gets information about an {\tt ESMF\_Grid} or specified subGrid, depending
+!     on user-supplied relative locations, and a list of optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be queried.
 !     \item[horzrelloc]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal subGrid.
-!     \item[{[vertrelloc]}]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical subGrid.
+!          Horizontal relative location of the subGrid to be queried.
+!     \item[[{vertrelloc]}]
+!          Vertical relative location of the subGrid to be queried.
 !     \item[{[horzgridtype]}]
-!          {\tt ESMF\_GridType} specifier denoting horizontal grid type.
+!          {\tt ESMF\_GridType} specifier denoting horizontal Grid type.
 !     \item[{[vertgridtype]}]
-!          {\tt ESMF\_GridVertType} specifier denoting vertical grid type.
+!          {\tt ESMF\_GridVertType} specifier denoting vertical subGrid type.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
+!          stagger.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting vertical grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting vertical subGrid
+!          stagger.
 !     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
@@ -1662,32 +1669,32 @@
 !     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical grid.
+!          the vertical subGrid.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).
 !     \item[{[dimCount]}]
-!          Number of dimensions represented by this {\tt grid}.
+!          Number of dimensions represented by this Grid.
 !     \item[{[distDimCount]}]
-!          Number of dimensions represented by the distribution of this {\tt grid}.
+!          Number of dimensions represented by the distribution of this Grid.
 !     \item[{[gridstorage]}]
-!          {\tt ESMF\_GridStorage} specifier denoting grid storage.
+!          {\tt ESMF\_GridStorage} specifier denoting Grid storage.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[globalCellCountPerDim]}]
-!          Array of numbers of global grid increments in each direction.
+!          Array of numbers of global Grid increments in each direction.
 !     \item[{[globalStartPerDEPerDim]}]
 !          Array of global starting locations for each DE and in each direction.
 !     \item[{[maxLocalCellCountPerDim]}]
-!          Array of maximum number of grid cells on any DE in each direction.
+!          Array of maximum number of Grid cells on any DE in each direction.
 !     \item[{[cellCountPerDEPerDim]}]
-!          2-D array of number of grid cells on each DE and in each direction.
+!          2-D array of number of Grid cells on each DE and in each direction.
 !     \item[{[periodic]}]
 !          Logical array that returns the periodicity of the coordinate axes.
 !     \item[{[delayout]}]
-!          {\tt delayout} that this {\tt grid} was distributed over.
+!          {\tt delayout} that this Grid was distributed over.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -1816,7 +1823,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer attribute from the {\tt grid}.
+!      Returns a 4-byte integer attribute from the Grid.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1876,7 +1883,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer list attribute from the {\tt grid}.
+!      Returns a 4-byte integer list attribute from the Grid.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1947,7 +1954,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer attribute from the {\tt grid}.
+!      Returns an 8-byte integer attribute from the Grid.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2007,7 +2014,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer list attribute from the {\tt grid}.
+!      Returns an 8-byte integer list attribute from the Grid.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2077,7 +2084,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the {\tt grid}.
+!      Returns a 4-byte real attribute from the Grid.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2136,7 +2143,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real list attribute from an {\tt ESMF\_Grid}.
+!      Returns a 4-byte real list attribute from the Grid.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2206,7 +2213,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the {\tt grid}.
+!      Returns an 8-byte real attribute from the Grid.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2266,7 +2273,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real list attribute from an {\tt ESMF\_Grid}.
+!      Returns an 8-byte real list attribute from the Grid.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2336,7 +2343,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a logical attribute from the {\tt grid}.
+!      Returns a logical attribute from the Grid.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2396,7 +2403,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from the {\tt grid}.
+!      Returns a logical list attribute from the Grid.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2466,7 +2473,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a character attribute from the {\tt grid}.
+!      Returns a character attribute from the Grid.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2522,7 +2529,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns the number of attributes associated with the given {\tt grid} in
+!      Returns the number of attributes associated with the given Grid in
 !      the argument {\tt count}.
 ! 
 !     The arguments are:
@@ -2768,7 +2775,7 @@
 !          Coordinates of corners of each cell.  The dimension index should
 !          be defined first, followed by the corner index.  Corners can
 !          be numbered in either clockwise or counter-clockwise direction,
-!          but must be numbered consistently throughout grid.
+!          but must be numbered consistently throughout the Grid.
 !     \item[{[faceCoord]}]
 !          Coordinates of face centers of each cell.  The dimension index should
 !          be defined first, followed by the face index.  Faces should
@@ -2862,7 +2869,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetDELocalInfo"
 !BOP
-! !IROUTINE: ESMF_GridGetDELocalInfo - Get local DE information for a Grid
+! !IROUTINE: ESMF_GridGetDELocalInfo - Get DE-local information for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGetDELocalInfo(grid, horzrelloc, vertrelloc, &
@@ -2887,19 +2894,21 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Gets {\tt grid} information for a particular Decomposition Element (DE).
+!     Gets Grid or subGrid information for a particular Decomposition
+!     Element (DE) assigned to this PET.  This routine cannot retrieve
+!     information about a DE on an different PET.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be queried.
 !     \item[horzrelloc]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal subGrid.
-!     \item[{[vertrelloc]}]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical subGrid.
+!          Horizontal relative location of the subGrid to be queried.
+!     \item[[{vertrelloc]}]
+!          Vertical relative location of the subGrid to be queried.
 !     \item[{[myDE]}]
 !          Identifier for this {\tt ESMF\_DE}, zero-based.  Note that this is 
-!          a returned value.
+!          a returned value, not an input one.
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
 !     \item[{[localCellCountPerDim]}]
@@ -2907,15 +2916,15 @@
 !     \item[{[minLocalCoordPerDim]}]
 !          Array of minimum local coordinate values on this DE in each dimension.
 !          The number of array elements should be greater or equal to the number
-!          of grid dimensions.
+!          of Grid dimensions.
 !     \item[{[maxLocalCoordPerDim]}]
 !          Array of maximum local coordinate values on this DE in each dimension.
 !          The number of array elements should be greater or equal to the number
-!          of grid dimensions.
+!          of Grid dimensions.
 !     \item[{[globalStartPerDim]}]
 !          Global index of starting counts for each dimension.
 !          The number of array elements should be greater or equal to the number
-!          of grid dimensions.
+!          of Grid dimensions.
 !     \item[{[reorder]}]
 !          If TRUE, reorder any results using a previously set CoordOrder
 !          before returning.  If FALSE, do not reorder.  The default
@@ -3007,7 +3016,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGlobalToDELocalIndex"
 !BOP
-! !IROUTINE: ESMF_GridGlobalToDELocalIndex - Translate global indexing to DE local
+! !IROUTINE: ESMF_GridGlobalToDELocalIndex - Translate global indexing to DE-local
 
 ! !INTERFACE:
       subroutine ESMF_GridGlobalToDELocalIndex(grid, horzrelloc, vertrelloc, &
@@ -3029,7 +3038,7 @@
 ! !DESCRIPTION:
 !     Translates an array of integer cell identifiers from global indexing 
 !     to DE-local indexing.  This routine is intended to identify equivalent
-!     positions of grid elements in distributed (local) arrays and gathered
+!     positions of grid elements in distributed (DE-local) arrays and gathered
 !     (global) arrays, either by memory location or index pairs.
 !     WARNING:  This routine is meant for very limited user access.  It works
 !               with Grid indices and will give erroneous results if applied to
@@ -3040,30 +3049,32 @@
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be used.
-!     \item[horzrelloc]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal subGrid.
-!     \item[{[vertrelloc]}]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical subGrid.
+!     \item[{[horzrelloc]}]
+!          Horizontal relative location of the subGrid to be used for the
+!          translation.
+!     \item[[{vertrelloc]}]
+!          Vertical relative location of the subGrid to be used for the
+!          translation.
 !     \item[{[global1D]}]
 !          One-dimensional array of global identifiers to be translated.
 !          Usage of this optional argument infers translating between positions
-!          in memory from a global array to a local (or distributed) one.
+!          in memory from a global array to a DE-local (or distributed) one.
 !          This array is dimensioned (N), where N is the number of memory
 !          locations to be translated.
 !     \item[{[local1D]}]
-!          One-dimensional array of local identifiers for the return of the
+!          One-dimensional array of DE-local identifiers for the return of the
 !          translation.  This array must be the same size as {\tt global1D},
 !          and must be present if {\tt global1D} is present.  If either of
 !          these conditions is not met, an error is issued.
 !     \item[{[global2D]}]
 !          Two-dimensional array of global identifiers to be translated.
 !          Usage of this optional argument infers translating between indices
-!          in ij space.  This array is assumed to be dimensioned (N,2), where
+!          in IJ space.  This array is assumed to be dimensioned (N,2), where
 !          N is the number of index locations to be translated and the second
-!          dimension corresponds to the two grid indices that are distributed 
-!          (currently any two dimensions of a three-dimensional grid can be
+!          dimension corresponds to the two Grid indices that are distributed 
+!          (currently any two dimensions of a three-dimensional Grid can be
 !          distributed).  So to translate three sets of global indices to
-!          local indexing,
+!          DE-local indexing,
 !          \begin{description}
 !            \item {\tt global2D(1,1)} = index1(1)
 !            \item {\tt global2D(1,2)} = index1(2)
@@ -3073,7 +3084,7 @@
 !            \item {\tt global2D(3,2)} = index3(2)
 !          \end{description}
 !     \item[{[local2D]}]
-!          Two-dimensional array of local identifiers for the return of the
+!          Two-dimensional array of DE-local identifiers for the return of the
 !          translation.  This array must be the same size as {\tt global2D},
 !          and must be present if {\tt global2D} is present.  If either of
 !          these conditions is not met, an error is issued.
@@ -3156,7 +3167,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridDELocalToGlobalIndex"
 !BOP
-! !IROUTINE: ESMF_GridDELocalToGlobalIndex - Translate DE local indexing to global
+! !IROUTINE: ESMF_GridDELocalToGlobalIndex - Translate DE-local indexing to global
 
 ! !INTERFACE:
       subroutine ESMF_GridDELocalToGlobalIndex(grid, horzrelloc, vertrelloc, &
@@ -3176,7 +3187,7 @@
 ! !DESCRIPTION:
 !     Translates an array of integer cell identifiers from DE-local indexing 
 !     to global indexing.  This routine is intended to identify equivalent
-!     positions of grid elements in distributed (local) arrays and gathered
+!     positions of grid elements in distributed (DE-local) arrays and gathered
 !     (global) arrays, either by memory location or index pairs.
 !     WARNING:  This routine is meant for very limited user access.  It works
 !               with Grid indices and will give erroneous results if applied to
@@ -3187,14 +3198,16 @@
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be used.
-!     \item[horzrelloc]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal subGrid.
-!     \item[{[vertrelloc]}]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical subGrid.
+!     \item[{[horzrelloc]}]
+!          Horizontal relative location of the subGrid to be used for the
+!          translation.
+!     \item[[{vertrelloc]}]
+!          Vertical relative location of the subGrid to be used for the
+!          translation.
 !     \item[{[local1D]}]
-!          One-dimensional array of global identifiers to be translated.
+!          One-dimensional array of DE-local identifiers to be translated.
 !          Usage of this optional argument infers translating between positions
-!          in memory from a local (or distributed) grid array to a global one.
+!          in memory from a DE-local (or distributed) Grid array to a global one.
 !          This array is dimensioned (N), where N is the number of memory
 !          locations to be translated.
 !     \item[{[global1D]}]
@@ -3203,13 +3216,13 @@
 !          and must be present if {\tt local1D} is present.  If either of
 !          these conditions is not met, an error is issued.
 !     \item[{[local2D]}]
-!          Two-dimensional array of local identifiers to be translated.
+!          Two-dimensional array of DE-local identifiers to be translated.
 !          Usage of this optional argument infers translating between indices
-!          in ij space.  This array is assumed to be dimensioned (N,2), where
+!          in IJ space.  This array is assumed to be dimensioned (N,2), where
 !          N is the number of index locations to be translated and the second
-!          dimension corresponds to the two grid indices that are distributed 
-!          (currently any two dimensions of a three-dimensional grid can be
-!          distributed).  So to translate three sets of local indices to
+!          dimension corresponds to the two Grid indices that are distributed 
+!          (currently any two dimensions of a three-dimensional Grid can be
+!          distributed).  So to translate three sets of DE-local indices to
 !          global indexing,
 !          \begin{description}
 !            \item {\tt local2D(1,1)} = index1(1)
@@ -3412,11 +3425,11 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Sets information for the {\tt grid} that may not have been included at
-!     {\tt grid} creation.
-!     WARNING:  This routine does not automatically regenerate the {\tt grid}
+!     Sets information for the Grid that may not have been included at
+!     Grid creation.
+!     WARNING:  This routine does not automatically regenerate the Grid
 !               when used to reset its values, some of which may significantly
-!               alter the existing {\tt grid}.  Therefore this routine may only
+!               alter the existing Grid.  Therefore this routine may only
 !               be used prior to the {\tt ESMF\_GridDistribute()} call.
 !
 !     The arguments are:
@@ -3424,21 +3437,23 @@
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be modified.
 !     \item[{[horzgridType]}]
-!          {\tt ESMF\_GridType} specifier denoting horizontal grid type.
+!          {\tt ESMF\_GridType} specifier denoting horizontal Grid type.
 !     \item[{[vertgridType]}]
-!          {\tt ESMF\_GridVertType} specifier denoting vertical grid type.
+!          {\tt ESMF\_GridVertType} specifier denoting vertical subGrid type.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
+!          stagger.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_GridVertStagger} specifier denoting vertical grid stagger.
+!          {\tt ESMF\_GridVertStagger} specifier denoting vertical subGrid
+!          stagger.
 !     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal grid.
+!          the horizontal Grid.
 !     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical grid.
+!          the vertical subGrid.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).
@@ -3524,7 +3539,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the {\tt grid}.
+!      Attaches a 4-byte integer attribute to the Grid.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
@@ -3577,7 +3592,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the {\tt grid}.
+!     Attaches a 4-byte integer list attribute to the Grid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
@@ -3641,7 +3656,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the {\tt grid}.
+!      Attaches an 8-byte integer attribute to the Grid.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
@@ -3694,7 +3709,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a 8-byte integer list attribute to the {\tt grid}.
+!     Attaches a 8-byte integer list attribute to the Grid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
@@ -3758,7 +3773,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the {\tt grid}.
+!      Attaches a 4-byte real attribute to the Grid.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
@@ -3810,7 +3825,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the {\tt grid}.
+!     Attaches a 4-byte real list attribute to the Grid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
@@ -3874,7 +3889,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the {\tt grid}.
+!      Attaches an 8-byte real attribute to the Grid.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
@@ -3926,7 +3941,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the {\tt grid}.
+!     Attaches an 8-byte real list attribute to the Grid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
@@ -3990,7 +4005,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a logical attribute to the {\tt grid}.
+!     Attaches a logical attribute to the Grid.
 !     The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
@@ -4043,7 +4058,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt grid}.
+!     Attaches a logical list attribute to the Grid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
@@ -4107,7 +4122,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt grid}.
+!      Attaches a character attribute to the Grid.
 !     The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
@@ -4621,8 +4636,10 @@
 ! !DESCRIPTION:
 !     Validates that an {\tt ESMF\_Grid} is internally consistent.  Currently
 !     checks to ensure:
-!          the pointer to the grid is associated; and
-!          the grid status indicates the grid is ready to use.
+!     \begin{enumerate}
+!        \item the pointer to the Grid is associated; and
+!        \item the Grid status indicates the Grid is ready to use.
+!     \end{enumerate}
 !
 !     The arguments are:
 !     \begin{description}
