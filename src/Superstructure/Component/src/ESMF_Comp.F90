@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.46 2003/04/29 17:47:06 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.47 2003/05/02 22:05:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_MachineMod
-      !use ESMF_ConfigMod
+      use ESMF_ConfigMod
       use ESMF_DELayoutMod
       use ESMF_ClockMod
       use ESMF_GridMod
@@ -101,11 +101,11 @@
 !------------------------------------------------------------------------------
 !     ! Configuration placeholder - TODO: replace with real config object
 !
-      type ESMF_Config
-      sequence
-      private
-          integer :: dummy
-      end type
+      !type ESMF_Config
+      !sequence
+      !private
+      !    integer :: dummy
+      !end type
 
 !------------------------------------------------------------------------------
 !     ! ESMF_CompClass
@@ -180,7 +180,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.46 2003/04/29 17:47:06 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.47 2003/05/02 22:05:25 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -367,14 +367,14 @@ end function
         if (present(configfile)) then
           !compp%config = ESMF_ConfigCreate(configfile, status)
         else
-          compp%config%dummy = 0
+          !compp%config = 0
         endif
 
         ! store already opened config object
         if (present(config)) then
           compp%config = config
         else
-          compp%config%dummy = 0
+          !compp%config = 0
         endif
 
         ! default grid for a gridded component
