@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.35 2003/09/12 18:05:39 flanigan Exp $ 
+# $Id: makefile,v 1.36 2003/09/18 23:01:54 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -60,7 +60,7 @@ CLOBBERDIRS =
 # colons.  The first path should be a "." for the local directory.
 # The last path listed should have a trailing colon.
 
-TEXINPUTS_VALUE = ".:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" 
+TEXINPUTS_VALUE = ".:graphics:blank_graphics:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" 
 
 #
 # The build rules for the req are in 
