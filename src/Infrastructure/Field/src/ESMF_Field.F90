@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.54 2003/08/05 20:41:41 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.55 2003/08/06 23:02:52 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.54 2003/08/05 20:41:41 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.55 2003/08/06 23:02:52 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2488,7 +2488,7 @@
       logical :: hascachedroute    ! can we reuse an existing route?
       integer :: nDEs
       integer :: my_DE
-      integer, dimension(ESMF_MAXGRIDDIM) :: global_stride
+      integer, dimension(ESMF_MAXGRIDDIM) :: global_count
       integer, dimension(:,:), allocatable :: global_start
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
@@ -2527,13 +2527,13 @@
          return
       endif 
 
-      ! Get global starting counts and global strides
+      ! Get global starting counts and global counts
       call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
       AI_count = nDEs
       allocate(global_start(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_stride, &
+      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_count, &
                         global_start=global_start, &
                         periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
@@ -2558,7 +2558,7 @@
           route = ESMF_RouteCreate(layout, rc) 
 
           call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, src_AI, dst_AI, &
-                                        AI_count, global_start, global_stride, &
+                                        AI_count, global_start, global_count, &
                                         layout, periodic, status)
 
       endif
@@ -2751,9 +2751,9 @@
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
-      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_stride
+      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
       integer, dimension(:,:), allocatable :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_stride
+      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
       integer, dimension(:,:), allocatable :: dst_global_start
       type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
       integer :: AI_snd_count, AI_rcv_count
@@ -2855,7 +2855,7 @@
           AI_snd_count = nx * ny
 
           allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_stride, &
+          call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_count, &
                             global_start=src_global_start, rc=status)
 
           allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
@@ -2871,7 +2871,7 @@
           AI_rcv_count = nx * ny
 
           allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_stride, &
+          call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_count, &
                             global_start=dst_global_start, rc=status)
 
           allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
@@ -2905,10 +2905,10 @@
           call ESMF_RoutePrecompute(route, datarank, &
                                     my_dst_DE, dst_AI_exc, dst_AI_tot, &
                                     AI_rcv_count, dst_global_start, &
-                                    dst_global_stride, dstlayout,  &
+                                    dst_global_count, dstlayout,  &
                                     my_src_DE, src_AI_exc, src_AI_tot, &
                                     AI_snd_count, src_global_start, &
-                                    src_global_stride, srclayout, &
+                                    src_global_count, srclayout, &
                                     rc=status)
 
       endif
