@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.1 2002/11/04 22:16:36 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.2 2002/11/05 17:46:15 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.1 2002/11/04 22:16:36 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.2 2002/11/05 17:46:15 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -71,8 +71,21 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
+// TODO: Add code here which does:
 //
-//  code goes here
+//   This code needs to make space for the private class data and store the
+//   arguments given.  Either malloc the existing list longer, or use an
+//   unused entry in an already allocated list.
+//
+//   It then call a *Fortran* allocate routine to get space - not malloc - and 
+//   it needs to call with a pointer of the correct type/kind/rank so
+//   that this array is useable from F90 as well as C++.  
+     //ESMF_Allocate();
+//
+//   It then needs to store the real F90 array pointer (dope vector), so that
+//   it can be returned to a fortran routine on demand.  From the C++ side
+//   it can return a handle or pointer which describes the private data, and
+//   from C++ you can get the real memory address and use it directly.
 //
 
  } // end ESMC_ArrayCreate
