@@ -1,4 +1,4 @@
-% $Id: state_desc.tex,v 1.1 2003/01/07 21:35:24 nscollins Exp $
+% $Id: state_desc.tex,v 1.2 2003/01/28 23:58:32 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,4 +10,14 @@
 
 %\subsection{Description}
 
-<Describe class function and relation to other classes.>
+A State object contains the data and description information needed to
+communicate data between multiple Components.
+
+If a Gridded Component object needs data
+from another Component to run it will query its associated
+Import State for the data.  If a Gridded Component creates data
+needed by another Component it will put that data into an
+Export State.  A Coupler Component can read one or more Export States,
+operate on the data as required, and can create one or more Import States.
+
+ 

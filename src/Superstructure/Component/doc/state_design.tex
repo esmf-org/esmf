@@ -1,4 +1,4 @@
-% $Id: state_design.tex,v 1.1 2003/01/07 21:35:26 nscollins Exp $
+% $Id: state_design.tex,v 1.2 2003/01/28 23:58:32 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,7 +10,24 @@
 
 %\subsection{Design}
 
-<Describe strategy for overall class design.>
+A State object encapsulates all data being communicated into and
+out of a Gridded Component explicitly.  No private communication
+of data between Components is permitted in order to maintain the
+independence of Components and to enable Components to be replaced
+without rewriting the internal code inside the Component.
 
+States contain the name of the associated Component, a flag for Import
+or Export, and a list of data objects, which can be a combination of
+Bundles, Fields, and/or Arrays.  The objects must be named and have
+the proper attributes so they can be identified by the receiver of
+the data.  For example, units may need to be associated with the data
+as an Attribute.  The standard CF naming convention for data 
+should be followed.
 
+States can be create and deleted, have data added or deleted from them,
+and queried for various kinds of information.
 
+Transform methods operate on States, doing regridding, interpolation,
+summation, averaging, transposes, and other operations needed to
+make the export State of one Component suitable for import to another
+Component.
