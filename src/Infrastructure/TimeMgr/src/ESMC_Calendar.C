@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.4 2003/03/14 05:17:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.4 2003/03/14 05:17:39 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -58,71 +58,71 @@
 //EOP
 // !REQUIREMENTS:
 
-	int rc; // return code 
+    int rc; // return code 
 
-	this->Type = Type;
+    this->Type = Type;
 
-	switch (Type)
-	{
-		case ESMC_GREGORIAN:
-		case ESMC_NOLEAP:
-			// specific leap year is property of a Time instant, not Calendar ??
-			//    OR calculated on-the-fly during Time instant calculations ??
-			//    Calendar type only determines whether leap year is used
-			DaysPerMonth[0]  = 31; DaysPerMonth[1]  = 28;
-			DaysPerMonth[2]  = 31; DaysPerMonth[3]  = 30;
-			DaysPerMonth[4]  = 31; DaysPerMonth[5]  = 30;
-			DaysPerMonth[6]  = 31; DaysPerMonth[7]  = 31;
-			DaysPerMonth[8]  = 30; DaysPerMonth[9]  = 31;
-			DaysPerMonth[10] = 30; DaysPerMonth[11] = 31;
-			SecondsPerDay  = 86400;
-			DaysPerYear.D  = 365;
-			DaysPerYear.Dn = 0;
-			DaysPerYear.Dd = 1;
-			rc = ESMF_SUCCESS;
-			break;
+    switch (Type)
+    {
+        case ESMC_GREGORIAN:
+        case ESMC_NOLEAP:
+            // specific leap year is property of a Time instant, not Calendar ??
+            //    OR calculated on-the-fly during Time instant calculations ??
+            //    Calendar type only determines whether leap year is used
+            DaysPerMonth[0]  = 31; DaysPerMonth[1]  = 28;
+            DaysPerMonth[2]  = 31; DaysPerMonth[3]  = 30;
+            DaysPerMonth[4]  = 31; DaysPerMonth[5]  = 30;
+            DaysPerMonth[6]  = 31; DaysPerMonth[7]  = 31;
+            DaysPerMonth[8]  = 30; DaysPerMonth[9]  = 31;
+            DaysPerMonth[10] = 30; DaysPerMonth[11] = 31;
+            SecondsPerDay  = 86400;
+            DaysPerYear.D  = 365;
+            DaysPerYear.Dn = 0;
+            DaysPerYear.Dd = 1;
+            rc = ESMF_SUCCESS;
+            break;
 
-		case ESMC_JULIAN:
-			// Days is the highest resolution of time, i.e. there is no
-			//   concept of months or years ??
-			SecondsPerDay  = 86400;
-			DaysPerYear.D  = 0;
-			DaysPerYear.Dn = 0;
-			DaysPerYear.Dd = 1;
-			rc = ESMF_SUCCESS;
-			break;
+        case ESMC_JULIAN:
+            // Days is the highest resolution of time, i.e. there is no
+            //   concept of months or years ??
+            SecondsPerDay  = 86400;
+            DaysPerYear.D  = 0;
+            DaysPerYear.Dn = 0;
+            DaysPerYear.Dd = 1;
+            rc = ESMF_SUCCESS;
+            break;
 
-		case ESMC_360DAY:
-			// 12 months of 30 days each
-			for (int i=1; i<=MONTHSPERYEAR; i++) DaysPerMonth[i] = 30;
-			SecondsPerDay  = 86400;
-			DaysPerYear.D  = 360;
-			DaysPerYear.Dn = 0;
-			DaysPerYear.Dd = 1;
-			rc = ESMF_SUCCESS;
-			break;
+        case ESMC_360DAY:
+            // 12 months of 30 days each
+            for (int i=1; i<=MONTHSPERYEAR; i++) DaysPerMonth[i] = 30;
+            SecondsPerDay  = 86400;
+            DaysPerYear.D  = 360;
+            DaysPerYear.Dn = 0;
+            DaysPerYear.Dd = 1;
+            rc = ESMF_SUCCESS;
+            break;
 
-		case ESMC_NOCALENDAR:
-			// no calendar needed, convert base time up to days only
-			SecondsPerDay  = 0;
-			DaysPerYear.D  = 0;
-			DaysPerYear.Dn = 0;
-			DaysPerYear.Dd = 1;
-			rc = ESMF_SUCCESS;
-			break;
+        case ESMC_NOCALENDAR:
+            // no calendar needed, convert base time up to days only
+            SecondsPerDay  = 0;
+            DaysPerYear.D  = 0;
+            DaysPerYear.Dn = 0;
+            DaysPerYear.Dd = 1;
+            rc = ESMF_SUCCESS;
+            break;
 
-		case ESMC_GENERIC:
-			// user defined; need more info; user must call
+        case ESMC_GENERIC:
+            // user defined; need more info; user must call
             //   InitGeneric() instead
-			rc = ESMF_FAILURE;
-			break;
+            rc = ESMF_FAILURE;
+            break;
 
-		default:
-			// unknown calendar type
-			rc = ESMF_FAILURE;
-			break;
-	}
-	return(rc);
+        default:
+            // unknown calendar type
+            rc = ESMF_FAILURE;
+            break;
+    }
+    return(rc);
 
 }  // end ESMC_CalendarInit
 
@@ -149,18 +149,18 @@
 //EOP
 // !REQUIREMENTS:
 
-	Type = ESMC_GENERIC;
+    Type = ESMC_GENERIC;
 
-	for(int i=1; i<=MONTHSPERYEAR; i++)
-	{ 
-       	this->DaysPerMonth[i] = DaysPerMonth[i];
-	}
+    for(int i=1; i<=MONTHSPERYEAR; i++)
+    { 
+           this->DaysPerMonth[i] = DaysPerMonth[i];
+    }
     this->SecondsPerDay  = SecondsPerDay;
     this->DaysPerYear.D  = DaysPerYear;
     this->DaysPerYear.Dn = DaysPerYearDn;
     this->DaysPerYear.Dd = DaysPerYearDd;
 
-	return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
 }  // end ESMC_CalendarInitGeneric
 
@@ -190,35 +190,35 @@
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
 
-	switch (Type)
-	{
-		// convert Gregorian Date => Time
-		case ESMC_GREGORIAN:
-		{
-			int temp;
-			int jdays;
+    switch (Type)
+    {
+        // convert Gregorian Date => Time
+        case ESMC_GREGORIAN:
+        {
+            int temp;
+            int jdays;
 
-			// convert date portion of Time instant into time portion of
-			//  Time instant
-			// Convert to Julian first
-			// Gregorian date (YY, MM, DD) => Julian day (D)
-    		temp = (MM-14)/12;
-    		jdays = (1461 * (YY + 4800 + temp)) / 4 + (367 * (MM - 2 - 12 *
-       				temp ))/12 - (3 * ( (YY + 4900 + temp)/100))/4 + DD - 32075;
-			T->S = jdays * SecondsPerDay;
-			break;
-		}
-		// convert Julian Date => Time
-		case ESMC_JULIAN:
-		{
-			T->S = D * SecondsPerDay;
-			break;
-		}
-		default:
-			break;
-	}
+            // convert date portion of Time instant into time portion of
+            //  Time instant
+            // Convert to Julian first
+            // Gregorian date (YY, MM, DD) => Julian day (D)
+            temp = (MM-14)/12;
+            jdays = (1461 * (YY + 4800 + temp)) / 4 + (367 * (MM - 2 - 12 *
+                       temp ))/12 - (3 * ( (YY + 4900 + temp)/100))/4 + DD - 32075;
+            T->S = jdays * SecondsPerDay;
+            break;
+        }
+        // convert Julian Date => Time
+        case ESMC_JULIAN:
+        {
+            T->S = D * SecondsPerDay;
+            break;
+        }
+        default:
+            break;
+    }
 
-	return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
 }  // end ESMC_CalendarConvertToTime
 
@@ -247,47 +247,47 @@
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
 
-	ESMF_IKIND_I8 TimeS;
+    ESMF_IKIND_I8 TimeS;
 
-	TimeS = T->S;
+    TimeS = T->S;
 
-	switch (Type)
-	{
-		// convert Time => Gregorian Date
-		case ESMC_GREGORIAN:
-		{
-			int tempi, tempj, templ, tempn;
-			int jdays;
+    switch (Type)
+    {
+        // convert Time => Gregorian Date
+        case ESMC_GREGORIAN:
+        {
+            int tempi, tempj, templ, tempn;
+            int jdays;
 
-			// convert time portion of Time instant into date portion of
-			//     Time instant
-			// Julian day (D) => Gregorian date (YY, MM, DD)
-			// The calculation below fails for jday >= 536,802,343.
-			//    (4*templ = 2^31)
-			jdays = TimeS / SecondsPerDay;	// convert to Julian first
-    		templ = jdays + 68569;
-    		tempn = ( 4 * templ ) / 146097;
-    		templ = templ - ( 146097 * tempn + 3 ) / 4;
-    		tempi = ( 4000 * ( templ + 1) ) / 1461001;
-    		templ = templ - ( 1461 * tempi ) / 4 + 31;
-    		tempj = ( 80 * templ ) / 2447;
-    		*DD = templ - ( 2447 * tempj ) / 80;
-    		templ = tempj / 11;
-    		*MM = tempj + 2 - ( 12 * templ );
-    		*YY = 100 * ( tempn - 49 ) + tempi + templ;
-			break;
-		}
-		// convert Time => Julian Date
-		case ESMC_JULIAN:
-		{
-			*D = TimeS / SecondsPerDay;
-			break;
-		}
-		default:
-			break;
-	}
+            // convert time portion of Time instant into date portion of
+            //     Time instant
+            // Julian day (D) => Gregorian date (YY, MM, DD)
+            // The calculation below fails for jday >= 536,802,343.
+            //    (4*templ = 2^31)
+            jdays = TimeS / SecondsPerDay;    // convert to Julian first
+            templ = jdays + 68569;
+            tempn = ( 4 * templ ) / 146097;
+            templ = templ - ( 146097 * tempn + 3 ) / 4;
+            tempi = ( 4000 * ( templ + 1) ) / 1461001;
+            templ = templ - ( 1461 * tempi ) / 4 + 31;
+            tempj = ( 80 * templ ) / 2447;
+            *DD = templ - ( 2447 * tempj ) / 80;
+            templ = tempj / 11;
+            *MM = tempj + 2 - ( 12 * templ );
+            *YY = 100 * ( tempn - 49 ) + tempi + templ;
+            break;
+        }
+        // convert Time => Julian Date
+        case ESMC_JULIAN:
+        {
+            *D = TimeS / SecondsPerDay;
+            break;
+        }
+        default:
+            break;
+    }
 
-	return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
 }  // end ESMC_CalendarConvertToDate
 
@@ -315,23 +315,23 @@
 //EOP
 // !REQUIREMENTS:
 
-	if (Type != NULL && DaysPerMonth != NULL &&
-		SecondsPerDay != NULL && DaysPerYear != NULL &&
-		DaysPerYearDn != NULL && DaysPerYearDd != NULL)
-	{
-		*Type = this->Type;
-		for (int i=1; i<= MONTHSPERYEAR; i++)
-		{
-			DaysPerMonth[i] = this->DaysPerMonth[i];	
-		}
-		*SecondsPerDay = this->SecondsPerDay;
-		*DaysPerYear   = this->DaysPerYear.D;
-		*DaysPerYearDn = this->DaysPerYear.Dn;
-		*DaysPerYearDd = this->DaysPerYear.Dd;
+    if (Type != NULL && DaysPerMonth != NULL &&
+        SecondsPerDay != NULL && DaysPerYear != NULL &&
+        DaysPerYearDn != NULL && DaysPerYearDd != NULL)
+    {
+        *Type = this->Type;
+        for (int i=1; i<= MONTHSPERYEAR; i++)
+        {
+            DaysPerMonth[i] = this->DaysPerMonth[i];    
+        }
+        *SecondsPerDay = this->SecondsPerDay;
+        *DaysPerYear   = this->DaysPerYear.D;
+        *DaysPerYearDn = this->DaysPerYear.Dn;
+        *DaysPerYearDd = this->DaysPerYear.Dd;
 
-		return(ESMF_SUCCESS);
-	}
-	else return(ESMF_FAILURE);
+        return(ESMF_SUCCESS);
+    }
+    else return(ESMF_FAILURE);
 
 }  // end ESMC_BasePrint
 
@@ -354,16 +354,16 @@
 //EOP
 // !REQUIREMENTS: 
 
-	printf("Type = %d\n", Type);
-	printf("DaysPerMonth = ");
-	for (int i=1; i<= MONTHSPERYEAR; i++) printf("%d ", DaysPerMonth[i]);
-	printf("\n");
-	printf("SecondsPerDay = %d\n", SecondsPerDay);
-	printf("DaysPerYear = %d\n", DaysPerYear.D);
-	printf("DaysPerYearDn = %d\n", DaysPerYear.Dn);
-	printf("DaysPerYearDd = %d\n", DaysPerYear.Dd);
-	
-	return(ESMF_SUCCESS);
+    printf("Type = %d\n", Type);
+    printf("DaysPerMonth = ");
+    for (int i=1; i<= MONTHSPERYEAR; i++) printf("%d ", DaysPerMonth[i]);
+    printf("\n");
+    printf("SecondsPerDay = %d\n", SecondsPerDay);
+    printf("DaysPerYear = %d\n", DaysPerYear.D);
+    printf("DaysPerYearDn = %d\n", DaysPerYear.Dn);
+    printf("DaysPerYearDd = %d\n", DaysPerYear.Dd);
+    
+    return(ESMF_SUCCESS);
 
 }  // end ESMC_BasePrint
 
@@ -387,8 +387,8 @@
 //EOP
 // !REQUIREMENTS: 
 
-	// default calendar type is none ??
-	ESMC_CalendarInit(ESMC_NOCALENDAR);
+    // default calendar type is none ??
+    ESMC_CalendarInit(ESMC_NOCALENDAR);
 
 } // end ESMC_Calendar
 
@@ -412,7 +412,7 @@
 //EOP
 // !REQUIREMENTS: 
 
-	ESMC_CalendarInit(Type);
+    ESMC_CalendarInit(Type);
 
 }   // end ESMC_Calendar
 
@@ -440,8 +440,8 @@
 //EOP
 // !REQUIREMENTS: 
 
-	ESMC_CalendarInitGeneric(DaysPerMonth,  SecondsPerDay, DaysPerYear,
-			            DaysPerYearDn, DaysPerYearDd);
+    ESMC_CalendarInitGeneric(DaysPerMonth,  SecondsPerDay, DaysPerYear,
+                        DaysPerYearDn, DaysPerYearDd);
 }  // end ESMC_Calendar
 
 //-------------------------------------------------------------------------

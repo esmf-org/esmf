@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.1 2003/02/11 18:33:54 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.2 2003/03/14 05:17:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.1 2003/02/11 18:33:54 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.2 2003/03/14 05:17:39 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -78,24 +78,24 @@
     //    Sd always positive and >= 1
     if ( ((S >= 0 && Sn >= 0) || (S <= 0 && Sn <= 0)) && Sd >= 1 )
     {
-		this->S = S;
-		this->Sn = Sn;
-		this->Sd = Sd;
+        this->S = S;
+        this->Sn = Sn;
+        this->Sd = Sd;
 
-		printf("ESMC_BaseTime::ESMC_BaseTimeInit(): S, Sn, Sd = %lld, %d, %d\n",
-					this->S, this->Sn, this->Sd);
+        printf("ESMC_BaseTime::ESMC_BaseTimeInit(): S, Sn, Sd = %lld, %d, %d\n",
+                    this->S, this->Sn, this->Sd);
 
-		// normalize (share logic with += ?? )
-		int w;
-		if (labs((w = this->Sn/this->Sd)) >= 1)
-		{
-		 	this->S += w;
-		 	this->Sn = this->Sn % this->Sd;
-		}
+        // normalize (share logic with += ?? )
+        int w;
+        if (labs((w = this->Sn/this->Sd)) >= 1)
+        {
+             this->S += w;
+             this->Sn = this->Sn % this->Sd;
+        }
 
-		return(ESMF_SUCCESS);
-	}
-	else return(ESMF_FAILURE);
+        return(ESMF_SUCCESS);
+    }
+    else return(ESMF_FAILURE);
 
 }  // end ESMC_BaseTimeInit
 
@@ -120,15 +120,15 @@
 //EOP
 // !REQUIREMENTS:  
 
-	if (S != NULL && Sn != NULL & Sd != NULL)
-	{
-		*S = this->S;
-		*Sn = this->Sn;
-		*Sd = this->Sd;
+    if (S != NULL && Sn != NULL & Sd != NULL)
+    {
+        *S = this->S;
+        *Sn = this->Sn;
+        *Sd = this->Sd;
 
-		return(ESMF_SUCCESS);
-	}
-	else return(ESMF_FAILURE);
+        return(ESMF_SUCCESS);
+    }
+    else return(ESMF_FAILURE);
 
 }  // end ESMC_BasePrint
 
@@ -152,11 +152,11 @@
 // !REQUIREMENTS:  
 
 /*
-	cout << "S = "  << S  << endl;
-	cout << "Sn = " << Sn << endl;
-	cout << "Sd = " << Sd << endl << endl;
+    cout << "S = "  << S  << endl;
+    cout << "Sn = " << Sn << endl;
+    cout << "Sd = " << Sd << endl << endl;
 */
-	return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
 }  // end ESMC_BasePrint
 
@@ -180,24 +180,24 @@
 //EOP
 // !REQUIREMENTS:  
 
-	ESMC_BaseTime sum = *this;
+    ESMC_BaseTime sum = *this;
 
-	// assume positive values for now ??
-	// fractional part addition -- LCD (assume same denominator for now) ??
-	sum.Sn += Time.Sn;
+    // assume positive values for now ??
+    // fractional part addition -- LCD (assume same denominator for now) ??
+    sum.Sn += Time.Sn;
 
-	// normalize (share logic with ESMC_BaseTimeInit() ?? )
-	int w;
-	if (labs((w = sum.Sn/sum.Sd)) >= 1)
-	{
-		 sum.S += w;
-		 sum.Sn = sum.Sn % sum.Sd;
-	}
+    // normalize (share logic with ESMC_BaseTimeInit() ?? )
+    int w;
+    if (labs((w = sum.Sn/sum.Sd)) >= 1)
+    {
+         sum.S += w;
+         sum.Sn = sum.Sn % sum.Sd;
+    }
 
-	// whole part addition
-	sum.S += Time.S;
+    // whole part addition
+    sum.S += Time.S;
 
-	return(sum);
+    return(sum);
 
 }  // end ESMC_BaseTime::operator+
 
@@ -221,25 +221,25 @@
 //EOP
 // !REQUIREMENTS:  
 
-	ESMC_BaseTime diff = *this;
+    ESMC_BaseTime diff = *this;
 
-	// assume positive values for now ??
-	// assume this > Time and both normalized for now ??
-	// fractional part subtraction -- LCD (assume same denominator for now) ??
+    // assume positive values for now ??
+    // assume this > Time and both normalized for now ??
+    // fractional part subtraction -- LCD (assume same denominator for now) ??
 
-	// fractional part subtraction
-	if (diff.Sn < Time.Sn)
-	{
-		// borrow
-		diff.Sn += diff.Sd;
-		diff.S--;
-	}
-	diff.Sn -= Time.Sn;
+    // fractional part subtraction
+    if (diff.Sn < Time.Sn)
+    {
+        // borrow
+        diff.Sn += diff.Sd;
+        diff.S--;
+    }
+    diff.Sn -= Time.Sn;
 
-	// whole part subtraction 
-	diff.S -= Time.S;
+    // whole part subtraction 
+    diff.S -= Time.S;
 
-	return(diff);
+    return(diff);
 
 }  // end ESMC_BaseTime::operator-
 
@@ -262,22 +262,22 @@
 //EOP
 // !REQUIREMENTS:  
 
-	// assume positive values for now ??
-	// fractional part addition -- LCD (assume same denominator for now) ??
-	Sn += Time.Sn;
+    // assume positive values for now ??
+    // fractional part addition -- LCD (assume same denominator for now) ??
+    Sn += Time.Sn;
 
-	// normalize (share logic with ESMC_BaseTimeInit() ?? )
-	int w;
-	if (labs((w = Sn/Sd)) >= 1)
-	{
-		 S += w;
-		 Sn = Sn % Sd;
-	}
+    // normalize (share logic with ESMC_BaseTimeInit() ?? )
+    int w;
+    if (labs((w = Sn/Sd)) >= 1)
+    {
+         S += w;
+         Sn = Sn % Sd;
+    }
 
-	// whole part addition
-	S += Time.S;
+    // whole part addition
+    S += Time.S;
 
-	return(*this);
+    return(*this);
 
 }  // end ESMC_BaseTime::operator+=
 
@@ -300,23 +300,23 @@
 //EOP
 // !REQUIREMENTS:  
 
-	// assume positive values for now ??
-	// assume this > Time and both normalized for now ??
-	// fractional part subtraction -- LCD (assume same denominator for now) ??
+    // assume positive values for now ??
+    // assume this > Time and both normalized for now ??
+    // fractional part subtraction -- LCD (assume same denominator for now) ??
 
-	// fractional part subtraction
-	if (Sn < Time.Sn)
-	{
-		// borrow
-		Sn += Sd;
-		S--;
-	}
-	Sn -= Time.Sn;
+    // fractional part subtraction
+    if (Sn < Time.Sn)
+    {
+        // borrow
+        Sn += Sd;
+        S--;
+    }
+    Sn -= Time.Sn;
 
-	// whole part subtraction 
-	S -= Time.S;
+    // whole part subtraction 
+    S -= Time.S;
 
-	return(*this);
+    return(*this);
 
 }  // end ESMC_BaseTime::operator-=
 
@@ -434,13 +434,13 @@
 //EOP
 // !REQUIREMENTS:  
 
-	if (S != NULL)
-	{
-		*S = this->S;
+    if (S != NULL)
+    {
+        *S = this->S;
 
-		return(ESMF_SUCCESS);
-	}
-	else return (ESMF_FAILURE);
+        return(ESMF_SUCCESS);
+    }
+    else return (ESMF_FAILURE);
 
 }  // end ESMC_BaseTimeGet_S
 
@@ -463,7 +463,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-	this->S = S;
+    this->S = S;
 
     return(ESMF_SUCCESS);
 
@@ -489,7 +489,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-	ESMC_BaseTimeInit(0, 0, 1);
+    ESMC_BaseTimeInit(0, 0, 1);
 
 }  // end ESMC_BaseTime
 
@@ -514,7 +514,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-	ESMC_BaseTimeInit(S, Sn, Sd);
+    ESMC_BaseTimeInit(S, Sn, Sd);
 
 }  // end ESMC_BaseTime
 

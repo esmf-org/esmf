@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.4 2003/03/14 05:17:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.4 2003/03/14 05:17:39 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -66,9 +66,9 @@
 //EOP
 // !REQUIREMENTS:
 
-	ESMC_BaseTime::ESMC_BaseTimeInit(S, Sn, Sd);
+    ESMC_BaseTime::ESMC_BaseTimeInit(S, Sn, Sd);
 
-	return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
 }  // end ESMC_TimeIntervalInit
 #endif
@@ -93,7 +93,7 @@
 //EOP
 // !REQUIREMENTS:
 
-	// uses default base class constructor
+    // uses default base class constructor
 
 } // end ESMC_TimeInterval
 

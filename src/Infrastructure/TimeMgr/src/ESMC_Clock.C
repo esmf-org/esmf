@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.4 2003/03/11 03:01:06 cdeluca Exp $
+// $Id: ESMC_Clock.C,v 1.5 2003/03/14 05:17:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.4 2003/03/11 03:01:06 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.5 2003/03/14 05:17:39 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -63,7 +63,7 @@
 //
 //  code goes here
 //
-	return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
  } // end ESMC_ClockInit
 
@@ -88,13 +88,13 @@
 //EOP
 // !REQUIREMENTS:  TMG 3.4.1
 
-	PrevTime = CurrTime;   // save current time, then
+    PrevTime = CurrTime;   // save current time, then
     CurrTime += TimeStep;  // advance it!
 
-	// call each alarm's CheckRingTime method; compile and return a list of 
+    // call each alarm's CheckRingTime method; compile and return a list of 
     // ringing alarms
 
-	return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
  } // end ESMC_ClockAdvance
 
@@ -122,7 +122,7 @@
 //
 //  code goes here
 //
-	return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
  } // end ESMC_BaseValidate
 
@@ -144,7 +144,7 @@
       ESMC_Time         *RefTime,              // out
       ESMC_Time         *CurrTime,             // out
       ESMC_Time         *PrevTime,             // out
-      ESMF_IKIND_I8            *AdvanceCount,         // out
+      ESMF_IKIND_I8     *AdvanceCount,         // out
       ESMC_Alarm        *AlarmList[],          // out
       int               *NumAlarms ) const {   // out 
 //
@@ -159,7 +159,7 @@
 //
 //  code goes here
 //
-	return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
  } // end ESMC_BasePrint
 
