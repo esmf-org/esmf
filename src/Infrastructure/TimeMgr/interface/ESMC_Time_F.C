@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.21 2003/12/19 19:21:21 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.22 2004/01/16 00:31:23 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -206,6 +206,24 @@ extern "C" {
           int rc = (ptr)->ESMC_TimeSyncToRealTime();      
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+       }
+
+       void FTN(c_esmc_timeinc)(ESMC_Time *time,
+                                ESMC_TimeInterval *timeInterval,
+                                ESMC_Time *esmf_baseTimeInc) {
+           *esmf_baseTimeInc = (*time + *timeInterval);
+       }
+
+       void FTN(c_esmc_timedec)(ESMC_Time *time,
+                                ESMC_TimeInterval *timeInterval,
+                                ESMC_Time *esmf_baseTimeDec) {
+           *esmf_baseTimeDec = (*time - *timeInterval);
+       }
+
+       void FTN(c_esmc_timediff)(ESMC_Time *time1,
+                                 ESMC_Time *time2,
+                                 ESMC_TimeInterval *esmf_timeDiff) {
+           *esmf_timeDiff = (*time1 - *time2);
        }
 
        void FTN(c_esmc_timereadrestart)(ESMC_Time *ptr, int *nameLen,
