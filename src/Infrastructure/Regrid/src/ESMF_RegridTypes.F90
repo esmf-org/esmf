@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.66 2004/12/03 20:47:48 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.67 2004/12/07 23:34:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -257,7 +257,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.66 2004/12/03 20:47:48 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.67 2004/12/07 23:34:40 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -557,7 +557,7 @@
 
 ! !INTERFACE:
       function ESMF_RegridRouteConstruct(dimCount, srcGrid, dstGrid, &
-                                         recvDomainList, parentDELayout, &
+                                         recvDomainList, parentVM, &
                                          srcDatamap, srcArray, hasSrcData, &
                                          dstDatamap, dstArray, hasDstData, &
                                          reorder, total, rc)
@@ -571,7 +571,7 @@
       type(ESMF_Grid),         intent(in   ) :: srcGrid
       type(ESMF_Grid),         intent(in   ) :: dstGrid
       type(ESMF_DomainList),   intent(inout) :: recvDomainList
-      type(ESMF_DELayout),     intent(in   ) :: parentDELayout
+      type(ESMF_VM),           intent(in   ) :: parentVM
       type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
       type(ESMF_Array),        intent(in   ), optional :: srcArray
       logical,                 intent(in   ), optional :: hasSrcData
@@ -596,7 +596,7 @@
 !TODO: Leave here or move to Route?
 
       integer :: localrc
-      integer :: myDE, gridrank, nDEs, theirDE, i, j, haloWidth
+      integer :: gridrank, nDEs, theirDE, i, j, haloWidth
       integer, dimension(:), allocatable :: dimOrder, lbounds
       logical :: totalUse, hasSrcDataUse, hasDstDataUse
       real(ESMF_KIND_R8) :: count
@@ -605,11 +605,10 @@
       type(ESMF_AxisIndex), dimension(:), allocatable :: myAI, myArrayAI, &
                                                          myArrayLocalAI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI, allLocalAI
-      type(ESMF_DELayout) :: srcDELayout
+      type(ESMF_DELayout) :: srcDELayout, dstDELayout
       type(ESMF_DomainList) :: sendDomainList
       type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc
       type(ESMF_Route) :: route
-      type(ESMF_VM) :: vm
 
 !     Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -628,8 +627,7 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-
-      call ESMF_DELayoutGet(srcDELayout, localDE=myDE, rc=localrc)
+      call ESMF_GridGet(dstGrid, delayout=dstDELayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -812,12 +810,10 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Get the associated VM
-      call ESMF_DELayoutGetVM(parentDElayout, vm, rc=localrc)
- 
       ! Create Route
-      route = ESMF_RouteCreate(vm, localrc)
-      call ESMF_RoutePrecomputeDomList(route, dimCount, myDE, &
+      route = ESMF_RouteCreate(parentVM, localrc)
+      call ESMF_RoutePrecomputeDomList(route, dimCount, &
+                                       srcDELayout, dstDELayout, &
                                        sendDomainList, recvDomainList, &
                                        hasSrcData, hasDstData, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
