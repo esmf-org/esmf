@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.17 2004/03/08 16:27:35 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.18 2004/04/20 22:55:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMF.h"
 !!#include "ESMF_Route.h"
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_RHandleMod - One line general statement about this class
 !
 ! !DESCRIPTION:
@@ -123,12 +123,12 @@
       public ESMF_RouteHandleValidate
       public ESMF_RouteHandlePrint
  
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.17 2004/03/08 16:27:35 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.18 2004/04/20 22:55:51 nscollins Exp $'
 
 !==============================================================================
 
@@ -139,7 +139,7 @@
 ! This section includes the TransformValues methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TransformValuesCreate - Create a new TransformValues obj
 
 ! !INTERFACE:
@@ -166,7 +166,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  AAAn.n.n
 
         ! local variables
@@ -205,7 +205,7 @@
         end function ESMF_TransformValuesCreate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TransformValuesDestroy - Free resources associated with a TransformValues 
 
 ! !INTERFACE:
@@ -227,7 +227,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -260,7 +260,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TransformValuesGet - Get values from a TransformValues
 
 ! !INTERFACE:
@@ -295,7 +295,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -430,7 +430,7 @@
         end subroutine ESMF_TransformValuesGetF90Ptrs
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TransformValuesSet - Set values in a TransformValues
 
 ! !INTERFACE:
@@ -465,7 +465,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -528,7 +528,7 @@
         end subroutine ESMF_TransformValuesSet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TransformValuesValidate - Check internal consistency of a TransformValues
 
 ! !INTERFACE:
@@ -552,7 +552,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 !
        character (len=6) :: defaultopts      ! default validate options
@@ -586,7 +586,7 @@
        end subroutine ESMF_TransformValuesValidate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TransformValuesPrint - Print the contents of a TransformValues
 
 ! !INTERFACE:
@@ -611,7 +611,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
        character (len=6) :: defaultopts      ! default print options
@@ -651,7 +651,7 @@
 ! This section includes the RouteHandle methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteHandleCreate - Create a new RouteHandle
 
 ! !INTERFACE:
@@ -673,7 +673,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  AAAn.n.n
 
         ! local variables
@@ -707,7 +707,7 @@
         end function ESMF_RouteHandleCreate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteHandleDestroy - Free all resources associated with a RouteHandle 
 
 ! !INTERFACE:
@@ -729,7 +729,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -762,7 +762,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteHandleGet - Get values from a RouteHandle
 
 ! !INTERFACE:
@@ -800,7 +800,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -858,7 +858,7 @@
         end subroutine ESMF_RouteHandleGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteHandleSet - Set values in a RouteHandle
 
 ! !INTERFACE:
@@ -897,7 +897,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -968,7 +968,7 @@
         end subroutine ESMF_RouteHandleSet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteHandleValidate - Check internal consistency of a RouteHandle
 
 ! !INTERFACE:
@@ -992,7 +992,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 !
        character (len=6) :: defaultopts      ! default validate options
@@ -1032,7 +1032,7 @@
        end subroutine ESMF_RouteHandleValidate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteHandlePrint - Print the contents of a RouteHandle
 
 ! !INTERFACE:
@@ -1057,7 +1057,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
        character (len=6) :: defaultopts      ! default print options
