@@ -1,17 +1,36 @@
-% $Id: Bundle_rest.tex,v 1.5 2004/03/22 19:02:30 cdeluca Exp $
+% $Id: Bundle_rest.tex,v 1.6 2004/06/09 23:26:44 cdeluca Exp $
 
-%\subsubsection{Restrictions and Future Work}
+\label{sec:bundlerest}
 
 \begin{enumerate}
 \item{\bf No mathematical operators.}
 The Bundle class does not support differential or other
-mathematical operators.
+mathematical operators.  We do not anticipate providing this 
+functionality in the near future.
 
-\item{\bf Limited collective field operations.}
+\item{\bf Limited collective operations.}
 The Bundle class does not automatically support collective field 
-operations, other than a limited set including I/O, regridding, and 
-indexing.  For other operations on Fields, first query the Bundle 
-for the specific Field desired, then operate on it with Field methods.
+operations.  In order to perform the same operation on Fields within
+a Bundle, you must currently loop over a query for each Field and
+call the method on each Field in turn.  We expect to have 
+interfaces for non-optimized collective operations such as 
+regridding, data communication, and IO shortly.
+
+One of the options that we are currently working on for Bundles is
+packing.  Packing means that the data from all the
+Fields that comprise the Bundle are copied into a single Array and
+manipulated collectively.  This operation can be done without 
+destroying the original Field data.  Packing is being designed to 
+facilitate optimized regridding, data communication, and IO operations.  
+It will be possible to collectively manipulate all the Fields within 
+a Bundle at once, rather than operating on each Field separately.  
+This will reduce the latency overhead of the communication.  
+
+\item{\bf Interleaving Fields within a Bundle.}
+Data locality is important for performance on some computing
+platforms.  An interleave option will allow the user to create
+a packed Bundle in which Fields are either concatenated in memory
+or in which Field elements are interleaved.
 
 \end{enumerate}
 
