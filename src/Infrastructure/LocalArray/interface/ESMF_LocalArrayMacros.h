@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.6 2004/03/04 16:31:55 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.7 2004/03/05 20:32:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,11 +43,11 @@
 #define RNG7 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6),lb(7):ub(7)
 
 
-#define LOC1 1
-#define LOC2 1,1
-#define LOC3 1,1,1
-#define LOC4 1,1,1,1
-#define LOC5 1,1,1,1,1
+#define LOC1 lb(1)
+#define LOC2 lb(1),lb(1)
+#define LOC3 lb(1),lb(1),lb(1)
+#define LOC4 lb(1),lb(1),lb(1),lb(1)
+#define LOC5 lb(1),lb(1),lb(1),lb(1),lb(1)
 
 #if 0
 !------------------------------------------------------------------------------
@@ -791,7 +791,7 @@
  @\
         wrap%##mtypekind##mrank##Dptr => newp @\
         call c_ESMC_LocalArraySetInternal(array, wrap, & @\
-                                 ESMF_DATA_ADDRESS(newp), counts, & @\
+                                 ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
                                  lbounds, ubounds, offsets, & @\
                                  ESMF_TRUE, do_dealloc, status) @\
  @\

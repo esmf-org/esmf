@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalAllocMacros.h,v 1.5 2004/03/04 18:57:05 nscollins Exp $
+! $Id: ESMF_LocalAllocMacros.h,v 1.6 2004/03/05 20:32:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
         offsets = 0 @\
  @\
         call c_ESMC_LocalArraySetInternal(array, local##mtypekind##mrank##D, & @\
-                        ESMF_DATA_ADDRESS(local##mtypekind##mrank##D%mtypekind##mrank##Dptr ), & @\
+                        ESMF_DATA_ADDRESS(local##mtypekind##mrank##D%mtypekind##mrank##Dptr ( mloc )), & @\
                         counts, lbounds, ubounds, offsets, & @\
                         ESMF_TRUE, ESMF_TRUE, status) @\
  @\
