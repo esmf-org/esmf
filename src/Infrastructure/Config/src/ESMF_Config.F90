@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.18 2004/09/22 17:17:43 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.19 2004/10/28 21:41:47 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -254,7 +254,11 @@
        
        character, parameter :: BLK = achar(32)   ! blank (space)
        character, parameter :: TAB = achar(09)   ! TAB
+#ifdef ESMF_HAS_ACHAR_BUG
+       character, parameter :: EOL = achar(12)   ! end of line mark (cr)
+#else
        character, parameter :: EOL = achar(10)   ! end of line mark (newline)
+#endif
        character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
        character, parameter :: NUL = achar(00)   ! what it says
        
