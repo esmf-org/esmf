@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.25 2003/08/26 16:24:55 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.26 2003/08/27 23:38:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.25 2003/08/26 16:24:55 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.26 2003/08/27 23:38:27 nscollins Exp $'
 
 !==============================================================================
 !
@@ -289,28 +289,10 @@
 
       !-------------
       case(ESMF_RegridMethod_Bilinear) ! bilinear
-
-         if (present(srcmask) .and. present(dstmask)) then 
-            routehandle = ESMF_RegridConstructBilinear( &
+          routehandle = ESMF_RegridConstructBilinear( &
                                               srcarray, srcgrid, srcdatamap, &
                                               dstarray, dstgrid, dstdatamap, &
                                               srcmask, dstmask, rc=stat)
-         elseif (present(srcmask) .and. .not. present(dstmask)) then
-            routehandle = ESMF_RegridConstructBilinear( &
-                                              srcarray, srcgrid, srcdatamap, &
-                                              dstarray, dstgrid, dstdatamap, &
-                                              srcmask, rc=stat)
-         elseif (.not. present(srcmask) .and. present(dstmask)) then
-            routehandle = ESMF_RegridConstructBilinear( &
-                                              srcarray, srcgrid, srcdatamap, &
-                                              dstarray, dstgrid, dstdatamap, &
-                                              dstmask=dstmask, rc=stat)
-         else
-            routehandle = ESMF_RegridConstructBilinear( &
-                                              srcarray, srcgrid, srcdatamap, &
-                                              dstarray, dstgrid, dstdatamap, &
-                                              rc=stat)
-         endif
 
       !-------------
       case(ESMF_RegridMethod_Bicubic)  ! bicubic
@@ -462,6 +444,7 @@
    !end do
 
    ! set return codes
+   ! nuke temp array
 
    end subroutine ESMF_RegridRunArray
 

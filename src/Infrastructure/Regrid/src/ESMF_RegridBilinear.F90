@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.14 2003/08/27 23:06:30 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.15 2003/08/27 23:38:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.14 2003/08/27 23:06:30 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.15 2003/08/27 23:38:28 nscollins Exp $'
 
 !==============================================================================
 
@@ -126,6 +126,7 @@
       logical :: rcpresent                        ! Return code present
       integer :: start, stop, my_DE
       integer :: src_size_x, src_size_y, dst_size_x, dst_size_y, size
+      integer :: size_xy(2), size_x0(2)
       integer :: i, num_domains, counts(3)
       logical, dimension(:), pointer :: src_mask, dst_mask
       real(ESMF_IKIND_R8), dimension(:), pointer :: src_center_x, src_center_y
@@ -140,6 +141,7 @@
       type(ESMF_Route) :: route
       type(ESMF_RouteHandle) :: rh
       type(ESMF_RegridType) :: temp_regrid
+      type(ESMF_TransformValues), pointer :: tv
       character (len = ESMF_MAXSTR) :: name
 
       ! Initialize return code
@@ -250,6 +252,37 @@
       call ESMF_LocalArrayGetData(srcCenterY, src_center_y, ESMF_DATA_REF, status)
       
       ! now all necessary data is local
+
+      ! Allocate space for the search to put links between grids.
+      ! TODO: this code should go into its own subroutine at some point.
+      allocate(tv, stat=status)
+      if (status .eq. 0) then
+          print *, "error in allocation of TransformValues type"
+          return
+      endif
+
+      ! initialize the rest of the tv structure.
+      tv%numlinks = 0
+      allocate(tv%countsperdomain(recvDomainList%num_domains), stat=status)
+      ! TODO: check for allocation error here
+   
+      ! TODO: the *4 is to guarentee the max allocation possible is enough
+      !  for bilinear interpolation.  eventually the addlinks routine should
+      !  grow the arrays internally.
+      size_xy(1) = src_size_x*4
+      size_xy(2) = src_size_y*4
+      size = src_size_x * src_size_y * 4
+      size_x0(1) = size_xy(1)
+      size_x0(2) = 1
+      tv%srcindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_KIND_I4, &
+                                          size, status)
+      tv%dstindex = ESMF_LocalArrayCreate(2, ESMF_DATA_INTEGER, ESMF_KIND_I4, &
+                                          size_xy, status) 
+      tv%weights = ESMF_LocalArrayCreate(2, ESMF_DATA_REAL, ESMF_KIND_R8, &
+                                          size_x0, status)
+ 
+      call ESMF_RouteHandleSet(rh, tdata=tv, rc=status)
+    
       ! Loop through domains for the search routine
       num_domains = recvDomainList%num_domains
       start = 1
@@ -259,7 +292,7 @@
         src_size_y = recvDomainList%domains(i)%ai(2)%max &
                    - recvDomainList%domains(i)%ai(2)%min + 1
         stop  = start + src_size_x*src_size_y - 1
-        call ESMF_RegridBilinearSearch(rh, src_center_x(start:stop), &
+        call ESMF_RegridBilinearSearch(tv, src_center_x(start:stop), &
                                        src_center_y(start:stop), &
                                        src_mask(start:stop), &
                                        src_size_x, src_size_y, start, &
@@ -282,13 +315,13 @@
 ! !IROUTINE: ESMF_RegridBilinearSearch - Searches a bilinear Regrid structure
 
 ! !INTERFACE:
-      subroutine ESMF_RegridBilinearSearch(rh, srcCenterX, srcCenterY, srcMask, &
+      subroutine ESMF_RegridBilinearSearch(tv, srcCenterX, srcCenterY, srcMask, &
                                            srcSizeX, srcSizeY, srcStart, &
                                            dstCenterX, dstCenterY, dstMask, &
                                            dstSizeX, dstSizeY, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(inout) :: rh
+      type(ESMF_TransformValues), intent(inout) :: tv
       integer, intent(in) :: srcSizeX  ! apparently these have to be first
       integer, intent(in) :: srcSizeY  ! so the compiler knows they're ints
       integer, intent(in) :: srcStart  ! when it goes to use them as dims
@@ -587,7 +620,7 @@
               src_add(1) = iii
               src_add(2) = jjj
    !           src_add(3) = src_DEid
-              call ESMF_RegridAddLink(rh, src_add, dst_add, weights(1), rc)
+              call ESMF_RegridAddLink(tv, src_add, dst_add, weights(1), rc)
             endif
             if (srcmask(ip1,jjj)) then
               dst_add(1) = i
@@ -596,7 +629,7 @@
               src_add(1) = ip1
               src_add(2) = jjj
    !           src_add(3) = src_DEid
-              call ESMF_RegridAddLink(rh, src_add, dst_add, weights(2), rc)
+              call ESMF_RegridAddLink(tv, src_add, dst_add, weights(2), rc)
             endif
             if (srcmask(ip1,jp1)) then
               dst_add(1) = i
@@ -605,7 +638,7 @@
               src_add(1) = ip1
               src_add(2) = jp1
    !           src_add(3) = src_DEid
-              call ESMF_RegridAddLink(rh, src_add, dst_add, weights(3), rc)
+              call ESMF_RegridAddLink(tv, src_add, dst_add, weights(3), rc)
             endif
             if (srcmask(iii,jp1)) then
               dst_add(1) = i
@@ -614,7 +647,7 @@
               src_add(1) = iii
               src_add(2) = jp1
    !           src_add(3) = src_DEid
-              call ESMF_RegridAddLink(rh, src_add, dst_add, weights(4), rc)
+              call ESMF_RegridAddLink(tv, src_add, dst_add, weights(4), rc)
             endif
 
           endif ! found box

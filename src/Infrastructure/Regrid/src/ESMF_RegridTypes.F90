@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.10 2003/08/27 14:25:59 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.11 2003/08/27 23:38:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.10 2003/08/27 14:25:59 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.11 2003/08/27 23:38:29 nscollins Exp $'
 
 !==============================================================================
 !
@@ -175,11 +175,11 @@
 ! !IROUTINE: ESMF_RegridAddLink - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridAddLink(routehandle, src_add, dst_add, weight, rc)
+      subroutine ESMF_RegridAddLink(tv, src_add, dst_add, weight, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_TransformValues), intent(inout) :: tv
       integer, dimension(2), intent(in) :: src_add
       integer, dimension(2), intent(in) :: dst_add
       real(kind=ESMF_IKIND_R8), intent(in) :: weight
@@ -191,8 +191,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[routehandle]
-!          RouteHandle type to which the new link is to be added.
+!     \item[transformvalues]
+!          Stored information related to the actual data transformation
+!          needed when moving data from one grid to another.
 !     \item[src\_add]
 !          Address in source field array for this link.
 !     \item[dst\_add]
@@ -209,15 +210,11 @@
 
       ! do these need to be 2 separate x and y arrays?
       integer, dimension(:), pointer :: src_ptr, dst_ptr
-      real(kind=ESMF_IKIND_R8), dimension(:), pointer :: wgt_ptr
+      real(kind=ESMF_IKIND_R8), dimension(:,:), pointer :: wgt_ptr
       type (ESMF_ARRAY) :: &! temps for use when re-sizing arrays
          src_add_tmp, dst_add_tmp, weights_tmp
-      type(ESMF_TransformValues) :: tv
 
       rc = ESMF_FAILURE
-
-      ! get real pointers to data
-      call ESMF_RouteHandleGet(routehandle, tdata=tv, rc=rc)
 
       call ESMF_LocalArrayGetData(tv%srcindex, src_ptr, ESMF_DATA_REF, rc)
       call ESMF_LocalArrayGetData(tv%dstindex, dst_ptr, ESMF_DATA_REF, rc)
@@ -243,7 +240,7 @@
       src_ptr((tv%numlinks * 2) + 1) = src_add(2)
       dst_ptr((tv%numlinks * 2) + 0) = dst_add(1)
       dst_ptr((tv%numlinks * 2) + 1) = dst_add(2)
-      wgt_ptr(tv%numlinks) = weight
+      wgt_ptr(tv%numlinks, 1) = weight
 
 
       rc = ESMF_SUCCESS      
