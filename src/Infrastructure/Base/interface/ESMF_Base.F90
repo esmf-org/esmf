@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.5 2002/10/23 20:01:31 eschwab Exp $
+! $Id: ESMF_Base.F90,v 1.6 2002/10/25 21:02:32 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,32 +122,32 @@
 !     The attribute routines can be inherited as-is.  The other
 !     routines need to be specialized by the higher level objects.
 !
-!   Virtual methods to be defined by derived classes
-!      public ESMF_Init
-!      public ESMF_Create
+!   Base class methods
+!      public ESMF_BaseInit
+!      public ESMF_BaseCreate
 !     no need for create, is there?  maybe for attribs if not inline?
-!      public ESMF_Destroy
-!      public ESMF_Construct 
-!      public ESMF_Destruct
-!      public ESMF_GetConfig
-!      public ESMF_SetConfig
+!      public ESMF_BaseDestroy
+!      public ESMF_BaseConstruct 
+!      public ESMF_BaseDestruct
+!      public ESMF_BaseGetConfig
+!      public ESMF_BaseSetConfig
+
+!      public ESMF_BaseGetInstCount
+
+!      public ESMF_BaseSetID
+!      public ESMF_BaseGetID
+
+!      public ESMF_BaseSetRefCount
+!      public ESMF_BaseGetRefCount
+
+!      public ESMF_BaseSetStatus
+!      public ESMF_BaseGetStatus
+
+!   Virtual methods to be defined by derived classes
 !      public ESMF_Read
 !      public ESMF_Write
 !      public ESMF_Validate
 !      public ESMF_Print
-
-!   Base class methods
-!      public ESMF_BaseGetInstCount
-!      public ESMF_BaseSetInstCount
-
-!      public ESMF_BaseGetID
-!      public ESMF_BaseSetID
-
-!      public ESMF_BaseGetRefCount
-!      public ESMF_BaseSetRefCount
-
-!      public ESMF_BaseGetStatus
-!      public ESMF_BaseSetStatus
 
 !  Attribute methods
       public ESMF_AttributeSet
@@ -168,7 +168,7 @@
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_Base.F90,v 1.5 2002/10/23 20:01:31 eschwab Exp $'
+      character(*), parameter, private :: version = '$Id: ESMF_Base.F90,v 1.6 2002/10/25 21:02:32 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -176,10 +176,12 @@
       contains
 
 !BOP
+! !IROUTINE:  ESMF_AttributeSet - set attribute on an ESMF type
+!
 ! !INTERFACE:
       subroutine ESMF_AttributeSet(anytype, name, value, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
       character (len = *), intent(in) :: name            ! attribute name
       type(ESMF_DataValue), intent(in) :: value              ! attribute value
@@ -190,20 +192,20 @@
 !     Associate a (name,value) pair with any type in the system.
 
 !
-! !REQUIREMENTS:  FLD1.5, FLD1.5.3
 !EOP
+! !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
       end subroutine ESMF_AttributeSet
 
 
 !-------------------------------------------------------------------------
 !BOP
-!
+! !IROUTINE:  ESMF_AttributeGet - get attribute from an ESMF type
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGet(anytype, name, type, value, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype           ! any ESMF type
       character (len = *), intent(in) :: name          ! attribute name
       type(ESMF_DataType), intent(out) :: type             ! all possible data types
@@ -214,8 +216,8 @@
 ! !DESCRIPTION:
 
 !
-! !REQUIREMENTS:  FLD1.5.1, FLD1.5.3
 !EOP
+! !REQUIREMENTS:  FLD1.5.1, FLD1.5.3
 
       end subroutine ESMF_AttributeGet
 
@@ -223,11 +225,12 @@
 !-------------------------------------------------------------------------
 !BOP
 !
+! !IROUTINE:  ESMF_AttributeGetCount - get an ESMF object's number of attributes
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGetCount(anytype, count, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
       integer, intent(out) :: count                      ! attribute count
       integer, intent(out), optional :: rc               ! return code
@@ -237,8 +240,8 @@
 ! Returns number of attributes present.
 
 !
-! !REQUIREMENTS:  FLD1.7.5
 !EOP
+! !REQUIREMENTS:  FLD1.7.5
 
       end subroutine ESMF_AttributeGetCount
 
@@ -246,11 +249,12 @@
 !-------------------------------------------------------------------------
 !BOP
 !
+! !IROUTINE:  ESMF_AttributeGetbyNumber - get an ESMF object's attribute by num ber
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGetbyNumber(anytype, number, name, type, value, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
       integer, intent(in) :: number                      ! attribute number
       character (len = *), intent(in) :: name            ! attribute name
@@ -263,8 +267,8 @@
 ! Allows the caller to get attributes by number instead of by name.
 ! This can be useful in iterating through all attributes in a loop.
 !
-! !REQUIREMENTS: 
 !EOP
+! !REQUIREMENTS: 
 
       end subroutine ESMF_AttributeGetbyNumber
 
@@ -272,11 +276,12 @@
 !-------------------------------------------------------------------------
 !BOP
 !
+!IROUTINE:  ESMF_AttributeGetNameList - get an ESMF object's attribute name list
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGetNameList(anytype, count, namelist, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
       integer, intent(out) :: count                      ! attribute count
       character (len = *), dimension (:), intent(out) :: namelist   ! attribute names
@@ -287,8 +292,8 @@
 ! Return a list of all attribute names without returning the values.
 
 !
-! !REQUIREMENTS:  FLD1.7.3
 !EOP
+! !REQUIREMENTS:  FLD1.7.3
 
       end subroutine ESMF_AttributeGetNameList
 
@@ -296,12 +301,13 @@
 !-------------------------------------------------------------------------
 !BOP
 !
+! !IROUTINE:  ESMF_AttributeSetList - set an ESMF object's attributes 
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeSetList(anytype, namelist, valuelist, rc)
 
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
       character (len = *), dimension (:), intent(in) :: namelist    ! attribute names
       type(ESMF_DataValue), dimension (:), intent(in) :: valuelist      ! attribute values
@@ -312,8 +318,8 @@
 ! Set multiple attributes on an object in one call.  Depending on what is
 ! allowed by the interface, all attributes may have to have the same type.
 !
-! !REQUIREMENTS:  (none.  added for completeness)
 !EOP
+! !REQUIREMENTS:  (none.  added for completeness)
 
       end subroutine ESMF_AttributeSetList
 
@@ -321,11 +327,12 @@
 !-------------------------------------------------------------------------
 !BOP
 !
+! !IROUTINE:  ESMF_AttributeGetList - get an ESMF object's attributes
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGetList(anytype, namelist, typelist, valuelist, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
       character (len = *), dimension (:), intent(in) :: namelist    ! attribute names
       type(ESMF_DataType), dimension (:), intent(out) :: typelist       ! all possible data types
@@ -337,8 +344,8 @@
 ! Get multiple attributes from an object in a single call.
 
 !
-! !REQUIREMENTS:  FLD1.7.4
 !EOP
+! !REQUIREMENTS:  FLD1.7.4
 
       end subroutine ESMF_AttributeGetList
 
@@ -346,11 +353,12 @@
 !-------------------------------------------------------------------------
 !BOP
 !
+! !IROUTINE:  ESMF_AttributeSetObjectList - set an attribute on multiple ESMF objects 
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeSetObjectList(anytypelist, name, value, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), dimension (:), intent(in) :: anytypelist     ! list of any ESMF types
       character (len = *), intent(in) :: name            ! attribute name
       type(ESMF_DataValue), dimension (:), intent(in) :: value          ! attribute value
@@ -361,8 +369,8 @@
 ! Set the same attribute on multiple objects in one call.
 
 !
-! !REQUIREMENTS:  FLD1.5.5 (pri 2)
 !EOP
+! !REQUIREMENTS:  FLD1.5.5 (pri 2)
 
       end subroutine ESMF_AttributeSetObjectList
 
@@ -371,10 +379,12 @@
 !BOP
 !
 !
+! !IROUTINE:  ESMF_AttributeGetObjectList - get an attribute from multiple ESMF objects 
+!
 ! !INTERFACE:
       subroutine ESMF_AttributeGetObjectList(anytypelist, name, typelist, valuelist, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), dimension (:), intent(in) :: anytypelist     ! list of any ESMF types
       character (len = *), intent(in) :: name            ! attribute name
       type(ESMF_DataType), dimension (:), intent(out) :: typelist       ! all possible data types
@@ -386,8 +396,8 @@
 ! Get the same attribute name from multiple objects in one call.
 
 !
-! !REQUIREMENTS:  FLD1.5.5 (pri 2)
 !EOP
+! !REQUIREMENTS:  FLD1.5.5 (pri 2)
 
       end subroutine ESMF_AttributeGetObjectList
 
@@ -395,11 +405,12 @@
 !-------------------------------------------------------------------------
 !BOP
 !
+! !IROUTINE:  ESMF_AttributeCopy - copy an attribute between two objects
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeCopy(name, source, destination, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       character (len = *), intent(in) :: name            ! attribute name
       type(ESMF_Base), intent(in) :: source              ! any ESMF type
       type(ESMF_Base), intent(in) :: destination         ! any ESMF type
@@ -414,8 +425,8 @@
 
 
 !
-! !REQUIREMENTS:  FLD1.5.4
 !EOP
+! !REQUIREMENTS:  FLD1.5.4
 
       end subroutine ESMF_AttributeCopy
 
@@ -423,11 +434,13 @@
 !-------------------------------------------------------------------------
 !BOP
 !
+!IROUTINE:  ESMC_AttributeCopyAll - copy attributes between two objects
+
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeCopyAll(source, destination, rc)
 !
-! !PARAMETERS:
+! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: source              ! any ESMF type
       type(ESMF_Base), intent(in) :: destination         ! any ESMF type
       integer, intent(out), optional :: rc               ! return code
@@ -440,8 +453,8 @@
 ! like {\tt name} must be unique and therefore can't be duplicated.)
 
 !
-! !REQUIREMENTS:  FLD1.5.4
 !EOP
+! !REQUIREMENTS:  FLD1.5.4
 
       end subroutine ESMF_AttributeCopyAll
 !-------------------------------------------------------------------------
@@ -453,4 +466,3 @@
 !-------------------------------------------------------------------------
 
       end module ESMF_BaseMod
-
