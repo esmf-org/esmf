@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.1 2005/03/10 21:12:49 nscollins Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.2 2005/03/10 22:16:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.1 2005/03/10 21:12:49 nscollins Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.2 2005/03/10 22:16:57 nscollins Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -361,7 +361,11 @@ contains
       call ESMF_VMGet(vm, petCount=npets, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      delayout = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
+      if (npets .eq. 1) then
+        delayout = ESMF_DELayoutCreate(vm, (/ 1, 1 /), rc=status)
+      else
+        delayout = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
+      endif
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! and get our local de number
@@ -447,7 +451,8 @@ contains
       type(ESMF_DELayout) :: delayout
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Grid) :: grid
-      integer :: npets, countsPerDE1(3), countsPerDE2(2)
+      integer :: npets, countsPerDE1(8), countsPerDE2(2)
+      integer :: nDE1, nDE2
       integer :: counts(3), order(3)
       real(ESMF_KIND_R8) :: min(2), max(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
@@ -462,15 +467,35 @@ contains
 
       call ESMF_VMGet(vm, petCount=npets, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
 
 
       ! Create a field in which we determine the number of items 
       ! in each of the local decompositions.
+      if (npets .eq. 1) then
+        nDE1 = 1
+        nDE2 = 1
+        countsPerDE1(1:1) = (/ 40 /)
+        countsPerDE2(1:1) = (/ 50 /)
+      else
+        nDE1 = npets/2
+        nDE2 = 2
+ 
+        if (nDE1 .eq. 2) then
+          countsPerDE1(1:nDE1) = (/ 28, 12 /)
+        else if (nDE1 .eq. 3) then
+          countsPerDE1(1:nDE1) = (/ 10, 18, 12 /)
+        else if (nDE1 .ge. 4) then
+          nDE1 = 4
+          countsPerDE1(1:nDE1) = (/ 10, 14, 10, 6 /)
+        endif
+        
+        countsPerDE2 = (/ 22, 28 /)
+      endif
+
+      delayout = ESMF_DELayoutCreate(vm, (/ nDE1, nDE2 /), rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+
       counts(1:3)  = (/  4, 40, 50 /)
-      countsPerDE1 = (/ 10, 18, 12 /)
-      countsPerDE2 = (/ 22, 28 /)
       min(1) = 0.0
       delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
                   1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
@@ -491,8 +516,8 @@ contains
                                     name="source grid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridDistribute(grid, delayout=delayout, &
-                               countsPerDEDim1=countsPerDE1, &
-                               countsPerDEDim2=countsPerDE2, &
+                               countsPerDEDim1=countsPerDE1(1:nDE1), &
+                               countsPerDEDim2=countsPerDE2(1:nDE2), &
                                rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
