@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.7 2004/03/18 20:02:51 nscollins Exp $
+! $Id: InjectArraysMod.F90,v 1.8 2005/01/12 20:37:30 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -6,7 +6,7 @@
 !
 ! !DESCRIPTION:
 !  Global storage of arrays and scalars, using the following 
-!    ESMF Framework objects: ESMF\_Field, ESMF\_Grid, ESMF\_Array.
+!    ESMF objects: ESMF\_Field, ESMF\_Grid, ESMF\_Array.
 !
 !EOPI
 
@@ -105,53 +105,43 @@
 
       field_sie  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="SIE", rc=status)
-      call ESMF_FieldGetArray(field_sie, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, sie, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_sie, sie, ESMF_DATA_REF, rc=status)
 
       field_u    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
                    haloWidth=haloWidth, name="U", rc=status)
-      call ESMF_FieldGetArray(field_u, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, u, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_u, u, ESMF_DATA_REF, rc=status)
 
       field_v    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
                    haloWidth=haloWidth, name="V", rc=status)
-      call ESMF_FieldGetArray(field_v, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, v, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_v, v, ESMF_DATA_REF, rc=status)
 
       field_rho  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="RHO", rc=status)
-      call ESMF_FieldGetArray(field_rho, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rho, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rho, rho, ESMF_DATA_REF, rc=status)
 
       field_rhoi = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="RHOI", rc=status)
-      call ESMF_FieldGetArray(field_rhoi, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhoi, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rhoi, rhoi, ESMF_DATA_REF, rc=status)
 
       field_rhou = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
                    haloWidth=haloWidth, name="RHOU", rc=status)
-      call ESMF_FieldGetArray(field_rhou, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhou, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rhou, rhou, ESMF_DATA_REF, rc=status)
 
       field_rhov = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
                    haloWidth=haloWidth, name="RHOV", rc=status)
-      call ESMF_FieldGetArray(field_rhov, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhov, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rhov, rhov, ESMF_DATA_REF, rc=status)
 
       field_p    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="P", rc=status)
-      call ESMF_FieldGetArray(field_p, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, p, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_p, p, ESMF_DATA_REF, rc=status)
 
       field_q    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="Q", rc=status)
-      call ESMF_FieldGetArray(field_q, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, q, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_q, q, ESMF_DATA_REF, rc=status)
 
       field_flag = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="FLAG", rc=status)
-      call ESMF_FieldGetArray(field_flag, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, flag, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_flag, flag, ESMF_DATA_REF, rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in InjectArraysAlloc"
@@ -160,6 +150,7 @@
 !
 ! set some of the scalars from array information
 !
+      call ESMF_FieldGetArray(field_flag, array_temp, rc=status)
       call ESMF_ArrayGetAxisIndex(array_temp, totalindex=indext, &
                                   compindex=indexe, rc=status)
       imin = indexe(1)%min
@@ -220,6 +211,6 @@
 
       end subroutine InjectArraysDealloc
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
     end module InjectArraysMod
     

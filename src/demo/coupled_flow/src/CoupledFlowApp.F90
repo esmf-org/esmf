@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.20 2004/11/22 15:58:35 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.21 2005/01/12 20:37:28 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -15,7 +15,7 @@
 
     program ESMF_ApplicationWrapper
 
-    ! ESMF Framework module, defines all ESMF data types and procedures
+    ! ESMF module, defines all ESMF data types and procedures
     use ESMF_Mod
     
     ! Flow Component registration routines
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 !
 
-    ! Initialize the ESMF Framework and get the default Global VM
+    ! Initialize the ESMF and get the default Global VM
     call ESMF_Initialize(vm=vm, rc=rc)
 
     ! Create the Gridded component, passing in the default VM.
@@ -201,7 +201,7 @@
 !  The following piece of code provides an example of Grid creation used in
 !  the Demo.  The extents of the Grid were previously read in from an input
 !  file, but the rest of the Grid parameters are set here by default.  The
-!  Grid spans the Application's DELayout, while the type of the Grid is 
+!  Grid spans the Application's PET list, while the type of the Grid is 
 !  assumed to be horizontal and cartesian x-y with an Arakawa C staggering.  
 !  The Grid name is set to "source grid":
 !\begin{verbatim}
@@ -219,7 +219,7 @@
       call ESMF_GridDistribute(grid, delayout=DELayoutTop, rc=rc)
 
 !\end{verbatim}
-!     The Grid can then be attached to the Gridded Component with a Set call:
+!     The Grid can then be attached to the Gridded Component with a set call:
 !\begin{verbatim}
      call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
 !\end{verbatim}

@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.22 2004/09/24 15:21:16 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.23 2005/01/12 20:37:30 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -94,12 +94,12 @@
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
-!     The Register routine sets the subroutines to be called
+!     The register routine sets the subroutines to be called
 !     as the init, run, and finalize routines.  Note that these are
 !     private to the module.
 !     \begin{description}
 !     \item [comp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -142,17 +142,17 @@
 !
 ! !DESCRIPTION:
 !     This subroutine is the registered init routine.  It reads input,
-!     creates the {\tt Grid}, attaches it to the {\tt Gridded Component},
-!     initializes data, and sets the import and export {\tt States}.
+!     creates the Grid, attaches it to the Gridded Component,
+!     initializes data, and sets the import and export States.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [import\_state]
-!           Pointer to a {\tt State} object containing the import list.
+!           State containing the import list.
 !     \item [export\_state]
-!           Pointer to a {\tt State} object containing the export list.
+!           State containing the export list.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -304,7 +304,7 @@
       call ESMF_StateAddNameOnly(export_state, "Q", rc)
       call ESMF_StateAddNameOnly(export_state, "FLAG", rc)
 
-! temporary fix
+! Give the export state an initial set of values for the SIE Field.
       call ESMF_StateAddField(export_state, field_sie, rc)
       rc = ESMF_SUCCESS
 
@@ -329,13 +329,13 @@
 !     It sets the export fields in the export state for what's required.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [import\_state]
-!           Pointer to a {\tt State} object containing the import list.
+!           State containing the import list.
 !     \item [export\_state]
-!           Pointer to a {\tt State} object containing the export list.
+!           State containing the export list.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -398,9 +398,9 @@
 !     FlowSolver.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -706,13 +706,11 @@
 !     algorithm and checks the output interval.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [import\_state]
-!           An {\tt ESMF\_State} object containing data obtained from other
-!           components.
+!           State containing data obtained from other components.
 !     \item [export\_state]
-!           An {\tt ESMF\_State} object containing data needed by other
-!           components.
+!           State containing data needed by other components.
 !     \item [clock]
 !           An {\tt ESMF\_Clock} object containing the current time,
 !           time step, and stop time.
@@ -928,11 +926,12 @@
 ! !DESCRIPTION:
 ! \subsubsection{Example of FieldHalo Usage:}
 !
-!     The following piece of code provides an example of Haloing the data in a
-!     Field.  Currently the FieldHalo routine assumes the entire Halo is updated
-!     completely; i.e. the user cannot specify halo width or side separately.
-!     FieldHalo uses the Route object to transfer data from the exclusive
-!     computational domain of one DE to the Halo region of another.
+!     The following piece of code provides an example of haloing the data in a
+!     Field.  Currently the Field halo routine assumes the entire halo is 
+!     updated completely; i.e. the user cannot specify halo width or side 
+!     separately.
+!     Field halo uses a Route object to transfer data from the exclusive
+!     computational domain of one DE to the halo region of another.
 !\begin{verbatim}
       call ESMF_FieldHalo(field_rhou, rc=status)
       if(status .NE. ESMF_SUCCESS) then
@@ -974,7 +973,7 @@
         enddo
       enddo
 !
-! Update RHOV with Halo
+! Update RHOV with halo
 !
       call ESMF_FieldHalo(field_rhov, rc=status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1094,7 +1093,7 @@
         enddo
       enddo
 !
-! Update RHOI with Halo
+! Update RHOI with halo
 !
       call ESMF_FieldHalo(field_rhoi, rc=status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1210,7 +1209,7 @@
         enddo
       enddo
 !
-! Update the RHO and SIE arrays with Halo.
+! Update the RHO and SIE arrays with halo.
 !
       call ESMF_FieldHalo(field_rho, rc=status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1577,9 +1576,9 @@
 !     run.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [file\_no]
 !           File number for output files, 999 max.
 !     \item [{[rc]}]
@@ -1692,13 +1691,13 @@
 !     process.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [import\_state]
-!           Pointer to a {\tt State} object containing the import list.
+!           State containing the import list.
 !     \item [export\_state]
-!           Pointer to a {\tt State} object containing the export list.
+!           State containing the export list.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !

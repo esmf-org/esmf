@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.7 2004/03/18 20:02:50 nscollins Exp $
+! $Id: FlowArraysMod.F90,v 1.8 2005/01/12 20:37:29 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -6,7 +6,7 @@
 ! !MODULE: FlowArraysMod.F90 - Source file for Data for Flow Solver
 !
 ! !DESCRIPTION:
-!  Allocate and Deallocate ESMF Framework objects which handle data arrays
+!  Allocate and deallocate ESMF objects which handle data arrays
 !  including ESMF\_Fields, ESMF\_Grids,  and ESMF\_Arrays.
 !
 !EOP
@@ -107,7 +107,7 @@
 ! \subsubsection{Example of Field Creation and Array Usage:}
 !
 !     The following piece of code provides an example of Field creation used in
-!     the Demo.  In this example, we create a Field from an ArraySpec, which
+!     the demo.  In this example we create a Field from an ArraySpec, which
 !     designates the rank, type, and kind of the data.  First initialize the
 !     ArraySpec with rank 2 for a two-dimensional array, type ESMF\_DATA\_REAL,
 !     and kind ESMF\_KIND\_R4:
@@ -121,69 +121,54 @@
       field_sie  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="SIE", rc=status)
 !\end{verbatim}
-!     Once the Field has been created, we have to get a pointer to the Array
-!     inside it.  In this example, we are not interested in the Array itself
-!     so we use a temporary array:
-!\begin{verbatim}
-      call ESMF_FieldGetArray(field_sie, array_temp, rc=status)
-!\end{verbatim}
-!     Here we are getting a pointer to the data inside the Array and calling it
-!     "sie."  Inside the Component "sie" can be used like an array made by an
+!     Once the Field has been created, we get a pointer to the Array
+!     data (the Fortran 90 array), and call it "sie".
+!     Inside the Component "sie" can be used like an array made by an
 !     F90 allocation but will reference the data inside "field\_sie."
 !\begin{verbatim}
-      call ESMF_ArrayGetData(array_temp, sie, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_sie, sie, ESMF_DATA_REF, rc=status)
 !\end{verbatim}
 !EOP
 
       field_u    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
                    haloWidth=haloWidth, name="U", rc=status)
-      call ESMF_FieldGetArray(field_u, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, u, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_u, u, ESMF_DATA_REF, rc=status)
 
       field_v    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
                    haloWidth=haloWidth, name="V", rc=status)
-      call ESMF_FieldGetArray(field_v, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, v, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_v, v, ESMF_DATA_REF, rc=status)
 
       field_rho  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="RHO", rc=status)
-      call ESMF_FieldGetArray(field_rho, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rho, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rho, rho, ESMF_DATA_REF, rc=status)
 
       field_rhoi = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="RHOI", rc=status)
-      call ESMF_FieldGetArray(field_rhoi, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhoi, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rhoi, rhoi, ESMF_DATA_REF, rc=status)
 
       field_rhou = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
                    haloWidth=haloWidth, name="RHOU", rc=status)
-      call ESMF_FieldGetArray(field_rhou, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhou, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rhou, rhou, ESMF_DATA_REF, rc=status)
 
       field_rhov = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
                    haloWidth=haloWidth, name="RHOV", rc=status)
-      call ESMF_FieldGetArray(field_rhov, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhov, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rhov, rhov, ESMF_DATA_REF, rc=status)
 
       field_p    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="P", rc=status)
-      call ESMF_FieldGetArray(field_p, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, p, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_p, p, ESMF_DATA_REF, rc=status)
 
       field_q    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="Q", rc=status)
-      call ESMF_FieldGetArray(field_q, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, q, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_q, q, ESMF_DATA_REF, rc=status)
 
       field_flag = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="FLAG", rc=status)
-      call ESMF_FieldGetArray(field_flag, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, flag, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_flag, flag, ESMF_DATA_REF, rc=status)
 
       field_de   = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="DE", rc=status)
-      call ESMF_FieldGetArray(field_de, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, de, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_de, de, ESMF_DATA_REF, rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowArraysAlloc"
@@ -192,6 +177,7 @@
 !
 ! set some of the scalars from array information
 !
+      call ESMF_FieldGetArray(field_de, array_temp, rc=status)
       call ESMF_ArrayGetAxisIndex(array_temp, totalindex=indext, &
                                   compindex=indexe, rc=status)
       imin = indexe(1)%min
@@ -253,6 +239,6 @@
 
       end subroutine FlowArraysDealloc
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
     end module FlowArraysMod
     

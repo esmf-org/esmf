@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.18 2004/10/05 22:51:09 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.19 2005/01/12 20:37:29 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -7,9 +7,9 @@
 !
 ! !DESCRIPTION:
 !  The Coupler Component provides two-way coupling between the Injector
-!  and FlowSolver Models.  During initialization this component is
+!  and FlowSolver Models.  During initialization this Component is
 !  responsible for setting that data "is needed" from the export state
-!  of each model.  In its Run routine it calls Route to transfer the
+!  of each model.  In its run routine it calls route to transfer the
 !  needed data directly from one Component's export state to the other
 !  Component's import state.
 !
@@ -219,9 +219,9 @@
         datanames(6) = "Q"
         datanames(7) = "FLAG"
 
-        ! In this case, the coupling is symmetric - you call Redist either way
-        ! we only care about the coupling direction in order to get
-        ! the right routehandle selected.
+        ! In this case, the coupling is symmetric - you call redist going
+        ! both ways - so we only care about the coupling direction in order 
+        ! to get the right routehandle selected.
         call ESMF_StateGet(importState, name=statename, rc=rc)
         if (trim(statename) .eq. "FlowSolver Feedback") then
             routehandle = fromFlow_rh 
@@ -240,12 +240,12 @@
            !print *, "processing field ", trim(datanames(i)), " as needed"
 !BOP
 ! !DESCRIPTION:
-! \subsubsection{Example of Route Usage:}
+! \subsubsection{Example of Redist Usage:}
 !
-!   The following piece of code provides an example of calling Route
-!   between two Fields in the Coupler Component.  
-!   Unlike Regrid, which translates between
-!   different Grids, Route translates between different DELayouts on
+!   The following piece of code provides an example of calling the data
+!   redistribution routine  between two Fields in the Coupler Component.  
+!   Unlike regrid, which translates between
+!   different Grids, redist translates between different DELayouts on
 !   the same Grid.   The first two lines get the Fields from the 
 !   States, each corresponding to a different subcomponent.  One is
 !   an Export State and the other is an Import State.
@@ -255,12 +255,12 @@
            call ESMF_StateGetField(exportState, datanames(i), dstfield, rc=rc)
 !\end{verbatim}
 !
-!   The Route routine uses information contained in the Fields and the
-!   Coupler DELayout object to call the Communication routines to move the data.
+!   The redist routine uses information contained in the Fields and the
+!   Coupler VM object to call the communication routines to move the data.
 !   Because many Fields may share the same Grid association, the same
-!   routing information may be needed repeatedly.  Route information is cached 
-!   so the precomputed information can be retained.  The following is an
-!   example of a Field Route call:
+!   routing information may be needed repeatedly.  Route information is 
+!   saved so the precomputed information can be retained.  The following 
+!   is an example of a Field redist call:
 !
 !\begin{verbatim}
            call ESMF_FieldRedist(srcfield, dstfield, routehandle, rc=rc)

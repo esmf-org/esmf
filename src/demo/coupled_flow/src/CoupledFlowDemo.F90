@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.24 2004/11/22 15:58:36 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.25 2005/01/12 20:37:29 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -7,8 +7,8 @@
 !
 ! !DESCRIPTION:
 ! ESMF Coupled Flow Demo - A Gridded Component which can be called either 
-!   directly from an Application Component or nested in a larger application.
-!   It contains 2 nested subcomponents and 1 coupler component which does 
+!   directly from an Application Driver or nested in a larger application.
+!   It contains 2 nested subcomponents and 1 Coupler Component which does 
 !   two-way coupling between the subcomponents.
 !
 !EOP
@@ -18,7 +18,7 @@
 
     module CoupledFlowMod
 
-    ! ESMF Framework module, defines all ESMF data types and procedures
+    ! ESMF module, defines all ESMF data types and procedures
     use ESMF_Mod
     
     ! User Component registration routines
@@ -58,8 +58,8 @@
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
-!     User-supplied SetServices routine.
-!     The Register routine sets the subroutines to be called
+!     User-supplied setservices routine.
+!     The register routine sets the subroutines to be called
 !     as the init, run, and finalize routines.  Note that these are
 !     private to the module.
 !
@@ -78,7 +78,7 @@
 !  !DESCRIPTION:
 ! \subsubsection{Example of Set Services Usage:}
 !
-!   The following code registers with the ESMF Framework
+!   The following code registers with ESMF 
 !   the subroutines to be called to Init, Run, and Finalize this component.
 !\begin{verbatim}
         ! Register the callback routines.
@@ -171,34 +171,28 @@
        by4 = 4
      endif
 
-    ! Set up the component DELayouts so they are different, so we can show
-    !  we really are routing data between processors.
-
-    ! Create the 2 model components and coupler.  The first component will
-    !  run on a 2 x N/2 DELayout, the second will be on a 4 x N/4 DELayout.
-    !  The coupler will run on the original default 1 x N DELayout.
+    ! Create the 2 model components and coupler. 
 
 !BOP
 ! !DESCRIPTION:
-! \subsubsection{Example of DELayout Creation:}
+! \subsubsection{Example of Component Creation:}
 !
-!   The following code creates 2 sublayouts on the same set of PETs 
+!   The following code creates 2 Gridded Components on the same set of PETs 
 !   (persistent execution threads) as the top level Component, but each 
-!   of the sublayouts has a different connectivity.
+!   of the Grids useds by these Components will have a different connectivity.
+!   It also creates a Coupler Component on the same PET set.
+!
 !\begin{verbatim}
     cnameIN = "Injector model"
-    layoutIN = ESMF_DELayoutCreate(vm, (/ mid, by2 /), rc=rc)
     INcomp = ESMF_GridCompCreate(vm, cnameIN, rc=rc)
 
     cnameFS = "Flow Solver model"
-    layoutFS = ESMF_DELayoutCreate(vm, (/ quart, by4 /), rc=rc)
     FScomp = ESMF_GridCompCreate(vm, cnameFS, rc=rc)
-!\end{verbatim}
-!EOP
 
     cplname = "Two-way coupler"
     cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
-
+!\end{verbatim}
+!EOP
 
     print *, "Comp Creates finished"
 
@@ -235,11 +229,14 @@
                                horzstagger=horz_stagger, &      
                                rc=rc)
 
+
     gridIN = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
                              horzstagger=horz_stagger, &      
                              name="Injector grid", rc=rc)
+
+    layoutIN = ESMF_DELayoutCreate(vm, (/ mid, by2 /), rc=rc)
     call ESMF_GridDistribute(gridIN, delayout=layoutIN, rc=rc)
 
 
@@ -250,6 +247,8 @@
                              maxGlobalCoordPerDim=maxcoords, &
                              horzstagger=horz_stagger, &      
                              name="Flow Solver grid", rc=rc)
+
+    layoutFS = ESMF_DELayoutCreate(vm, (/ quart, by4 /), rc=rc)
     call ESMF_GridDistribute(gridFS, delayout=layoutFS, rc=rc)
 
     call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)
@@ -263,7 +262,7 @@
 ! \subsubsection{Example of State Creation:}
 !
 !   The following code creates Import and Export States for the
-!   Injection subcomponent.  All information being passed to other
+!   Injection subcomponent.  All information being passed between
 !   subcomponents will be described by these States.
 !
 !\begin{verbatim}

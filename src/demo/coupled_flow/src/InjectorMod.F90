@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.15 2004/09/24 15:21:15 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.16 2005/01/12 20:37:30 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -23,7 +23,7 @@
 
     module InjectorMod
 
-    ! ESMF Framework module
+    ! ESMF module
     use ESMF_Mod
     use InjectArraysMod
     
@@ -72,7 +72,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp]
-!          The Gridded Component corresponding to this code.
+!          A Gridded Component.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          {\tt ESMF\_FAILURE} othewise.
@@ -134,15 +134,15 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gcomp]
-!          Argument 1.
+!           A Gridded Component.
 !     \item[importState]
-!          Argument 2.
+!           State containing the import list.
 !     \item[exportState]
-!          Argument 2.
+!           State containing the export list.
 !     \item[clock]
-!          Optional object name.
+!           Clock describing the external time.
 !     \item[rc]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
@@ -306,13 +306,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!          Component.
+!           A Gridded Component.
 !     \item[importState]
-!          Importstate.
+!           State containing the import list.
 !     \item[exportState]
-!          Exportstate.
+!           State containing the export list.
 !     \item[clock] 
-!          External clock.
+!           Clock describing the external time.
 !     \item[rc] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          otherwise {\tt ESMF\_FAILURE}.
@@ -375,13 +375,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!          Component.
+!           A Gridded Component.
 !     \item[importState]
-!          Importstate.
+!           State containing the import list.
 !     \item[exportState]
-!          Exportstate.
+!           State containing the export list.
 !     \item[clock] 
-!          External clock.
+!           Clock describing the external time.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          otherwise {\tt ESMF\_FAILURE}.
@@ -505,13 +505,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!          Component.
+!           A Gridded Component.
 !     \item[importState]
-!          Importstate.
+!           State containing the import list.
 !     \item[exportState]
-!          Exportstate.
+!           State containing the export list.
 !     \item[clock] 
-!          External clock.
+!           Clock describing the external time.
 !     \item[rc] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          otherwise {\tt ESMF\_FAILURE}.
