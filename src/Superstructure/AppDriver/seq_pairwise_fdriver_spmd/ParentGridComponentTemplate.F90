@@ -1,4 +1,4 @@
-! $Id: ParentGridComponentTemplate.F90,v 1.7 2004/04/28 23:12:10 cdeluca Exp $
+! $Id: ParentGridComponentTemplate.F90,v 1.8 2004/05/13 12:08:05 nscollins Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -62,28 +62,28 @@
       type(ESMF_Clock) :: parentclock
       integer :: rc
      
-      type(ESMF_DELayout) :: parentlayout
+      type(ESMF_VM) :: parentvm
       type(ESMF_Grid) :: parentgrid
 
       ! call ESMF_LogErrMsg("Parent Gridded Component Initialize routine called")
       print *, "Parent Gridded Component Initialize routine called"
 
       ! Get the layout and grid associated with this component
-      call ESMF_GridCompGet(gcomp, layout=parentlayout, grid=parentgrid, rc=rc)
+      call ESMF_GridCompGet(gcomp, vm=parentvm, grid=parentgrid, rc=rc)
 
       ! Create the first child Gridded component
       gname1 = "ESMF Gridded Child Component 1"
-      comp1Grid = ESMF_GridCompCreate(name=gname1, layout=parentlayout, &
+      comp1Grid = ESMF_GridCompCreate(parentvm, name=gname1, & 
                                          grid=parentgrid, rc=rc)
 
       ! Create the second child Gridded component
       gname2 = "ESMF Gridded Child Component 2"
-      comp2Grid = ESMF_GridCompCreate(name=gname2, layout=parentlayout, &
+      comp2Grid = ESMF_GridCompCreate(parentvm, name=gname2, &
                                          grid=parentgrid, rc=rc)
 
       ! Create the Coupler component
       cname = "ESMF Coupler Component"
-      compCoupler = ESMF_CplCompCreate(name=cname, layout=parentlayout, rc=rc)
+      compCoupler = ESMF_CplCompCreate(parentvm, name=cname, rc=rc)
 
       ! call ESMF_LogErrMsg("Component Creates finished")
       print *, "Component Creates finished"
@@ -97,11 +97,11 @@
 
       ! Now create Import and Export State objects in order to pass data
       ! between the Coupler and the Gridded Components
-      G1imp = ESMF_StateCreate("GComp1 Import", ESMF_STATEIMPORT, gname1)
-      G1exp = ESMF_StateCreate("GComp1 Export", ESMF_STATEEXPORT, gname1)
+      G1imp = ESMF_StateCreate("GComp1 Import", ESMF_STATEIMPORT)
+      G1exp = ESMF_StateCreate("GComp1 Export", ESMF_STATEEXPORT)
 
-      G2imp = ESMF_StateCreate("GComp2 Import", ESMF_STATEIMPORT, gname2)
-      G2exp = ESMF_StateCreate("GComp2 Export", ESMF_STATEEXPORT, gname2)
+      G2imp = ESMF_StateCreate("GComp2 Import", ESMF_STATEIMPORT)
+      G2exp = ESMF_StateCreate("GComp2 Export", ESMF_STATEEXPORT)
 
       ! Now give each of the subcomponents a chance to initialize themselves.
       call ESMF_GridCompInitialize(comp1Grid, G1imp, G1exp, parentclock, rc=rc)

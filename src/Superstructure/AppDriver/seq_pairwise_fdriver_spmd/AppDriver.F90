@@ -39,7 +39,8 @@
     ! Components
     type(ESMF_GridComp) :: compGridded
 
-    ! States and Layouts
+    ! States, Virtual Machines, and Layouts
+    type(ESMF_VM) :: defaultvm
     type(ESMF_DELayout) :: defaultlayout
     type(ESMF_State) :: defaultstate
 
@@ -91,15 +92,15 @@
     !  for the main time loop.
     !
     ! e.g. to get an integer parameter from the config file:
-    !  ndays = ESMF_ConfigGetInt( config, label ='Number_of_Days:', &
-    !                             default=30, rc = rc )
+    ! call ESMF_ConfigGetAttribute( config, ndays, label ='Number_of_Days:', &
+    !                               default=30, rc = rc )
     !
-    i_max = ESMF_ConfigGetInt(config, label='I Counts:', default=20, rc=rc)
-    j_max = ESMF_ConfigGetInt(config, label='J Counts:', default=80, rc=rc)
-    x_min = ESMF_ConfigGetFloat(config, label='X Min:', default=0.0, rc=rc)
-    y_min = ESMF_ConfigGetFloat(config, label='Y Min:', default=-180.0, rc=rc)
-    x_max = ESMF_ConfigGetFloat(config, label='X Max:', default=90.0, rc=rc)
-    y_max = ESMF_ConfigGetFloat(config, label='Y Max:', default=180.0, rc=rc)
+    call ESMF_ConfigGetAttribute(config, i_max, 'I Counts:', default=20, rc=rc)
+    call ESMF_ConfigGetAttribute(config, j_max, 'J Counts:', default=80, rc=rc)
+    call ESMF_ConfigGetAttribute(config, x_min, 'X Min:', default=0.0, rc=rc)
+    call ESMF_ConfigGetAttribute(config, y_min, 'Y Min:', default=-180.0, rc=rc)
+    call ESMF_ConfigGetAttribute(config, x_max, 'X Max:', default=90.0, rc=rc)
+    call ESMF_ConfigGetAttribute(config, y_max, 'Y Max:', default=180.0, rc=rc)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -108,15 +109,11 @@
 !------------------------------------------------------------------------------
 !
  
-    ! Create a default layout, which is 1xN in topology, where N is the
-    !  number of DEs this program was started on.
-    defaultlayout = ESMF_DELayoutCreate(rc=rc)
-
+    ! Get the default VM which contains all PEs this job was started on.
+    call ESMF_VMGetGlobal(defaultvm, rc)
 
     ! Create the top Gridded component, passing in the default layout.
-    compGridded = ESMF_GridCompCreate("ESMF Gridded Component", &
-                                       layout=defaultlayout, rc=rc)
-
+    compGridded = ESMF_GridCompCreate(defaultvm, "ESMF Gridded Component", rc=rc)
 
     ! call ESMF_LogErrMsg("Component Create finished")
     print *, "Component Create finished"
@@ -160,15 +157,17 @@
                                 stopTime, rc=rc)
 
 
-      ! Same with the grid.
+      ! Same with the grid.  Get a default layout based on the VM.
+      defaultlayout = ESMF_DELayoutCreate(defaultvm, rc=rc)
 
-      grid = ESMF_GridCreate(numDims=2, counts=(/i_max, j_max/), &
-                             min=(/x_min, y_min/), &
-                             max=(/x_max, y_max/), &
-                             layout=defaultlayout, &   
-                             horz_gridtype=ESMF_GridType_XY, &
-                             horz_stagger=ESMF_GridStagger_C, &
-                             horz_coord_system=ESMF_CoordSystem_Cartesian, &
+      grid = ESMF_GridCreateLogRectUniform(dimCount=2, &
+                             counts=(/i_max, j_max/), &
+                             minGlobalCoordPerDim=(/x_min, y_min/), &
+                             maxGlobalCoordPerDim=(/x_max, y_max/), &
+                             delayout=defaultlayout, &   
+                             horzGridType=ESMF_GridType_XY, &
+                             horzStagger=ESMF_GridStagger_C_NE, &
+                             horzCoordSystem=ESMF_CoordSystem_Cartesian, &
                              name="source grid", rc=rc)
 
      ! Attach the Grid to the Component
