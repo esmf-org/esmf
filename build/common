@@ -1,4 +1,4 @@
-# $Id: common,v 1.12 2002/12/11 18:31:59 nscollins Exp $ 
+# $Id: common,v 1.13 2003/01/08 23:22:15 nscollins Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -46,7 +46,11 @@ libc:${LIBNAME}(${OBJSC})
 libf:${LIBNAME}(${OBJSF})
 
 storeh:
-	cp -f ${ESMF_DIR}/${LOCDIR}/../include/${STOREH} ${ESMF_DIR}/src/include
+	for hfile in ${STOREH} foo ; do \
+	  if [ $$hfile != "foo" ]; then \
+	    cp -f ${ESMF_DIR}/${LOCDIR}/../include/$$hfile ${ESMF_DIR}/src/include ; \
+	  fi ; \
+	done
 
 buildtex: ${TEXFILES}
 
