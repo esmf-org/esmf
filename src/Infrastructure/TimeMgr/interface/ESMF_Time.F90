@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.80 2004/12/17 23:08:55 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.81 2005/01/08 00:17:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.80 2004/12/17 23:08:55 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.81 2005/01/08 00:17:23 eschwab Exp $'
 
 !==============================================================================
 !
@@ -518,12 +518,23 @@
 !     floating point seconds, you would get 5.375 (s\_r8=5.375).
 !     (Reals not implemented yet).
 !
-!     Units are bound (normalized) to the next larger unit specified.  For
-!     example, if a time is defined to be 2:00 am on a particular date, then
-!     {\tt ESMF\_TimeGet(h = hours, s = seconds)} would return
-!       {\tt hours = 2}, {\tt seconds = 0},
-!     whereas {\tt ESMF\_TimeGet(s=seconds)} would return
-!       {\tt seconds = 7200}.
+!     Units are bound (normalized) by the next larger unit specified.  For
+!     example, if a time is defined to be 2:00 am on February 2, 2004, then
+!     {\tt ESMF\_TimeGet(dd=day, h=hours, s=seconds)} would return
+!       {\tt day = 2}, {\tt hours = 2}, {\tt seconds = 0},
+!     whereas {\tt ESMF\_TimeGet(dd = day, s=seconds)} would return
+!       {\tt day = 2}, {\tt seconds = 7200}.
+!     Note that {\tt hours} and {\tt seconds} are bound by a day.  If bound
+!     by a month,
+!     {\tt ESMF\_TimeGet(mm=month, h=hours, s=seconds)} would return
+!       {\tt month = 2}, {\tt hours = 26}, {\tt seconds = 0},
+!     and {\tt ESMF\_TimeGet(mm = month, s=seconds)} would return
+!       {\tt month = 2}, {\tt seconds = 93600} (26 * 3600).
+!     Similarly, if bound to a year,
+!     {\tt ESMF\_TimeGet(yy=year, h=hours, s=seconds)} would return
+!       {\tt year = 2004}, {\tt hours = 770} (32*24 + 2), {\tt seconds = 0},
+!     and {\tt ESMF\_TimeGet(yy = year, s=seconds)} would return
+!       {\tt year = 2004}, {\tt seconds = 2772000} (770 * 3600).
 !
 !     For {\tt timeString}, {\tt timeStringISOFrac}, {\tt dayOfWeek},
 !     {\tt midMonth}, {\tt dayOfYear}, {\tt dayOfYear\_r8}, and
