@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.67 2005/01/13 00:59:38 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.68 2005/01/13 04:42:58 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -679,7 +679,7 @@ end subroutine ESMF_LogGet
     endif
     ESMF_LogDefault%LOG_ENTRY => localbuf
     
-    call c_ESMC_LogInitialize(filename,i,rc2)
+    call c_ESMC_LogInitialize(fname,i,rc2)
     if (present(rc)) rc=ESMF_SUCCESS
 	
 end subroutine ESMF_LogInitialize
