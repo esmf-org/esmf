@@ -30,12 +30,13 @@
 // associated class definition file
 #include "ESMC_Array.h"
 #include "ESMC_DELayout.h"
+#include "ESMC_Grid.h"        // grid info
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.5 2003/07/17 21:16:53 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.6 2003/07/17 22:46:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -791,7 +792,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DomainType dt,                 // out - domain type, total/comp/excl
+      ESMC_DomainType dt,                 // in - domain type, total/comp/excl
       struct ESMC_AxisIndex *ai) const {  // out - values to get
 //
 // !DESCRIPTION:
@@ -826,6 +827,74 @@
      return ESMF_SUCCESS;
 
  } // end ESMC_ArrayGetAxisIndex
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayGetAllAxisIndices - get all AIs for local/global
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArrayGetAllAxisIndices(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Grid *grid,                     // in - associated grid 
+      struct ESMC_AxisIndex *total,        // out - total region
+      struct ESMC_AxisIndex *comp,         // out - computational
+      struct ESMC_AxisIndex *excl) const { // out - exclusive
+//
+// !DESCRIPTION:
+//  Based on the grid and the halo widths of the {\tt ESMC\_Array} 
+//  on the local DE, compute all requested AI lists for all {\tt DE}s
+//  in the DELayout associated with the specified {\tt ESMF_Grid}.
+//  This does assume that all {\tt ESMC\_Array}s associated with 
+//  a grid have the same halo widths (but they can be different sizes
+//  on different sides).
+//
+//EOP
+
+     int i;
+     int halo_width;   // TODO: make this an array before/after each dim
+
+     // TODO: when widths are 2*Ndim, compute all of them.
+     halo_width = ai_comp[0].min - ai_total[0].min;
+
+     // nsc - needs code here
+     // nsc - ask grid how many DEs there are.
+
+     // nsc - needs code here
+     // nsc - ask grid for the starts along each dim
+     // nsc - ai_global
+
+     
+     for (i=0; i<rank; i++) {
+
+         // nsc - fixme.  code not implemented
+
+         if (total) {
+             total[i].max = 0;
+             total[i].min = 0;
+             total[i].stride = 1;
+         }
+
+         if (comp) {
+             comp[i].max = 0;
+             comp[i].min = 0;
+             comp[i].stride = 1;
+         }
+
+         if (excl) {
+             excl[i].max = 0;
+             excl[i].min = 0;
+             excl[i].stride = 1;
+         }
+
+     }
+    
+     return ESMF_SUCCESS;
+
+ } // end ESMC_ArrayGetAllAxisIndices
 
 //-----------------------------------------------------------------------------
 //BOP

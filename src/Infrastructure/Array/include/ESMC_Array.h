@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.4 2003/07/17 20:02:46 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.5 2003/07/17 22:46:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,6 +39,7 @@
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
 #include <ESMC_DELayout.h>    // communications code
 #include <ESMC_LocalArray.h>  // functions to interoperate F90/C++ arrays
+#include <ESMC_Grid.h>        // grid info
 
 // !PUBLIC TYPES:
  class ESMC_ArrayConfig;
@@ -95,6 +96,9 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
  // optional index values for subsetting and handling arrays standalone
     int ESMC_ArrayGetAxisIndex(ESMC_DomainType dt, struct ESMC_AxisIndex *index) const;
     int ESMC_ArraySetAxisIndex(ESMC_DomainType dt, struct ESMC_AxisIndex *index);
+    int ESMC_ArrayGetAllAxisIndices(ESMC_Grid *grid, struct ESMC_AxisIndex *total,
+                 struct ESMC_AxisIndex *comp, struct ESMC_AxisIndex *excl) const; 
+
     
  // accessor methods for class members
     //int ESMC_ArrayGet<Value>(<value type> *value) const;
