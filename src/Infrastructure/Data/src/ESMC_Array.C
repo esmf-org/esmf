@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.19 2003/02/06 22:36:53 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.20 2003/02/13 23:33:12 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,12 +31,13 @@
 // associated class definition file
 #include "ESMC_Array.h"
 #include "ESMC_Alloc.h"
+#include "ESMC_Layout.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.19 2003/02/06 22:36:53 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.20 2003/02/13 23:33:12 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -461,6 +462,228 @@
      return ESMF_SUCCESS;
 
  } // end ESMC_ArrayGetAxisIndex
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayRedist - general redistribution of an Array
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArrayRedist(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Layout *layout,       // in  - layout (temporarily)
+      int rank_trans[],          // in  - translation of old ranks to new
+                                 //       Array
+      int size_rank_trans,       // in  - size of rank_trans array
+      int decompids[],           // in  - decomposition identifier for each
+                                 //       axis for the redistributed Array
+      int size_decomp,           // in  - size of decomp array
+      ESMC_Array *RedistArray) { // out - Redistributed Array
+//
+// !DESCRIPTION:
+//      
+//     
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int rc = ESMF_FAILURE;
+
+//  allocate global-sized array on each DE and fill with distributed data
+//  from current Array
+    int gsize=1;
+    int lsize=1;
+    for (int i=0; i<rank; i++) {
+      gsize = gsize * ai[i].max;
+      lsize = lsize * (ai[i].r - ai[i].l+1);
+    }
+    float *fp;
+    int *ip;
+    // switch based on datatype
+    switch (this->type) {
+      case ESMF_DATA_REAL:
+        // allocate global array from this size
+        fp = new float[gsize];
+        delete [] fp;
+      break;
+      case ESMF_DATA_INTEGER:
+        // allocate global array from this size
+        ip = new int[gsize];
+
+        // switch based on array rank
+        switch (this->rank) {
+          case 1:
+            printf("no code to handle array rank %d yet\n", this->rank);
+          break;
+          case 2:
+            {
+              // call allgatherv to fill this array or if Earl works out a method
+              // get layout size
+              int nx, ny;
+              layout->ESMC_LayoutGetSize(&nx, &ny);
+              int nde = nx*ny;
+              // figure out which ranks are decomposed and figure out the
+              // number of separate data chunks per rank and size of data
+              // chunks
+              int rankx, ranky;
+              int rmax[2];
+              int rsize[2];
+              int rstart[2];
+              for (int i=0; i<size_decomp; i++) {
+                rmax[i] = ai[i].max;
+                rsize[i] = ai[i].r - ai[i].l + 1;
+                rstart[i] = ai[i].l;
+                if (decompids[i] == 1) {
+                  rankx = i;
+                }
+                if (decompids[i] == 2) {
+                  ranky = i;
+                }
+              }
+              // loop over ranks, skipping the first decomposed one, loading
+              // up chunks of data to gather
+              int *ip0 = (int *)this->base_addr;
+              int *sendbuf, *recvbuf;
+              int sendcount;
+              int* recvcounts = new int[nde];
+              int* displs = new int[nde];
+              for (int i=0; i<size_decomp; i++) {
+                if (decompids[i] != 1) {
+                  for (int j=0; j<rsize[i]; j++) {
+                    sendbuf = (int *)ip0[j*rsize[rankx]];
+                    sendcount = rsize[rankx];
+                    recvbuf = (int *)ip[j*rmax[rankx]];
+                    for (int k=0; k<nde; k++) {
+                      recvcounts[k] = rsize[rankx]; // TODO: fix so variable
+                      displs[k] = rstart[i]*rmax[rankx] + rstart[rankx];
+                    }
+                  // call layout gather routine
+                  layout->ESMC_LayoutAllGatherVI(sendbuf, sendcount,
+                                                 recvbuf, recvcounts, displs);
+                  }
+                }
+              }
+              delete [] recvcounts;
+              delete [] displs;
+       
+              //  copy decomposed piece of global array into new Array
+              int gmax[2];
+              int lmax[2];
+              int lstart[2];
+              gmax[rank_trans[0]] = 1;
+              for (int i=1; i<this->rank; i++) {
+                int i_new = rank_trans[i];
+                gmax[i_new] = ai[i-1].max;
+              }
+              for (int i=0; i<this->rank; i++) {
+                lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
+                lstart[i] = RedistArray->ai[i].l;
+              }
+              int *ip2 = (int *)RedistArray->base_addr;
+              int local, global;
+              for (int j=0; j<lmax[1]; j++) {
+                for (int i=0; i<lmax[0]; i++) {
+                  local  = (lmax[0]*j) + i;
+                  global = gmax[1]*(j+lstart[1]) + gmax[0]*(i+lstart[0]) ;
+                  ip2[local] = ip[global];
+                }
+              }
+            }
+          break;
+          case 3:
+            {
+              // call allgatherv to fill this array or if Earl works out a method
+
+              //  copy decomposed piece of global array into new Array
+              int gmax[3];
+              int lmax[3];
+              int lstart[3];
+              gmax[rank_trans[0]] = 1;
+              for (int i=1; i<this->rank; i++) {
+                int i_new = rank_trans[i];
+                gmax[i_new] = ai[i-1].max;
+              }
+              for (int i=0; i<this->rank; i++) {
+                lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
+                lstart[i] = RedistArray->ai[i].l;
+              }
+              int *ip2 = (int *)RedistArray->base_addr;
+              int local, global;
+              for (int k=0; k<lmax[2]; k++) {
+                for (int j=0; j<lmax[1]; j++) {
+                  for (int i=0; i<lmax[0]; i++) {
+                    local  = lmax[1]*lmax[0]*k +
+                             lmax[0]*j + i;
+                    global = gmax[2]*gmax[1]*(k+lstart[2]) + 
+                             gmax[1]*(j+lstart[1]) +
+                             gmax[0]*(i+lstart[0]);
+                    ip2[local] = ip[global];
+                  }
+                }
+              }
+            }
+          break;
+          case 4:
+            {
+              // call allgatherv to fill this array or if Earl works out a method
+
+              //  copy decomposed piece of global array into new Array
+              int gmax[4];
+              int lmax[4];
+              int lstart[4];
+              gmax[rank_trans[0]] = 1;
+              for (int i=1; i<this->rank; i++) {
+                int i_new = rank_trans[i];
+                gmax[i_new] = ai[i-1].max;
+              }
+              for (int i=0; i<this->rank; i++) {
+                lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
+                lstart[i] = RedistArray->ai[i].l;
+              }
+              int *ip2 = (int *)RedistArray->base_addr;
+              int local, global;
+              for (int l=0; l<lmax[3]; l++) {
+                for (int k=0; k<lmax[2]; k++) {
+                  for (int j=0; j<lmax[1]; j++) {
+                    for (int i=0; i<lmax[0]; i++) {
+                      local  = lmax[2]*lmax[1]*lmax[0]*l +
+                               lmax[1]*lmax[0]*k + 
+                               lmax[0]*j + i;
+                      global = gmax[3]*gmax[2]*gmax[1]*(l+lstart[3]) +
+                               gmax[2]*gmax[1]*(k+lstart[2]) + 
+                               gmax[1]*(j+lstart[1]) +
+                               gmax[0]*(i+lstart[0]);
+                      ip2[local] = ip[global];
+                    }
+                  }
+                }
+              }
+            }
+          break;
+          case 5:
+            printf("no code to handle array rank %d yet\n", this->rank);
+          break;
+          default:
+            printf("no code to handle array rank %d yet\n", this->rank);
+          break;
+        }
+
+        // deallocate global array
+        delete [] ip;
+      break;
+      default:
+        printf("no code to handle data type %d yet\n", this->type);
+      break;
+    }
+
+    rc = ESMF_SUCCESS;
+    return rc;
+
+ } // end ESMC_ArrayRedist
+
 
 //-----------------------------------------------------------------------------
 //BOP
