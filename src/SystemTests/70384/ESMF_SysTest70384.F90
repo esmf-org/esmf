@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.19 2003/07/28 15:19:02 jwolfe Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.20 2003/07/29 16:44:55 jwolfe Exp $
 !
 ! System test code #70384
 
@@ -26,7 +26,7 @@
     ! Local variables
     integer :: nx, ny, nz, i, j, k, ni, nj, nk, nj2, nk2, rc, ii, jj, kk
     integer, dimension(:), allocatable :: delist
-    integer, dimension(3) :: global_start
+    integer, dimension(3) :: global_start, global_position
     integer :: result, len, base, de_id, de_x, de_y
     integer :: i_max, j_max, k_max, miscount
     integer :: status
@@ -34,7 +34,8 @@
     logical :: match
     integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
     integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
-    integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
+    integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans, &
+                             global_dimlengths
     character(len=ESMF_MAXSTR) :: cname, sname, gname, fname
     type(ESMF_DELayout) :: layout0, layout1, layout2
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
@@ -125,11 +126,13 @@
     ! Get our position in the layout
     call ESMF_DELayoutGetDEPosition(layout1, de_x, de_y, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
+    de_x = de_x + 1  ! TODO:  Should not have to translate from C
+    de_y = de_y + 1
 
-    ! Calculate global_starts -- would otherwise come from a grid call
-    global_start(1) = ni*(de_x-1)
-    global_start(2) = nj*(de_y-1)
-    global_start(3) = 0
+    ! Calculate global_positions -- would otherwise come from a grid call
+    global_position(1) = ni*(de_x-1)
+    global_position(2) = nj*(de_y-1)
+    global_position(3) = 0
 
     ! Create arrays, set and get axis info here before initializing
     ! the data.
@@ -178,11 +181,11 @@
     i_max = indexlist1(1)%max
     j_max = indexlist1(2)%max
     do k=1,indexlist1(3)%max-indexlist1(3)%min+1
-      kk = k+global_start(3)
+      kk = k+global_position(3)
       do j=1,indexlist1(2)%max-indexlist1(2)%min+1
-        jj = j+global_start(2)
+        jj = j+global_position(2)
         do i=1,indexlist1(1)%max-indexlist1(1)%min+1
-          ii = i+global_start(1)
+          ii = i+global_position(1)
           srcdata(i, j, k) = i_max*j_max*(kk-1) + i_max*(jj-1) + ii
         enddo
       enddo
@@ -215,11 +218,21 @@
     print *, "Source Array retrieved from state"
     
     !! Call transpose method here, output ends up in array2
+    global_dimlengths(1) = ni
+    global_dimlengths(2) = nj
+    global_dimlengths(3) = nk
+    do i=1,3
+      global_start(i) = global_position(i)
+      if(decompids1(i).ne.0) then
+        global_dimlengths(i) = global_counts(decompids1(i))
+        global_start(i) = global_position(decompids1(i))
+      endif
+    enddo
     rank_trans(1) = 1
     rank_trans(2) = 2
     rank_trans(3) = 3
-    call ESMF_ArrayRedist(array1, layout1, rank_trans, decompids1, &
-                          decompids2, array2, rc)
+    call ESMF_ArrayRedist(array1, layout1, global_start, global_dimlengths, &
+                          rank_trans, decompids1, decompids2, array2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
@@ -228,11 +241,21 @@
 
     !! Transpose back so we can compare contents
     !! Call transpose method again here, output ends up in array3
+    global_dimlengths(1) = ni
+    global_dimlengths(2) = nj
+    global_dimlengths(3) = nk
+    do i=1,3
+      global_start(i) = global_position(i)
+      if(decompids2(i).ne.0) then
+        global_dimlengths(i) = global_counts(decompids2(i))
+        global_start(i) = global_position(decompids2(i))
+      endif
+    enddo
     rank_trans(1) = 1
     rank_trans(2) = 2
     rank_trans(3) = 3
-    call ESMF_ArrayRedist(array2, layout1, rank_trans, decompids2, &
-                          decompids1, array3, rc)
+    call ESMF_ArrayRedist(array2, layout1, global_start, global_dimlengths, &
+                          rank_trans, decompids2, decompids1, array3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after second Transpose, should match original:"
