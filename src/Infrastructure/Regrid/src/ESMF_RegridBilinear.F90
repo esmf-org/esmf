@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.15 2003/08/27 23:38:28 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.16 2003/08/28 15:45:47 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.15 2003/08/27 23:38:28 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.16 2003/08/28 15:45:47 jwolfe Exp $'
 
 !==============================================================================
 
@@ -499,8 +499,7 @@
        !       endif
 
               ! check to see if point inside cell
-       !       found = ESMF_PhysGridCellContainsPoint(dst_x, dst_y, &
-       !                                              src_x, src_y, rc)
+               found = ESMF_PhysGridPointInCell(dst_x, dst_y, src_x, src_y, rc)
 
        !       if (found) exit search_loop
             enddo   ! i-loop on src DE
