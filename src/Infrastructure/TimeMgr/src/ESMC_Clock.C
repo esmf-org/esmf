@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.35 2003/10/22 03:33:00 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.36 2003/10/22 18:28:43 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ {\tt ESMC\_Clock} methods declared
-// in the companion file {\tt ESMC_Clock.h}
+// in the companion file {\tt ESMC\_Clock.h}
 //
 //-------------------------------------------------------------------------
 //
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.35 2003/10/22 03:33:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.36 2003/10/22 18:28:43 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -528,7 +528,7 @@ int ESMC_Clock::count=0;
                                                  // ESMF_ALARMLIST_NEXTRINGING)
 //
 // !DESCRIPTION:
-//    Gets a {\tt ESMF_Clock}'s list of alarms.
+//    Gets an {\tt ESMF\_Clock}'s list of alarms.
 //
 //EOP
 // !REQUIREMENTS:  TMG 4.3, 4.8
