@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.8 2005/01/07 22:28:55 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.9 2005/01/12 07:23:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,8 +101,8 @@ typedef struct{
 
 typedef struct{
   int comm_type;    // communication type
-  int mpitag_send;  // tag for MPI communications
-  int mpitag_recv;  // tag for MPI communications
+//gjt - don't use yet:  int mpitag_send;  // tag for MPI communications
+//gjt - don't use yet:  int mpitag_recv;  // tag for MPI communications
   shared_mp *shmp;  // shared memory message passing structure
   pipc_mp *pipcmp;  // posix ipc message passing structure
 }comminfo;
@@ -204,7 +204,7 @@ class ESMC_VMK{
       vmOp op);
     void vmk_scatter(void *in, void *out, int len, int root);
     void vmk_gather(void *in, void *out, int len, int root);
-    void vmk_broadcast(void *in, void *out, int len, int root);
+    void vmk_broadcast(void *data, int len, int root);
 
     void vmk_wait(vmk_commhandle **commhandle);
     void vmk_waitqueue(void);
