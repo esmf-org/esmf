@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.7 2004/04/14 22:00:41 jwolfe Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.8 2004/04/15 19:24:53 nscollins Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -73,7 +73,7 @@
     ! Create a default 1xN DELayout
     delayout0 = ESMF_newDELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_newDELayoutGet(delayout0, deCount=ndes, rc)
+    call ESMF_newDELayoutGet(delayout0, deCount=ndes, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     if (ndes .eq. 1) then
