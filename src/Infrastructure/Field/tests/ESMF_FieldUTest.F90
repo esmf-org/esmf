@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.33 2004/02/03 00:06:17 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.34 2004/02/05 22:04:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.33 2004/02/03 00:06:17 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.34 2004/02/05 22:04:11 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: x, y
+      integer :: x, y, i, count
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
@@ -63,9 +63,10 @@
       type(ESMF_Mask) :: mask
       type(ESMF_Field) :: f1, f2, f3, f4, f5, f6
       integer :: intattr, intattr2
-      real :: rattr
+      integer :: intattrlist(6)
+      real :: rattr, rattrlist(2)
       character (len=32) :: lattrstr
-      type(ESMF_Logical) :: lattr
+      type(ESMF_Logical) :: lattr, lattrlist(6)
       character (len=512) :: cattr, cattr2
 
 !-------------------------------------------------------------------------------
@@ -325,6 +326,7 @@
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
       ! Verifing that a Field can be created with a Grid and Array
+      dm = ESMF_DataMapCreate(ESMF_IO_IJ)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    2, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
@@ -412,6 +414,7 @@
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    1, dm, "Field 0", ios, rc)
       call ESMF_FieldSetAttribute(f3, "Scale Factor", 4, rc)
+      !call ESMF_FieldPrint(f3, rc=rc)
       intattr = 0
       call ESMF_FieldGetAttribute(f3, "Scale Factor", intattr, rc)
       write(failMsg, *) ""
@@ -421,6 +424,7 @@
       !NEX_UTest
       ! test setting a second attribute
       call ESMF_FieldSetAttribute(f3, "Invalid Data Tag", -999, rc)
+      !call ESMF_FieldPrint(f3, rc=rc)
       intattr2 = 0
       call ESMF_FieldGetAttribute(f3, "Invalid Data Tag", intattr2, rc)
       print *, "Invalid Data Tag should be -999, is: ", intattr2
@@ -436,8 +440,20 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
       !NEX_UTest
+      ! setting an integer list
+      call ESMF_FieldSetAttribute(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
+      call ESMF_FieldPrint(f3, rc=rc)
+      intattr = 0
+      call ESMF_FieldGetAttribute(f3, "Multiple Scale Factors", count, intattrlist, rc)
+      print *, count, "attributes found in list"
+      write(failMsg, *) ""
+      write(name, *) "Getting an Integer List Attribute back from a Field"
+      call ESMF_Test((intattrlist(1).eq.4), name, failMsg, result, ESMF_SRCLINE)
+ 
+      !NEX_UTest
       ! test setting a real attribute
       call ESMF_FieldSetAttribute(f3, "Pi", 3.14159, rc)
+      !call ESMF_FieldPrint(f3, rc=rc)
       rattr = 0.0
       call ESMF_FieldGetAttribute(f3, "Pi", rattr, rc)
       print *, "Pi should be 3.14159, is: ", rattr
@@ -446,8 +462,21 @@
       call ESMF_Test((rattr.eq.3.14159999), name, failMsg, result, ESMF_SRCLINE)
 
       !NEX_UTest
+      ! test setting a real list
+      call ESMF_FieldSetAttribute(f3, "Vertices", 2, (/1.1, 2.2/), rc)
+      !call ESMF_FieldPrint(f3, rc=rc)
+      rattr = 0.0
+      call ESMF_FieldGetAttribute(f3, "Vertices", count, rattrlist, rc)
+      print *, count, "attributes found in list"
+      print *, "Vertices should be 1.1 and 2.2, are: ", rattrlist
+      write(failMsg, *) ""
+      write(name, *) "Getting a real list Attribute back from a Field"
+      call ESMF_Test((rattrlist(1).eq.1.1), name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
       ! test setting a logical attribute
       call ESMF_FieldSetAttribute(f3, "Sky is Blue", ESMF_TRUE, rc)
+      !call ESMF_FieldPrint(f3, rc=rc)
       lattr = ESMF_FALSE
       call ESMF_FieldGetAttribute(f3, "Sky is Blue", lattr, rc)
       call ESMF_LogicalString(lattr, lattrstr, rc)
@@ -457,13 +486,30 @@
       call ESMF_Test((lattr.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
 
       !NEX_UTest
+      ! test setting a logical list
+      call ESMF_FieldSetAttribute(f3, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
+      !call ESMF_FieldPrint(f3, rc=rc)
+      lattr = ESMF_FALSE
+      call ESMF_FieldGetAttribute(f3, "FlipFlop", count, lattrlist, rc)
+      print *, count, "attributes found in list"
+      print *, "FlipFlop should be alternate, are: " 
+      do i=1, 3
+        call ESMF_LogicalString(lattrlist(i), lattrstr, rc)
+        print *, i, lattrstr
+      enddo
+      write(failMsg, *) ""
+      write(name, *) "Getting a logical Attribute back from a Field"
+      call ESMF_Test((lattrlist(1).eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
       ! test setting a character attribute
       cattr = "It was a dark and stormy night"
       call ESMF_FieldSetAttribute(f3, "Book", cattr, rc)
+      call ESMF_FieldPrint(f3, rc=rc)
       call ESMF_FieldGetAttribute(f3, "Book", cattr2, rc)
-      print *, "Book  should be drivel, is: ", cattr2
+      print *, "Book  should be drivel, is: ", trim(cattr2)
       write(failMsg, *) ""
-      write(name, *) "Getting a logical Attribute back from a Field"
+      write(name, *) "Getting a character Attribute back from a Field"
       call ESMF_Test((cattr.eq.cattr2), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
