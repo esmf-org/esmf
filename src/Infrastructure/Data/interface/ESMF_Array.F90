@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.56 2003/04/29 18:04:42 cdeluca Exp $
+! $Id: ESMF_Array.F90,v 1.57 2003/04/30 21:10:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -271,7 +271,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.56 2003/04/29 18:04:42 cdeluca Exp $'
+      '$Id: ESMF_Array.F90,v 1.57 2003/04/30 21:10:16 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -16875,6 +16875,7 @@ end function
     integer :: status ! local error status
     integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds
     integer, dimension(ESMF_MAXDIM) :: strides, offsets
+    integer :: localkind, localtype
     !! local variables, expanded by macro
 ! <Created by macro - do not edit directly > 
  type(ESMF_ArrWrapI21D) :: localI21D 
@@ -16915,13 +16916,15 @@ end function
 
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
+    localtype = type%dtype
+    localkind = kind%dkind
     !! macros which are expanded by the preprocessor
-    select case (type%dtype)
+    select case (localtype)
       case (ESMF_DATA_INTEGER%dtype)
         select case (rank)
           case (1)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI21D%I21Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
@@ -16951,7 +16954,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI41D%I41Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
@@ -16981,7 +16984,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI81D%I81Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
@@ -17014,8 +17017,8 @@ end function
               case default
             end select
           case (2)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI22D%I22Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
@@ -17045,7 +17048,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI42D%I42Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
@@ -17075,7 +17078,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI82D%I82Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
@@ -17108,8 +17111,8 @@ end function
               case default
             end select
           case (3)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI23D%I23Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
@@ -17139,7 +17142,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI43D%I43Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
@@ -17169,7 +17172,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI83D%I83Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
@@ -17202,8 +17205,8 @@ end function
               case default
             end select
           case (4)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI24D%I24Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
@@ -17233,7 +17236,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI44D%I44Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
@@ -17263,7 +17266,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localI84D%I84Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
@@ -17300,8 +17303,8 @@ end function
        case (ESMF_DATA_REAL%dtype)
         select case (rank)
           case (1)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localR41D%R41Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
@@ -17331,7 +17334,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localR81D%R81Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
@@ -17364,8 +17367,8 @@ end function
               case default
             end select
           case (2)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localR42D%R42Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
@@ -17395,7 +17398,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localR82D%R82Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
@@ -17428,8 +17431,8 @@ end function
               case default
             end select
           case (3)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localR43D%R43Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
@@ -17459,7 +17462,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localR83D%R83Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
@@ -17492,8 +17495,8 @@ end function
               case default
             end select
           case (4)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localR44D%R44Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
@@ -17523,7 +17526,7 @@ end function
  endif 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
  allocate(localR84D%R84Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
@@ -17594,6 +17597,7 @@ end function
 !EOP
 ! !REQUIREMENTS:
     integer :: status ! local error status
+    integer :: localkind, localtype
     !! local variables, expanded by macro
 ! <Created by macro - do not edit directly > 
  type(ESMF_ArrWrapI21D) :: localI21D 
@@ -17633,25 +17637,27 @@ end function
  
 
     if (present(rc)) rc = ESMF_FAILURE
+    localtype = type
+    localkind = kind
     !! macros which are expanded by the preprocessor
-    select case (type%dtype)
+    select case (localtype)
       case (ESMF_DATA_INTEGER%dtype)
         select case (rank)
           case (1)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI21D%I21Dptr, stat=status) 
  nullify(localI21D%I21Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI41D%I41Dptr, stat=status) 
  nullify(localI41D%I41Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI81D%I81Dptr, stat=status) 
  nullify(localI81D%I81Dptr) 
@@ -17660,20 +17666,20 @@ end function
               case default
             end select
           case (2)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI22D%I22Dptr, stat=status) 
  nullify(localI22D%I22Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI42D%I42Dptr, stat=status) 
  nullify(localI42D%I42Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI82D%I82Dptr, stat=status) 
  nullify(localI82D%I82Dptr) 
@@ -17682,20 +17688,20 @@ end function
               case default
             end select
           case (3)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI23D%I23Dptr, stat=status) 
  nullify(localI23D%I23Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI43D%I43Dptr, stat=status) 
  nullify(localI43D%I43Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI83D%I83Dptr, stat=status) 
  nullify(localI83D%I83Dptr) 
@@ -17704,20 +17710,20 @@ end function
               case default
             end select
           case (4)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI24D%I24Dptr, stat=status) 
  nullify(localI24D%I24Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI44D%I44Dptr, stat=status) 
  nullify(localI44D%I44Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localI84D%I84Dptr, stat=status) 
  nullify(localI84D%I84Dptr) 
@@ -17730,14 +17736,14 @@ end function
        case (ESMF_DATA_REAL%dtype)
         select case (rank)
           case (1)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localR41D%R41Dptr, stat=status) 
  nullify(localR41D%R41Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localR81D%R81Dptr, stat=status) 
  nullify(localR81D%R81Dptr) 
@@ -17746,14 +17752,14 @@ end function
               case default
             end select
           case (2)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localR42D%R42Dptr, stat=status) 
  nullify(localR42D%R42Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localR82D%R82Dptr, stat=status) 
  nullify(localR82D%R82Dptr) 
@@ -17762,14 +17768,14 @@ end function
               case default
             end select
           case (3)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localR43D%R43Dptr, stat=status) 
  nullify(localR43D%R43Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localR83D%R83Dptr, stat=status) 
  nullify(localR83D%R83Dptr) 
@@ -17778,14 +17784,14 @@ end function
               case default
             end select
           case (4)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localR44D%R44Dptr, stat=status) 
  nullify(localR44D%R44Dptr) 
 ! < End macro - do not edit directly > 
 
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
  deallocate(localR84D%R84Dptr, stat=status) 
  nullify(localR84D%R84Dptr) 
