@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.2 2003/03/10 04:16:23 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.3 2003/03/13 22:56:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 !------------------------------------------------------------------------------
-#include "ESMF.h"
+#include <ESMF.h>
 !------------------------------------------------------------------------------
 !BOP
 ! !MODULE: ESMF_DELayoutMod - F90 Interface to C++ ESMC_DELayout class
@@ -44,6 +44,10 @@
 
       integer, parameter :: ESMF_SUM=0, ESMF_MIN=1, ESMF_MAX=2
 
+! exclusivity type used for allocating DEs within a layout to sub-layouts
+! TODO:  move to ESMF_DE.F90 when created, to be symmetrical with C++ ?
+      integer, parameter :: ESMF_NONEXCL=0, ESMF_EXCL=1
+
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
@@ -64,19 +68,21 @@
       public ESMF_DELayout
       public ESMF_NOHINT, ESMF_XFAST, ESMF_YFAST, ESMF_ZFAST
       public ESMF_SUM, ESMF_MIN, ESMF_MAX
+      public ESMF_NONEXCL, ESMF_EXCL
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
       public ESMF_DELayoutCreate
       public ESMF_DELayoutDestroy
- 
+
       !public ESMF_DELayoutSetData
       !public ESMF_DELayoutGetData
       !public ESMF_DELayoutGet
       public ESMF_DELayoutGetSize
       public ESMF_DELayoutGetDEPosition
       public ESMF_DELayoutGetDEid
+      public ESMF_DELayoutGetNumDEs
       public ESMF_DELayoutSetAxisIndex
       public ESMF_DELayoutGatherArrayI
  
@@ -94,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.2 2003/03/10 04:16:23 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.3 2003/03/13 22:56:12 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -102,38 +108,24 @@
 !
 !==============================================================================
 
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_DELayoutCreate -- Generic interface to create an DELayout
 
 ! !INTERFACE:
-     interface ESMF_DELayoutCreate
+      interface ESMF_DELayoutCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_DELayoutCreateIntDE2D
-!        !module procedure ESMF_DELayoutCreateNoData
+      module procedure ESMF_DELayoutCreateIntDE2D
+      module procedure ESMF_DELayoutCreateDefault1D
+      module procedure ESMF_DELayoutCreateDELayout2D
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DELayoutCreate} functions.   
-!
-!  \begin{description}
-!  \item[xxx]
-!    Description of xxx.
-!  \item[yyy]
-!    Description of yyy.
-!  \item[[zzz]]
-!    Description of optional arg zzz.
-!  \item[rc]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!  \end{description}
-!
-!  
 !EOP 
-end interface
-
-!------------------------------------------------------------------------------
-
+      end interface
 
 !==============================================================================
 
@@ -147,6 +139,139 @@ end interface
 !
 ! This section includes the DELayout Create and Destroy methods.
 !
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutCreateDefault1D - Create 1D default DELayout object
+
+! !INTERFACE:
+      function ESMF_DELayoutCreateDefault1D(rc)
+!
+! !RETURN VALUE:
+      type(ESMF_DELayout) :: ESMF_DELayoutCreateDefault1D
+!
+! !ARGUMENTS:
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new 1D DELayout object; self-discover PEList
+!
+!  The return value is a new DELayout.
+!    
+!  The arguments are:
+!  \begin{description}
+! 
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        type (ESMF_DELayout) :: layout        ! opaque pointer to new C++ DELayout
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       Initialize the pointer to null.
+        layout%this = ESMF_NULL_POINTER
+
+!       Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ creation routine.
+        call c_ESMC_DELayoutCreateDefault1D(layout, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "DELayout creation error"
+          return
+        endif
+
+!       set return values
+        ESMF_DELayoutCreateDefault1D = layout 
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_DELayoutCreateDefault1D
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutCreateDELayout2D - Create 2D DELayout from a given layout
+
+! !INTERFACE:
+      function ESMF_DELayoutCreateDELayout2D(nx, ny, parentDELayout, commhint, &
+                                         exclusive, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_DELayout) :: ESMF_DELayoutCreateDELayout2D
+!
+! !ARGUMENTS:
+      integer, intent(in) :: nx, ny                 ! x, y layout dimensions
+      type(ESMF_DELayout), intent(inout) :: parentDELayout ! to allocate DEs from
+      integer, intent(in) :: commhint               ! communications hint
+      integer, intent(in), optional :: exclusive    ! consume parent layout DEs?
+      integer, intent(out), optional :: rc          ! return code
+!
+! !DESCRIPTION:
+!  Create a new DELayout using a parent layout's DEs.  If exclusive, the parent's
+!  DE's are consumed; they are not available for subsequent calls to this
+!  method.  Typically, the parent layout will contain a 1D list of DEs avaliable!  for allocation to sub-layouts within components.
+!
+!  The return value is a new DELayout.
+!    
+!  The arguments are:
+!  \begin{description}
+! 
+!   \item[nx]
+!     Number of {\tt DE}s in the {\tt I} dimension.
+! 
+!   \item[ny]
+!     Number of {\tt DE}s in the {\tt J} dimension.
+! 
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        type (ESMF_DELayout) :: layout        ! opaque pointer to new C++ DELayout
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       Initialize the pointer to null.
+        layout%this = ESMF_NULL_POINTER
+
+!       Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ creation routine.
+        if (present(exclusive)) then
+          call c_ESMC_DELayoutCreateDELayout2D(layout, nx, ny, parentDELayout, &
+                                           commhint, exclusive, status)
+        else
+          call c_ESMC_DELayoutCreateDELayout2Dnexc(layout, nx, ny, &
+                                               parentDELayout, commhint, &
+                                               status)
+        endif
+
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "DELayout creation error"
+          return
+        endif
+
+!       set return values
+        ESMF_DELayoutCreateDELayout2D = layout 
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_DELayoutCreateDELayout2D
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_DELayoutCreateIntDE2D - Create 2D DELayout from a integer DE list
@@ -314,7 +439,6 @@ end interface
         end subroutine ESMF_DELayoutDestroy
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
       subroutine ESMF_DELayoutSetData(layout, rc)
@@ -388,6 +512,44 @@ end interface
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_DELayoutGet
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_DELayoutGetNumDEs(layout, nDEs, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      integer, intent(out) :: nDEs
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!      Returns the number of processors in the DELayout's processor list
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ routine.
+        call c_ESMC_DELayoutGetNumDEs(layout, nDEs, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutGetNumDEs error"
+          return
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_DELayoutGetNumDEs
 
 !------------------------------------------------------------------------------
 !BOP
@@ -832,11 +994,11 @@ end interface
        endif
 
 !      ! Interface to call the C++ print code
-       !if(present(options)) then
-       !    call c_ESMC_DELayoutPrint(layout%this, options, status) 
-       !else
-       !    call c_ESMC_DELayoutPrint(layout%this, defaultopts, status) 
-       !endif
+       if(present(options)) then
+           call c_ESMC_DELayoutPrint(layout, options, status) 
+       else
+           call c_ESMC_DELayoutPrint(layout, defaultopts, status) 
+       endif
 
        if (status .ne. ESMF_SUCCESS) then
          print *, "DELayout print error"

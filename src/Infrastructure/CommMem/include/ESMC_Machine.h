@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.h,v 1.4 2003/03/11 03:00:43 cdeluca Exp $
+// $Id: ESMC_Machine.h,v 1.5 2003/03/13 22:56:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 

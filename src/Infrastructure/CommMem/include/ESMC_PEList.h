@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.h,v 1.4 2003/03/11 03:00:44 cdeluca Exp $
+// $Id: ESMC_PEList.h,v 1.5 2003/03/13 22:56:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,6 +85,8 @@
 //    int ESMC_PEListGet<Value>(<value type> *value) const;
 //    int ESMC_PEListSet<Value>(<value type>  value);
     int ESMC_PEListGetPE(int i, ESMC_PE **pe) const;
+    int ESMC_PEListSetPE(int i, ESMC_PE *pe);
+    int ESMC_PEListGetNumPEs(int *npes) const;
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_PEListValidate(void) const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.h,v 1.4 2003/03/10 03:22:59 cdeluca Exp $
+// $Id: ESMC_DE.h,v 1.5 2003/03/13 22:56:11 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
-// #include <ESMC_CommMem.h> 
+//#include <ESMC_CommMem.h> 
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -44,10 +44,11 @@
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
  #include <ESMC_PE.h> 
- //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
-                        // composites, associates, friends)
 
 enum ESMC_DEType_e {ESMC_PROCESS, ESMC_THREAD};
+
+// exclusivity type used for allocating DEs within a layout to sub-layouts
+enum ESMC_Exclusivity_e {ESMC_NONEXCL, ESMC_EXCL};
 
 // !PUBLIC TYPES:
 // class ESMC_DEConfig;
@@ -68,18 +69,19 @@ enum ESMC_DEType_e {ESMC_PROCESS, ESMC_THREAD};
  //  < insert class members here >  corresponds to type ESMF_DE members
  //                                 in F90 modules
      int esmfID;     // ESMF assigned ID
-     int pID;        // processID (index)
-     int tID;        // threadID (index)
-     ESMC_DEType_e deType;  // process or thread
-     bool process;   // true if DE is a process
-     bool thread;    // true if DE is a thread
+     int pID;        // associated processID (index)
+     int tID;        // associated threadID (index)
+     ESMC_DEType_e deType;  // associated with a process or thread
+     bool process;   // true if DE is associated with a process
+     bool thread;    // true if DE is associated with a thread
+     ESMC_Exclusivity_e exclusive; // exclusively used (e.g. by sublayout)
      ESMC_PE *PE;    // assigned PE from peList
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
   public:
-    int ESMC_DEInit(int esmfid, int pid, int tid, bool proc, bool thrd,
-                    ESMC_PE *pe);
+    int ESMC_DEInit(int esmfid, int pid, int tid, ESMC_DEType_e detype,
+                    bool proc, bool thrd, ESMC_Exclusivity_e excl, ESMC_PE *pe);
 
  // optional configuration methods
 //    int ESMC_DEGetConfig(ESMC_DEConfig *config) const;
@@ -89,11 +91,14 @@ enum ESMC_DEType_e {ESMC_PROCESS, ESMC_THREAD};
 //    int ESMC_DEGet<Value>(<value type> *value) const;
 //    int ESMC_DESet<Value>(<value type>  value);
     int ESMC_DESetPE(ESMC_PE *pe);
+    int ESMC_DEGetPE(ESMC_PE **pe);
     int ESMC_DESetESMFID(int esmfid);
     int ESMC_DEGetESMFID(int *esmfid) const;
     int ESMC_DEGetpID(int *pid) const;
     int ESMC_DESetType(ESMC_DEType_e detype);
     int ESMC_DEGetType(ESMC_DEType_e *detype) const;
+    int ESMC_DESetExclusivity(ESMC_Exclusivity_e excl);
+    int ESMC_DEGetExclusivity(ESMC_Exclusivity_e *excl) const;
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_DEValidate(void) const;

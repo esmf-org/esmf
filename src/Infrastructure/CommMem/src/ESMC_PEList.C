@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.C,v 1.8 2003/03/11 03:00:47 cdeluca Exp $
+// $Id: ESMC_PEList.C,v 1.9 2003/03/13 22:56:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PEList.C,v 1.8 2003/03/11 03:00:47 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_PEList.C,v 1.9 2003/03/13 22:56:13 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -65,7 +65,7 @@
 //
 // !DESCRIPTION:
 //      Create a new PEList from ... Allocates memory for a new PEList
-//      object and uses the internal routine ESMC\_PEListConstruct to
+//      object and uses the internal routine ESMC\_PEListContruct to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use ESMC\_PEListInit.
 //      There can be multiple overloaded methods with the same name, but
@@ -105,7 +105,7 @@
 //
 // !DESCRIPTION:
 //      Create a new PEList from ... Allocates memory for a new PEList
-//      object and uses the internal routine ESMC\_PEListConstruct to
+//      object and uses the internal routine ESMC\_PEListContruct to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use ESMC\_PEListInit.
 //      There can be multiple overloaded methods with the same name, but
@@ -441,6 +441,62 @@
 
  } // end ESMC_PEListGetPE
 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_PEListSetPE - set PE in PEList
+//
+// !INTERFACE:
+      int ESMC_PEList::ESMC_PEListSetPE(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int i,             // in - ith PE to set in PEList
+      ESMC_PE *pe) {     // in - pointer to ith PE
+//
+// !DESCRIPTION:
+//     Sets the ith PE in the list to the given PE.
+//
+//EOP
+// !REQUIREMENTS:
+
+  if (i<0 || i>=numPEs) {
+    return(ESMF_FAILURE);
+  } else {
+    peList[i] = *pe;
+    return (ESMF_SUCCESS);
+  }
+
+ } // end ESMC_PEListSetPE
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_PEListGetNumPEs - get number of PEs in list
+//
+// !INTERFACE:
+      int ESMC_PEList::ESMC_PEListGetNumPEs(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *npes) const {    // in  - number of PEs in list
+//
+// !DESCRIPTION:
+//     Returns the number of PEs in the list
+//
+//EOP
+// !REQUIREMENTS:  
+
+  if (npes == 0) {
+    return(ESMF_FAILURE);
+  } else {
+    *npes = numPEs;
+    return (ESMF_SUCCESS);
+  }
+
+ } // end ESMC_PEListGetNumPEs
 
 //-----------------------------------------------------------------------------
 //BOP

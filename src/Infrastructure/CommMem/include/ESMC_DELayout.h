@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.4 2003/03/11 03:00:43 cdeluca Exp $
+// $Id: ESMC_DELayout.h,v 1.5 2003/03/13 22:56:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
-// #include <ESMC_CommMem.h> 
+//#include <ESMC_CommMem.h> 
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -47,8 +47,6 @@
  #include <ESMC_PEList.h>  
  #include <ESMC_DE.h>  
  #include <ESMC_Comm.h>  
- //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
-                        // composites, associates, friends)
 
 // !PUBLIC TYPES:
 // class ESMC_DELayoutConfig;
@@ -76,6 +74,7 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
     int nxDELayout;          // number of DE's laid out in the x-direction
     int nyDELayout;          // number of DE's laid out in the y-direction
     int nzDELayout;          // number of DE's laid out in the z-direction
+    int nDEs;              // total number of DE's in layout
     ESMC_PEList *peList;   // PE list on which the layout maps. 
     ESMC_CommHint_e commHint;  // hint about direction of the most performance
                                //   critical (frequent and/or voluminous)
@@ -99,6 +98,10 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 
   public:
  // the following methods apply to deep classes only
+    int ESMC_DELayoutConstruct(void);
+    int ESMC_DELayoutConstruct(int nx, int ny, ESMC_DELayout *parentDELayout,
+                             ESMC_CommHint_e commhint,
+                             ESMC_Exclusivity_e exclusive); 
     int ESMC_DELayoutConstruct(int nx, int ny, int *delist,
                              ESMC_CommHint_e commhint); 
     int ESMC_DELayoutConstruct(int nx, int ny, int nz, ESMC_PEList *pelist,
@@ -114,10 +117,13 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
  // accessor methods for class members
 //    int ESMC_DELayoutGet<Value>(<value type> *value) const;
 //    int ESMC_DELayoutSet<Value>(<value type>  value);
+    int ESMC_DELayoutGetNumDEs(int *ndes) const;
     int ESMC_DELayoutGetSize(int *nx, int *ny) const;
     int ESMC_DELayoutGetSize(int *nx, int *ny, int *nz) const;
     int ESMC_DELayoutGetDEPosition(ESMC_DE *de, int *x, int *y, int *z) const;
     int ESMC_DELayoutGetDEPosition(int *x, int *y) const;
+    int ESMC_DELayoutGetDE(int x, int y, int z, ESMC_DE *de) const;
+    int ESMC_DELayoutGetDEExclusive(ESMC_DE *de) const;
     int ESMC_DELayoutGetDEid(int *deid) const;
     int ESMC_DELayoutSetAxisIndex(int global_counts[], int size_gcount,
                                 int decompids[], int size_decomp,
@@ -156,12 +162,22 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 
  };   // end class ESMC_DELayout
 
+    // create default 1D layout
+    ESMC_DELayout *ESMC_DELayoutCreate(int *rc); 
+
+    // create sub-layout from parent, non-exclusively (don't consume parent DEs)
+    ESMC_DELayout *ESMC_DELayoutCreate(int nx, int ny, ESMC_DELayout *parentDELayout,
+                                   ESMC_CommHint_e commhint, int *rc);
+
+    // create sub-layout from parent, exclusively (consumes parent DEs)
+    ESMC_DELayout *ESMC_DELayoutCreate(int nx, int ny, ESMC_DELayout *parentDELayout,
+                                   ESMC_CommHint_e commhint,
+                                   ESMC_Exclusivity_e exclusive, int *rc);
+
     ESMC_DELayout *ESMC_DELayoutCreate(int nx, int ny, int *delist,
                                    ESMC_CommHint_e commhint, int *rc);
-                                                 // interface only, deep class
     ESMC_DELayout *ESMC_DELayoutCreate(int nx, int ny, int nz, ESMC_PEList *pelist,
                                    ESMC_CommHint_e commhint, int *rc);
-                                                 // interface only, deep class
-    int ESMC_DELayoutDestroy(ESMC_DELayout *layout); // interface only, deep class
+    int ESMC_DELayoutDestroy(ESMC_DELayout *layout);
 
  #endif  // ESMC_DELayout_H

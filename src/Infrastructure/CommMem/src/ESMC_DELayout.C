@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.4 2003/03/11 03:00:46 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.5 2003/03/13 22:56:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.4 2003/03/11 03:00:46 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.5 2003/03/13 22:56:13 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -46,6 +46,124 @@
 // This section includes all the DELayout routines
 //
 //
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutCreate - Create a default 1D layout object
+//
+// !INTERFACE:
+      ESMC_DELayout *ESMC_DELayoutCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_DELayout
+//
+// !ARGUMENTS:
+      int *rc) {                 // out - return code
+//
+// !DESCRIPTION:
+//      Allocates memory for a new 1D DELayout object using a self-discovered
+//      PEList
+//
+//EOP
+// !REQUIREMENTS:  AAAn.n.n
+
+  ESMC_DELayout *layout;
+
+  try {
+    layout = new ESMC_DELayout;
+      //cout << "ESMC_DELayoutCreate() succesful\n";
+    *rc = layout->ESMC_DELayoutConstruct();
+    return(layout);
+  }
+  catch (...) {
+    // TODO:  call ESMF log/err handler
+    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
+    *rc = ESMF_FAILURE;
+    return(0);
+  }
+ } // end ESMC_DELayoutCreate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutCreate - Create a new 2D DELayout from a given DELayout
+//
+// !INTERFACE:
+      ESMC_DELayout *ESMC_DELayoutCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_DELayout
+//
+// !ARGUMENTS:
+      int nx,                       // in - number of DE's in the x direction
+      int ny,                       // in - number of DE's in the y direction
+      ESMC_DELayout *parentDELayout,    // in - parent DELayout
+      ESMC_CommHint_e commhint,     // in - fastest communication direction hint
+      ESMC_Exclusivity_e exclusive, // in - consumes parent DELayout's DE's ?
+      int *rc) {                    // out - return code
+//
+// !DESCRIPTION:
+//  Create a new DELayout using a parent layout's DEs.  If exclusive, the parent's
+//  DE's are consumed; they are not available for subsequent calls to this
+//  method.  Typically, the parent layout will contain a 1D list of DEs
+//  avaliable for allocation to sub-layouts within components.
+//
+//EOP
+// !REQUIREMENTS:  AAAn.n.n
+
+  ESMC_DELayout *layout;
+
+// TODO: ?? use exception handling when universally supported (pgCC doesn't)
+  try {
+    layout = new ESMC_DELayout;
+//cout << "ESMC_DELayoutCreate() succesful\n";
+    *rc = layout->ESMC_DELayoutConstruct(nx, ny, parentDELayout, commhint,
+                                       exclusive);
+    return(layout);
+  }
+  catch (...) {
+//  catch (bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
+// TODO:  call ESMF log/err handler
+    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
+    *rc = ESMF_FAILURE;
+    return(0);
+  }
+
+ } // end ESMC_DELayoutCreate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutCreate - Create a new 2D DELayout from a given DELayout
+//
+// !INTERFACE:
+      ESMC_DELayout *ESMC_DELayoutCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_DELayout
+//
+// !ARGUMENTS:
+      int nx,                       // in - number of DE's in the x direction
+      int ny,                       // in - number of DE's in the y direction
+      ESMC_DELayout *parentDELayout,    // in - parent DELayout
+      ESMC_CommHint_e commhint,     // in - fastest communication direction hint
+      int *rc) {                    // out - return code
+//
+// !DESCRIPTION:
+//  Create a new DELayout using a parent layout's DEs.  Non exclusive;
+//  the parent's DE's are not consumed; they are available for subsequent
+//  calls to this method.  Typically, the parent layout will contain a 1D
+//  list of DEs avaliable for allocation to sub-layouts within components.
+//
+//EOP
+// !REQUIREMENTS:  AAAn.n.n
+
+  ESMC_DELayout *layout;
+
+  // front-end to exclusive method, with non-exclusive flag passed
+  layout = ESMC_DELayoutCreate(nx, ny, parentDELayout, commhint, ESMC_NONEXCL, rc);
+
+  return(layout);
+
+ } // end ESMC_DELayoutCreate
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -67,7 +185,7 @@
 //
 // !DESCRIPTION:
 //      Allocates memory for a new DELayout
-//      object and uses the internal routine ESMC\_DELayoutConstruct to
+//      object and uses the internal routine ESMC\_DELayoutContruct to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
 //
@@ -111,7 +229,7 @@
 //
 // !DESCRIPTION:
 //      Allocates memory for a new DELayout
-//      object and uses the internal routine ESMC\_DELayoutConstruct to
+//      object and uses the internal routine ESMC\_DELayoutContruct to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
 //
@@ -188,6 +306,275 @@
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_DELayoutConstruct - Build a 1D DE topology from a
+//                                    self-discovered PEList
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutConstruct(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      ESMF routine which fills in the contents of an already
+//      allocated DELayout object.  May need to do additional allocations
+//      as needed.  Must call the corresponding ESMC\_DELayoutDestruct
+//      routine to free the additional memory.  Intended for internal
+//      ESMF use only; end-users use ESMC\_DELayoutCreate, which calls
+//      ESMC\_DELayoutConstruct.  Define for deep classes only.
+//
+//EOP
+// !REQUIREMENTS:  
+
+  //
+  // self discover the PEList by sharing our PE with all other DEs
+  //
+  // TODO: currently, this works only in the default case of all MPI DEs: no
+  //  threads
+  //
+
+  // Initialize comm, PE, DE, Machine
+  ESMC_DELayoutInit();
+
+  // get total number of DEs
+  comm.ESMC_CommGetNumDEs(&nDEs);
+    //cout << "comm group size = " << nDEs << "\n";
+
+  // Get our PE ids
+  int mypeid=0, mycpuid=0, mynodeid=0;
+  myPE.ESMC_PEGetEsmfID(&mypeid); //   (mypeid = myDEid)
+  myPE.ESMC_PEGetCpuID(&mycpuid);
+  myPE.ESMC_PEGetNodeID(&mynodeid);
+    //cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
+       //<< mynodeid << "\n";
+
+  // prepare send buffer with our PE ids
+  //  TODO: ?? use MPI derived type to send whole PE object rather
+  //           than 3 ints. Then use resulting receive buffer as PE list array,
+  //           thereby avoiding a copy operation.
+  int sendbuf[3];
+  sendbuf[0] = mypeid;
+  sendbuf[1] = mycpuid;
+  sendbuf[2] = mynodeid;
+
+  // temporary global buffer used to perform all gather
+  int *gbuf=0;
+  try {
+    gbuf = new int[nDEs * 3 * sizeof(int)];
+  }
+  catch(...) {
+//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
+    // TODO:  call ESMF log/err handler
+    cerr << "ESMC_DELayoutConstruct() gbuf memory allocation failed\n";
+    return(ESMF_FAILURE);
+  }
+
+  // share/gather all PE IDs from all DEs
+  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMC_INT);
+  //cout << "DELayoutCreate(): exited ESMC_CommAllGather" << endl;
+
+  // create PE List from gathered IDs
+  // create a PE list object entirely on the heap
+  int rc;
+  peList = ESMC_PEListCreate(nDEs, &rc); // assume #PEs = nDEs
+                                         //   for now
+  for(int i=0; i<nDEs; i++) {
+    // populate PE list with gathered ids
+    peList->ESMC_PEListInit(i, gbuf[i*3], gbuf[i*3+1], gbuf[i*3+2]);
+  }
+
+  // done with gbuf, delete it
+  delete gbuf;
+
+  // sort PE list by fastest communication neighbors (node) to
+  //   prep assignment to layout
+  //   TODO: other sort criteria (different node types) ?
+  //peList->ESMC_PEListPrint();
+  peList->ESMC_PEListSort();
+  //peList->ESMC_PEListPrint();
+
+  // construct 1D array of ESMC_DE's
+  try {
+    // first, create array of (nx) pointers to ESMC_DE pointers
+    layout = new ESMC_DE**[nDEs];
+
+    // then allocate ny=1, nz=1 DEs
+    for (int i=0; i<nDEs; i++) {
+      layout[i] = new ESMC_DE*[1];
+      layout[i][0] = new ESMC_DE[1];
+    }
+  }
+  catch(...) {
+//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
+    // TODO:  call ESMF log/err handler
+    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
+    return(ESMF_FAILURE);
+  }
+
+  nxDELayout = nDEs;
+  nyDELayout = 1;
+  nzDELayout = 1;
+
+  ESMC_PE *pe;
+  for (int i=0; i<nDEs; i++) {
+    // retrieve next PE from our list
+    peList->ESMC_PEListGetPE(i, &pe);
+
+    // then assign it to this DE
+    layout[i][0][0].ESMC_DESetPE(pe);
+
+    //layout[i][0][0].ESMC_DEPrint();
+  }
+
+    //cout << "ESMC_DELayoutConstruct() successful\n";
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DELayoutConstruct
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutConstruct - Build a 2D DE topology from a
+//                                    parent layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutConstruct(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int nx,                     // in     - number of DE's in the x direction
+      int ny,                     // in     - number of DE's in the y direction
+      ESMC_DELayout *parentDELayout,  // in/out - parentDELayout
+      ESMC_CommHint_e commhint,   // in - fastest communication direction hint
+      ESMC_Exclusivity_e exclusive) { // in - consume parent layout DE's
+//
+// !DESCRIPTION:
+//      ESMF routine which fills in the contents of an already
+//      allocated DELayout object.  May need to do additional allocations
+//      as needed.  Must call the corresponding ESMC\_DELayoutDestruct
+//      routine to free the additional memory.  Intended for internal
+//      ESMF use only; end-users use ESMC\_DELayoutCreate, which calls
+//      ESMC\_DELayoutConstruct.  Define for deep classes only.
+//
+//EOP
+// !REQUIREMENTS:  
+
+  // Initialize comm, PE, DE, Machine
+  ESMC_DELayoutInit();
+
+  // construct 2D array of ESMC_DE's
+
+  try {
+    // construct 2D array of ESMC_DE's
+
+    // first, create array of (nx) pointers to ESMC_DE pointers
+    layout = new ESMC_DE**[nx];
+
+    // then allocate an array of (ny) ESMC_DE pointers for each x pointer
+    for (int i=0; i<nx; i++) {
+      layout[i] = new ESMC_DE*[ny];
+      // finally allocate a Z array of ESMC_DE's for each y pointer
+      // only 1 long, since this version of Construct is 2D
+      for (int j=0; j<ny; j++) {
+        layout[i][j] = new ESMC_DE[1];
+      }
+    }
+  }
+  catch(...) {
+//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
+// TODO:  call ESMF log/err handler
+    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
+    return(ESMF_FAILURE);
+  }
+
+  nxDELayout = nx;
+  nyDELayout = ny;
+  nzDELayout = 1;
+  nDEs = nxDELayout * nyDELayout;
+  commHint = commhint;
+
+  // create a PE list object to hold the parent PE sub-list
+  int rc;
+  peList = ESMC_PEListCreate(nDEs, &rc); // assume #PEs = nDEs for now
+
+  //
+  // Assign parent DELayout DE's to DE's in new layout according to
+  // communication hint.  Assume parent layout is 1D; contained DE list
+  // consists of unique DE ids that are pre-sorted
+  // by fastest communication affinity (e.g. node, thread, process)
+  //
+  int ni, nj;  // loop limits
+  int i, j;    // i outer loop, j inner loop (fastest)
+  int *x, *y;  // layout coordinates to loop through
+  switch (commHint)
+  {
+    case ESMC_XFAST:
+    case ESMC_NOHINT:
+      ni = nyDELayout;  y = &i; // 2nd fastest (outer loop)
+      nj = nxDELayout;  x = &j; // fastest (inner loop)
+      break;
+    case ESMC_YFAST:
+      ni = nxDELayout; x = &i; // 2nd fastest (outer loop)
+      nj = nyDELayout; y = &j; // fastest (inner loop)
+      break;
+    default:
+      break;
+  }
+
+//cout << "ESMC_DELayoutConstruct() ni, nj " << ni << ", " << nj << endl;
+
+  ESMC_DE de;
+  ESMC_PE *pe;
+  int PEix=0;
+  for (i=0; i<ni; i++) {
+    for(j=0; j<nj; j++) {
+
+        //cout << "ESMC_DELayoutConstruct(): " << i << ", " << j  << "\n";
+        //cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y << "\n";
+
+        // retrieve next DE from our list
+        //  assumes parent layout is 1D, pre-sorted by fastest
+        //  communication attribute. TODO: generalize to multi-dimensions ?
+        if (exclusive == ESMC_EXCL) {
+          // parent DE CANNOT be reused by subsequent DELayoutCreate calls
+          rc = parentDELayout->ESMC_DELayoutGetDEExclusive(&de);
+          //cout << "ESMC_DELayoutGetDEExclusive called, rc = " << rc << endl;
+        }
+        else
+        {
+          // parent DE CAN be reused by subsequent DELayoutCreate calls
+          rc = parentDELayout->ESMC_DELayoutGetDE((i*nj+j), 0, 0, &de);
+          //cout << "ESMC_DELayoutGetDE(" << i*nj+j << ") called, rc = "
+               //<< rc << endl;
+        }
+        if (rc == ESMF_SUCCESS) {
+          // assign DE in given parent layout to this DE in layout
+          layout[*x][*y][0] = de;
+
+          // copy PE sub-list from parent layout; determine from DE list
+          de.ESMC_DEGetPE(&pe);
+          peList->ESMC_PEListSetPE(PEix++, pe);
+        }
+        else {
+          // TODO: log err
+          cout << "ESMC_DELayoutConstruct(): ESMC_DELayoutGetDE[Exclusive]()" <<
+                  " returned ESMF_FAILURE" << endl;
+          return(ESMF_FAILURE);
+        }
+    }
+  }
+  //peList->ESMC_PEListPrint();
+
+  //cout << "ESMC_DELayoutConstruct() successful\n";
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DELayoutConstruct
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_DELayoutConstruct - Build a 2D DE topology from a DE list
 //
 // !INTERFACE:
@@ -245,6 +632,7 @@
   nxDELayout = nx;
   nyDELayout = ny;
   nzDELayout = 1;
+  nDEs = nxDELayout * nyDELayout;
   //deList = delist;
   commHint = commhint;
 
@@ -380,6 +768,7 @@
   nxDELayout = nx;
   nyDELayout = ny;
   nzDELayout = nz;
+  nDEs = nxDELayout * nyDELayout * nzDELayout;
   peList = pelist;
   commHint = commhint;
 
@@ -527,12 +916,17 @@
   myDE.ESMC_DESetType(ESMC_PROCESS); // TODO: auto determine proc or thread,
                                      //       or get from config file ?
   comm.ESMC_CommInit(&argc, &argv, &myDE); // computes unique ESMF DE id
+
+  // initialize machine to defaults TODO:
+  Mach.ESMC_MachineInit(256, 1024, 4, true, true, true, 1, 200, 2, 100);
   myPE.ESMC_PEInit(&Mach);        // gets cpu, node ids from machine
+
   myDE.ESMC_DEGetESMFID(&myDEid);
   myPE.ESMC_PESetEsmfID(myDEid);  // assume 1-to-1 DE-to-PE for now TODO: ?
 //cout << "myDEid = " << myDEid << "\n";
 
 #if 0
+  // debug
   int mypeid=0, mycpuid=0, mynodeid=0;
   myPE.ESMC_PEGetEsmfID(&mypeid); //   (mypeid = myDEid)
   myPE.ESMC_PEGetCpuID(&mycpuid);
@@ -648,6 +1042,29 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
  } // end ESMC_DELayoutSet<Value>
 #endif
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetNumDEs - get the total number of DEs in layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetNumDEs(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *ndes) const {     // out - total number of DEs in layout
+//
+// !DESCRIPTION:
+//    Returns the total number of DEs in the layout
+//EOP
+// !REQUIREMENTS:  
+
+  *ndes = nDEs;
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DELayoutGetNumDEs
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -783,6 +1200,89 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   return(ESMF_FAILURE);
 
  } // end ESMC_DELayoutGetDEPosition
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetDE - get DE at position (x,y,z)
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetDE(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int x,               // in - x position of DE in layout
+      int y,               // in - y position of DE in layout
+      int z,               // in - z position of DE in layout
+      ESMC_DE *de) const { // out - DE at (x,y,z)
+//
+// !DESCRIPTION:
+//    returns DE at position (x,y,z) in layout
+//
+//EOP
+// !REQUIREMENTS:  
+
+  if (x >= 0 && x < nxDELayout &&
+      y >= 0 && y < nyDELayout &&
+      z >= 0 && z < nzDELayout &&
+      de != 0) {
+    *de = layout[x][y][z];
+    return(ESMF_SUCCESS);
+  }
+  else {
+    // TODO: log error
+    return(ESMF_FAILURE);
+  }
+
+ } // end ESMC_DELayoutGetDE
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetDEExclusive - get next non-exclusive DE, mark exclusive
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetDEExclusive(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_DE *de) const { // out - next non-exclusive DE
+//
+// !DESCRIPTION:
+//    returns next non-exclusive DE in layout. Used to allocate (sub-divide)
+//    to sub-layouts.
+//
+//EOP
+// !REQUIREMENTS:  
+
+  // linear search for next non-exclusive DE
+  //   TODO: different search method? save last i,j,k to speed up subsequent
+  //         calls ?
+  ESMC_Exclusivity_e excl;
+  for (int i=0; i<nxDELayout; i++) {
+    for (int j=0; j<nyDELayout; j++) {
+      for (int k=0; k<nzDELayout; k++) {
+
+
+        layout[i][j][k].ESMC_DEGetExclusivity(&excl);
+        if (excl == ESMC_NONEXCL) {
+          //cout << "ESMC_DELayoutGetDEExclusive" << "i,j,k = "
+                 //<< i << "," << j << "," << k <<  endl;
+          // found -- return this DE and mark it "exclusive"
+          *de = layout[i][j][k];
+          layout[i][j][k].ESMC_DESetExclusivity(ESMC_EXCL);
+          return(ESMF_SUCCESS);
+        }
+
+      }
+    }
+  }
+  // none found -- all used up!
+  return(ESMF_FAILURE);
+
+ } // end ESMC_DELayoutGetDEExclusive
 
 //-----------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/03/10 03:22:57 cdeluca Exp $
+# $Id: makefile,v 1.3 2003/03/13 22:56:09 cdeluca Exp $
 
 All:
 	do_chprotex ESMC_Comm ../include/ESMC_Comm.h

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.11 2003/03/11 03:00:44 cdeluca Exp $
+// $Id: ESMC_Comm.C,v 1.12 2003/03/13 22:56:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.11 2003/03/11 03:00:44 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.12 2003/03/13 22:56:13 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -159,6 +159,10 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
     lbufSize = lbufsize;
     lbufType = lbuftype;
 
+    // TODO:  coordinate with other DEs to determine group size ??
+    // default to what's given, override later if needed
+    numDEs = nThreadsPerProc * nProcs;
+
     // allocate local message buffer
     if (lbuf == 0) {
       switch (lbufType)
@@ -216,9 +220,6 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
       }
     }
 
-    // TODO:  coordinate with other DEs to determine group size ??
-    numDEs = nThreadsPerProc * nProcs;
-
   pthread_mutex_unlock(&initMutex);
 
   if (DE->deType == ESMC_PROCESS) {
@@ -238,7 +239,9 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
     //   Comm and Machine, which could be ok
 
     // get size of DE process group
-    // MPI_Comm_size(MPI_COMM_WORLD, &numDEs);
+    // TODO: MPI overrides given nProcs ?
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    numDEs = nThreadsPerProc * nProcs;
 
     // get my unique DE process group ID
     MPI_Comm_rank(MPI_COMM_WORLD, &(DE->pID));  // TODO same as MPI rank for now

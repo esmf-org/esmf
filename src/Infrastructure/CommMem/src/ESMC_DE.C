@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.C,v 1.7 2003/03/11 03:00:45 cdeluca Exp $
+// $Id: ESMC_DE.C,v 1.8 2003/03/13 22:56:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DE.C,v 1.7 2003/03/11 03:00:45 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DE.C,v 1.8 2003/03/13 22:56:13 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -58,8 +58,10 @@
       int esmfid,                  // in - ESMF ID
       int pid,                     // in - platform process ID
       int tid,                     // in - platform thread ID
+      ESMC_DEType_e detype,        // in - process or thread
       bool proc,                   // in - true if DE is a process
       bool thrd,                   // in - true if DE is a thread
+      ESMC_Exclusivity_e excl,     // in - exclusively used flag
       ESMC_PE *pe) {               // in - assigned PE from peList
 //
 // !DESCRIPTION:
@@ -74,8 +76,10 @@
   esmfID = esmfid;
   pID = pid;
   tID = tid;
+  deType = detype;
   process = proc;
   thread = thrd;
+  exclusive = excl;
   PE = pe;
 
   return(ESMF_SUCCESS);
@@ -234,7 +238,32 @@
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_DESet<Value>
+ } // end ESMC_DESetPE
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DEGetPE - get PE assigned to a DE
+//
+// !INTERFACE:
+      int ESMC_DE::ESMC_DEGetPE(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_PE **pe) {     // in - PE
+//
+// !DESCRIPTION:
+//     Gets the DE's associated PE
+//
+//EOP
+// !REQUIREMENTS:  
+
+  *pe = PE;
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DEGetPE
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -340,6 +369,58 @@
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_DESetExclusivity - set DE's exclusivity
+
+//
+// !INTERFACE:
+      int ESMC_DE::ESMC_DESetExclusivity(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Exclusivity_e excl) {     // in - exclusivity
+//
+// !DESCRIPTION:
+//     Sets the DE's exclusivity
+//
+//EOP
+// !REQUIREMENTS:
+
+  exclusive = excl; 
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DESetExclusivity
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DEGetExclusivity - get DE's exclusivity
+
+//
+// !INTERFACE:
+      int ESMC_DE::ESMC_DEGetExclusivity(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Exclusivity_e *excl) const {     // out - exclusivity
+//
+// !DESCRIPTION:
+//     Gets the DE's exclusivity
+//
+//EOP
+// !REQUIREMENTS:
+
+  *excl = exclusive; 
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DEGetExclusivity
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_DEValidate - internal consistency check for a DE
 //
 // !INTERFACE:
@@ -386,8 +467,10 @@
   cout << "esmfID = " << esmfID << endl;
   cout << "pID = " << pID << endl;
   cout << "tID = " << tID << endl;
+  cout << "deType = " << deType << endl;
   cout << "process = " << process << endl;
   cout << "thread = " << thread << endl;
+  cout << "exclusive = " << exclusive << endl;
 
   cout << "PE = ";
   if (PE != 0) {
@@ -420,7 +503,7 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  ESMC_DEInit(0,0,0, false,false, 0);
+  ESMC_DEInit(0,0,0, ESMC_PROCESS, false,false, ESMC_NONEXCL, 0);
 
  } // end ESMC_DE
 
@@ -444,8 +527,7 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  deType = detype;
-  ESMC_DEInit(0,0,0, false,false, 0);
+  ESMC_DEInit(0,0,0, detype, false,false, ESMC_NONEXCL, 0);
 
  } // end ESMC_DE
 
@@ -469,13 +551,3 @@
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  } // end ~ESMC_DE
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMemEx.C,v 1.5 2003/03/10 05:14:21 cdeluca Exp $
+// $Id: ESMC_CommMemEx.C,v 1.6 2003/03/13 22:56:10 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 //
 // !DESCRIPTION:
 //
-// Exercises CommMem classes ESMC_PE, ESMC_DE, ESMC_PEList, ESMC_DELayout,
+// Excercises CommMem classes ESMC_PE, ESMC_DE, ESMC_PEList, ESMC_DELayout,
 // ESMC_Comm and ESMC_Machine to build a PE List and corresponding DELayout.
 // Uses mixed mode communication of MPI and pthreads to perform an "All Gather"
 // collective of PE information to create a PE list.
