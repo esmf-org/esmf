@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.103 2004/11/04 22:22:33 theurich Exp $
+// $Id: ESMC_Route.C,v 1.104 2004/11/05 00:24:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.103 2004/11/04 22:22:33 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.104 2004/11/05 00:24:44 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1218,7 +1218,7 @@ static int maxroutes = 10;
           theirDE = i;
 
           // get the parent DE identifier for this DE in the rcv layout
-          dstdeLayout->ESMC_DELayoutGetDEMatch(theirDE, *delayout, NULL,
+          dstdeLayout->ESMC_DELayoutGetDEMatchDE(theirDE, *delayout, NULL,
                                                   &theirDEParent, 1);
   //        printf("Match1: %d, %d\n", theirDE, theirDEParent);
           //theirDEParent = theirDE;     // temporarily
@@ -1283,7 +1283,7 @@ static int maxroutes = 10;
           theirDE = i;
 
           // get the parent DE identifier for this DE in the src layout
-          dstdeLayout->ESMC_DELayoutGetDEMatch(theirDE, *delayout, NULL,
+          dstdeLayout->ESMC_DELayoutGetDEMatchDE(theirDE, *delayout, NULL,
                                                   &theirDEParent, 1);
   //        printf("Match2: %d, %d\n", theirDE, theirDEParent);
           //theirDEParent = theirDE;     // temporarily
@@ -1441,7 +1441,7 @@ static int maxroutes = 10;
           their_de = i;
 
           // get the parent DE identifier for this DE in the rcv layout
-          delayout_rcv->ESMC_DELayoutGetDEMatch(their_de, *delayout, NULL,
+          delayout_rcv->ESMC_DELayoutGetDEMatchDE(their_de, *delayout, NULL,
                                                    &their_de_parent, 1);
  //         printf("Match1: %d, %d\n", their_de, their_de_parent);
           //their_de_parent = their_de;     // temporarily
@@ -1507,7 +1507,7 @@ static int maxroutes = 10;
           their_de = i;
 
           // get the parent DE identifier for this DE in the snd layout
-          delayout_snd->ESMC_DELayoutGetDEMatch(their_de, *delayout, NULL,
+          delayout_snd->ESMC_DELayoutGetDEMatchDE(their_de, *delayout, NULL,
                                                    &their_de_parent, 1);
   //        printf("Match2: %d, %d\n", their_de, their_de_parent);
           //their_de_parent = their_de;     // temporarily

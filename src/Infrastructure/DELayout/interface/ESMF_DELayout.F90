@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.39 2004/08/19 16:52:19 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.40 2004/11/05 00:21:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -123,7 +123,7 @@ module ESMF_DELayoutMod
   
   public ESMF_DELayoutGet
   public ESMF_DELayoutGetDELocalInfo
-  public ESMF_DELayoutGetDEMatch
+  public ESMF_DELayoutGetDEMatchDE
   
   public ESMF_DELayoutPrint
   public ESMF_DELayoutValidate
@@ -146,7 +146,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.39 2004/08/19 16:52:19 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.40 2004/11/05 00:21:58 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -661,12 +661,12 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutGetDEMatch()"
+#define ESMF_METHOD "ESMF_DELayoutGetDEMatchDE()"
 !BOP
-! !IROUTINE: ESMF_DELayoutGetDEMatch - Match virtual memory spaces between DELayouts
+! !IROUTINE: ESMF_DELayoutGetDEMatchDE - Match virtual memory spaces between DELayouts
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutGetDEMatch(delayout, de, delayoutMatch, &
+  subroutine ESMF_DELayoutGetDEMatchDE(delayout, de, delayoutMatch, &
     deMatchCount, deMatchList, rc)
 !
 ! !ARGUMENTS:
@@ -728,14 +728,14 @@ contains
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutGetDEMatch(delayout, de, delayoutMatch, &
+    call c_ESMC_DELayoutGetDEMatchDE(delayout, de, delayoutMatch, &
       deMatchCount, opt_deMatchList, len_deMatchList, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_DELayoutGetDEMatch
+  end subroutine ESMF_DELayoutGetDEMatchDE
 !------------------------------------------------------------------------------
 
 
