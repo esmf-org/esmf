@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.14 2003/04/29 21:37:47 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.15 2003/04/30 21:11:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.14 2003/04/29 21:37:47 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.15 2003/04/30 21:11:37 nscollins Exp $'
 
 !==============================================================================
 !
@@ -673,8 +673,8 @@
           enddo
           do i=1,AI_src_count
             AI_src_exc(i,j)%l = AI_src_exc(i,j)%l + 1
-            AI_src_exc(i,j)%l = AI_src_exc(i,j)%l + 1
-            AI_src_tot(i,j)%r = AI_src_tot(i,j)%r + 1
+            AI_src_exc(i,j)%r = AI_src_exc(i,j)%r + 1
+            AI_src_tot(i,j)%l = AI_src_tot(i,j)%l + 1
             AI_src_tot(i,j)%r = AI_src_tot(i,j)%r + 1
           enddo
         enddo
