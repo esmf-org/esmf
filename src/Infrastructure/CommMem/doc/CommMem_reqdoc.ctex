@@ -1,4 +1,4 @@
-% $Id: CommMem_reqdoc.ctex,v 1.2 2002/10/08 17:24:42 cdeluca Exp $
+% $Id: CommMem_reqdoc.ctex,v 1.3 2002/10/08 17:42:17 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -97,11 +97,15 @@
 \input{../../../../scripts/doc_templates/templates/attr_reqdoc}
 #endif
 
-\section{\longname Abbreviations}
+%\section{Abbreviations}
 #ifdef STANDALONE
-\input{CommMem_abbr}
+%\input{CommMem_abbr}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/CommMem_abbr}
+%\input{../Infrastructure/CommMem/doc/CommMem_abbr}
+#endif
+
+#ifdef CONSTITUENT
+\section{Communication and Memory Kernel Requirements}
 #endif
 
 \newpage
