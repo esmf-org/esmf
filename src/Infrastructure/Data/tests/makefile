@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2003/05/23 16:12:46 flanigan Exp $ 
+# $Id: makefile,v 1.16 2003/08/11 19:19:15 svasquez Exp $ 
 
 ALL:  tests
 
@@ -15,17 +15,14 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Data/tests
 
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest \
-		$(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest \
-		$(ESMF_TESTDIR)/ESMF_ArrayUTest 
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest \
+		$(ESMF_TESTDIR)/ESMF_LocalArrayUTest 
 
-TESTS_RUN     = RUN_ESMF_ArrayBasicUTest \
-		RUN_ESMF_ArrayF90PtrUTest \
-		RUN_ESMF_ArrayUTest 
+TESTS_RUN     = RUN_ESMF_ArrayF90PtrUTest \
+		RUN_ESMF_LocalArrayUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_ArrayBasicUTestUNI \
-		RUN_ESMF_ArrayF90PtrUTestUNI \
-		RUN_ESMF_ArrayUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_ArrayF90PtrUTestUNI \
+		RUN_ESMF_LocalArrayUTestUNI
 
 
 TESTS_RM      = 
@@ -52,27 +49,15 @@ RUN_ESMF_ArrayF90PtrUTestUNI:
 ESMF_ArrayF90PtrUTest.rm:
 	-@echo "ESMF_ArrayF90Ptr.rm target called here."
 #
-#  ESMF_ArrayUTest
+#  ESMF_LocalArrayUTest
 #
-RUN_ESMF_ArrayUTest:
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
+RUN_ESMF_LocalArrayUTest:
+	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_LocalArrayUTest > $(ESMF_TESTDIR)/ESMF_LocalArrayUTest.stdout
 
-RUN_ESMF_ArrayUTestUNI:
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
+RUN_ESMF_LocalArrayUTestUNI:
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_LocalArrayUTest > $(ESMF_TESTDIR)/ESMF_LocalArrayUTest.stdout
 
 ESMF_ArrayUTest.rm:
-	-@echo "ESMF_ArrayTest.rm target called here."
-
-#
-#  ESMF_ArrayBasicUTest
-#
-RUN_ESMF_ArrayBasicUTest:
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest > $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest.stdout
-
-RUN_ESMF_ArrayBasicUTestUNI:
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest > $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest.stdout
-
-ESMF_ArrayBasic.rm:
-	-@echo "ESMF_ArrayBasic.rm target called here."
+	-@echo "ESMF_LocalArrayTest.rm target called here."
 
 
