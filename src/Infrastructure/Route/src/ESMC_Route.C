@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.60 2003/08/15 17:59:57 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.61 2003/08/22 21:59:37 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.60 2003/08/15 17:59:57 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.61 2003/08/22 21:59:37 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1333,6 +1333,157 @@ static int maxroutes = 10;
     return ESMF_SUCCESS;
 
  } // end ESMC_RoutePrecomputeRegrid
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RoutePrecomputeDomainList - initialize a Route from a DomainList
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RoutePrecomputeDomainList(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int rank,                    // in  - rank of data
+      int my_DE,                   // in  - DE identifier in the DELayout
+      ESMC_DomainList *sendDomainList,
+                                   // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field
+      ESMC_DomainList *recvDomainList) {
+                                   // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field
+//
+// !DESCRIPTION:
+//      Initializes a Route from a DomainList with send and receive RouteTables.
+//      Returns error code if problems are found.
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    ESMC_AxisIndex my_AI[ESMF_MAXDIM], their_AI[ESMF_MAXDIM];
+    ESMC_XPacket *my_XP = NULL;
+    ESMC_XPacket *their_XP = NULL;
+    ESMC_RouteCacheEntry *ep;
+    ESMC_Logical boundary[ESMF_MAXGRIDDIM][2];
+    int my_XPcount, their_XPcount;
+    int global_count[ESMF_MAXDIM];
+    int rc;   // TODO: really use this
+    int j, k, theirOffset, offset, count;
+    int their_de;
+
+    //
+    for (j=0; j<rank; j++) {
+      boundary[j][0] = ESMF_TF_FALSE;
+      boundary[j][1] = ESMF_TF_FALSE;
+      global_count[j] = 0;
+    }
+
+    // Calculate the sending table.
+    // loop over DE's from DomainList to send to
+    for (k=0; k<sendDomainList->num_domains; k++) {
+      their_de = sendDomainList->domains[k].DE;
+      // get "my" AI
+      for (j=0; j<rank; j++) {
+        my_AI[j] = sendDomainList->domains[k].ai_list[j];
+      }
+ 
+      // calculate "my" XPacket from the AxisIndices -- in this case the
+      // AIs are in local space and so is the XPacket
+      rc = ESMC_XPacketFromAxisIndex(my_AI, rank, global_count, boundary,
+                                     &my_XP, &my_XPcount);
+      
+      // load the XPacket into the sending RTable
+      sendRT->ESMC_RTableSetEntry(their_de, my_XP);
+      ct->ESMC_CommTableSetPartner(their_de);
+    }
+
+    // Calculate the receiving table.
+    // loop over DE's from DomainList to receive from
+    offset = 0;
+    for (k=0; k<recvDomainList->num_domains; k++) {
+      their_de = recvDomainList->domains[k].DE;
+      // get "their" AI
+      count = 1;
+      for (j=0; j<rank; j++) {
+        their_AI[j] = recvDomainList->domains[k].ai_list[j];
+        count = count * (their_AI[j].max - their_AI[j].min + 1);
+      }
+ 
+      // calculate "their" XPacket from the AxisIndices -- in this case the
+      // AIs are in local space and so is the XPacket
+      rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, boundary,
+                                     &their_XP, &their_XPcount);
+      
+      // modify the XPacket so it gets stored immediately after the last one
+      theirOffset = their_XP->ESMC_XPacketGetOffset();
+      theirOffset += offset;
+      their_XP->ESMC_XPacketSetOffset(theirOffset);
+      offset += count;
+
+      // load the XPacket into the sending RTable
+      sendRT->ESMC_RTableSetEntry(their_de, their_XP);
+      ct->ESMC_CommTableSetPartner(their_de);
+    }
+ 
+    //ESMC_RoutePrint("");
+ 
+    // free unneeded XPs here
+    delete my_XP;  
+    my_XP = NULL;
+    delete their_XP; 
+    their_XP = NULL;
+
+    // add to cache table here.
+    if (routetable.rcep == NULL) {
+       routetable.rcep = (ESMC_RouteCacheEntry **) 
+                       malloc(sizeof(ESMC_RouteCacheEntry *) * maxroutes);
+       routetable.nalloc = maxroutes;
+
+    }
+    // if we decide to grow the table slowly...
+    //if (routetable.nroutes <= routetable.nalloc) {
+    //    realloc(routetable.rcep, (routetable.nalloc + 4) *
+    //                                    sizeof(ESMC_RouteCacheEntry *));
+    //    routetable.nalloc += 4;
+    //}
+
+    if (routetable.nroutes < maxroutes) {
+
+        ep = new ESMC_RouteCacheEntry;
+        routetable.rcep[routetable.nroutes] = ep;
+        routetable.nroutes++;
+        
+        // store this in the cache
+        ep->routeid = routeid;
+        ep->theroute = this; 
+        ep->entrystatus = 1;
+        ep->rank = rank; 
+        ep->snd_layout = layout;
+        ep->snd_DE = my_DE; 
+   //     ep->snd_AI_count = AI_count;
+   //     for (i=0; i<rank; i++) {
+   //       ep->snd_AI_exc[i] = AI_exc[i]; 
+   //       ep->snd_AI_tot[i] = AI_tot[i];
+   //     }
+        ep->rcv_layout = layout;
+        ep->rcv_DE = my_DE; 
+   //     ep->rcv_AI_count = AI_count; 
+   //     for (i=0; i<rank; i++) {
+   //       ep->rcv_AI_exc[i] = AI_exc[i]; 
+   //       ep->rcv_AI_tot[i] = AI_tot[i];
+   //       ep->periodic[i] = ESMF_TF_FALSE;
+   //     }
+    } else {
+       printf("Warning: this route not Cached - Cache table full\n");
+    }
+    
+    return ESMF_SUCCESS;
+
+ } // end ESMC_RoutePrecomputeDomainList
 
 
 //-----------------------------------------------------------------------------
