@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.38 2003/07/29 16:42:22 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.39 2003/07/31 22:59:44 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.38 2003/07/29 16:42:22 jwolfe Exp $";
+           "$Id: ESMC_DELayout.C,v 1.39 2003/07/31 22:59:44 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1821,7 +1821,6 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       AIPtr->min = 0;
       AIPtr->max = n1-1;
       AIPtr->stride = global_counts[i];    // jw?
- //     AIPtr->gstart = x*n1;
     }
     // if decomp is 2, use nyDELayout
     if (decompids[i] == 2) {
@@ -1829,13 +1828,57 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       AIPtr->min = 0;
       AIPtr->max = n2-1;
       AIPtr->stride = global_counts[i];   // jw?
-  //    AIPtr->gstart = y*n2;
     }
   }
    
   return(ESMF_SUCCESS);
 
  } // end ESMC_DELayoutSetAxisIndex
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutParse - parse a total count over DEs in a layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutParse(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int axis,                 // in  - the axis number
+      int count,                // in  - total number of elements
+      int *countsPerDE) {       // out - array of number of elements per DE
+                                //       for the axis
+//
+// !DESCRIPTION:
+//    returns an array of element counts per DE along an axis, used to provide
+//    a consistent decomposition scheme
+//
+//EOP
+// !REQUIREMENTS:
+
+  int nx, ny, nDEs;
+  this->ESMC_DELayoutGetSize( &nx, &ny);
+
+// check and make sure axis number is valid
+  if (axis == 1)
+    nDEs = nx;
+  else if (axis == 2)
+    nDEs = ny;
+  else
+    return(ESMF_FAILURE);
+
+  // loop to set countsPerDE array
+  int total=0; 
+  for (int i=0; i<nDEs; i++) {
+    countsPerDE[i] = ((count*(i+1)+nDEs/2)/nDEs) - total; // round to nearest
+    total = total + countsPerDE[i];
+  }
+   
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DELayoutParse
 
 //-----------------------------------------------------------------------------
 //BOP

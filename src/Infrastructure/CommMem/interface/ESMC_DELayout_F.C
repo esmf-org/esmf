@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.24 2003/07/29 16:40:41 jwolfe Exp $
+// $Id: ESMC_DELayout_F.C,v 1.25 2003/07/31 22:59:29 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -106,9 +106,13 @@ extern "C" {
                                            int *size_decomp, 
                                            ESMC_AxisIndex *AIPtr, int *status) {
            *status = (*ptr)->ESMC_DELayoutSetAxisIndex(global_counts,
-                                                       *size_gcount, 
-                                                       decompids, *size_decomp,
-                                                       AIPtr);
+                                           *size_gcount, decompids, *size_decomp,
+                                           AIPtr);
+       }
+
+       void FTN(c_esmc_delayoutparse)(ESMC_DELayout **ptr, int *axis, int *count,
+                                      int *countsPerDE, int *status) { 
+           *status = (*ptr)->ESMC_DELayoutParse(*axis, *count, countsPerDE);
        }
 
        void FTN(c_esmc_delayoutgatherarrayi)(ESMC_DELayout **ptr,

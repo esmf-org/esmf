@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.28 2003/07/31 21:46:45 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.29 2003/07/31 22:59:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -111,6 +111,7 @@
       public ESMF_DELayoutGetDEExists
       public ESMF_DELayoutGetNumDEs
       public ESMF_DELayoutSetAxisIndex
+      public ESMF_DELayoutParse
       public ESMF_DELayoutGatherArrayI, ESMF_DELayoutGatherArrayR
  
       public ESMF_DELayoutCheckpoint
@@ -130,7 +131,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.28 2003/07/31 21:46:45 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.29 2003/07/31 22:59:17 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -1042,6 +1043,50 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutParse
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutParse(layout, axis, count, countsPerDE, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      integer, intent(in) :: axis
+      integer, intent(in) :: count
+      integer, dimension(:), intent(out) :: countsPerDE
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!    Parse an element count over the DEs along one axis of a layout
+!
+!EOP
+! !REQUIREMENTS:
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutParse(layout, axis, count, countsPerDE, status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutParse error"
+          return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DELayoutParse
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_DELayoutGatherArrayI
 !
 ! !INTERFACE:
@@ -1506,7 +1551,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutScatterI4 - Scatter inteter*4 array among DEs
+! !IROUTINE: ESMF_DELayoutScatterI4 - Scatter integer*4 array among DEs
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutScatterI4(layout, sndArray, rcvArray, len, &
