@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.36 2003/09/04 22:24:21 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.37 2003/09/12 22:39:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.36 2003/09/04 22:24:21 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.37 2003/09/12 22:39:05 jwolfe Exp $'
 
 !==============================================================================
 
@@ -247,9 +247,9 @@
 
       !! TODO:  TEMPORARY CODE TO BYPASS REAL REGRID CODE
       !!  remove these next 2 lines to finish debugging regrid code.
-      routehandle = ESMF_RouteHandleCreate(rc)
-      if(present(rc)) rc = ESMF_SUCCESS
-      return
+  !    routehandle = ESMF_RouteHandleCreate(rc)
+  !    if(present(rc)) rc = ESMF_SUCCESS
+  !    return
       !! END BYPASS
       
       ! Call the appropriate create routine based on method choice
@@ -379,15 +379,15 @@
 
     !! TODO:  TEMPORARY CODE TO BYPASS REAL REGRID CODE
     !!  remove these next 2 lines to finish debugging regrid code.
-    dstarray = srcarray  
-    if(present(rc)) rc = ESMF_SUCCESS
-    return
+!    dstarray = srcarray  
+!    if(present(rc)) rc = ESMF_SUCCESS
+!    return
     !! END BYPASS
       
    ! get the first route from the table and run it to gather the
    ! data values which overlap this bounding box.
  
-   call ESMF_RouteHandleGet(routehandle, route1=rh, rc=status)
+   ! call ESMF_RouteHandleGet(routehandle, route1=rh, rc=status)
 
    ! from the domain or from someplace, get the counts of how many data points
    ! we are expecting from other DEs.  we might also need to know what
@@ -396,24 +396,25 @@
    ! of the outgoing array?  so we can get the data type and shape from
    ! the dstarray argument to this function.  and what about halo widths?
 
-   !tempdst = ESMF_ArrayCreate(rank, type, kind, counts, halo_widths, rc)
-   !call ESMF_RouteRun(rh, srcarray, tempdst, status)
+   ! tempdst = ESMF_ArrayCreate(rank, type, kind, counts, halo_widths, rc)
+   ! TODO  make into LocalArrays
+   ! call ESMF_RouteRun(rh, srcarray, tempdst, status)
 
    ! get the indirect indicies and weights from the routehandle
 
-   !call ESMF_RouteHandleGet(routehandle, transformvalues=tv, rc=status)
-   !call ESMF_TransformValues(tv, ?=srcindex, ?=dstindex, ?=weights)
+   ! call ESMF_RouteHandleGet(routehandle, transformvalues=tv, rc=status)
+   ! call ESMF_TransformValues(tv, ?=srcindex, ?=dstindex, ?=weights)
 
    ! get a real f90 pointer from all the arrays
    ! i4ptr and r8ptr TKR can be fixed, but unfortunately the dptr can be
    ! whatever the user wants - so this code might need to move into
    ! another file and be macroized heavily for TKR.
-   !call ESMF_ArrayGetData(srcindex, i4ptr, ESMF_DATA_REF, rc)
-   !call ESMF_ArrayGetData(dstindex, i4ptr, ESMF_DATA_REF, rc)
-   !call ESMF_ArrayGetData(weights, r8ptr, ESMF_DATA_REF, rc)
+   ! call ESMF_ArrayGetData(srcindex, i4ptr, ESMF_DATA_REF, rc)
+   ! call ESMF_ArrayGetData(dstindex, i4ptr, ESMF_DATA_REF, rc)
+   ! call ESMF_ArrayGetData(weights, r8ptr, ESMF_DATA_REF, rc)
 
-   !call ESMF_ArrayGetData(tempdst, dptr, ESMF_DATA_REF, rc)
-   !call ESMF_ArrayGetData(dstaddr, dptr, ESMF_DATA_REF, rc)
+   ! call ESMF_ArrayGetData(tempdst, dptr, ESMF_DATA_REF, rc)
+   ! call ESMF_ArrayGetData(dstaddr, dptr, ESMF_DATA_REF, rc)
 
    ! TODO: apply the weights from src to destination
    !  does this need a nested loop and an array of ESMF_Arrays, one
@@ -425,15 +426,15 @@
 
    !*** initialize dest field to zero
    
-   !dstarrayptr = zero
+   ! dstarrayptr = zero
 
    !*** do the regrid
 
    ! will look something like   
-   !do n=1,num_links
-   !  dstarrayptr(dstindexptr(n)) = dstarrayptr(dstindexptr(n)) + &
-   !                                tempdstptr(srcindexptr(n)) * weightptr(n))
-   !end do
+   ! do n=1,num_links
+   !   dstarrayptr(dstindexptr(n)) = dstarrayptr(dstindexptr(n)) + &
+   !                                 tempdstptr(srcindexptr(n)) * weightptr(n))
+   ! end do
 
    ! set return codes
    ! nuke temp array
