@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.20 2003/06/27 21:27:59 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.21 2003/07/29 22:44:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.20 2003/06/27 21:27:59 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.21 2003/07/29 22:44:14 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -194,6 +194,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+      !EX_UTest
       !  Test Requirement FLD2.5.7 Return Grid
       ! Commented out until Bug 707065 is fixed 
       call ESMF_BundleGetGrid(bundle2, grid2, rc);
