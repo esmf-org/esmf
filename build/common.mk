@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.41 2004/03/12 16:34:43 nscollins Exp $
+#  $Id: common.mk,v 1.42 2004/03/12 23:32:34 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -135,6 +135,7 @@ OBJS		= ${OBJSC} ${OBJSF}
 DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results
 DO_EX_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results
 DO_ST_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results
+DO_SUM_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
@@ -666,6 +667,9 @@ tree_run_demo_uni: $(DEMO_RUN_UNI)
 #-------------------------------------------------------------------------------
 
 check_results: check_tests check_examples check_system_tests
+
+results_summary:
+	@$(DO_SUM_RESULTS)
 
 
 #-------------------------------------------------------------------------------
