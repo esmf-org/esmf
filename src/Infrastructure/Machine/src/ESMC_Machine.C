@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.5 2003/10/16 22:35:26 nscollins Exp $
+// $Id: ESMC_Machine.C,v 1.6 2004/02/09 18:04:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,20 +33,20 @@
 #include <string.h>               // strpbrk
 #endif
 
- #include <iostream.h>
+#include <iostream.h>
 //#include <iostream> // TODO: use when namespaces consistently implemented
 //using std::cout;
- #include <ESMC.h>
- #include <mpi.h>     // TODO: temp - use MPI rank to id procs, NOT RIGHT
+#include "ESMC.h"
+#include <mpi.h>     // TODO: temp - use MPI rank to id procs, NOT RIGHT
 
- // associated class definition file
- #include <ESMC_Machine.h>
+// associated class definition file
+#include "ESMC_Machine.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-                 "$Id: ESMC_Machine.C,v 1.5 2003/10/16 22:35:26 nscollins Exp $";
+                 "$Id: ESMC_Machine.C,v 1.6 2004/02/09 18:04:27 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -166,6 +166,11 @@ ESMC_Machine Machine;
   //  max rank overrides the numCPUs.  
   ESMC_MachineSetCpuID();
   ESMC_MachineSetNodeID();
+
+  // sync stdio with fortran i/o, if available
+#if ESMF_HAS_STDIOSYNC
+  sync_sith_stdio();
+#endif
 
   return(ESMF_SUCCESS);
 
