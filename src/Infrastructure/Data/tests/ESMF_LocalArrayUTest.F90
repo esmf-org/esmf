@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.6 2003/08/28 20:05:25 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.7 2003/08/29 22:23:22 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -246,7 +246,6 @@
     enddo
     print *, "realptr data changed after nocopy set, now = ", realptr
 
-   !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
     call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
@@ -298,7 +297,6 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 2 create returned"
 
-   !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
     call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
