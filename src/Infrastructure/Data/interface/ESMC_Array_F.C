@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.38 2003/04/28 17:45:00 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.39 2003/06/19 15:23:57 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt Array} class functions.
+//  allows F90 to call C++ for supporting {\tt ESMC\_Array} class functions.
 //
 //EOP
 
