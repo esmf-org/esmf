@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.12 2004/03/18 21:49:29 cdeluca Exp $
+// $Id: ESMC_FTable_F.C,v 1.13 2004/04/01 16:03:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -193,25 +193,18 @@ extern "C" {
 #ifdef ESMF_ENABLE_VM       
 // VM-enabled CallBack loop     
      
-static void *ESMC_FTableCallEntryPointVMHop(vmachine &vmach, void *cargoin){
+static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargoin){
   // This routine is the first level that gets instantiated in new VM
-  // The first argument must be of type (vmachine &). This is how the newly
-  // created vmachine gets handed to the instantiated code.
+  // The first argument must be of type (void *) and points to a derived
+  // vmachine class object.
   
+  // pull out info from cargoin
   char *name = ((cargotype *)cargoin)->name;
   ESMC_FTable &ftable = *((cargotype *)cargoin)->ftable;  // reference to ftable
   
-//debug:  printf("hi this is from ### do_stuff ###\n");
-//debug:  printf("name: %s, function table at: %p\n", name, &ftable);
-//debug:  printf("do_stuff, new vm is located at: %p\n", &vmach);
-//debug:  vmach.vmachine_print();
-  
   // Need to call a special call function which adds the VM to the interface
-  ESMC_VM vm;
-  vm.ESMC_VMFillFromVmachine(vmach);
-  ESMC_VM *vmm = &vm;
   int funcrc, localrc;
-  localrc = ftable.ESMC_FTableCallVFuncPtr(name, &vmm, &funcrc);
+  localrc = ftable.ESMC_FTableCallVFuncPtr(name, (ESMC_VM*)vm, &funcrc);
   
   return NULL;
 }
@@ -234,7 +227,6 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   char *name;               // trimmed type string
 
   newtrim(type, slen, phase, NULL, &name);
-  //printf("after newtrim, name = '%s'\n", name);
 
   // TODO: two return codes here - one is whether we could find
   // the right function to call; the other is the actual return code
@@ -245,21 +237,14 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   ESMC_VM &vm_parent = **ptr_vm_parent;     // reference to parent VM
   ESMC_VMPlan &vmplan = **ptr_vmplan;       // reference to VMPlan
   ESMC_FTable &ftable = **ptr;              // reference to function table
-
-//debug:  printf("o.k. buddy, I am in c_esmc_ftablecallentrypointvm...\n");
-//debug:  vm_parent.vmachine_print();
-//debug:  vmplan.vmplan_print();
          
   cargotype *cargo = new cargotype;
   strcpy(cargo->name, name);   // copy trimmed type string
   cargo->ftable = &ftable;     // reference to function table
   *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
-
-//debug:  printf("debug in c_esmc_ftablecallentrypointvm: vm_parent: %p\n", &vm_parent);
          
   *vm_info = vm_parent.vmachine_enter(vmplan, ESMC_FTableCallEntryPointVMHop,
     (void*)cargo);
-//debug:  printf("returned from vmachine_enter\n");
   
   delete[] name;
   *status = ESMF_SUCCESS;
