@@ -1,4 +1,4 @@
-% $Id: Bundle_rest.tex,v 1.8 2004/06/15 23:23:53 cdeluca Exp $
+% $Id: Bundle_rest.tex,v 1.9 2004/09/23 21:44:59 nscollins Exp $
 
 \label{sec:bundlerest}
 
@@ -8,20 +8,18 @@ The Bundle class does not support differential or other
 mathematical operators.  We do not anticipate providing this 
 functionality in the near future.
 
-\item{\bf Limited validation and options.}
+\item{\bf Limited validation and print options.}
 We are planning to increase the number of validity checks available
-for Bundles as soon as possible, foremost the ability to check 
-that the Fields it contains are on the same Grid.  We also will
+for Bundles as soon as possible.  We also will
 be working on print options.
 
-\item{\bf Limited collective operations.}
-The Bundle class does not automatically support collective field 
-operations.  In order to perform the same operation on Fields within
-a Bundle, you must currently loop over a query for each Field and
-call the method on each Field in turn.  We expect to have 
-interfaces for non-optimized collective operations such as 
-regridding, data communication, and IO shortly.
+\item{\bf Limited communication support.}
+Only a subset of the communication routines are currently supported
+for Bundles.  For those routines not implemented yet the user can
+loop over the Fields in the Bundle and call the Field level 
+communication routines instead.
 
+\item{\bf Packed data not supported.}
 One of the options that we are currently working on for Bundles is
 packing.  Packing means that the data from all the
 Fields that comprise the Bundle are copied into a single Array and
