@@ -1,4 +1,4 @@
-% $Id: ArrayHalo_desc.tex,v 1.3 2004/06/03 22:33:15 cdeluca Exp $
+% $Id: ArrayHalo_desc.tex,v 1.4 2004/06/03 22:35:53 cdeluca Exp $
 
 \label{sec:halo}
 Halo operations update ghost cell or halo regions at the boundaries
@@ -6,7 +6,9 @@ of a local data decomposition.  Halo regions are to be considered
 read-only by the local process; their data values can be used to
 compute the new values for cells which are local to this process,
 but they cannot be updated except by a halo operation.  Haloing is
-supported at the Array and Field level.  
+supported at the Array and Field level.  The description of halo
+regions that follows is phrased in terms of Arrays, but also holds
+for Fields (which contain Arrays).
 
 \subsection{Halo Domains}
 
