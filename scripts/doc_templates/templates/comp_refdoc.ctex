@@ -1,0 +1,116 @@
+% $Id: comp_refdoc.ctex,v 1.1 2002/08/29 02:26:20 eschwab Exp $
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage[T1]{fontenc}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{<Title>}
+\newcommand{\myauthors}{<Authors>}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+%\section{Synopsis}
+#ifdef STANDALONE
+\input{comp_syn}
+#elif defined(CONSTITUENT)
+\input{comppath/comp_syn}
+#endif
+
+\section{Installation and General Usage}
+See the \htmladdnormallink{ESMF User's Guide}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
+usage of the ESMF libraries.
+
+%\section{Architecture}
+#ifdef STANDALONE
+\input{comp_arch}
+#elif defined(CONSTITUENT)
+\input{comppath/comp_arch}
+#endif
+
+\newpage
+\section{<Name1> Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{class_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/class_desc}
+#endif
+
+\subsection{Restrictions}
+#ifdef STANDALONE
+input{class\_rest}
+#elif defined(CONSTITUENT)
+input{comppath/class\_rest}
+#endif
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{class_ex} 
+#elif defined(CONSTITUENT)
+%\input{comppath/class_ex} 
+#endif
+
+\newpage
+\section{<Name2> Class} ...
+
+#ifdef STANDALONE
+%\section{Glossary}
+\input{comp_glos}
+
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+
+\newpage
+\setcounter{section}{1}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+
+\section*{Appendix A:  Fortran Interface}
+\addcontentsline{toc}{section}{Appendix A:  Fortran Interface}
+
+%\input{<Name1>}
+
+\newpage
+\setcounter{section}{2}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+
+\section*{Appendix B:  Class Implementations}
+\addcontentsline{toc}{section}{Appendix B:  Class Implementations}
+
+\subsection{Public Classes}
+
+%\input{<Name1>}
+
+\subsection{Private Classes}
+
+%\input{<Name2>}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
