@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.46 2004/02/13 00:59:41 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.47 2004/03/10 20:38:00 eschwab Exp $'
 
 !==============================================================================
 !
@@ -892,7 +892,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockReadRestart - Restore the contents of a Clock
+! !IROUTINE: ESMF_ClockReadRestart - Restore the contents of a Clock (not implemented)
 
 ! !INTERFACE:
       function ESMF_ClockReadRestart(name, iospec, rc)
@@ -907,7 +907,7 @@
 
 ! !DESCRIPTION:
 !     Restores an {\tt ESMF\_Clock} object from the last call to
-!     {\tt ESMF\_ClockWriteRestart()}.
+!     {\tt ESMF\_ClockWriteRestart()}.  (Not implemented yet).
 !
 !     The arguments are:
 !     \begin{description}
@@ -934,7 +934,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockWriteRestart - Save the contents of a Clock 
+! !IROUTINE: ESMF_ClockWriteRestart - Save the contents of a Clock (not implemented)
 
 ! !INTERFACE:
       subroutine ESMF_ClockWriteRestart(clock, iospec, rc)
@@ -946,7 +946,7 @@
 
 ! !DESCRIPTION:
 !     Saves an {\tt ESMF\_Clock} object.  Default options are to select the
-!     fastest way to save to disk.
+!     fastest way to save to disk.  (Not implemented yet).
 !
 !     The arguments are:
 !     \begin{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.49 2004/03/10 03:05:01 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.50 2004/03/10 20:38:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.49 2004/03/10 03:05:01 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.50 2004/03/10 20:38:03 eschwab Exp $'
 
 !==============================================================================
 !
@@ -872,18 +872,18 @@
       integer(ESMF_KIND_I4),   intent(in),  optional :: m
       integer(ESMF_KIND_I4),   intent(in),  optional :: s
       integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ms
-      integer(ESMF_KIND_I4),   intent(in),  optional :: us
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ns
-      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8
-      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8
-      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8
-      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8
-      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8
-      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8
-      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sN
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sD
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
       type(ESMF_Time),         intent(in),  optional :: startTime
       type(ESMF_Time),         intent(in),  optional :: endTime
       type(ESMF_Calendar),     intent(in),  optional :: calendar
@@ -896,6 +896,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally to integers.
+!     (Fractions and reals not implemented yet).
 !
 !     Ranges are limited only by machine word size.  Numeric defaults are 0,
 !     except for sD, which is 1.
@@ -925,31 +926,31 @@
 !     \item[{[s\_i8]}]
 !          Integer seconds (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0
+!          Integer milliseconds.  Default = 0.  (Not implemented yet).
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0
+!          Integer microseconds.  Default = 0.  (Not implemented yet).
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0
+!          Integer nanoseconds.  Default = 0.  (Not implemented yet).
 !     \item[{[d\_r8]}]
-!          Double precision days.  Default = 0.0
+!          Double precision days.  Default = 0.0.  (Not implemented yet).
 !     \item[{[h\_r8]}]
-!          Double precision hours.  Default = 0.0
+!          Double precision hours.  Default = 0.0.  (Not implemented yet).
 !     \item[{[m\_r8]}]
-!          Double precision minutes.  Default = 0.0
+!          Double precision minutes.  Default = 0.0.  (Not implemented yet).
 !     \item[{[s\_r8]}]
-!          Double precision seconds.  Default = 0.0
+!          Double precision seconds.  Default = 0.0.  (Not implemented yet).
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0
+!          Double precision milliseconds.  Default = 0.0.  (Not implemented yet).
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0
+!          Double precision microseconds.  Default = 0.0.  (Not implemented yet).
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.  Default = 0.0
+!          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
 !     \item[{[sN]}]
 !          Integer numerator portion of fractional seconds (sN/sD).
-!          Default = 0.
+!          Default = 0.  (Not implemented yet).
 !     \item[{[sD]}]
 !          Integer denominator portion of fractional seconds (sN/sD).
-!          Default = 1.
+!          Default = 1.  (Not implemented yet).
 !     \item[{[startTime]}]
 !          Starting time of an absolute calendar interval (yy, mm, and/or d);
 !          pins a calendar interval to a specific point in time.  If not set,
@@ -1019,18 +1020,18 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: m
       integer(ESMF_KIND_I4),   intent(out), optional :: s
       integer(ESMF_KIND_I8),   intent(out), optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(out), optional :: ms
-      integer(ESMF_KIND_I4),   intent(out), optional :: us
-      integer(ESMF_KIND_I4),   intent(out), optional :: ns
-      real(ESMF_KIND_R8),      intent(out), optional :: d_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: h_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: m_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: s_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: us_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8
-      integer(ESMF_KIND_I4),   intent(out), optional :: sN
-      integer(ESMF_KIND_I4),   intent(out), optional :: sD
+      integer(ESMF_KIND_I4),   intent(out), optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Time),         intent(out), optional :: endTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
@@ -1047,6 +1048,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally from integers.
+!     (Fractions and reals not implemented yet).
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time interval is defined to be one day, then
@@ -1086,29 +1088,31 @@
 !     \item[{[s\_i8]}]
 !          Integer seconds (large, >= 64-bit).
 !     \item[{[ms]}]
-!          Integer milliseconds.
+!          Integer milliseconds.  (Not implemented yet).
 !     \item[{[us]}]
-!          Integer microseconds.
+!          Integer microseconds.  (Not implemented yet).
 !     \item[{[ns]}]
-!          Integer nanoseconds.
+!          Integer nanoseconds.  (Not implemented yet).
 !     \item[{[d\_r8]}]
-!          Double precision days.
+!          Double precision days.  (Not implemented yet).
 !     \item[{[h\_r8]}]
-!          Double precision hours.
+!          Double precision hours.  (Not implemented yet).
 !     \item[{[m\_r8]}]
-!          Double precision minutes.
+!          Double precision minutes.  (Not implemented yet).
 !     \item[{[s\_r8]}]
-!          Double precision seconds.
+!          Double precision seconds.  (Not implemented yet).
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.
+!          Double precision milliseconds.  (Not implemented yet).
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.
+!          Double precision microseconds.  (Not implemented yet).
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.
+!          Double precision nanoseconds.  (Not implemented yet).
 !     \item[{[sN]}]
 !          Integer numerator portion of fractional seconds (sN/sD).
+!          (Not implemented yet).
 !     \item[{[sD]}]
 !          Integer denominator portion of fractional seconds (sN/sD).
+!          (Not implemented yet).
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
 !          (yy, mm, and/or d).
@@ -1714,7 +1718,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval
+! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval (not implmented)
 
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalReadRestart(timeInterval, name, iospec, rc)
@@ -1727,7 +1731,7 @@
 
 ! !DESCRIPTION:
 !     Restores an {\tt ESMF\_TimeInterval} object from the last call to
-!     {\tt ESMF\_TimeIntervalWriteRestart()}.
+!     {\tt ESMF\_TimeIntervalWriteRestart()}.  (Not implemented yet).
 !
 !     The arguments are:
 !     \begin{description}
@@ -1757,7 +1761,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalWriteRestart - Save the contents of a TimeInterval
+! !IROUTINE:  ESMF_TimeIntervalWriteRestart - Save the contents of a TimeInterval (not implemented)
 
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalWriteRestart(timeInterval, iospec, rc)
@@ -1769,7 +1773,7 @@
 
 ! !DESCRIPTION:  
 !     Saves an {\tt ESMF\_TimeInterval} object.  Default options are to select
-!     the fastest way to save to disk.
+!     the fastest way to save to disk.  (Not implemented yet).
 !
 !     The arguments are:
 !     \begin{description}

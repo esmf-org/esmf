@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.44 2004/02/11 21:54:05 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.45 2004/03/10 20:37:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.44 2004/02/11 21:54:05 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.45 2004/03/10 20:37:58 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1022,7 +1022,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmReadRestart - Restore the contents of an Alarm
+! !IROUTINE: ESMF_AlarmReadRestart - Restore the contents of an Alarm (not implemented)
 
 ! !INTERFACE:
       function ESMF_AlarmReadRestart(name, iospec, rc)
@@ -1037,7 +1037,7 @@
 
 ! !DESCRIPTION:
 !     Restores an {\tt ESMF\_Alarm} object from the last call to
-!     {\tt ESMF\_AlarmWriteRestart()}.
+!     {\tt ESMF\_AlarmWriteRestart()}.  (Not implemented yet).
 !
 !     The arguments are:
 !     \begin{description}
@@ -1064,7 +1064,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmWriteRestart - Save the contents of an Alarm
+! !IROUTINE: ESMF_AlarmWriteRestart - Save the contents of an Alarm (not implemented)
 
 ! !INTERFACE:
       subroutine ESMF_AlarmWriteRestart(alarm, iospec, rc)
@@ -1076,7 +1076,7 @@
 
 ! !DESCRIPTION:
 !     Saves an {\tt ESMF\_Alarm} object.  Default options are to select the
-!     fastest way to save to disk.
+!     fastest way to save to disk.  (Not implemented yet).
 !
 !     The arguments are:
 !     \begin{description}
