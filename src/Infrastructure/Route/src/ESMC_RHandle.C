@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.7 2004/11/01 23:39:13 nscollins Exp $
+// $Id: ESMC_RHandle.C,v 1.8 2004/11/02 21:51:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.7 2004/11/01 23:39:13 nscollins Exp $";
+       "$Id: ESMC_RHandle.C,v 1.8 2004/11/02 21:51:55 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -302,8 +302,8 @@
     printf(msgbuf);
     if (rhandle1) 
 	rhandle1->ESMC_RoutePrint(options);
-    if (rhandle1) 
-	rhandle1->ESMC_RoutePrint(options);
+    if (rhandle2) 
+	rhandle2->ESMC_RoutePrint(options);
     //if (tvalues)
     //    tvalues->ESMC_TransformValuesPrint(options);
 
