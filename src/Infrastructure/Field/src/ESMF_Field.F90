@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.21 2003/04/28 19:00:40 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.22 2003/04/29 16:23:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.21 2003/04/28 19:00:40 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.22 2003/04/29 16:23:45 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1782,6 +1782,7 @@
       logical :: apresent                         ! Array present
       logical :: bpresent                         ! Buffer present
       character(len=ESMF_MAXSTR) :: str
+      type(ESMF_FieldType), pointer :: ftypep
 
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -1795,14 +1796,14 @@
 
       ! Minimal error checking 
       if (.not.associated(field%ftypep)) then
-        print *, "Invalid or Destroyed Field"
-        if (present(rc)) rc = ESMF_FAILURE
+        print *, "ESMF_FieldGetData: Invalid or Destroyed Field"
         return
       endif
 
-      if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-        print *, "Field not ready"
-        if (present(rc)) rc = ESMF_FAILURE
+      ftypep => field%ftypep
+
+      if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+        print *, "ESMF_FieldGetData: Field not ready"
         return
       endif
 
@@ -1811,12 +1812,14 @@
       if(present(buffer)) bpresent=.TRUE.
 
       if(apresent) then
-          ! TODO: check that an array is associated with the field
-          !  if (field%ptr%localfield%datastatus .eq. ...)
+          if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+              print *, "ESMF_FieldGetData: no data associated with field"
+              return
+          endif
 
-          call ESMF_StatusString(field%ftypep%datastatus, str, rc)
-          print *, "getting array data, status = ", trim(str)
-          array = field%ftypep%localfield%localdata
+          !call ESMF_StatusString(ftypep%datastatus, str, rc)
+          !print *, "getting array data, status = ", trim(str)
+          array = ftypep%localfield%localdata
       endif 
    
       if(bpresent) then
