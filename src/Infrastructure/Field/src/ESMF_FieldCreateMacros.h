@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.5 2004/06/23 10:45:28 nscollins Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.5.4.1 2005/02/09 18:47:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
                                 ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        array = ESMF_ArrayCreate(fptr, copyflag, rc=status) @\
+        array = ESMF_ArrayCreate(fptr, copyflag, haloWidth, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
