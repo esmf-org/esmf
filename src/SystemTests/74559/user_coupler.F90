@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2003/04/17 17:31:23 nscollins Exp $
+! $Id: user_coupler.F90,v 1.3 2003/04/24 16:52:18 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -55,9 +55,9 @@
     
     subroutine user_init(comp, statelist, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State), optional :: statelist
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+        type(ESMF_State) :: statelist
+        type(ESMF_Clock) :: clock
+        integer :: rc
 
 !     ! Local variables
         type(ESMF_State) :: toflow, fromflow
@@ -98,9 +98,9 @@
  
     subroutine user_run(comp, statelist, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State), optional :: statelist
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+        type(ESMF_State) :: statelist
+        type(ESMF_Clock) :: clock
+        integer :: rc
 
       ! Local variables
         type(ESMF_State) :: mysource, mydest
@@ -152,9 +152,9 @@
  
     subroutine user_final(comp, statelist, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State), optional :: statelist
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+        type(ESMF_State) :: statelist
+        type(ESMF_Clock) :: clock
+        integer :: rc
 
       ! Local variables
         type(ESMF_State) :: state1, state2
