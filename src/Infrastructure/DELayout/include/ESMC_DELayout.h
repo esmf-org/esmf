@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.8 2004/04/28 23:11:48 cdeluca Exp $
+// $Id: ESMC_DELayout.h,v 1.9 2004/04/30 20:24:11 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -96,15 +96,15 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_DELayoutPrint(void);
     int ESMC_DELayoutValidate(void);
     // Communication
-    int ESMC_DELayoutCopy(void **srcdata, void **destdata, 
+    int ESMC_DELayoutSend(void **srcdata, void **destdata, 
       int blen, int srcDE, int destDE, ESMC_Logical oneToOneFlag);
-    int ESMC_DELayoutCopy(void **srcdata, void **destdata, 
+    int ESMC_DELayoutSend(void **srcdata, void **destdata, 
       int len, ESMC_DataKind dtk, int srcDE, int destDE, 
       ESMC_Logical oneToOneFlag);
-    int ESMC_DELayoutCopyCopy(void **srcData1, void **srcData2, 
+    int ESMC_DELayoutSendRecv(void **srcData1, void **srcData2, 
       void **dstData1, void **dstData2, int blen1, int blen2, int de1, int de2,
       ESMC_Logical oneToOneFlag);
-    int ESMC_DELayoutCopyCopy(void **srcData1, void **srcData2, 
+    int ESMC_DELayoutSendRecv(void **srcData1, void **srcData2, 
       void **dstData1, void **dstData2, int len1, int len2, ESMC_DataKind dtk1,
       ESMC_DataKind dtk2, int de1, int de2, ESMC_Logical oneToOneFlag);
     int ESMC_DELayoutBcast(void **data, int blen, int rootDE, 

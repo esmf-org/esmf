@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.19 2004/04/28 23:11:49 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.20 2004/04/30 20:24:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,7 +126,6 @@
       public ESMF_R4_AP
       public ESMF_R8_AP
       public ESMF_DELayoutData
-      !public ESMF_DELayoutCommHandle
       
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
@@ -153,8 +152,8 @@
       public ESMF_DELayoutDataCreate
       public ESMF_DELayoutDataDestroy
 
-      public ESMF_DELayoutCopy
-      public ESMF_DELayoutCopyCopy
+      public ESMF_DELayoutSend
+      public ESMF_DELayoutSendRecv
       public ESMF_DELayoutScatter
       public ESMF_DELayoutGather
       public ESMF_DELayoutAllGlobalReduce
@@ -166,7 +165,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.19 2004/04/28 23:11:49 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.20 2004/04/30 20:24:11 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -191,8 +190,6 @@
 !EOPI 
       end interface
 
-!==============================================================================
-      
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_DELayoutDataCreate -- Generic interface
@@ -212,52 +209,46 @@
 !EOPI 
       end interface
 
-!==============================================================================
-
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_DELayoutCopy -- Generic interface
+! !IROUTINE: ESMF_DELayoutSend -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_DELayoutCopy
+      interface ESMF_DELayoutSend
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_DELayoutCopyGeneral
-      module procedure ESMF_DELayoutCopyI4
-      module procedure ESMF_DELayoutCopyR4
-      module procedure ESMF_DELayoutCopyR8
+      module procedure ESMF_DELayoutSendGeneral
+      module procedure ESMF_DELayoutSendI4
+      module procedure ESMF_DELayoutSendR4
+      module procedure ESMF_DELayoutSendR8
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_DELayoutCopy} functions.   
+!  types of {\tt ESMF\_DELayoutSend} functions.   
 !EOPI 
       end interface
 
-!==============================================================================
-      
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_DELayoutCopyCopy -- Generic interface
+! !IROUTINE: ESMF_DELayoutSendRecv -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_DELayoutCopyCopy
+      interface ESMF_DELayoutSendRecv
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_DELayoutCopyCopyGeneral
-      module procedure ESMF_DELayoutCopyCopyI4
-      module procedure ESMF_DELayoutCopyCopyR4
-      module procedure ESMF_DELayoutCopyCopyR8
+      module procedure ESMF_DELayoutSendRecvGeneral
+      module procedure ESMF_DELayoutSendRecvI4
+      module procedure ESMF_DELayoutSendRecvR4
+      module procedure ESMF_DELayoutSendRecvR8
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_DELayoutCopyCopy} functions.   
+!  types of {\tt ESMF\_DELayoutSendRecv} functions.   
 !EOPI 
       end interface
 
-!==============================================================================
-      
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_DELayoutScatter -- Generic interface
@@ -278,8 +269,6 @@
 !EOPI 
       end interface
 
-!==============================================================================
-      
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_DELayoutGather -- Generic interface
@@ -300,8 +289,6 @@
 !EOPI 
       end interface
 
-!==============================================================================
-      
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_DELayoutAllGlobalReduce -- Generic interface
@@ -329,6 +316,433 @@
 
 contains
       
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce I4 data on a general DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
+  subroutine ESMF_DELayoutGlobReduceGenI4(delayout, srcData, &
+    dstData, count, operation, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    type(ESMF_DELayoutData),       intent(in)            :: srcData
+    integer,                       intent(out)           :: dstData
+    integer,                       intent(in)            :: count
+    type(ESMF_newOp),              intent(in)            :: operation
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Reduce I4 data to a single value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements per DE to be considered.
+!     \item[operation] 
+!          Reduction operation.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
+      count, ESMF_I4, operation, ESMF_FALSE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGlobReduceGenI4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R4 data on a general DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
+  subroutine ESMF_DELayoutGlobReduceGenR4(delayout, srcData, &
+    dstData, count, operation, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    type(ESMF_DELayoutData),       intent(in)            :: srcData
+    real(ESMF_KIND_R4),            intent(out)           :: dstData
+    integer,                       intent(in)            :: count
+    type(ESMF_newOp),              intent(in)            :: operation
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Reduce R4 data to a single value
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements per DE to be considered.
+!     \item[operation] 
+!          Reduction operation.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
+      count, ESMF_R4, operation, ESMF_FALSE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGlobReduceGenR4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R8 data on a general DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
+  subroutine ESMF_DELayoutGlobReduceGenR8(delayout, srcData, &
+    dstData, count, operation,  blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),        intent(in)            :: delayout
+    type(ESMF_DELayoutData),       intent(in)            :: srcData
+    real(ESMF_KIND_R8),            intent(out)           :: dstData
+    integer,                       intent(in)            :: count
+    type(ESMF_newOp),              intent(in)            :: operation
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Reduce R8 data to a single value
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements per DE to be considered.
+!     \item[operation] 
+!          Reduction operation.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
+      count, ESMF_R8, operation, ESMF_FALSE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGlobReduceGenR8
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce I4 data on a one-to-one DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
+  subroutine ESMF_DELayoutGlobReduceI4(delayout, srcData, &
+    dstData, count, operation, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    integer(ESMF_KIND_I4),         intent(in)            :: srcData(:)
+    integer,                       intent(out)           :: dstData
+    integer,                       intent(in)            :: count
+    type(ESMF_newOp),              intent(in)            :: operation
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Reduce I4 data to a single value
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements per DE to be considered.
+!     \item[operation] 
+!          Reduction operation.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
+      count, ESMF_I4, operation, ESMF_TRUE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGlobReduceI4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R4 data on a one-to-one DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
+  subroutine ESMF_DELayoutGlobReduceR4(delayout, srcData, &
+    dstData, count, operation, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    real(ESMF_KIND_R4),            intent(in)            :: srcData(:)
+    real(ESMF_KIND_R4),            intent(out)           :: dstData
+    integer,                       intent(in)            :: count
+    type(ESMF_newOp),              intent(in)            :: operation
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Reduce R4 data to a single value
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements per DE to be considered.
+!     \item[operation] 
+!          Reduction operation.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
+      count, ESMF_R4, operation, ESMF_TRUE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGlobReduceR4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R8 data on a one-to-one DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
+  subroutine ESMF_DELayoutGlobReduceR8(delayout, srcData, &
+    dstData, count, operation, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    real(ESMF_KIND_R8),            intent(in)            :: srcData(:)
+    real(ESMF_KIND_R8),            intent(out)           :: dstData
+    integer,                       intent(in)            :: count
+    type(ESMF_newOp),              intent(in)            :: operation
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Reduce R4 data to a single value
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements per DE to be considered.
+!     \item[operation] 
+!          Reduction operation.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
+      count, ESMF_R8, operation, ESMF_TRUE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGlobReduceR8
+!------------------------------------------------------------------------------
         
 !------------------------------------------------------------------------------
 !BOP
@@ -505,6 +919,307 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_DELayoutGather - Gather data on a general DELayout
+
+! !INTERFACE:
+  subroutine ESMF_DELayoutGatherGeneral(delayout, srcData, dstData, count, &
+    root, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    type(ESMF_DELayoutData),       intent(in)            :: srcData
+    type(ESMF_DELayoutData),       intent(out)           :: dstData
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: root
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     MPI-like Gather
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements gathered from each DE.
+!     \item[root] 
+!          Root DE.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: blen
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Determine the number of bytes that need to be copied dependent on type
+    if (srcData%dtk == ESMF_I4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
+      ESMF_FALSE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutGather error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGatherGeneral
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutGather - Gather I4 data on a one-to-one DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutGather()
+  subroutine ESMF_DELayoutGatherI4(delayout, srcData, dstData, count, &
+    root, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    integer(ESMF_KIND_I4),         intent(in)            :: srcData(:)
+    integer(ESMF_KIND_I4),         intent(out)           :: dstData(:)
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: root
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     MPI-like Gather
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements gathered from each DE.
+!     \item[root] 
+!          Root DE.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: blen
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Determine the number of bytes that need to be copied dependent on type
+    blen = count * 4 ! 4 bytes
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
+      ESMF_TRUE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutGather error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGatherI4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutGather - Gather R4 data on a one-to-one DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutGather()
+  subroutine ESMF_DELayoutGatherR4(delayout, srcData, dstData, count, &
+    root, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    real(ESMF_KIND_R4),            intent(in)            :: srcData(:)
+    real(ESMF_KIND_R4),            intent(out)           :: dstData(:)
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: root
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     MPI-like Gather
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements gathered from each DE.
+!     \item[root] 
+!          Root DE.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: blen
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Determine the number of bytes that need to be copied dependent on type
+    blen = count * 4 ! 4 bytes
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
+      ESMF_TRUE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutGather error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGatherR4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutGather - Gather R8 data on a one-to-one DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutGather()
+  subroutine ESMF_DELayoutGatherR8(delayout, srcData, dstData, count, &
+    root, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    real(ESMF_KIND_R8),            intent(in)            :: srcData(:)
+    real(ESMF_KIND_R8),            intent(out)           :: dstData(:)
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: root
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     MPI-like Gather
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements gathered from each DE.
+!     \item[root] 
+!          Root DE.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: blen
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Determine the number of bytes that need to be copied dependent on type
+    blen = count * 8 ! 8 bytes
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
+      ESMF_TRUE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutGather error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutGatherR8
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_DELayoutGet - Get internal info
 
 ! !INTERFACE:
@@ -603,7 +1318,7 @@ contains
     connectionList, connectionWeightList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout), intent(in)            :: delayout
+    type(ESMF_DELayout),    intent(in)            :: delayout
     integer,                intent(in)            :: de
     integer, target,        intent(out), optional :: coord(:)
     integer,                intent(out), optional :: connectionCount
@@ -697,16 +1412,16 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutGetDEMatch - Match DE's between Layouts
+! !IROUTINE: ESMF_DELayoutGetDEMatch - Match DE's between DELayouts
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGetDEMatch(delayout, de, delayoutMatch, &
     deMatchCount, deMatchList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout), intent(in)            :: delayout
+    type(ESMF_DELayout),    intent(in)            :: delayout
     integer,                intent(in)            :: de
-    type(ESMF_DELayout), intent(in)            :: delayoutMatch
+    type(ESMF_DELayout),    intent(in)            :: delayoutMatch
     integer,                intent(out), optional :: deMatchCount
     integer, target,        intent(out), optional :: deMatchList(:)
     integer,                intent(out), optional :: rc  
@@ -780,7 +1495,7 @@ contains
   subroutine ESMF_DELayoutPrint(delayout, options, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout), intent(in)      :: delayout
+    type(ESMF_DELayout),    intent(in)      :: delayout
     character(len=*), intent(in), optional  :: options
     integer, intent(out), optional          :: rc  
 !         
@@ -825,464 +1540,9 @@ contains
   end subroutine ESMF_DELayoutPrint
 !------------------------------------------------------------------------------
 
-
-
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutDataCreate - Create I4 DELayoutData
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutDataCreate()
-  function ESMF_DELayoutDataCreateI4(array, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_I4_AP), intent(in)            :: array(:)
-    integer,          intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-      type(ESMF_DELayoutData) :: ESMF_DELayoutDataCreateI4
-!
-! !DESCRIPTION:
-!     Create I4 DELayoutData
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!          ESMF\_I4\_AP array.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    type(ESMF_DELayoutData):: mydata    ! new object
-    integer :: status                   ! local error status
-    logical :: rcpresent
-    integer :: i
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
-    ! Initialize the pointer to null.
-    mydata%this = ESMF_NULL_POINTER
-    
-    ! Initialize members
-    mydata%n = size(array)          ! number of pointers in the pointer array
-    allocate(mydata%len(mydata%n))  
-    do i=1, mydata%n
-      mydata%len(i) = size(array(i)%ap)! number of elments for this pointer el.
-    enddo
-    mydata%dtk = ESMF_I4    !data type and kind
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutDataCreate(mydata, mydata%n, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutDataCreate error"
-      return
-    endif
-
-    do i=1, mydata%n
-      call c_ESMC_nDELayoutDataAdd(mydata, array(i)%ap, i, status)
-      if (status /= ESMF_SUCCESS) then
-        print *, "c_ESMC_nDELayoutDataAdd error"
-        return
-      endif
-    enddo
-
-    ! set return values
-    ESMF_DELayoutDataCreateI4 = mydata 
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end function ESMF_DELayoutDataCreateI4
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutDataCreate - Create R4 DELayoutData
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutDataCreate()
-  function ESMF_DELayoutDataCreateR4(array, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_R4_AP), intent(in)            :: array(:)
-    integer,          intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-      type(ESMF_DELayoutData) :: ESMF_DELayoutDataCreateR4
-!
-! !DESCRIPTION:
-!     Create R4 DELayoutData
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!          ESMF\_R4\_AP array.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    type(ESMF_DELayoutData):: mydata    ! new object
-    integer :: status                   ! local error status
-    logical :: rcpresent
-    integer :: i
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
-    ! Initialize the pointer to null.
-    mydata%this = ESMF_NULL_POINTER
-    
-    ! Initialize members
-    mydata%n = size(array)          ! number of pointers in the pointer array
-    allocate(mydata%len(mydata%n))  
-    do i=1, mydata%n
-      mydata%len(i) = size(array(i)%ap)! number of elments for this pointer el.
-    enddo
-    mydata%dtk = ESMF_R4    !data type and kind
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutDataCreate(mydata, mydata%n, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutDataCreate error"
-      return
-    endif
-
-    do i=1, mydata%n
-      call c_ESMC_nDELayoutDataAdd(mydata, array(i)%ap, i, status)
-      if (status /= ESMF_SUCCESS) then
-        print *, "c_ESMC_nDELayoutDataAdd error"
-        return
-      endif
-    enddo
-
-    ! set return values
-    ESMF_DELayoutDataCreateR4 = mydata 
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end function ESMF_DELayoutDataCreateR4
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutDataCreate - Create R8 DELayoutData
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutDataCreate()
-  function ESMF_DELayoutDataCreateR8(array, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_R8_AP), intent(in)            :: array(:)
-    integer,          intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-      type(ESMF_DELayoutData) :: ESMF_DELayoutDataCreateR8
-!
-! !DESCRIPTION:
-!     Create R8 DELayoutData
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!          ESMF\_R8\_AP array.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    type(ESMF_DELayoutData):: mydata    ! new object
-    integer :: status                   ! local error status
-    logical :: rcpresent
-    integer :: i
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
-    ! Initialize the pointer to null.
-    mydata%this = ESMF_NULL_POINTER
-    
-    ! Initialize members
-    mydata%n = size(array)          ! number of pointers in the pointer array
-    allocate(mydata%len(mydata%n))  
-    do i=1, mydata%n
-      mydata%len(i) = size(array(i)%ap)! number of elments for this pointer el.
-    enddo
-    mydata%dtk = ESMF_R8    !data type and kind
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutDataCreate(mydata, mydata%n, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutDataCreate error"
-      return
-    endif
-
-    do i=1, mydata%n
-      call c_ESMC_nDELayoutDataAdd(mydata, array(i)%ap, i, status)
-      if (status /= ESMF_SUCCESS) then
-        print *, "c_ESMC_nDELayoutDataAdd error"
-        return
-      endif
-    enddo
-
-    ! set return values
-    ESMF_DELayoutDataCreateR8 = mydata 
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end function ESMF_DELayoutDataCreateR8
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutDataDestroy - Destroy a DELayoutData object
-
-! !INTERFACE:
-  subroutine ESMF_DELayoutDataDestroy(delayoutData, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayoutData), intent(inout)         ::  delayoutData 
-    integer,                 intent(out), optional ::  rc  
-!         
-!
-! !DESCRIPTION:
-!     Destroy a DELayoutData object
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayoutData] 
-!          ESMF\_DELayoutData object.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutDataDestroy(delayoutData, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutDataDestroy error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutDataDestroy
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-! Communication Routines (General DELayout)
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutCopy - Copy data between DEs in a DELayout
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutCopy()
-  subroutine ESMF_DELayoutCopyGeneral(delayout, srcData, dstData, count, &
-    src, dst, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    type(ESMF_DELayoutData),       intent(in)            :: srcData
-    type(ESMF_DELayoutData),       intent(out)           :: dstData
-    integer,                       intent(in)            :: count
-    integer,                       intent(in)            :: src
-    integer,                       intent(in)            :: dst
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Copy data between DEs in a DELayout
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements to be copied.
-!     \item[src] 
-!          Source DE.
-!     \item[dst] 
-!          Destination DE.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    integer :: blen
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Determine the number of bytes that need to be copied dependent on type
-    if (srcData%dtk == ESMF_I4) blen = count * 4 ! 4 bytes
-    if (srcData%dtk == ESMF_R4) blen = count * 4 ! 4 bytes
-    if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
-      ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutCopy error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutCopyGeneral
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutCopyCopy - 
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutCopyCopy()
-  subroutine ESMF_DELayoutCopyCopyGeneral(delayout, srcData1, srcData2, &
-    dstData1, dstData2, count1, count2, de1, de2, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    type(ESMF_DELayoutData),       intent(in)            :: srcData1
-    type(ESMF_DELayoutData),       intent(in)            :: srcData2
-    type(ESMF_DELayoutData),       intent(out)           :: dstData1
-    type(ESMF_DELayoutData),       intent(out)           :: dstData2
-    integer,                       intent(in)            :: count1
-    integer,                       intent(in)            :: count2
-    integer,                       intent(in)            :: de1
-    integer,                       intent(in)            :: de2
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Copy data between DEs in a DELayout
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData1]
-!          Source data reference located on de1
-!     \item[srcData2]
-!          Source data reference located on de2
-!     \item[dstData1]
-!          Destination data reference located on de1
-!     \item[dstData2]
-!          Destination data reference located on de2
-!     \item[count1]
-!          Number of elements to be copied from de1 to de2
-!     \item[count2]
-!          Number of elements to be copied from de2 to de1
-!     \item[de1]
-!          Id of de1.
-!     \item[de2]
-!          Id of de2.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}]
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    integer :: blen1, blen2
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Determine the number of bytes that need to be copied dependent on type
-    if (srcData1%dtk == ESMF_I4) blen1 = count1 * 4 ! 4 bytes
-    if (srcData1%dtk == ESMF_R4) blen1 = count1 * 4 ! 4 bytes
-    if (srcData1%dtk == ESMF_R8) blen1 = count1 * 8 ! 8 bytes
-    if (srcData2%dtk == ESMF_I4) blen2 = count2 * 4 ! 4 bytes
-    if (srcData2%dtk == ESMF_R4) blen2 = count2 * 4 ! 4 bytes
-    if (srcData2%dtk == ESMF_R8) blen2 = count2 * 8 ! 8 bytes
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutCopyCopy(delayout, srcData1, srcData2, &
-      dstData1, dstData2, blen1, blen2, de1, de2, ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutCopyCopy error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutCopyCopyGeneral
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutScatter - MPI-like Scatter
+! !IROUTINE: ESMF_DELayoutScatter - Scatter data on a general DELayout
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutScatter()
@@ -1359,801 +1619,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutGather - MPI-like Gather
-
-! !INTERFACE:
-  subroutine ESMF_DELayoutGatherGeneral(delayout, srcData, dstData, count, &
-    root, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    type(ESMF_DELayoutData),       intent(in)            :: srcData
-    type(ESMF_DELayoutData),       intent(out)           :: dstData
-    integer,                       intent(in)            :: count
-    integer,                       intent(in)            :: root
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     MPI-like Gather
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements gathered from each DE.
-!     \item[root] 
-!          Root DE.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    integer :: blen
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Determine the number of bytes that need to be copied dependent on type
-    if (srcData%dtk == ESMF_I4) blen = count * 4 ! 4 bytes
-    if (srcData%dtk == ESMF_R4) blen = count * 4 ! 4 bytes
-    if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
-      ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutGather error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutGatherGeneral
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce I4 data to a single value
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutGlobReduceGenI4(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    type(ESMF_DELayoutData),       intent(in)            :: srcData
-    integer,                       intent(out)           :: dstData
-    integer,                       intent(in)            :: count
-    type(ESMF_newOp),              intent(in)            :: operation
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Reduce I4 data to a single value
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements per DE to be considered.
-!     \item[operation] 
-!          Reduction operation.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_I4, operation, ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutGlobReduceGenI4
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R4 data to a single value
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutGlobReduceGenR4(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    type(ESMF_DELayoutData),       intent(in)            :: srcData
-    real(ESMF_KIND_R4),            intent(out)           :: dstData
-    integer,                       intent(in)            :: count
-    type(ESMF_newOp),              intent(in)            :: operation
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_CommHandle), intent(out), optional :: commHandle
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Reduce R4 data to a single value
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements per DE to be considered.
-!     \item[operation] 
-!          Reduction operation.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_R4, operation, ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutGlobReduceGenR4
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R8 data to a single value
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutGlobReduceGenR8(delayout, srcData, &
-    dstData, count, operation,  blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    type(ESMF_DELayoutData),       intent(in)            :: srcData
-    real(ESMF_KIND_R8),            intent(out)           :: dstData
-    integer,                       intent(in)            :: count
-    type(ESMF_newOp),              intent(in)            :: operation
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_CommHandle), intent(out), optional :: commHandle
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Reduce R8 data to a single value
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements per DE to be considered.
-!     \item[operation] 
-!          Reduction operation.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_R8, operation, ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutGlobReduceGenR8
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-! Communication Routines (1-to-1 DELayout)
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutCopy - Copy data between DEs in a DELayout
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutCopy()
-  subroutine ESMF_DELayoutCopyI4(delayout, srcData, dstData, count, &
-    src, dst, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    integer(ESMF_KIND_I4),         intent(in)            :: srcData(:)
-    integer(ESMF_KIND_I4),         intent(out)           :: dstData(:)
-    integer,                       intent(in)            :: count
-    integer,                       intent(in)            :: src
-    integer,                       intent(in)            :: dst
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Copy data between DEs in a DELayout
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements to be copied.
-!     \item[src] 
-!          Source DE.
-!     \item[dst] 
-!          Destination DE.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    integer :: blen
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Determine the number of bytes that need to be copied dependent on type
-    blen = count * 4 ! 4 bytes
-
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
-      ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutCopy error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutCopyI4
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutCopy - Copy data between DEs in a DELayout
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutCopy()
-  subroutine ESMF_DELayoutCopyR4(delayout, srcData, dstData, count, &
-    src, dst, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    real(ESMF_KIND_R4),            intent(in)            :: srcData(:)
-    real(ESMF_KIND_R4),            intent(out)           :: dstData(:)
-    integer,                       intent(in)            :: count
-    integer,                       intent(in)            :: src
-    integer,                       intent(in)            :: dst
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Copy data between DEs in a DELayout
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements to be copied.
-!     \item[src] 
-!          Source DE.
-!     \item[dst] 
-!          Destination DE.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    integer :: blen
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Determine the number of bytes that need to be copied dependent on type
-    blen = count * 4 ! 4 bytes
-
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
-      ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutCopy error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutCopyR4
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutCopy - Copy data between DEs in a DELayout
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutCopy()
-  subroutine ESMF_DELayoutCopyR8(delayout, srcData, dstData, count, &
-    src, dst, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    real(ESMF_KIND_R8),            intent(in)            :: srcData(:)
-    real(ESMF_KIND_R8),            intent(out)           :: dstData(:)
-    integer,                       intent(in)            :: count
-    integer,                       intent(in)            :: src
-    integer,                       intent(in)            :: dst
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Copy data between DEs in a DELayout
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements to be copied.
-!     \item[src] 
-!          Source DE.
-!     \item[dst] 
-!          Destination DE.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    integer :: blen
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Determine the number of bytes that need to be copied dependent on type
-    blen = count * 8 ! 8 bytes
-
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
-      ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutCopy error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutCopyR8
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutCopyCopy - 
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutCopyCopy()
-  subroutine ESMF_DELayoutCopyCopyI4(delayout, srcData1, srcData2, &
-    dstData1, dstData2, count1, count2, de1, de2, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    integer(ESMF_KIND_I4),         intent(in)            :: srcData1(:)
-    integer(ESMF_KIND_I4),         intent(in)            :: srcData2(:)
-    integer(ESMF_KIND_I4),         intent(out)           :: dstData1(:)
-    integer(ESMF_KIND_I4),         intent(out)           :: dstData2(:)
-    integer,                       intent(in)            :: count1
-    integer,                       intent(in)            :: count2
-    integer,                       intent(in)            :: de1
-    integer,                       intent(in)            :: de2
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Copy data between DEs in a DELayout
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData1]
-!          Source data reference located on de1
-!     \item[srcData2]
-!          Source data reference located on de2
-!     \item[dstData1]
-!          Destination data reference located on de1
-!     \item[dstData2]
-!          Destination data reference located on de2
-!     \item[count1]
-!          Number of elements to be copied from de1 to de2
-!     \item[count2]
-!          Number of elements to be copied from de2 to de1
-!     \item[de1]
-!          Id of de1.
-!     \item[de2]
-!          Id of de2.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}]
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    integer :: blen1, blen2
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Determine the number of bytes that need to be copied dependent on type
-    blen1 = count1 * 4 ! 4 bytes
-    blen2 = count2 * 4 ! 4 bytes
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutCopyCopy(delayout, srcData1, srcData2, &
-      dstData1, dstData2, blen1, blen2, de1, de2, ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutCopyCopy error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutCopyCopyI4
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutCopyCopy - 
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutCopyCopy()
-  subroutine ESMF_DELayoutCopyCopyR4(delayout, srcData1, srcData2, &
-    dstData1, dstData2, count1, count2, de1, de2, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    real(ESMF_KIND_R4),            intent(in)            :: srcData1(:)
-    real(ESMF_KIND_R4),            intent(in)            :: srcData2(:)
-    real(ESMF_KIND_R4),            intent(out)           :: dstData1(:)
-    real(ESMF_KIND_R4),            intent(out)           :: dstData2(:)
-    integer,                       intent(in)            :: count1
-    integer,                       intent(in)            :: count2
-    integer,                       intent(in)            :: de1
-    integer,                       intent(in)            :: de2
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Copy data between DEs in a DELayout
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData1]
-!          Source data reference located on de1
-!     \item[srcData2]
-!          Source data reference located on de2
-!     \item[dstData1]
-!          Destination data reference located on de1
-!     \item[dstData2]
-!          Destination data reference located on de2
-!     \item[count1]
-!          Number of elements to be copied from de1 to de2
-!     \item[count2]
-!          Number of elements to be copied from de2 to de1
-!     \item[de1]
-!          Id of de1.
-!     \item[de2]
-!          Id of de2.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}]
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    integer :: blen1, blen2
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Determine the number of bytes that need to be copied dependent on type
-    blen1 = count1 * 4 ! 4 bytes
-    blen2 = count2 * 4 ! 4 bytes
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutCopyCopy(delayout, srcData1, srcData2, &
-      dstData1, dstData2, blen1, blen2, de1, de2, ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutCopyCopy error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutCopyCopyR4
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutCopyCopy - 
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutCopyCopy()
-  subroutine ESMF_DELayoutCopyCopyR8(delayout, srcData1, srcData2, &
-    dstData1, dstData2, count1, count2, de1, de2, blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    real(ESMF_KIND_R8),            intent(in)            :: srcData1(:)
-    real(ESMF_KIND_R8),            intent(in)            :: srcData2(:)
-    real(ESMF_KIND_R8),            intent(out)           :: dstData1(:)
-    real(ESMF_KIND_R8),            intent(out)           :: dstData2(:)
-    integer,                       intent(in)            :: count1
-    integer,                       intent(in)            :: count2
-    integer,                       intent(in)            :: de1
-    integer,                       intent(in)            :: de2
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
-    integer,                       intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Copy data between DEs in a DELayout
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          DELayout object.
-!     \item[srcData1]
-!          Source data reference located on de1
-!     \item[srcData2]
-!          Source data reference located on de2
-!     \item[dstData1]
-!          Destination data reference located on de1
-!     \item[dstData2]
-!          Destination data reference located on de2
-!     \item[count1]
-!          Number of elements to be copied from de1 to de2
-!     \item[count2]
-!          Number of elements to be copied from de2 to de1
-!     \item[de1]
-!          Id of de1.
-!     \item[de2]
-!          Id of de2.
-!     \item[{[blockingFlag]}]
-!          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}]
-!          Must be present for non-blocking calls, providing handle for Wait.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    integer :: blen1, blen2
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Determine the number of bytes that need to be copied dependent on type
-    blen1 = count1 * 8 ! 8 bytes
-    blen2 = count2 * 8 ! 8 bytes
-    
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutCopyCopy(delayout, srcData1, srcData2, &
-      dstData1, dstData2, blen1, blen2, de1, de2, ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutCopyCopy error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DELayoutCopyCopyR8
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutScatter - MPI-like Scatter
+! !IROUTINE: ESMF_DELayoutScatter - Scatter I4 data 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutScatter()
@@ -2161,7 +1627,7 @@ contains
     root, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
+    type(ESMF_DELayout),           intent(in)            :: delayout
     integer(ESMF_KIND_I4),         intent(in)            :: srcData(:)
     integer(ESMF_KIND_I4),         intent(out)           :: dstData(:)
     integer,                       intent(in)            :: count
@@ -2228,7 +1694,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutScatter - MPI-like Scatter
+! !IROUTINE: ESMF_DELayoutScatter - Scatter R4 data
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutScatter()
@@ -2236,7 +1702,7 @@ contains
     root, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
+    type(ESMF_DELayout),           intent(in)            :: delayout
     real(ESMF_KIND_R4),            intent(in)            :: srcData(:)
     real(ESMF_KIND_R4),            intent(out)           :: dstData(:)
     integer,                       intent(in)            :: count
@@ -2303,7 +1769,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutScatter - MPI-like Scatter
+! !IROUTINE: ESMF_DELayoutScatter - Scatter R8 data
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutScatter()
@@ -2311,7 +1777,7 @@ contains
     root, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
+    type(ESMF_DELayout),           intent(in)            :: delayout
     real(ESMF_KIND_R8),            intent(in)            :: srcData(:)
     real(ESMF_KIND_R8),            intent(out)           :: dstData(:)
     integer,                       intent(in)            :: count
@@ -2377,27 +1843,111 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+
 !BOP
-! !IROUTINE: ESMF_DELayoutGather - MPI-like Gather
+! !IROUTINE: ESMF_DELayoutSend - Send data between DEs in a general DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutGather()
-  subroutine ESMF_DELayoutGatherI4(delayout, srcData, dstData, count, &
-    root, blockingFlag, commHandle, rc)
+  ! Private name; call using ESMF_DELayoutSend()
+  subroutine ESMF_DELayoutSendGeneral(delayout, srcData, dstData, count, &
+    src, dst, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    type(ESMF_DELayoutData),       intent(in)            :: srcData
+    type(ESMF_DELayoutData),       intent(out)           :: dstData
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: src
+    integer,                       intent(in)            :: dst
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
+    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Copy data between DEs in a DELayout
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData] 
+!          Source data.
+!     \item[dstData] 
+!          Destination data.
+!     \item[count] 
+!          Number of elements to be copied.
+!     \item[src] 
+!          Source DE.
+!     \item[dst] 
+!          Destination DE.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}] 
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: blen
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Determine the number of bytes that need to be copied dependent on type
+    if (srcData%dtk == ESMF_I4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutSend(delayout, srcData, dstData, blen, src, dst, &
+      ESMF_FALSE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutSend error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutSendGeneral
+
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutSend - Send I4 data between DEs in a one-to-one DELayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutSend()
+  subroutine ESMF_DELayoutSendI4(delayout, srcData, dstData, count, &
+    src, dst, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
     integer(ESMF_KIND_I4),         intent(in)            :: srcData(:)
     integer(ESMF_KIND_I4),         intent(out)           :: dstData(:)
     integer,                       intent(in)            :: count
-    integer,                       intent(in)            :: root
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(in)            :: src
+    integer,                       intent(in)            :: dst
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
+    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
-!     MPI-like Gather
+!     Copy data between DEs in a DELayout.  The {\tt delayout} must be
+!     one-to-one with the PETs in its associated VM.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2408,9 +1958,11 @@ contains
 !     \item[dstData] 
 !          Destination data.
 !     \item[count] 
-!          Number of elements gathered from each DE.
-!     \item[root] 
-!          Root DE.
+!          Number of elements to be copied.
+!     \item[src] 
+!          Source DE.
+!     \item[dst] 
+!          Destination DE.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
 !     \item[{[commHandle]}] 
@@ -2436,43 +1988,44 @@ contains
     
     ! Determine the number of bytes that need to be copied dependent on type
     blen = count * 4 ! 4 bytes
-    
+
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutSend(delayout, srcData, dstData, blen, src, dst, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutGather error"
+      print *, "c_ESMC_nDELayoutSend error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_DELayoutGatherI4
+  end subroutine ESMF_DELayoutSendI4
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutGather - MPI-like Gather
+! !IROUTINE: ESMF_DELayoutSend - Send R4 data between DEs in a one-to-one DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutGather()
-  subroutine ESMF_DELayoutGatherR4(delayout, srcData, dstData, count, &
-    root, blockingFlag, commHandle, rc)
+  ! Private name; call using ESMF_DELayoutSend()
+  subroutine ESMF_DELayoutSendR4(delayout, srcData, dstData, count, &
+    src, dst, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
+    type(ESMF_DELayout),           intent(in)            :: delayout
     real(ESMF_KIND_R4),            intent(in)            :: srcData(:)
     real(ESMF_KIND_R4),            intent(out)           :: dstData(:)
     integer,                       intent(in)            :: count
-    integer,                       intent(in)            :: root
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    integer,                       intent(in)            :: src
+    integer,                       intent(in)            :: dst
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
+    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
-!     MPI-like Gather
+!     Copy data between DEs in a DELayout
 !
 !     The arguments are:
 !     \begin{description}
@@ -2483,9 +2036,11 @@ contains
 !     \item[dstData] 
 !          Destination data.
 !     \item[count] 
-!          Number of elements gathered from each DE.
-!     \item[root] 
-!          Root DE.
+!          Number of elements to be copied.
+!     \item[src] 
+!          Source DE.
+!     \item[dst] 
+!          Destination DE.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
 !     \item[{[commHandle]}] 
@@ -2511,43 +2066,44 @@ contains
     
     ! Determine the number of bytes that need to be copied dependent on type
     blen = count * 4 ! 4 bytes
-    
+
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutSend(delayout, srcData, dstData, blen, src, dst, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutGather error"
+      print *, "c_ESMC_nDELayoutSend error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_DELayoutGatherR4
+  end subroutine ESMF_DELayoutSendR4
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutGather - MPI-like Gather
+! !IROUTINE: ESMF_DELayoutSend - Send R8 data between DEs in a one-to-one DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutGather()
-  subroutine ESMF_DELayoutGatherR8(delayout, srcData, dstData, count, &
-    root, blockingFlag, commHandle, rc)
+  ! Private name; call using ESMF_DELayoutSend()
+  subroutine ESMF_DELayoutSendR8(delayout, srcData, dstData, count, &
+    src, dst, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
+    type(ESMF_DELayout),           intent(in)            :: delayout
     real(ESMF_KIND_R8),            intent(in)            :: srcData(:)
     real(ESMF_KIND_R8),            intent(out)           :: dstData(:)
     integer,                       intent(in)            :: count
-    integer,                       intent(in)            :: root
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
+    integer,                       intent(in)            :: src
+    integer,                       intent(in)            :: dst
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
     type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
-!     MPI-like Gather
+!     Copy data between DEs in a DELayout
 !
 !     The arguments are:
 !     \begin{description}
@@ -2558,9 +2114,11 @@ contains
 !     \item[dstData] 
 !          Destination data.
 !     \item[count] 
-!          Number of elements gathered from each DE.
-!     \item[root] 
-!          Root DE.
+!          Number of elements to be copied.
+!     \item[src] 
+!          Source DE.
+!     \item[dst] 
+!          Destination DE.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
 !     \item[{[commHandle]}] 
@@ -2586,59 +2144,71 @@ contains
     
     ! Determine the number of bytes that need to be copied dependent on type
     blen = count * 8 ! 8 bytes
-    
+
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutSend(delayout, srcData, dstData, blen, src, dst, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutGather error"
+      print *, "c_ESMC_nDELayoutSend error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_DELayoutGatherR8
+  end subroutine ESMF_DELayoutSendR8
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce I4 data to a single value
+! !IROUTINE: ESMF_DELayoutSendRecv - Send and receive data on a general DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutGlobReduceI4(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
+  ! Private name; call using ESMF_DELayoutSendRecv()
+  subroutine ESMF_DELayoutSendRecvGeneral(delayout, srcData1, srcData2, &
+    dstData1, dstData2, count1, count2, de1, de2, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    integer(ESMF_KIND_I4),         intent(in)            :: srcData(:)
-    integer,                       intent(out)           :: dstData
-    integer,                       intent(in)            :: count
-    type(ESMF_newOp),              intent(in)            :: operation
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    type(ESMF_DELayoutData),       intent(in)            :: srcData1
+    type(ESMF_DELayoutData),       intent(in)            :: srcData2
+    type(ESMF_DELayoutData),       intent(out)           :: dstData1
+    type(ESMF_DELayoutData),       intent(out)           :: dstData2
+    integer,                       intent(in)            :: count1
+    integer,                       intent(in)            :: count2
+    integer,                       intent(in)            :: de1
+    integer,                       intent(in)            :: de2
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
+    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
-!     Reduce I4 data to a single value
+!     Send and receive data between DEs in a DELayout
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[delayout] 
 !          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements per DE to be considered.
-!     \item[operation] 
-!          Reduction operation.
+!     \item[srcData1]
+!          Source data reference located on de1
+!     \item[srcData2]
+!          Source data reference located on de2
+!     \item[dstData1]
+!          Destination data reference located on de1
+!     \item[dstData2]
+!          Destination data reference located on de2
+!     \item[count1]
+!          Number of elements to be copied from de1 to de2
+!     \item[count2]
+!          Number of elements to be copied from de2 to de1
+!     \item[de1]
+!          Id of de1.
+!     \item[de2]
+!          Id of de2.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
+!     \item[{[commHandle]}]
 !          Must be present for non-blocking calls, providing handle for Wait.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2649,6 +2219,7 @@ contains
 
     integer :: status                 ! local error status
     logical :: rcpresent
+    integer :: blen1, blen2
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -2658,58 +2229,79 @@ contains
       rc = ESMF_FAILURE
     endif
     
+    ! Determine the number of bytes that need to be copied dependent on type
+    if (srcData1%dtk == ESMF_I4) blen1 = count1 * 4 ! 4 bytes
+    if (srcData1%dtk == ESMF_R4) blen1 = count1 * 4 ! 4 bytes
+    if (srcData1%dtk == ESMF_R8) blen1 = count1 * 8 ! 8 bytes
+    if (srcData2%dtk == ESMF_I4) blen2 = count2 * 4 ! 4 bytes
+    if (srcData2%dtk == ESMF_R4) blen2 = count2 * 4 ! 4 bytes
+    if (srcData2%dtk == ESMF_R8) blen2 = count2 * 8 ! 8 bytes
+    
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_I4, operation, ESMF_TRUE, status)
+    call c_ESMC_nDELayoutSendRecv(delayout, srcData1, srcData2, &
+      dstData1, dstData2, blen1, blen2, de1, de2, ESMF_FALSE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
+      print *, "c_ESMC_nDELayoutSendRecv error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_DELayoutGlobReduceI4
+  end subroutine ESMF_DELayoutSendRecvGeneral
 !------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R4 data to a single value
+! !IROUTINE: ESMF_DELayoutSendRecv - Send and receive I4 data on a one-to-one DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutGlobReduceR4(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
+  ! Private name; call using ESMF_DELayoutSendRecv()
+  subroutine ESMF_DELayoutSendRecvI4(delayout, srcData1, srcData2, &
+    dstData1, dstData2, count1, count2, de1, de2, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    real(ESMF_KIND_R4),            intent(in)            :: srcData(:)
-    real(ESMF_KIND_R4),            intent(out)           :: dstData
-    integer,                       intent(in)            :: count
-    type(ESMF_newOp),              intent(in)            :: operation
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    integer(ESMF_KIND_I4),         intent(in)            :: srcData1(:)
+    integer(ESMF_KIND_I4),         intent(in)            :: srcData2(:)
+    integer(ESMF_KIND_I4),         intent(out)           :: dstData1(:)
+    integer(ESMF_KIND_I4),         intent(out)           :: dstData2(:)
+    integer,                       intent(in)            :: count1
+    integer,                       intent(in)            :: count2
+    integer,                       intent(in)            :: de1
+    integer,                       intent(in)            :: de2
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
+    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
-!     Reduce R4 data to a single value
+!     Copy data between DEs in a DELayout
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[delayout] 
 !          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements per DE to be considered.
-!     \item[operation] 
-!          Reduction operation.
+!     \item[srcData1]
+!          Source data reference located on de1
+!     \item[srcData2]
+!          Source data reference located on de2
+!     \item[dstData1]
+!          Destination data reference located on de1
+!     \item[dstData2]
+!          Destination data reference located on de2
+!     \item[count1]
+!          Number of elements to be copied from de1 to de2
+!     \item[count2]
+!          Number of elements to be copied from de2 to de1
+!     \item[de1]
+!          Id of de1.
+!     \item[de2]
+!          Id of de2.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
+!     \item[{[commHandle]}]
 !          Must be present for non-blocking calls, providing handle for Wait.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2720,6 +2312,7 @@ contains
 
     integer :: status                 ! local error status
     logical :: rcpresent
+    integer :: blen1, blen2
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -2729,58 +2322,74 @@ contains
       rc = ESMF_FAILURE
     endif
     
+    ! Determine the number of bytes that need to be copied dependent on type
+    blen1 = count1 * 4 ! 4 bytes
+    blen2 = count2 * 4 ! 4 bytes
+    
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_R4, operation, ESMF_TRUE, status)
+    call c_ESMC_nDELayoutSendRecv(delayout, srcData1, srcData2, &
+      dstData1, dstData2, blen1, blen2, de1, de2, ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
+      print *, "c_ESMC_nDELayoutSendRecv error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_DELayoutGlobReduceR4
+  end subroutine ESMF_DELayoutSendRecvI4
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R8 data to a single value
+! !IROUTINE: ESMF_DELayoutSendRecv - Send and receive R4 data on a one-to-one DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutGlobReduceR8(delayout, srcData, &
-    dstData, count, operation, blockingFlag, commHandle, rc)
+  ! Private name; call using ESMF_DELayoutSendRecv()
+  subroutine ESMF_DELayoutSendRecvR4(delayout, srcData1, srcData2, &
+    dstData1, dstData2, count1, count2, de1, de2, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),        intent(in)            :: delayout
-    real(ESMF_KIND_R8),            intent(in)            :: srcData(:)
-    real(ESMF_KIND_R8),            intent(out)           :: dstData
-    integer,                       intent(in)            :: count
-    type(ESMF_newOp),              intent(in)            :: operation
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_CommHandle), intent(out), optional :: commHandle    
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    real(ESMF_KIND_R4),            intent(in)            :: srcData1(:)
+    real(ESMF_KIND_R4),            intent(in)            :: srcData2(:)
+    real(ESMF_KIND_R4),            intent(out)           :: dstData1(:)
+    real(ESMF_KIND_R4),            intent(out)           :: dstData2(:)
+    integer,                       intent(in)            :: count1
+    integer,                       intent(in)            :: count2
+    integer,                       intent(in)            :: de1
+    integer,                       intent(in)            :: de2
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
+    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
-!     Reduce R4 data to a single value
+!     Send data between DEs in a DELayout.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[delayout] 
 !          DELayout object.
-!     \item[srcData] 
-!          Source data.
-!     \item[dstData] 
-!          Destination data.
-!     \item[count] 
-!          Number of elements per DE to be considered.
-!     \item[operation] 
-!          Reduction operation.
+!     \item[srcData1]
+!          Source data reference located on de1
+!     \item[srcData2]
+!          Source data reference located on de2
+!     \item[dstData1]
+!          Destination data reference located on de1
+!     \item[dstData2]
+!          Destination data reference located on de2
+!     \item[count1]
+!          Number of elements to be copied from de1 to de2
+!     \item[count2]
+!          Number of elements to be copied from de2 to de1
+!     \item[de1]
+!          Id of de1.
+!     \item[de2]
+!          Id of de2.
 !     \item[{[blockingFlag]}]
 !          Flag indicating whether this call should be blocking or non-blocking.
-!     \item[{[commHandle]}] 
+!     \item[{[commHandle]}]
 !          Must be present for non-blocking calls, providing handle for Wait.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2791,6 +2400,7 @@ contains
 
     integer :: status                 ! local error status
     logical :: rcpresent
+    integer :: blen1, blen2
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -2800,27 +2410,111 @@ contains
       rc = ESMF_FAILURE
     endif
     
+    ! Determine the number of bytes that need to be copied dependent on type
+    blen1 = count1 * 4 ! 4 bytes
+    blen2 = count2 * 4 ! 4 bytes
+    
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
-      count, ESMF_R8, operation, ESMF_TRUE, status)
+    call c_ESMC_nDELayoutSendRecv(delayout, srcData1, srcData2, &
+      dstData1, dstData2, blen1, blen2, de1, de2, ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
+      print *, "c_ESMC_nDELayoutSendRecv error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_DELayoutGlobReduceR8
+  end subroutine ESMF_DELayoutSendRecvR4
 !------------------------------------------------------------------------------
 
-
-
-
 !------------------------------------------------------------------------------
-! Sync for non-blocking communications
-!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutSendRecv - Send and receive R8 data on a general DELayout
 
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutSendRecv()
+  subroutine ESMF_DELayoutSendRecvR8(delayout, srcData1, srcData2, &
+    dstData1, dstData2, count1, count2, de1, de2, blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),           intent(in)            :: delayout
+    real(ESMF_KIND_R8),            intent(in)            :: srcData1(:)
+    real(ESMF_KIND_R8),            intent(in)            :: srcData2(:)
+    real(ESMF_KIND_R8),            intent(out)           :: dstData1(:)
+    real(ESMF_KIND_R8),            intent(out)           :: dstData2(:)
+    integer,                       intent(in)            :: count1
+    integer,                       intent(in)            :: count2
+    integer,                       intent(in)            :: de1
+    integer,                       intent(in)            :: de2
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
+    type(ESMF_CommHandle),         intent(out), optional :: commHandle    
+    integer,                       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Copy data between DEs in a DELayout
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[srcData1]
+!          Source data reference located on de1
+!     \item[srcData2]
+!          Source data reference located on de2
+!     \item[dstData1]
+!          Destination data reference located on de1
+!     \item[dstData2]
+!          Destination data reference located on de2
+!     \item[count1]
+!          Number of elements to be copied from de1 to de2
+!     \item[count2]
+!          Number of elements to be copied from de2 to de1
+!     \item[de1]
+!          Id of de1.
+!     \item[de2]
+!          Id of de2.
+!     \item[{[blockingFlag]}]
+!          Flag indicating whether this call should be blocking or non-blocking.
+!     \item[{[commHandle]}]
+!          Must be present for non-blocking calls, providing handle for Wait.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: blen1, blen2
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Determine the number of bytes that need to be copied dependent on type
+    blen1 = count1 * 8 ! 8 bytes
+    blen2 = count2 * 8 ! 8 bytes
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutSendRecv(delayout, srcData1, srcData2, &
+      dstData1, dstData2, blen1, blen2, de1, de2, ESMF_TRUE, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutSendRecv error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutSendRecvR8
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2831,12 +2525,12 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),        intent(in)            :: delayout
-    type(ESMF_CommHandle), intent(in)            :: commHandle
-    integer,                       intent(out), optional :: rc
+    type(ESMF_CommHandle), intent(in)                 :: commHandle
+    integer,                    intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
-!     Wait for DELayout communication to finish
+!     Wait for DELayout communication to finish.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2867,6 +2561,279 @@ contains
  
   end subroutine ESMF_DELayoutWait
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_DELayoutDataCreate - Create I4 DELayoutData
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutDataCreate()
+  function ESMF_DELayoutDataCreateI4(array, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_I4_AP), intent(in)            :: array(:)
+    integer,          intent(out), optional :: rc
+!         
+! !RETURN VALUE:
+      type(ESMF_DELayoutData) :: ESMF_DELayoutDataCreateI4
+!
+! !DESCRIPTION:
+!     Create I4 DELayoutData
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          ESMF\_I4\_AP array.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    type(ESMF_DELayoutData):: mydata    ! new object
+    integer :: status                   ! local error status
+    logical :: rcpresent
+    integer :: i
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! Initialize the pointer to null.
+    mydata%this = ESMF_NULL_POINTER
+    
+    ! Initialize members
+    mydata%n = size(array)          ! number of pointers in the pointer array
+    allocate(mydata%len(mydata%n))  
+    do i=1, mydata%n
+      mydata%len(i) = size(array(i)%ap)! number of elments for this pointer el.
+    enddo
+    mydata%dtk = ESMF_I4    !data type and kind
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutDataCreate(mydata, mydata%n, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutDataCreate error"
+      return
+    endif
+
+    do i=1, mydata%n
+      call c_ESMC_nDELayoutDataAdd(mydata, array(i)%ap, i, status)
+      if (status /= ESMF_SUCCESS) then
+        print *, "c_ESMC_nDELayoutDataAdd error"
+        return
+      endif
+    enddo
+
+    ! set return values
+    ESMF_DELayoutDataCreateI4 = mydata 
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DELayoutDataCreateI4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_DELayoutDataCreate - Create R4 DELayoutData
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutDataCreate()
+  function ESMF_DELayoutDataCreateR4(array, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_R4_AP), intent(in)            :: array(:)
+    integer,          intent(out), optional :: rc
+!         
+! !RETURN VALUE:
+      type(ESMF_DELayoutData) :: ESMF_DELayoutDataCreateR4
+!
+! !DESCRIPTION:
+!     Create R4 DELayoutData
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          ESMF\_R4\_AP array.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    type(ESMF_DELayoutData):: mydata    ! new object
+    integer :: status                   ! local error status
+    logical :: rcpresent
+    integer :: i
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! Initialize the pointer to null.
+    mydata%this = ESMF_NULL_POINTER
+    
+    ! Initialize members
+    mydata%n = size(array)          ! number of pointers in the pointer array
+    allocate(mydata%len(mydata%n))  
+    do i=1, mydata%n
+      mydata%len(i) = size(array(i)%ap)! number of elments for this pointer el.
+    enddo
+    mydata%dtk = ESMF_R4    !data type and kind
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutDataCreate(mydata, mydata%n, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutDataCreate error"
+      return
+    endif
+
+    do i=1, mydata%n
+      call c_ESMC_nDELayoutDataAdd(mydata, array(i)%ap, i, status)
+      if (status /= ESMF_SUCCESS) then
+        print *, "c_ESMC_nDELayoutDataAdd error"
+        return
+      endif
+    enddo
+
+    ! set return values
+    ESMF_DELayoutDataCreateR4 = mydata 
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DELayoutDataCreateR4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_DELayoutDataCreate - Create R8 DELayoutData
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutDataCreate()
+  function ESMF_DELayoutDataCreateR8(array, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_R8_AP), intent(in)            :: array(:)
+    integer,          intent(out), optional :: rc
+!         
+! !RETURN VALUE:
+      type(ESMF_DELayoutData) :: ESMF_DELayoutDataCreateR8
+!
+! !DESCRIPTION:
+!     Create R8 DELayoutData
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          ESMF\_R8\_AP array.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    type(ESMF_DELayoutData):: mydata    ! new object
+    integer :: status                   ! local error status
+    logical :: rcpresent
+    integer :: i
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! Initialize the pointer to null.
+    mydata%this = ESMF_NULL_POINTER
+    
+    ! Initialize members
+    mydata%n = size(array)             ! number of pointers in the pointer array
+    allocate(mydata%len(mydata%n))  
+    do i=1, mydata%n
+      mydata%len(i) = size(array(i)%ap)! number of elments for this pointer el.
+    enddo
+    mydata%dtk = ESMF_R8    !data type and kind
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutDataCreate(mydata, mydata%n, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutDataCreate error"
+      return
+    endif
+
+    do i=1, mydata%n
+      call c_ESMC_nDELayoutDataAdd(mydata, array(i)%ap, i, status)
+      if (status /= ESMF_SUCCESS) then
+        print *, "c_ESMC_nDELayoutDataAdd error"
+        return
+      endif
+    enddo
+
+    ! set return values
+    ESMF_DELayoutDataCreateR8 = mydata 
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DELayoutDataCreateR8
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_DELayoutDataDestroy - Destroy a DELayoutData object
+
+! !INTERFACE:
+  subroutine ESMF_DELayoutDataDestroy(delayoutData, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayoutData), intent(inout)         ::  delayoutData 
+    integer,                 intent(out), optional ::  rc  
+!         
+!
+! !DESCRIPTION:
+!     Destroy a DELayoutData object
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayoutData] 
+!          ESMF\_DELayoutData object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_nDELayoutDataDestroy(delayoutData, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_nDELayoutDataDestroy error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DELayoutDataDestroy
 
 
 end module ESMF_DELayoutMod

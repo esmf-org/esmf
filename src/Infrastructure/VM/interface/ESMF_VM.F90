@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.8 2004/04/26 20:05:07 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.9 2004/04/30 20:24:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.8 2004/04/26 20:05:07 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.9 2004/04/30 20:24:12 cdeluca Exp $'
 
 !==============================================================================
 
@@ -314,52 +314,6 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMGetGlobal - Get Global VM
-
-! !INTERFACE:
-  subroutine ESMF_VMGetGlobal(vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM), intent(out)      :: vm
-    integer, intent(out), optional  :: rc           
-!
-! !DESCRIPTION:
-!   Get Global VM
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        Global VM
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
-    ! Copy the handle to the global VM into the output variable
-    vm = GlobalVM
-
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_VMGetGlobal
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_VMGet - Get VM internals
 
 ! !INTERFACE:
@@ -405,6 +359,52 @@ module ESMF_VMMod
     
   end subroutine ESMF_VMGet
 !------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMGetGlobal - Get Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMGetGlobal(vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(out)      :: vm
+    integer, intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!   Get Global VM
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        Global VM
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! Copy the handle to the global VM into the output variable
+    vm = GlobalVM
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMGetGlobal
+!------------------------------------------------------------------------------
+
 
 
 !------------------------------------------------------------------------------

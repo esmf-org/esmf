@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.11 2004/04/28 23:11:49 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.12 2004/04/30 20:24:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.11 2004/04/28 23:11:49 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.12 2004/04/30 20:24:12 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -605,10 +605,10 @@ int ESMC_DELayout::ESMC_DELayoutValidate(){
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutCopy
+// !IROUTINE:  ESMC_DELayoutSend
 //
 // !INTERFACE:
-int ESMC_DELayout::ESMC_DELayoutCopy(
+int ESMC_DELayout::ESMC_DELayoutSend(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -672,10 +672,10 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutCopy
+// !IROUTINE:  ESMC_DELayoutSend
 //
 // !INTERFACE:
-int ESMC_DELayout::ESMC_DELayoutCopy(
+int ESMC_DELayout::ESMC_DELayoutSend(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -695,7 +695,7 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
 //EOP
 //-----------------------------------------------------------------------------
   int blen = len * ESMC_DataKindSize(dtk);
-  return ESMC_DELayoutCopy(srcdata, destdata, blen, srcDE, destDE, 
+  return ESMC_DELayoutSend(srcdata, destdata, blen, srcDE, destDE, 
     oneToOneFlag);
 }
 //-----------------------------------------------------------------------------
@@ -703,10 +703,10 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutCopyCopy
+// !IROUTINE:  ESMC_DELayoutSendRecv
 //
 // !INTERFACE:
-int ESMC_DELayout::ESMC_DELayoutCopyCopy(
+int ESMC_DELayout::ESMC_DELayoutSendRecv(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -728,11 +728,11 @@ int ESMC_DELayout::ESMC_DELayoutCopyCopy(
 //EOP
 //-----------------------------------------------------------------------------
   if (de1<=de2){
-    ESMC_DELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
-    ESMC_DELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
+    ESMC_DELayoutSend(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
+    ESMC_DELayoutSend(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
   }else{
-    ESMC_DELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
-    ESMC_DELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
+    ESMC_DELayoutSend(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
+    ESMC_DELayoutSend(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
   }
   return ESMF_SUCCESS;
 }
@@ -741,10 +741,10 @@ int ESMC_DELayout::ESMC_DELayoutCopyCopy(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutCopyCopy
+// !IROUTINE:  ESMC_DELayoutSendRecv
 //
 // !INTERFACE:
-int ESMC_DELayout::ESMC_DELayoutCopyCopy(
+int ESMC_DELayout::ESMC_DELayoutSendRecv(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -769,7 +769,7 @@ int ESMC_DELayout::ESMC_DELayoutCopyCopy(
 //-----------------------------------------------------------------------------
   int blen1 = len1 * ESMC_DataKindSize(dtk1);
   int blen2 = len2 * ESMC_DataKindSize(dtk2);
-  return ESMC_DELayoutCopyCopy(srcData1, srcData2, dstData1, dstData2, 
+  return ESMC_DELayoutSendRecv(srcData1, srcData2, dstData1, dstData2, 
     blen1, blen2, de1, de2, oneToOneFlag);
 }
 //-----------------------------------------------------------------------------
@@ -798,7 +798,7 @@ int ESMC_DELayout::ESMC_DELayoutBcast(
 //-----------------------------------------------------------------------------
   // very crude implementation of a layout wide bcast
   for (int i=0; i<ndes; i++)
-    ESMC_DELayoutCopy(data, data, blen, rootDE, i, ESMF_TRUE);
+    ESMC_DELayoutSend(data, data, blen, rootDE, i, ESMF_TRUE);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -829,7 +829,7 @@ int ESMC_DELayout::ESMC_DELayoutBcast(
   int blen = len * ESMC_DataKindSize(dtk);
   // very crude implementation of a layout wide bcast
   for (int i=0; i<ndes; i++)
-    ESMC_DELayoutCopy(data, data, blen, rootDE, i, oneToOneFlag);
+    ESMC_DELayoutSend(data, data, blen, rootDE, i, oneToOneFlag);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -866,7 +866,7 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
     if (oneToOneFlag==ESMF_TRUE){
       char *tempdata = (char *)srcdata;
       for (int i=0; i<ndes; i++){
-        ESMC_DELayoutCopy((void **)tempdata, destdata, blen, rootDE, i,
+        ESMC_DELayoutSend((void **)tempdata, destdata, blen, rootDE, i,
           ESMF_TRUE);
         tempdata += blen;
       }
@@ -877,7 +877,7 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
       void *rootdata = srcdata[j]; // backup the correct start of rootDE's data
       char *tempdata = (char *)srcdata[j];
       for (int i=0; i<ndes; i++){
-        ESMC_DELayoutCopy(srcdata, destdata, blen, rootDE, i, ESMF_FALSE);
+        ESMC_DELayoutSend(srcdata, destdata, blen, rootDE, i, ESMF_FALSE);
         tempdata += blen;
         srcdata[j] = tempdata;
       }
@@ -886,10 +886,10 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
   }else{
     if (oneToOneFlag==ESMF_TRUE){
       for (int i=0; i<ndes; i++)
-        ESMC_DELayoutCopy(srcdata, destdata, blen, rootDE, i, ESMF_TRUE);
+        ESMC_DELayoutSend(srcdata, destdata, blen, rootDE, i, ESMF_TRUE);
     }else{
       for (int i=0; i<ndes; i++)
-        ESMC_DELayoutCopy(srcdata, destdata, blen, rootDE, i, ESMF_FALSE);
+        ESMC_DELayoutSend(srcdata, destdata, blen, rootDE, i, ESMF_FALSE);
     }
   }
   return ESMF_SUCCESS;
@@ -957,7 +957,7 @@ int ESMC_DELayout::ESMC_DELayoutGather(
     if (oneToOneFlag==ESMF_TRUE){
       char *tempdata = (char *)destdata;
       for (int i=0; i<ndes; i++){
-        ESMC_DELayoutCopy(srcdata, (void **)tempdata, blen, i, rootDE,
+        ESMC_DELayoutSend(srcdata, (void **)tempdata, blen, i, rootDE,
           ESMF_TRUE);
         tempdata += blen;
       }
@@ -968,7 +968,7 @@ int ESMC_DELayout::ESMC_DELayoutGather(
       void *rootdata = destdata[j]; // backup the correct start of rootDE's data
       char *tempdata = (char *)destdata[j];
       for (int i=0; i<ndes; i++){
-        ESMC_DELayoutCopy(srcdata, destdata, blen, i, rootDE, ESMF_FALSE);
+        ESMC_DELayoutSend(srcdata, destdata, blen, i, rootDE, ESMF_FALSE);
         tempdata += blen;
         destdata[j] = tempdata;
       }
@@ -977,10 +977,10 @@ int ESMC_DELayout::ESMC_DELayoutGather(
   }else{
     if (oneToOneFlag==ESMF_TRUE){
       for (int i=0; i<ndes; i++)
-        ESMC_DELayoutCopy(srcdata, destdata, blen, i, rootDE, ESMF_TRUE);
+        ESMC_DELayoutSend(srcdata, destdata, blen, i, rootDE, ESMF_TRUE);
     }else{
       for (int i=0; i<ndes; i++)
-        ESMC_DELayoutCopy(srcdata, destdata, blen, i, rootDE, ESMF_FALSE);
+        ESMC_DELayoutSend(srcdata, destdata, blen, i, rootDE, ESMF_FALSE);
     }
   }
   return ESMF_SUCCESS;
@@ -1052,7 +1052,7 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
       char *tempdata;
       for (int i=0; i<ndes; i++){
         tempdata = (char *)destdata + bdestdispl[i];
-        ESMC_DELayoutCopy(srcdata, (void **)tempdata, blen[i], i, rootDE,
+        ESMC_DELayoutSend(srcdata, (void **)tempdata, blen[i], i, rootDE,
           ESMF_TRUE);
       }
     }else{
@@ -1062,17 +1062,17 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
       void *rootdata = destdata[j]; // backup the correct start of rootDE's data
       for (int i=0; i<ndes; i++){
         destdata[j] = (char *)rootdata + bdestdispl[i];;
-        ESMC_DELayoutCopy(srcdata, destdata, blen[i], i, rootDE, ESMF_FALSE);
+        ESMC_DELayoutSend(srcdata, destdata, blen[i], i, rootDE, ESMF_FALSE);
       }
       destdata[j] = rootdata;  // restore correct start of root's destdata
     }
   }else{
     if (oneToOneFlag==ESMF_TRUE){
       for (int i=0; i<ndes; i++)
-        ESMC_DELayoutCopy(srcdata, destdata, blen[i], i, rootDE, ESMF_TRUE);
+        ESMC_DELayoutSend(srcdata, destdata, blen[i], i, rootDE, ESMF_TRUE);
     }else{
       for (int i=0; i<ndes; i++)
-        ESMC_DELayoutCopy(srcdata, destdata, blen[i], i, rootDE, ESMF_FALSE);
+        ESMC_DELayoutSend(srcdata, destdata, blen[i], i, rootDE, ESMF_FALSE);
     }
   }
   return ESMF_SUCCESS;
