@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.30 2003/04/25 16:03:51 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.31 2003/04/25 16:05:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.30 2003/04/25 16:03:51 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.31 2003/04/25 16:05:47 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1419,10 +1419,10 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  
 
-  if (x >= 0 && x < length[0] &&
-      y >= 0 && y < length[1] &&
-      z >= 0 && z < length[2] &&
-      deid != NULL) {
+  if ((x >= 0 && x < length[0]) &&
+      (y >= 0 && y < length[1]) &&
+      (z >= 0 && z < length[2]) &&
+      (deid != NULL)) {
        layout[x][y][z].ESMC_DEGetESMFID(deid);
     return(ESMF_SUCCESS);
   }
@@ -1456,9 +1456,9 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  
 
-  if (x >= 0 && x < length[0] &&
-      y >= 0 && y < length[1] &&
-      deid != NULL) {
+  if ((x >= 0 && x < length[0]) &&
+      (y >= 0 && y < length[1]) &&
+      (deid != NULL)) {
        layout[x][y][0].ESMC_DEGetESMFID(deid);
     return(ESMF_SUCCESS);
   }
