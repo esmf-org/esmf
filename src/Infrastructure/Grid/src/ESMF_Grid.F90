@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.203 2004/12/07 21:39:02 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.204 2004/12/08 18:30:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.203 2004/12/07 21:39:02 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.204 2004/12/08 18:30:25 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5814,12 +5814,13 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       newNDEs(2) = oldNDEs(2)
-      newNDEs(1) = npets/newNDEs(2)            ! TODO: this only works for 1-1
-                                               !       should figure out the number
-                                               !       of DEs for the new layout based
-                                               !       in part on the number of DEs per
-                                               !       pet from the old one
-      npets2 = newNDEs(1)*newNDEs(2)           ! in case the division is not even
+      newNDEs(1) = (npets+newNDEs(2)-1)/newNDEs(2)   
+                                      ! TODO: this only works for 1-1
+                                      !       should figure out the number
+                                      !       of DEs for the new layout based
+                                      !       in part on the number of DEs per
+                                      !       pet from the old one
+      npets2 = newNDEs(1)*newNDEs(2)  ! in case the division is not even
 
       ! now allocate a petlist and more for the new delayout
       allocate(       petlist(0:npets2-1), &
