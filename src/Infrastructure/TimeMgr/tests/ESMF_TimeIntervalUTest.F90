@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.6 2004/02/06 03:50:02 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.7 2004/02/09 07:07:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.6 2004/02/06 03:50:02 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.7 2004/02/09 07:07:08 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -140,6 +140,43 @@
 
       print *, " Days = ", days
 
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
+      write(name, *) "Time Step initialization with d = 1  Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) "Seconds should = 86400."
+      write(name, *) "Get Time Step in seconds Test 1"
+      call ESMF_TimeIntervalGet(timeStep, s=secs, rc=rc)
+      call ESMF_Test((secs.eq.86400), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, " Seconds = ", secs
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, h=65, rc=rc)
+      write(name, *) "Time Step initialization with hr = 65  Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) "Seconds should = 234000."
+      write(name, *) "Get Time Step in seconds Test 2"
+      call ESMF_TimeIntervalGet(timeStep, s=secs, rc=rc)
+      call ESMF_Test((secs.eq.234000), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, " Seconds = ", secs
 
       ! ----------------------------------------------------------------------------
 
@@ -152,26 +189,6 @@
       write(name, *) "Time Step Get of uninitalized Time Interval Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, " Seconds = ", secs
-
-      ! ----------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_TimeIntervalSet(timeStep, h=65, rc=rc)
-      write(name, *) "Time Step initialization with hr = 65  Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      write(failMsg, *) "Seconds should = 234000."
-      write(name, *) "Get Time Step in seconds Test"
-      call ESMF_TimeIntervalGet(timeStep, s=secs, rc=rc)
-      call ESMF_Test((secs.eq.234000), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-
       print *, " Seconds = ", secs
 
      ! ----------------------------------------------------------------------------
