@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.10 2003/04/24 16:43:15 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.11 2003/04/25 18:11:48 jwolfe Exp $
 !
 ! System test code #69527
 
@@ -111,7 +111,7 @@
     do i=1,ni
        ldata(i) = i
     enddo
-    call ESMF_GridLocalToGlobalIndex(grid1, ldata, idata, rc) 
+    call ESMF_GridLocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, rc=rc) 
 
     !  Create Array based on an existing, allocated F90 pointer.
     !  Data is type Integer, 1D.
