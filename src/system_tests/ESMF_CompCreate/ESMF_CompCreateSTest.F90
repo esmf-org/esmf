@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.4 2004/04/09 19:54:15 eschwab Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.5 2004/04/13 22:00:42 nscollins Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -30,7 +30,8 @@
     integer :: delist(64), dummy(2)
     integer :: i, de_id, ndes, mid, by2, rc
     character(len=ESMF_MAXSTR) :: cname
-    type(ESMF_DELayout) :: layout1, layout2
+    type(ESMF_VM):: vm
+    type(ESMF_newDELayout) :: layout1, layout2
     type(ESMF_GridComp) :: comp1
     type(ESMF_State) :: imp, exp
         
@@ -58,10 +59,13 @@
     call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+    ! get the default global VM
+    call ESMF_VMGetGlobal(vm, rc)
+
     ! Create a default 1xN DELayout
-    layout1 = ESMF_DELayoutCreate(rc=rc)
+    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (ndes .le. 1) then
@@ -75,8 +79,9 @@
     ! Create a child DELayout for the Component which is 2 by half the
     !  total number of procs.
     delist = (/ (i, i=0, ndes-1) /)
-    layout2 = ESMF_DELayoutCreate(layout1, 2, (/ mid, by2 /), (/ 0, 0 /), &
-                                                   de_indices=delist, rc=rc)
+    layout2 = ESMF_newDELayoutCreate(vm, rc=rc)
+    !layout2 = ESMF_DELayoutCreate(vm, layout1, 2, (/ mid, by2 /), (/ 0, 0 /), &
+    !                                               de_indices=delist, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test CompCreate"
@@ -143,7 +148,7 @@
       call ESMF_GridCompFinalize(comp1, imp, exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+      call ESMF_newDELayoutGetDEID(layout1, de_id, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "-----------------------------------------------------------------"
@@ -168,9 +173,9 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(exp, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_DELayoutDestroy(layout2, rc)
+      call ESMF_newDELayoutDestroy(layout2, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_DELayoutDestroy(layout1, rc)
+      call ESMF_newDELayoutDestroy(layout1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "All Destroy routines done"
 
