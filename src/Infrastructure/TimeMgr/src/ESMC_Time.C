@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.6 2003/03/22 05:43:52 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.7 2003/03/26 01:10:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.6 2003/03/22 05:43:52 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.7 2003/03/26 01:10:13 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -77,7 +77,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInit - shallow class initializer
+// !IROUTINE:  ESMC_TimeInit - initializer for native C++ use
 //
 // !INTERFACE:
       int ESMC_Time::ESMC_TimeInit(
@@ -90,6 +90,51 @@
       int tz,                  // in - timezone
       const char *timeList,    // in - initializer specifier string
       ...) {                   // in - specifier values (variable args)
+//
+// !DESCRIPTION:
+//      Initialzes a {\tt Time} with values given in variable arg list
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeInit
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInit - initializer to support F90 interface
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeInit(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int YY,                  // in - integer year
+      int MM,                  // in - integer month
+      int DD,                  // in - integer day of the month
+      int D,                   // in - integer days
+      int H,                   // in - integer hours
+      int M,                   // in - integer minutes
+      ESMF_IKIND_I8 S,         // in - long integer seconds 
+      int MS,                  // in - integer milliseconds
+      int US,                  // in - integer microseconds
+      int NS,                  // in - integer nanoseconds
+      double d_,               // in - floating point days
+      double h_,               // in - floating point hours
+      double m_,               // in - floating point minutes
+      double s_,               // in - floating point seconds
+      double ms_,              // in - floating point milliseconds
+      double us_,              // in - floating point microseconds
+      double ns_,              // in - floating point nanoseconds
+      int Sn,                  // in - fractional seconds numerator
+      int Sd,                  // in - fractional seconds denominator
+      ESMC_Calendar *cal,      // in - associated calendar
+      int tz) {                // in - timezone (hours offset from GMT,
+                               //      e.g. EST = -5)
 //
 // !DESCRIPTION:
 //      Initialzes a {\tt Time} with values given in variable arg list
