@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.2 2003/10/28 23:22:11 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.3 2004/03/02 16:29:10 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -19,5 +19,6 @@ This symbol selectively disables initialization in the
 places where it causes a compiler internal error.
 #endif
 
+#define ESMF_NO_INITIALIZERS 1
 #define ESMF_AIX_8_INITBUG 1
 
