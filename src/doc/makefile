@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2003/03/10 02:12:53 cdeluca Exp $ 
+# $Id: makefile,v 1.15 2003/03/10 02:22:39 cdeluca Exp $ 
 ALL: lib 
 
 
@@ -51,7 +51,7 @@ ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USERDOC_FILES)
 
 # Pdf files
 ${ESMC_DOCDIR}/ESMF_reqdoc.pdf: ${ESMC_DOCDIR}/ESMF_reqdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/ESMF_reqdoc.dvi ${ESMC_DOCDIR}/ESMF_reqdoc.pdff
+	dvipdf ${ESMC_DOCDIR}/ESMF_reqdoc.dvi ${ESMC_DOCDIR}/ESMF_reqdoc.pdf
 
 ${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ${ESMC_DOCDIR}/ESMF_usrdoc.dvi
 	dvipdf ${ESMC_DOCDIR}/ESMF_usrdoc.dvi ${ESMC_DOCDIR}/ESMF_usrdoc.pdf
