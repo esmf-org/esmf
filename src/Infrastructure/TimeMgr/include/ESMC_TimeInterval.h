@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.30 2004/03/10 03:05:00 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.31 2004/03/19 00:37:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -193,8 +193,18 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);
-    ESMC_TimeInterval(ESMF_KIND_I8 s, int sN=0, int sD=1);
-    ESMC_TimeInterval(ESMF_KIND_I8 yy, ESMF_KIND_I8 mm, ESMF_KIND_I8 d);
+    ESMC_TimeInterval(ESMF_KIND_I8 s, int sN=0, int sD=1,
+                      ESMF_KIND_I8 yy=0, ESMF_KIND_I8 mm=0, ESMF_KIND_I8 d=0,
+                      ESMC_Time *startTime=0, ESMC_Time *endTime=0,
+                      ESMC_Calendar *calendar=0);
+    int ESMC_TimeIntervalSet(ESMF_KIND_I8 s, int sN=0, int sD=1,
+                      ESMF_KIND_I8 yy=0, ESMF_KIND_I8 mm=0, ESMF_KIND_I8 d=0,
+                      ESMC_Time *startTime=0, ESMC_Time *endTime=0,
+                      ESMC_Calendar *calendar=0);
+                                   // used internally instead of constructor
+                                   // to cover case of initial entry from F90,
+                                   // to avoid automatic destructor invocation
+                                   // when leaving scope to return to F90.
 
     ~ESMC_TimeInterval(void);
 
