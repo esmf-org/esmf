@@ -47,6 +47,12 @@ refer to a text such as ``The Unified Modeling Language Reference Manual.''
 
 \subsection{Component-Based Design}
 
+Component architectures have proliferated in the commercial world, with
+packages such as COM, CORBA, Java Beans, and others enabling interoperability
+of different software packages and different languages in a wide range
+of domains.  Component architectures have recently extended into the 
+scientific domain through the Common Component Architecture (CCA) project, a 
+DOE effort to standardize science components using the same basic ideas.
 In this section we describe the features of component-based software 
 architecture, then outline how the ESMF borrows from that model.  Unlike
 OO design, the basic concepts of component-based design are not especially
@@ -64,7 +70,7 @@ architectures must define some sort of control mechanism that can handle tasks
 such as acquiring computing resources and starting an application, 
 and creating, running, sequencing and synchronizing components.  We'll refer to
 this mechanism as the Object Request Broker (ORB), as it's called in CORBA.  In the 
-Common Component Architecture, this is called the framework - a different usage
+CCA, this is called the framework - a different usage
 of the word than we are accustomed to in ESMF.
 
 The component model gets more complicated when, as in most ESMF applications, 
@@ -85,10 +91,10 @@ The CCA architecture gets around this complication by
 requiring that all cross-process communication occur within a component, and
 that all inter-component calls exchange only local data.  So, for example,
 if you wanted to transfer data between two CCA components A and B, you would need 
-to define a third component C on the union of A and B's processors and perform
+to define a third component C on the union of A and B's processes and perform
 the data transfer entirely within component C.
 
-Architectures such as CA enable components to contain and run 
+Architectures such as CCA enable components to instantiate and run 
 subcomponents.  This
 capability is very import to support system scalability.  CCA does it 
 through an interface, called {\tt BuilderServices}, that any component
@@ -128,11 +134,12 @@ models or the ESMF.
 
 There are also aspects of component-based design that we will not adopt.
 IDLs require significant effort to implement and there is currently no
-IDL which supports the languages we require, F90 and C++.  We see no pressing
-reason to develop one or to use ESMF resources to accelerate the development
+IDL which supports both the languages we require, F90 and C++.  We see 
+no pressing
+reason to develop an IDL or to use ESMF resources to accelerate the development
 of one.  We will continue to track the 
-development of and experiment with the Scientific IDL (SIDL) being 
-developed by CCA, as described in the {\it ESMF Implementation Report}.
+development of and experiment with CCA's Scientific IDL (SIDL), 
+as described in the {\it ESMF Implementation Report}.
 
 We do not anticipate using function pointers exclusively to manipulate
 components in our initial implementation of ESMF.  We will conceptually

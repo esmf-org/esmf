@@ -109,8 +109,9 @@ methods of the components and coupler that effect the coupled exchange.
 \subsection{Flow of Data}
 
 The design choices we have made enable the user to configure an ESMF
-coupler so that data is sent directly from one component to another, 
-without requiring that it first be sent to a coupler (or even necessarily
+coupler so that data is transferred directly from one component to another, 
+without requiring that it first be sent via message passing to to the
+coupler (or even necessarily
 copied).  This is likely to be the most efficient way of performing 
 inter-component coupling when the components are instantiated on different
 DE sets.  However, if desired, an application can also be configured so that
