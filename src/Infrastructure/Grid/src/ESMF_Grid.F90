@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.85 2003/08/28 21:01:51 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.86 2003/08/29 21:07:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.85 2003/08/28 21:01:51 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.86 2003/08/29 21:07:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1216,6 +1216,7 @@
       integer :: physgrid_id                  ! integer identifier for physgrid
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
+      type(ESMF_RelLoc) :: relloc
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -1252,7 +1253,9 @@
 
 !     Create main physgrid
       physgrid_name = 'base'
-      call ESMF_GridAddPhysGrid(grid, counts, physgrid_id, &
+      ! TODO: based on horiz and vert grid types, set the proper relloc
+      relloc = ESMF_CELL_CENTER
+      call ESMF_GridAddPhysGrid(grid, counts, physgrid_id, relloc, &
                                 x_min, x_max, y_min, y_max, &
                                 physgrid_name, status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1327,17 +1330,17 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid}
-!     \item[{[countsPerDE1]}]
+!     \item[countsPerDE1]
 !          Array of number of grid increments per DE in the x-direction.
-!     \item[{[countsPerDE2]}]
+!     \item[countsPerDE2]
 !          Array of number of grid increments per DE in the y-direction.
-!     \item[{[min]}]
+!     \item[min]
 !          Array of minimum physical coordinate in each direction.
-!     \item[{[delta1]}]
+!     \item[delta1]
 !          Array of physical increments between nodes in the first direction.
-!     \item[{[delta2]}]
+!     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
-!     \item[{[layout]}]
+!     \item[layout]
 !         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[dim\_names]}]
 !          Array of dimension names.
@@ -1366,6 +1369,7 @@
       logical :: rcpresent                    ! Return code present
       character(len=4) :: physgrid_name       !
       integer :: physgrid_id                  ! integer identifier for physgrid
+      type(ESMF_RelLoc) :: relloc
 
 !     Initialize return code
       status = ESMF_SUCCESS
@@ -1411,8 +1415,10 @@
 
 !     Create main physgrid
       physgrid_name = 'base'
-      call ESMF_GridAddPhysGrid(grid, physgrid_id, min, delta1, delta2, &
-                                countsPerDE1, countsPerDE2, dim_names, &
+      ! TODO: based on horiz and vert grid type set the proper relloc
+      relloc = ESMF_CELL_CENTER
+      call ESMF_GridAddPhysGrid(grid, physgrid_id, relloc, delta1, delta2, &
+                                countsPerDE1, countsPerDE2, min, dim_names, &
                                 dim_units, physgrid_name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
@@ -1561,7 +1567,7 @@
 ! !IROUTINE: ESMF_GridAddPhysGrid - Add a PhysGrid to a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridAddPhysGrid(grid, counts, physgrid_id, &
+      subroutine ESMF_GridAddPhysGrid(grid, counts, physgrid_id, relloc, &
                                       x_min, x_max, y_min, y_max, &
                                       physgrid_name, rc)
 !
@@ -1569,6 +1575,7 @@
       type(ESMF_GridType) :: grid
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: counts
       integer, intent(out) :: physgrid_id
+      type(ESMF_RelLoc), intent(in) :: relloc
       real, intent(in), optional :: x_min
       real, intent(in), optional :: x_max
       real, intent(in), optional :: y_min
@@ -1682,6 +1689,7 @@
       global_max_coord(2)=y_max
       global_nmax(2)=counts(2)
       temp_pgrids(physgrid_id)=ESMF_PhysGridCreate(dim_num=2, &
+                                      relloc=relloc, &
                                       local_min=local_min_coord, &
                                       local_max=local_max_coord, &
                                       local_nmax=local_nmax, &
@@ -1700,19 +1708,20 @@
 ! !IROUTINE: ESMF_GridAddPhysGridSpecd - Add a specified PhysGrid to a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridAddPhysGridSpecd(grid, physgrid_id, min, delta1, &
+      subroutine ESMF_GridAddPhysGridSpecd(grid, physgrid_id, relloc, delta1, &
                                            delta2, countsPerDE1, countsPerDE2, &
-                                           dim_names, dim_units, physgrid_name, &
-                                           rc)
+                                           min, dim_names, dim_units, &
+                                           physgrid_name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType), target :: grid
       integer, intent(out) :: physgrid_id
-      real, dimension(:), intent(in), optional :: min
+      type(ESMF_RelLoc), intent(in) :: relloc
       real, dimension(:), intent(in) :: delta1
       real, dimension(:), intent(in) :: delta2
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
+      real, dimension(:), intent(in), optional :: min
       character (len=*), dimension(:), intent(in), optional :: dim_names
       character (len=*), dimension(:), intent(in), optional :: dim_units
       character (len=*), intent(in), optional :: physgrid_name
@@ -1724,13 +1733,12 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Class to be queried.
-!     \item[{[counts]}]
-!          Array of number of grid increments in each direction.
-!     \item [{[physgrid\_id]}]
+!          {\tt Grid} to add {\tt PhysGrid} to.
+!     \item[physgrid\_id]
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
-!     \item[{[min]}]
-!          Array of minimum physical coordinates in each direction.
+!     \item[relloc]
+!          Relative location of data t the centers, faces, and vertices of
+!          the {\tt Grid}.
 !     \item[{[delta1]}]
 !          Array of physical increments between nodes in the first direction.
 !     \item[{[delta2]}]
@@ -1739,6 +1747,8 @@
 !          Array of number of grid increments per DE in the x-direction.
 !     \item[{[countsPerDE2]}]
 !          Array of number of grid increments per DE in the y-direction.
+!     \item[{[min]}]
+!          Array of minimum physical coordinates in each direction.
 !     \item[{[dim\_names]}]
 !          Array of dimension names.
 !     \item[{[dim\_units]}]
@@ -1863,17 +1873,18 @@
       enddo
 
       temp_pgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, &
-                                                     delta1=delta1_local, &
-                                                     delta2=delta2_local, &
-                                                     local_min=local_min, &
-                                                     local_max=local_max, &
-                                                     global_min=global_min, &
-                                                     global_max=global_max, &
-                                                     counts=counts, &
-                                                     dim_names=dim_names, &
-                                                     dim_units=dim_units, &
-                                                     name=physgrid_name, &
-                                                     rc=status)
+                                   relloc=relloc, &
+                                   delta1=delta1_local, &
+                                   delta2=delta2_local, &
+                                   local_min=local_min, &
+                                   local_max=local_max, &
+                                   global_min=global_min, &
+                                   global_max=global_max, &
+                                   counts=counts, &
+                                   dim_names=dim_names, &
+                                   dim_units=dim_units, &
+                                   name=physgrid_name, &
+                                   rc=status)
       grid%physgrids => temp_pgrids
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -4072,8 +4083,8 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       integer :: i, j, rank, nDEs, num_domains
-      integer :: size, totalSize
-      integer :: counts(ESMF_MAXGRIDDIM)
+      integer :: size, totalPoints
+      integer :: counts(ESMF_MAXDIM)
       real, dimension(:,:,:), pointer :: boxes
       type(ESMF_AxisIndex), dimension(:,:), pointer :: grid_ai
       type(ESMF_Domain) :: domain
@@ -4091,13 +4102,9 @@
       call ESMF_GridGetBoundingBoxes(grid%ptr, array, status)
 
       ! get rank and counts from the bounding boxes array
-      call ESMF_LocalArrayGet(array, rank=rank, counts=counts, rc=status)
+      call ESMF_LocalArrayGet(array, counts=counts, rc=status)
       nDEs = counts(1)
-      if (rank.ge.2) then
-        do i = 2,rank
-          nDEs = nDEs*counts(i)
-        enddo
-      endif
+      rank = counts(3)
 
       ! allocate arrays now
       allocate(grid_ai(nDEs,rank))
@@ -4119,7 +4126,7 @@
         if ((local_min(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
             (local_max(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .or. &
             (local_min(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .or. &
-            (local_max(1).lt.min(boxes(i,1,2),boxes(i,2,2)))) exit
+            (local_max(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
         num_domains = num_domains + 1
       enddo
 
@@ -4129,12 +4136,12 @@
       ! figures the number of domains and one that fills it in
       ! TODO: move some of this code to Base and add a DomainList method
       num_domains = 0
-      totalSize  = 0
+      totalPoints  = 0
       do j = 1,nDEs
         if ((local_min(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
             (local_max(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
             (local_min(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .or. &
-            (local_max(1).lt.min(boxes(j,1,2),boxes(j,2,2)))) exit
+            (local_max(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
         num_domains = num_domains + 1
         domainList%domains(num_domains)%DE   = j
         domainList%domains(num_domains)%rank = rank
@@ -4143,9 +4150,9 @@
           domainList%domains(num_domains)%ai(i) = grid_ai(j,i)
           size = size * (grid_ai(j,i)%max - grid_ai(j,i)%min + 1)
         enddo
-        totalSize = totalSize + size
+        totalPoints = totalPoints + size
       enddo
-      domainList%total_size = totalSize
+      domainList%total_points = totalPoints
 
       ! TODO:  the code below is taken from Phil's regrid routines and needs
       !        to be incorporated at some point
