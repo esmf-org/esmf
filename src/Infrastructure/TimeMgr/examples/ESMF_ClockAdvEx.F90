@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.3 2003/05/07 21:06:33 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.4 2003/05/07 21:25:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.3 2003/05/07 21:06:33 eschwab Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.4 2003/05/07 21:25:46 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -168,7 +168,7 @@
       print *, "Current Time Step = "
       call ESMF_ClockPrint(clock, "timestep string", rc)
 
-      call ESMF_TimeIntervalInit(timeStep, D=int(2,kind=ESMF_IKIND_I8), rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, D=int(2,kind=ESMF_IKIND_I8), rc=rc)
       call ESMF_ClockSetTimeStep(clock, timeStep, rc)
       print *, "Time Step reset to = "
       call ESMF_ClockPrint(clock, "timestep string", rc)
@@ -178,8 +178,9 @@
       print *, "Previous time = "
       call ESMF_ClockPrint(clock, "prevtime string", rc)
 
-      call ESMF_TimeInit(curr_time, YR=int(1776,kind=ESMF_IKIND_I8), &
-                         MM=7, DD=4, cal=gregorianCalendar, rc=rc)
+      curr_time = refTime  ! copy refTime to get calendar
+      call ESMF_TimeSet(curr_time, YR=int(1776,kind=ESMF_IKIND_I8), &
+                         MM=7, DD=4, rc=rc)
       call ESMF_ClockSetCurrTime(clock, curr_time, rc)
       print *, "Current Time changed to = "
       call ESMF_ClockPrint(clock, "currtime string", rc)
