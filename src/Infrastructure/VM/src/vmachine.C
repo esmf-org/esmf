@@ -63,8 +63,8 @@ int *vmachine::ssiid;
 static int MPI_InitWrapper(void){
   // This wrapper is used for MPICH in order to provide argc and argv
   int pid = getpid();
-  char command[80], fname[80], args[8000];
-  sprintf(command, "ps -p %d -o args= > .args.%d", pid, pid);
+  char command[160], fname[80], args[8000];
+  sprintf(command, "env COLUMNS=8000 ps -p %d -o args= > .args.%d", pid, pid);
   system(command);
   sprintf(fname, ".args.%d", pid);
   FILE *fp=fopen(fname, "r");
