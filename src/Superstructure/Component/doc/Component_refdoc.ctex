@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.18 2003/12/18 22:28:49 svasquez Exp $
+% $Id: Component_refdoc.ctex,v 1.19 2004/02/27 20:57:47 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,37 +44,6 @@
 
 \newpage
 #endif
-
-\section{Component Class}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{comp_desc}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/comp_desc}
-#endif
-
-\subsection{Usage}
-#ifdef STANDALONE
-\input{comp_usage}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/comp_usage}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{comp_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/comp_rest}
-#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_Comp_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_Comp_fapi}
-#endif
-
 
 %%%%%%%%%%%%% Gridded Component Class %%%%%%%%%
 \section{Gridded Component Class}
