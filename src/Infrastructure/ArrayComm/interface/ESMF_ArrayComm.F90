@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.33 2004/04/12 15:43:48 theurich Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.34 2004/04/12 19:10:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.33 2004/04/12 15:43:48 theurich Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.34 2004/04/12 19:10:47 theurich Exp $'
 !
 !==============================================================================
 !
@@ -410,12 +410,21 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
       type(ESMF_DELayout) :: layout
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+#ifdef ESMF_ENABLE_VM
+      type (ESMF_newDELayout) :: delayout
+#endif
 
       ! get layout from the grid in order to get the number of DEs
       call ESMF_ArrayGet(array, rank=datarank, rc=status)
       call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
+#ifdef ESMF_ENABLE_VM
+      call ESMF_GridGet(grid, delayout=delayout, rc=status)
+      call ESMF_newDELayoutGet(delayout, nDEs, rc=status)
+#else
       call ESMF_GridGetDELayout(grid, layout, status)
       call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
+#endif
+      
 
       ! allocate dimOrder array and get from datamap
       allocate(dimOrder(datarank), stat=status)
