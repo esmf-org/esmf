@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.13 2004/06/16 12:32:23 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.14 2004/09/23 17:02:59 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -202,7 +202,11 @@
       !
       ! Read in input file
       !
-      open(10, status="old", file="coupled_inject_input")
+      open(9, status="old", file="coupled_inject_input",action="read",iostat=rc)
+      if (rc .ne. 0) then
+        print *, "Error!  Failed to open namelist file 'coupled_app_input' "
+        stop
+      endif
       read(10, input, end=20)
    20 continue
 

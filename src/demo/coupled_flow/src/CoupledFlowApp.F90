@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.18 2004/09/21 16:41:44 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.19 2004/09/23 17:02:58 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -113,7 +113,11 @@
       !
       ! Read in input file
       !
-      open(9, status="old", file="coupled_app_input")
+      open(9, status="old", file="coupled_app_input",action="read",iostat=rc)
+      if (rc .ne. 0) then
+        print *, "Error!  Failed to open namelist file 'coupled_app_input' "
+        stop
+      endif
       read(9, input, end=20)
    20 continue
 
