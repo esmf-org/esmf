@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2003/04/04 16:11:56 nscollins Exp $
+! $Id: user_model2.F90,v 1.3 2003/04/04 17:12:34 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -102,31 +102,32 @@
         print *, "User Comp Init starting"
 
         ! Initially import state contains a field with a grid but no data.
+        call ESMF_GridCompGet(comp, layout=layout, rc=status)
 
         ! Add a "humidity" field to the import state.
         i_max = 40
         j_max = 20
+        x_min = 0.0
+        x_max = 20.0
+        y_min = 0.0
+        y_max = 5.0
         horz_gridtype = ESMF_GridType_XY
         vert_gridtype = ESMF_GridType_Unknown
         horz_stagger = ESMF_GridStagger_A
         vert_stagger = ESMF_GridStagger_Unknown
         horz_coord_system = ESMF_CoordSystem_Cartesian
         vert_coord_system = ESMF_CoordSystem_Unknown
-        x_min = 0.0
-        x_max = 20.0
-        y_min = 0.0
-        y_max = 5.0
 
         grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                                nDE_i=2, nDE_j=2, &
+                                x_min=x_min, x_max=x_max, &
+                                y_min=y_min, y_max=y_max, &
+                                layout=layout, &
                                 horz_gridtype=horz_gridtype, &
                                 vert_gridtype=vert_gridtype, &
                                 horz_stagger=horz_stagger, &
                                 vert_stagger=vert_stagger, &
                                 horz_coord_system=horz_coord_system, &
                                 vert_coord_system=vert_coord_system, &
-                                x_min=x_min, x_max=x_max, &
-                                y_min=y_min, y_max=y_max, &
                                 name="source grid", rc=status)
 
         ! Set initial data values over exclusive domain to the de identifier

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2003/04/04 16:11:51 nscollins Exp $
+! $Id: user_model1.F90,v 1.7 2003/04/04 17:12:32 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,33 +113,34 @@
         if (.not.present(clock)) print *, "clock *not* present"
         if (present(rc)) print *, "rc present"
         if (.not.present(rc)) print *, "rc *not* present"
+
         ! query comp for layout
         call ESMF_GridCompGet(comp, layout=layout, rc=status)
 
         ! Add a "humidity" field to the export state.
         i_max = 40
         j_max = 20
+        x_min = 0.0
+        x_max = 20.0
+        y_min = 0.0
+        y_max = 5.0
         horz_gridtype = ESMF_GridType_XY
         vert_gridtype = ESMF_GridType_Unknown
         horz_stagger = ESMF_GridStagger_A
         vert_stagger = ESMF_GridStagger_Unknown
         horz_coord_system = ESMF_CoordSystem_Cartesian
         vert_coord_system = ESMF_CoordSystem_Unknown
-        x_min = 0.0
-        x_max = 20.0
-        y_min = 0.0
-        y_max = 5.0
 
         grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                                nDE_i=4, nDE_j=1, &
+                                x_min=x_min, x_max=x_max, &
+                                y_min=y_min, y_max=y_max, &
+                                layout=layout, &
                                 horz_gridtype=horz_gridtype, &
                                 vert_gridtype=vert_gridtype, &
                                 horz_stagger=horz_stagger, &
                                 vert_stagger=vert_stagger, &
                                 horz_coord_system=horz_coord_system, &
                                 vert_coord_system=vert_coord_system, &
-                                x_min=x_min, x_max=x_max, &
-                                y_min=y_min, y_max=y_max, &
                                 name="source grid", rc=status)
 
         ! Figure out our local processor id

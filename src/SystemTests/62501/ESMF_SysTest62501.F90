@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62501.F90,v 1.4 2003/04/04 16:11:47 nscollins Exp $
+! $Id: ESMF_SysTest62501.F90,v 1.5 2003/04/04 17:12:29 nscollins Exp $
 !
 ! System test code #62501
 
@@ -72,10 +72,19 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_GridCompInit(comp1, rc)
+    call ESMF_GridCompInit(comp1, istate, estate, clock, rc)
+       type(ESMF_GridComp) :: comp1
+       type(ESMF_State) :: istate, estate
+       type(ESMF_Clock) :: clock
+       integer :: rc
 
 !   !  The user creates a simple horizontal Grid internally by passing all
 !   !  necessary information through the CreateInternal argument list.
+
+      type(ESMF_DELayout) :: layout
+ 
+     
+      call ESMF_GridCompGet(comp1, layout=layout, rc=status)
 
       i_max = 40
       j_max = 20
@@ -92,15 +101,15 @@
       gname = "test grid 1"
 
       grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                             nDE_i=2, nDE_j=1, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             layout=layout, &
                              horz_gridtype=horz_gridtype, &
                              vert_gridtype=vert_gridtype, &
                              horz_stagger=horz_stagger, &
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
                              name=gname, rc=status)
 
       print *, "Grid Create returned"
