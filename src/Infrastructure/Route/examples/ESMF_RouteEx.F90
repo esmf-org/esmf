@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.1 2003/03/05 20:59:10 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.2 2003/04/04 16:24:29 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -8,25 +8,19 @@
 !BOP
 !
 ! !DESCRIPTION:
-! See the following code fragments for examples of how to create new Fields.  
+! See the following code fragments for examples of how to call Route on 
+! a Field.
 ! Also see the Programming Model section of this document.
 !
 !
 !\begin{verbatim}
 
 !   ! Example program showing various ways to create a Field object
-    program ESMF_FieldCreateEx
-    
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
+    program ESMF_RouteUseEx
 
-!   ! Other ESMF modules which are needed by Fields
-    use ESMF_IOMod
-    use ESMF_ArrayMod
-    use ESMF_DataMapMod
-    use ESMF_GridMod
-    use ESMF_FieldMod
-    
+    ! ESMF Framework module
+    use ESMF_Mod
+
     implicit none
     
 !   ! Local variables
@@ -122,7 +116,7 @@
      call ESMF_FieldDestroy(field3)
      !call ESMF_FieldDestroy(field4)
 
-     end program ESMF_FieldCreateEx
+     end program ESMF_RouteUseEx
     
 !\end{verbatim}
     
