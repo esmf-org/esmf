@@ -1,30 +1,32 @@
-% $Id: LogErr_usage.tex,v 1.9 2004/06/22 20:07:32 cpboulder Exp $
+% $Id: LogErr_usage.tex,v 1.10 2004/06/23 16:27:27 cdeluca Exp $
 
 %\subsection{Use and Examples}
 
-A default log is created on {\tt ESMF\_Initialize()} and placed in the
-root ESMF directory.  ESMF handles the initialization and finalization of
-the default log so the user can immediately start using the default log.
-A single default log is opened in the directory that initializes the default
-log.  If one is not present, a new one is created.  If multiple logs are 
+A default Log is created at {\tt ESMF\_Initialize()}.  ESMF handles 
+the initialization and finalization of the default Log so the user 
+can immediately start using it.  A single default Log is opened 
+in the directory that initializes the default Log.  If a Log is 
+not present, a new one is created.  If multiple Logs are 
 desired, they must be explicitly created or opened using 
 {\tt ESMF\_LogOpen()}.
 
-If a user wants to use a new or different log, the user must call
-{\tt ESMF\_LogOpen()} and pass in a log object and file name to open a Log 
+If a user wants to use a new or different Log, the user must call
+{\tt ESMF\_LogOpen()} and pass in a Log object and filename to open a Log 
 file.
  
-By default, the log file is not truncated at the start of a new run; it just
+By default, the Log file is not truncated at the start of a new run; it just
 gets appended to each time.  Future functionality could include an option to
-either truncate or append to the log file. 
+either truncate or append to the Log file. 
 
-In all cases where a log is opened, a unit number is assigned to a specific
-log.  A log will be assigned the lowest available unit number starting with
-11.  If a unit number is occupied, the next higher unit number will be 
+In all cases where a Log is opened, a unit number is assigned to a specific
+Log.  A Log is assigned the lowest available unit number starting with
+11.  If a unit number is occupied, the next higher unit number is 
 checked using the "inquire" method.  The process repeats until a free unit 
-number is found or when the unit number reaches {\tt ESMF\_LOGUPPER()} in 
+number is found or when the unit number reaches {\tt ESMF\_LOGUPPER} in 
 which case an error is returned.  As a result, the user should always check
 for free numbers using "inquire" to prevent potential unit number conflicts.
+In the near future we anticipate supporting an option in which a desired
+unit number can be passed in.
 
 The user can then set or get options on how the Log should be used 
 with the {\tt ESMF\_LogSet()} and {\tt ESMF\_LogGet()} methods.  These are 
@@ -36,7 +38,7 @@ full or by using the {\tt ESMF\_LogFlush()} method.  In the current
 implementation the Log flushes after every write.  
 
 For every {\tt ESMF\_LogWrite()}, a time and date stamp is prepended to the
-log entry.  The time is given in microsecond precision.
+Log entry.  The time is given in microsecond precision.
 
 When calling {\tt ESMF\_LogWrite()}, the user can supply an optional line,
 file and method.  These arguments can be passed in explicitly or with the help
@@ -49,18 +51,6 @@ it is a value supplied by cpp.
 
 When done writing messages, the Log is closed by calling 
 {\tt ESMF\_LogClose()} which will release the assigned unit number.
-
-Some of the assumptions implicit in using the Log utility are:
-
-\begin{enumerate}
-
-\item Prior to closing, {\tt ESMF\_LogFlush} is always executed.
-\item Prior to halting, {\tt ESMF\_LogFlush} is always executed.
-\item If the number of elements in a Log exceeds {\tt maxElements}, 
-a message is written to file and the buffer flushes automatically.
-
-\end{enumerate}
-
 
 
 

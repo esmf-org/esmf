@@ -1,43 +1,32 @@
-% $Id: LogErr_desc.tex,v 1.8 2004/06/22 20:08:54 cdeluca Exp $
-
-%
+% $Id: LogErr_desc.tex,v 1.9 2004/06/23 16:27:26 cdeluca Exp $
 
 % Earth System Modeling Framework
-
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
-
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-
 % Laboratory, University of Michigan, National Centers for Environmental 
-
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
-
 % NASA Goddard Space Flight Center.
-
 % Licensed under the GPL.
-
 
 
 %\subsection{Description}
 
-
-
 The Log class consists of a variety of methods for writing error, warning, 
-and other messages to files or to standard out.  Options include the ability 
-to write to a single file or multiple files, to write from a root PE or 
-from all active PEs, and to halt at errors, at warnings, or never.  The 
-verbosity of ouput can be adjusted with a flag.  Multiple Logs can be created 
-within an application.  Logs may be given user-specified names, or, if desired, 
-a default Log can be used.  
-
-
+and informational messages to files.  A default Log is 
+created at ESMF initialization.  Other Logs can be created later in the code
+by the user.  A set of standard return codes and associated messages are 
+provided for error handling.  
 
 Log provides capabilities to write to a file immediately or store entries 
 in a buffer for writing either when the buffer is full, or when the user
-calls an {\tt ESMF\_LogFlush()} command.  The user can specify the number 
-of entries that a Log should contain when it is flushed.  For buffered output, 
-it's also possible to specify whether Log entries should be ordered or not.  
+calls an {\tt ESMF\_LogFlush()} command.  Currently the Log flushes after
+every write command.
 
+Many options are planned for Log, including the ability 
+to write to a single file or multiple files, to write from a root PE or 
+from all active PEs, to halt at errors, at warnings, or never, to 
+adjust the verbosity of ouput, and to optionally write to {\tt stdout} 
+instead of file(s).
 
 
 
