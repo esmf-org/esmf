@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.16 2003/07/24 16:01:22 shep_smith Exp $
+! $Id: ESMF_LogErr.F90,v 1.17 2003/07/24 16:20:01 shep_smith Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,44 +38,60 @@ module ESMF_LogErrMod
 type ESMF_Log
     private
     sequence
-    type(ESMF_Logical) :: oneLogErrFile   !An ESMF_Log object
-                                          !will write to one file if
-			                  !oneLogErrFile is set to
-					  !ESMF_TF_TRUE
+    type(ESMF_Logical) :: oneLogErrFile           !An ESMF_Log
+                                                  !object
+                                                  !will write to
+					          !one file if
+			                          !oneLogErrFile
+					          !is set to
+					          !ESMF_TF_TRUE
 
-    type(ESMF_Logical) :: standardOut     !If standardOut set 
-                                          !to ESMF_TF_TRUE output
-                                          !goes to standard out.
+    type(ESMF_Logical) :: standardOut             !If standardOut
+                                                  !set 
+                                                  !to ESMF_TF_TRUE
+					          !output
+                                                  !goes to standard
+					          !out.
 
-    type(ESMF_Logical) :: fortIsOpen      !If fortIsOpen is set to
-                                          !ESMF_TF_TRUE an 
-			                  !ESMF_Log object has a Fortran file
-					  !open.
+    type(ESMF_Logical) :: fortIsOpen              !If fortIsOpen
+                                                  !is set to
+                                                  !ESMF_TF_TRUE an 
+			                          !ESMF_Log object
+					          !has a Fortran file
+					          !open.
 
-    integer unitNumber                    !Fortran unit number for output
+    integer unitNumber                            !Fortran unit number
+                                                  !for output
 
-    integer numFilePtr                    !Index into global array of File
-                                          !pointers for C/C++ I/O
+    integer numFilePtr                            !Index into global
+                                                  !array of File
+                                                  !pointers for C/C++ I/O
 
-    integer numFileFort                   !Index into global array of
-                                          !Fortran unit numbers
+    integer numFileFort                           !Index into global
+                                                  !array of
+                                                  !Fortran unit numbers
 
 
-    type(ESMF_Logical) :: verboseSet      !An ESMF_Log object will write
-                                          !output only if verbose is set to
-					  !ESMF_TF_TRUE
+    type(ESMF_Logical) :: verboseSet=ESMF_TF_TRUE !An ESMF_Log object will write
+                                                  !output only if verbose
+						  !is set to
+					          !ESMF_TF_TRUE
     
-    type(ESMF_Logical) :: flushSet        !An ESMF_Log object will have its
-                                          !output flushed if flushSet is set
-					  !to ESMF_TF_TRUE 
+    type(ESMF_Logical) :: flushSet=ESMF_TF_FALSE  !An ESMF_Log object
+                                                  !will have its
+                                                  !output flushed if
+						  !flushSet is set
+					          !to ESMF_TF_TRUE 
 
-    type(ESMF_Logical) :: haltOnWarn      !An ESMF_Log object will halt
-                                          !on encountering a warning if
-					  !haltOnWarn is set to ESMF_TF_TRUE 
+    type(ESMF_Logical) :: haltOnWarn=ESMF_TF_FALSE !An ESMF_Log object will halt
+                                                   !on encountering a warning if
+					           !haltOnWarn is set to
+						   !ESMF_TF_TRUE 
 
-    type (ESMF_Logical) :: haltOnErr      !An ESMF_Log object will halt
-                                          !on encountering an error if
-					  !haltOnErr is set to ESMF_TF_TRUE. 
+    type (ESMF_Logical) :: haltOnErr=ESMF_TF_TRUE  !An ESMF_Log object will halt
+                                                   !on encountering an error if
+					           !haltOnErr is set to
+						   !ESMF_TF_TRUE. 
 
     character(len=32) nameLogErrFile      !Name of an ESMF_Log objects's
                                           !output file 
@@ -273,13 +289,13 @@ subroutine ESMF_LogGet(aLog, verbose, flush, haltOnErr, haltOnWarn)
 !   \begin{description}
 !
 !   \item[verbose]
-!   If set to ESMF_TF_TRUE, output written to Log file.
+!   If present, return value in argument. 
 !  \item[flush]
-!   If set to ESMF_TF_TRUE, output is flushed.
+!   If present, return value in argument. 
 !  \item[haltOnWarn]
-!   If set to ESMF_TF_TRUE, code stops on warnings.
+!   If present, return value in argument. 
 !  \item[haltOnErr]
-!   If set to ESMF_TF_TRUE, code stops on errors.
+!   If present, return value in argument. 
 !  \end{description}
 !
 !
