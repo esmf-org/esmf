@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.119 2004/12/21 17:07:57 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.120 2004/12/21 21:50:17 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.119 2004/12/21 17:07:57 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.120 2004/12/21 21:50:17 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1114,11 +1114,11 @@ static int maxroutes = 10;
     ESMC_XPacket *my_XP = NULL;
     ESMC_XPacket *their_XP = NULL;
     ESMC_Logical boundary[ESMF_MAXGRIDDIM][2];
-    int nde[ESMF_MAXGRIDDIM], their_DE_pos[ESMF_MAXGRIDDIM];
-    int my_global_start[ESMF_MAXDIM];
+    int nde[ESMF_MAXGRIDDIM], DEpos[ESMF_MAXGRIDDIM];
+    int my_global_start[ESMF_MAXDIM], my_start[ESMF_MAXDIM];
     int my_XPcount, their_XPcount;
     int rc; 
-    int i, j, k, start;
+    int i, j, k, nextxp, start;
     int their_de, decount, dummy;
 
     // Calculate the sending table.  If this DE is not part of the sending
@@ -1148,7 +1148,7 @@ static int maxroutes = 10;
     // already obtained "decount" during last call
     for (k=0; k<decount; k++) {
       their_de = k;
-      delayout->ESMC_DELayoutGetDELocalInfo(their_de, their_DE_pos,
+      delayout->ESMC_DELayoutGetDELocalInfo(their_de, DEpos,
         ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL, NULL);
       // get "their" AI out of the AI_tot array
       for (j=0; j<rank; j++) {
@@ -1160,9 +1160,9 @@ static int maxroutes = 10;
         boundary[j][0] = ESMF_FALSE;
         boundary[j][1] = ESMF_FALSE;
         if (periodic[j]==ESMF_TRUE) {
-          if (their_DE_pos[j] == 0) 
+          if (DEpos[j] == 0) 
             boundary[j][0] = ESMF_TRUE;
-          if (their_DE_pos[j] == nde[j]-1) 
+          if (DEpos[j] == nde[j]-1) 
             boundary[j][1] = ESMF_TRUE;
         }
       }
@@ -1200,45 +1200,71 @@ static int maxroutes = 10;
 
     // Calculate the receiving table.
  
-    rc = ESMC_XPacketFromAxisIndex(my_AI_tot, rank, global_count, NULL, &my_XP,
-                                   &my_XPcount);
+    // figure out my boundary array
+    delayout->ESMC_DELayoutGetDELocalInfo(my_DE, DEpos, ESMF_MAXGRIDDIM, NULL,
+                                          0, NULL, 0, NULL, NULL);
+    for (j=0; j<rank; j++) {
+      boundary[j][0] = ESMF_FALSE;
+      boundary[j][1] = ESMF_FALSE;
+      if (periodic[j] == ESMF_TRUE) {
+        if (DEpos[j] == 0) 
+          boundary[j][0] = ESMF_TRUE;
+        if (DEpos[j] == nde[j]-1) 
+          boundary[j][1] = ESMF_TRUE;
+      }
+    }
+
+    rc = ESMC_XPacketFromAxisIndex(my_AI_tot, rank, global_count, boundary,
+                                   &my_XP, &my_XPcount);
+
+    // calculate my_Start for the different XPs
+    int myStart[5][2];
+    for (i=0; i<my_XPcount; i++) {
+      myStart[i][0] = my_global_start[0];
+      myStart[i][1] = my_global_start[1];
+    }
+
+    // there's always 1, which is OK with the default setting
+    nextxp = 0;
+
+    // if periodic along the first axis and this piece along boundary:
+    for (i=0; i<rank; i++) {
+      if (boundary && (boundary[i][0] == ESMF_TRUE)) {
+        nextxp++;
+        myStart[nextxp][i] = my_global_start[i] + global_count[i];
+      }
+      if (boundary && (boundary[i][1] == ESMF_TRUE)) {
+        nextxp++;
+        myStart[nextxp][i] = my_global_start[i] - global_count[i];
+      }
+    }
 
     // loop over DE's from layout to calculate receive table
     for (k=0; k<decount; k++) {
       their_de = k;
-      delayout->ESMC_DELayoutGetDELocalInfo(their_de, their_DE_pos,
-        ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL, NULL);
       // get "their" AI out of the AI_exc array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_exc[their_de + j*AI_count];
       }
  
       // calculate "their" XPacket in the sense of the global data
-      for (j=0; j<rank; j++) {
-        boundary[j][0] = ESMF_FALSE;
-        boundary[j][1] = ESMF_FALSE;
-        if (periodic[j] == ESMF_TRUE) {
-          if (their_DE_pos[j] == 0) 
-            boundary[j][0] = ESMF_TRUE;
-          if (their_DE_pos[j] == nde[j]-1) 
-            boundary[j][1] = ESMF_TRUE;
-        }
-      }
-      rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, boundary, 
+      rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, NULL, 
                                      &their_XP, &their_XPcount);
 
       // calculate the intersection
       start = 0;
       if (my_DE == their_de) start=1;
-      for (i=start; i<their_XPcount; i++) {
+      for (i=start; i<my_XPcount; i++) {
 
-        intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[i]);
+        intersect_XP.ESMC_XPacketIntersect(&my_XP[i], &their_XP[0]);
 
         // if there's no intersection, no need to add an entry here
         if (intersect_XP.ESMC_XPacketEmpty()) 
           continue;
          
         // translate from global to local
+        my_global_start[0] = myStart[i][0];
+        my_global_start[1] = myStart[i][1];
         intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot,
                                                rank, my_global_start);
 
