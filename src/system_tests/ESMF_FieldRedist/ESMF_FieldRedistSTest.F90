@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.16 2004/04/14 21:52:18 nscollins Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.17 2004/04/14 22:44:57 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -53,7 +53,7 @@
     type(ESMF_Grid)  ::  grid1,  grid2
     type(ESMF_Field) :: field1, field2, field3
     type(ESMF_RouteHandle) :: rh12, rh23
-    type(ESMF_newDELayout), intent(in) :: parentDelayout
+    type(ESMF_newDELayout) :: parentDElayout
     type(ESMF_VM):: vm
     type(ESMF_newDELayout) :: delayout0, delayout1
 
@@ -80,12 +80,13 @@
     call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
+    ! get the default global VM
     call ESMF_VMGetGlobal(vm, rc)
 
     ! Create a default 1-dim DELayout with N DE's, where N is number of PETs in VM
     delayout0 = ESMF_newDELayoutCreate(vm, rc=rc)
     if (rc /= ESMF_SUCCESS) stop
-    call ESMF_newDELayoutGet(delayout0, ndes, rc=rc)
+    call ESMF_newDELayoutGet(delayout0, deCount=ndes, rc=rc)
     if (rc /= ESMF_SUCCESS) stop
 
     if (ndes .eq. 1) then
@@ -155,8 +156,8 @@
                               haloWidth=hWidth, name="field2", rc=rc)
 
     ! precompute communication patterns
-    call ESMF_FieldRedistStore(field1, field2, layout1, rh12, rc=status, parentdelayout=ndelayout)
-    call ESMF_FieldRedistStore(field2, field3, layout1, rh23, rc=status, parentdelayout=ndelayout)
+    call ESMF_FieldRedistStore(field1, field2, delayout1, rh12, rc=status)
+    call ESMF_FieldRedistStore(field2, field3, delayout1, rh23, rc=status)
 
     ! get coordinate arrays available for setting the source data array
     allocate(coordArray(2))
@@ -282,7 +283,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_GridDestroy(grid2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_newDELayoutDestroy(layout1, rc)
+    call ESMF_newDELayoutDestroy(delayout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 
