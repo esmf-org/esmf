@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.23 2003/05/07 20:05:45 cdeluca Exp $
+% $Id: ESMF_install.tex,v 1.24 2003/05/28 20:27:58 flanigan Exp $
 
 \subsection{ESMF Download Options}
 
@@ -40,6 +40,19 @@ The following environment variables must be set:
   ESMF_ARCH     platform and compiler configuration
 \end{verbatim}
 
+On Alpha machines an additional environment variable needs
+to be set:
+
+\begin{verbatim}
+  ESMF_PROJECT  Load Sharing Facility (LSF) project name 
+\end{verbatim}
+
+On a Alpha machine, test and demo applications are run using 
+the bsub command.  The value of ESMF\_PROJECT is used as the 
+argument for bsub's -P option. The -P option assigns a job to 
+a specific project.  
+
+
 \subsubsection{Supported Platforms}
 \input{user_arch.tex}
 
@@ -79,18 +92,18 @@ specified directories are explained in Section~\ref{BuildOptions}.
 \noindent To build documentation for one module:
 
 \noindent First change directory to the where the desired module's documentation resides;  for
-example, to build the {\tt TimeMgmt} documentation start with:
+example, to build the {\tt TimeMgr} documentation start with:
 
 \begin{verbatim}
-cd ${ESMF_DIR}/src/Infrastructure/TimeMgmt/doc
+cd ${ESMF_DIR}/src/Infrastructure/TimeMgr/doc
 \end{verbatim}
 
 \noindent Next issue one of the following commands:
 \begin{verbatim}
-  gmake localdvi      ! Builds local dvi files.
-  gmake localpdf      ! Builds local pdf files.
-  gmake localhtml     ! Builds local html files.
-  gmake localdoc      ! Builds all of the local documents.
+  gmake dvi      ! Builds local dvi files.
+  gmake pdf      ! Builds local pdf files.
+  gmake html     ! Builds local html files.
+  gmake alldoc   ! Builds all of the local documents.
 \end{verbatim}
 
 \noindent The output from this local documentation build is in the top level {\tt doc}
