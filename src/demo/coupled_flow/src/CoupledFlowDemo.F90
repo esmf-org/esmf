@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.6 2004/02/05 21:56:13 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.7 2004/02/19 22:55:51 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -37,7 +37,6 @@
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
     type(ESMF_DELayout) :: layoutTop, layoutIN, layoutFS
     type(ESMF_State), save :: INimp, INexp, FSimp, FSexp
-    type(ESMF_State), save :: cplstateF2I, cplstateI2F
 
     ! Public entry point
     public CoupledFlow_register
@@ -306,25 +305,11 @@
     print *, "Flow Model Initialize finished, rc =", rc
 
     !
-    ! Create a list of 2 states for Coupler, direction 1
-    !
-    cplstateI2F = ESMF_StateCreate("Coupler States Injector to FlowSolver", &
-                                                      ESMF_STATELIST, cplname)
-    call ESMF_StateAddData(cplstateI2F, INexp, rc=rc)
-    call ESMF_StateAddData(cplstateI2F, FSimp, rc=rc)
- 
-    !
-    ! Create a list of 2 states for Coupler, direction 2
-    !
-    cplstateF2I = ESMF_StateCreate("Coupler States FlowSolver to Injector", &
-                                                      ESMF_STATELIST, cplname)
-    call ESMF_StateAddData(cplstateF2I, FSexp, rc=rc)
-    call ESMF_StateAddData(cplstateF2I, INimp, rc=rc)
- 
-    !
-    ! Initialize the coupler (single phase, no need for second pass)
+    ! Initialize the coupler, once for each export state
+    ! (note this is not 2 phases - it is calling the same code each time.)
     !
     call ESMF_CplCompInitialize(cpl, FSexp, INimp, clock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, INexp, FSimp, clock, rc=rc)
     print *, "Coupler Initialize finished, rc =", rc
  
     !
@@ -458,8 +443,6 @@ end subroutine coupledflow_run
       call ESMF_StateDestroy(INexp, rc)
       call ESMF_StateDestroy(FSimp, rc)
       call ESMF_StateDestroy(FSexp, rc)
-      call ESMF_StateDestroy(cplstateI2F, rc)
-      call ESMF_StateDestroy(cplstateF2I, rc)
 
       call ESMF_GridCompDestroy(INcomp, rc)
       call ESMF_GridCompDestroy(FScomp, rc)
