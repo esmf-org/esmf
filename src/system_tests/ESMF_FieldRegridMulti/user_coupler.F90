@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.8 2004/05/24 23:07:47 jwolfe Exp $
+! $Id: user_coupler.F90,v 1.9 2004/12/07 23:31:21 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -85,16 +85,14 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
-      ! Query component for VM and create a layout 
+      ! Query component for VM and pass into Regrid Store
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      cpllayout = ESMF_DELayoutCreate(vm, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! These are fields on different Grids - call RegridStore to set
-      ! up the Regrid structure
+      ! up the precomputed Regrid communication calls.
 
-      call ESMF_FieldRegridStore(humidity1, humidity2, cpllayout, &
+      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
                                  routehandle, &
                                  regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=rc)

@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.6 2004/05/24 23:08:43 jwolfe Exp $
+! $Id: user_coupler.F90,v 1.7 2004/12/07 23:31:22 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,15 +83,13 @@
       call ESMF_StateGetField(exportState, "humidity", humidity2, rc=rc)
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
-      ! Get VM from coupler component and create a layout with all the PETs
+      ! Get VM from coupler component
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-      cpllayout = ESMF_DELayoutCreate(vm, rc=rc)
-      
 
       ! These are fields on different Grids - call RegridStore to set
-      ! up the Regrid structure
+      ! up the precomputed Regrid communication calls.
 
-      call ESMF_FieldRegridStore(humidity1, humidity2, cpllayout, &
+      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
                                  routehandle, &
                                  regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=rc)
