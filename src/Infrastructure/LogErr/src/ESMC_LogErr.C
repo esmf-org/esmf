@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.16 2003/10/09 16:26:31 shep_smith Exp $
+// $Id: ESMC_LogErr.C,v 1.17 2003/10/10 16:26:21 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.16 2003/10/09 16:26:31 shep_smith Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.17 2003/10/10 16:26:21 shep_smith Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
@@ -117,7 +117,7 @@ void ESMC_Log::ESMC_LogOpenFile(
      ESMC_LogExit();
   }
      
- }   //end ESMC_LogErrOpenFile
+}   //end ESMC_LogErrOpenFile
 
 //-------------------------------------------------------------------------------
 //BOP
@@ -467,14 +467,14 @@ void ESMC_Log::ESMC_LogInfoFortran(
 // !IROUTINE:  ESMC_LogGet - get value of verbose, flush, haltOnErr, and/or haltOnWarn
 //
 // !INTERFACE:
-   void ESMC_LogGet(
+   void ESMC_Log::ESMC_LogGet(
 //
 // !RETURN VALUE:
 //  none
 // !ARGUMENTS:
 //  An arbitrary number of "option, value" pairs
 
-   char* option, ESMC_Logical value,...)
+   char* option, ESMC_Logical & value,...)
 // 
 // !DESCRIPTION:
 //  This method returns the value of the argument option in the variable value.
@@ -485,14 +485,13 @@ void ESMC_Log::ESMC_LogInfoFortran(
   char verboseOption[]="verbose";
   char haltOnErrOption[] = "haltOnErr";
   char haltOnWarnOption[] = "haltOnWarn";
-  char* optionPtr
-  int aValue;
   va_list argp;
   va_start(argp,value);
   for (;;)
   {
     if (strcmp(option,flushOption) == 0) {
-      value=flush;
+//      value=flush;
+       value=ESMF_TRUE;
     } else if (strcmp(option,verboseOption) == 0) {
       value=verbose;
     } else if (strcmp(option,haltOnErrOption) == 0) {
@@ -503,9 +502,9 @@ void ESMC_Log::ESMC_LogInfoFortran(
       printf("Error using ESMC_Set");
       ESMC_LogExit();
     }
-    option= va_arg(ap, char*);
+    option= va_arg(argp, char*);
     if (!(*option)) break;
-    value = va_arg(ap, int);
+    value = va_arg(argp, ESMC_Logical);
   }
 } 
 
@@ -514,7 +513,7 @@ void ESMC_Log::ESMC_LogInfoFortran(
 // !IROUTINE: ESMC_LogSet - sets the value of verbose, flush, haltOnWarn and/or haltOnErr
 //
 // !INTERFACE:
-   void ESMC_LogSet(
+   void ESMC_Log::ESMC_LogSet(
 
 // !RETURN VALUE 
 //   none
@@ -533,8 +532,6 @@ void ESMC_Log::ESMC_LogInfoFortran(
   char verboseOption[]="verbose";
   char haltOnErrOption[] = "haltOnErr";
   char haltOnWarnOption[] = "haltOnWarn";
-  char* optionPtr
-  int aValue;
   va_list argp;
   va_start(argp,value);
   for (;;) 
@@ -551,9 +548,9 @@ void ESMC_Log::ESMC_LogInfoFortran(
       printf("Error using ESMC_Set");
       ESMC_LogExit();
     }
-    option= va_arg(ap, char*);
+    option= va_arg(argp, char*);
     if (!(*option)) break;
-    value = va_arg(ap, int);
+    value = va_arg(argp, ESMC_Logical);
   }
 }    
    
@@ -584,7 +581,7 @@ void ESMC_Log::ESMC_LogInfoFortran(
   int fortIO=ESMF_FALSE;
   ESMC_LogPrintHeader(fortIO);
   return logErrCFilePtr[numFilePtr];
-
+}
 //
 //------------------------------------------------------------------------------------
 //BOP
@@ -743,38 +740,6 @@ void ESMC_Log::ESMC_LogCloseFile(
 
 
  
-//----------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_Log - native C++ constructor for log class
-//
-// !INTERFACE:
-
-ESMC_Log::ESMC_Log(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
-//  none
-
-  )
-
-// !DESCRIPTION:
-//   Native C++ constructor
-//EOP
-
-
-{
- nameLogErrFile[0]='\0';
- oneLogErrFile=ESMF_TRUE;
- standardOut=ESMF_TRUE;
- verbose=ESMF_TRUE; 
- fortIsOpen=ESMF_FALSE;
- numFilePtr=numCFiles;
- unitNumber=50;
- flush=ESMF_FALSE;
- logErrCFilePtr[numFilePtr]=stdout;
-}
 
 //----------------------------------------------------------------------
 //BOP
@@ -1035,6 +1000,42 @@ void ESMC_Log::ESMC_LogWarnFortran(
  }
 
 }
+
+//---------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_Log() - constructor
+// !INTERFACE:
+
+  ESMC_Log::ESMC_Log(
+//
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS:
+//  none
+
+    )
+//
+// !DESCRIPTION:
+// This is the constructor.  Sets verbose, flush, haltOnErr and haltOnWarn
+// and other variables to their default values.
+//
+//EOP
+  {
+    verbose=ESMF_TRUE;
+    flush=ESMF_FALSE;
+    haltOnErr=ESMF_TRUE;
+    haltOnWarn=ESMF_FALSE;
+    nameLogErrFile[0]='\0';
+    oneLogErrFile=ESMF_TRUE;
+    standardOut=ESMF_TRUE;
+    fortIsOpen=ESMF_FALSE;
+    numFilePtr=numCFiles;
+    unitNumber=50;
+    flush=ESMF_FALSE;
+    logErrCFilePtr[numFilePtr]=stdout;
+}
+
 
 //------------------------------------------------------------------------------
 //BOP

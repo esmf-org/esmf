@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.16 2003/10/09 16:31:44 shep_smith Exp $
+// $Id: ESMC_LogErr.h,v 1.17 2003/10/10 16:25:13 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -136,37 +136,19 @@ class ESMC_Log {
     void ESMC_LogErrFortran(int errCode,int line,char file[],char dir[],char msg[]);
     void ESMC_LogExit();
     void ESMC_LogSet(char* option, ESMC_Logical value, ...);
-    void ESMC_LogGet(char* option, ESMC_Logical value, ...);
-    FILE* ESMC_Log::ESMC_GetFileHandle();
+    void ESMC_LogGet(char* option, ESMC_Logical & value, ...);
+    FILE* ESMC_GetFileHandle();
     ESMC_Log();
 };
 //EOP
 
-//---------------------------------------------------------------------------
-//BOP
-//
-// !IROUTINE: ESMC_Log() - constructor
-// !INTERFACE:
+// private static data - address of fortran callback funcs
 
-inline ESMC_Log::ESMC_Log(
-//
-// !RETURN VALUE:
-//  none
-// !ARGUMENTS:
-// none
-   
-  )
-
-// !DESCRIPTION:
-// This is the constructor.  Sets verbose, flush, haltOnErr and haltOnWarn
-// to their default values.
-//
-//EOP
-{
-  verbose=ESMF_TRUE
-  flush=ESMF_FALSE
-  haltOnErr=ESMF_TRUE
-  haltOnWarn=ESMF_FALSE
+ extern "C" {
+  void FTN(f_esmf_logopenfortran)(ESMC_Logical*, int *, char*, int );
+  void FTN(f_esmf_logclosefortran)(int *);
+  void FTN(f_esmf_logprintstring)(int *, char*, ESMC_Logical*, int );
+  void FTN(f_esmf_logprintnewline)(int *, ESMC_Logical*);
 }
  
 //---------------------------------------------------------------------------
