@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.14 2003/09/02 17:15:47 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.15 2003/09/02 18:56:34 nscollins Exp $
 !
 ! System test code #79497
 
@@ -83,17 +83,6 @@
       print *, "This system test needs to run at least 6-way, current np = ", ndes
       goto 10
     endif
-
-    !! BYPASS CODE:  This system test isn't working yet.
-    !!  remove the lines up to the "goto" to enable it again.
-    rc = ESMF_SUCCESS
-    print *,   "BYPASS: This system test is being bypassed because the"
-    print *,   "  necessary functions are not complete at this time."
-    write(0,*) "BYPASS: This system test is being bypassed because the"
-    write(0,*) "  necessary functions are not complete at this time."
-    ! Figure out our local processor id for message below.
-    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
-    goto 10
 
     mid = ndes / 2
 
