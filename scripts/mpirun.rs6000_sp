@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.rs6000_sp,v 1.5 2003/02/27 23:23:45 nscollins Exp $
+# $Id: mpirun.rs6000_sp,v 1.6 2003/03/04 17:48:15 nscollins Exp $
 # This script provides an interface such that the simple command
 # mpirun -np # runs # copies of the program in parallel.
 # The IBM poe command does not fit this paradigm.
@@ -12,11 +12,13 @@ then
 	exit 1
 fi
 
+num_procs=$2
+shift 2
+prog=$*
+
 # this may be different on different machines.
 # TODO: make it an optional arg to mpirun?
 MAX_TASKS_PER_NODE=4
-
-num_procs=$2
 
 if [ $num_procs -le $MAX_TASKS_PER_NODE ]; then
   num_nodes=1
@@ -24,18 +26,12 @@ if [ $num_procs -le $MAX_TASKS_PER_NODE ]; then
 else
   let num_nodes="($num_procs + $MAX_TASKS_PER_NODE - 1)/$MAX_TASKS_PER_NODE"
   let num_tasks="$num_procs / $num_nodes"
-  let odd_procs="$num_tasks - ($num_procs * $num_nodes)"
+  let odd_procs="$num_procs - ($num_tasks * $num_nodes)"
   if [ $odd_procs -ne 0 ] ; then
-     echo !!WARNING, number of processes does not divide evenly. 
+     echo "!!WARNING, number of processes does not divide evenly. odd_procs =" $odd_procs
      echo "num_procs =" $num_procs " num_nodes =" $num_nodes " num_tasks=" $num_tasks
   fi
 fi
-
-shift 2
-
-prog=$*
-
-echo "prog is<$prog>"
 
 MP_PROCS=$num_procs
 MP_NODES=$num_nodes
@@ -43,9 +39,7 @@ MP_TASKS_PER_NODE=$num_tasks
 
 export MP_NODES MP_TASKS_PER_NODE MP_PROCS
 
-echo "MP_PROCS =" $MP_PROCS
-echo "MP_NODES =" $MP_NODES
-echo "MP_TASKS_PER_NODE =" $MP_TASKS_PER_NODE
-echo "about to exec< exec poe -procs $num_procs $prog>"
+echo "env: MP_PROCS =" $MP_PROCS " MP_NODES =" $MP_NODES " MP_TASKS_PER_NODE =" $MP_TASKS_PER_NODE
+echo "about to <exec poe $prog>"
 
 exec poe $prog
