@@ -1,4 +1,4 @@
-/* $Id: mpi.h,v 1.1 2001/11/13 18:35:48 dneckels Exp $ */
+/* $Id: mpi.h,v 1.2 2002/01/25 20:43:16 dneckels Exp $ */
 
 /*
    This is a special set of bindings for uni-processor use of MPI by the PETSc library.
@@ -58,6 +58,10 @@
 
 #if !defined(__MPI_H)
 #define __MPI_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #if defined(__BSdependh)
 #error You cannot use MPI-uni with BlockSolve95
@@ -599,6 +603,10 @@ extern int    Petsc_MPI_Finalize(void);
 
 #define MPI_NULL_COPY_FN   0
 #define MPI_NULL_DELETE_FN 0
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

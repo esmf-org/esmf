@@ -1,5 +1,5 @@
 !
-!     $Id: mpif.h,v 1.1 2001/11/13 18:35:48 dneckels Exp $
+!     $Id: mpif.h,v 1.2 2002/01/25 20:43:16 dneckels Exp $
 !
 
 !     Trying to provide as little support for fortran code in petsc as needed
@@ -25,6 +25,14 @@
        parameter (MPI_ERR_INTERN = 21)
        integer MPI_SUM
        parameter (MPI_SUM=0)
+       integer MPI_MAX
+       parameter (MPI_MAX=40)
+       integer MPI_MIN
+       parameter (MPI_MIN=41)
+       integer MPI_STATUS_SIZE
+       parameter (MPI_STATUS_SIZE=4)
+       integer MPI_REQUEST_NULL
+       parameter (MPI_REQUEST_NULL=0)
 
        INTEGER MPI_SOURCE,MPI_TAG,MPI_ERROR
        PARAMETER(MPI_SOURCE=2,MPI_TAG=3,MPI_ERROR=4)

@@ -1,4 +1,4 @@
-/*$Id: mpi.c,v 1.1 2001/11/13 18:35:48 dneckels Exp $*/
+/*$Id: mpi.c,v 1.2 2002/01/25 20:43:15 dneckels Exp $*/
 
 /*
       This provides a few of the MPI-uni functions that cannot be implemented
@@ -304,8 +304,37 @@ void MPIUNI_STDCALL MPI_ALLREDUCE(void *sendbuf,void *recvbuf,int *count,int *da
 } 
 
 
+/* These are some symbols needed by some MPI procs.  These will
+   core dump if they try to call these functions, but this at least
+   allows compilation, which is the whole point of mpiuni. */
+int
+	mpi_initialized_,
+	mpi_comm_dup_,
+	mpi_barrier_,
+	mpi_comm_split_,
+	mpi_comm_free_,
+	mpi_type_indexed_,
+	mpi_type_commit_,
+	mpi_type_indexed_,
+	mpi_type_commit_,
+	mpi_comm_dup_,
+	mpi_bcast_,
+	mpi_waitall_,
+	mpi_recv_,
+	mpi_isend_,
+	mpi_alltoall_,
+	mpi_type_free_,
+	mpi_type_free_,
+	mpi_wait_,
+	mpi_irecv_;
+	
+	
+
+
+
 #if defined(__cplusplus)
 }
 #endif
+
 
 
