@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: sys_tests_results.pl,v 1.1 2005/03/18 16:09:23 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.2 2005/03/18 16:31:56 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -52,7 +52,7 @@ use File::Find
         }
         if ( $st_count == 0 ) {
         	if ($SUMMARY) { # Print only if full output requested
-                	print "\n\nEXAMPLES SUMMARY\n";
+                	print "\n\nSYSTEM TESTS SUMMARY\n";
         	}
                 print "NOTE: Found no system test files.\n";
                 return 0;
@@ -82,11 +82,11 @@ use File::Find
         if (not $ok) {
 		print "\n\n";
         	if ($SUMMARY) { # Print only if full output requested
-                	print "EXAMPLES SUMMARY\n";
+                	print "SYSTEM TESTS SUMMARY\n";
         	}
                 #The test directory does not exist.
                 print "NOTE: There is no $TEST_DIR directory,\n";
-                print "either the 'gmake ESMF_BOPT=$ESMF_BOPT build_system_tests' has not been run or \n";
+                print "either the 'gmake ESMF_BOPT=$ESMF_BOPT build_system_tests' has not been run or ";
                 print "the 'gmake  ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
                 return 0;
         }
