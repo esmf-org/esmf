@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.8 2004/12/08 20:41:32 nscollins Exp $
+! $Id: user_model1.F90,v 1.9 2004/12/21 03:31:02 theurich Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -214,7 +214,9 @@
      !   call ESMF_StatePrint(exportState, rc=status)
      !   call ESMF_FieldPrint(humidity1, rc=status)
      !   call ESMF_ArrayPrint(array1, "", rc=status)
- 
+     
+        deallocate(coordArray)
+        
         print *, "User Comp Run returning"
 
         rc = status

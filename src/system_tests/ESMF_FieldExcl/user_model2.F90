@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2004/12/08 20:41:32 nscollins Exp $
+! $Id: user_model2.F90,v 1.9 2004/12/21 03:31:02 theurich Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -296,7 +296,10 @@
             maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
           enddo
         enddo
+        deallocate(calc)
       endif
+
+      deallocate(coordArray)
 
       write(*,*) "Results for DE #", myDE, ":"
       write(*,*) "   minimum regridded value = ", minDValue
