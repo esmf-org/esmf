@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.21 2003/02/12 17:58:13 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.22 2003/02/12 18:57:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -243,7 +243,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.21 2003/02/12 17:58:13 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.22 2003/02/12 18:57:51 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1064,9 +1064,10 @@ end function
       logical :: rcpresent=.FALSE.                ! Return code present
       type(ESMF_StateData), pointer :: nextitem
       type(ESMF_Field) :: field
-      integer, pointer, dimension(:) :: bindex
+      character(len=ESMF_MAXSTR) :: bname
+      integer, pointer, dimension(:) :: bindex, btodo
       integer :: i, j, startbase
-      integer :: count, fcount
+      integer :: count, fcount, ecount
 
       ! Initialize return code.  Assume failure until success assured.
       if(present(rc)) then
@@ -1075,6 +1076,12 @@ end function
       endif
   
       ! Add the bundles to the state, checking for name clashes
+      ! TODO: check for existing name, if placeholder, replace it
+
+      ! for each bundle, look for existing name
+      !  if found and if placeholder,  ...
+      ! call ESMF_BundleGetName(bundles(i), nextitem%namep)
+      
       ! TODO: check for name collisions
 
       call ESMF_StateTypeExtendList(stypep, bcount, status)
@@ -2241,7 +2248,10 @@ end function
        character (len=6) :: defaultopts="brief"
        integer :: status=ESMF_FAILURE      ! local error status
        type(ESMF_StateType), pointer :: sp
+       type(ESMF_StateData), pointer :: dp
+       character (len=1024) :: outbuf
        logical :: rcpresent=.FALSE.
+       integer :: i, nitems
 
 !      Initialize return code; assume failure until success is certain
        if (present(rc)) then
@@ -2254,10 +2264,50 @@ end function
        sp => state%statep
        print *, "StatePrint: "  
        print *, "  Component ", trim(sp%compname)
-       print *, "  Number of members: ", sp%datacount
        if (sp%st .eq. ESMF_STATEIMPORT) print *, "  Import State"
        if (sp%st .eq. ESMF_STATEEXPORT) print *, "  Export State"
        if (sp%st .eq. ESMF_STATEUNKNOWN) print *, "  Unknown State Type"
+       print *, "  Number of members: ", sp%datacount
+      
+       do i=1, sp%datacount
+         dp => sp%datalist(i)
+
+         print *, "  Item ", i, ":"
+         outbuf = "    Name= " // trim(dp%namep) // ", "
+
+         select case (dp%otype%ot)
+           case (ESMF_STATEBUNDLE%ot)
+             outbuf = trim(outbuf) //  " type Bundle,"
+           case (ESMF_STATEFIELD%ot)
+             outbuf = trim(outbuf) //  " type Field,"
+           case (ESMF_STATEARRAY%ot)
+             outbuf = trim(outbuf) //  " type Array,"
+           case (ESMF_STATEDATANAME%ot)
+             outbuf = trim(outbuf) //  " placeholder name,"
+           case (ESMF_STATEINDIRECT%ot)
+             outbuf = trim(outbuf) //  " field inside a bundle,"
+           case (ESMF_STATEOBJTYPEUNKNOWN%ot)
+             outbuf = trim(outbuf) //  " unknown type,"
+         end select
+
+         select case (dp%needed%needed)
+           case (ESMF_STATEDATAISNEEDED%needed)
+             outbuf = trim(outbuf) //  " marked as needed."
+           case (ESMF_STATEDATANOTNEEDED%needed)
+             outbuf = trim(outbuf) //  " marked as NOT needed."
+         end select
+
+        print *, trim(outbuf)
+
+        ! TODO: finish printing more info here
+        !type(ESMF_StateDataReady) :: ready
+        !type(ESMF_StateDataValid) :: valid
+
+        !type(ESMF_DataHolder), pointer :: datap
+
+        !print *, trim(outbuf)
+
+       enddo
 
 
 !      set return values

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.5 2003/02/11 23:41:42 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.6 2003/02/12 18:57:52 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -34,7 +34,7 @@
     character(ESMF_MAXSTR) :: cname, sname, bname, fname
     type(ESMF_Array) :: array1
     type(ESMF_Field) :: field1
-    type(ESMF_Bundle) :: bundle1, bundle2, bundle3
+    type(ESMF_Bundle) :: bundle1, bundle2, bundle3, qbundle
     type(ESMF_State) :: state1, state2, state3, state4
         
 !-------------------------------------------------------------------------
@@ -78,16 +78,28 @@
     call ESMF_StatePrint(state2, rc=rc)
     print *, "State Print returned", rc
 
-    call ESMF_StateGetData(state2, "Surface pressure", bundle3, rc=rc)
+    bundle2 = ESMF_BundleCreate(name="Temperature", rc=rc)
+    print *, "Bundle Create returned", rc
+
+    call ESMF_StateAddData(state2, bundle2, rc=rc)
+    print *, "StateAddData returned", rc
+    
+    call ESMF_StatePrint(state2, rc=rc)
+    print *, "State Print returned", rc
+
+    call ESMF_StateGetData(state2, "Surface pressure", qbundle, rc=rc)
     print *, "State GetData returned", rc
 
-    call ESMF_BundlePrint(bundle3, "", rc=rc)
+    call ESMF_BundlePrint(qbundle, "", rc=rc)
     print *, "Bundle Print returned", rc
 
     call ESMF_StateDestroy(state2, rc=rc)
     print *, "State Destroy returned", rc
 
     call ESMF_BundleDestroy(bundle1, rc=rc)
+    print *, "Bundle Destroy returned", rc
+
+    call ESMF_BundleDestroy(bundle2, rc=rc)
     print *, "Bundle Destroy returned", rc
 
     print *, "State Test 2 finished"
@@ -148,11 +160,14 @@
       call ESMF_BundleAddFields(bundle2, field1, rc=rc) 
       print *, "Bundle AddField returned", rc
 
-      call ESMF_StateAddData(state3, bundle1, rc=rc)
+      call ESMF_StateAddData(state3, bundle2, rc=rc)
       print *, "StateAddData returned", rc
     else
       print *, "Data marked as not needed", trim(sname)
     endif
+
+    call ESMF_StatePrint(state3, rc=rc)
+    print *, "State Print returned", rc
     
     call ESMF_StateDestroy(state3, rc=rc)
     print *, "State Destroy returned", rc
