@@ -103,8 +103,10 @@
 \subsection{Usage}
 #ifdef STANDALONE
 \input{TimeInterval_usage}
+\input{TimeInterval_fex}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/TimeInterval_usage}
+\input{../Infrastructure/TimeMgr/doc/TimeInterval_fex}
 #endif
 
 %\subsection{Restrictions}
@@ -113,13 +115,6 @@
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
 %#endif
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{TimeInterval_fex}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_fex}
-#endif
 
 %\subsection{Parameters and Definitions}
 %#ifdef STANDALONE

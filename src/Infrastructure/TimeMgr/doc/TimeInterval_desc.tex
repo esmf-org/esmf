@@ -1,4 +1,4 @@
-% $Id: TimeInterval_desc.tex,v 1.4 2003/08/12 14:02:07 cdeluca Exp $
+% $Id: TimeInterval_desc.tex,v 1.5 2003/08/12 14:14:18 cdeluca Exp $
 
 A TimeInterval represents a period between time instants.  
 It can be either positive or negative.  If the TimeInterval 
@@ -9,21 +9,21 @@ interval.  The ESMF recognizes when a TimeInterval needs to be
 associated with a calendar and when it does not.
 
 There are TimeInterval methods defined for incrementing and
-decrementing a TimeInterval by another {\tt TimeInterval},
-and for multiplication and division of {\tt TimeIntervals} by integers, 
-reals, fractions and other {\tt TimeIntervals}.  Methods are also 
+decrementing a TimeInterval by another TimeInterval,
+and for multiplication and division of TimeIntervals by integers, 
+reals, fractions and other TimeIntervals.  Methods are also 
 defined to take the absolute value and negative absolute value of a 
-{\tt TimeInterval}, and for comparing the length of two
-{\tt TimeIntervals}.
+TimeInterval, and for comparing the length of two
+TimeIntervals.
 
-The class used to represent time instants in ESMF is {\tt Time},
+The class used to represent time instants in ESMF is Time,
 and this class is frequently used in operations along with 
-{\tt TimeIntervals}.  For example, the difference between two
-{\tt Times} is a {\tt TimeInterval}.  
+TimeIntervals.  For example, the difference between two
+Times is a TimeInterval.  
 
-{\tt Time Intervals} are used by other parts of the ESMF timekeeping
-system, such as {\tt Clocks} (Section~\ref{sec:Clock}) and 
-{\tt Alarms} (Section~\ref{sec:Alarm}).    
+Time Intervals are used by other parts of the ESMF timekeeping
+system, such as Clocks (Section~\ref{sec:Clock}) and Alarms 
+(Section~\ref{sec:Alarm}).    
 
 
 
