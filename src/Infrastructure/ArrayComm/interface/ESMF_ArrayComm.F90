@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.39 2004/04/19 21:54:39 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.40 2004/04/19 22:10:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.39 2004/04/19 21:54:39 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.40 2004/04/19 22:10:45 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -715,10 +715,8 @@
       integer, dimension(:), allocatable :: globalCellCountPerDim, decompids
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
       integer, dimension(:,:), allocatable :: globalStartPerDEPerDim
-      integer :: size_decomp, size_AI
       integer :: nDEs, my_DE
       integer :: gridrank, datarank
-      integer :: i, dimCount
       logical :: hascachedroute    ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
@@ -1072,7 +1070,6 @@
                                               srcStartPerDEPerDim
       integer :: nDEs, dstMyDE, srcMyDE
       integer :: gridrank, datarank
-      integer :: i, dimCount
       logical :: hascachedroute     ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
@@ -1273,7 +1270,6 @@
         integer :: status         ! local error status
         logical :: rcpresent      ! did user specify rc?
         integer :: size_decomp
-        integer :: i
 
 ! initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
