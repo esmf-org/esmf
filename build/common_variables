@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.5 2001/12/13 20:15:12 cdeluca Exp $ 
+# $Id: common_variables,v 1.6 2001/12/13 20:22:01 cdeluca Exp $ 
 #
 # LDIR (defined from $ESMF_DIR) determines the libraries that are linked.
 # PDIR (defined from $ESMF_DIR) determines where the libraries are built.
@@ -30,9 +30,9 @@ ESMC_MODDIR      = ${ESMF_BUILD}/mod/mod${BOPT}/${ESMF_ARCH}
 ESMC_OBJDIR      = ${ESMC_MODDIR}
 ESMC_TESTDIR     = ${ESMF_DIR}/test${BOPT}/${ESMF_ARCH}
 ESMC_DOCDIR      = ${ESMF_DIR}/doc
-PROTEX           = ${ESMF_DIR}/scripts/doc_templates/templates/protex 
-DO_LATEX         = ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_latex
-DOL2H            = ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_l2h
+PROTEX           = ${ESMF_DIR}/scripts/protex 
+DO_LATEX         = ${ESMF_DIR}/scripts/do_latex
+DOL2H            = ${ESMF_DIR}/scripts/do_l2h
 PDIR	       = ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
 LIBNAME	       = ${PDIR}/${LIBBASE}.a
 SOURCE	       = ${SOURCEC} ${SOURCEF}
