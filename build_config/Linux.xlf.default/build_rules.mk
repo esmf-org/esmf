@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.3 2005/02/23 05:15:51 theurich Exp $
+#  $Id: build_rules.mk,v 1.4 2005/02/24 22:50:24 jedwards Exp $
 #
 #  
 #
@@ -146,13 +146,13 @@ CXX_SYS_LIBS		= -lC
 C_CXXF90LD		= ${CXX_CC}
 C_F90CXXLD		= ${CXX_FC}
 
-C_CXXF90LIBS		= -L/opt/ibmcmp/xlf/9.1/lib -L/opt/ibmcmp/vacpp/7.0/lib -lm -lxlf90 -libmc++
+C_CXXF90LIBS		= -L/opt/ibmcmp/xlf/9.1/blrts_lib -L/opt/ibmcmp/vacpp/7.0/blrts_lib -lm -lxlf90 -lxl -lxlopt -libmc++ -lxlfmath -lm -lrt
 
-C_F90CXXLIBS		= -L/opt/ibmcmp/xlf/9.1/lib -L/opt/ibmcmp/vacpp/7.0/lib -lxlf90 -libmc++
+C_F90CXXLIBS		= -L/opt/ibmcmp/xlf/9.1/blrts_lib -L/opt/ibmcmp/vacpp/7.0/blrts_lib -lxlf90  -lxl -lxlopt -libmc++ -lxlfmath -lm -lrt
 
 C_CXXSO			= mpCC -G
 
-C_CXXSOLIBS		= -L/opt/ibmcmp/xlf/9.1/lib -L/opt/ibmcmp/vacpp/7.0/lib -lm -lxlf90 -libmc++
+C_CXXSOLIBS		= -L/opt/ibmcmp/xlf/9.1/blrts_lib -L/opt/ibmcmp/vacpp/7.0/blrts_lib  -lxlf90 -lxl -lxlopt -libmc++ -lxlfmath -lm -lrt
 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
@@ -168,12 +168,12 @@ OCOMP_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
 OCOMP_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 #
 
-SL_LIBS_TO_MAKE = libesmf
+SL_LIBS_TO_MAKE = 
+SL_SUFFIX   = 
+SL_LIBOPTS  =
 
-SL_SUFFIX   = so
-SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
-SL_LINKOPTS = -brtl
-SL_F_LINKER = $(F90CXXLD) 
+SL_LINKOPTS = 
+SL_F_LINKER = $(CXXF90LD) 
 SL_C_LINKER = $(CXXF90LD) 
 
 # end of common settings
