@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.34 2003/05/02 01:05:42 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.35 2003/05/02 22:12:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.34 2003/05/02 01:05:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.35 2003/05/02 22:12:32 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -127,18 +127,15 @@
     if (cal != ESMC_NULL_POINTER) {
       Calendar = cal;
     }
-    else {
-      Calendar = ESMC_NULL_POINTER;
-      // TODO: log err
-      cout << "ESMC_Time::ESMC_TimeInit(): calendar not set" << endl;
-      return (ESMF_FAILURE);
-    }
 
     // set timezone
     Timezone = (tz != ESMC_NULL_POINTER) ? *tz : ESMC_NULL_POINTER;
 
-    return(ESMC_TimeSet(YR, MM, DD, D, H, M, S, MS, US, NS, d_, h_, m_, s_,
-                        ms_, us_, ns_, Sn, Sd));
+    if (ESMC_TimeSet(YR, MM, DD, D, H, M, S, MS, US, NS, d_, h_, m_, s_,
+                     ms_, us_, ns_, Sn, Sd) != ESMF_SUCCESS)
+      return(ESMF_FAILURE);
+
+    return (ESMC_TimeValidate());
 
  }  // end ESMC_TimeInit
 
@@ -741,11 +738,7 @@
 
     // validate inputs
     if (dayOfWeek == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-
-    // this method is valid for any calendar which uses 7-day weeks
     if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (Calendar->Type == ESMC_CAL_JULIAN ||
-        Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
     // date variables
     ESMF_IKIND_I8 YR;
@@ -754,10 +747,32 @@
     //  The day of the week is simply modulo 7 from a reference date,
     //  adjusted for a 1-based count and negative deltas.
     //  The reference date is any known Monday (day of the week = 1)
-    //  after the Gregorian reformation of 9/14/1752
+    //  This method is valid for any calendar which uses 7-day weeks.
 
+    switch (Calendar->Type)
+    {
+        case ESMC_CAL_GREGORIAN:
+        case ESMC_CAL_NOLEAP:    // TODO: ?
+        case ESMC_CAL_360DAY:    // TODO: ?
+          //  Can be any Monday after the Gregorian reformation of 9/14/1752
+          YR=1796; MM=7; DD=4;   // America's 20th birthday was a Monday !
+          break;
+
+        case ESMC_CAL_JULIAN:
+          //  Can be any Monday before the Gregorian reformation of 9/2/1752
+          YR=1492; MM=10; DD=29;  // Columbus landed in Cuba on a Monday !
+          break;
+
+        case ESMC_CAL_NOCALENDAR:
+        case ESMC_CAL_GENERIC:
+        default:
+          return(ESMF_FAILURE);
+          break;
+    }
+
+    // TODO: put the above reference dates into a pre-initialized lookup table
+    //       to skip this step
     ESMC_Time referenceMonday = *this; // initialize calendar & timezone
-    YR=1796; MM=7; DD=4;    // America's 20th birthday was a Monday !
     // TODO: use native C++ Set() when ready
     referenceMonday.ESMC_TimeSet(&YR, &MM, &DD);
 
@@ -1052,7 +1067,21 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO
+    if (ESMC_BaseTime::ESMC_BaseTimeValidate() != ESMF_SUCCESS)
+      return(ESMF_FAILURE);
+
+    if (Calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+    if (Calendar->ESMC_CalendarValidate() != ESMF_SUCCESS) return(ESMF_FAILURE);
+
+    // earliest Gregorian date representable by the Fliegel algorithm
+    //  is -4800/3/1 == -32044 Julian days == -2,768,601,600 core seconds
+    if (Calendar->Type == ESMC_CAL_GREGORIAN && S < -2768601600LL)
+        return(ESMF_FAILURE);
+
+    // TODO: other calendar ranges ?
+
+    // TODO: valid Timezones ?
+
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeValidate
