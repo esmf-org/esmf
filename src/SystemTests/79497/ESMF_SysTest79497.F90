@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.10 2003/08/29 05:38:05 eschwab Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.11 2003/08/29 22:45:51 nscollins Exp $
 !
 ! System test code #79497
 
@@ -69,6 +69,11 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
+
+    !! BYPASS CODE:  This system test isn't working yet.
+    !!  remove the next line to run the actual test and debug it.
+    rc = ESMF_FAILURE
+    goto 10
 
     ! Create the top level application component.
     aname = "System Test #79497"
