@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.1 2003/03/28 23:04:20 nscollins Exp $ 
+# $Id: makefile,v 1.2 2003/04/15 18:07:32 nscollins Exp $ 
 ALL: lib 
 
-CFLAGS    =
-FFLAGS    =
+CFLAGS    = ${MPI_INCLUDE}
+FFLAGS    = ${MPI_INCLUDE}
 SOURCEC	  = ESMC_LogErrInterface.C
 SOURCEF	  = ESMF_LogErr.F90 
 SOURCEH	  = 
