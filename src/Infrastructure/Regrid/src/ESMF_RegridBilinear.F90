@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.28 2003/09/25 16:29:41 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.29 2003/10/09 22:56:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,17 +31,18 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_BaseMod      ! ESMF base   class
+      use ESMF_BaseMod        ! ESMF base   class
       use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayBaseMod ! ESMF array  class
+      use ESMF_ArrayBaseMod   ! ESMF array  class
       use ESMF_ArrayExpandMod ! ESMF array  class
-      use ESMF_PhysGridMod  ! ESMF physical grid class
-      use ESMF_DistGridMod  ! ESMF distributed grid class
+      use ESMF_PhysCoordMod   ! ESMF physical grid domain class
+      use ESMF_PhysGridMod    ! ESMF physical grid class
+      use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_DataMapMod
-      use ESMF_GridMod      ! ESMF grid   class
-      use ESMF_FieldMod     ! ESMF field  class
-      use ESMF_BundleMod    ! ESMF bundle class
+      use ESMF_GridMod        ! ESMF grid   class
+      use ESMF_FieldMod       ! ESMF field  class
+      use ESMF_BundleMod      ! ESMF bundle class
       use ESMF_RegridTypesMod ! ESMF regrid data structures
       implicit none
 
@@ -59,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.28 2003/09/25 16:29:41 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.29 2003/10/09 22:56:32 jwolfe Exp $'
 
 !==============================================================================
 
@@ -126,7 +127,7 @@
       logical :: rcpresent                        ! Return code present
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: start, stop, my_DE, coordSystem
+      integer :: start, stop, my_DE
       integer :: srcSizeX, srcSizeY, size
       integer :: size_xy(2)
       integer :: i, j, num_domains, dstCounts(3), srcCounts(3), ij
@@ -136,16 +137,17 @@
       real(ESMF_KIND_R8), dimension(:), pointer :: srcLocalCoordX, srcLocalCoordY
       real(ESMF_KIND_R8), dimension(:), pointer :: dstLocalCoordX, dstLocalCoordY
       real(ESMF_KIND_R8), dimension(:), pointer :: tempCrud
-      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: dstLocalCoord, srcLocalCoord
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dstMin, dstMax
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: srcMin, srcMax
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
+      type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
       type(ESMF_LocalArray) :: srcindex, dstindex, weights
       type(ESMF_LocalArray) :: srcLocalCoordXArray, srcLocalCoordYArray
       type(ESMF_LocalArray) :: srcGatheredCoordXArray, srcGatheredCoordYArray
-      type(ESMF_LocalArray) :: dstLocalCoordArray, srcLocalCoordArray
+      type(ESMF_Array), dimension(:), pointer :: dstLocalCoordArray
+      type(ESMF_Array), dimension(:), pointer :: srcLocalCoordArray
       type(ESMF_DomainList) :: sendDomainList, recvDomainList
       type(ESMF_DELayout) :: srcDELayout
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
@@ -218,23 +220,18 @@
                  "returned failure"
         return
       endif
-      allocate(dstLocalCoord(dstCounts(1),dstCounts(2),dstCounts(3)))
-      dstLocalCoordArray = ESMF_LocalArrayCreate(dstLocalCoord, ESMF_DATA_REF, &
-                                                 status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: LocalArrayCreate ", &
-                 "returned failure"
-        return
-      endif
+      allocate(dstLocalCoordArray(2))    ! TODO:
       call ESMF_GridGetCoord(dstGrid, relloc=dstRelLoc, &
-                             center_coord=dstLocalCoordArray, rc=status)
+                             centerCoord=dstLocalCoordArray, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetCoord ", &
                  "returned failure"
         return
       endif
-      call ESMF_LocalArrayGetData(dstLocalCoordArray, dstLocalCoord, &
-                                  ESMF_DATA_REF, status)
+      call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
+                             ESMF_DATA_REF, status)
+      call ESMF_ArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
+                             ESMF_DATA_REF, status)
 
       ! get source grid info
       call ESMF_DataMapGet(srcDataMap, relloc=srcRelLoc, rc=status)
@@ -250,36 +247,27 @@
                  "returned failure"
         return
       endif
-    !  type = ESMF_DATA_REAL
-    !  kind = ESMF_R8
-    !  centerCoordArray = ESMF_LocalArrayCreate(3, type, kind, counts, status)
-    !  call ESMF_LocalArrayGetData(centerCoordArray, center_coord, &
-    !                              ESMF_DATA_REF, status)
-      allocate(srcLocalCoord(srcCounts(1),srcCounts(2),srcCounts(3)))
-      srcLocalCoordArray = ESMF_LocalArrayCreate(srcLocalCoord, ESMF_DATA_REF, &
-                                                 status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: LocalArrayCreate ", &
-                 "returned failure"
-        return
-      endif
+
+      allocate(srcLocalCoordArray(2))   ! TODO
       call ESMF_GridGetCoord(srcGrid, relloc=srcRelLoc, &
-                             center_coord=srcLocalCoordArray, rc=status)
+                             centerCoord=srcLocalCoordArray, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetCoord ", &
                  "returned failure"
         return
       endif
-      call ESMF_LocalArrayGetData(srcLocalCoordArray, srcLocalCoord, &
-                                  ESMF_DATA_REF, status)
+      call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordX, &
+                             ESMF_DATA_REF, status)
+      call ESMF_ArrayGetData(srcLocalCoordArray(2), srcLocalCoordY, &
+                             ESMF_DATA_REF, status)
 
       ! Calculate the intersections of this DE's bounding box with all others
       hassrcdata = .true.   ! temp for now
       hasdstdata = .true.   ! temp for now
 
       ! From the grid get the bounding box on this DE
-      call ESMF_GridGetPhysGrid(srcGrid, srcRelLoc, local_min=srcMin, &   
-                                local_max=srcMax, rc=status)
+      call ESMF_GridGetPhysGrid(srcGrid, srcRelLoc, localMin=srcMin, &   
+                                localMax=srcMax, rc=status)
       call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, myAI, &
                                      sendDomainList, status)
       if(status .NE. ESMF_SUCCESS) then
@@ -289,8 +277,8 @@
       endif
 
       ! From the grid get the bounding box on this DE
-      call ESMF_GridGetPhysGrid(dstGrid, dstRelLoc, local_min=dstMin, &
-                                local_max=dstMax, rc=status)
+      call ESMF_GridGetPhysGrid(dstGrid, dstRelLoc, localMin=dstMin, &
+                                localMax=dstMax, rc=status)
       call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
                                      recvDomainList, status)
       if(status .NE. ESMF_SUCCESS) then
@@ -316,15 +304,6 @@
       call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
       ! Create arrays for gathered coordinates 
-   !   type = ESMF_DATA_REAL
-   !   kind = ESMF_R8
-   !   size = recvDomainList%total_points
-   !   srcCenterX = ESMF_LocalArrayCreate(1, type, kind, size, status)
-   !   call ESMF_LocalArrayGetData(srcCenterX, src_center_x, &
-   !                               ESMF_DATA_REF, status)
-   !   srcCenterY = ESMF_LocalArrayCreate(1, type, kind, size, status)
-   !   call ESMF_LocalArrayGetData(srcCenterY, src_center_y, &
-   !                               ESMF_DATA_REF, status)
       size = recvDomainList%total_points
       allocate(srcGatheredCoordX(size))
       allocate(srcGatheredCoordY(size))
@@ -333,41 +312,14 @@
       srcGatheredCoordYArray = ESMF_LocalArrayCreate(srcGatheredCoordY, &
                                                      ESMF_DATA_REF, status)
 
-      ! create local arrays of the x and y coords to be used for the
-      ! routed gather process.  Note: we currently have to create separate
-      ! x and y arrays since the Route will be used to get other 1-D arrays
-      ! elsewhere.  But at some point it would be good to have a modified
-      ! Route that could accept vectors and halo widths
-   !   type = ESMF_DATA_REAL
-   !   kind = ESMF_R8
-   !   size = counts(1)*counts(2)
-   !   centerCoordXArray = ESMF_LocalArrayCreate(2, type, kind, counts, status)
-   !   call ESMF_LocalArrayGetData(centerCoordXArray, centerCoordX, &
-   !                               ESMF_DATA_REF, status)
-   !   centerCoordYArray = ESMF_LocalArrayCreate(2, type, kind, counts, status)
-   !   call ESMF_LocalArrayGetData(centerCoordYArray, centerCoordY, &
-   !                               ESMF_DATA_REF, status)
-      size = srcCounts(1)*srcCounts(2)
-      allocate(srcLocalCoordX(size))
-      allocate(srcLocalCoordY(size))
-      srcLocalCoordXArray = ESMF_LocalArrayCreate(srcLocalCoordX, &
-                                                  ESMF_DATA_REF, status)
-      srcLocalCoordYArray = ESMF_LocalArrayCreate(srcLocalCoordY, &
-                                                  ESMF_DATA_REF, status)
-   !   srcLocalCoordX = pack(srcLocalCoord(:,:,1:1), mask=.true.)
-   !   srcLocalCoordY = pack(srcLocalCoord(:,:,2:2), mask=.true.)
-      do j = 1,srcCounts(2)
-      do i = 1,srcCounts(1)
-        ij = (j-1)*srcCounts(1) + i
-        srcLocalCoordX(ij) = srcLocalCoord(i,j,1)
-        srcLocalCoordY(ij) = srcLocalCoord(i,j,2)
-      enddo
-      enddo
-
       ! Execute Route now to gather grid center coordinates from source
       ! This same Route will be executed at RegridRun time to bring over
       ! data values using the same patterns.
       ! TODO: load srcMask the same way
+      srcLocalCoordXArray = ESMF_LocalArrayCreate(srcLocalCoordX, &
+                                                  ESMF_DATA_REF, status)
+      srcLocalCoordYArray = ESMF_LocalArrayCreate(srcLocalCoordY, &
+                                                  ESMF_DATA_REF, status)
       call ESMF_RouteRun(route, srcLocalCoordXArray, srcGatheredCoordXArray, &
                          status)
       call ESMF_RouteRun(route, srcLocalCoordYArray, srcGatheredCoordYArray, &
@@ -415,18 +367,11 @@
       endif
      
       ! Loop through domains for the search routine
-      size = dstCounts(1)*dstCounts(2)
-      allocate(dstLocalCoordX(size))
-      allocate(dstLocalCoordY(size))
- !     dstLocalCoordX = pack(dstLocalCoord(:,:,1:1), mask=.true.)
- !     dstLocalCoordY = pack(dstLocalCoord(:,:,2:2), mask=.true.)
-       do j = 1,dstCounts(2)
-       do i = 1,dstCounts(1)
-         ij = (j-1)*dstCounts(1) + i
-         dstLocalCoordX(ij) = dstLocalCoord(i,j,1)
-         dstLocalCoordY(ij) = dstLocalCoord(i,j,2)
-      enddo
-      enddo
+    !  size = dstCounts(1)*dstCounts(2)
+    !  allocate(dstLocalCoordX(size))
+    !  allocate(dstLocalCoordY(size))
+    !  dstLocalCoordX = pack(dstLocalCoord(:,:), mask=.true.)
+    !  dstLocalCoordY = pack(dstLocalCoord(:,:), mask=.true.)
       call ESMF_GridGet(srcGrid, horz_coord_system=coordSystem, rc=status)
       num_domains = recvDomainList%num_domains
       start = 1
@@ -452,10 +397,10 @@
 
       call ESMF_LocalArrayDestroy(srcLocalCoordXArray, status)
       call ESMF_LocalArrayDestroy(srcLocalCoordYArray, status)
-      call ESMF_LocalArrayDestroy(dstLocalCoordArray, status)
-      call ESMF_LocalArrayDestroy(srcLocalCoordArray, status)
       call ESMF_LocalArrayDestroy(srcGatheredCoordXArray, status)
       call ESMF_LocalArrayDestroy(srcGatheredCoordYArray, status)
+      ! deallocate(dstLocalCoordArray, status)
+      ! deallocate(srcLocalCoordArray, status)
       
       ESMF_RegridConstructBilinear = rh
 
@@ -477,13 +422,13 @@
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(inout) :: tv
       type(ESMF_Domain), intent(in) :: domain
-      integer, intent(in) :: coordSystem
+      logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
+      type(ESMF_CoordSystem), intent(in) :: coordSystem
       integer, intent(in) :: srcSizeX  ! apparently these have to be first
       integer, intent(in) :: srcSizeY  ! so the compiler knows they're ints
       integer, intent(in) :: srcStart  ! when it goes to use them as dims
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
-      logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterX
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterY
       logical, dimension(srcSizeX,srcSizeY), intent(in) :: srcMask
@@ -644,7 +589,7 @@
        !       endif
 
               ! check to see if point inside cell
-              found(i,j) = ESMF_PhysGridPointInCell(dstX, dstY, srcX, srcY, rc)
+              found(i,j) = ESMF_PhysGridPointInCell(dstX, dstY, srcX, srcY, status)
 
               if (found(i,j)) exit search_loop
             enddo            ! iii-loop on src DE
