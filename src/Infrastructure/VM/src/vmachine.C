@@ -1241,6 +1241,7 @@ void vmplan::vmplan_maxthreads(vmachine &vm, int max, int *plist, int nplist){
       for (j=0; j<nplist; j++)
         if (plist[j]==i) break;
       if (j==nplist){
+        spawnflag[i]=0;     // this PET is not spawn into new vmachine
         contribute[i]=-1;   // don't contribute any cores
         cspawnid[i]=-1;     // invalidate
         continue;
@@ -1349,6 +1350,7 @@ void vmplan::vmplan_minthreads(vmachine &vm, int max, int *plist, int nplist){
       for (j=0; j<nplist; j++)
         if (plist[j]==i) break;
       if (j==nplist){
+        spawnflag[i]=0;     // this PET is not spawn into new vmachine
         contribute[i]=-1;   // don't contribute any cores
         cspawnid[i]=-1;     // invalidate
         continue;
@@ -1434,6 +1436,7 @@ void vmplan::vmplan_maxcores(vmachine &vm, int max, int *plist, int nplist){
       for (j=0; j<nplist; j++)
         if (plist[j]==i) break;
       if (j==nplist){
+        spawnflag[i]=0;     // this PET is not spawn into new vmachine
         contribute[i]=-1;   // don't contribute any cores
         cspawnid[i]=-1;     // invalidate
         continue;
