@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateEx.F90,v 1.1 2003/01/29 23:33:40 nscollins Exp $
+! $Id: ESMF_StateCreateEx.F90,v 1.2 2003/01/29 23:50:31 nscollins Exp $
 !
 ! Example code for creating States.
 
@@ -130,8 +130,9 @@
     call ESMF_StateGetNeeded(state3, sname, isneeded, rc)
     print *, "StateGetNeeded returned", rc
 
-    if (isneeded .eq. ESMF_STATEDATAISNEEDED) then
-    !if (ESMF_needeq(isneeded, ESMF_STATEDATAISNEEDED)) then
+    ! this should work - the operator is overloaded by the State module.
+    !if (isneeded .eq. ESMF_STATEDATAISNEEDED) then
+    if (ESMF_needeq(isneeded, ESMF_STATEDATAISNEEDED)) then
       print *, "Data marked as needed", trim(sname)
 
       bname = sname
