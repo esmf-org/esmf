@@ -1750,39 +1750,45 @@ void vmachine::vmachine_allreduce(void *in, void *out, int len, vmType type,
     case vmSUM:
       switch (type){
       case vmI4:
-        int *tempdata = (int *)temparray;
-        int *outdata = (int *)out;
-        for (int i=0; i<len; i++){
-          *outdata = 0;
-          for (int j=0; j<npets; j++){
-            *outdata += tempdata[j*len];
+        {
+          int *tempdata = (int *)temparray;
+          int *outdata = (int *)out;
+          for (int i=0; i<len; i++){
+            *outdata = 0;
+            for (int j=0; j<npets; j++){
+              *outdata += tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
           }
-          ++tempdata;
-          ++outdata;
         }
         break;
       case vmR4:
-        float *tempdata = (float *)temparray;
-        float *outdata = (float *)out;
-        for (int i=0; i<len; i++){
-          *outdata = 0;
-          for (int j=0; j<npets; j++){
-            *outdata += tempdata[j*len];
+        {
+          float *tempdata = (float *)temparray;
+          float *outdata = (float *)out;
+          for (int i=0; i<len; i++){
+            *outdata = 0;
+            for (int j=0; j<npets; j++){
+              *outdata += tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
           }
-          ++tempdata;
-          ++outdata;
         }
         break;
       case vmR8:
-        double *tempdata = (double *)temparray;
-        double *outdata = (double *)out;
-        for (int i=0; i<len; i++){
-          *outdata = 0;
-          for (int j=0; j<npets; j++){
-            *outdata += tempdata[j*len];
+        {
+          double *tempdata = (double *)temparray;
+          double *outdata = (double *)out;
+          for (int i=0; i<len; i++){
+            *outdata = 0;
+            for (int j=0; j<npets; j++){
+              *outdata += tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
           }
-          ++tempdata;
-          ++outdata;
         }
         break;
       }
