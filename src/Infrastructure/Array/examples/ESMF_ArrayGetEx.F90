@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGetEx.F90,v 1.2 2004/06/23 17:15:03 jwolfe Exp $
+! $Id: ESMF_ArrayGetEx.F90,v 1.3 2004/06/23 19:22:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
     end if
 
 !BOE
-!\subsubsection{Print Array contents}
+!\subsubsection{Print Array Contents}
     
 !  Print the data contents of an {\tt ESMF\_Array}.
 !EOE
@@ -71,7 +71,7 @@
     end if
 
 !BOE
-!\subsubsection{Get a pointer to the Array contents}
+!\subsubsection{Get a Pointer to the Array Contents}
     
 !  Associate a Fortran pointer with the data from an {\tt ESMF\_Array}.
 !  Point directly at the data contents; do not make a separate copy.
@@ -135,7 +135,7 @@
     end if
 
 !BOE
-!\subsubsection{Get a pointer to a copy of the Array contents}
+!\subsubsection{Get a Pointer to a Copy of the Array Contents}
     
 !  Associate a Fortran pointer with the data from an {\tt ESMF\_Array}.
 !  Allocate and copy the existing data into a separate buffer and return

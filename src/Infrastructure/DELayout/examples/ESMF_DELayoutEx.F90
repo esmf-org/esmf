@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.4 2004/06/21 20:14:02 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.5 2004/06/23 19:22:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@ program ESMF_DELayoutEx
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-! \subsubsection{1-D DELayout with fixed number of DEs}
+! \subsubsection{1-D DELayout with Fixed Number of DEs}
 ! 
 ! The {\tt deCountList} argument has two functions when present. First it
 ! specifies the total number
@@ -88,7 +88,7 @@ program ESMF_DELayoutEx
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-! \subsubsection{2-D DELayout with fixed number of DEs}
+! \subsubsection{2-D DELayout with Fixed Number of DEs}
 ! 
 ! Here a 2-dimensional DELayout will be created with 6 DEs, layed out as 2x3.
 ! As in the previous example  it depends on the

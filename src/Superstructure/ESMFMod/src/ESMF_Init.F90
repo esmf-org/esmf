@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.12 2004/06/08 09:27:21 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.13 2004/06/23 19:22:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_Initialize"
 !BOP
-! !IROUTINE:  ESMF_Initialize - Initialize the ESMF Framework.
+! !IROUTINE:  ESMF_Initialize - Initialize the ESMF
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
@@ -106,10 +106,10 @@
 
 !
 ! !DESCRIPTION:
-!     Initialize the ESMF.  This routine must be called before
-!     any other ESMF routines are used, and before exiting the program
-!     must call {\tt ESMF\_Finalize()} to release resources and clean up
-!     the ESMF gracefully.
+!     Initialize the ESMF.  This method must be called before
+!     any other ESMF methods are used.  Before exiting the application
+!     the user must call {\tt ESMF\_Finalize()} to release resources 
+!     and clean up the ESMF gracefully.
 !
 !     The arguments are:
 !     \begin{description}
@@ -260,7 +260,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_Finalize"
 !BOP
-! !IROUTINE:  ESMF_Finalize - Clean up and close the ESMF Framework.
+! !IROUTINE:  ESMF_Finalize - Clean up and close the ESMF
 !
 ! !INTERFACE:
       subroutine ESMF_Finalize(rc)
@@ -270,7 +270,7 @@
 
 !
 ! !DESCRIPTION:
-!     Finalize the ESMF.  This must be called before the program exits
+!     Finalize the ESMF.  This must be called before the application exits
 !     to allow the ESMF to flush buffers, close open connections, and 
 !     release internal resources cleanly.
 !

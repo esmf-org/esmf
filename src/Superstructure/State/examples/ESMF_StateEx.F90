@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.17 2004/06/21 12:31:57 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.18 2004/06/23 19:22:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Adding items to a State}
+!\subsubsection{Adding Items to a State}
 !   
 !  Creation of an empty {\tt ESMF\_State}, and adding an {\tt ESMF\_Bundle}
 !  to it.  Note that the {\tt ESMF\_Bundle} does not get destroyed when
@@ -154,7 +154,7 @@
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Marking an item Needed}
+!\subsubsection{Marking an Item Needed}
 !   
 ! How to set the {\tt NEEDED} state of an item.
 !EOE

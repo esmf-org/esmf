@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.22 2004/06/16 22:25:33 svasquez Exp $
+! $Id: ESMF_GCompEx.F90,v 1.23 2004/06/23 19:22:39 cdeluca Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -26,22 +26,22 @@
 !EOC
 
 !BOP
-!\subsubsection{Specifying a SetServices Routine}
+!\subsubsection{Specifying a User-Code SetServices Routine}
 !
 ! Every {\tt ESMF\_GridComp} is required to provide and document
-! the setservices routine.  It can have any name, but must
+! a set services routine.  It can have any name, but must
 ! follow the declaration below: a subroutine which takes an
 ! {\tt ESMF\_GridComp} as the first argument, and
 ! an integer return code as the second.
 !
-! It must call the ESMF routines {\tt ESMF\_GridCompSetEntryPoint()} to
-! register with the framework what subroutines should be called when
-! it is time to Initialize, Run, and Finalize the component.  There are
+! It must call the ESMF method {\tt ESMF\_GridCompSetEntryPoint()} to
+! register with the framework what user-code subroutines should be called 
+! to initialize, run, and finalize the component.  There are
 ! additional routines which can be registered as well, for checkpoint
 ! and restart functions.
 !
 ! Note that the actual subroutines being registered do not have to be
-! public to this module; only the {\tt SetServices} routine itself must
+! public to this module; only the set services routine itself must
 ! be available to be used by other code.
 !EOP
 
@@ -65,10 +65,11 @@
 !EOC
 
 !BOP
-!\subsubsection{The Initialization Routine}
+!\subsubsection{Specifying a User-Code Initialize Routine}
 !
-! When a higher level component is ready to begin using this component,
-! it will call the initialization routine.  The component writer must
+! When a higher level component is ready to begin using an 
+! {\tt ESMF\_GridComp},
+! it will call its initialize routine.  The component writer must
 ! supply a subroutine with the exact calling sequence below; no arguments
 ! can be optional, and the types and order must match.
 !
@@ -102,7 +103,7 @@
 !EOC
 
 !BOP
-!\subsubsection{The Run Routine}
+!\subsubsection{Specifying a User-Code Run Routine}
 ! 
 ! During the execution loop, the run routine may be called many times.
 ! Each time it should read data from the {\tt importState}, use the
@@ -110,12 +111,12 @@
 ! component, compute new values or process the data,
 ! and produce any output and place it in the {\tt exportState}. 
 ! 
-! When a higher level component is ready to use this component
-! it will call the run routine.  The component writer must
+! When a higher level component is ready to use the {\tt ESMF\_GridComp}
+! it will call its run routine.  The component writer must
 ! supply a subroutine with the exact calling sequence below; 
 ! no arguments can be optional, and the types and order must match.
 !
-! It is expected this is where the bulk of the model computation
+! It is expected that this is where the bulk of the model computation
 ! or data analysis will occur.
 !   
 ! The {\tt rc} return code should be set if an error occurs, otherwise
@@ -145,11 +146,11 @@
 !EOC
 
 !BOP
-!\subsubsection{The Finalization Routine}
+!\subsubsection{Specifying a User-Code Finalize Routine}
 !
-! At the end of the execution, each component will have a chance to
-! deallocate data space, close open files, flush final results.
-! These should be placed in the finalization routine.
+! At the end of application execution, each {\tt ESMF\_GridComp} should
+! deallocate data space, close open files, and flush final results.
+! These functions should be placed in a finalize routine.
 !
 ! The {\tt rc} return code should be set if an error occurs, otherwise
 ! the value {\tt ESMF\_SUCCESS} should be returned.

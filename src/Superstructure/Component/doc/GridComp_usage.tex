@@ -1,4 +1,4 @@
-% $Id: GridComp_usage.tex,v 1.5 2004/06/23 17:11:36 cdeluca Exp $
+% $Id: GridComp_usage.tex,v 1.6 2004/06/23 19:22:39 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,44 +16,5 @@ between itself and other Components.  It uses a Clock object
 to manage time, and a VM to describe its own and its child
 components' computational resources.
 
-\subsubsection{The SetServices Method}
-
-Most programs call some sort of library routines.  The library
-documentation must explain what the routine name is, what arguments 
-are required and what are optional, and what the code does.  
-
-In contrast, all ESMF Components must be written to {\it be called}
-by another part of the program; in effect, an ESMF Component takes the 
-place of a library.  In this case the interface is already prescribed,
-so the Component writer must provide specific subroutines which 
-have fixed argument lists and perform specific operations.
-
-One of the required interfaces a Component must provide is 
-the {\tt SetServices} method.  This subroutine must have an
-externally accessible name (be a public symbol), take an {\tt ESMF\_GridComp}
-as the first argument, and an integer return code as the second.
-The subroutine name is not predefined, it is set by the component
-writer, but must be provided as part of the component documentation.
-
-The required function of the {\tt SetServices} subroutine is to
-register the rest of the required functions in the Gridded Component,
-such as the Initialize, Run, and Finalize subroutines.  The subroutine
-{\tt ESMF\_GridCompSetEntryPoint} should be called for
-each of the required subroutines.  
-
-The names of the initialize, run, and finalize subroutines do not
-need to be public, and in fact are encourage to be private to lower
-the chances of public symbol clashes between different components.
-
-The {\tt SetServices} routine can also register a private data block
-by calling the {\tt ESMF\_GridCompSetInternalState} subroutine.
-
-Note that a Component does not call its own {\tt SetServices} routine;
-the higher level code which is creating this Component will first call
-{\tt ESMF\_GridCompCreate} to create an "empty" component, and then call
-the Component specific {\tt SetServices} routine to attach the code
-to the Component.  After {\tt SetServices} has been called, the Framework
-now will be able to call the proper Initialize, Run, and Finalize routines
-when required.  
 
 

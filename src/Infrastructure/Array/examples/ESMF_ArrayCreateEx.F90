@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.14 2004/06/23 17:15:31 jwolfe Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.15 2004/06/23 19:22:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
     call ESMF_Initialize(rc=rc)
 
 !BOE
-!\subsubsection{Create an Array based on existing data}
+!\subsubsection{Create an Array with Existing Data}
 
 !  Create an {\tt ESMF\_Array} based on an existing, allocated Fortran 
 !  pointer.  The data is type Integer, one dimensional.
@@ -103,7 +103,7 @@
     end if
 
 !BOE    
-!\subsubsection{Create an Array and copy existing data}
+!\subsubsection{Create an Array and Copy Existing Data}
 
 !  Create an {\tt ESMF\_Array} based on an existing, allocated Fortran
 !  pointer.  The data is type Integer, one dimensional.
@@ -166,7 +166,7 @@
     end if
 
 !BOE    
-!\subsubsection{Create an Array and allocate data space}
+!\subsubsection{Create an Array and Allocate Data Space}
 
 !  Create an {\tt ESMF\_Array} based on a description of the data.
 !  The framework will allocate the data space itself.  
