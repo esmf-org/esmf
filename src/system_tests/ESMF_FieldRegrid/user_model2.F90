@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.32 2005/02/28 17:02:13 nscollins Exp $
+! $Id: user_model2.F90,v 1.33 2005/03/04 00:23:08 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -351,7 +351,14 @@
       write(*,*) "   maximum percent error   = ", maxPerError
       print *, "User verifyResults returning"
    
-      rc = status
+      ! only accept this test as successful if the max percent
+      ! error is below 2%
+      if (maxPerError .gt. 2.0) then
+          write(*,*) "Test Failing because percentage error too large"
+          rc = ESMF_FAILURE 
+      else
+          rc = status
+      endif
 
     end subroutine verifyResults
 

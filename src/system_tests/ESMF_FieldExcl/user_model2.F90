@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.10 2005/02/16 04:11:16 nscollins Exp $
+! $Id: user_model2.F90,v 1.11 2005/03/04 00:23:04 nscollins Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -310,7 +310,14 @@
       write(*,*) "   maximum percent error   = ", maxPerError
       !print *, "User verifyResults returning"
    
-      rc = ESMF_SUCCESS
+      ! only accept this test as successful if the max percent
+      ! error is below 2%
+      if (maxPerError .gt. 2.0) then
+          write(*,*) "Test Failing because percentage error too large"
+          rc = ESMF_FAILURE 
+      else
+          rc = ESMF_SUCCESS
+      endif
 
     end subroutine verifyResults
 
