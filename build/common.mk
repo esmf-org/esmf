@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.71 2004/09/14 23:05:04 nscollins Exp $
+#  $Id: common.mk,v 1.72 2004/09/20 15:20:31 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -162,10 +162,8 @@ OBJS		= ${OBJSC} ${OBJSF}
 ESMF_TESTSCRIPTS    = ${ESMF_TOP_DIR}/scripts/test_scripts
 DO_UT_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ut_results.pl -d $(ESMF_TESTDIR) 
 DO_EX_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ex_results.pl -d $(ESMF_EXDIR)
-DO_EX_RESULTS.BASH  = ${ESMF_TESTSCRIPTS}/do_ex_results.bash
 DO_ST_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_st_results.pl -d $(ESMF_TESTDIR)
 DO_SUM_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_summary.pl -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR)
-DO_SUM_RESULTS.BASH = ${ESMF_TESTSCRIPTS}/do_summary.bash
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
@@ -497,7 +495,7 @@ system_tests: chkopts build_libs chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests tree
-	$(DO_ST_RESULTS) ;  \
+	$(MAKE) check_system_tests
 
 tree_system_tests: tree_build_system_tests tree_run_system_tests
 
@@ -515,7 +513,7 @@ system_tests_uni: chkopts chkdir_tests
 	   fi; \
 	fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests_uni tree
-	$(DO_ST_RESULTS) ;  \
+	$(MAKE) check_system_tests
 
 tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 
@@ -559,7 +557,7 @@ run_system_tests:  chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests tree
-	$(DO_ST_RESULTS) ;  \
+	$(MAKE) check_system_tests
 
 tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
 
@@ -577,7 +575,7 @@ run_system_tests_uni:  chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests_uni tree
-	$(DO_ST_RESULTS) ;  \
+	$(MAKE) check_system_tests
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
@@ -585,7 +583,7 @@ tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 # report statistics on system tests
 #
 check_system_tests:
-	$(DO_ST_RESULTS) ;  \
+	$(DO_ST_RESULTS)
 
 
 #-------------------------------------------------------------------------------
@@ -594,7 +592,7 @@ check_system_tests:
 
 tests: chkopts chkdir_tests build_libs
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_tests tree
-	$(DO_UT_RESULTS) ;\
+	$(MAKE) check_tests
 
 tree_tests: tree_build_tests tree_run_tests
 
@@ -603,7 +601,7 @@ tree_tests: tree_build_tests tree_run_tests
 #
 tests_uni: chkopts chkdir_tests
 	-$(MAKE) ACTION=tree_tests_uni tree
-	$(DO_UT_RESULTS) ;\
+	$(MAKE) check_tests
 
 tree_tests_uni: tree_build_tests tree_run_tests_uni
 
@@ -628,7 +626,7 @@ $(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 #
 run_tests:  chkopts chkdir_tests
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_tests tree
-	$(DO_UT_RESULTS) ;\
+	$(MAKE) check_tests
 
 tree_run_tests: $(TESTS_RUN) 
 
@@ -637,7 +635,7 @@ tree_run_tests: $(TESTS_RUN)
 #
 run_tests_uni:  chkopts chkdir_tests
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_tests_uni tree 
-	$(DO_UT_RESULTS) ;\
+	$(MAKE) check_tests
 
 tree_run_tests_uni: $(TESTS_RUN_UNI)
 
@@ -645,7 +643,7 @@ tree_run_tests_uni: $(TESTS_RUN_UNI)
 # report statistics on tests
 #
 check_tests:
-	$(DO_UT_RESULTS) ;\
+	$(DO_UT_RESULTS)
 
 #-------------------------------------------------------------------------------
 # Targets for building and running examples
@@ -671,7 +669,7 @@ check_tests:
 #
 examples: chkopts chkdir_examples build_libs
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples tree
-	$(DO_EX_RESULTS) ; \
+	$(MAKE) check_examples
 
 
 tree_examples: tree_build_examples tree_run_examples
@@ -681,7 +679,7 @@ tree_examples: tree_build_examples tree_run_examples
 #
 examples_uni: chkopts chkdir_examples  
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples_uni tree
-	$(DO_EX_RESULTS) ; \
+	$(MAKE) check_examples
 
 tree_examples_uni: tree_build_examples tree_run_examples_uni
 
@@ -714,7 +712,7 @@ $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
 #
 run_examples:  chkopts chkdir_examples
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_examples tree
-	$(DO_EX_RESULTS) ; \
+	$(MAKE) check_examples
 
 tree_run_examples: $(EXAMPLES_RUN) 
 
@@ -723,7 +721,7 @@ tree_run_examples: $(EXAMPLES_RUN)
 #
 run_examples_uni:  chkopts chkdir_examples
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_examples_uni tree 
-	$(DO_EX_RESULTS) ; \
+	$(MAKE) check_examples
 
 tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 
@@ -731,7 +729,7 @@ tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 # report statistics on examples
 #
 check_examples:
-	$(DO_EX_RESULTS) ; \
+	$(DO_EX_RESULTS)
 
 
 #-------------------------------------------------------------------------------
@@ -789,11 +787,7 @@ tree_run_demo_uni: $(DEMO_RUN_UNI)
 check_results: check_tests check_examples check_system_tests
 
 results_summary:
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_SUM_RESULTS) ; \
-        else \
-                $(DO_SUM_RESULTS.BASH)  ; \
-        fi; \
+	$(DO_SUM_RESULTS)
 
 
 #-------------------------------------------------------------------------------
