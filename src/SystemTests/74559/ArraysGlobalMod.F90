@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.1 2003/04/15 15:42:20 nscollins Exp $
+! $Id: ArraysGlobalMod.F90,v 1.2 2003/04/16 22:53:06 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -47,6 +47,7 @@
     public :: q0, u0, v0, sie0, rho0
     integer :: imin, imax, jmin, jmax
     integer :: imin_t, imax_t, jmin_t, jmax_t
+    type(ESMF_TimeInterval) :: time_step
     real :: dt, dx, dy
     real :: uin, rhoin, siein
     real :: gamma, akb
@@ -155,8 +156,8 @@
       jmin_t = indext(2)%l
       jmax_t = indext(2)%r
 ! TODO  need to add calls to get dx and dy from physgrid -- just set for today
-      dx = 0.5
-      dy = 0.25
+      dx = 5.0
+      dy = 2.50
 
       if(rcpresent) rc = ESMF_SUCCESS
 
