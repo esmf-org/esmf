@@ -40,6 +40,15 @@ directly manipulate their internal data.
 
 \item The JMC components must be able to accept ESMF time management 
 information.
+
+\item Data and information to be exchanged with other JMC code components
+must be provided through ESMF constructs and utilities (i.e. ESMF state,
+bundles, fields, grid, etc.) These must include
+pertinent metadata information and provide a standard format for
+exchanging information.  JMC code components must use the public 
+interface methods provided by the ESMF utilities and not directly 
+manipulate the internal data of those utilities.  
+
 \end{itemize}
 
 \subsubsection{Full Compliance}
