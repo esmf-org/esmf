@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.20 2005/02/01 23:26:12 svasquez Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.21 2005/02/14 04:07:16 theurich Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -303,7 +303,7 @@
 
       endif
     
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 
       end program ESMF_CoupledFlowDemo
     

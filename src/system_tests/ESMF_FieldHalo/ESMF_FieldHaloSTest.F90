@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.35 2005/02/01 23:08:50 svasquez Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.36 2005/02/14 04:06:58 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -151,7 +151,7 @@
 
     endif
     
-    call ESMF_Finalize(rc)  
+    call ESMF_Finalize(rc=rc)  
     
     end program FieldHalo
     

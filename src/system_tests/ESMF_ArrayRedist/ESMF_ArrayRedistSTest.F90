@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.16 2005/02/01 23:38:24 svasquez Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.17 2005/02/14 04:06:58 theurich Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -331,7 +331,7 @@
 
     endif
     
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program ArrayRedist
     

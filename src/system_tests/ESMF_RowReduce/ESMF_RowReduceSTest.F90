@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.32 2005/02/01 23:30:42 svasquez Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.33 2005/02/14 04:07:17 theurich Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -300,7 +300,7 @@
 
     endif
     
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program DELayoutRowReduce
     

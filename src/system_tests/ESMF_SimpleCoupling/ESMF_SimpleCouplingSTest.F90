@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.19 2005/02/01 23:32:30 svasquez Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.20 2005/02/14 04:07:17 theurich Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -280,7 +280,7 @@
   
       endif
     
-      call ESMF_Finalize(rc) 
+      call ESMF_Finalize(rc=rc) 
 
       end program SimpleCoupling
     

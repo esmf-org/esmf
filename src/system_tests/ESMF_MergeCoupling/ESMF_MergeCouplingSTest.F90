@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.12 2004/06/11 02:13:00 cdeluca Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.13 2005/02/14 04:07:16 theurich Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -358,7 +358,7 @@
   
       endif
     
-      call ESMF_Finalize(rc) 
+      call ESMF_Finalize(rc=rc) 
 
       end program MergeCoupling
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.16 2005/02/01 23:22:50 svasquez Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.17 2005/02/14 04:07:00 theurich Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -226,7 +226,7 @@
 
       endif
     
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 
       end program FlowComp
     

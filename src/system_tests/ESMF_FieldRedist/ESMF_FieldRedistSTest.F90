@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.27 2005/02/01 23:12:31 svasquez Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.28 2005/02/14 04:06:59 theurich Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -320,7 +320,7 @@
 
     endif
     
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program FieldRedist
     

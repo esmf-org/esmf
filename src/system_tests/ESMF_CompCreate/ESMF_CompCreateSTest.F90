@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.14 2005/02/01 23:03:24 svasquez Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.15 2005/02/14 04:06:58 theurich Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -181,7 +181,7 @@
 
       endif
 
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 
       end program CompCreate
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_VectorStorageSTest.F90,v 1.4 2005/02/09 00:35:42 jwolfe Exp $
+! $Id: ESMF_VectorStorageSTest.F90,v 1.5 2005/02/14 04:07:17 theurich Exp $
 !
 ! System test VectorStorage
 !  Description on Sourceforge under System Test #XXXXX
@@ -366,7 +366,7 @@
 
     endif
     
-    call ESMF_Finalize(status)
+    call ESMF_Finalize(rc=status)
 
     end program VectorStorage
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.14 2005/02/01 23:17:06 svasquez Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.15 2005/02/14 04:06:59 theurich Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -289,7 +289,7 @@
 
     endif
   
-    call ESMF_Finalize(rc) 
+    call ESMF_Finalize(rc=rc) 
 
     end program FieldRegridMulti
     

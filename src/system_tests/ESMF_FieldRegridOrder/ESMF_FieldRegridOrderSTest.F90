@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.10 2005/02/01 23:21:24 svasquez Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.11 2005/02/14 04:06:59 theurich Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -287,7 +287,7 @@
 
     endif
   
-    call ESMF_Finalize(rc) 
+    call ESMF_Finalize(rc=rc) 
 
     end program FieldRegridOrder
     

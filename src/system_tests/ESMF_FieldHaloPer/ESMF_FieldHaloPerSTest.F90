@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.31 2005/02/01 23:10:16 svasquez Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.32 2005/02/14 04:06:59 theurich Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -169,7 +169,7 @@
   
     endif
     
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program FieldHaloPeriodic
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.4 2005/02/01 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.5 2005/02/14 04:06:59 theurich Exp $
 !
 ! System test code FieldRegridConserv
 
@@ -285,7 +285,7 @@
 
     endif
   
-    call ESMF_Finalize(rc) 
+    call ESMF_Finalize(rc=rc) 
 
     end program FieldRegridConserv
     

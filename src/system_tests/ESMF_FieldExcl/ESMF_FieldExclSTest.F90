@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.18 2005/02/03 00:15:44 theurich Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.19 2005/02/14 04:06:58 theurich Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -328,7 +328,7 @@
 
     endif
   
-    call ESMF_Finalize(rc) 
+    call ESMF_Finalize(rc=rc) 
 
     end program FieldExcl
     
