@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.5 2004/03/20 03:54:51 cdeluca Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.6 2004/03/24 23:59:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.5 2004/03/20 03:54:51 cdeluca Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.6 2004/03/24 23:59:50 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -116,29 +116,29 @@
 
       !------------------------------------------------------------------------
       ! The following code is commented out until bug 918863 is addressed.
-      !grid = ESMF_GridCreateLogRectUniform(3, counts=counts, &
-                              !minGlobalCoordPerDim=grid_min, &
-                              !maxGlobalCoordPerDim=grid_max, &
-                              !horzGridType=horz_gridtype, &
-                              !horzStagger=horz_stagger, &
-                              !horzCoordSystem=horz_coord_system, &
-                              !vertGridType=horz_gridtype, &
-                              !vertStagger=horz_stagger, &
-                              !vertCoordSystem=horz_coord_system, &
-                              !layout=layout, &
-                              !name=name, rc=status)
+      grid = ESMF_GridCreateLogRectUniform(3, counts=counts, &
+                              minGlobalCoordPerDim=grid_min, &
+                              maxGlobalCoordPerDim=grid_max, &
+                              horzGridType=horz_gridtype, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
+                              vertGridType=horz_gridtype, &
+                              vertStagger=horz_stagger, &
+                              vertCoordSystem=horz_coord_system, &
+                              layout=layout, &
+                              name=name, rc=status)
 
-      !write(failMsg, *) "Returned ESMF_FAILURE"
-      !write(name, *) "Creating a Grid Test"
-      !call ESMF_Test((status.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Returned ESMF_FAILURE"
+      write(name, *) "Creating a Grid Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       ! Printing a Grid
-      !call ESMF_GridPrint(grid, "", rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Printing a Grid Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_GridPrint(grid, "", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       ! TODO: add more tests here
