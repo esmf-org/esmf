@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2003/05/07 15:23:07 flanigan Exp $ 
+# $Id: makefile,v 1.32 2003/05/19 15:19:05 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -54,14 +54,6 @@ DIRS =
 CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc $(HTMLFILE)
 CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG ESMF_reqdoc.tex ESMF_refdoc.tex $(PDFFILES) $(DVIFILES)
 CLOBBERDIRS = 
-
-#
-# Shortcut targets
-#
-refpdf: $(ESMC_DOCDIR)/ESMF_refdoc.pdf
-reqpdf: $(ESMC_DOCDIR)/ESMF_reqdoc.pdf
-usrpdf: $(ESMC_DOCDIR)/ESMF_usrdoc.pdf
-
 
 
 #
