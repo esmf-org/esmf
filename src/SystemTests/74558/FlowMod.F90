@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.2 2003/04/04 21:38:21 nscollins Exp $
+! $Id: FlowMod.F90,v 1.3 2003/04/04 23:25:17 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -197,7 +197,7 @@
 !
 ! read in parameters   ! TODO: just set here for now
 !
-      uin = 1.5
+      uin = 1.4
       rhoin = 6.0
       siein= 0.50
       gamma = 1.40
@@ -240,6 +240,33 @@
         rhoi(1,j) = rhoin*siein
         rhou(1,j) = rhoin*uin
       enddo
+      call ESMF_FieldHalo(field_rho, status)   ! TODO:  shouldn't have to halo
+                                               ! here, but every left column on
+                                               ! each DE is getting inlet values
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowInit:  rho halo"
+        return
+      endif
+      call ESMF_FieldHalo(field_sie, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowInit:  sie halo"
+        return
+      endif
+      call ESMF_FieldHalo(field_u, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowInit:  u halo"
+        return
+      endif
+      call ESMF_FieldHalo(field_rhoi, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowInit:  rhoi halo"
+        return
+      endif
+      call ESMF_FieldHalo(field_rhou, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowInit:  rhou halo"
+        return
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -279,7 +306,7 @@
 !       print *, "ERROR in FlowSolve: clock get timestep"
 !       return
 !     endif
-      dt = 0.20
+      dt = 0.02
 !
 ! calculate RHOU's and RHOV's
 !
