@@ -1,17 +1,28 @@
-% $Id: PhysGrid_background.tex,v 1.1 2002/02/26 16:20:21 cnh Exp $
+% $Id: PhysGrid_background.tex,v 1.2 2002/03/07 02:49:02 cnh Exp $
 
 \section{Background}
 
-<Desciption of this class, module or utility set.>
+  The ESMF Physical Grid facility (PhysGrid) describes the physical location of
+data and of all the points on a grid. In addition, PhysGrid provides an
+extensive range of metric terms (e.g. grid spacings and areas) associated with
+a grid.  Grid masks are generated through PhysGrid.
 
 \subsection{Location}
 
-<Describe whether this software is in the infrastructure or superstructure,
-and other software modules that it interacts with.>
+  PhysGrid is a part of the "Fields and Grids" portion of the infrastructure.
+PhysGrid interacts closely with the index spaces in the Distributed Grid
+facility (DistGrid); the creation of a DistGrid precedes the creation of a
+PhysGrid.  Most Fields exist at locations described via PhysGrid.  Regrid uses
+PhysGrid information.
 
 \subsection{Scope}
 
-<Discussion of scope and restrictions.>
+PhysGrid does not cover domain decomposition or specification of grid
+topology; these are covered by DistGrid.
+
+
+
+
 
 
 

@@ -1,17 +1,180 @@
-% $Id: PhysGrid_req.tex,v 1.1 2002/02/26 16:20:21 cnh Exp $
-
+% $Id: PhysGrid_req.tex,v 1.2 2002/03/07 02:49:02 cnh Exp $
 %===============================================================================
-% Requirements may be itemized under a main topic:
-%===============================================================================
-%===============================================================================
-\req{<Requirement>}
+\req{Physical Locations}
 %-------------------------------------------------------------------------------
 
-<Description>
+A mechanism shall be provided for describing physical locations in space in 1
+(vertical), 2 (horizontal) or 3 dimensions, including both specification of
+points and of ranges. 
 
-\sreq{<Subrequirement>}
 
-<Description>
+\sreq{Horizontal Locations}
+
+\ssreq{Horizontal Coordinates}
+
+Physical domains may use Cartesian or spherical coordinate systems in the
+horizontal directions.  Units for these coordinates are meters and degrees of
+latitude and longitude.
+
+\ssreq{Horizontal Locations may be points}
+
+   Horizontal locations may be specified as a pair of real values in the order
+(X,Y) or (longitude, latitude).
+
+
+\ssreq{Horizontal Locations may be polygonal regions}
+
+  Horizontal Locations may be specified to be regions by providing the number
+of vertices and the list of the vertex points.  Vertex points must be specified
+either clockwise or counterclockwise around the region.  The vertex points
+may be redundant.
+ 
+\ssreq{Horizontal regions may have central points}
+
+  Both a central point and a region may be specified in describing a horizontal
+location.  The points may provide a convenient nominal location, even when
+a value actually pertains to a region.
+
+\ssreq{Horizontal Locations may have radii of influence}
+
+  A horizontal location may be specified by adding a nominal radius of
+influence to the central point.  This may be the radius of a Gaussian
+distribution of influence.
+
+
+\ssreq{Paths between region vertices may be specified} 
+
+The faces of polygonal regions in sperical coordinates may be linear in
+latitude-longitude space or may follow great-circle routes between vertices, or
+may follow user-defined curves.  There must be an exact definition of control
+volumes for calculating horizontal areas and ensuring that the surface is tiled
+by horizontal regions. The former is traditionally used in spherical
+coordinates and is particularly simple for analytically calculating the areas
+of regions, but may be ill defined near the poles.  The grid associated with a
+component model may require some other specification for optimal numerical
+performance.
+
+\sreq{Vertical Locations}
+
+\ssreq{Vertical Coordinates}
+
+Physical domains may use a variety of vertical coordinates, including pressure,
+height, density, isotherms, sigma, other terrain-following, or any other
+vertically monotonic quantity.  In addition, a user-interpretable vertical
+proxy (such as a satellite measurement channel) may be used.  Units of this
+coordinate must be self-consistent.  (See the CF convention for a full
+discussion of options for vertical coordinates.)
+
+\ssreq{Vertical Locations may be points}
+
+\ssreq{Vertical Locations may be regions}
+
+Vertical locations may be specified by providing the values of the top and
+bottom bounding points.  Such regions have the same extent regardless of the
+order in which the bounding points are specified.
+
+\ssreq{Vertical regions have central points}
+
+  Both a central point and a region may be specified in describing a vertical
+location.  The points may provide a convenient nominal location, even when
+a value actually pertains to a region.
+
+%===============================================================================
+\req{Physical Grids}
+%-------------------------------------------------------------------------------
+
+Physical Grids provide the locations of each of the cells/points associated with
+the range of indices in a distributed grid.  Each PhysGrid is associated with a
+single Dist grid.  Physical grids may be purely horizontal, purely vertical, or
+both.  Structured grids assume that adjacent locations in index space share
+boundaries in a predicable way.
+
+\sreq{Reading grids}
+
+Grids can be read from standard files.
+
+\sreq{Writing grids}
+
+Grids are output to standard files.
+
+\sreq{PhysGrids may be internally generated}
+
+For an arbitrary number of points in the global domain of the associated
+DistGrid, it shall be possible to specify an algorithm for internally
+determining the PhysGrid.
+
+\sreq{Cell specification}
+
+PhysGrids shall specify both the locations of cell vertices, and the locations
+of cell centers.
+
+\sreq{Interpolation}
+
+A PhysGrid may be interpolated to generate an equivalent PhysGrid on a coarser
+or finer global DistGrid.  Methods should be provided to accomplish such
+interpolation.
+
+\sreq{Horizontal coordinate independent of vertical}
+Horizontal grid locations can be assumed independent of the vertical coordinate.
+
+\sreq{Vertical coordinate potentially dependent on horizontal}
+
+Vertical grid locations may be functions of the horizontal coordinate, or may be
+independent of it.  This is necessary to support, for example, partial cells in
+Z-coordinate ocean models.
+
+\sreq{Horizontal physical grids}
+
+\ssreq{PhysGrids map projections}
+
+PhysGrids may be generated from a number of standard map projections,
+including traditional and Mercator grids on a sphere, cubed-sphere, or tripolar
+grids.
+
+\ssreq{Supported topologies} Supported horizontal grid topologies will include
+logically rectangular grids that are reentrant in 0, 1, or 2 directions,
+northern and southern tripolar (Murray 1996), sphere, icosahedral, and
+unstructured grids.  Unstructured arrays of logically rectangular grids
+(cubed-sphere and arbitrary nesting) will also be supported.
+
+\ssreq{PhysGrid topology consistency checking}
+
+A mechanism shall be provided to verify that the locations of the points in
+a PhysGrid are consistent with the topology of the underlying DistGrid.  An
+exception shall be generated in case of inconsistency.
+
+\ssreq{Areas tile sphere}
+Grid areas may be calculated using algorithms that guarantee that the grid
+exactly tiles the sphere (or a portion of it).
+
+\ssreq{Available subgrids}
+
+For locally quadrilateral horizontal grids, information shall be available for
+each of the 4 related subgrids.  That is if a t-cell is centered at a tracer
+point,  cells centered on the east face, north face, and northeast corner of
+the t-cell will also be provided in the case of a NorthEast underlying
+distributed grid.
+
+\sreq{Horizontal Functional Representations}
+
+A spectral horizontal description may be used.  More generally, the horizontal
+structure of information may be given by specifying functional decompositions.
+
+\ssreq{Horizontal Fourier grids} 
+
+Cartesian Fourier grids will be supported.  Associated with this grid are the
+wavenumbers (in units of $m^{-1}$) of each of the elements on the grid.
+
+\ssreq{Horizontal spherical harmonics grids} 
+
+Spherical harmonics grids will be supported.  Associated with this grid are the
+wavenumbers (nondimensional m,n) of each of the elements on the grid.  At a
+minimum, rhomboidal and triangular trunctations will be supported.
+
+\ssreq{Extensible horizontal functional representations}
+
+The PhysGrid design should not preclude the user from using alternative
+functional horizontal representations, such as spectral elements.
 
 \begin{reqlist}
 {\bf Priority:} <Priority 1-3> \\
@@ -20,31 +183,78 @@
 {\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
 {\bf Notes:} <Background, comments on design, implementation, etc.> 
 \end{reqlist}
-
 %===============================================================================
-% Or requirements may be itemized under a subtopic:
-%===============================================================================
-%===============================================================================
-\req{<Requirement>}
+\req{Grid Metrics}
 %-------------------------------------------------------------------------------
 
-<Description>
+Grid metrics are all of the lengths (or partial derivatives of distances with
+index number) and related quantities required to do a variety of calculations. 
+All metrics are a function of the grid and must be static with time.
 
-\sreq{<Subrequirement>}
+\sreq{Calculation of metrics}
+All metrics may be calculated from grid locations.
 
-<Description>
+\sreq{Reading metrics}
+All metrics may be read from a standard grid file.
 
-\ssreq{Subsubrequirement} 
+\sreq{MKS metric units}
+Metrics have units of m or $m^2$, or other appropriate MKS units.
 
-<Description>
+\sreq{Available Metrics}
+Available metric information includes an extensive list of grid lengths, cell
+areas, and the angle between logical and physical north.  (This list will be
+developed as a part of the requirement.)
 
-\begin{reqlist}
-{\bf Priority:} <Priority 1-3> \\
-{\bf Source:} <JMC Code (required, desired)> \\
-{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
-{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
-{\bf Notes:} <Background, comments on design, implementation, etc.> 
-\end{reqlist}
+\sreq{Methods for calculating metrics}
+Metrics may be calculated by either standard or user-provided algorithms. 
+
+
+% 
+% %===============================================================================
+% % Requirements may be itemized under a main topic:
+% %===============================================================================
+% %===============================================================================
+% \req{<Requirement>}
+% %-------------------------------------------------------------------------------
+
+% <Description>
+
+% \sreq{<Subrequirement>}
+
+% <Description>
+
+% \begin{reqlist}
+% {\bf Priority:} <Priority 1-3> \\
+% {\bf Source:} <JMC Code (required, desired)> \\
+% {\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+% {\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+% {\bf Notes:} <Background, comments on design, implementation, etc.> 
+% \end{reqlist}
+
+% %===============================================================================
+% % Or requirements may be itemized under a subtopic:
+% %===============================================================================
+% %===============================================================================
+% \req{<Requirement>}
+% %-------------------------------------------------------------------------------
+
+% <Description>
+
+% \sreq{<Subrequirement>}
+
+% <Description>
+
+% \ssreq{Subsubrequirement} 
+
+% <Description>
+
+% \begin{reqlist}
+% {\bf Priority:} <Priority 1-3> \\
+% {\bf Source:} <JMC Code (required, desired)> \\
+% {\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+% {\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+% {\bf Notes:} <Background, comments on design, implementation, etc.> 
+% \end{reqlist}
 
 
 
