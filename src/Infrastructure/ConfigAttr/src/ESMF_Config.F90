@@ -173,7 +173,7 @@
 !  ESMF_ConfigGetInt ( cf, label, size,     returns next integer number 
 !                      default, rc )        (function)
 ! 
-!  ESMF_ConfigGetChar ( cf, label, rc )     returns next charecter array
+!  ESMF_ConfigGetChar ( cf, label, rc )     returns next character array
 !                                           /word (function)
 !
 !  ESMF_ConfigGetString ( cf, label,        retutns next string 
@@ -490,7 +490,7 @@
 !
 ! !IROUTINE: ESMF_ConfigGetInt - gets an integer number/numbers
 !
-! !DESCRIPTION: Gets a floating point number/numbers
+! !DESCRIPTION: Gets a integer point number/numbers
 
 !
 ! !INTERFACE:
@@ -518,7 +518,71 @@
 
 
 
-!!!! For char and string ----- difference ????
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetChar - gets a characher
+!
+! !DESCRIPTION: Gets a character
+
+!
+! !INTERFACE:
+
+    character function ESMF_ConfigGetChar( cf, label, size, default, rc )
+
+      implicit none
+
+      type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
+      character(len=*), intent(in), optional :: label    ! label
+      integer, intent(in), optional          :: size     ! number of  
+                                                         ! characters
+      character, intent(in), optional        :: default  ! default value
+
+      integer, intent(out), optional         :: rc       ! Error code
+!
+! !REVISION HISTORY:
+! 	7anp2003  Zaslavsky  initial interface/prolog
+!
+!EOP -------------------------------------------------------------------
+      rc = 0
+      ESMF_ConfigGetChar = 'y'
+    end function ESMF_ConfigGetChar
+
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetString - gets a string 
+!
+! !DESCRIPTION: Gets a sequence of characters (word). It will be 
+!               terminated by the first white space.
+
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigGetString( cf, string, label, default, rc )
+
+      implicit none
+
+      type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
+      character(len=*), intent(out)          :: string   ! string
+
+      character(len=*), intent(in), optional :: label    ! label
+
+      character(len=*), intent(in), optional :: default  ! default value
+
+      integer, intent(out), optional         :: rc       ! Error code
+!
+! !REVISION HISTORY:
+! 	7anp2003  Zaslavsky  initial interface/prolog
+!
+!EOP -------------------------------------------------------------------
+      string ='GoodBye!'
+      rc = 0
+    end subroutine ESMF_ConfigGetString
 
 
 !-----------------------------------------------------------------------
