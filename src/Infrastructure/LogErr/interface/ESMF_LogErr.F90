@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.8 2003/04/14 22:33:10 flanigan Exp $
+! $Id: ESMF_LogErr.F90,v 1.9 2003/04/15 16:18:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,13 +11,13 @@
 !==============================================================================
 !
 
-!#include "/home/sjs/ESMF/esmf/esmf/src/include/ESMF.h"
-#include "ESMF.h"
-!#include "../include/ESMF_LogConstants.inc"
+#include "ESMF_Macros.inc"
 #include "ESMF_LogConstants.inc"
 
 module ESMF_LogErr
-implicit none
+
+   use ESMF_BaseMod
+   use ESMF_IOMod
 
 !BOP
 !============================================================================
@@ -31,7 +31,10 @@ implicit none
 !
 !============================================================================
 !
-type:: ESMF_Log
+   implicit none
+   private
+
+type ESMF_Log
     private
     sequence
     integer oneLogErrFile     !An ESMF_Log object will write to one file if
@@ -76,19 +79,19 @@ contains
 ! !IROUTINE: ESMF_LogInit - initialize an error object.
 !
 ! !INTERFACE:
-subroutine ESMF_LogInit(aLog,verbose,flush,haltOnErr,haltOnWarn)
+subroutine ESMF_LogInit(aLog,verbose,flushflag,haltOnErr,haltOnWarn)
 !
 ! !ARGUMENTS:
 !
  type(ESMF_Log), intent(in) :: aLog
- integer, intent(in),optional::verbose, flush, haltOnErr,haltOnWarn 
+ integer, intent(in),optional::verbose, flushflag, haltOnErr,haltOnWarn 
 !
 ! !DESCRIPTION:
 !   Most of the Fortran wrapper routines for the C/C++ ESMC/_Log class are
 !   written in C. This is the only routine that isn't. See the class design
 !   section for the rational for doing this. 
 !
-!   With the exception of the ESMF/_Log object, all the arguments are optional.
+!   With the exception of the ESMF\_Log object, all the arguments are optional.
 !   See the Examples section of the document for a discussion of how to use the
 !   routine.
 !
@@ -103,7 +106,7 @@ subroutine ESMF_LogInit(aLog,verbose,flush,haltOnErr,haltOnWarn)
  stopOnWarn=ESMF_LOG_FALSE
 
  if (present(verbose)) verbosity=verbose
- if (present(flush)) flushOut=flush
+ if (present(flushflag)) flushOut=flushflag
  if (present(haltOnErr)) stopOnErr=haltOnErr
  if (present(haltOnWarn)) stopOnWarn=haltOnWarn
  call esmf_loginit_c(aLog,verbosity,flushOut,stopOnErr,stopOnWarn)
@@ -231,17 +234,17 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 ! have just used fprintf.  However, because we needed to use the Fortran I/O 
 ! libraries when calling Log from a Fortran code
 ! (see the discussion about the class design), we had to make 
-! calls to ESMF/_LogPrintChar() and the subroutines below, in addition to
+! calls to ESMF\_LogPrintChar() and the subroutines below, in addition to
 ! C's fprintf() (We still have to support C/C++, so we still need fprintf() ).
-! ESMF/_LogPrintChar() and the routines below are not particularly general,
+! ESMF\_LogPrintChar() and the routines below are not particularly general,
 ! but do the trick.
 !EOP
 !========================================================================
 
   if (length /= 0) write(unitNumber,10) (msg(i:i),i=1,length) 
   write(unitNumber,10) charData
-!  if (flushSet == ESMF_LOG_TRUE) call flush(unitNumber, istat)
-  10 format(/A)
+  if (flushSet == ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
+  10 format('+',A)
  end subroutine
 
 !======================================================================
@@ -258,13 +261,13 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 ! !ARGUMENTS:
   integer, intent(in)::unitNumber,flushSet  !see above
 ! !DESCRIPTION:
-! Prints a newline character.  See ESMF/_LogPrintChar for more 
+! Prints a newline character.  See ESMF\_LogPrintChar for more 
 ! discussion
 !EOP
 !=====================================================================
   integer :: istat
   write(unitNumber,*)
-!  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
+  if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
  end subroutine
 
 
@@ -282,14 +285,14 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
   integer, intent(in)::unitNumber,flushSet,len1,len2
   character(len=32), intent(in)::msg,stringData
 ! !DESCRIPTION:
-! Prints a string; see ESMF/_LogPrintChar() for a fuller discussion
+! Prints a string; see ESMF\_LogPrintChar() for a fuller discussion
 !EOP
 !======================================================================
   integer :: i,istat
   if (len2 /= 0) write(unitNumber,10) (msg(i:i),i=1,len2)
   write(unitNumber,10) (stringData(i:i), i=1,len1)
-!  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
-  10 format(/A)
+  if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
+  10 format('+',A)
  end subroutine
 
   
@@ -307,15 +310,15 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
   integer, intent(in)::unitNumber,flushSet,intData
   character(len=32), intent(in):: msg
 ! !DESCRIPTION
-! Prints an integer; see ESMF/_LogPrintChar() for more details
+! Prints an integer; see ESMF\_LogPrintChar() for more details
 !
 !EOP
 !======================================================================
   if (length /= 0) write(unitNumber,20) (msg(i:i),i=1,length)
   write(unitNumber,10) intData
-!  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
-  10 format(/I3)
-  20 format(/A1)
+  if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
+  10 format('+',I3)
+  20 format('+',A1)
  end subroutine
 
 !======================================================================
@@ -332,14 +335,14 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
   real, intent(in):: floatData
   character(len=32), intent(in):: msg
 ! !DESCRIPTION:
-! Prints a real number; see ESMF/_LogPrintChar() for a longer discussion
+! Prints a real number; see ESMF\_LogPrintChar() for a longer discussion
 !
 !EOP
 !======================================================================
   if (length /= 0) write(unitNumber,20) (msg(i:i),i=1,length)
   write(unitNumber,10) floatdata 
-!  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
-  10 format(/F14.7)
-  20 format(/A)
+  if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
+  10 format('+',F14.7)
+  20 format('+',A)
  end subroutine
 
