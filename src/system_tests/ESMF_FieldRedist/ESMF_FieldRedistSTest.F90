@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.10 2004/03/22 19:47:08 nscollins Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.11 2004/03/23 20:48:56 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -169,6 +169,12 @@
     ! Get pointers to the data and set it up
     call ESMF_FieldGetArray(field1, array1, rc)
     call ESMF_ArrayGetData(array1, srcdata, ESMF_DATA_REF, rc)
+    call ESMF_FieldGetArray(field3, array3, rc)
+    call ESMF_ArrayGetData(array3, resdata, ESMF_DATA_REF, rc)
+
+    ! initialize data arrays
+    srcdata = 0.0
+    resdata = 0.0
 
     ! set data array to a function of coordinates (just in the computational part
     ! of the array)
@@ -233,10 +239,6 @@
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
-    call ESMF_ArrayGetData(array1, srcdata, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(array3, resdata, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
     match    = .true.
     miscount = 0
     do i     = 1,size(resdata,1)
