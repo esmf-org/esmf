@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.29 2004/06/03 23:46:46 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.30 2004/06/11 00:24:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
       type(ESMF_TimeInterval) :: timeinterval1
 
       ! local variables for Get functions
-      integer :: D, H, M, S
+      integer :: YY, MM, DD, H, M, S
 
       ! return code
       integer:: rc
@@ -54,7 +54,7 @@
 !BOE
 !\subsubsection{Time Initialization}
 
-! This example shows how to initialize two {\tt ESMF\_Time}s.
+! This example shows how to initialize an {\tt ESMF\_Time}.
 !EOE
 
 !BOC
@@ -71,39 +71,51 @@
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOE
+!\subsubsection{Time Increment}
+
+! This example shows how to increment an {\tt ESMF\_Time} by
+! an {\tt ESMF\_TimeInterval}.
+!EOE
+
 !BOC
-      ! initialize time2 to 3/1/2000 3:26:01
-      call ESMF_TimeSet(time2, yy=2000, mm=3, dd=1, h=3, m=26, s=1, rc=rc)
+      ! initialize a time interval to 2 days, 8 hours, 36 minutes, 15 seconds
+      call ESMF_TimeIntervalSet(timeinterval1, d=2, h=8, m=36, s=15, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      print *, "Time2 = "
-      call ESMF_TimePrint(time2, "string", rc)
+      print *, "Timeinterval1 = "
+      call ESMF_TimeIntervalPrint(timeinterval1, "string", rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      ! increment time1 with timeinterval1
+      time2 = time1 + timeinterval1
+
+      call ESMF_TimeGet(time2, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      print *, "time2 = time1 + timeinterval1 = ", YY, "/", MM, "/", DD, " ", &
+               H, ":", M, ":", S
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Difference Between Two Times}
+!\subsubsection{Time Comparison}
 
-! This example shows how to determine the difference between two
-! {\tt ESMF\_Time}s.
+! This example shows how to compare two {\tt ESMF\_Times}.
 !EOE
 
 !BOC
-      ! calculate difference between time2 and time1
-      timeinterval1 = time2 - time1
+      if (time2 > time1) then
+        print *, "time2 is larger than time1"
+      else
+        print *, "time1 is smaller than or equal to time2"
+      endif
 
-      call ESMF_TimeIntervalGet(timeinterval1, d=D, h=H, m=M, s=S, rc=rc)
-      print *, "Difference between time2 and time1 = ", D, " days, ", H, &
-               " hours, ", M, " minutes, ", S, " seconds."
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
       ! finalize ESMF framework
       call ESMF_Finalize(rc)
 !EOC
