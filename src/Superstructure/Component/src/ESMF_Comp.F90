@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.121 2004/12/21 01:05:56 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.122 2004/12/23 17:58:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -240,7 +240,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.121 2004/12/21 01:05:56 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.122 2004/12/23 17:58:52 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -647,12 +647,9 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-!        type(ESMF_State) :: is, es
-!        logical :: isdel, esdel
         integer :: dummy
         logical :: blocking
         integer :: callrc
-        integer :: oldvmid, vmid
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -707,17 +704,6 @@ end function
                                ESMF_LOG_WARNING)
         endif
 
-        ! set the ID of the currently executing component, saving the 
-        ! previous one to be restored afterwards.
-!gjt        call c_ESMC_CompGetVMID(oldvmid, status)
-        ! TODO: fix this.   same comment in run and finalize.
-        ! this is wrong - it must be the child vm, not the parent.
-        ! but i cannot find when the vm argument has a valid value...
-        ! it is null in some of my test cases.
-        !call ESMF_VMGet(compp%vm, mpiCommunicator=vmid, rc=status)
-!gjt        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
-!gjt        call c_ESMC_CompSetVMID(vmid, status)
-
         call ESMF_GetName(compp%base, cname, status)
 
         ! Wrap comp so it's passed to C++ correctly.
@@ -755,13 +741,6 @@ end function
                                   ESMF_CONTEXT, rc)) continue
         ! fall thru intentionally - we still have cleanup to do
 
-        ! restore previous comp id.
-!gjt        call c_ESMC_CompSetVMID(oldvmid, status)
-
-        ! if we created dummy states, delete them here.
-!gjt        if (isdel) call ESMF_StateDestroy(is, rc=dummy)
-!gjt        if (esdel) call ESMF_StateDestroy(es, rc=dummy)
-      
         ! Set return values
         if (rcpresent) rc = status
 
@@ -1023,12 +1002,9 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-!        type(ESMF_State) :: is, es
-!        logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
         integer :: callrc
-        integer :: oldvmid, vmid
 
         ! Finalize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -1084,14 +1060,6 @@ end function
                                ESMF_LOG_WARNING)
         endif
 
-        ! set the ID of the currently executing component, saving the 
-        ! previous one to be restored afterwards.
-!gjt        call c_ESMC_CompGetVMID(oldvmid, status)
-        ! TODO: see comment in init
-        !call ESMF_VMGet(compp%vm, mpiCommunicator=vmid, rc=status)
-!gjt        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
-!gjt        call c_ESMC_CompSetVMID(vmid, status)
-
         call ESMF_GetName(compp%base, cname, status)
 
         ! Wrap comp so it's passed to C++ correctly.
@@ -1127,13 +1095,6 @@ end function
                                   ESMF_CONTEXT, rc)) continue
         ! fall thru intentionally - we have more cleanup to do.
 
-        ! restore previous comp id.
-!gjt        call c_ESMC_CompSetVMID(oldvmid, status)
-
-        ! if we created dummy states, delete them here.
-!gjt        if (isdel) call ESMF_StateDestroy(is, rc=dummy)
-!gjt        if (esdel) call ESMF_StateDestroy(es, rc=dummy)
-      
         ! Set return values
         if (rcpresent) rc = status
 
@@ -1191,12 +1152,9 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-!        type(ESMF_State) :: is, es
-!        logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
         integer :: callrc
-        integer :: oldvmid, vmid
 
         ! Run return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -1252,14 +1210,6 @@ end function
                                ESMF_LOG_WARNING)
         endif
 
-        ! set the ID of the currently executing component, saving the 
-        ! previous one to be restored afterwards.
-!gjt        call c_ESMC_CompGetVMID(oldvmid, status)
-        ! TODO: see comment in init
-        !call ESMF_VMGet(compp%vm, mpiCommunicator=vmid, rc=status)
-!gjt        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
-!gjt        call c_ESMC_CompSetVMID(vmid, status)
-
         call ESMF_GetName(compp%base, cname, status)
 
         ! Wrap comp so it's passed to C++ correctly.
@@ -1295,13 +1245,6 @@ end function
                                   ESMF_CONTEXT, rc)) continue
         ! fall thru intentionally - we have cleanup to do.
 
-        ! restore previous comp id.
-!gjt        call c_ESMC_CompSetVMID(oldvmid, status)
-
-        ! if we created dummy states, delete them here.
-!gjt        if (isdel) call ESMF_StateDestroy(is, rc=dummy)
-!gjt        if (esdel) call ESMF_StateDestroy(es, rc=dummy)
-      
         ! Set return values
         if (rcpresent) rc = status
 
