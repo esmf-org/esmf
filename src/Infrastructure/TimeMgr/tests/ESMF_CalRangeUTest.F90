@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.9 2003/08/29 19:09:34 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.10 2003/09/02 19:23:20 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.9 2003/08/29 19:09:34 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.10 2003/09/02 19:23:20 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -73,6 +73,9 @@
 !     Special strings (Non-exhaustive and exhaustive) have been
 !     added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
+
+#ifdef ESMF_EXHAUSTIVE
+      !EX_UTest
 
       ! initialize ESMF framework
       call ESMF_FrameworkInitialize(rc)
@@ -432,4 +435,5 @@
 
       end function ESMF_CheckTime
 
+#endif
       end program ESMF_CalRangeUTest
