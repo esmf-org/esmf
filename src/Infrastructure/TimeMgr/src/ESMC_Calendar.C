@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.58 2004/04/27 22:57:52 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.59 2004/05/12 13:51:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.58 2004/04/27 22:57:52 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.59 2004/05/12 13:51:52 nscollins Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -64,7 +64,7 @@ int ESMC_Calendar::count=0;
 //
 //
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CalendarInitialize - initialize the default Calendar type
 //
 // !INTERFACE:
@@ -80,14 +80,14 @@ int ESMC_Calendar::count=0;
 // !DESCRIPTION:
 //      Friend function which initializes the Time Manager default calendar.
 //
-//EOP
+//EOPI
 
   return(ESMC_CalendarSetDefault(calendarType));
 
  } // end ESMC_CalendarInitialize
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CalendarFinalize - free all internal Calendars
 //
 // !INTERFACE:
@@ -102,7 +102,7 @@ int ESMC_Calendar::count=0;
 // !DESCRIPTION:
 //      Friend function which de-allocates all internal built-in Calendars.
 //
-//EOP
+//EOPI
 
   for (int i=0; i<CALENDAR_TYPE_COUNT; i++) {
     delete ESMC_Calendar::internalCalendar[i];
