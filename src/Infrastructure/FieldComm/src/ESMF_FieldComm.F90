@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.57 2004/08/20 15:32:56 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.58 2004/10/05 22:47:27 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.57 2004/08/20 15:32:56 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.58 2004/10/05 22:47:27 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1091,45 +1091,38 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
+      integer :: htype, srcCount, dstCount
       logical :: allInOne
       logical :: dummy
+      logical :: hasSrcData        ! does this DE contain localdata from src?
+      logical :: hasDstData        ! does this DE contain localdata from dst?
       type(ESMF_DELayout) :: srcDelayout, dstDelayout
-      !type(ESMF_DELayout) :: parentDelayout
-      type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: my_src_DE, my_dst_DE, htype
-      !integer :: my_DE
-      type(ESMF_Array) :: src_array, dst_array
-      type(ESMF_Grid) :: src_grid, dst_grid
-      type(ESMF_FieldDataMap) :: src_datamap, dst_datamap
+      type(ESMF_Logical) :: hasData        ! does this DE contain localdata?
+      type(ESMF_Array) :: srcArray, dstArray
+      type(ESMF_Grid) :: srcGrid, dstGrid
+      type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
+      type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize other variables
       allInOne = .false.
 
       ! if the routehandle has not been precomputed, do so now
       ! first check if the RouteHandle is valid (constructed)
-      call ESMF_RouteHandleValidate(routehandle, rc=status)
+      call ESMF_RouteHandleValidate(routehandle, rc=localrc)
 
       ! if valid, check the routehandle type
-      if (status.eq.ESMF_SUCCESS) then
-        call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
+      if (localrc.eq.ESMF_SUCCESS) then
+        call ESMF_RouteHandleGet(routehandle, htype=htype, rc=localrc)
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
         elseif (htype .ne. ESMF_REGRIDHANDLE) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                        "routehandle not defined for regrid", &
-                                        ESMF_CONTEXT, rc)
+                                      "routehandle not defined for regrid", &
+                                      ESMF_CONTEXT, rc)
           return
         endif
       ! if not valid, try calling RegridStore to initialize
@@ -1140,15 +1133,15 @@
       ! if needed, call FieldRegridStore to set up the routehandle
       if (allInOne) then
         call ESMF_LogWrite("uninitialized routehandle: calling FieldRegridStore", &
-                              ESMF_LOG_WARNING, &
-                              ESMF_CONTEXT)
+                           ESMF_LOG_WARNING, &
+                           ESMF_CONTEXT)
         call ESMF_FieldRegridStore(srcField, dstField, parentDelayout, &
                                    routehandle, regridmethod, regridnorm, &
-                                   srcMask, dstMask, status)
+                                   srcMask, dstMask, localrc)
       endif
 
       ! Our DE number in the parent layout
-      ! call ESMF_DELayoutGet(parentDelayout, localDe=my_DE, status)
+      ! call ESMF_DELayoutGet(parentDelayout, localDe=myDE, localrc)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -1160,64 +1153,53 @@
       !  in this communication.
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_FieldGet(srcField, grid=src_grid, rc=status)
-      call ESMF_GridGet(src_grid, delayout=srcDelayout, rc=status)
- !jw   call ESMF_DELayoutGetDEExists(parentDelayout, my_DE, srcDelayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TRUE) 
-      hassrcdata = .true.   ! temp for now
-      if (hassrcdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGet(srcDelayout, localDE=my_src_DE, rc=status)
-          call ESMF_FieldGetArray(srcField, src_array, rc=status)
-          call ESMF_FieldGet(srcField, datamap=src_datamap, rc=status)
+      call ESMF_FieldGet(srcField, datamap=srcDataMap, grid=srcGrid, rc=localrc)
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
+      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=srcRelLoc, &
+                                   localCellCount=srcCount, rc=localrc)
+      call ESMF_FieldGetArray(srcField, srcArray, rc=localrc)
+ !jw   if (hasData.eq.ESMF_FALSE .OR. srcCount.le.0) then
+      if (srcCount.le.0) then
+        hasSrcData = .false.
+      else
+        hasSrcData = .true.
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_FieldGet(dstField, grid=dst_grid, rc=status)
-      call ESMF_GridGet(dst_grid, delayout=dstDelayout, rc=status)
- !jw   call ESMF_DELayoutGetDEExists(parentDelayout, my_DE, dstDelayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TRUE) 
-      hasdstdata = .true.   ! temp for now
-      if (hasdstdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGet(dstDelayout, localDE=my_dst_DE, rc=status)
-          call ESMF_FieldGetArray(dstField, dst_array, rc=status)
-          call ESMF_FieldGet(dstField, datamap=dst_datamap, rc=status)
+      call ESMF_FieldGet(dstField, datamap=dstDataMap, grid=dstGrid, rc=localrc)
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=localrc)
+      call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=dstRelLoc, &
+                                   localCellCount=dstCount, rc=localrc)
+      call ESMF_FieldGetArray(dstField, dstArray, rc=localrc)
+ !jw   if (hasData.eq.ESMF_FALSE .OR. dstCount.le.0) then
+      if (dstCount.le.0) then
+        hasDstData = .false.
+      else
+        hasDstData = .true.
       endif
 
       ! if neither are true this DE cannot be involved in the communication
       !  and it can just return now.
-      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
+      if ((.not. hasSrcData) .and. (.not. hasDstData)) then
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
       endif
 
 
-      ! There are 3 possible cases - src+dst, src only, dst only
-      !  (if both are false then we've already returned.)
-      if ((hassrcdata) .and. (.not. hasdstdata)) then
-          !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
-          !                      dst_datamap, routehandle, &       
-          !                        srcMask, dstMask, blockingflag, commhandle, rc)
-      else if ((.not. hassrcdata) .and. (hasdstdata)) then
-          !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
-          !                      dst_datamap, routehandle, &       
-          !                        srcMask, dstMask, blockingflag, commhandle, rc)
-      else
-          call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
-                                dst_datamap, routehandle, &       
-                                srcMask, dstMask, blockingflag, commhandle, rc)
-      endif
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_ArrayRegrid(srcArray, srcDatamap, hasSrcData, &
+                            dstArray, dstDatamap, hasDstData, &
+                            routehandle, srcMask, dstMask, &
+                            blockingflag, commhandle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! if this is a regrid call with an uninitialized routehandle, then 
       ! destroy it before returning    TODO:  is this right?
-      if (allInOne) call ESMF_FieldRegridRelease(routehandle, status)
+      if (allInOne) call ESMF_FieldRegridRelease(routehandle, localrc)
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldRegrid
 
@@ -1316,31 +1298,22 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc              ! Error status
+      integer :: myDE, dstCount, srcCount
+      logical :: hasSrcData           ! does this DE contain localdata from src?
+      logical :: hasDstData           ! does this DE contain localdata from dst?
+      type(ESMF_Array) :: srcArray, dstArray
       type(ESMF_DELayout) :: srcDelayout, dstDelayout
-      type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: my_src_DE, my_dst_DE, my_DE
-      type(ESMF_Array) :: src_array, dst_array
-      type(ESMF_Grid) :: src_grid, dst_grid
-      type(ESMF_FieldDataMap) :: src_datamap, dst_datamap
-
+      type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
+      type(ESMF_Grid) :: srcGrid, dstGrid
+      type(ESMF_Logical) :: hasdata   ! does this DE contain localdata?
+      type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
    
-      ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Our DE number in the parent layout
-      call ESMF_DELayoutGet(parentDelayout, localDE=my_DE, rc=status)
-
-      ! TODO: we need not only to know if this DE has data in the field,
-      !   but also the de id for both src & dest fields
+      call ESMF_DELayoutGet(parentDelayout, localDE=myDE, rc=localrc)
 
       ! This routine is called on every processor in the parent layout.
       !  It is quite possible that the source and destination fields do
@@ -1348,47 +1321,52 @@
       !  we do not go lower than this on the processors which are uninvolved
       !  in this communication.
 
-      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_FieldGet(srcField, grid=src_grid, rc=status)
-      call ESMF_GridGet(src_grid, delayout=srcDelayout, rc=status)
- !jw   call ESMF_DELayoutGetDEExists(parentDelayout, my_DE, srcDelayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TRUE) 
-      hassrcdata = .true.   ! temp for now
-      if (hassrcdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGet(srcDelayout, localDE=my_src_DE, rc=status)
-          call ESMF_FieldGetArray(srcField, src_array, rc=status)
-          call ESMF_FieldGet(srcField, datamap=src_datamap, rc=status)
+      ! if srclayout ^ parentlayout == NULL or if local count = 0, then
+      ! nothing to send from this DE id.
+      call ESMF_FieldGet(srcField, datamap=srcDataMap, grid=srcGrid, rc=localrc)
+      call ESMF_FieldGetArray(srcField, srcArray, rc=localrc)
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
+      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=srcRelLoc, &
+                                   localCellCount=srcCount, rc=localrc)
+ !jw   call ESMF_GridGet(srcGrid, delayout=srcDelayout, rc=localrc)
+ !jw   call ESMF_DELayoutGetDEExists(parentDelayout, myDE, srcDelayout, hasdata)
+ !jw   if (hasData.eq.ESMF_FALSE .OR. srcCount.le.0) then
+      if (srcCount.le.0) then
+        hasSrcData = .false.
+      else
+        hasSrcData = .true.
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_FieldGet(dstField, grid=dst_grid, rc=status)
-      call ESMF_GridGet(dst_grid, delayout=dstDelayout, rc=status)
- !jw   call ESMF_DELayoutGetDEExists(parentDelayout, my_DE, dstDelayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TRUE) 
-      hasdstdata = .true.   ! temp for now
-      if (hasdstdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGet(dstDelayout, localDE=my_dst_DE, rc=status)
-          call ESMF_FieldGetArray(dstField, dst_array, rc=status)
-          call ESMF_FieldGet(dstField, datamap=dst_datamap, rc=status)
+      call ESMF_FieldGet(dstField, datamap=dstDataMap, grid=dstGrid, rc=localrc)
+      call ESMF_FieldGetArray(dstField, dstArray, rc=localrc)
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=localrc)
+      call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=dstRelLoc, &
+                                   localCellCount=dstCount, rc=localrc)
+ !jw   call ESMF_GridGet(dstGrid, delayout=dstDelayout, rc=localrc)
+ !jw   call ESMF_DELayoutGetDEExists(parentDelayout, myDE, dstDelayout, hasData)
+ !jw   if (hasData.eq.ESMF_FALSE .OR. dstCount.le.0) then
+      if (dstCount.le.0) then
+        hasDstData = .false.
+      else
+        hasDstData = .true.
       endif
 
       ! if neither are true this DE cannot be involved in the communication
       !  and it can just return now.
-      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
+      if ((.not. hasSrcData) .AND. (.not. hasDstData)) then
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
       endif
 
-      call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
-                                 dst_array, dst_grid, dst_datamap, &
+      call ESMF_ArrayRegridStore(srcArray, srcGrid, srcDatamap, hasSrcData, &      
+                                 dstArray, dstGrid, dstDatamap, hasDstData, &
                                  parentDelayout, routehandle, &
                                  regridmethod, regridnorm, &    
-                                 srcMask, dstMask, status)
+                                 srcMask, dstMask, localrc)
 
       ! Set return values.
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldRegridStore
 
