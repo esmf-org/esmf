@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.13 2003/06/06 14:31:39 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.14 2003/07/17 20:15:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.13 2003/06/06 14:31:39 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.14 2003/07/17 20:15:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -79,7 +79,6 @@
       integer :: horz_coord_system, vert_coord_system
       integer :: status
       integer :: phy_grid_id
-      integer :: halo_width
       real :: x_min, x_max, y_min, y_max
       type(ESMF_Grid) :: grid, grid1, grid2
       type(ESMF_GridType) :: grid_type
@@ -113,7 +112,6 @@
       y_min = 0.0
       y_max = 12.0
       name = "test grid 1"
-      halo_width = 1
 
       !NEX_UTest
 
@@ -134,7 +132,6 @@
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-			     halo_width=halo_width, &
                              name=name, rc=status)
 
       !NEX_UTest
@@ -158,8 +155,7 @@
       !                       vert_stagger=vert_stagger, &
       !                       horz_coord_system=horz_coord_system, &
       !                       vert_coord_system=vert_coord_system, &
-      !			     halo_width=halo_width, &
-      !                      name=name, rc=status)
+      !                       name=name, rc=status)
 
       !  write(failMsg, *) ""
       ! write(name, *) "Creating an Internal Grid Test"
