@@ -47,8 +47,6 @@
   integer :: finalrc
   finalrc = ESMF_SUCCESS
   
-  print *, 'Testing wrf write'
-
   call ESMF_Initialize(rc=rc)
 
   if (rc.NE.ESMF_SUCCESS) then
