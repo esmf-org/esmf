@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.2 2003/09/18 16:38:28 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.3 2003/09/18 17:31:54 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -37,14 +37,14 @@
 %#ifdef STANDALONE
 %\input{Field_syn}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/Field_syn}
+%\input{../Infrastructure/Bundle/doc/Field_syn}
 %#endif
 
 %\section{Programming Model}
 %#ifdef STANDALONE
 %\input{Field_prog}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/Field_prog}
+%\input{../Infrastructure/Bundle/doc/Field_prog}
 %#endif
 
 \section{Bundle Class}
@@ -53,42 +53,42 @@
 #ifdef STANDALONE
 \input{Bundle_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Bundle_desc}
+\input{../Infrastructure/Bundle/doc/Bundle_desc}
 #endif
 
 \subsection{Usage}
 #ifdef STANDALONE
 \input{Bundle_usage}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Bundle_usage}
+\input{../Infrastructure/Bundle/doc/Bundle_usage}
 #endif
 
 %\subsubsection{Restrictions}
 %#ifdef STANDALONE
 %\input{Bundle_rest}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/Bundle_rest}
+%\input{../Infrastructure/Bundle/doc/Bundle_rest}
 %#endif
 
 %\subsection{Use and Examples}
 %% #ifdef STANDALONE
 %% \input{bundleex_fapi}
 %% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/bundleex_fapi}
+%% \input{../Infrastructure/Bundle/doc/bundleex_fapi}
 %% #endif
 
 % \subsection{Parameters and Definitions}
 % #ifdef STANDALONE
 % \input{Bundle_fparam}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Field/doc/Bundle_fparam}
+% \input{../Infrastructure/Bundle/doc/Bundle_fparam}
 % #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_Bundle_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMF_Bundle_fapi}
+\input{../Infrastructure/Bundle/doc/ESMF_Bundle_fapi}
 #endif
 
 %#ifdef STANDALONE
