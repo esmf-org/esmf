@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.12 2005/03/28 17:34:14 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.13 2005/03/28 20:04:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.12 2005/03/28 17:34:14 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.13 2005/03/28 20:04:30 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -48,12 +48,12 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name, msg_type, Pet_num
+      character(ESMF_MAXSTR) :: name, msg_type, Pet_num, todays_date, my_todays_date
       character :: random_char
       character (5) :: random_string, msg_string
 
 !     !LOCAL VARIABLES:
-      integer :: rc2, ran_num, i, todays_date, input_status
+      integer :: rc2, ran_num, i, input_status
       real :: r1, real_number 
       logical :: is_error
       type(ESMF_Log) :: log1, log2
@@ -350,6 +350,24 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, "rc = ", rc
       print *, "msg_string is ", msg_string
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Verify correct date was written to log file
+      write(failMsg, *) "Date in file is wrong"
+      write(name, *) "Verify date in Log File Test"
+      call date_and_time(date=my_todays_date)
+      call ESMF_Test((my_todays_date.eq.todays_date), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Verify correct message type was written to log file
+      write(failMsg, *) "Message type in file is wrong"
+      write(name, *) "Verify Message Type in Log File Test"
+      call ESMF_Test((msg_type.eq."INFO"), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !EX_UTest
