@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout_F.C,v 1.2 2003/01/09 02:17:16 eschwab Exp $
+// $Id: ESMC_Layout_F.C,v 1.3 2003/01/09 18:32:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,8 +59,8 @@ extern "C" {
            *status = (*ptr)->ESMC_LayoutGetDEid(id);
        }
 
-//     void FTN(c_esmc_layoutprint)(ESMC_Layout *ptr, char *opts, int *status) {
-//         *status = ptr->ESMC_LayoutPrint(opts);
+//     void FTN(c_esmc_layoutprint)(ESMC_Layout **ptr, char *opts, int *status){
+//         *status = (*ptr)->ESMC_LayoutPrint(opts);
 //     }
 
        void FTN(c_esmc_layoutallreduce)(ESMC_Layout **ptr, int *array,

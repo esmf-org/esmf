@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout.F90,v 1.3 2003/01/09 02:17:16 eschwab Exp $
+! $Id: ESMF_Layout.F90,v 1.4 2003/01/09 18:32:27 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
       use ESMF_IOMod
       implicit none
 
-!  TODO: move to include file ?
+!  TODO: move to include file and share with C++ ?
       integer, parameter :: ESMF_NOHINT=0, ESMF_XFAST=1, ESMF_YFAST=2, &
                             ESMF_ZFAST=3
 
@@ -56,7 +56,7 @@
       type ESMF_Layout
       sequence
       private
-        type(ESMF_Layout), pointer :: this       ! the C++ class data
+        type(ESMF_Pointer) :: this       ! opaque pointer to the C++ class data
       end type
 
 !------------------------------------------------------------------------------
@@ -73,6 +73,7 @@
  
       !public ESMF_LayoutSetData
       !public ESMF_LayoutGetData
+      !public ESMF_LayoutGet
       public ESMF_LayoutGetSize
       public ESMF_LayoutGetDEPosition
       public ESMF_LayoutGetDEid
@@ -90,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Layout.F90,v 1.3 2003/01/09 02:17:16 eschwab Exp $'
+      '$Id: ESMF_Layout.F90,v 1.4 2003/01/09 18:32:27 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -179,15 +180,13 @@ end interface
 !EOP
 ! !REQUIREMENTS:
 
-
 !       local vars
-        type (ESMF_Layout) :: ptr   ! opaque pointer to new C++ Layout
-!        type (ESMF_Layout), pointer :: ptr   ! opaque pointer to new C++ Layout
+        type (ESMF_Layout) :: layout        ! opaque pointer to new C++ Layout
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       Initialize the pointer to null.
-!        nullify(ptr)
+        layout%this = ESMF_NULL_POINTER
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -196,19 +195,17 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_LayoutCreate(ptr, nx, ny, delist, commhint, status)
+        call c_ESMC_LayoutCreate(layout, nx, ny, delist, commhint, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Layout creation error"
           return
         endif
 
 !       set return values
-        ESMF_LayoutCreateIntDE2D = ptr 
-!        ESMF_LayoutCreateIntDE2D%this => ptr 
+        ESMF_LayoutCreateIntDE2D = layout 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_LayoutCreateIntDE2D
-
 
 !------------------------------------------------------------------------------
 !BOP
@@ -221,7 +218,7 @@ end interface
       type(ESMF_Layout) :: ESMF_LayoutCreateNoData
 !
 ! !ARGUMENTS:
-      integer, intent(out), optional :: rc 
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !  Create a new empty {\tt Layout} object.
@@ -239,12 +236,12 @@ end interface
 
 
 !       ! Local variables
-        type (ESMF_Layout), pointer :: a    ! pointer to new Layout
+        type (ESMF_Layout) :: layout        ! new class being created
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       ! Initialize pointer
-        nullify(a)
+        layout%this = ESMF_NULL_POINTER
 
 !       ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -253,18 +250,17 @@ end interface
         endif
 
 !       ! C routine which interfaces to the C++ routine which does actual work
-        !call c_ESMC_LayoutCreateNoData(status)
+        !call c_ESMC_LayoutCreateNoData(layout, status)
         !if (status .ne. ESMF_SUCCESS) then
         !  print *, "Layout construction error"
         !  return
         !endif
 
 !       set return values
-        ESMF_LayoutCreateNoData%this => a
+        ESMF_LayoutCreateNoData = layout
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_LayoutCreateNoData
-
 
 !------------------------------------------------------------------------------
 !BOP
@@ -314,8 +310,6 @@ end interface
 
         end subroutine ESMF_LayoutDestroy
 
-
-
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
@@ -323,12 +317,12 @@ end interface
       subroutine ESMF_LayoutSetData(layout, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout 
-      integer, intent(out), optional :: rc     
+      type(ESMF_Layout) :: layout
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Used only with the version of LayoutCreate which creates an empty 
-!      Layout and allows the Data to be specified later. 
+!      Used only with the version of LayoutCreate which creates an empty
+!      Layout and allows the Data to be specified later.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -353,9 +347,45 @@ end interface
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-! 
+!
 ! Query for information from the layout.
 !
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_LayoutGet(layout, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Layout) :: layout
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!      Returns information about the layout.  For queries where the caller
+!      only wants a single value, specify the argument by name.
+!      All the arguments after the layout input are optional to facilitate this
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_LayoutGet
+
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
@@ -475,6 +505,7 @@ end interface
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_LayoutGetDEid
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
@@ -547,17 +578,14 @@ end interface
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
         type (ESMF_Layout) :: a 
-
-!       this is just to shut the compiler up
-        type (ESMF_Layout), target :: b 
-        a%this => b
-        nullify(a%this)
 !
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+!       ! add code here
 
         ESMF_LayoutRestore = a 
  
@@ -634,16 +662,13 @@ end interface
 
         type (ESMF_Layout) :: a
 
-!       this is just to shut the compiler up
-        type (ESMF_Layout), target :: b 
-        a%this => b
-        nullify(a%this)
-
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+!       ! add code here
 
         ESMF_LayoutRead = a 
  
@@ -692,10 +717,10 @@ end interface
        !    call c_ESMC_LayoutPrint(layout%this, defaultopts, status) 
        !endif
 
-       !if (status .ne. ESMF_SUCCESS) then
-       !  print *, "Layout print error"
-       !  return
-       !endif
+       if (status .ne. ESMF_SUCCESS) then
+         print *, "Layout print error"
+         return
+       endif
 
 !      set return values
        if (rcpresent) rc = ESMF_SUCCESS
