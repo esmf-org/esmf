@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.29 2004/02/13 00:59:41 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.30 2004/02/18 01:45:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,8 +17,9 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include "ESMC.h"
-#include "ESMC_Clock.h"
+#include <ESMC.h>
+#include <ESMC_F90Interface.h>
+#include <ESMC_Clock.h>
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -75,7 +76,7 @@ extern "C" {
        }
 
        void FTN(c_esmc_clockdestroy)(ESMC_Clock **ptr, int *status) {
-          int rc = ESMC_ClockDestroy(*ptr);
+          int rc = ESMC_ClockDestroy(ptr);
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
@@ -92,6 +93,7 @@ extern "C" {
                                  ESMC_Time *currTime,
                                  ESMF_KIND_I8 *advanceCount,
                                  int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockSet(
                  *nameLen,   // always present internal argument.
 
@@ -136,6 +138,7 @@ extern "C" {
                                  ESMF_KIND_I8 *advanceCount,
                                  int *alarmCount,
                                  int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGet(
                  *nameLen,      // always present internal argument.
 
@@ -182,6 +185,7 @@ extern "C" {
                                    char *ringingAlarmList2ndElementPtr,
                                    int *sizeofRingingAlarmList,
                                    int *ringingAlarmCount, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockAdvance(
              ((void*) timeStep         == (void*)ESMC_BAD_POINTER ?
                             ESMC_NULL_POINTER : timeStep),
@@ -203,6 +207,7 @@ extern "C" {
                                    char *ringingAlarmList1stElementPtr,
                                    int *sizeofRingingAlarmList,
                                    int *ringingAlarmCount, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockAdvance(
              ((void*) timeStep         == (void*)ESMC_BAD_POINTER ?
                             ESMC_NULL_POINTER : timeStep),
@@ -223,6 +228,7 @@ extern "C" {
                                    ESMC_TimeInterval *timeStep,
                                    int *sizeofRingingAlarmList,
                                    int *ringingAlarmCount, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockAdvance(
              ((void*) timeStep         == (void*)ESMC_BAD_POINTER ?
                             ESMC_NULL_POINTER : timeStep),
@@ -240,6 +246,7 @@ extern "C" {
 
        void FTN(c_esmc_clockisstoptime)(ESMC_Clock **ptr, 
                                       int *esmf_clockIsStopTime, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           *esmf_clockIsStopTime = (int) (*ptr)->ESMC_ClockIsStopTime(
                        ((void*) status == (void*)ESMC_BAD_POINTER ?
                                                  ESMC_NULL_POINTER : status) );
@@ -249,6 +256,7 @@ extern "C" {
                                  ESMC_Time *nextTime,
                                  ESMC_TimeInterval *timeStep,
                                  int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGetNextTime(
                  nextTime,  // required
 
@@ -263,6 +271,7 @@ extern "C" {
                                       char *name,
                                       ESMC_Alarm **alarm,
                                       int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGetAlarm(*nameLen, name, alarm);
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
@@ -277,6 +286,7 @@ extern "C" {
                                           int *alarmCount,
                                           ESMC_TimeInterval *timeStep,
                                           int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGetAlarmList(*type,
                                                   AlarmList1stElementPtr,
                                                   AlarmList2ndElementPtr,
@@ -296,6 +306,7 @@ extern "C" {
                                           int *alarmCount,
                                           ESMC_TimeInterval *timeStep,
                                           int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGetAlarmList(*type,
                                                   AlarmList1stElementPtr,
                                                   ESMC_NULL_POINTER,
@@ -308,6 +319,7 @@ extern "C" {
        }
 
        void FTN(c_esmc_clocksynctorealtime)(ESMC_Clock **ptr, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockSyncToRealTime();
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
@@ -315,12 +327,14 @@ extern "C" {
 
        void FTN(c_esmc_clockeq)(ESMC_Clock **clock1, ESMC_Clock **clock2,
                                    int *esmf_clockEQ) {
-           *esmf_clockEQ = (int) (**clock1 == **clock2);
+          ESMF_CHECK_BINARY_OPERATOR_POINTERS(*clock1, *clock2, esmf_clockEQ)
+          *esmf_clockEQ = (int) (**clock1 == **clock2);
        }
 
        void FTN(c_esmc_clockne)(ESMC_Clock **clock1, ESMC_Clock **clock2,
                                    int *esmf_clockNE) {
-           *esmf_clockNE = (int) (**clock1 != **clock2);
+          ESMF_CHECK_BINARY_OPERATOR_POINTERS(*clock1, *clock2, esmf_clockNE)
+          *esmf_clockNE = (int) (**clock1 != **clock2);
        }
 
        void FTN(c_esmc_clockreadrestart)(ESMC_Clock **ptr, int *nameLen,
@@ -339,6 +353,7 @@ extern "C" {
        void FTN(c_esmc_clockwriterestart)(ESMC_Clock **ptr,
                                           ESMC_IOSpec *iospec,
                                           int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockWriteRestart(
               ((void*)iospec == (void*)ESMC_BAD_POINTER ?
                                                   ESMC_NULL_POINTER : iospec) );
@@ -348,6 +363,7 @@ extern "C" {
 
        void FTN(c_esmc_clockvalidate)(ESMC_Clock **ptr, const char *options,
                                       int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockValidate(
                      ((void*) options == (void*)ESMC_BAD_POINTER ?
                                                 ESMC_NULL_POINTER : options) );
@@ -357,6 +373,7 @@ extern "C" {
 
        void FTN(c_esmc_clockprint)(ESMC_Clock **ptr, const char *options,
                                    int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockPrint(
                      ((void*) options == (void*)ESMC_BAD_POINTER ?
                                                 ESMC_NULL_POINTER : options) );
