@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.56.2.2 2004/07/05 07:37:41 svasquez Exp $
+#  $Id: common.mk,v 1.56.2.3 2004/07/06 15:31:54 svasquez Exp $
 #===============================================================================
 #   common.mk
 #
@@ -143,7 +143,9 @@ DO_UT_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results.bash
 DO_EX_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results
 DO_EX_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results.bash
 DO_ST_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results
+DO_ST_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results.bash
 DO_SUM_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary
+DO_SUM_RESULTS.bash	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary.bash
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
@@ -392,7 +394,9 @@ system_tests: chkopts build_libs chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests tree
-	$(DO_ST_RESULTS)
+	-@if [ $(DO_ST_RESULTS) != "foo" ]; then \
+          $(DO_ST_RESULTS.BASH)  ; fi
+
 
 tree_system_tests: tree_build_system_tests tree_run_system_tests
 
@@ -410,7 +414,8 @@ system_tests_uni: chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests_uni tree
-	$(DO_ST_RESULTS)
+	-@if [ $(DO_ST_RESULTS) != "foo" ]; then \
+          $(DO_ST_RESULTS.BASH)  ; fi
 
 
 tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
@@ -455,7 +460,8 @@ run_system_tests:  chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests tree
-	$(DO_ST_RESULTS)
+	-@if [ $(DO_ST_RESULTS) != "foo" ]; then \
+          $(DO_ST_RESULTS.BASH)  ; fi
 
 tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
 
@@ -473,7 +479,8 @@ run_system_tests_uni:  chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests_uni tree
-	$(DO_ST_RESULTS)
+	-@if [ $(DO_ST_RESULTS) != "foo" ]; then \
+          $(DO_ST_RESULTS.BASH)  ; fi
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
@@ -481,7 +488,8 @@ tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 # report statistics on system tests
 #
 check_system_tests:
-	$(DO_ST_RESULTS)
+	-@if [ $(DO_ST_RESULTS) != "foo" ]; then \
+          $(DO_ST_RESULTS.BASH)  ; fi
 
 
 #-------------------------------------------------------------------------------
@@ -692,7 +700,8 @@ tree_run_demo_uni: $(DEMO_RUN_UNI)
 check_results: check_tests check_examples check_system_tests
 
 results_summary:
-	@$(DO_SUM_RESULTS)
+	-@if [ $(DO_SUM_RESULTS) != "foo" ]; then \
+          $(DO_SUM_RESULTS.BASH)  ; fi
 
 
 #-------------------------------------------------------------------------------
