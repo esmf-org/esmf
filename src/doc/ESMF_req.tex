@@ -12,7 +12,7 @@ ESMF software shall support the following language bindings:
 
 \ssreq{Fortran 90 Interface}
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} All codes except GFDL-HIM require F90 interfaces. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Interface inspection. 
@@ -20,10 +20,19 @@ ESMF software shall support the following language bindings:
 
 \ssreq{C++ Interface}
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} GFDL-HIM. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Interface inspection.
+\end{reqlist}
+
+\ssreq{C Interface}
+\begin{reqlist}
+  {\bf Priority:} none \\
+  {\bf Source:} GFDL-HIM. \\
+  {\bf Status:} Deleted. \\
+  {\bf Notes:} There will be a single interface serving C and C++
+  applications.
 \end{reqlist}
 
 \sreq{Platforms}
@@ -31,7 +40,7 @@ The ESMF shall operate on the following platforms:
 
 \ssreq{IBM SP}
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} NCAR, NCEP. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
@@ -39,7 +48,7 @@ The ESMF shall operate on the following platforms:
 
 \ssreq{SGI Origin}
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} GFDL, LANL, NCAR, DAO.  May be part of ESMF testbed system. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
@@ -47,7 +56,7 @@ The ESMF shall operate on the following platforms:
 
 \ssreq{Compaq ES}
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} NSIPP, DAO.  May be part of ESMF testbed system. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
@@ -55,7 +64,7 @@ The ESMF shall operate on the following platforms:
 
 \ssreq{PC Linux platforms (including cluster)}
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} MIT.  Required for optional cluster milestones. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
@@ -63,7 +72,7 @@ The ESMF shall operate on the following platforms:
 
 \ssreq{Sun-Solaris}
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} NCAR. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
@@ -71,7 +80,10 @@ The ESMF shall operate on the following platforms:
 
 \ssreq{Vector machines running Unix}
 \begin{reqlist}
-  {\bf Priority:} 3.
+{\bf Priority:} 2-approved. \\
+{\bf Source:} NCAR. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test and system test.
 \end{reqlist}
 
 \sreq{Performance} \label{perf}
@@ -79,22 +91,33 @@ The framework shall not increase the execution time of an existing code
 written without the framework by more than 10\% on scalar 
 architectures within their scalable range.
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} Required for Milestone G. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Demonstrate with NCEP analysis and MITgcm ocean.
 \end{reqlist}
 
 \sreq{Precision} ESMF will provide methods for applications using
-integers and floating-point numbers at either 32-bit or 64-bit
+default integers and floating-point numbers at either 32-bit or 64-bit
 precision.
 
 \begin{reqlist}
-  {\bf Priority:} 1. \\
-  {\bf Source:} \\
+  {\bf Priority:} 1-approved. \\
+  {\bf Source:} DAO, NCEP. \\
   {\bf Status:} Proposed. \\
   {\bf Verification:} Interface inspection, code inspection, unit
-  test, system test.
+  test, system test. \\
+  {\bf Notes:}
+  \begin{enumerate}
+  \item While it is technically possible through overloading to allow
+    argument lists to contain arbitrary combinations of 32-bit and
+    64-bit quantities, this Requirement only calls for a uniform
+    application-wide word length for integers and FP numbers to be
+    supported.
+  \item There may be individual operations within ESMF that explicitly
+    call for transformations between 64-bit and 32-bit quantities.
+    Those will appear as individual requirements.
+  \end{enumerate}
 \end{reqlist}
 
 \sreq{Runtime Configurability} The ESMF shall allow the user to set
@@ -106,7 +129,7 @@ threads to be configurable at runtime.  The choice of parallelization
 mechanism (message passing/multithreading/combination) must be
 configurable at runtime.
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} CAM-EUL. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} System test.
@@ -115,7 +138,7 @@ configurable at runtime.
 \ssreq{Configurable Resolution}
 ESMF shall allow model resolution to be configurable at runtime.
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} all codes. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} System test.
@@ -124,10 +147,11 @@ ESMF shall allow model resolution to be configurable at runtime.
 \sreq{Bit-reproducibility}
 
 Bitwise identical results between two runs is an important feature for
-debugging and maintenance. This is not possible to ensure across
-platforms, at different levels of compiler optimization, or even
-different versions of the same compiler. Within these constraints,
-ESMF shall provide varied levels of bit-reproducibility:
+deterministic execution, as well as for debugging and maintenance.
+This is not possible to enforce across platforms, at different levels
+of compiler optimization, or even different versions of the same
+compiler. Within these constraints, ESMF shall provide varied levels
+of bit-reproducibility:
 
 \ssreq{Parallel bit-reproducibility}
 
@@ -137,7 +161,7 @@ processor counts, or different parallelism options. This execution
 mode is not subject to the performance requirement of Section~\ref{perf}.
 
 \begin{reqlist}
-{\bf Priority:} 1 \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} all JMC codes. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} System test.
@@ -152,7 +176,7 @@ processor count, with the same parallelism options. This mode
 Section~\ref{perf}.
 
 \begin{reqlist}
-{\bf Priority:} 1.\\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} all codes. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} System test.
@@ -167,8 +191,8 @@ the same parallelism options, may not return bitwise identical
 results.
 
 \begin{reqlist}
-{\bf Priority:} 3 \\
-{\bf Source:} NCEP? \\
+{\bf Priority:} 2-approved. \\
+{\bf Source:} NCEP, HIM. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} System test.
 \end{reqlist}
@@ -177,7 +201,7 @@ results.
 The ESMF shall be instrumented for error handling consistly across the
 framework.  The user shall receive ample information on errors.
 \begin{reqlist}
-  {\bf Priority:} 1. \\
+  {\bf Priority:} 1-approved. \\
   {\bf Source:} Required by all codes. \\
   {\bf Status:} Proposed. \\
   {\bf Verification:} Interface inspection, code inspection, unit
@@ -185,12 +209,12 @@ framework.  The user shall receive ample information on errors.
 \end{reqlist}
 
 \sreq{Modularity}
-Layers of the framework will be designed to adapt to
-restructuring of other parts of the framework and user-supplied components.  
-For example, the coupling layers should be able to adapt to different 
+Layers of the framework will be designed to adapt to restructuring of
+other parts of the framework and user-supplied components.  For
+example, the coupling layers should be able to adapt to different
 implementations and data structures of component models.
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} Required for interoperability Milestones I and J. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Interoperability experiments.
@@ -202,7 +226,7 @@ that is reasonably modular.  We adopt as a goal that such applications should
 need to modify no more than 2\% of their source code to utilize the coupling
 features of ESMF.
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} GFDL, NSIPP. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Line count!
@@ -215,7 +239,7 @@ computational environment, and must include an ongoing research component
 dedicated to increasing the performance, flexibility and functionality of
 the software.
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 1-approved. \\
 {\bf Source:} All participants. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Publicly documented commitment, line item in 
