@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.5 2003/10/21 21:59:39 jwolfe Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.6 2003/10/22 05:01:28 eschwab Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -155,7 +155,7 @@
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
-      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
+      clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -240,6 +240,8 @@
       call ESMF_StateDestroy(c1exp, rc)
       call ESMF_StateDestroy(c2imp, rc)
       call ESMF_StateDestroy(cplstate, rc)
+
+      call ESMF_ClockDestroy(clock, rc)
 
       call ESMF_GridCompDestroy(comp1, rc)
       call ESMF_GridCompDestroy(comp2, rc)

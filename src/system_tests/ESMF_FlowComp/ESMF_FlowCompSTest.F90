@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.2 2003/10/20 20:13:58 cdeluca Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.3 2003/10/22 05:01:28 eschwab Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -129,7 +129,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize the clock with the above values
-      call ESMF_ClockSetup(clock, time_step, startTime, stopTime, rc=rc)
+      clock = ESMF_ClockCreate("Clock 1", time_step, startTime, stopTime, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------
@@ -195,6 +195,9 @@
 !     Clean up
 
       call ESMF_StateDestroy(c1exp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+
+      call ESMF_ClockDestroy(clock, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompDestroy(comp1, rc)

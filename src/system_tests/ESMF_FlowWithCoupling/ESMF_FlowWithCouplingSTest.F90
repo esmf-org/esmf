@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.2 2003/10/20 20:13:58 cdeluca Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.3 2003/10/22 05:01:29 eschwab Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -177,7 +177,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize the clock with the above values
-      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
+      clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 
@@ -312,6 +312,9 @@
       call ESMF_StateDestroy(cplstateI2F, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(cplstateF2I, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+
+      call ESMF_ClockDestroy(clock, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompDestroy(INcomp, rc)
