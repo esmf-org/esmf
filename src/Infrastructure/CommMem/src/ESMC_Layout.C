@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.7 2003/01/09 19:55:10 eschwab Exp $
+// $Id: ESMC_Layout.C,v 1.8 2003/01/10 00:51:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.7 2003/01/09 19:55:10 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.8 2003/01/10 00:51:58 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -176,7 +176,7 @@
 
 cout << "ESMC_LayoutDestroy, layout = " << layout << endl;
   if (layout != 0) {
-    layout->ESMC_LayoutDestruct();
+    //layout->ESMC_LayoutDestruct(); constructor calls it!
     delete layout;
 cout << "ESMC_LayoutDestroy() successful\n";
     return(ESMF_SUCCESS);
@@ -462,7 +462,7 @@ cout << "ESMC_LayoutDestroy() successful\n";
 //
 //  code goes here
 //
-//cout << "ESMC_LayoutDestruct() invoked\n";
+cout << "ESMC_LayoutDestruct() invoked\n";
 
   // first delete each array of (ny) ESMC_DE's for each x pointer
   for (int i=0; i<nxLayout; i++) {
@@ -918,7 +918,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//cout << "ESMC_Layout() invoked\n";
+cout << "ESMC_Layout constructor invoked\n";
 
   // Initialize comm, PE, DE, Machine
   ESMC_LayoutInit();
@@ -944,7 +944,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//cout << "~ESMC_Layout() invoked\n";
+cout << "~ESMC_Layout() invoked\n";
   ESMC_LayoutDestruct();
 
  } // end ~ESMC_Layout
