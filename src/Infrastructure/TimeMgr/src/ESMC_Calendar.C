@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.63 2004/05/18 23:08:37 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.64 2004/05/19 22:05:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.63 2004/05/18 23:08:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.64 2004/05/19 22:05:08 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -1255,7 +1255,7 @@ int ESMC_Calendar::count=0;
 //
 // !ARGUMENTS:
       const ESMC_Time *time,                            // in
-      const ESMC_TimeInterval &timeInterval) const {    // in
+      const ESMC_TimeInterval &timeinterval) const {    // in
 
 //
 // !DESCRIPTION:
@@ -1275,7 +1275,7 @@ int ESMC_Calendar::count=0;
     ESMC_Time sum = *time;
 
     // prepare for increment with any non-calendar units (h,m,s)
-    ESMC_TimeInterval nonCalTi = timeInterval;
+    ESMC_TimeInterval nonCalTi = timeinterval;
 
     switch (calendarType)
     {
@@ -1302,7 +1302,7 @@ int ESMC_Calendar::count=0;
 
             // do calendar increment only if non-zero calendar interval units
             //    years or months are specified
-            if (timeInterval.yy != 0 || timeInterval.mm != 0) {
+            if (timeinterval.yy != 0 || timeinterval.mm != 0) {
 
                 // get calendar units from given time, while saving time-of-day
                 //   units and calendar & timezone properties
@@ -1321,7 +1321,7 @@ int ESMC_Calendar::count=0;
                                    //   ready
             
                 // do the calendar increment!
-                mm += timeInterval.mm % monthsPerYear;  // months increment
+                mm += timeinterval.mm % monthsPerYear;  // months increment
                 if (mm > monthsPerYear) {  // check for years carryover
                   mm -= monthsPerYear;
                   yy_i8++;
@@ -1329,9 +1329,9 @@ int ESMC_Calendar::count=0;
                   mm += monthsPerYear;
                   yy_i8--;
                 }
-                yy_i8 += timeInterval.mm / monthsPerYear; 
+                yy_i8 += timeinterval.mm / monthsPerYear; 
                                                // years part of months increment
-                yy_i8 += timeInterval.yy;      // years increment
+                yy_i8 += timeinterval.yy;      // years increment
 
                 // clip day-of-the-month if necessary
                 int daysInMonth = daysPerMonth[mm-1];
@@ -1363,8 +1363,8 @@ int ESMC_Calendar::count=0;
     // convert any relative days increment to absolute time based
     //   on this calendar and add to non-calendar units increment
     //   (applies to all calendars since secondsPerDay is defined for all)
-    if (timeInterval.d != 0) {
-        ESMC_TimeInterval daysTi(timeInterval.d * secondsPerDay);
+    if (timeinterval.d != 0) {
+        ESMC_TimeInterval daysTi(timeinterval.d * secondsPerDay);
         nonCalTi.ESMC_BaseTime::operator+=(daysTi);
     }
 
@@ -1388,7 +1388,7 @@ int ESMC_Calendar::count=0;
 //
 // !ARGUMENTS:
       const ESMC_Time *time,                            // in
-      const ESMC_TimeInterval &timeInterval) const {    // in
+      const ESMC_TimeInterval &timeinterval) const {    // in
 
 //
 // !DESCRIPTION:
@@ -1408,7 +1408,7 @@ int ESMC_Calendar::count=0;
     ESMC_Time diff = *time;
 
     // prepare for decrement with any non-calendar units (h,m,s)
-    ESMC_TimeInterval nonCalTi = timeInterval;
+    ESMC_TimeInterval nonCalTi = timeinterval;
 
     switch (calendarType)
     {
@@ -1435,7 +1435,7 @@ int ESMC_Calendar::count=0;
 
             // do calendar decrement only if non-zero calendar interval units
             //    years or months are specified
-            if (timeInterval.yy != 0 || timeInterval.mm != 0) {
+            if (timeinterval.yy != 0 || timeinterval.mm != 0) {
 
                 // get calendar units from given time, while saving time-of-day
                 //   units and calendar & timezone properties
@@ -1454,7 +1454,7 @@ int ESMC_Calendar::count=0;
                                    //   ready
 
                 // do the calendar decrement!
-                mm -= timeInterval.mm % monthsPerYear;  // months decrement
+                mm -= timeinterval.mm % monthsPerYear;  // months decrement
                 if (mm < 1) {  // check for year carryunder (borrow)
                   mm += monthsPerYear;
                   yy_i8--;
@@ -1462,9 +1462,9 @@ int ESMC_Calendar::count=0;
                   mm -= monthsPerYear;
                   yy_i8++;
                 }
-                yy_i8 -= timeInterval.mm / monthsPerYear; 
+                yy_i8 -= timeinterval.mm / monthsPerYear; 
                                                // years part of months decrement
-                yy_i8 -= timeInterval.yy;      // years decrement
+                yy_i8 -= timeinterval.yy;      // years decrement
 
                 // clip day-of-the-month if necessary
                 int daysInMonth = daysPerMonth[mm-1];
@@ -1496,8 +1496,8 @@ int ESMC_Calendar::count=0;
     // convert any relative days increment to absolute time based
     //   on this calendar and add to non-calendar units increment
     //   (applies to all calendars since secondsPerDay is defined for all)
-    if (timeInterval.d != 0) {
-        ESMC_TimeInterval daysTi(timeInterval.d * secondsPerDay);
+    if (timeinterval.d != 0) {
+        ESMC_TimeInterval daysTi(timeinterval.d * secondsPerDay);
         nonCalTi.ESMC_BaseTime::operator+=(daysTi);
     }
 

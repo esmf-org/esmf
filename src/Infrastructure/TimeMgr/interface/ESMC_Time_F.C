@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.31 2004/04/26 18:01:42 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.32 2004/05/19 22:05:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -158,15 +158,15 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeinc)(ESMC_Time *time,
-                                ESMC_TimeInterval *timeInterval,
+                                ESMC_TimeInterval *timeinterval,
                                 ESMC_Time *esmf_baseTimeInc) {
-           *esmf_baseTimeInc = (*time + *timeInterval);
+           *esmf_baseTimeInc = (*time + *timeinterval);
        }
 
        void FTN(c_esmc_timedec)(ESMC_Time *time,
-                                ESMC_TimeInterval *timeInterval,
+                                ESMC_TimeInterval *timeinterval,
                                 ESMC_Time *esmf_baseTimeDec) {
-           *esmf_baseTimeDec = (*time - *timeInterval);
+           *esmf_baseTimeDec = (*time - *timeinterval);
        }
 
        void FTN(c_esmc_timediff)(ESMC_Time *time1,

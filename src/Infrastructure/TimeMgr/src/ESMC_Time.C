@@ -24,6 +24,8 @@
  #include <time.h>
  #include <string.h>
 
+ #include <ESMC_LogErr.h>
+ #include <ESMF_LogMacros.inc>
  #include <ESMC_TimeInterval.h>
 
  // associated class definition file
@@ -32,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.60 2004/04/27 22:59:01 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.61 2004/05/19 22:05:07 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -90,6 +92,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeSet()"
+
     // TODO: Since ESMC_Time is a shallow statically allocated class,
     //       ensure initialization if called via F90 interface;
     //       cannot call constructor, because destructor is subsequently
@@ -101,6 +106,8 @@
     //  validate calendar and/or timezone)
     // (this if-else logic avoids the need for a separate ESMC_TimeSetup()
     //  method)
+
+    int rc = ESMF_SUCCESS;
 
     // save current time to restore in case there is a failure
     ESMC_Time saveTime = *this;
@@ -127,21 +134,24 @@
       // set calendar type
       if (calendar != ESMC_NULL_POINTER) {             // 1st choice
         this->calendar = *calendar;
-        if (ESMC_TimeValidate("calendar") != ESMF_SUCCESS)
-          goto ESMC_TIMESET_FAILURE;
+        rc = ESMC_TimeValidate("calendar");
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+          { *this = saveTime; return(rc); }
 
       } else if (calendarType != ESMC_NULL_POINTER) {  // 2nd choice
         // set to specified built-in type; create if necessary
-        if (ESMC_CalendarCreate(*calendarType) != ESMF_SUCCESS)
-          goto ESMC_TIMESET_FAILURE;
+        rc = ESMC_CalendarCreate(*calendarType);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+          { *this = saveTime; return(rc); }
         this->calendar = ESMC_Calendar::internalCalendar[*calendarType-1];
       }
 
       // set timezone
       if (timeZone != ESMC_NULL_POINTER) {
         this->timeZone = *timeZone;
-        if (ESMC_TimeValidate("timezone") != ESMF_SUCCESS)
-          goto ESMC_TIMESET_FAILURE;
+        rc = ESMC_TimeValidate("timezone");
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+          { *this = saveTime; return(rc); }
       }
       return(ESMF_SUCCESS);
     }
@@ -158,8 +168,9 @@
 
     } else if (calendarType != ESMC_NULL_POINTER) {  // 2nd choice
       // set to specified built-in type; create if necessary
-      if (ESMC_CalendarCreate(*calendarType) != ESMF_SUCCESS)
-        goto ESMC_TIMESET_FAILURE;
+      rc = ESMC_CalendarCreate(*calendarType);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        { *this = saveTime; return(rc); }
       this->calendar = ESMC_Calendar::internalCalendar[*calendarType-1];
 
     } else if (ESMC_Calendar::defaultCalendar != ESMC_NULL_POINTER) {
@@ -168,8 +179,9 @@
 
     } else {                                         // 4th choice
       // create default calendar
-      if (ESMC_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER)
-          != ESMF_SUCCESS) goto ESMC_TIMESET_FAILURE;
+      rc = ESMC_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        { *this = saveTime; return(rc); }
       this->calendar = ESMC_Calendar::defaultCalendar;
     }
 
@@ -189,7 +201,9 @@
         mm != ESMC_NULL_POINTER || dd    != ESMC_NULL_POINTER) {
 
       // calendar required
-      if (this->calendar == ESMC_NULL_POINTER) goto ESMC_TIMESET_FAILURE;
+      if (this->calendar == ESMC_NULL_POINTER) {
+        goto ESMC_TIMESET_FAILURE;
+      }
 
       // year required
       if (yy == ESMC_NULL_POINTER && yy_i8 == ESMC_NULL_POINTER)
@@ -243,11 +257,9 @@
     if (ESMC_TimeValidate() != ESMF_SUCCESS) goto ESMC_TIMESET_FAILURE;
     else return(ESMF_SUCCESS);
 
-    // common failure handler
     ESMC_TIMESET_FAILURE:
-      // restore previous value
       *this = saveTime;
-      return(ESMF_FAILURE);
+      return(rc);
 
  }  // end ESMC_TimeSet
 
@@ -628,11 +640,11 @@
 //    ESMC_Time result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to add
 //
 // !DESCRIPTION:
-//    Adds {\tt timeInterval} expression to this time.
+//    Adds {\tt timeinterval} expression to this time.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -642,7 +654,7 @@
 //                          (calendar & timeZone) to the result. 
 //
     // delegate the increment operation to my calendar associate
-    return(calendar->ESMC_CalendarIncrement(this, timeInterval));
+    return(calendar->ESMC_CalendarIncrement(this, timeinterval));
 
 }  // end ESMC_Time::operator+
 
@@ -657,11 +669,11 @@
 //    ESMC_Time result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to subtract
 //
 // !DESCRIPTION:
-//    Subtracts {\tt timeInterval} expression from this time.
+//    Subtracts {\tt timeinterval} expression from this time.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -671,7 +683,7 @@
 //                          (calendar & timeZone) to the result. 
 //
     // delegate the decrement operation to my calendar associate
-    return(calendar->ESMC_CalendarDecrement(this, timeInterval));
+    return(calendar->ESMC_CalendarDecrement(this, timeinterval));
 
 }  // end ESMC_Time::operator-
 
@@ -686,17 +698,17 @@
 //    ESMC_Time& result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) {  // in - ESMC_TimeInterval
                                                 //      to add
 //
 // !DESCRIPTION:
-//    Adds {\tt timeInterval} expression to this time.
+//    Adds {\tt timeinterval} expression to this time.
 //
 //EOP
 // !REQUIREMENTS:  
 
     // delegate the increment operation to my calendar associate
-    *this = calendar->ESMC_CalendarIncrement(this, timeInterval);
+    *this = calendar->ESMC_CalendarIncrement(this, timeinterval);
 
     return(*this);
 
@@ -713,17 +725,17 @@
 //    ESMC_Time& result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) {  // in - ESMC_TimeInterval
                                                 //      to subtract
 //
 // !DESCRIPTION:
-//    Adds {\tt timeInterval} expression to this time.
+//    Adds {\tt timeinterval} expression to this time.
 //
 //EOP
 // !REQUIREMENTS:  
 
     // delegate the derement operation to my calendar associate
-    *this = calendar->ESMC_CalendarDecrement(this, timeInterval);
+    *this = calendar->ESMC_CalendarDecrement(this, timeinterval);
 
     return(*this);
 

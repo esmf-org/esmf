@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.59 2004/04/27 23:01:04 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.60 2004/05/19 22:05:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.59 2004/04/27 23:01:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.60 2004/05/19 22:05:08 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -276,11 +276,11 @@
     // TODO: reduce size of this method by creating seperate methods on
     //       ESMC_TimeInterval and ESMC_Calendar ?
 
-    // timeInterval-to-convert.  This is used to reduce this time
+    // timeinterval-to-convert.  This is used to reduce this time
     // interval's units, which is later used to to convert to user-requested
     // units.  Represents remaining unconverted time; any years, months or days
-    // later requested from timeInterval-to-convert will be removed from
-    // timeInterval-to-convert.  In this way, a requested unit is bounded
+    // later requested from timeinterval-to-convert will be removed from
+    // timeinterval-to-convert.  In this way, a requested unit is bounded
     // (normalized) by the next higher requested unit.
 
     ESMC_TimeInterval tiToConvert = *this;
@@ -849,7 +849,7 @@
 
     // calendar must be defined
     if (this->calendar == ESMC_NULL_POINTER) {
-      // TODO: write LogErr message (timeInterval calendar undefined)
+      // TODO: write LogErr message (timeinterval calendar undefined)
       return(errorResult);
     }
 
@@ -986,7 +986,7 @@
 //    ESMF_KIND_R8 result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //        to divide by
 //
 // !DESCRIPTION:
@@ -1003,14 +1003,14 @@
 
     // calendars must be defined
     if (this->calendar == ESMC_NULL_POINTER ||
-        timeInterval.calendar == ESMC_NULL_POINTER) {
-      // TODO: write LogErr message (timeInterval calendar undefined)
+        timeinterval.calendar == ESMC_NULL_POINTER) {
+      // TODO: write LogErr message (timeinterval calendar undefined)
       return(0.0);
     }
 
     // create local copies to manipulate and divide 
     ESMC_TimeInterval ti1 = *this;
-    ESMC_TimeInterval ti2 = timeInterval;
+    ESMC_TimeInterval ti2 = timeinterval;
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
@@ -1024,7 +1024,7 @@
       if (ti2.s != 0) {  // TODO: fractions
         return((ESMF_KIND_R8) ti1.s / (ESMF_KIND_R8) ti2.s);
       } else {
-        // TODO: write LogErr message (divide by zero timeInterval)
+        // TODO: write LogErr message (divide by zero timeinterval)
         return(0.0);
       }
     }
@@ -1032,7 +1032,7 @@
     // calendars must be the same for divide on relative parts
     // TODO: relax this restriction (e.g. 10 days Gregorian % 3 days 360-day)
     if (ti1.calendar->calendarType != ti2.calendar->calendarType) {
-      // TODO: write LogErr message (timeInterval calendars not the same)
+      // TODO: write LogErr message (timeinterval calendars not the same)
       return(0.0);
     }
 
@@ -1053,7 +1053,7 @@
           if (ti2.mm != 0) {
             return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
           } else {
-            // TODO: write LogErr message (divide by zero timeInterval)
+            // TODO: write LogErr message (divide by zero timeinterval)
             return(0.0);
           }
 
@@ -1065,7 +1065,7 @@
 
         // divisor zero
         } else if (ti2.mm == 0 && ti2.s == 0) {
-          // TODO: write LogErr message (divide by zero timeInterval)
+          // TODO: write LogErr message (divide by zero timeinterval)
           return(0.0);
 
         // all other combinations
@@ -1101,7 +1101,7 @@
           if (ti2.yy != 0) {
             return((ESMF_KIND_R8) ti1.yy / (ESMF_KIND_R8) ti2.yy);
           } else {
-            // TODO: write LogErr message (divide by zero timeInterval)
+            // TODO: write LogErr message (divide by zero timeinterval)
             return(0.0);
           }
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
@@ -1112,7 +1112,7 @@
           if (ti2.mm != 0) {
             return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
           } else {
-            // TODO: write LogErr message (divide by zero timeInterval)
+            // TODO: write LogErr message (divide by zero timeinterval)
             return(0.0);
           }
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
@@ -1123,7 +1123,7 @@
           if (ti2.d != 0) {
             return((ESMF_KIND_R8) ti1.d / (ESMF_KIND_R8) ti2.d);
           } else {
-            // TODO: write LogErr message (divide by zero timeInterval)
+            // TODO: write LogErr message (divide by zero timeinterval)
             return(0.0);
           }
         } else {
@@ -1304,7 +1304,7 @@
 //    ESMC_Fraction result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //        to divide by
 //
 // !DESCRIPTION:
@@ -1333,7 +1333,7 @@
 //    ESMC_TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //        to modulo by
 //
 // !DESCRIPTION:
@@ -1358,14 +1358,14 @@
 
     // calendars must be defined
     if (this->calendar == ESMC_NULL_POINTER ||
-        timeInterval.calendar == ESMC_NULL_POINTER) {
-      // TODO: write LogErr message (timeInterval calendar undefined)
+        timeinterval.calendar == ESMC_NULL_POINTER) {
+      // TODO: write LogErr message (timeinterval calendar undefined)
       return(remainder);
     }
 
     // create local copies to manipulate and modulus 
     ESMC_TimeInterval ti1 = *this;
-    ESMC_TimeInterval ti2 = timeInterval;
+    ESMC_TimeInterval ti2 = timeinterval;
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
@@ -1380,7 +1380,7 @@
         remainder.s = ti1.s % ti2.s;
         return(remainder);
       } else {
-        // TODO: write LogErr message (divide by zero timeInterval)
+        // TODO: write LogErr message (divide by zero timeinterval)
         return(remainder);
       }
     }
@@ -1388,7 +1388,7 @@
     // calendars must be the same for modulus on relative parts
     // TODO: relax this restriction (e.g. 10 days Gregorian % 3 days 360-day)
     if (ti1.calendar->calendarType != ti2.calendar->calendarType) {
-      // TODO: write LogErr message (timeInterval calendars not the same)
+      // TODO: write LogErr message (timeinterval calendars not the same)
       return(remainder);
     }
 
@@ -1410,7 +1410,7 @@
             remainder.mm = ti1.mm % ti2.mm;
             return(remainder);
           } else {
-            // TODO: write LogErr message (divide by zero timeInterval)
+            // TODO: write LogErr message (divide by zero timeinterval)
             return(remainder);
           }
 
@@ -1422,7 +1422,7 @@
 
         // divisor zero
         } else if (ti2.mm == 0 && ti2.s == 0) {
-          // TODO: write LogErr message (divide by zero timeInterval)
+          // TODO: write LogErr message (divide by zero timeinterval)
           return(remainder);
 
         // all other combinations
@@ -1459,7 +1459,7 @@
             remainder.yy = ti1.yy % ti2.yy;
             return(remainder);
           } else {
-            // TODO: write LogErr message (divide by zero timeInterval)
+            // TODO: write LogErr message (divide by zero timeinterval)
             return(remainder);
           }
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
@@ -1471,7 +1471,7 @@
             remainder.mm = ti1.mm % ti2.mm;
             return(remainder);
           } else {
-            // TODO: write LogErr message (divide by zero timeInterval)
+            // TODO: write LogErr message (divide by zero timeinterval)
             return(remainder);
           }
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
@@ -1483,7 +1483,7 @@
             remainder.d = ti1.d % ti2.d;
             return(remainder);
           } else {
-            // TODO: write LogErr message (divide by zero timeInterval)
+            // TODO: write LogErr message (divide by zero timeinterval)
             return(remainder);
           }
         } else {
@@ -1518,7 +1518,7 @@
 //    ESMC_TimeInterval& result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) {  // in - ESMC_TimeInterval
                                                 //        to modulo by
 //
 // !DESCRIPTION:
@@ -1527,7 +1527,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(*this = *this % timeInterval);
+    return(*this = *this % timeinterval);
 
 }  // end ESMC_TimeInterval::operator%=
 
@@ -1804,11 +1804,11 @@
 //    ESMC_TimeInterval result
 //    
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to add
 //
 // !DESCRIPTION:
-//    Adds given {\tt timeInterval} expression to this {\tt timeInterval}.
+//    Adds given {\tt timeinterval} expression to this {\tt timeinterval}.
 //
 //EOP
 // !REQUIREMENTS:
@@ -1820,12 +1820,12 @@
     // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // add relative yy, mm, d parts
-    sum.yy += timeInterval.yy;
-    sum.mm += timeInterval.mm;
-    sum.d  += timeInterval.d;
+    sum.yy += timeinterval.yy;
+    sum.mm += timeinterval.mm;
+    sum.d  += timeinterval.d;
 
     // add absolute seconds part using ESMC_BaseTime operator
-    sum.ESMC_BaseTime::operator+=(timeInterval);
+    sum.ESMC_BaseTime::operator+=(timeinterval);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -1845,12 +1845,12 @@
 //    ESMC_TimeInterval result
 //    
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to subtract
 //
 // !DESCRIPTION:
-//    Subtracts given {\tt timeInterval} expression from this 
-//    {\tt timeInterval}.
+//    Subtracts given {\tt timeinterval} expression from this 
+//    {\tt timeinterval}.
 //
 //EOP
 // !REQUIREMENTS:
@@ -1862,12 +1862,12 @@
     // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // subtract relative yy, mm, d parts
-    diff.yy -= timeInterval.yy;
-    diff.mm -= timeInterval.mm;
-    diff.d  -= timeInterval.d;
+    diff.yy -= timeinterval.yy;
+    diff.mm -= timeinterval.mm;
+    diff.d  -= timeinterval.d;
 
     // subtract absolute seconds part using ESMC_BaseTime operator
-    diff.ESMC_BaseTime::operator-=(timeInterval);
+    diff.ESMC_BaseTime::operator-=(timeinterval);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -1887,7 +1887,7 @@
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -1898,7 +1898,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_EQ));
+    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_EQ));
 
 }  // end ESMC_TimeInterval::operator==
 
@@ -1913,7 +1913,7 @@
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -1924,9 +1924,9 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: define as !(*this == timeInterval) ?
+    // TODO: define as !(*this == timeinterval) ?
 
-    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_NE));
+    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_NE));
 
 }  // end ESMC_TimeInterval::operator!=
 
@@ -1941,7 +1941,7 @@
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -1952,7 +1952,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_LT));
+    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_LT));
 
 }  // end ESMC_TimeInterval::operator<
 
@@ -1967,7 +1967,7 @@
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -1978,7 +1978,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_GT));
+    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_GT));
 
 }  // end ESMC_TimeInterval::operator>
 
@@ -1993,7 +1993,7 @@
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -2004,9 +2004,9 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: define as !(*this > timeInterval) ?
+    // TODO: define as !(*this > timeinterval) ?
 
-    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_LE));
+    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_LE));
 
 }  // end ESMC_TimeInterval::operator<=
 
@@ -2021,7 +2021,7 @@
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -2032,9 +2032,9 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: define as !(*this < timeInterval) ?
+    // TODO: define as !(*this < timeinterval) ?
 
-    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_GE));
+    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_GE));
 
 }  // end ESMC_TimeInterval::operator>=
 
@@ -2049,12 +2049,12 @@
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval,            // in - 2nd to compare
+      const ESMC_TimeInterval &timeinterval,            // in - 2nd to compare
             ESMC_ComparisonType comparisonType) const { // in - operator type
 //
 // !DESCRIPTION:
 //      Captures common logic for comparing two time intervals, *this and
-//      timeInterval.
+//      timeinterval.
 //
 //EOPI
 // !REQUIREMENTS:  
@@ -2067,14 +2067,14 @@
 
     // calendars must be defined
     if (this->calendar == ESMC_NULL_POINTER ||
-        timeInterval.calendar == ESMC_NULL_POINTER) {
-      // TODO: write LogErr message (timeInterval calendar undefined)
+        timeinterval.calendar == ESMC_NULL_POINTER) {
+      // TODO: write LogErr message (timeinterval calendar undefined)
       return(false);
     }
 
     // create local copies to manipulate and compare 
     ESMC_TimeInterval ti1 = *this;
-    ESMC_TimeInterval ti2 = timeInterval;
+    ESMC_TimeInterval ti2 = timeinterval;
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
@@ -2105,7 +2105,7 @@
     // calendars must be the same for relative comparison
     // TODO: relax this restriction (e.g. 1 month Gregorian > 27 day 360-day)
     if (ti1.calendar->calendarType != ti2.calendar->calendarType) {
-      // TODO: write LogErr message (timeInterval calendars not the same)
+      // TODO: write LogErr message (timeinterval calendars not the same)
       return(false);
     }
 

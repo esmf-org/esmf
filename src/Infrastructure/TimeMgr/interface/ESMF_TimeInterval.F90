@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.57 2004/05/04 22:28:32 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.58 2004/05/19 22:05:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.57 2004/05/04 22:28:32 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.58 2004/05/19 22:05:06 eschwab Exp $'
 
 !==============================================================================
 !
@@ -125,25 +125,25 @@
 !
 ! !INTERFACE:
       interface operator(+)
-!     sum = timeInterval1 + timeInterval2
+!     sum = timeinterval1 + timeinterval2
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: sum
 !
 ! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 ! !DESCRIPTION:
 !     Overloads the (+) operator for the {\tt ESMF\_TimeInterval} class to
-!     add {\tt timeInterval1} to {\tt timeInterval2} and return the
+!     add {\tt timeinterval1} to {\tt timeinterval2} and return the
 !     sum as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          The augend.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          The addend.
 !     \end{description}
 ! 
@@ -162,25 +162,25 @@
 !
 ! !INTERFACE:
       interface operator(-)
-!     difference = timeInterval1 - timeInterval2
+!     difference = timeinterval1 - timeinterval2
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: difference
 !
 ! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 ! !DESCRIPTION:
 !     Overloads the (-) operator for the {\tt ESMF\_TimeInterval} class to
-!     subtract {\tt timeInterval2} from {\tt timeInterval1} and return
+!     subtract {\tt timeinterval2} from {\tt timeinterval1} and return
 !     the difference as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          The minuend.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          The subtrahend.
 !     \end{description}
 !
@@ -199,25 +199,25 @@
 !
 ! !INTERFACE:
       interface operator(/)
-!     quotient = timeInterval1 / timeInterval2
+!     quotient = timeinterval1 / timeinterval2
 !
 ! !RETURN VALUE:
 !     real(ESMF_KIND_R8) :: quotient
 !
 ! !ARGUMENTS: 
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 ! !DESCRIPTION:
 !     Overloads the (/) operator for the {\tt ESMF\_TimeInterval} class to
-!     return {\tt timeInterval1} divided by {\tt timeInterval2} as a
+!     return {\tt timeinterval1} divided by {\tt timeinterval2} as a
 !     double precision quotient.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          The dividend.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          The divisor.
 !     \end{description}
 !
@@ -236,23 +236,23 @@
 !
 ! !INTERFACE:
 !     interface operator(/)
-!     quotient = timeInterval / divisor
+!     quotient = timeinterval / divisor
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: quotient
 !
 ! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !     integer(ESMF_KIND_I4),   intent(in) :: divisor
 !
 ! !DESCRIPTION:
 !     Overloads the (/) operator for the {\tt ESMF\_TimeInterval} class to
-!     divide a {\tt timeInterval} by an integer {\tt divisor}, and
+!     divide a {\tt timeinterval} by an integer {\tt divisor}, and
 !     return the quotient as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The dividend.
 !     \item[divisor]
 !          Integer divisor.
@@ -273,23 +273,23 @@
 !
 ! !INTERFACE:
 !     interface operator(/)
-!     quotient = timeInterval / divisor
+!     quotient = timeinterval / divisor
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: quotient
 !
 ! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !     real(ESMF_KIND_R8),      intent(in) :: divisor
 !
 ! !DESCRIPTION:
 !     Overloads the (/) operator for the {\tt ESMF\_TimeInterval} class to
-!     divide a {\tt timeInterval} by a double precision {\tt divisor}, 
+!     divide a {\tt timeinterval} by a double precision {\tt divisor}, 
 !     and return the quotient as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The dividend.
 !     \item[divisor]
 !          Double precision divisor.
@@ -312,18 +312,18 @@
 !
 ! !INTERFACE:
       interface operator(.DIV.)
-!     quotient = timeInterval1 .DIV. timeInterval2
+!     quotient = timeinterval1 .DIV. timeinterval2
 !
 ! !RETURN VALUE:
 !     type(ESMF_Fraction) :: quotient
 !
 ! !ARGUMENTS: 
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 ! !DESCRIPTION:
 !     Defines a new operator (.DIV.) for the {\tt ESMF\_TimeInterval} class
-!     which returns {\tt timeInterval1} divided by {\tt timeInterval2} as a 
+!     which returns {\tt timeinterval1} divided by {\tt timeinterval2} as a 
 !     fraction quotient.
 !
 !     Implementation note:  This cannot be overloaded with (/) because the
@@ -336,9 +336,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          The dividend.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          The divisor.
 !     \end{description}
 !
@@ -357,25 +357,25 @@
 !
 ! !INTERFACE:
       interface MOD
-!     remainder = MOD(timeInterval1, timeInterval2)
+!     remainder = MOD(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: remainder
 !
 ! !ARGUMENTS: 
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 ! !DESCRIPTION:
 !     Overloads the pre-defined MOD() function for the {\tt ESMF\_TimeInterval}
-!     class to return the remainder of {\tt timeInterval1} divided by
-!     {\tt timeInterval2} as an {\tt ESMF\_TimeInterval}.
+!     class to return the remainder of {\tt timeinterval1} divided by
+!     {\tt timeinterval2} as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          The dividend.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          The divisor.
 !     \end{description}
 !
@@ -394,25 +394,25 @@
 !
 ! !INTERFACE:
       interface operator(*)
-!     product = timeInterval * multiplier
+!     product = timeinterval * multiplier
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: product
 !
 ! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !     integer(ESMF_KIND_I4),   intent(in) :: multiplier
 !
 ! !DESCRIPTION:
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
-!     multiply a {\tt timeInterval} by an integer {\tt multiplier},
+!     multiply a {\tt timeinterval} by an integer {\tt multiplier},
 !     and return the product as an {\tt ESMF\_TimeInterval}.
 !
 !     Commutative complement to overloaded operator (*) below.
 !     
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]        
+!     \item[timeinterval]        
 !          The multiplicand.
 !     \item[mutliplier]
 !          The integer multiplier.
@@ -431,18 +431,18 @@
 !
 ! !INTERFACE:
 !     interface operator(*)
-!     product = multiplier * timeInterval
+!     product = multiplier * timeinterval
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: product
 !
 ! !ARGUMENTS:
 !     integer(ESMF_KIND_I4),   intent(in) :: multiplier
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
 ! !DESCRIPTION:
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to      
-!     multiply a {\tt timeInterval} by an integer {\tt multiplier},
+!     multiply a {\tt timeinterval} by an integer {\tt multiplier},
 !     and return the product as an {\tt ESMF\_TimeInterval}. 
 !
 !     Commutative complement to overloaded operator (*) above.
@@ -451,7 +451,7 @@
 !     \begin{description}
 !     \item[mutliplier]
 !          The integer multiplier.
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The multiplicand.
 !     \end{description}
 !
@@ -470,25 +470,25 @@
 !
 ! !INTERFACE:
 !     interface operator(*)
-!     product = timeInterval * multiplier
+!     product = timeinterval * multiplier
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: product
 !
 ! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !     type(ESMF_Fraction),     intent(in) :: multiplier
 !
 ! !DESCRIPTION:
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
-!     multiply a {\tt timeInterval} by a fraction {\tt multiplier},
+!     multiply a {\tt timeinterval} by a fraction {\tt multiplier},
 !     and return the product as an {\tt ESMF\_TimeInterval}.
 !
 !     Commutative complement to overloaded operator (*) below.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The multiplicand.
 !     \item[mutliplier]
 !          The fraction multiplier.
@@ -509,18 +509,18 @@
 !
 ! !INTERFACE:
 !     interface operator(*)
-!     product = multiplier * timeInterval
+!     product = multiplier * timeinterval
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: product
 !
 ! !ARGUMENTS:
 !     type(ESMF_Fraction),     intent(in) :: multiplier
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
 ! !DESCRIPTION:
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
-!     multiply a {\tt timeInterval} by a fraction {\tt multiplier},
+!     multiply a {\tt timeinterval} by a fraction {\tt multiplier},
 !     and return the product as an {\tt ESMF\_TimeInterval}.
 !
 !     Commutative complement to overloaded operator (*) above.
@@ -529,7 +529,7 @@
 !     \begin{description}
 !     \item[mutliplier]
 !          The fraction multiplier.
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The multiplicand.
 !     \end{description}
 !
@@ -548,25 +548,25 @@
 !
 ! !INTERFACE:
 !     interface operator(*)
-!     product = timeInterval * multiplier
+!     product = timeinterval * multiplier
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: product
 !
 ! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !     real(ESMF_KIND_R8),      intent(in) :: multiplier
 !
 ! !DESCRIPTION:
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
-!     multiply a {\tt timeInterval} by a double precision {\tt multiplier},
+!     multiply a {\tt timeinterval} by a double precision {\tt multiplier},
 !     and return the product as an {\tt ESMF\_TimeInterval}.
 !
 !     Commutative complement to overloaded operator (*) below.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The multiplicand.
 !     \item[mutliplier]
 !          The double precision multiplier.
@@ -587,18 +587,18 @@
 !
 ! !INTERFACE:
 !     interface operator(*)
-!     product = multiplier * timeInterval
+!     product = multiplier * timeinterval
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: product
 !
 ! !ARGUMENTS:
 !     real(ESMF_KIND_R8),      intent(in) :: multiplier
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
 ! !DESCRIPTION:
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
-!     multiply a {\tt timeInterval} by a double precision {\tt multiplier},
+!     multiply a {\tt timeinterval} by a double precision {\tt multiplier},
 !     and return the product as an {\tt ESMF\_TimeInterval}.
 !
 !     Commutative complement to overloaded operator (*) above.
@@ -607,7 +607,7 @@
 !     \begin{description}
 !     \item[mutliplier]
 !          The double precision multiplier.
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The multiplicand.
 !     \end{description}
 !
@@ -626,27 +626,27 @@
 !
 ! !INTERFACE:
       interface operator(==)
-!     if (timeInterval1 == timeInterval2) then ... endif
+!     if (timeinterval1 == timeinterval2) then ... endif
 !                  OR
-!     result = (timeInterval1 == timeInterval2)
+!     result = (timeinterval1 == timeinterval2)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:     
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeInterval1} and {\tt timeInterval2} are equal,
+!     return true if {\tt timeinterval1} and {\tt timeinterval2} are equal,
 !     and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          Second {\tt ESMF\_TimeInterval} in comparison.
 !     \end{description}
 ! 
@@ -665,27 +665,27 @@
 !
 ! !INTERFACE:
       interface operator(/=)
-!     if (timeInterval1 /= timeInterval2) then ... endif
+!     if (timeinterval1 /= timeinterval2) then ... endif
 !                  OR
-!     result = (timeInterval1 /= timeInterval2)
+!     result = (timeinterval1 /= timeinterval2)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:     
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeInterval1} and {\tt timeInterval2} are not equal,
+!     return true if {\tt timeinterval1} and {\tt timeinterval2} are not equal,
 !     and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          Second {\tt ESMF\_TimeInterval} in comparison.
 !     \end{description}
 ! 
@@ -704,27 +704,27 @@
 !
 ! !INTERFACE:
       interface operator(<)
-!     if (timeInterval1 < timeInterval2) then ... endif
+!     if (timeinterval1 < timeinterval2) then ... endif
 !                  OR
-!     result = (timeInterval1 < timeInterval2)
+!     result = (timeinterval1 < timeinterval2)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:     
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 !DESCRIPTION:
 !     Overloads the (<) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeInterval1} is less than {\tt timeInterval2},
+!     return true if {\tt timeinterval1} is less than {\tt timeinterval2},
 !     and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          Second {\tt ESMF\_TimeInterval} in comparison.
 !     \end{description}
 ! 
@@ -743,27 +743,27 @@
 !
 ! !INTERFACE:
       interface operator(<=)
-!     if (timeInterval1 <= timeInterval2) then ... endif
+!     if (timeinterval1 <= timeinterval2) then ... endif
 !                  OR
-!     result = (timeInterval1 <= timeInterval2)
+!     result = (timeinterval1 <= timeinterval2)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:     
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 !DESCRIPTION:
 !     Overloads the (<=) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeInterval1} is less than or equal to
-!     {\tt timeInterval2}, and false otherwise.
+!     return true if {\tt timeinterval1} is less than or equal to
+!     {\tt timeinterval2}, and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          Second {\tt ESMF\_TimeInterval} in comparison.
 !     \end{description}
 ! 
@@ -782,27 +782,27 @@
 !
 ! !INTERFACE:
       interface operator(>)
-!     if (timeInterval1 > timeInterval2) then ... endif
+!     if (timeinterval1 > timeinterval2) then ... endif
 !                  OR
-!     result = (timeInterval1 > timeInterval2)
+!     result = (timeinterval1 > timeinterval2)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:     
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 !DESCRIPTION:
 !     Overloads the (<) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeInterval1} is greater than {\tt timeInterval2},
+!     return true if {\tt timeinterval1} is greater than {\tt timeinterval2},
 !     and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          Second {\tt ESMF\_TimeInterval} in comparison.
 !     \end{description}
 ! 
@@ -821,27 +821,27 @@
 !
 ! !INTERFACE:
       interface operator(>=)
-!     if (timeInterval1 >= timeInterval2) then ... endif
+!     if (timeinterval1 >= timeinterval2) then ... endif
 !                  OR
-!     result = (timeInterval1 >= timeInterval2)
+!     result = (timeinterval1 >= timeinterval2)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:     
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 !DESCRIPTION:
 !     Overloads the (<=) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeInterval1} is greater than or equal to
-!     {\tt timeInterval2}, and false otherwise.
+!     return true if {\tt timeinterval1} is greater than or equal to
+!     {\tt timeinterval2}, and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval1]
+!     \item[timeinterval1]
 !          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
+!     \item[timeinterval2]
 !          Second {\tt ESMF\_TimeInterval} in comparison.
 !     \end{description}
 ! 
@@ -863,20 +863,20 @@
 ! !IROUTINE:  ESMF_TimeIntervalAbsValue - Get the absolute value of a TimeInterval
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalAbsValue(timeInterval)
+      function ESMF_TimeIntervalAbsValue(timeinterval)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalAbsValue
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
 
 ! !DESCRIPTION:
-!     Returns the absolute value of {\tt timeInterval}.
+!     Returns the absolute value of {\tt timeinterval}.
 !
 !     The argument is:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The object instance to take the absolute value of.
 !          Absolute value is returned as the value of the function.
 !     \end{description}
@@ -885,7 +885,7 @@
 ! !REQUIREMENTS:
 !     TMG1.5.8
     
-      call c_ESMC_TimeIntervalAbsValue(timeInterval, ESMF_TimeIntervalAbsValue)
+      call c_ESMC_TimeIntervalAbsValue(timeinterval, ESMF_TimeIntervalAbsValue)
 
       end function ESMF_TimeIntervalAbsValue
 
@@ -894,7 +894,7 @@
 ! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalGet(timeInterval, &
+      subroutine ESMF_TimeIntervalGet(timeinterval, &
                                       yy, yy_i8, &
                                       mm, mm_i8, &
                                       d, d_i8, &
@@ -911,7 +911,7 @@
                                       timeString, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeInterval
+      type(ESMF_TimeInterval), intent(in)            :: timeinterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -946,7 +946,7 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Gets the value of {\tt timeInterval} in units specified by the
+!     Gets the value of {\tt timeinterval} in units specified by the
 !     user via Fortran optional arguments.
 !
 !     The ESMF Time Manager represents and manipulates time internally with
@@ -969,7 +969,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The object instance to query.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).
@@ -1059,7 +1059,7 @@
 !     TMG1.1
 
       ! use optional args for any subset
-      call c_ESMC_TimeIntervalGet(timeInterval, yy, yy_i8, mm, mm_i8, &
+      call c_ESMC_TimeIntervalGet(timeinterval, yy, yy_i8, mm, mm_i8, &
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                   us_r8, ns_r8, sN, sD, &
@@ -1076,20 +1076,20 @@
 ! !IROUTINE:  ESMF_TimeIntervalNegAbsValue - Get the negative absolute value of a TimeInterval
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalNegAbsValue(timeInterval)
+      function ESMF_TimeIntervalNegAbsValue(timeinterval)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalNegAbsValue
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
 
 ! !DESCRIPTION:
-!     Returns the negative absolute value of {\tt timeInterval}.
+!     Returns the negative absolute value of {\tt timeinterval}.
 !
 !     The argument is:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The object instance to take the negative absolute value of.
 !          Negative absolute value is returned as the value of the function.
 !     \end{description}
@@ -1098,7 +1098,7 @@
 ! !REQUIREMENTS:
 !     TMG1.5.8
     
-      call c_ESMC_TimeIntervalNegAbsValue(timeInterval, &
+      call c_ESMC_TimeIntervalNegAbsValue(timeinterval, &
                                           ESMF_TimeIntervalNegAbsValue)
 
       end function ESMF_TimeIntervalNegAbsValue
@@ -1108,10 +1108,10 @@
 ! !IROUTINE:  ESMF_TimeIntervalPrint - Print the contents of a TimeInterval
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalPrint(timeInterval, options, rc)
+      subroutine ESMF_TimeIntervalPrint(timeinterval, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeInterval
+      type(ESMF_TimeInterval), intent(in)            :: timeinterval
       character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
@@ -1122,7 +1122,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          Time interval to be printed out.
 !     \item[{[options]}]
 !          Print options.  If none specified, prints all TimeInterval
@@ -1137,7 +1137,7 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
     
-      call c_ESMC_TimeIntervalPrint(timeInterval, options, rc)
+      call c_ESMC_TimeIntervalPrint(timeinterval, options, rc)
 
       end subroutine ESMF_TimeIntervalPrint
 
@@ -1146,10 +1146,10 @@
 ! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval (not implmented)
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalReadRestart(timeInterval, name, iospec, rc)
+      subroutine ESMF_TimeIntervalReadRestart(timeinterval, name, iospec, rc)
 !
 ! !ARGUMENTS:      
-      type(ESMF_TimeInterval), intent(in)            :: timeInterval
+      type(ESMF_TimeInterval), intent(in)            :: timeinterval
       character (len=*),       intent(in)            :: name
       type(ESMF_IOSpec),       intent(in),  optional :: iospec
       integer,                 intent(out), optional :: rc
@@ -1160,7 +1160,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          Restore into this {\tt ESMF\_TimeInterval}.
 !     \item[name]
 !          Restore from this object name.
@@ -1178,8 +1178,8 @@
       integer :: nameLen
       nameLen = len_trim(name)
 
-!     invoke C to C++ entry point to restore timeInterval
-      call c_ESMC_TimeIntervalReadRestart(timeInterval, nameLen, name, &
+!     invoke C to C++ entry point to restore timeinterval
+      call c_ESMC_TimeIntervalReadRestart(timeinterval, nameLen, name, &
                                           iospec, rc)
 
       end subroutine ESMF_TimeIntervalReadRestart
@@ -1189,7 +1189,7 @@
 ! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalSet(timeInterval, &
+      subroutine ESMF_TimeIntervalSet(timeinterval, &
                                       yy, yy_i8, &
                                       mm, mm_i8, &
                                       d, d_i8, &
@@ -1203,7 +1203,7 @@
                                       calendar, calendarType, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(inout)         :: timeInterval
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       integer(ESMF_KIND_I4),   intent(in),  optional :: yy
       integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: mm
@@ -1246,7 +1246,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The object instance to initialize.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).  Default = 0
@@ -1328,7 +1328,7 @@
 !     TMGn.n.n
 
       ! use optional args for any subset
-      call c_ESMC_TimeIntervalSet(timeInterval, yy, yy_i8, mm, mm_i8, &
+      call c_ESMC_TimeIntervalSet(timeinterval, yy, yy_i8, mm, mm_i8, &
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                   us_r8, ns_r8, sN, sD, &
@@ -1342,20 +1342,20 @@
 ! !IROUTINE:  ESMF_TimeIntervalValidate - Validate a TimeInterval
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalValidate(timeInterval, options, rc)
+      subroutine ESMF_TimeIntervalValidate(timeinterval, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeInterval
+      type(ESMF_TimeInterval), intent(in)            :: timeinterval
       character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Checks whether a {\tt timeInterval} is valid.  The options control
+!     Checks whether a {\tt timeinterval} is valid.  The options control
 !     the type of validation.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          {\tt ESMF\_TimeInterval} to be validated.
 !     \item[{[options]}]
 !          Validation options.  TODO:  To be determined.
@@ -1367,7 +1367,7 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
     
-      call c_ESMC_TimeIntervalValidate(timeInterval, options, rc)
+      call c_ESMC_TimeIntervalValidate(timeinterval, options, rc)
 
       end subroutine ESMF_TimeIntervalValidate
 
@@ -1376,10 +1376,10 @@
 ! !IROUTINE:  ESMF_TimeIntervalWriteRestart - Save the contents of a TimeInterval (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalWriteRestart(timeInterval, iospec, rc)
+      subroutine ESMF_TimeIntervalWriteRestart(timeinterval, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeInterval
+      type(ESMF_TimeInterval), intent(in)            :: timeinterval
       type(ESMF_IOSpec),       intent(in),  optional :: iospec
       integer,                 intent(out), optional :: rc
 
@@ -1389,7 +1389,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The object instance to save.  
 !     \item[{[iospec]}]  
 !          The IO specification of the restart file.
@@ -1402,7 +1402,7 @@
 !     TMGn.n.n
 
 !     invoke C to C++ entry point 
-      call c_ESMC_TimeIntervalWriteRestart(timeInterval, iospec, rc)
+      call c_ESMC_TimeIntervalWriteRestart(timeinterval, iospec, rc)
 
       end subroutine ESMF_TimeIntervalWriteRestart
 
@@ -1418,14 +1418,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalRQuot - Divide two TimeIntervals, return double precision quotient
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalRQuot(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalRQuot(timeinterval1, timeinterval2)
 
 ! !RETURN VALUE:
       real(ESMF_KIND_R8) :: ESMF_TimeIntervalRQuot
 
 ! !ARGUMENTS: 
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method overloads the (/) operator for the {\tt ESMF\_TimeInterval}
@@ -1433,7 +1433,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalRQuot(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalRQuot(timeinterval1, timeinterval2, &
                                     ESMF_TimeIntervalRQuot)
 
       end function ESMF_TimeIntervalRQuot
@@ -1443,13 +1443,13 @@
 ! !IROUTINE:  ESMF_TimeIntervalQuotI - Divide TimeInterval by an integer, return TimeInterval quotient 
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalQuotI(timeInterval, divisor)
+      function ESMF_TimeIntervalQuotI(timeinterval, divisor)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalQuotI
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
       integer(ESMF_KIND_I4),   intent(in) :: divisor
 
 ! !DESCRIPTION:
@@ -1458,7 +1458,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalQuotI(timeInterval, divisor, &
+      call c_ESMC_TimeIntervalQuotI(timeinterval, divisor, &
                                     ESMF_TimeIntervalQuotI)
 
       end function ESMF_TimeIntervalQuotI
@@ -1468,13 +1468,13 @@
 ! !IROUTINE:  ESMF_TimeIntervalQuotR - Divide TimeInterval by a double precision, return TimeInterval quotient 
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalQuotR(timeInterval, divisor)
+      function ESMF_TimeIntervalQuotR(timeinterval, divisor)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalQuotR
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
       real(ESMF_KIND_R8),      intent(in) :: divisor
 
 ! !DESCRIPTION:
@@ -1483,7 +1483,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalQuotR(timeInterval, divisor, &
+      call c_ESMC_TimeIntervalQuotR(timeinterval, divisor, &
                                     ESMF_TimeIntervalQuotR)
 
       end function ESMF_TimeIntervalQuotR
@@ -1493,14 +1493,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalFQuot - Divide two TimeIntervals, return fraction quotient
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalFQuot(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalFQuot(timeinterval1, timeinterval2)
 
 ! !RETURN VALUE:
       type(ESMF_Fraction) :: ESMF_TimeIntervalFQuot
 
 ! !ARGUMENTS: 
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method defines the (.DIV.) operator for the {\tt ESMF\_TimeInterval}
@@ -1508,7 +1508,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalFQuot(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalFQuot(timeinterval1, timeinterval2, &
                                     ESMF_TimeIntervalFQuot)
 
       end function ESMF_TimeIntervalFQuot
@@ -1518,14 +1518,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalRemainder - Divide two TimeIntervals, return time interval remainder
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalRemainder(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalRemainder(timeinterval1, timeinterval2)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalRemainder
 
 ! !ARGUMENTS: 
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method overloads the pre-defined MOD function for the
@@ -1534,7 +1534,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalRemainder(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalRemainder(timeinterval1, timeinterval2, &
                                         ESMF_TimeIntervalRemainder)
 
       end function ESMF_TimeIntervalRemainder
@@ -1544,13 +1544,13 @@
 ! !IROUTINE:   ESMF_TimeIntervalProdTI - Multiply a TimeInterval by an integer
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalProdTI(timeInterval, multiplier)
+      function ESMF_TimeIntervalProdTI(timeinterval, multiplier)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdTI
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
       integer(ESMF_KIND_I4),   intent(in) :: multiplier
 
 ! !DESCRIPTION:
@@ -1559,7 +1559,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalProdTI(timeInterval, multiplier, &
+      call c_ESMC_TimeIntervalProdTI(timeinterval, multiplier, &
                                      ESMF_TimeIntervalProdTI)
 
       end function ESMF_TimeIntervalProdTI
@@ -1569,14 +1569,14 @@
 ! !IROUTINE:   ESMF_TimeIntervalProdIT - Multiply a TimeInterval by an integer
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalProdIT(multiplier, timeInterval)
+      function ESMF_TimeIntervalProdIT(multiplier, timeinterval)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdIT
 
 ! !ARGUMENTS:
       integer(ESMF_KIND_I4),   intent(in) :: multiplier
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
 
 ! !DESCRIPTION:
 !     This method overloads the (*) operator for the {\tt ESMF\_TimeInterval}
@@ -1584,7 +1584,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalProdIT(multiplier, timeInterval, &
+      call c_ESMC_TimeIntervalProdIT(multiplier, timeinterval, &
                                      ESMF_TimeIntervalProdIT)
 
       end function ESMF_TimeIntervalProdIT
@@ -1594,13 +1594,13 @@
 ! !IROUTINE:  ESMF_TimeIntervalProdTF - Multiply a TimeInterval by a fraction
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalProdTF(timeInterval, multiplier)
+      function ESMF_TimeIntervalProdTF(timeinterval, multiplier)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdTF
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
       type(ESMF_Fraction),     intent(in) :: multiplier
 
 ! !DESCRIPTION:
@@ -1609,7 +1609,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalProdTF(timeInterval, multiplier, &
+      call c_ESMC_TimeIntervalProdTF(timeinterval, multiplier, &
                                      ESMF_TimeIntervalProdTF)
 
       end function ESMF_TimeIntervalProdTF
@@ -1619,14 +1619,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalProdFT - Multiply a TimeInterval by a fraction
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalProdFT(multiplier, timeInterval)
+      function ESMF_TimeIntervalProdFT(multiplier, timeinterval)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdFT
 
 ! !ARGUMENTS:
       type(ESMF_Fraction),     intent(in) :: multiplier
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
 
 ! !DESCRIPTION:
 !     This method overloads the (*) operator for the {\tt ESMF\_TimeInterval}
@@ -1634,7 +1634,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalProdFT(multiplier, timeInterval, &
+      call c_ESMC_TimeIntervalProdFT(multiplier, timeinterval, &
                                      ESMF_TimeIntervalProdFT)
 
       end function ESMF_TimeIntervalProdFT
@@ -1644,13 +1644,13 @@
 ! !IROUTINE:   ESMF_TimeIntervalProdTR - Multiply a TimeInterval by a double precision
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalProdTR(timeInterval, multiplier)
+      function ESMF_TimeIntervalProdTR(timeinterval, multiplier)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdTR
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
       real(ESMF_KIND_R8),      intent(in) :: multiplier
 
 ! !DESCRIPTION:
@@ -1659,7 +1659,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalProdTR(timeInterval, multiplier, &
+      call c_ESMC_TimeIntervalProdTR(timeinterval, multiplier, &
                                      ESMF_TimeIntervalProdTR)
 
       end function ESMF_TimeIntervalProdTR
@@ -1669,14 +1669,14 @@
 ! !IROUTINE:   ESMF_TimeIntervalProdRT - Multiply a TimeInterval by a double precision
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalProdRT(multiplier, timeInterval)
+      function ESMF_TimeIntervalProdRT(multiplier, timeinterval)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdRT
 
 ! !ARGUMENTS:
       real(ESMF_KIND_R8),      intent(in) :: multiplier
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
 
 ! !DESCRIPTION:
 !     This method overloads the (*) operator for the {\tt ESMF\_TimeInterval}
@@ -1684,7 +1684,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalProdRT(multiplier, timeInterval, &
+      call c_ESMC_TimeIntervalProdRT(multiplier, timeinterval, &
                                      ESMF_TimeIntervalProdRT)
 
       end function ESMF_TimeIntervalProdRT
@@ -1701,14 +1701,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalSum - Add two TimeIntervals 
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalSum(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalSum(timeinterval1, timeinterval2)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalSum
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method overloads the (+) operator for the {\tt ESMF\_TimeInterval}
@@ -1716,7 +1716,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalSum(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalSum(timeinterval1, timeinterval2, &
                                   ESMF_TimeIntervalSum)
 
       end function ESMF_TimeIntervalSum
@@ -1726,14 +1726,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalDiff - Subtract one TimeInterval from another
    
 ! !INTERFACE:
-      function ESMF_TimeIntervalDiff(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalDiff(timeinterval1, timeinterval2)
 
 ! !RETURN VALUE:
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalDiff
 
 ! !ARGUMENTS: 
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method overloads the (-) operator for the {\tt ESMF\_TimeInterval}
@@ -1742,7 +1742,7 @@
 !EOPI
 ! !REQUIREMENTS:
 
-      call c_ESMC_TimeIntervalDiff(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalDiff(timeinterval1, timeinterval2, &
                                    ESMF_TimeIntervalDiff)
 
       end function ESMF_TimeIntervalDiff
@@ -1752,14 +1752,14 @@
 ! !IROUTINE: ESMF_TimeIntervalEQ - Test if TimeInterval 1 is equal to TimeInterval 2
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalEQ(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalEQ(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeIntervalEQ
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 !DESCRIPTION:
 !     This method overloads the (==) operator for the {\tt ESMF\_TimeInterval}
@@ -1767,7 +1767,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalEQ(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalEQ(timeinterval1, timeinterval2, &
                                  ESMF_TimeIntervalEQ)
 
       end function ESMF_TimeIntervalEQ
@@ -1777,14 +1777,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalNE - Test if TimeInterval 1 is not equal to TimeInterval 2
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalNE(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalNE(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeIntervalNE
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method overloads the (/=) operator for the {\tt ESMF\_TimeInterval}
@@ -1792,7 +1792,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalNE(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalNE(timeinterval1, timeinterval2, &
                                  ESMF_TimeIntervalNE)
 
       end function ESMF_TimeIntervalNE
@@ -1802,14 +1802,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalLT - Test if TimeInterval 1 is less than TimeInterval 2
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalLT(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalLT(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeIntervalLT
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method overloads the (<) operator for the {\tt ESMF\_TimeInterval}
@@ -1817,7 +1817,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalLT(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalLT(timeinterval1, timeinterval2, &
                                  ESMF_TimeIntervalLT)
 
       end function ESMF_TimeIntervalLT
@@ -1827,14 +1827,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalLE - Test if TimeInterval 1 is less than or equal to TimeInterval 2
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalLE(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalLE(timeinterval1, timeinterval2)
 
 ! !RETURN VALUE:
       logical :: ESMF_TimeIntervalLE
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method overloads the (<=) operator for the {\tt ESMF\_TimeInterval}
@@ -1842,7 +1842,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalLE(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalLE(timeinterval1, timeinterval2, &
                                  ESMF_TimeIntervalLE)
 
       end function ESMF_TimeIntervalLE
@@ -1852,14 +1852,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalGT - Test if TimeInterval 1 is greater than TimeInterval 2
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalGT(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalGT(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeIntervalGT
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method overloads the (>) operator for the {\tt ESMF\_TimeInterval}
@@ -1867,7 +1867,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalGT(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalGT(timeinterval1, timeinterval2, &
                                  ESMF_TimeIntervalGT)
 
       end function ESMF_TimeIntervalGT
@@ -1877,14 +1877,14 @@
 ! !IROUTINE:  ESMF_TimeIntervalGE - Test if TimeInterval1 is greater than or equal to TimeInterval2
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalGE(timeInterval1, timeInterval2)
+      function ESMF_TimeIntervalGE(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeIntervalGE
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
 !     This method overloads the (>=) operator for the {\tt ESMF\_TimeInterval}
@@ -1892,7 +1892,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeIntervalGE(timeInterval1, timeInterval2, &
+      call c_ESMC_TimeIntervalGE(timeinterval1, timeinterval2, &
                                  ESMF_TimeIntervalGE)
 
       end function ESMF_TimeIntervalGE

@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.70 2004/05/04 22:28:31 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.71 2004/05/19 22:05:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.70 2004/05/04 22:28:31 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.71 2004/05/19 22:05:06 eschwab Exp $'
 
 !==============================================================================
 !
@@ -110,25 +110,25 @@
 !
 ! !INTERFACE:
       interface operator(+)
-!     time2 = time1 + timeInterval      
+!     time2 = time1 + timeinterval      
 !
 ! !RETURN VALUE:   
 !     type(ESMF_Time) :: time2
 !
 ! !ARGUMENTS:
 !     type(ESMF_Time),         intent(in) :: time1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 ! 
 ! !DESCRIPTION:
 !     Overloads the (+) operator for the {\tt ESMF\_Time} class to increment
-!     {\tt time1} with {\tt timeInterval} and return the result as an
+!     {\tt time1} with {\tt timeinterval} and return the result as an
 !     {\tt ESMF\_Time}.
 !
 !     The arguments are:
 !     \begin{description} 
 !     \item[time1] 
 !          The {\tt ESMF\_Time} to increment.
-!     \item[timeInterval] 
+!     \item[timeinterval] 
 !          The {\tt ESMF\_TimeInterval} to add to the given {\tt ESMF\_Time}.
 !     \end{description}
 !
@@ -147,25 +147,25 @@
 !
 ! !INTERFACE:
       interface operator(-)
-!     time2 = time1 - timeInterval      
+!     time2 = time1 - timeinterval      
 ! 
 ! !RETURN VALUE:
 !     type(ESMF_Time) :: time2
 ! 
 ! !ARGUMENTS:
 !     type(ESMF_Time),         intent(in) :: time1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
 ! !DESCRIPTION:
 !     Overloads the (-) operator for the {\tt ESMF\_Time} class to decrement
-!     {\tt time1} with {\tt timeInterval}, and return the result as an
+!     {\tt time1} with {\tt timeinterval}, and return the result as an
 !     {\tt ESMF\_Time}.
 ! 
 !     The arguments are:      
 !     \begin{description}
 !     \item[time1]
 !          The {\tt ESMF\_Time} to decrement.
-!     \item[timeInterval]
+!     \item[timeinterval]
 !          The {\tt ESMF\_TimeInterval} to subtract from the given
 !          {\tt ESMF\_Time}.
 !     \end{description}
@@ -1059,14 +1059,14 @@
 ! !IROUTINE: ESMF_TimeInc - Increment a Time with a TimeInterval
 !
 ! !INTERFACE:
-      function ESMF_TimeInc(time, timeInterval)
+      function ESMF_TimeInc(time, timeinterval)
 !
 ! !RETURN VALUE:
       type(ESMF_Time) :: ESMF_TimeInc
 !
 ! !ARGUMENTS:
       type(ESMF_Time),         intent(in) :: time
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
 ! !DESCRIPTION:
 !     This method overloads the (+) operator for the {\tt ESMF\_Time} class.
@@ -1074,7 +1074,7 @@
 !
 !EOPI
 
-      call c_ESMC_TimeInc(time, timeInterval, ESMF_TimeInc)
+      call c_ESMC_TimeInc(time, timeinterval, ESMF_TimeInc)
 
       end function ESMF_TimeInc
 !------------------------------------------------------------------------------
@@ -1082,14 +1082,14 @@
 ! !IROUTINE: ESMF_TimeDec - Decrement a Time with a TimeInterval
 !
 ! !INTERFACE:
-      function ESMF_TimeDec(time, timeInterval)
+      function ESMF_TimeDec(time, timeinterval)
 !
 ! !RETURN VALUE:
       type(ESMF_Time) :: ESMF_TimeDec
 !
 ! !ARGUMENTS:
       type(ESMF_Time),         intent(in) :: time
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
 ! !DESCRIPTION:
 !     This method overloads the (-) operator for the {\tt ESMF\_Time} class.
@@ -1097,7 +1097,7 @@
 !
 !EOPI
 
-       call c_ESMC_TimeDec(time, timeInterval, ESMF_TimeDec)
+       call c_ESMC_TimeDec(time, timeinterval, ESMF_TimeDec)
 
       end function ESMF_TimeDec
 

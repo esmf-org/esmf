@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.33 2004/04/26 18:01:42 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.34 2004/05/19 22:05:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -138,92 +138,92 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeintervalabsvalue)(ESMC_TimeInterval *ptr,
-                                    ESMC_TimeInterval *timeIntervalAbsValue) {
-           *timeIntervalAbsValue = (ptr)->ESMC_TimeIntervalAbsValue();
+                                    ESMC_TimeInterval *timeintervalAbsValue) {
+           *timeintervalAbsValue = (ptr)->ESMC_TimeIntervalAbsValue();
        }
 
        void FTN(c_esmc_timeintervalnegabsvalue)(ESMC_TimeInterval *ptr,
-                                  ESMC_TimeInterval *timeIntervalNegAbsValue) {
-           *timeIntervalNegAbsValue = (ptr)->ESMC_TimeIntervalNegAbsValue();
+                                  ESMC_TimeInterval *timeintervalNegAbsValue) {
+           *timeintervalNegAbsValue = (ptr)->ESMC_TimeIntervalNegAbsValue();
        }
 
-       void FTN(c_esmc_timeintervalrquot)(ESMC_TimeInterval *timeInterval1,
-                                          ESMC_TimeInterval *timeInterval2,
-                                          ESMF_KIND_R8 *timeIntervalRQuot) {
-           *timeIntervalRQuot = (*timeInterval1 / *timeInterval2);
+       void FTN(c_esmc_timeintervalrquot)(ESMC_TimeInterval *timeinterval1,
+                                          ESMC_TimeInterval *timeinterval2,
+                                          ESMF_KIND_R8 *timeintervalRQuot) {
+           *timeintervalRQuot = (*timeinterval1 / *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalquoti)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalquoti)(ESMC_TimeInterval *timeinterval,
                                         ESMF_KIND_I4 *divisor,
-                                        ESMC_TimeInterval *timeIntervalQuotI) {
-           *timeIntervalQuotI = (*timeInterval / *divisor);
+                                        ESMC_TimeInterval *timeintervalQuotI) {
+           *timeintervalQuotI = (*timeinterval / *divisor);
        }
 
-       void FTN(c_esmc_timeintervalquotr)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalquotr)(ESMC_TimeInterval *timeinterval,
                                         ESMF_KIND_R8 *divisor,
-                                        ESMC_TimeInterval *timeIntervalQuotR) {
-           *timeIntervalQuotR = (*timeInterval / *divisor);
+                                        ESMC_TimeInterval *timeintervalQuotR) {
+           *timeintervalQuotR = (*timeinterval / *divisor);
        }
 
-       void FTN(c_esmc_timeintervalfquot)(ESMC_TimeInterval *timeInterval1,
-                                          ESMC_TimeInterval *timeInterval2,
-                                          ESMC_Fraction *timeIntervalFQuot) {
-           *timeIntervalFQuot = 
-                        timeInterval1->ESMC_TimeIntervalDiv(*timeInterval2);
+       void FTN(c_esmc_timeintervalfquot)(ESMC_TimeInterval *timeinterval1,
+                                          ESMC_TimeInterval *timeinterval2,
+                                          ESMC_Fraction *timeintervalFQuot) {
+           *timeintervalFQuot = 
+                        timeinterval1->ESMC_TimeIntervalDiv(*timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalremainder)(ESMC_TimeInterval *timeInterval1,
-                                              ESMC_TimeInterval *timeInterval2,
-                                    ESMC_TimeInterval *timeIntervalRemainder) {
-           *timeIntervalRemainder = (*timeInterval1 % *timeInterval2);
+       void FTN(c_esmc_timeintervalremainder)(ESMC_TimeInterval *timeinterval1,
+                                              ESMC_TimeInterval *timeinterval2,
+                                    ESMC_TimeInterval *timeintervalRemainder) {
+           *timeintervalRemainder = (*timeinterval1 % *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalprodti)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalprodti)(ESMC_TimeInterval *timeinterval,
                                         ESMF_KIND_I4 *multiplier,
-                                        ESMC_TimeInterval *timeIntervalProdTI) {
-           *timeIntervalProdTI = (*timeInterval * *multiplier);
+                                        ESMC_TimeInterval *timeintervalProdTI) {
+           *timeintervalProdTI = (*timeinterval * *multiplier);
        }
 
        void FTN(c_esmc_timeintervalprodit)(ESMF_KIND_I4 *multiplier,
-                                        ESMC_TimeInterval *timeInterval,
-                                        ESMC_TimeInterval *timeIntervalProdIT) {
-           *timeIntervalProdIT = (*multiplier * *timeInterval);
+                                        ESMC_TimeInterval *timeinterval,
+                                        ESMC_TimeInterval *timeintervalProdIT) {
+           *timeintervalProdIT = (*multiplier * *timeinterval);
        }
 
-       void FTN(c_esmc_timeintervalprodtf)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalprodtf)(ESMC_TimeInterval *timeinterval,
                                         ESMC_Fraction *multiplier,
-                                        ESMC_TimeInterval *timeIntervalProdTF) {
-           *timeIntervalProdTF = (*timeInterval * *multiplier);
+                                        ESMC_TimeInterval *timeintervalProdTF) {
+           *timeintervalProdTF = (*timeinterval * *multiplier);
        }
 
        void FTN(c_esmc_timeintervalprodft)(ESMC_Fraction *multiplier,
-                                        ESMC_TimeInterval *timeInterval,
-                                        ESMC_TimeInterval *timeIntervalProdFT) {
-           *timeIntervalProdFT = (*multiplier * *timeInterval);
+                                        ESMC_TimeInterval *timeinterval,
+                                        ESMC_TimeInterval *timeintervalProdFT) {
+           *timeintervalProdFT = (*multiplier * *timeinterval);
        }
 
-       void FTN(c_esmc_timeintervalprodtr)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalprodtr)(ESMC_TimeInterval *timeinterval,
                                         ESMF_KIND_R8 *multiplier,
-                                        ESMC_TimeInterval *timeIntervalProdTR) {
-           *timeIntervalProdTR = (*timeInterval * *multiplier);
+                                        ESMC_TimeInterval *timeintervalProdTR) {
+           *timeintervalProdTR = (*timeinterval * *multiplier);
        }
 
        void FTN(c_esmc_timeintervalprodrt)(ESMF_KIND_R8 *multiplier,
-                                        ESMC_TimeInterval *timeInterval,
-                                        ESMC_TimeInterval *timeIntervalProdRT) {
-           *timeIntervalProdRT = (*multiplier * *timeInterval);
+                                        ESMC_TimeInterval *timeinterval,
+                                        ESMC_TimeInterval *timeintervalProdRT) {
+           *timeintervalProdRT = (*multiplier * *timeinterval);
        }
 
-       void FTN(c_esmc_timeintervalsum)(ESMC_TimeInterval *timeInterval1,
-                                 ESMC_TimeInterval *timeInterval2,
-                                 ESMC_TimeInterval *esmf_timeIntervalSum) {
-           *esmf_timeIntervalSum = (*timeInterval1 + *timeInterval2);
+       void FTN(c_esmc_timeintervalsum)(ESMC_TimeInterval *timeinterval1,
+                                 ESMC_TimeInterval *timeinterval2,
+                                 ESMC_TimeInterval *esmf_timeintervalSum) {
+           *esmf_timeintervalSum = (*timeinterval1 + *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervaldiff)(ESMC_TimeInterval *timeInterval1,
-                                 ESMC_TimeInterval *timeInterval2,
-                                 ESMC_TimeInterval *esmf_timeIntervalDiff) {
-           *esmf_timeIntervalDiff = (*timeInterval1 - *timeInterval2);
+       void FTN(c_esmc_timeintervaldiff)(ESMC_TimeInterval *timeinterval1,
+                                 ESMC_TimeInterval *timeinterval2,
+                                 ESMC_TimeInterval *esmf_timeintervalDiff) {
+           *esmf_timeintervalDiff = (*timeinterval1 - *timeinterval2);
        }
 
 
@@ -231,40 +231,40 @@ extern "C" {
        // overloaded comparison operators
        //
 
-       void FTN(c_esmc_timeintervaleq)(ESMC_TimeInterval *timeInterval1,
-                                       ESMC_TimeInterval *timeInterval2,
-                                       int *esmf_timeIntervalEQ) {
-           *esmf_timeIntervalEQ = (int) (*timeInterval1 == *timeInterval2);
+       void FTN(c_esmc_timeintervaleq)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalEQ) {
+           *esmf_timeintervalEQ = (int) (*timeinterval1 == *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalne)(ESMC_TimeInterval *timeInterval1,
-                                       ESMC_TimeInterval *timeInterval2,
-                                       int *esmf_timeIntervalNE) {
-           *esmf_timeIntervalNE = (int) (*timeInterval1 != *timeInterval2);
+       void FTN(c_esmc_timeintervalne)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalNE) {
+           *esmf_timeintervalNE = (int) (*timeinterval1 != *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervallt)(ESMC_TimeInterval *timeInterval1,
-                                       ESMC_TimeInterval *timeInterval2,
-                                       int *esmf_timeIntervalLT) {
-           *esmf_timeIntervalLT = (int) (*timeInterval1 < *timeInterval2);
+       void FTN(c_esmc_timeintervallt)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalLT) {
+           *esmf_timeintervalLT = (int) (*timeinterval1 < *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalgt)(ESMC_TimeInterval *timeInterval1,
-                                       ESMC_TimeInterval *timeInterval2,
-                                       int *esmf_timeIntervalGT) {
-           *esmf_timeIntervalGT = (int) (*timeInterval1 > *timeInterval2);
+       void FTN(c_esmc_timeintervalgt)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalGT) {
+           *esmf_timeintervalGT = (int) (*timeinterval1 > *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalle)(ESMC_TimeInterval *timeInterval1,
-                                       ESMC_TimeInterval *timeInterval2,
-                                       int *esmf_timeIntervalLE) {
-           *esmf_timeIntervalLE = (int) (*timeInterval1 <= *timeInterval2);
+       void FTN(c_esmc_timeintervalle)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalLE) {
+           *esmf_timeintervalLE = (int) (*timeinterval1 <= *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalge)(ESMC_TimeInterval *timeInterval1,
-                                       ESMC_TimeInterval *timeInterval2,
-                                       int *esmf_timeIntervalGE) {
-           *esmf_timeIntervalGE = (int) (*timeInterval1 >= *timeInterval2);
+       void FTN(c_esmc_timeintervalge)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalGE) {
+           *esmf_timeintervalGE = (int) (*timeinterval1 >= *timeinterval2);
        }
 
 

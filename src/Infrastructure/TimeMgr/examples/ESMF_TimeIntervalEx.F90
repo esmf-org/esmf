@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.22 2004/04/09 20:13:38 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.23 2004/05/19 22:05:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 !-----------------------------------------------------------------------------
       use ESMF_Mod
       implicit none
-      type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3
+      type(ESMF_TimeInterval) :: timeinterval1, timeinterval2, timeinterval3
 
       ! temp variables
       integer :: d, h, m, s, rc
@@ -48,7 +48,7 @@
 
 !BOC
       ! initialize time interval1 to 1 day, 1800 seconds (0.5 hour)
-      call ESMF_TimeIntervalSet(timeInterval1, d=1, rc=rc)
+      call ESMF_TimeIntervalSet(timeinterval1, d=1, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -57,7 +57,7 @@
 
 !BOC
       ! initialize time interval2 to 4 days, 5400 seconds (1.5 hours)
-      call ESMF_TimeIntervalSet(timeInterval2, d=4, s=5400, rc=rc)
+      call ESMF_TimeIntervalSet(timeinterval2, d=4, s=5400, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -65,7 +65,7 @@
       end if
 
 !BOC
-      call ESMF_TimeIntervalGet(timeInterval1, s=s, rc=rc)
+      call ESMF_TimeIntervalGet(timeinterval1, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -74,7 +74,7 @@
 
 !BOC
       print *, "Time Interval1 = ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval1, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval1, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -82,7 +82,7 @@
       end if
 
 !BOC
-      call ESMF_TimeIntervalGet(timeInterval2, d=d, h=h, m=m, rc=rc)
+      call ESMF_TimeIntervalGet(timeinterval2, d=d, h=h, m=m, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -91,7 +91,7 @@
 
 !BOC
       print *, "Time Interval2 = ", d, " days, ", h, " hours, ", m, " minutes."
-      call ESMF_TimeIntervalPrint(timeInterval2, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval2, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -100,8 +100,8 @@
 
 !BOC
       ! difference
-      timeInterval3 = timeInterval2 - timeInterval1
-      call ESMF_TimeIntervalGet(timeInterval3, d=d, s=s, rc=rc)
+      timeinterval3 = timeinterval2 - timeinterval1
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -111,7 +111,7 @@
 !BOC
       print *, "Difference between TimeInterval2 and TimeInterval1 = ", &
                d, " days, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -120,8 +120,8 @@
 
 !BOC
       ! sum
-      timeInterval3 = timeInterval2 + timeInterval1
-      call ESMF_TimeIntervalGet(timeInterval3, d=d, s=s, rc=rc)
+      timeinterval3 = timeinterval2 + timeinterval1
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -131,7 +131,7 @@
 !BOC
       print *, "Sum of TimeInterval1 and TimeInterval2 = ", d, " days, ", &
                s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -140,11 +140,11 @@
 
 !BOC
       ! divide
-      quotient = timeInterval2 / timeInterval1
+      quotient = timeinterval2 / timeinterval1
       print *, "TimeInterval2 divided by TimeInterval1 = ", quotient
 
       ! modulo
-      remainder = MOD(timeInterval2, timeInterval1)
+      remainder = MOD(timeinterval2, timeinterval1)
       print *, "TimeInterval2 modulo TimeInterval1 = " 
       call ESMF_TimeIntervalPrint(remainder, "string", rc)
 !EOC
@@ -155,8 +155,8 @@
 
 !BOC
       ! divide by integer
-      timeInterval3 = timeInterval2 / 2
-      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
+      timeinterval3 = timeinterval2 / 2
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -166,7 +166,7 @@
 !BOC
       print *, "TimeInterval2 divided by 2 = ", d, " days, ", h, " hours, ", &
                m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -176,8 +176,8 @@
 !BOC
       ! divide by double precision real
       divisor = 1.5
-      timeInterval3 = timeInterval2 / divisor
-      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
+      timeinterval3 = timeinterval2 / divisor
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -187,7 +187,7 @@
 !BOC
       print *, "TimeInterval2 divided by 1.5 = ", d, " days, ", h, " hours, ", &
                m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -196,8 +196,8 @@
 
 !BOC
       ! multiply by integer
-      timeInterval3 = timeInterval1 * 3
-      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
+      timeinterval3 = timeinterval1 * 3
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -207,7 +207,7 @@
 !BOC
       print *, "TimeInterval1 multiplied by 3 = ", d, " days, ", h, &
                " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -218,8 +218,8 @@
       ! multiply by double precision real; use commutative variant of
       !   (*) operator
       multiplier = 2.25
-      timeInterval3 = multiplier * timeInterval1
-      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
+      timeinterval3 = multiplier * timeinterval1
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -229,7 +229,7 @@
 !BOC
       print *, "TimeInterval1 multiplied by 2.25 = ", d, " days, ", h, &
                " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -238,8 +238,8 @@
 
 !BOC
       ! change time interval 1 to negative value
-      timeInterval1 = timeInterval1 * (-1)
-      call ESMF_TimeIntervalGet(timeInterval1, d=d, h=h, m=m, rc=rc)
+      timeinterval1 = timeinterval1 * (-1)
+      call ESMF_TimeIntervalGet(timeinterval1, d=d, h=h, m=m, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -249,7 +249,7 @@
 !BOC
       print *, "Time Interval1 changed to ", d, " days, ", h, " hours, ", &
                m, " minutes."
-      call ESMF_TimeIntervalPrint(timeInterval1, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval1, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -258,8 +258,8 @@
 
 !BOC
       ! absolute value
-      timeInterval3 = ESMF_TimeIntervalAbsValue(timeInterval1)
-      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
+      timeinterval3 = ESMF_TimeIntervalAbsValue(timeinterval1)
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -269,7 +269,7 @@
 !BOC
       print *, "Absolute value of TimeInterval1 = ", d, " days, ", h, &
                " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -278,8 +278,8 @@
 
 !BOC
       ! negative absolute value of time interval 1
-      timeInterval3 = ESMF_TimeIntervalNegAbsValue(timeInterval1)
-      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
+      timeinterval3 = ESMF_TimeIntervalNegAbsValue(timeinterval1)
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -289,7 +289,7 @@
 !BOC
       print *, "Negative absolute value of TimeInterval1 = ", d, " days, ", h, &
                " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 
 !EOC
       if (rc.NE.ESMF_SUCCESS) then
@@ -298,8 +298,8 @@
 
 !BOC
       ! negative absolute value of time interval 2
-      timeInterval3 = ESMF_TimeIntervalNegAbsValue(timeInterval2)
-      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
+      timeinterval3 = ESMF_TimeIntervalNegAbsValue(timeinterval2)
+      call ESMF_TimeIntervalGet(timeinterval3, d=d, h=h, m=m, s=s, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -309,7 +309,7 @@
 !BOC
       print *, "Negative absolute value of TimeInterval2 = ", d, " days, ", h, &
                " hours, ", m, " minutes, ", s, " seconds."
-      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval3, "string", rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -318,11 +318,11 @@
 
 !BOC
       ! comparison
-      if (timeInterval2 > timeInterval1) then
+      if (timeinterval2 > timeinterval1) then
         print *, "TimeInterval2 is larger than TimeInterval1"
-      else if (timeInterval2 .lt. timeInterval1) then
+      else if (timeinterval2 .lt. timeinterval1) then
         print *, "TimeInterval2 is smaller than TimeInterval1"
-      else if (timeInterval2 == timeInterval1) then
+      else if (timeinterval2 == timeinterval1) then
         print *, "TimeInterval2 is equal to TimeInterval1"
       end if
 !EOC

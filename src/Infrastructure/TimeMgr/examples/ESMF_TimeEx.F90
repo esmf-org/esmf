@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.25 2004/04/09 20:13:38 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.26 2004/05/19 22:05:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
       type(ESMF_Time) :: wallClock
 
       ! instantiate time interval
-      type(ESMF_TimeInterval) :: timeInterval1, timeInterval2
+      type(ESMF_TimeInterval) :: timeinterval1, timeinterval2
 
       ! temp variables for Get functions
       integer :: YY, MM, DD, D, H, M, S, rc
@@ -106,7 +106,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize time interval1 to 2 days, 1800 seconds (0.5 hour)
-      call ESMF_TimeIntervalSet(timeInterval1, d=2, &
+      call ESMF_TimeIntervalSet(timeinterval1, d=2, &
                                 s=1800, rc=rc)
 !\end{verbatim}
 !EOP
@@ -139,7 +139,7 @@
 
 !BOP
 !\begin{verbatim}
-      call ESMF_TimeIntervalGet(timeInterval1, d=D, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeinterval1, d=D, s=S, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -153,8 +153,8 @@
       print *
 
       ! calculate difference between time2 and time1
-      timeInterval2 = time2 - time1
-      call ESMF_TimeIntervalGet(timeInterval2, d=D, h=H, m=M, s=S, rc=rc)
+      timeinterval2 = time2 - time1
+      call ESMF_TimeIntervalGet(timeinterval2, d=D, h=H, m=M, s=S, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -168,7 +168,7 @@
                " hours, ", M, " minutes, ", S, " seconds."
 
       ! add time interval1 to time1
-      time3 = time1 + timeInterval1
+      time3 = time1 + timeinterval1
       print *, "Time1 plus TimeInterval1 = "
       call ESMF_TimePrint(time3, "string", rc)
 !\end{verbatim}
@@ -181,7 +181,7 @@
 !BOP
 !\begin{verbatim}
       ! subtract time interval1 from time2
-      time3 = time2 - timeInterval1
+      time3 = time2 - timeinterval1
       print *, "Time2 minus TimeInterval1 = "
       call ESMF_TimePrint(time3, "string", rc)
 !\end{verbatim}
