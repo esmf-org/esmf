@@ -1,4 +1,4 @@
-% $Id: Regrid_background.tex,v 1.5 2002/05/03 18:17:22 pwjones Exp $
+% $Id: Regrid_background.tex,v 1.6 2002/05/23 20:07:19 jwolfe Exp $
 
 Many applications in Earth system modeling require
 transforming fields between different grids.  Such
@@ -32,7 +32,7 @@ implementing regridding operations.  Appropriate
 functions will be supplied for all supported ESMF grids,
 including grids in spherical, Cartesian and cylindrical
 coordinates and non-gridded lists of points
-in those coordinates (see PhysGrid requirements for
+in those coordinates (see physical grid requirements for
 complete list of supported grids).  A variety of methods will
 be supplied, including conservative, spectral transform,
 linear and higher-order methods.  The   
@@ -42,9 +42,9 @@ for all of the supported options.
 \subsection{Location}
 
 Regridding and interpolation is part of the ESMF
-Infrastructure.  It will use information from Physical
-Grids (PhysGrid) or Distributed Grids (DistGrid) to compute
-regridding information and use DistGrid
+Infrastructure.  It will use information from physical
+grids or distributed grids to compute
+regridding information and use distributed grids
 for performing data motion related to regridding.  It will
 (presumably) be used by couplers and fields as well as
 within component models when necessary.
@@ -54,5 +54,5 @@ within component models when necessary.
 ESMF Regrid is meant to be used for interpolating or
 remapping data between supported ESMF grids.  Support
 for moving fields between points on staggered grids
-will be included in PhysGrid.
+will be included in the physical grid.
 

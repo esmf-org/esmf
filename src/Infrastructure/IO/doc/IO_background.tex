@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.14 2002/05/20 20:24:28 dasilva Exp $
+% $Id: IO_background.tex,v 1.15 2002/05/23 20:07:18 jwolfe Exp $
 
 
 Earth system modeling applications require efficient and robust tools
@@ -38,7 +38,7 @@ neutral. Our principles will be:
 
 
 
-\subsection{Data Models}
+\subsection{Data models}
 
 Earth system models use a variety of discrete grids to maintain information 
 about fields in continuous space, as well as observations. The primary ESMF 
@@ -50,7 +50,7 @@ physical grid and are decomposed in memory in an identical fashion;
 that is, they share a distributed grid. They form a {\em bundle of
 fields} defined on the same distributed grid. The gridded data are
 supported by three ESMF elements: {\em PhysGrid} element 
-for phyical grids, {\em DistGrid} element for distributed grids, and 
+for physical grids, {\em DistGrid} element for distributed grids, and 
 {\em Fields} class for fields (\cite{ESMF-PhysGrid-Req},
 \cite{ESMF-DistGrid-Req}, \cite{ESMF-Field-Req}). 
 
@@ -153,7 +153,7 @@ able to do so.
 %%% the ESMF convention.
 
 
-\subsection{Data Formats}
+\subsection{Data formats}
 
 
 Several standard formats are currently used in Earth Science modeling
@@ -331,7 +331,7 @@ Balaji_Parallel_IO_1999, Balaji_Parallel_IO_2000}. Parallel IO implemented in
 GFDL (\cite{mpp_io}) supports parallel writing to single or multiple files. 
 It supports NetCDF and binary data formats.
 
-\subsection{Synchronous and Asynchronous IO}
+\subsection{Synchronous and asynchronous IO}
 
 ESMF shall provide an asynchronous option for all ESMF IO models.  It
 shall provide async read and write operations, the capability to wait

@@ -1,4 +1,4 @@
-%$Id: PhysGrid_req.tex,v 1.18 2002/05/20 17:18:28 michalak Exp $
+%$Id: PhysGrid_req.tex,v 1.19 2002/05/23 20:07:18 jwolfe Exp $
 
 %===============================================================================
 \req{Physical locations}
@@ -211,7 +211,7 @@ horizontal corners of a region.
 
 Streams of locations are used to describe the physical (and potentially temporal)
 locations associated with streams of data.  Streams of locations differ from
-Physical Grids (see below) in that there are no concept of neighboring values,
+physical grids (see below) in that there are no concept of neighboring values,
 topology, covering a space, or of locations being exclusive.
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -272,7 +272,7 @@ Location streams may be written to files.
 \end{reqlist}
 
 \sreq{Underlying grid}
-A location stream may have associated with it an underlying PhysGrid, so that each
+A location stream may have associated with it an underlying physical grid, so that each
 location stream element may be uniquely associated with a single grid cell. (A single
 grid cell may contain multiple location stream elements.)
 \begin{reqlist}
@@ -331,7 +331,7 @@ registry.  A pointer to any location stream may be determined given its name.
 {\bf Notes:} I think this should be deferred - CNH.
 \end{reqlist}
 
-\ssreq{Global attributes: Number of dimensions}
+\ssreq{Global attributes: number of dimensions}
 A location stream may be queried for the number of dimensions, which is
 set at the time of creation of the stream.
 \begin{reqlist}
@@ -546,11 +546,11 @@ manipulated in compatible ways.
 \req{Physical grids}
 %-------------------------------------------------------------------------------
 
-Physical grids (PhysGrids) provide the locations of each of the cells/points
-associated with the range of indices in a distributed grid.  A PhysGrid is a
-distributed object associated with a single DistGrid.  A PhysGrid may have
-undistributed dimensions that are not present in the underlying DistGrid. 
-Multiple PhysGrids may be derived from the same global, undistributed PhysGrid. 
+Physical grids provide the locations of each of the cells/points
+associated with the range of indices in a distributed grid.  A physical grid is a
+distributed object associated with a single distributed grid.  A physical grid may have
+undistributed dimensions that are not present in the underlying distributed grid. 
+Multiple physical grids may be derived from the same global, undistributed physical grid. 
 Physical grids may be purely horizontal, purely vertical, or 3-dimensional. 
 Structured grids assume that adjacent locations in index space share boundaries
 in a predictable way.  Unstructured grids also have concepts of neighboring
@@ -565,8 +565,8 @@ cells, but the relative indices of neighbors are unpredictable.
 \end{reqlist}
 
 \sreq{Reading grids}
-Given a DistGrid, a PhysGrid can be read from a standard file containing a
-global PhysGrid. If no DistGrid is provided, the entire global physical grid will
+Given a distributed grid, a physical grid can be read from a standard file containing a
+global physical grid. If no distributed grid is provided, the entire global physical grid will
 be read in.
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -578,7 +578,7 @@ be read in.
 \end{reqlist}
 
 \sreq{Writing grids}
-PhysGrids can be output to standard files.
+Physical grids can be output to standard files.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CCSM-CPL, POP, CICE, 
@@ -588,10 +588,10 @@ PhysGrids can be output to standard files.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{PhysGrids may be internally generated}
+\sreq{Physical grids may be internally generated}
 For an arbitrary number of points in the global domain of the associated
-DistGrid, it may be possible to specify an algorithm for internally
-determining the PhysGrid.
+distributed grid, it may be possible to specify an algorithm for internally
+determining the physical grid.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI,
@@ -601,9 +601,9 @@ determining the PhysGrid.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Null PhysGrid creation}
-It shall be possible to create any data objects associated with a PhysGrid without
-providing the data that a PhysGrid will contain.
+\sreq{Null physical grid creation}
+It shall be possible to create any data objects associated with a physical grid without
+providing the data that a physical grid will contain.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} CCSM-CPL, MIT \\
@@ -612,8 +612,8 @@ providing the data that a PhysGrid will contain.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{PhysGrid query}
-Methods shall be provided to query a PhysGrid for all information in contains.
+\sreq{Physical grid query}
+Methods shall be provided to query a physical grid for all information in contains.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
@@ -624,7 +624,7 @@ Methods shall be provided to query a PhysGrid for all information in contains.
 \end{reqlist}
 
 \sreq{Cell specification}
-PhysGrids shall specify both the locations of cell vertices, and the locations
+Physical grids shall specify both the locations of cell vertices, and the locations
 of cell centers.
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -635,7 +635,7 @@ of cell centers.
 \end{reqlist}
 
 \sreq{Refinement}
-A PhysGrid may be interpolated to generate a PhysGrid with an equivalent physical
+A physical grid may be interpolated to generate a physical grid with an equivalent physical
 domain at finer or coarser resolution.  Methods should be provided to accomplish such
 interpolation via a simple interface that uses the Regrid facility.
 \begin{reqlist}
@@ -645,14 +645,14 @@ interpolation via a simple interface that uses the Regrid facility.
 {\bf Verification:} Unit test\\
 {\bf Notes:} Necessary for runtime configurable resolution.  Also, note that 
 there may be a Catch-22 here, as Regrid would naturally provide the facility
-for regridding, but Regrid will typically require the target PhysGrid for
+for regridding, but Regrid will typically require the target physical grid for
 creating the regridding.  This requirement is also explicitly addressed within the
 Regrid requirement document.
 \end{reqlist}
 
 \sreq{Regeneration}
-A new PhysGrid may be generated for a given DistGrid from another PhysGrid.
-The global domain of the source PhysGrid may be the same as or a superset of
+A new physical grid may be generated for a given distributed grid from another physical grid.
+The global domain of the source physical grid may be the same as or a superset of
 the target global domain.
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -662,8 +662,8 @@ the target global domain.
 {\bf Notes:} Necessary for support of transposes, or of moving nests.
 \end{reqlist}
 
-\sreq{DistGrid reference}
-A PhysGrid may be queried for the DistGrid upon which it is based.
+\sreq{Distributed grid reference}
+A physical grid may be queried for the distributed grid upon which it is based.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:}  MIT\\
@@ -699,11 +699,11 @@ Z-coordinate ocean models.
 \end{reqlist}
 
 \sreq{Dimension extension}
-A new PhysGrid may be generated by adding a dimension to an existing PhysGrid.
-The global domain of the source PhysGrid may be the same as or a superset of
+A new physical grid may be generated by adding a dimension to an existing physical grid.
+The global domain of the source physical grid may be the same as or a superset of
 the target global domain.  The new dimension will be independent of the underlying
-DistGrid, and both PhysGrids share the same DistGrid.  The new dimension be in any
-order with respect to existing dimensions.
+distributed grid, and both physical grids share the same distributed grid.  The new
+dimension be in any order with respect to existing dimensions.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL \\
@@ -714,10 +714,10 @@ coordinates.
 \end{reqlist}
 
 \sreq{Dimension reduction}
-A new PhysGrid may be generated by removing a dimension from an existing PhysGrid.
+A new physical grid may be generated by removing a dimension from an existing physical grid.
 If the dimension that is removed is one that is present in the original underlying
-DistGrid, an appropriately reduced must also be provided.  Otherwise the new PhysGrid
-is based on the same DistGrid as the original PhysGrid.
+distributed grid, an appropriately reduced must also be provided.  Otherwise the new physical
+grid is based on the same distributed grid as the original physical grid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL \\
@@ -726,8 +726,8 @@ is based on the same DistGrid as the original PhysGrid.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Arbitrary dimensional PhysGrids}
-PhysGrids may have an arbitrary number of dimensions. 
+\sreq{Arbitrary dimensional physical grids}
+Physical grids may have an arbitrary number of dimensions. 
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} ? \\
@@ -737,9 +737,9 @@ PhysGrids may have an arbitrary number of dimensions.
 without adding much functionality.
 \end{reqlist}
 
-\sreq{1- 2- or 3- dimensional PhysGrids}
-PhysGrids may have up to 3 dimensions, but must have at least as many dimensions as the
-underlying DistGrid. 
+\sreq{1- 2- or 3- dimensional physical grids}
+Physical grids may have up to 3 dimensions, but must have at least as many dimensions as the
+underlying distributed grid. 
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} General Req. 1.5.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
@@ -748,13 +748,13 @@ underlying DistGrid.
 {\bf Verification:} Unit test\\
 {\bf Notes:} If supported, this facility would dramatically complicate implementation,
 without adding much functionality. Don't understand this note - without dimensions
-there is no PhysGrid - CNH?
+there is no physical grid - CNH?
 \end{reqlist}
 
 \sreq{Index order}
-A PhysGrid may use any index order (XYZ, XZY, etc.).  Methods shall be provided to
-specify the order upon creation and to query the order of a PhysGrid.  It shall
-also be possible (if not efficient) to extract PhysGrid information in any index
+A physical grid may use any index order (XYZ, XZY, etc.).  Methods shall be provided to
+specify the order upon creation and to query the order of a physical grid.  It shall
+also be possible (if not efficient) to extract physical grid information in any index
 order.
 \begin{reqlist}
 {\bf Priority:}  \\
@@ -769,11 +769,11 @@ PSAS (XYZ,XZY) \\
 \end{reqlist}
 
 \sreq{Dimension reordering}
-A new PhysGrid may be generated with reordered dimensions from another PhysGrid.
-If the new dimension order is inconsistent with the original DistGrid, a new
-consistent PhysGrid must also be provided.  To be consistent, all dimensions present
-in a DistGrid must have the same relative order in the PhysGrid.  (i.e. if the
-DistGrid uses XY, PhysGrids using XYZ, ZXY, or XZY are all consistent, while one using
+A new physical grid may be generated with reordered dimensions from another physical grid.
+If the new dimension order is inconsistent with the original distributed grid, a new
+consistent physical grid must also be provided.  To be consistent, all dimensions present
+in a distributed grid must have the same relative order in the physical grid.  (i.e. if the
+distributed grid uses XY, physical grids using XYZ, ZXY, or XZY are all consistent, while one using
 ZYX is not.)
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -787,8 +787,8 @@ ZYX is not.)
 A method shall be provided to return the cell index of a location.  An option shall
 be provided to either create an exception for any location outside of the valid
 range of the coordinate system, or to produce a gracefully treatable return value if
-the location is (1) outside of the range of the local PhysGrid, or (2) outside of the
-range of the global PhysGrid.  The index locations should be floating point numbers to
+the location is (1) outside of the range of the local physical grid, or (2) outside of the
+range of the global physical grid.  The index locations should be floating point numbers to
 facilitate interpolation.
 \begin{reqlist}
 {\bf Priority:} \\
@@ -799,10 +799,10 @@ facilitate interpolation.
 \end{reqlist}
 
 \sreq{Index location determination}
-A method shall be provided to return the physical locations from a PhysGrid of
+A method shall be provided to return the physical locations from a physical grid of
 floating point index coordinates.  Any index in the global physical grid may be
 used, although there may be performance differences between points that are on
-and off of the local PhysGrid.
+and off of the local physical grid.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} Regrid (maybe - depending on implementation) \\
@@ -813,8 +813,8 @@ and off of the local PhysGrid.
 
 \sreq{Horizontal physical grids}
 
-\ssreq{PhysGrids map projections}
-PhysGrids may be generated from a number of standard map projections, including
+\ssreq{Physical grids map projections}
+Physical grids may be generated from a number of standard map projections, including
 traditional and Mercator grids on a sphere, rotated latitude-longitude,
 tripolar, and Gaussian cylindrical grids.  Additional requested grids include 
 cubed-sphere, polar stereographic, and Lambert conformal projections.
@@ -829,9 +829,9 @@ internally generated.
 {\bf Arlindo Notes} The underlying (background?) grid associated with a location stream may be in one of these map projections.
 \end{reqlist}
 
-\ssreq{Unstretched Cartesian internal generation}
+\ssreq{Unstretched cartesian internal generation}
 A simple interface shall be provided to internally generate a uniform Cartesian
-coordinate PhysGrid, given the lengths of the edges of a square domain.
+coordinate physical grid, given the lengths of the edges of a square domain.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, MIT \\
@@ -842,7 +842,7 @@ coordinate PhysGrid, given the lengths of the edges of a square domain.
 
 \ssreq{Latitude-longitude internal generation}
 A simple interface shall be provided to internally generate a uniform (constant
-grid-spacing in degrees) latitude-longitude PhysGrid, given the extent of the domain
+grid-spacing in degrees) latitude-longitude physical grid, given the extent of the domain
 in latitude and longitude.                                                           
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -853,9 +853,9 @@ CAM-FV, PSAS, MIT \\
 {\bf Notes:} 
 \end{reqlist}
 
-\ssreq{Stand-alone PhysGrid generation examples}
+\ssreq{Stand-alone physical grid generation examples}
 Stand-alone software examples shall be provided to demonstrate the generation of a
-global PhysGrid file on a stretched latitude-longitude grid, a rotated
+global physical grid file on a stretched latitude-longitude grid, a rotated
 latitude-longitude grid and a tripolar grid. 
 \begin{reqlist}
 {\bf Priority:} 2 \\
@@ -864,7 +864,7 @@ DAO, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} These are intended both for real use, and for use as patterns in the
-creation of PhysGrid files for more complicated grids.  The above list may be
+creation of physical grid files for more complicated grids.  The above list may be
 altered, extended or reduced following discussions.
 \end{reqlist}
 
@@ -879,15 +879,15 @@ et al. 1996), reduced grids, and arbitrary nesting] will also be supported.
 CAM-FV, PSAS, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
-{\bf Notes:}  Topologies are intrinsic to both DistGrid and PhysGrid.  Since
-the topology information is so widely used in DistGrid, and since DistGrids
-are used to initiate PhysGrids, it is perhaps reasonable to make topology a
-property of DistGrid, which is then inherited and checked by a PhysGrid.
+{\bf Notes:}  Topologies are intrinsic to both distributed grids and physical grids.  Since
+the topology information is so widely used in distributed grids, and since distributed grids
+are used to initiate physical grids, it is perhaps reasonable to make topology a
+property of a distributed grid, which is then inherited and checked by a physical grid.
 \end{reqlist}
 
-\ssreq{PhysGrid topology consistency checking}
+\ssreq{Physical grid topology consistency checking}
 A mechanism shall be provided to verify that the locations of the points in
-a PhysGrid are consistent with the topology of the underlying DistGrid.  An
+a physical grid are consistent with the topology of the underlying distributed grid.  An
 exception shall be generated in case of inconsistency.
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -912,7 +912,7 @@ CAM-FV, PSAS, MIT  \\
 \end{reqlist}
 
 \ssreq{Staggered grids}
-Staggered grids will be supported as a single PhysGrid.
+Staggered grids will be supported as a single physical grid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} POP, CICE, 
@@ -999,7 +999,7 @@ sphere that is latitude in one dimension and Fourier zonal wavenumber
 \end{reqlist}
 
 \ssreq{Extensible horizontal functional representations}
-The PhysGrid design should not preclude the user from using alternative
+The physical grid design should not preclude the user from using alternative
 functional horizontal representations, such as spectral elements.
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -1011,7 +1011,7 @@ functional horizontal representations, such as spectral elements.
 
 \sreq{Vertical functional representations}
 \ssreq{Vertical user defined functions}
-The PhysGrid design should not preclude the user from using 
+The physical grid design should not preclude the user from using 
 functional vertical representations, such as EOFs, eigenfunctions,
 and finite elements.  The vertical coordinate of such a grid might be a wavenumer
 or a similar quantity.
@@ -1028,7 +1028,7 @@ inverse transform, and the adjoint transform.
 \end{reqlist}
 
 \sreq{Area overlap checking}
-A method shall be provided to check that PhysGrid cells do not overlap. 
+A method shall be provided to check that physical grid cells do not overlap. 
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} GFDL, CCSM-CPL, Regrid, MIT \\
@@ -1038,10 +1038,10 @@ A method shall be provided to check that PhysGrid cells do not overlap.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
-\sreq{PhysGrid attributes}
+\sreq{Physical grid attributes}
 
-\ssreq{PhysGrid name}
-Each PhysGrid has a unique name by which it can be referred.  If no name is
+\ssreq{Physical grid name}
+Each physical grid has a unique name by which it can be referred.  If no name is
 specified, one will automatically be generated.
 \begin{reqlist}
 {\bf Priority:} \\
@@ -1052,8 +1052,8 @@ specified, one will automatically be generated.
 \end{reqlist}
 
 \ssreq{Number of dimensions}
-A PhysGrid may be queried for the number of dimensions, which is
-set at the time of its creation.  Corresponding local and global PhysGrids have
+A physical grid may be queried for the number of dimensions, which is
+set at the time of its creation.  Corresponding local and global physical grids have
 the same number of dimensions.
 \begin{reqlist}
 {\bf Priority:} 2 \\
@@ -1077,7 +1077,7 @@ PSAS, MIT \\
 \end{reqlist}
 
 \ssreq{Dimension lengths}
-A PhysGrid may be queried for the local or global lengths of each of its dimensions.
+A physical grid may be queried for the local or global lengths of each of its dimensions.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, Regrid, 
@@ -1088,7 +1088,7 @@ PSAS, MIT \\
 \end{reqlist}
 
 \ssreq{Dimension attributes and units}
-A PhysGrid contains the units of each dimension, which may be set and queried. 
+A physical grid contains the units of each dimension, which may be set and queried. 
 Dimensions may also have additional named attributes.
 \begin{reqlist}
 {\bf Priority:} 2 \\
@@ -1100,9 +1100,9 @@ PSAS, MIT  \\
 \end{reqlist}
 
 \ssreq{Global attributes}
-A PhysGrid may have an arbitrary number of text or numeric attributes,
+A physical grid may have an arbitrary number of text or numeric attributes,
 which may be added, set and queried.  Each attribute has a text name by which it
-can be queried.  Also, a PhysGrid can be queried for a list of all global
+can be queried.  Also, a physical grid can be queried for a list of all global
 attribute names.
 
 \begin{reqlist}
@@ -1121,7 +1121,7 @@ Grid metrics are all of the lengths (or partial derivatives of distances with
 index number) and related quantities required to do a variety of calculations. 
 All metrics are a function of the grid and must be static with time.  Metric-like
 fields that vary with time (thicknesses in isopycnal/isentropic coordinates
-or node locations in fully Lagrangian codes) are not handled by PhysGrid.
+or node locations in fully Lagrangian codes) are not handled by the physical grid.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, CICE, MIT \\
@@ -1162,7 +1162,7 @@ Some metrics may not have units i.e. scale factors with latitude etc... - CNH.
 \end{reqlist}
 
 \sreq{Available metrics}
-All metrics are optional.  In a particular instance of a PhysGrid it shall be
+All metrics are optional.  In a particular instance of a physical grid it shall be
 possible to specify which metric terms are available.  Typically, available
 metric information includes an extensive list of grid lengths, cell areas, and
 the angle between logical and physical north.  Some functionality (e.g. certain
@@ -1177,7 +1177,7 @@ regridding) may be limited if certain common metric terms are omitted.
 
 \sreq{On-demand metrics}
 In cases where one metric can be generated internally either from grid information
-or from other metrics or from another PhysGrid, a method may be provided to create
+or from other metrics or from another physical grid, a method may be provided to create
 that metric field only once it is clear that it will be needed.
 \begin{reqlist}
 {\bf Priority:} ? \\
@@ -1392,7 +1392,7 @@ the point locations of a grid.
 
 \sreq{Additional metrics}
 It shall be possible for a user to specify additional metric terms to be associated
-with a PhysGrid.
+with a physical grid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, MIT \\
@@ -1420,7 +1420,7 @@ land.  Masks are also important for nested applications.
 \end{reqlist}
 
 \sreq{Arbitrary number of masks}
-A PhysGrid may have an arbitrary number of masks associated with it.
+A physical grid may have an arbitrary number of masks associated with it.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} POP, MIT \\
@@ -1430,7 +1430,7 @@ A PhysGrid may have an arbitrary number of masks associated with it.
 \end{reqlist}
 
 \sreq{Mask names}
-Each of the masks associated with a PhysGrid is associated with a
+Each of the masks associated with a physical grid is associated with a
 unique name.  A method shall be specified to return a pointer to a mask given
 its name.
 \begin{reqlist}
@@ -1475,7 +1475,7 @@ A method shall be provided to generate the complement of a mask.
 
 %cnh m%titude
 %cnh ===============================================================================
-%cnh \req{Initialization of a Physical Grids}
+%cnh \req{Initialization of a Physical Grid}
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\
 %cnh {\bf Notes:} Two style of initialization are required for setting up the
@@ -2604,7 +2604,7 @@ A method shall be provided to generate the complement of a mask.
 %cnh \end{reqlist}
 %cnh 
 %cnh \ssreq{Extensible horizontal functional representations}
-%cnh The PhysGrid design should not preclude the user from using alternative
+%cnh The Physical Grid element design should not preclude the user from using alternative
 %cnh functional horizontal representations, such as spectral elements.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 1 \\
@@ -2632,7 +2632,7 @@ A method shall be provided to generate the complement of a mask.
 %cnh \end{reqlist}
 %cnh 
 %cnh \ssreq{Area overlap checking}
-%cnh A method shall be provided to check that PhysGrid cells do not overlap. 
+%cnh A method shall be provided to check that physical grid cells do not overlap. 
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 2 \\
 %cnh {\bf Source:} GFDL, NCAR (required) \\
@@ -2655,8 +2655,8 @@ A method shall be provided to generate the complement of a mask.
 %cnh \end{reqlist}
 %cnh 
 %cnh \ssreq{PhysGrid registry}
-%cnh Upon creation, the name and a pointer to each PhysGrid shall be stored in a
-%cnh registry.  A pointer to any PhysGrid may be determined given its name.
+%cnh Upon creation, the name and a pointer to each physical grid shall be stored in a
+%cnh registry.  A pointer to any physical grid may be determined given its name.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 3 \\
 %cnh {\bf Source:} \\
@@ -2666,7 +2666,7 @@ A method shall be provided to generate the complement of a mask.
 %cnh \end{reqlist}
 %cnh 
 %cnh \ssreq{Number of dimensions}
-%cnh A PhysGrid may be queried for the number of dimensions, which is
+%cnh A physical grid may be queried for the number of dimensions, which is
 %cnh set at the time of its creation.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 2 \\
@@ -2687,7 +2687,7 @@ A method shall be provided to generate the complement of a mask.
 %cnh \end{reqlist}
 %cnh 
 %cnh \ssreq{Dimension lengths}
-%cnh A PhysGrid may be queried for the local or global lengths of each of its dimensions.
+%cnh A physical grid may be queried for the local or global lengths of each of its dimensions.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 2 \\
 %cnh {\bf Source:} \\
@@ -2708,9 +2708,9 @@ A method shall be provided to generate the complement of a mask.
 %cnh \end{reqlist}
 %cnh 
 %cnh \ssreq{Global attributes}
-%cnh A PhysGrid may have an arbitrary number of text or numeric attributes,
+%cnh A physical grid may have an arbitrary number of text or numeric attributes,
 %cnh which may be added, set and queried.  Each attribute has a text name by which it
-%cnh can be queried.  Also, a PhysGrid can be queried for a list of all global
+%cnh can be queried.  Also, a physical grid can be queried for a list of all global
 %cnh attribute names.
 %cnh 
 %cnh \begin{reqlist}
@@ -2967,7 +2967,7 @@ A method shall be provided to generate the complement of a mask.
 %cnh \end{reqlist}
 %cnh 
 %cnh \sreq{Arbitrary number of masks}
-%cnh A PhysGrid may have an arbitrary number of masks associated with it.
+%cnh A physical grid may have an arbitrary number of masks associated with it.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 2 \\
 %cnh {\bf Source:} ? \\

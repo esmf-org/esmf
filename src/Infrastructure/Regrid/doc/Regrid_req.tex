@@ -1,10 +1,10 @@
-% $Id: Regrid_req.tex,v 1.14 2002/05/20 17:19:45 michalak Exp $
+% $Id: Regrid_req.tex,v 1.15 2002/05/23 20:07:19 jwolfe Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
 %===============================================================================
 %===============================================================================
-\req{General Regridding Requirements}
+\req{General regridding requirements}
 
 %-------------------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ Components may be able to write regridding information to a file.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
-\sreq{Support for ESMF Grids}
+\sreq{Support for ESMF grids}
 
 Regridding operations must be available for all supported ESMF grids,
 including ungridded data.  Not all regridding operations are appropriate for
@@ -436,7 +436,7 @@ coordinate singularities such as the poles in spherical coordinates.
 \sreq{Regridding based on index space}
 
 Methods must be available for regridding based
-only on logical indices of grid points and thus only on DistGrid information.  
+only on logical indices of grid points and thus only on distributed grid information.  
 Such a function is useful for nested grid and multi-grid applications where 
 no physical grid information is required for creating the regridding.
 
@@ -464,8 +464,8 @@ re-creating a regridding using calls to create or destroy methods.
 {\bf Source:}  WRF required \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} A requirement for this exists in DistGrid, so
-             Regrid would utilize the DistGrid functionality to 
+{\bf Notes:} A requirement for this exists for the distributed grid, so
+             Regrid would utilize the distributed grid functionality to 
              accomplish this.
 \end{reqlist}
 
@@ -474,7 +474,7 @@ re-creating a regridding using calls to create or destroy methods.
 
 Methods shall be supplied for regridding between physical space and
 Fourier space.  The adjoints shall also be supplied.  Ordering in
-Fourier space will be defined by DistGrid.  This requirement applies only
+Fourier space will be defined by the distributed grid.  This requirement applies only
 to grids consistent with the Fourier transform (eg lat/lon grids,
 reduced grids, spectral elements, etc.).
 

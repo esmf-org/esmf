@@ -22,6 +22,9 @@ object model but simply to achieve a common language.
    alarm on a real alarm clock except that in order to determine whether 
 it is "ringing", an alarm is "read" by an explicit application action.
 
+\item[Addressable node] \label{glos:Anode} A set of processors that are
+  capable of addressing the same set of blocks of physical memory.
+
 \item[Application] \label{glos:Application} A coherent computational 
   entity run 
   as a single executable or set of communicating executables.  It 
@@ -162,7 +165,7 @@ exhange.
   fields, as well as to create and execute grid transforms. 
 
 \item[Grid metrics] \label{glos:GridMetrics} Terms relating measurements 
-  in index space to physical gris quantities like distances and areas.
+  in index space to physical grid quantities like distances and areas.
 
 \item[Grid staggering] \label{glos:GridStagger} 
   A descriptor of relative locations
@@ -237,6 +240,9 @@ exhange.
   associated with an local domain.  The memory domain is always at least 
   as large as the local domain.
 
+\item[Memory node] \label{glos:Mnode} A set of processors
+  sharing equal flat access to a block of physical memory.
+
 \item[MPMD] \label{glos:MPMD} Multiple Program Multiple Datastream.
   Multiple executables, any of which could itself be an SPMD
   executable, executing independently within an application.
@@ -268,6 +274,9 @@ and days per month as in a non-leap year of a Gregorian calendar.
 \item[Platform] \label{glos:Platform} 
   The processor hardware, operating system, compiler and
   parallel library that together form a unique compilation target.
+
+\item[Processing node] \label{glos:Pnode} A set of processors to which an
+  operating system scheduler is capable of assigning to a single job.
 
 \item[Restart state] \label{glos:RestartState} The component 
   data that 

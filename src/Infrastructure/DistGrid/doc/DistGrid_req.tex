@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.20 2002/05/20 16:31:13 michalak Exp $
+% $Id: DistGrid_req.tex,v 1.21 2002/05/23 20:07:18 jwolfe Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -9,7 +9,7 @@ types follow in Part~\ref{DG:gridtypes}.
 
 \req{Grid definition}
 
-\sreq{Generation of PE layout}
+\sreq{Generation of a layout}
 
 Given a global domain and a PElist, there will be methods to derive an
 appropriate layout of PEs in multiple dimensions.
@@ -22,9 +22,9 @@ appropriate layout of PEs in multiple dimensions.
 {\bf Notes:}
 \end{reqlist}
 
-\ssreq{Subdivide a PE layout}
+\ssreq{Subdivide a layout}
 
-Subdivide a PE layout.  All Distgrid operations shall work on such a sub-layout.
+Subdivide a layout.  All distributed grid operations shall work on such a sub-layout.
 
 \begin{reqlist}
 {\bf Priority:} \\
@@ -34,9 +34,9 @@ Subdivide a PE layout.  All Distgrid operations shall work on such a sub-layout.
 {\bf Notes:}
 \end{reqlist}
 
-\sreq{User-specified PE layout}
+\sreq{User-specified layout}
 
-It will be possible to override the internally generated PE layout above
+It will be possible to override the internally generated layout above
 by direct user specification.
 
 \begin{reqlist}
@@ -50,7 +50,7 @@ by direct user specification.
 \sreq{1D decomposition}
 
 ESMF permits 1D domain decomposition, i.e. the distribution of a
-(possibly multidimensional) array over a 1D PE layout.
+(possibly multidimensional) array over a 1D layout.
 
 \begin{reqlist}
 {\bf Priority:} \\ 1
@@ -94,7 +94,7 @@ etc).
 \sreq{2D decomposition}
 
 ESMF permits 2D domain decomposition, i.e. the distribution of a
-(2- or more dimensional) array over a 2D PE layout.
+(2- or more dimensional) array over a 2D layout.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
@@ -155,7 +155,7 @@ distributed along a single axis of distribution.
 \sreq{3D decomposition}
 
 ESMF permits 3D domain decomposition, i.e. the distribution of a
-(3- or more dimensional) array over a 3D PE layout.
+(3- or more dimensional) array over a 3D layout.
 
 \begin{reqlist}
 {\bf Priority:} \\
@@ -167,7 +167,7 @@ ESMF permits 3D domain decomposition, i.e. the distribution of a
 
 \sreq{Generation of a computational domain decomposition}
 
-Given a global domain and a PE layout, there will be methods to assign
+Given a global domain and a layout, there will be methods to assign
 each point in the domain to one PE for computation. 
 
 \begin{reqlist}
@@ -183,8 +183,7 @@ each point in the domain to one PE for computation.
   The partitions do not necessarily have a PE associated with it. The
   partitions may define a task queue from which PEs assigned to
   threads pop tasks. The pool of PEs available for threading is drawn
-  from the associated PE list, of which not all are part of the PE
-  layout.
+  from the associated PE list, of which not all are part of the layout.
   
   Threads can be mapped on to an anode, which can consist of multiple
   PEs.  The main thing I'm trying to arrive at is that the
@@ -208,7 +207,7 @@ extents.
 {\bf Notes:} WS:  there will there be a fairly wide spectrum 
 of decomposition create methods, with varying degrees of user
 specification, e.g. less specific ``distributed a 3-D XYZ array 
-over a 2-D PE layout in a block-cyclic manner''), or more 
+over a 2-D layout in a block-cyclic manner''), or more 
 user-specified (``map the global domain to the following PE 
 and local indices'').
 
@@ -273,10 +272,10 @@ specify this as input information for grid topology generation.
 {\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
-{\bf Notes:} it is natural to treat this as a \textbf{DistGrid}
+{\bf Notes:} it is natural to treat this as a distributed grid
   feature, rather than having separate edge detection code in
   applications. There is more than one way to treat LBCs in a
-  \textbf{DistGrid}: these will be spelt out anon.
+  distributed grid: these will be spelt out anon.
    
 \end{reqlist}
 
@@ -326,7 +325,7 @@ computational domain along each axis of decomposition.
 \ssreq{Maximum domain extent}
 
 It shall be possible to retrieve the maximum size along each axis of
-decomposition of all the computational domains in the \textbf{DistGrid}. 
+decomposition of all the computational domains in the distributed grid. 
 
 \begin{reqlist}
 {\bf Priority:} \\ 
@@ -339,7 +338,7 @@ decomposition of all the computational domains in the \textbf{DistGrid}.
 \ssreq{Computational domain list}
 
 ESMF methods will be provided to retrieve the list of computational
-domains associated with each PE of a  \textbf{DistGrid}.
+domains associated with each PE of a distributed grid.
 
 \begin{reqlist}
 {\bf Priority:} \\ 
@@ -395,7 +394,7 @@ data domain along each axis of decomposition.
 \ssreq{Maximum domain extent}
 
 It shall be possible to retrieve the maximum size along each axis of
-decomposition of all the data domains in the \textbf{DistGrid}. 
+decomposition of all the data domains in the distributed grid. 
 
 \begin{reqlist}
 {\bf Priority:} \\
@@ -429,7 +428,7 @@ globally-conformant indices.
 \ssreq{Data domain list}
 
 ESMF methods will be provided to retrieve the list of data
-domains associated with each PE of a  \textbf{DistGrid}.
+domains associated with each PE of a distributed grid.
 
 \begin{reqlist}
 {\bf Priority:} \\
@@ -471,9 +470,9 @@ global domain along each axis of decomposition.
 indices are known a priori and does not need to be retrieved.
 \end{reqlist}
 
-\sreq{PE layout retrieval}
+\sreq{Layout retrieval}
 
-ESMF methods will be provided to publish and retrieve the PE layout
+ESMF methods will be provided to publish and retrieve the layout
 associated with a distributed grid.
 
 \begin{reqlist}
@@ -517,7 +516,7 @@ these mappings be highly efficient (a challenging programming task)?
 
 \sreq{Cross-component queries}
 
-It shall be possible to retrieve the \textbf{DistGrid} associated with
+It shall be possible to retrieve the distributed grid associated with
 any component in an application in a form that permits all the query
 operations listed above.
 
@@ -586,7 +585,7 @@ data transfer may not be complete when the call returns.
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} maybe we're pre-empting design issues, but I'd want
-  issues like wait-for-completion dealt with within \textbf{DistGrid}.
+  issues like wait-for-completion dealt with within distributed grids.
 \\WRF: This is only useful if we also have a way of computing separately the
 interior (those points that do not have data dependencies on the halo)
 and boundary (those around the edge that do)
@@ -684,7 +683,7 @@ data transfer may not be complete when the call returns.
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} maybe we're pre-empting design issues, but I'd want
-  issues like wait-for-completion dealt with within \textbf{DistGrid}.
+  issues like wait-for-completion dealt with within distributed grids.
 \end{reqlist}
 
 \sreq{Blocked data transpose}
@@ -864,7 +863,7 @@ distribution for aggregate data transfer.
   methods may be simple and efficient.
   
   Bundling methods with similar requirements may appear in other
-  documents (e.g \textbf{Fields}, \textbf{Regrid}, \textbf{PhysGrid}),
+  documents (e.g \textbf{Fields}, \textbf{Regrid}, \textbf{Physical Grids}),
   but the methods there will likely cascade to here, as the main
   utility of bundles lies in aggregate data transfer methods on
   distributed grids. The other documents should derive an equivalent
@@ -888,7 +887,7 @@ a distributed grid.
 
 \sreq{Add an array}
 
-It must be possible to add any array on a conformant \textbf{DistGrid}
+It must be possible to add any array on a conformant distributed grid
 to a bundle.
 
 \begin{reqlist}
@@ -914,14 +913,14 @@ It must be possible to delete any array from a bundle.
 
 \sreq{Merge bundles}
 
-It must be possible to merge bundles sharing a \textbf{DistGrid}.
+It must be possible to merge bundles sharing a distributed grid.
 
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} CCSM-CPL, MIT \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
-{\bf Notes:} Two bundles on different \textbf{DistGrid}s may end up on the same
+{\bf Notes:} Two bundles on different distributed grids may end up on the same
   one after a data transpose.
 \end{reqlist}
 
@@ -1128,7 +1127,7 @@ retrievable.
 {\bf Notes:}
 \end{reqlist}
 
-\req{Blocked and Unblocked Collectives}
+\req{Blocked and unblocked collectives}
 
 It shall be possible to perform gather, scatter, broadcast, and reduction in both blocked and unblocked forms.
 
@@ -1228,7 +1227,7 @@ WRF (MesoNH)
 \item[Notes]
 \end{reqlist}
 
-\part{Requirements for specific grid types} \label{DG:gridtypes}
+\part{Requirements for Specific Grid Types} \label{DG:gridtypes}
 
 The distributed grid module will provide support the following 
 physical grids:
@@ -1399,7 +1398,7 @@ discussions on these grids.
 
 Nested grids are overlapping grids with certain properties that may be
 possible to exploit for efficiency. Many of the requirements having to
-do with data exchange between nested grids will appear in the PhysGrid
+do with data exchange between nested grids will appear in the physical grid
 and Regrid documents. Some requirements of nested grids appear here:
 these concern the special case of \emph{mesh-aligned} nested
 grids. Nesting is defined to be mesh-aligned when every coarse grid
@@ -1429,7 +1428,7 @@ Unstructured grids and ungridded location streams will come associated
 with an underlying background grid (see~\ref{DG:terms}). Requirements
 in this section use the background grid to define operations on
 unstructured grids and ungridded location streams. For the purpose of
-\emph{DistGrid}, unstructured grids and ungridded location streams are
+a distributed grid, unstructured grids and ungridded location streams are
 aligned on a single axis, each index of which is associated with a
 background grid cell.
 
@@ -1444,7 +1443,7 @@ grids and ungridded location streams.
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} The method to generate the background grid requires
-  location information, and belongs to \textbf{PhysGrid}.  Needed
+  location information, and belongs to the physical grid.  Needed
   for PSAS, but not a milestone.
 \end{reqlist}
 

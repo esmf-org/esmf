@@ -1,11 +1,11 @@
-% $Id: DistGrid_terms.tex,v 1.6 2002/04/22 17:37:08 vbalaji Exp $
+% $Id: DistGrid_terms.tex,v 1.7 2002/05/23 20:07:18 jwolfe Exp $
 
 \begin{description}
 \item[PElist] a list of processor IDs associated with a component. (We
   use PE as shorthand for processor, or ``processing element'').
 \item[Layout] distribution of elements of a PElist across multiple
   dimensions for the purpose of domain decomposition. All members of
-  the PElist may not necessarily be assigned to the PE layout, but me
+  the PElist may not necessarily be assigned to the layout, but me
   set aside for the pool of PEs available for multi-threading.
 \item[Node] ESMF recognizes a machine model based on a multi-level node
   hierarchy. An \emph{mnode} or memory node, is a set of processors
@@ -47,9 +47,9 @@
   with PEs, and describes the the topology and connectivity of the
   layout.
 \item[Domain decomposition] the act of grid distribution: creating a
-  PE layout; and associating gridpoints with PEs. The dimensionality
+  layout; and associating gridpoints with PEs. The dimensionality
   of the domain decomposition is the dimensionality of the associated
-  PE layout.
+  layout.
 \item[Regular distribution] the distribution along any axis is
   independent of position on any other axis. An \emph{irregular
     distribution} tiles the global domain with irregularly-sized
