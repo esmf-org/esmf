@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.17 2003/04/24 17:07:11 flanigan Exp $ 
+# $Id: base_variables,v 1.18 2003/04/25 21:23:45 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -49,8 +49,8 @@ CXX_CCV		   = CC -version
 CXX_SYS_LIB	   = -lfpe -lcomplex -lfortran -lftn -lfastm -lmalloc 
 C_CXXF90LD         = CC -64 /usr/lib64/c++init.o
 C_F90CXXLD         = f90 -64 /usr/lib64/c++init.o
-C_CXXF90LIBS       = -lftn90 -lftn -lfortran
-C_F90CXXLIBS       = -lC -lCio -lc
+C_CXXF90LIBS       = -rpath . -lftn90 -lftn -lfortran
+C_F90CXXLIBS       = -rpath . -lC -lCio -lc
 C_CXXSO            =  CC -64 -shared -rpath .
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g
