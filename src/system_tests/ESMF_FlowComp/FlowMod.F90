@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.1 2003/10/09 20:56:13 cdeluca Exp $
+! $Id: FlowMod.F90,v 1.2 2003/10/10 17:02:15 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -62,11 +62,11 @@
       integer :: i, j
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
-      real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
+      real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
-      integer :: horz_coord_system, vert_coord_system
+      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde, halo_width
 !
 ! Set initial values
@@ -81,10 +81,10 @@
 !
         counts(1) = 40
         counts(2) = 20
-        x_min = 0.0
-        x_max = 200.0
-        y_min = 0.0
-        y_max = 50.0
+        g_min(1) = 0.0
+        g_max(1) = 200.0
+        g_min(2) = 0.0
+        g_max(2) = 50.0
         horz_gridtype = ESMF_GridType_XY
         vert_gridtype = ESMF_GridType_Unknown
         horz_stagger = ESMF_GridStagger_A
@@ -93,9 +93,8 @@
         vert_coord_system = ESMF_CoordSystem_Unknown
         halo_width = 1
 
-        grid = ESMF_GridCreate(counts=counts, &
-                               x_min=x_min, x_max=x_max, &
-                               y_min=y_min, y_max=y_max, &
+        grid = ESMF_GridCreate(2, counts=counts, &
+                               min=g_min, max=g_max, &
                                layout=layout, &
                                horz_gridtype=horz_gridtype, &
                                vert_gridtype=vert_gridtype, &

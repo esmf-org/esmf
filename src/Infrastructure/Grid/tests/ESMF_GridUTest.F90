@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.17 2003/09/22 20:25:15 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.18 2003/10/10 16:58:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.17 2003/09/22 20:25:15 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.18 2003/10/10 16:58:33 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -76,10 +76,10 @@
       integer :: nDE_i, nDE_j
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
-      integer :: horz_coord_system, vert_coord_system
+      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: status
       integer :: phy_grid_id
-      real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
+      real(ESMF_KIND_R8) :: grid_min(2), grid_max(2)
       type(ESMF_Grid) :: grid, grid1, grid2
       type(ESMF_GridType) :: grid_type
       type(ESMF_DELayout) :: layout, layout2
@@ -107,10 +107,10 @@
       vert_stagger = ESMF_GridStagger_Unknown
       horz_coord_system = ESMF_CoordSystem_Cartesian
       vert_coord_system = ESMF_CoordSystem_Unknown
-      x_min = 0.0
-      x_max = 10.0
-      y_min = 0.0
-      y_max = 12.0
+      grid_min(1) = 0.0
+      grid_max(1) = 10.0
+      grid_min(2) = 0.0
+      grid_max(2) = 12.0
       name = "test grid 1"
 
       !NEX_UTest
@@ -122,9 +122,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-     grid = ESMF_GridCreate(counts=counts, &
-                            x_min=x_min, x_max=x_max, &
-                            y_min=y_min, y_max=y_max, &
+     grid = ESMF_GridCreate(2, counts=counts, &
+                            min=grid_min, max=grid_max, &
                             layout=layout, &
                             horz_gridtype=horz_gridtype, &
                             vert_gridtype=vert_gridtype, &
@@ -151,11 +150,11 @@
       write(name, *) "Printing a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      ! THe following code is commented out because it crashes.
+      ! The following code is commented out because it crashes. 
+      ! (Because the layout being passed in is uninitialized.)
       ! Bug report 796975 has been filed
-      ! grid = ESMF_GridCreate(counts=counts, &
-      !                      x_min=x_min, x_max=x_max, &
-      !                      y_min=y_min, y_max=y_max, &
+      !grid = ESMF_GridCreate(2, counts=counts, &
+      !                      min=grid_min, max=grid_max, &
       !                      layout=layout2, &
       !                      horz_gridtype=horz_gridtype, &
       !                      vert_gridtype=vert_gridtype, &
@@ -171,14 +170,15 @@
       !write(name, *) "Creating a Grid with a non created layout Test"
       !call ESMF_Test((status.eq.ESMF_SUCCESS), &
       !                name, failMsg, result, ESMF_SRCLINE)
-      x_min = 7.0
-      x_max = -10.0
-      y_min = 5.0
-      y_max = 1.0
+      !------------------------------------------------------------------------
 
-     grid = ESMF_GridCreate(counts=counts, &
-                            x_min=x_min, x_max=x_max, &
-                            y_min=y_min, y_max=y_max, &
+      grid_min(1) = 7.0
+      grid_max(1) = -10.0
+      grid_min(2) = 5.0
+      grid_max(2) = 1.0
+
+      grid = ESMF_GridCreate(2, counts=counts, &
+                            min=grid_min, max=grid_max, &
                             layout=layout, &
                             horz_gridtype=horz_gridtype, &
                             vert_gridtype=vert_gridtype, &
@@ -207,21 +207,21 @@
 #ifdef ESMF_EXHAUSTIVE
 
       ! Test creating an internal Grid
-      ! grid2 = ESMF_GridCreateInternal(counts=counts, &
-      !                       x_min=x_min, x_max=x_max, &
-      !		             layout=layout, &
-      !                       horz_gridtype=horz_gridtype, &
-      !                       vert_gridtype=vert_gridtype, &
-      !                       horz_stagger=horz_stagger, &
-      !                       vert_stagger=vert_stagger, &
-      !                       horz_coord_system=horz_coord_system, &
-      !                       vert_coord_system=vert_coord_system, &
-      !                       name=name, rc=status)
+      grid2 = ESMF_GridCreate(2, counts=counts, &
+                              min=grid_min, max=grid_max, &
+       		              layout=layout, &
+                              horz_gridtype=horz_gridtype, &
+                              vert_gridtype=vert_gridtype, &
+                              horz_stagger=horz_stagger, &
+                              vert_stagger=vert_stagger, &
+                              horz_coord_system=horz_coord_system, &
+                              vert_coord_system=vert_coord_system, &
+                              name=name, rc=status)
 
-      !  write(failMsg, *) ""
-      ! write(name, *) "Creating an Internal Grid Test"
-      ! call ESMF_Test((status.eq.ESMF_SUCCESS), &
-      !               name, failMsg, result, ESMF_SRCLINE)
+         write(failMsg, *) ""
+        write(name, *) "Creating an Internal Grid Test"
+        call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
