@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.2 2004/04/28 20:14:23 cpboulder Exp $
+// $Id: ESMC_LogErr_F.C,v 1.3 2004/04/28 21:21:43 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.2 2004/04/28 20:14:23 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.3 2004/04/28 21:21:43 cpboulder Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -58,8 +58,8 @@ extern "C" {
 // 
 // !ARGUMENTS:
       char *filename,           // in - F90 filename, non-null terminated string
-      int nlen,                 // hidden/in - strlen count for filename
-      int *rc){                 // out - return code
+      int *rc,                 // hidden/in - strlen count for filename
+      int nlen){                 // out - return code
 // 
 // !DESCRIPTION:
 //     Initialize C++ version of LogErr.
@@ -103,9 +103,7 @@ extern "C" {
 //
 //EOP
 // !REQUIREMENTS: 
-  
-  *rc = ESMF_FAILURE;
-  if (nameLogErrFile) delete [] nameLogErrFile;
+
   *rc = ESMF_SUCCESS;
   return;
 

@@ -83,12 +83,13 @@ type ESMF_Log
     integer max_elements
     type(ESMF_LOGENTRY), dimension(1)::LOG_ENTRY
     character(len=32) nameLogErrFile      
-    integer :: MaxTryOpen=100000
 !If standardout not unit 6, must be changed here.
 #ifndef ESMF_NO_INITIALIZERS
+    integer :: MaxTryOpen=100000
     integer :: stdOutUnitNumber=6
     type(ESMF_Logical) :: fileIO=ESMF_FALSE !File written to standard out
 #else
+    integer :: MaxTryOpen
     integer :: stdOutUnitNumber
     type(ESMF_Logical) :: fileIO
 #endif
@@ -556,7 +557,7 @@ end subroutine ESMF_LogGet
    	enddo 
 	if (gLog%FileIsOpen .eq. ESMF_FALSE) return
 	gLog%unitNumber = i  
-	call c_ESMC_LogInitialize(filename,len(filename),rc2)
+	call c_ESMC_LogInitialize(filename,rc2)
 	if (present(rc)) rc=ESMF_SUCCESS
 	
 end subroutine ESMF_LogInitialize
