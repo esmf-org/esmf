@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.193 2004/08/24 19:30:01 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.194 2004/09/02 21:24:18 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.193 2004/08/24 19:30:01 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.194 2004/09/02 21:24:18 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1167,17 +1167,18 @@
 !     \item[{[countsPerDEDim2]}]
 !          Array denoting the number of grid cells per DE in the second
 !          decomposition axis.  Please see the description of
-!          [{[countsPerDEDim1]}] above for more deatils
+!          [{[countsPerDEDim1]}] above for more details
 !     \item[{[decompIds]}]
-!          Integer array of identifiers for which {\tt grid} axes are decomposed.
+!          Integer array identifying which {\tt grid} axes are decomposed.
 !          This array describes the relationship between the {\tt grid} and the
 !          {\tt delayout}.  The elements of this array contains decompostion
-!          information for the corresponding grid axis.  If this element is:
+!          information for the corresponding grid axis.  The following is a
+!          list of valid values and the meaning of each:
 !                  0   the grid axis is not distributed;
 !                  1   the grid axis is distributed by the first decomposition
 !                      axis in the {\tt delayout};
 !                  2   the grid axis is distributed by the second decomposition
-!                      axis in the {\tt delayout};
+!                      axis in the {\tt delayout}.
 !          The number of array elements should be greater or equal to the number
 !          of grid dimensions.  The default is that the first grid axis is
 !          distributed by the first decompostion axis, the second grid axis is
