@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.18 2004/03/16 23:28:16 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.19 2004/03/18 20:28:02 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -92,11 +92,11 @@
 !   ! Example 3:
 !   !
 !   !  The user wishes to associate different data with the Field
-!   !  created in example 1.  The detach data call returns the 
-!   !  pointer to the old data array; the attach call passes in the 
+!   !  created in example 1.  The get data call returns the 
+!   !  pointer to the old data array; the set call passes in the 
 !   !  pointer to the new array.
 
-    call ESMF_FieldDetachData(field1, array=arraya, rc=rc)
+    call ESMF_FieldGetArray(field1, array=arraya, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -105,7 +105,7 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_FieldAttachData(field1, array=arrayb, rc=rc)
+    call ESMF_FieldSetArray(field1, array=arrayb, rc=rc)
     print *, "Field example 3 returned"
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
