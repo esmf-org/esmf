@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.17 2004/04/14 20:04:45 jwolfe Exp $
+! $Id: ESMF_BundleComm.F90,v 1.18 2004/04/14 20:45:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.17 2004/04/14 20:04:45 jwolfe Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.18 2004/04/14 20:45:00 nscollins Exp $'
 
 !==============================================================================
 !
@@ -128,7 +128,7 @@
       type(ESMF_Bundle), intent(inout) :: bundle                 
       type(ESMF_Array), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -206,7 +206,7 @@
       integer, intent(in) :: destinationDE
       type(ESMF_Array), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -355,7 +355,7 @@
       integer :: rtype
       integer :: result
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -427,7 +427,7 @@
       integer, intent(in) :: sourceDE
       type(ESMF_Bundle), intent(inout) :: bundle                 
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -551,7 +551,7 @@
       type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
-      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -729,7 +729,7 @@
       type(ESMF_newDELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
-      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -949,7 +949,7 @@
       type(ESMF_Bundle), intent(inout) :: dstbundle
       type(ESMF_newDELayout), intent(in) :: parentDElayout
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:

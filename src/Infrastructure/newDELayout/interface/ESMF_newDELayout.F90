@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.21 2004/04/14 20:08:55 nscollins Exp $
+! $Id: ESMF_newDELayout.F90,v 1.22 2004/04/14 20:46:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -106,11 +106,13 @@
 
 !------------------------------------------------------------------------------
 
+      ! TODO: is this needed?  there is a basic ESMF_CommHandle type
+      ! already defined.  take this out for now.
       ! CommHandle type for DELayout
-      type ESMF_DELayoutCommHandle
-        sequence
-        integer:: dummy ! not yet used...
-      end type
+      !type ESMF_DELayoutCommHandle
+      !  sequence
+      !  integer:: dummy ! not yet used...
+      !end type
 
 !------------------------------------------------------------------------------
 
@@ -124,7 +126,7 @@
       public ESMF_R4_AP
       public ESMF_R8_AP
       public ESMF_DELayoutData
-      public ESMF_DELayoutCommHandle
+      !public ESMF_DELayoutCommHandle
       
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
@@ -163,7 +165,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.21 2004/04/14 20:08:55 nscollins Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.22 2004/04/14 20:46:05 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1094,7 +1096,7 @@ contains
     integer,                       intent(in)            :: src
     integer,                       intent(in)            :: dst
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1173,7 +1175,7 @@ contains
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: root
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1249,7 +1251,7 @@ contains
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: root
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1326,7 +1328,7 @@ contains
     integer,                       intent(in)            :: count
     type(ESMF_newOp),              intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1397,7 +1399,7 @@ contains
     integer,                       intent(in)            :: count
     type(ESMF_newOp),              intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle
+    type(ESMF_CommHandle), intent(out), optional :: commHandle
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1469,7 +1471,7 @@ contains
     integer,                       intent(in)            :: count
     type(ESMF_newOp),              intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle
+    type(ESMF_CommHandle), intent(out), optional :: commHandle
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1547,7 +1549,7 @@ contains
     integer,                       intent(in)            :: src
     integer,                       intent(in)            :: dst
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1625,7 +1627,7 @@ contains
     integer,                       intent(in)            :: src
     integer,                       intent(in)            :: dst
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1703,7 +1705,7 @@ contains
     integer,                       intent(in)            :: src
     integer,                       intent(in)            :: dst
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag    
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1780,7 +1782,7 @@ contains
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: root
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1855,7 +1857,7 @@ contains
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: root
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -1930,7 +1932,7 @@ contains
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: root
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -2005,7 +2007,7 @@ contains
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: root
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -2080,7 +2082,7 @@ contains
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: root
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -2155,7 +2157,7 @@ contains
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: root
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -2230,7 +2232,7 @@ contains
     integer,                       intent(in)            :: count
     type(ESMF_newOp),              intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -2301,7 +2303,7 @@ contains
     integer,                       intent(in)            :: count
     type(ESMF_newOp),              intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -2372,7 +2374,7 @@ contains
     integer,                       intent(in)            :: count
     type(ESMF_newOp),              intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
-    type(ESMF_DELayoutCommHandle), intent(out), optional :: commHandle    
+    type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
 !         
 !
@@ -2444,7 +2446,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout),        intent(in)            :: delayout
-    type(ESMF_DELayoutCommHandle), intent(in)            :: commHandle
+    type(ESMF_CommHandle), intent(in)            :: commHandle
     integer,                       intent(out), optional :: rc
 !         
 !
