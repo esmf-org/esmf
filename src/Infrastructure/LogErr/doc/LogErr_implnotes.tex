@@ -1,4 +1,4 @@
-+% $Id: LogErr_implnotes.tex,v 1.10 2004/10/14 20:39:35 cpboulder Exp $
++% $Id: LogErr_implnotes.tex,v 1.11 2004/12/22 21:45:08 cpboulder Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,27 +16,36 @@ written in Fortran, but callable from Log's C++ methods.  These utility
 functions call the standard Fortran write, open and close functions.  If you
 call the Log methods from C/C++ code, you bypass the utility functions and 
 all I/O is done with the C I/O libraries.
-At initialization a LogArray is created.  This array is a container that holds
-multiple Logs.  Within the LogArray, one or more Logs may be created.  Each Log
-stores information for a specific Log file.   When working with more than one 
-Log file, multiple Logs are required (one Log for each Log file).  For each 
-Log, a handle is returned through the {\tt ESMF\_LogOpen()} method so that the
-user can manage the various Logs.  The properties of a specific Log are set 
-with the {\tt ESMF\_LogSet()} method.  Additionally, buffering occurs within a
-Log.  Every time the {\tt ESMF\_LogWrite()} method is called, LogEntry element
-is populated with the {\tt ESMF\_LogWrite()} information.  The user can set the
-number of LogEntry elements in the Log buffer.  When the buffer is full (i.e.,
-when all the LogEntry elements are populated), the buffer will be flushed and
-all the contents will be written to file.  If buffering is not needed 
-({\tt autoflush=false}), the {\tt ESMF\_LogWrite()} method will immediately 
-write to the Log files. 
+At initialization an {\tt ESMF\_LOG} is created.  The {\tt ESMF\_LOG} stores 
+information for a specific Log file.   When working with more than one 
+Log file, multiple {\tt ESMF\_LOG} are required (one {\tt ESMF\_LOG} for each 
+Log file).  For each Log, a handle is returned through the 
+{\tt ESMF\_LogInitialize} method for the default log or {\tt ESMF\LogOpen} for a
+user created log.  The user can specify single or multi logs by setting the
+{\tt defaultlogtype} property in the {\tt ESMF\_LogInitialize} or 
+{\tt ESMF\_Open} method to {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
+This is useful as the pet numbers are automatically added to the log entries.
+A single log will put all entries, irregardless of pet number, into a single
+log while a multi log will create multiple logs with the pet number prepended
+to the filename and all entries will be written to their corresponding log 
+by their pet number.
 
-Buffering allows ESMF to manage output data streams in a desired way.  For 
-instance, a solution to clean streaming PE\_ordered output would be to gather
-the buffers on root PE when flushing and order and stream them as desired by
-the user.  Buffering the output provides a layer where the output can be
-managed.  Writing to the buffer is transparent to the user because all the Log
-entries are handled automatically by the {\tt ESMF\_LogWrite()} method. 
+The properties for a Log are set with the {\tt ESMF\_LogSet()} method and 
+retrieved with the {\tt ESMF\_LogGet()} method.
+
+Additionally, buffering is enabled.  Buffering allows {\tt ESMF} to manage 
+output data streams in a desired way.  Writing to the buffer is transparent 
+to the user because all the Log entries are handled automatically by the 
+{\tt ESMF\_LogWrite()} method.  All the user has to do is specify the buffer
+size (the default is ten) by setting the {\tt maxElements} property.  Every 
+time the {\tt ESMF\_LogWrite()} method is called, a LogEntry element is 
+populated with the {\tt ESMF\_LogWrite()} information.  When the buffer is 
+ull (i.e., when all the LogEntry elements are populated), the buffer will be 
+flushed and all the contents will be written to file.  If buffering is not 
+needed, that is ({\tt autoflush=false}), the {\tt ESMF\_LogWrite()} method 
+will immediately write to the Log files. 
+
+
 \end{enumerate}
 
 

@@ -1,4 +1,4 @@
-% $Id: LogErr_design.tex,v 1.5 2004/09/13 19:41:28 cpboulder Exp $
+% $Id: LogErr_design.tex,v 1.6 2004/12/22 21:45:07 cpboulder Exp $
 
 
 
@@ -7,8 +7,6 @@
 
 
 ACTIONS
-
-
 
 1. A default log will be initialized when {\tt ESMF} starts.
 
@@ -21,15 +19,16 @@ ACTIONS
 
 5. The user can flush the array via ESMF_LogFlush.
 
-6. There can be up to maxElements write messages in a single Log.
+6. Pet numbers will be automnatically added to the log entries.
 
-7. The log closes automatically when ESMF shuts down.
+7. The user can specify {\tt ESMF\_LOG\_SINGLE} which writes all entries from
+all pet numbers to a single file or {\tt ESMF\_LOG\_MULTI} which writes 
+entries to multiple files according to its pet number.
 
+8. The log closes automatically when ESMF shuts down.
 
 
 ASSUMPTIONS
-
-
 
 1. Prior to closing, {\tt ESMF\_LogFlush} is always executed.
 

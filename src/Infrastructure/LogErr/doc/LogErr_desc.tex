@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.13 2004/11/01 23:00:32 cpboulder Exp $
+% $Id: LogErr_desc.tex,v 1.14 2004/12/22 21:45:07 cpboulder Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,24 +20,29 @@ handling.
 LogErr provides capabilities to write to a file immediately or store entries in a 
 buffer for writing either when the buffer is full, or when the user calls an 
 {\tt ESMF\_LogFlush()} command.  Currently the default is set so the Log flushes
-after every write command but can easily be set to higher values using the 
-{\tt ESMF\_LogSet} command and setting the {\tt maxElements} property to a value
-greater than one.  The {\tt ESMF\_LogFlush()} command is automatically
-called when the program exits (either by finishing or by using the {\tt halt}
-property in the {\tt ESMF\_LogSet} command or when the Log is closed.)
+after every ten entries but can easily be set to other values using the 
+{\tt ESMF\_LogSet()} command and setting the {\tt maxElements} property to another 
+value greater.  The {\tt ESMF\_LogFlush()} command is automatically called when 
+the program exits (either by finishing or by using the {\tt halt} property in the 
+{\tt ESMF\_LogSet()} command or when the Log is closed.)
 
 The user has the capability to halt the program on an error or on a warning.  By 
-using the {\tt ESMF\_LogSet} command and setting the {\tt halt} property to
+using the {\tt ESMF\_LogSet()} command and setting the {\tt halt} property to
 user can halt the program when the halt property is set to 
 {\tt ESMF\_LOG\_HALTWARNING}, the program will stop on any waning or errors.  By
 setting the {\tt halt} property to {\tt ESMF\_LOG\_HALTERROR}, the program will 
 only halt on errors.  Lastly, the user can choose to never halt by setting the 
 {\tt halt} property to {\tt ESMF\_LOG\_HALTNEVER}.
 
-Many options are planned for Log, including the ability to write to a single
-file or multiple files, to write from a root PET or from all active PETs,to 
-adjust the verbosity of ouput, and to optionally write to {\tt stdout} instead 
-of file(s).
+LogErr will automatically put the pet number into the log.  Also, the user can 
+either specify {\tt ESMF\_LOG\_SINGLE} which writes all the entries to a single 
+log or {\tt ESMF\_LOG\_MULTI} which wites entries to multiple logs according to 
+the pet number.  To distinguish logs from each other when using 
+{\tt ESMF\_LOG\_MULTI}, the pet number (in the format {\tt petx.} will be 
+prepended to the file name where x is the pet number.
+ 
+Other options that are planned for LogErr are to adjust the verbosity of ouput, 
+and to optionally write to {\tt stdout} instead of file(s).
 
 
 

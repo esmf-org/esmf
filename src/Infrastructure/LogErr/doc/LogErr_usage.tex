@@ -1,25 +1,32 @@
-% $Id: LogErr_usage.tex,v 1.15 2004/12/13 21:09:49 nscollins Exp $
+% $Id: LogErr_usage.tex,v 1.16 2004/12/22 21:45:08 cpboulder Exp $
 
 %\subsection{Use and Examples}
 
-A default Log is created at {\tt ESMF\_Initialize()}.  ESMF handles 
-the initialization and finalization of the default Log so the user 
-can immediately start using it.  A single default Log is opened 
-in the directory that initializes the default Log.  If a Log is 
-not present, a new one is created.  If multiple Logs are 
-desired, they must be explicitly created or opened using 
-{\tt ESMF\_LogOpen()}.
+A default log is created at {\tt ESMF\_Initialize()}.  ESMF handles the 
+initialization and finalization of the default log so the user can 
+immediately start using it.  A single default log is opened in the directory
+that initializes the default log.  If a log is not present, a new one is 
+created.  If multiple log objects are desired, they must be explicitly created
+or opened using {\tt ESMF\_LogOpen()}.
 
-If a user wants to use a new or different Log, the user must call
-{\tt ESMF\_LogOpen()} and pass in a Log object and filename to open a Log 
-file.
+If a user wants to use a new or different log, the user must call
+{\tt ESMF\_LogOpen()} and pass in a Log object and filename to open a Log file.
+
+Additionally,  the user can specify single or multi logs by setting the
+{\tt defaultlogtype} property in the {\tt ESMF\_LogInitialize()} or 
+{\tt ESMF\_Open()} method to {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
+This is useful as the pet numbers are automatically added to the log entries.
+A single log will put all entries, irregardless of pet number, into a single
+log while a multi log will create multiple logs with the pet number prepended
+to the filename and all entries will be written to their corresponding log 
+by their pet number.
  
-By default, the Log file is not truncated at the start of a new run; it just
+By default, the log file is not truncated at the start of a new run; it just
 gets appended each time.  Future functionality would include an option to
-either truncate or append to the Log file. 
+either truncate or append to the log file. 
 
 In all cases where a Log is opened, a unit number is assigned to a specific
-Log.  A Log is assigned the lowest available unit number starting with
+log.  A log is assigned the lowest available unit number starting with
 11.  If a unit number is occupied, the next higher unit number is 
 checked using the "inquire" method.  The process repeats until a free unit 
 number is found or when the unit number reaches {\tt ESMF\_LOGUPPER} in 
@@ -28,19 +35,22 @@ for free numbers using "inquire" to prevent potential unit number conflicts.
 In the near future we anticipate supporting an option in which a desired
 unit number can be passed in.
 
-The user can then set or get options on how the Log should be used 
+The user can then set or get options on how the log should be used 
 with the {\tt ESMF\_LogSet()} and {\tt ESMF\_LogGet()} methods.  These are 
 partially implemented at this time. 
 
 Depending on how the options are set, {\tt ESMF\_LogWrite()} either writes user
-messages directly to a Log file or writes to a buffer that can be flushed when 
+messages directly to a log file or writes to a buffer that can be flushed when 
 full or by using the {\tt ESMF\_LogFlush()} method.  The default is to flush 
-after every {\tt ESMF\_LogWrite()} because {\tt maxElements} is initialized to
-one (which means the buffer reaches its full state after each write, therefore,
-flushing.
+after every ten entries because {\tt maxElements} is initialized to ten 
+(which means the buffer reaches its full state after every ten writes and then
+flushes).
 
 For every {\tt ESMF\_LogWrite()}, a time and date stamp is prepended to the
-Log entry.  The time is given in microsecond precision.
+log entry.  The time is given in microsecond precision.  The user call other 
+methods to write to the log.  In every case, all methods eventually make a call
+implicitly to \tt ESMF\_LogWrite()} even though the user may never explicitly
+call it.
 
 When calling {\tt ESMF\_LogWrite()}, the user can supply an optional line,
 file and method.  These arguments can be passed in explicitly or with the help
@@ -51,24 +61,40 @@ be placed at the beginning of each method.  The user can then use the
 parameters into the method.  The user does not have to specify line number as
 it is a value supplied by cpp.
 
-An example of log output is given below:
+An example of log output is given below running with {\tt defaultlogtype} 
+property set to {\tt ESMF\_LOG\_SINGLE} using the default log:
 
-20041105 163418.472210 INFO      Running with ESMF Version 2.0.2   
+(Log file {\tt ESMF_LogFile}
+20041105 163418.472210 INFO      pet0     Running with ESMF Version 2.0.2   
+20041105 163419.186153 ERROR     pet1     ESMF\_Field.F90             812  
+ESMF\_FieldGet No Grid or Bad Grid attached to Field
 
-20041105 163419.186153 ERROR     ESMF\_Field.F90             812  ESMF\_FieldGet
-No Grid or Bad Grid attached to Field
+The results are all put into the log file {\tt ESMF_LogFile}.
 
-The first entry of the shows date and time stamp.  The time is given in 
-microsecond precision.  The next item shown is the type of message (INFO 
-in this case).  Lastly, the context is written.
+The next example shows same messages running with {\tt defaultlogtype} 
+property set to {\tt ESMF\_LOG\_MULTI} using the default log:
+
+(Log file {\tt pet0.ESMF_LogFile}
+20041105 163418.472210 INFO      pet0     Running with ESMF Version 2.0.2   
+(Log file {\tt pet1.ESMF_LogFile}
+20041105 163419.186153 ERROR     pet1     ESMF\_Field.F90             812  
+ESMF\_FieldGet No Grid or Bad Grid attached to Field
+
+Note in this example that a separate file is created for each pet when using
+{\tt ESMF\_LOG\_MULTI}.
+
+The first entry shows date and time stamp.  The time is given in microsecond 
+precision.  The next item shown is the type of message (INFO in this case).  
+Next, the pet number is added.  Lastly, the context is written.
 
 The second entry shows something slightly different.  In this case, we have
 an ERROR.  The method name (ESMF\_Field.F90) is automatically provided from 
 the cpp macros as well as the line number (812).  Lastly, the context of the 
 message is written.
  
-When done writing messages, the Log is closed by calling 
-{\tt ESMF\_LogClose()} which will release the assigned unit number.
+When done writing messages, the default Log is closed by calling 
+{\tt ESMF\_LogFinalize()}  or {\tt ESMF\_LogClose()} for user created Logs.  
+Both methods will release the assigned unit number.
 
 
 
