@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.48 2004/03/18 16:37:36 nscollins Exp $
+! $Id: ESMF_Alarm.F90,v 1.49 2004/03/19 18:22:32 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,9 +28,9 @@
 ! !MODULE: ESMF_AlarmMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager F90 API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implemenation.
 !
-! Defines F90 wrapper entry points for corresponding
+! Defines Fortran wrapper entry points for corresponding
 ! C++ class {\tt ESMC\_Alarm}.
 !
 ! See {\tt ../include/ESMC\_Alarm.h} for complete description.
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.48 2004/03/18 16:37:36 nscollins Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.49 2004/03/19 18:22:32 eschwab Exp $'
 
 !==============================================================================
 !
@@ -535,7 +535,8 @@
                            timeStepRingingCount, ringBegin, refTime, &
                            ringing, ringingOnPrevTimeStep, enabled, sticky, rc)
 
-      ! copy temp name back to given name to restore native F90 storage style
+      ! copy temp name back to given name to restore native Fortran
+      !   storage style
       if (present(name)) then
         name = tempName(1:tempNameLen)
       endif

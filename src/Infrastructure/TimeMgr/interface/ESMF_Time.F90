@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.67 2004/03/18 16:37:36 nscollins Exp $
+! $Id: ESMF_Time.F90,v 1.68 2004/03/19 18:22:32 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,9 +26,9 @@
 ! !MODULE: ESMF_TimeMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager F90 API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implemenation.
 !
-! Defines F90 wrapper entry points for corresponding
+! Defines Fortran wrapper entry points for corresponding
 ! C++ class {\tt ESMC\_Time} implementation.
 !
 ! See {\tt ../include/ESMC\_Time.h} for complete description.
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.67 2004/03/18 16:37:36 nscollins Exp $'
+      '$Id: ESMF_Time.F90,v 1.68 2004/03/19 18:22:32 eschwab Exp $'
 
 !==============================================================================
 !
@@ -504,7 +504,7 @@
 
 ! !DESCRIPTION:
 !     Gets the value of {\tt time} in units specified by the user
-!     via F90 optional arguments.  See {\tt ESMF\_TimeSet()} above for a
+!     via Fortran optional arguments.  See {\tt ESMF\_TimeSet()} above for a
 !     description of time units and calendars.
 !
 !     The ESMF Time Manager represents and manipulates time internally with 
@@ -652,8 +652,8 @@
                           MidMonth, dayOfYear, dayOfYear_r8, &
                           dayOfYear_intvl, rc)
 
-      ! copy temp time string back to given time string to restore native F90
-      !   storage style
+      ! copy temp time string back to given time string to restore
+      !   native Fortran storage style
       if (present(timeString)) then
         timeString = tempTimeString(1:tempTimeStringLen)
       endif
@@ -821,7 +821,7 @@
 
 ! !DESCRIPTION:
 !     Initializes an {\tt ESMF\_Time} with a set of user-specified units
-!     via F90 optional arguments.
+!     via Fortran optional arguments.
 !
 !     The range of valid values for mm and dd depend on the calendar used.
 !     For Gregorian, Julian, and No-Leap calendars, mm is [1-12] and dd is
@@ -1039,7 +1039,7 @@
 !
 ! This section includes the inherited ESMF_BaseTime class overloaded operators
 ! internal, private implementation methods.
-! Note:  these functions do not have a return code, since F90 forbids more
+! Note:  these functions do not have a return code, since Fortran forbids more
 ! than 2 arguments for arithmetic overloaded operators
 !
 !------------------------------------------------------------------------------

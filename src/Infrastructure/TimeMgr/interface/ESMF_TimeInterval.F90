@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.52 2004/03/18 16:37:37 nscollins Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.53 2004/03/19 18:22:32 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,9 +27,9 @@
 ! !MODULE: ESMF_TimeIntervalMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager F90 API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implemenation.
 !
-! Defines F90 wrapper entry points for corresponding
+! Defines Fortran wrapper entry points for corresponding
 ! C++ implementaion of class {\tt ESMC\_TimeInterval}.
 !
 ! See {\tt ../include/ESMC\_TimeInterval.h} for complete description.
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.52 2004/03/18 16:37:37 nscollins Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.53 2004/03/19 18:22:32 eschwab Exp $'
 
 !==============================================================================
 !
@@ -323,7 +323,7 @@
 !     Implementation note:  This cannot be overloaded with (/) because the
 !     arguments are the same as "Divide two TimeIntervals, return double
 !     precision quotient" (see below).  The difference is in the return type
-!     ({\tt ESMF\_Fraction} vs. real), which F90 does not use to distinguish
+!     ({\tt ESMF\_Fraction} vs. real), which Fortran does not use to distinguish
 !     among multiple overloaded methods.  Since the {\tt ESMF\_Fraction} return
 !     type is less likely to be used, it was selected for the new
 !     .DIV. operator.
@@ -929,7 +929,7 @@
 
 ! !DESCRIPTION:
 !     Gets the value of {\tt timeInterval} in units specified by the
-!     user via F90 optional arguments.
+!     user via Fortran optional arguments.
 !
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
@@ -1204,7 +1204,7 @@
 
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
-!     the user via F90 optional arguments.
+!     the user via Fortran optional arguments.
 !
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
@@ -1375,7 +1375,7 @@
 !
 ! This section includes overloaded operators defined only for TimeInterval
 ! (not inherited from BaseTime)
-! Note:  these functions do not have a return code, since F90 forbids more
+! Note:  these functions do not have a return code, since Fortran forbids more
 ! than 2 arguments for arithmetic overloaded operators
 !
 !------------------------------------------------------------------------------
@@ -1658,7 +1658,7 @@
 !
 ! This section includes the inherited ESMF_BaseTime class overloaded operators
 ! internal, private implementation methods
-! Note:  these functions do not have a return code, since F90 forbids more
+! Note:  these functions do not have a return code, since Fortran forbids more
 ! than 2 arguments for arithmetic overloaded operators
 !
 !------------------------------------------------------------------------------
