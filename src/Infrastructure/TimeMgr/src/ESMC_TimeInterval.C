@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.42 2004/02/06 00:27:48 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.43 2004/02/06 22:47:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.42 2004/02/06 00:27:48 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.43 2004/02/06 22:47:21 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -131,16 +131,15 @@
     // TODO: use Calendar-defined SecondsPerDay; for now assume 86400
     // get number of seconds in a day
     int secPerDay = SECONDS_PER_DAY;
-//    if (Calendar != ESMC_NULL_POINTER) {
-//      secPerDay = Calendar->SecondsPerDay;
+//    if (calendar != ESMC_NULL_POINTER) {
+//      secPerDay = calendar->secondsPerDay;
 //    }
 
     if (d != ESMC_NULL_POINTER) {
       this->s = ((ESMF_KIND_I8) *d) * secPerDay;  // >= 32-bit
     } else if (d_i8 != ESMC_NULL_POINTER) {
       this->s = *d_i8 * secPerDay; // >= 64-bit
-    }
-    if (d_r8 != ESMC_NULL_POINTER) {
+    } else if (d_r8 != ESMC_NULL_POINTER) {
       this->s = (ESMF_KIND_I8) (*d_r8 * secPerDay);
     }
 
@@ -258,7 +257,7 @@
       if (days >= INT_MIN && days <= INT_MAX) {
         *d = days;
       } else {
-        // to large to fit in given int
+        // too large to fit in given int
         return(ESMF_FAILURE);
       }
     }
