@@ -1,4 +1,4 @@
-% $Id: LogErr_refdoc.ctex,v 1.17 2004/06/22 17:36:18 cpboulder Exp $
+% $Id: LogErr_refdoc.ctex,v 1.18 2004/06/22 23:13:45 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@
 \input{../Infrastructure/LogErr/doc/LogErr_implnotes}
 #endif
 
-%\subsection{Object Model}
+\subsection{Object Model}
 #ifdef STANDALONE
 \input{LogErr_obj.tex}
 #elif defined(CONSTITUENT)

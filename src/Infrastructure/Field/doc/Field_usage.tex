@@ -1,4 +1,4 @@
-% $Id: Field_usage.tex,v 1.7 2004/03/18 00:07:28 cdeluca Exp $
+% $Id: Field_usage.tex,v 1.8 2004/06/22 23:13:44 cdeluca Exp $
 
 %\subsection{Use and Examples}
 
@@ -7,7 +7,7 @@ a description of the grid it is associated with and metadata
 such as name and units.  Fields can be used in this capacity
 alone, as convenient, descriptive containers into which arrays 
 can be placed and retrieved.  However, for most codes the primary 
-use of Fields is in the context of Import and Export States,
+use of Fields is in the context of import and export States,
 which are the objects that carry coupling information between 
 Components.  Fields enable data to be self-describing, and a
 State holding ESMF Fields contains data in a standard format
@@ -28,19 +28,13 @@ some time to complete.  We do not recommend that the user
 create or destroy Fields inside performance-critical 
 computational loops.
 
-All versions of the {\tt ESMF\_FieldCreate} 
+All versions of the {\tt ESMF\_FieldCreate()} 
 routines require a Grid object as input, or require a Grid
 be added before most operations involving Fields can be performed.
 The Grid contains the information needed to know which 
 Decomposition Elements (DEs) are participating in 
 the processing of this Field, and which subsets of the data
-are local to this DE.
-
-Requests to access local Field data will not require 
-communication overhead; the user code is expected to
-query the Grid object to discover what part of the
-overall dataset is local to this processor and do
-computations based on that data.
+are local to a particular DE.
 
 The details of how the create process happens depends 
 on which of the variants of the {\tt ESMF\_FieldCreate()} 
@@ -65,21 +59,10 @@ data values in the array.  Then at Field create time, the
 appropriate amount of memory is allocated to contain the
 data which is local to each DE.
 
-\subsubsection{Accessing Field Data}
-
-The user code on each DE calls the {\tt ESMF\_FieldGridQuery}
-routine to find out about the local subset of the data, including
-the number of items, the extents
-of the dimensions, and the corresponding coordinates of this
-decomposition.
-
-The user code can then call {\tt ESMF\_FieldGet()} to
-begin iterating through the data.  This routine returns a
-pointer to the buffer.  
-
 \subsubsection{Field Deletion}
 
 There is a {\tt ESMF\_FieldDestroy()} method which releases
 any data buffers which were allocated or copied by this Field,
-and deletes the Field object.  Since the Grid can be shared
-amongst multiple Fields, the Grid is not deleted by this call.
+and deletes the Field object.  Since a single Grid reference 
+can be shared by multiple Fields, the Grid is not deleted by 
+this call.

@@ -1,23 +1,19 @@
-% $Id: Grid_usage.tex,v 1.6 2004/05/24 22:58:05 jwolfe Exp $
+% $Id: Grid_usage.tex,v 1.7 2004/06/22 23:13:45 cdeluca Exp $
 
 %\subsection{Design and Implementation Notes}
 
 
 In typical applications, Grids are created either internally or read in from
-a file.  The {\tt ESMF\_Grid} class will provide methods for both, though at 
-the moment is only has routines for simple internal Grid generation.  It also
+a file.  The {\tt ESMF\_Grid} class will provide methods for both, though 
+currently it only has routines for simple internal Grid generation.  It also
 has a variety of methods to set and get Grid parameters like the number of cells
-on any particular processor.  Some methods which have a Grid interface are
-actually implemented at the underlying DistGrid or PhysGrid level; they will be
-inherited by the Grid class.  This allows the API to present functions at the
-level which is most consistent to the application without restricting where
-inside the ESMF the actual implementation is done.
+associated with a particular DE.  
 
-The creation of a distributed {\tt ESMF\_Grid} requires multiple steps, as
-illustrated in the example code below.  The GridCreate call, which has an
+The creation of a distributed Grid requires multiple steps, as
+illustrated in the example code below.  The {\tt ESMF\_GridCreateHorz<GridType>()} call, which has an
 explicit interface for each GridType, allocates space for the Grid class and sets
 parameters defining the horizontal grid.  A vertical subGrid can then be attached
-to the Grid via a GridAddVert call.  Currently a Grid can have only a single
+to the Grid via an {\tt ESMF\_GridAddVert<VertGridType>()} call.  Currently a Grid can have only a single
 vertical subGrid.  The last call, {\tt ESMF\_GridDistribute()}, allocates some of
 the Grid subclasses and distributes the Grid in either a default or
 user-specified decomposition.  Currently, these calls must be made in this order
