@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.3 2003/04/29 21:41:36 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.4 2003/04/30 21:13:24 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -65,32 +65,25 @@
 
         print *, "Coupler Init starting"
 
-        print *, "statelist before"
-        call ESMF_StatePrint(statelist)
         call ESMF_StateGetData(statelist, &
                      "Coupler States FlowSolver to Injector", flowstates, rc)
 
         call ESMF_StateGetData(flowstates, "FlowSolver Feedback", fromflow, rc)
         call ESMF_StateSetNeeded(fromflow, "SIE", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(fromflow, "U", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(fromflow, "V", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(fromflow, "RHO", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(fromflow, "FLAG", ESMF_STATEDATAISNEEDED, rc)
-        print *, "from flow"
-        call ESMF_StatePrint(fromflow)
 
         call ESMF_StateGetData(statelist, &
                        "Coupler States Injector to FlowSolver", injectstates, rc)
 
         call ESMF_StateGetData(injectstates, "Injection Feedback", frominject, rc)
         call ESMF_StateSetNeeded(frominject, "SIE", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(frominject, "U", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(frominject, "V", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(frominject, "RHO", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(frominject, "FLAG", ESMF_STATEDATAISNEEDED, rc)
-        print *, "from inject"
-        call ESMF_StatePrint(frominject)
-
-        print *, "statelist after"
-        call ESMF_StatePrint(statelist)
 
         print *, "Coupler Init returning"
    
@@ -111,6 +104,8 @@
         type(ESMF_State) :: toflow, toinjector
         type(ESMF_State) :: mysource, mydest
         type(ESMF_Field) :: srcfield, dstfield
+        type(ESMF_Array) :: srcarray, dstarray
+        real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: srcptr, dstptr
         type(ESMF_DELayout) :: cpllayout
       
         character(len=ESMF_MAXSTR) :: statename
@@ -138,7 +133,7 @@
 
         else if (trim(statename) .eq. "Coupler States FlowSolver to Injector") then
 
-            ! Get import and export states
+            ! FlowSolver to Injector
             call ESMF_StateGetData(statelist, "FlowSolver Feedback", mysource, rc)
             call ESMF_StateGetData(statelist, "Injection Input", mydest, rc)
 
@@ -156,24 +151,32 @@
 
            ! check isneeded flag here
            if (.not. ESMF_StateIsNeeded(mysource, datanames(i), rc)) then 
+               !print *, "skipping field ", trim(datanames(i)), " not needed"
                cycle
            endif
 
+           !print *, "processing field ", trim(datanames(i)), " as needed"
            call ESMF_StateGetData(mysource, datanames(i), srcfield, rc=status)
-           !call ESMF_FieldPrint(srcfield, "", rc=rc)
-
            call ESMF_StateGetData(mydest, datanames(i), dstfield, rc=status)
+
+           ! These are fields on different layouts - call Route to rearrange
+           !  the data using the Comm routines.
+           call ESMF_FieldRoute(srcfield, dstfield, cpllayout, status)
+
+           ! debug:  
+           !print *, "Route Source Field (after route)"
+           !call ESMF_FieldPrint(srcfield, "", rc=rc)
+           !print *, "Route Dest Field (after route)"
            !call ESMF_FieldPrint(dstfield, "", rc=rc)
 
-
-          ! These are fields on different layouts - call Route to rearrange
-          !  the data using the Comm routines.
-          call ESMF_FieldRoute(srcfield, dstfield, cpllayout, status)
-
+           !call ESMF_FieldGetData(dstfield, dstarray, rc=status)
+           !call ESMF_ArrayPrint(dstarray, "full, line", rc=status)
+           !call ESMF_ArrayGetData(dstarray, dstptr, ESMF_DATA_REF, status)
+         
           !call ESMF_FieldHalo(dstfield, rc)
 
           ! Set export data in export state
-          !call ESMF_StateAddData(mydest, datanames(i), rc=status)
+          !call ESMF_StateAddData(mydest, dstarray, rc=status)
 
         enddo
 

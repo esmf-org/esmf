@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.4 2003/04/29 22:48:48 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.5 2003/04/30 21:13:25 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -72,14 +72,14 @@
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      real :: x_min, x_max, y_min, y_max
+      real(kind=ESMF_IKIND_R4) :: x_min, x_max, y_min, y_max
       integer :: i_max, j_max
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
       integer :: myde, halo_width
       namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
-                       uin, rhoin, siein, vin2, rhoin2, siein2, &
+                       uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
                        printout, sieobs, nobsdesc, iobs_min, iobs_max, &
                        jobs_min, jobs_max, iflo_min, iflo_max
@@ -159,6 +159,15 @@
       call ESMF_StateAddData(import_state, field_p, rc)
       call ESMF_StateAddData(import_state, field_q, rc)
       call ESMF_StateAddData(import_state, field_flag, rc)
+
+      !print *, "Fields added to import state at Flow init time"
+      !call ESMF_FieldPrint(field_sie, rc=rc)
+     ! call ESMF_FieldPrint(field_u, rc=rc)
+     ! call ESMF_FieldPrint(field_v, rc=rc)
+     ! call ESMF_FieldPrint(field_rho, rc=rc)
+     ! call ESMF_FieldPrint(field_p, rc=rc)
+     ! call ESMF_FieldPrint(field_q, rc=rc)
+      !call ESMF_FieldPrint(field_flag, rc=rc)
 
       ! This is adding names only to the export list, marked by default
       !  as "not needed".  The coupler will mark the ones needed based
@@ -441,11 +450,12 @@
       !
       integer :: status
       logical :: rcpresent
+      integer :: i, j
       integer :: counter = 0
       integer :: print_count = 0
       double precision :: s_
 
-      integer :: i, datacount
+      integer :: datacount
       character(len=ESMF_MAXSTR), dimension(7) :: datanames
       type(ESMF_Field) :: thisfield
 
@@ -470,6 +480,7 @@
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
+
       !
       ! Increment counter
       !
@@ -493,6 +504,23 @@
       !call ESMF_FieldHalo(field_u, status)
       !call ESMF_FieldHalo(field_v, status)
       !call ESMF_FieldHalo(field_rho, status)
+      
+      ! copy injection values from exclusive domain into ghost cells
+      do j = jmin, jmax
+        do i = imin, imax
+          if (flag(i,j).eq.10 .and. flag(i,j-1).eq.10) then
+            sie(i,j-1) = sie(i,j)
+            v(i,j-1) = v(i,j)
+            rho(i,j-1) = rho(i,j)
+          endif
+        enddo
+      enddo
+      where (flag.eq.10.0)
+        rhoi = rho*sie
+        rhov = rho*v
+        rhou = 0.0
+        u = 0.0
+      endwhere
 
       !
       ! calculate RHOU's and RHOV's
@@ -534,6 +562,12 @@
         print *, "ERROR in FlowSolve"
         return
       endif
+      ! Debug
+      call ESMF_StateAddData(export_state, field_sie, rc=status)
+      call ESMF_StateAddData(export_state, field_u, rc=status)
+      call ESMF_StateAddData(export_state, field_v, rc=status)
+      call ESMF_StateAddData(export_state, field_rho, rc=status)
+      call ESMF_StateAddData(export_state, field_flag, rc=status)
       !
       ! Update export state with needed fields
       !
@@ -558,6 +592,10 @@
         call FlowPrint(gcomp, clock, print_count, status)
       endif
 
+      !print *, "States at end of Flow run"
+      !call ESMF_StatePrint(export_state, rc=rc)
+      !!call ESMF_FieldPrint(field_sie, "", rc)
+      !!call ESMF_FieldPrint(field_flag, "", rc)
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine FlowSolve
@@ -573,8 +611,8 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j
-      real :: u_ij, u_ipj, rhouu_m, rhouu_p, v_ipjm, v_ipjp, rhouv_p, rhouv_m
-      real :: v_ij, v_ijp, rhovv_m, rhovv_p, u_imjp, u_ipjp, rhovu_p, rhovu_m
+      real(kind=ESMF_IKIND_R4) :: u_ij, u_ipj, rhouu_m, rhouu_p, v_ipjm, v_ipjp, rhouv_p, rhouv_m
+      real(kind=ESMF_IKIND_R4) :: v_ij, v_ijp, rhovv_m, rhovv_p, u_imjp, u_ipjp, rhovu_p, rhovu_m
 !
 ! Set initial values
 !
@@ -679,7 +717,7 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j
-      real :: rhoiu_m, rhoiu_p, rhoiv_m, rhoiv_p, dsiedx2, dsiedy2
+      real(kind=ESMF_IKIND_R4) :: rhoiu_m, rhoiu_p, rhoiv_m, rhoiv_p, dsiedx2, dsiedy2
 !
 ! Set initial values
 !
@@ -779,8 +817,8 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j
-      real, dimension(imax,jmax) :: rho_new  ! sloppy, but OK for now
-      real :: rhou_m, rhou_p, rhov_m, rhov_p, dsiedx2, dsiedy2
+      real(kind=ESMF_IKIND_R4), dimension(imax,jmax) :: rho_new  ! sloppy, but OK for now
+      real(kind=ESMF_IKIND_R4) :: rhou_m, rhou_p, rhov_m, rhov_p, dsiedx2, dsiedy2
 !
 ! Set initial values
 !
@@ -886,7 +924,7 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j
-      real :: rhoav
+      real(kind=ESMF_IKIND_R4) :: rhoav
 !
 ! Set initial values
 !

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/04/29 22:48:49 nscollins Exp $ 
+# $Id: makefile,v 1.7 2003/04/30 21:13:26 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -20,7 +20,7 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SysTest74559
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-SYSTEM_TESTS_OBJ      = ArraysGlobalMod.o FlowSolverMod.o InjectorMod.o CouplerMod.o
+SYSTEM_TESTS_OBJ      = ArraysGlobalMod.o ArraysGlobalMod2.o FlowSolverMod.o InjectorMod.o CouplerMod.o
 
 SYSTEM_TESTS_RUN      = RUN_ESMF_SysTest74559  
 
@@ -38,7 +38,7 @@ CLOBBERDIRS =
 
 RUN_ESMF_SysTest74559:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest74559.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SysTest74559 >$(ESMC_TESTDIR)/ESMF_SysTest74559.stdout
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SysTest74559 >$(ESMC_TESTDIR)/ESMF_SysTest74559.stdout
 
 RUN_ESMF_SysTest74559UNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest74559.tmps
