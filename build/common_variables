@@ -33,7 +33,10 @@ ESMC_TESTDIR	= ${ESMF_DIR}/test/test${BOPT}/${ESMF_ARCH}
 ESMC_DOCDIR	= ${ESMF_DIR}/doc
 PROTEX		= ${ESMF_DIR}/scripts/doc_templates/templates/protex 
 DO_LATEX	= ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_latex
+# this below should be consistent with the line above?  i added a dup line
+# with the _ so it didn't break older stuff.   nsc 01/28/03
 DOL2H		= ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_l2h
+DO_L2H		= ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_l2h
 PDIR		= ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
 LIBNAME		= ${PDIR}/${LIBBASE}.a
 SOURCE		= ${SOURCEC} ${SOURCEF}
