@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.4 2004/03/18 18:40:17 nscollins Exp $
+! $Id: ESMF_StateMacros.h,v 1.5 2004/05/21 09:25:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -89,13 +89,11 @@
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        type (ESMF_Bundle) :: bundle        ! bundle object @\
+        !!type (ESMF_Bundle) :: bundle        ! bundle object @\
         type (ESMF_Field) :: field          ! field object @\
         type (ESMF_Array) :: array          ! array object @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
- @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
