@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.109 2004/11/19 23:28:05 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.110 2004/12/07 17:21:12 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.109 2004/11/19 23:28:05 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.110 2004/12/07 17:21:12 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1126,7 +1126,7 @@ static int maxroutes = 10;
     for (k=0; k<decount; k++) {
       their_de = k;
       delayout->ESMC_DELayoutGetDELocalInfo(their_de, their_DE_pos,
-        ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL);
+        ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL, NULL);
       // get "their" AI out of the AI_tot array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_tot[their_de + j*AI_count];
@@ -1184,7 +1184,7 @@ static int maxroutes = 10;
     for (k=0; k<decount; k++) {
       their_de = k;
       delayout->ESMC_DELayoutGetDELocalInfo(their_de, their_DE_pos,
-        ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL);
+        ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL, NULL);
       // get "their" AI out of the AI_exc array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_exc[their_de + j*AI_count];
