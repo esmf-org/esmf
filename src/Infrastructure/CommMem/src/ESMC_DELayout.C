@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.10 2003/03/27 20:41:24 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.11 2003/03/28 17:52:18 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,7 @@
 //
  // insert any higher level, 3rd party or system includes here
 #include <iostream.h>  // cout
+#include <stdio.h>
 //#include <iostream> // TODO: use when namespaces consistently implemented
 //using std::cout;
 //using std::cerr;
@@ -33,11 +34,12 @@
 
  // associated class definition file
  #include <ESMC_DELayout.h>
+#define ESMF_MPI_TAG 1
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.10 2003/03/27 20:41:24 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.11 2003/03/28 17:52:18 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
