@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.23 2004/02/11 17:12:51 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.24 2004/02/11 19:03:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -165,8 +165,8 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
                           int *lbounds, int *ubounds, int *offsets, 
                           ESMC_Logical contig, ESMC_Logical dealloc,
                           int halo_width);
-    int ESMC_ArraySetName(char *name);
-    // TODO: add Get method
+    int ESMC_ArraySetName(char *name) { return ESMC_BaseSetName(name, "Array"); }
+    char *ESMC_ArrayGetName(void) { return ESMC_BaseGetName(); }
 
     // most important array methods
     int ESMC_ArrayRedist(ESMC_DELayout *layout, int global_start[], 

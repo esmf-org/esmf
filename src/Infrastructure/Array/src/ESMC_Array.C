@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.26 2004/02/11 17:13:01 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.27 2004/02/11 19:03:47 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -828,27 +828,6 @@
 
  } // end ESMC_ArrayGetAllAxisIndices
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArraySetName - Set the name of an Array
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArraySetName(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      char *name) {    // in - new name
-//
-// !DESCRIPTION:
-//      Allows an array to be renamed after creation.
-//
-//EOP
-
-    return ESMC_BaseSetName(name, "Array");
-
- } // end ESMC_ArraySetName
 
 //-----------------------------------------------------------------------------
 //BOP
