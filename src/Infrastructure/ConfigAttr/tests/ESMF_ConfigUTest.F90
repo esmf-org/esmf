@@ -96,7 +96,7 @@
       rc = 0
 
 !*********************************************************************
-      call ESMF_ConfigGetInt ( cf, nDE, label ='Number_of_DEs:', & 
+      nDE = ESMF_ConfigGetInt( cf, label ='Number_of_DEs:', & 
            default=7, rc = rc )
 !*********************************************************************      
       counter_total =counter_total + 1
@@ -116,8 +116,8 @@
 
       rc = 0
 !*********************************************************************   
-      call ESMF_ConfigGetFloat ( cf, tau, &
-           label ='Relaxation_time_scale_in_days:', rc = rc)
+      tau = ESMF_ConfigGetFloat(cf, &
+           label = 'Relaxation_time_scale_in_days:', rc = rc)
 !*********************************************************************   
       counter_total =counter_total + 1
       if ( rc /= 0 ) then      
@@ -191,11 +191,11 @@
       print *,'ESMF_ConfigGetString: u_dataType= ', u_dataType, &
            ' rc =', rc
 
-      call ESMF_ConfigGetInt ( cf, nu, rc = rc )            ! second token
-      print *,'ESMF_ConfigGetInt: nu =', nu, ' rc =', rc
+      nu = ESMF_ConfigGetInt ( cf, rc = rc )                 ! second token
+      print *,'ESMF_ConfigGetInts: nu =', nu, ' rc =', rc
 
-      call ESMF_ConfigGetFloat ( cf, sigU, nu,  rc=rc )     ! tokens 3 thru 8 
-      print *,'ESMF_ConfigGetFloat: sigU(1,', nu,') =', &
+      call ESMF_ConfigGetFloats ( cf, sigU, nu,  rc=rc )     ! tokens 3 thru 8 
+      print *,'ESMF_ConfigGetFloats: sigU(1,', nu,') =', &
            sigU(1:nu), ' rc =', rc 
 
       call ESMF_ConfigFindLabel ( cf, 'v-wind-error:', rc )
@@ -204,11 +204,11 @@
       print *,'ESMF_ConfigGetString: v_dataType= ', v_dataType, &
            ' rc =', rc
 
-      call ESMF_ConfigGetInt ( cf, nv, rc = rc )
-      print *,'ESMF_ConfigGetInt: nv =', nv, ' rc =', rc
+      nv = ESMF_ConfigGetInt ( cf, rc = rc )
+      print *,'ESMF_ConfigGetInts: nv =', nv, ' rc =', rc
 
-      call ESMF_ConfigGetFloat ( cf, sigV, nsize=nv, rc=rc )
-      print *,'ESMF_ConfigGetFloat: sigV(1,', nv,') =', &
+      call ESMF_ConfigGetFloats ( cf, sigV, nsize=nv, rc=rc )
+      print *,'ESMF_ConfigGetFloats: sigV(1,', nv,') =', &
            sigV(1:nv), ' rc =', rc 
 
   
@@ -229,11 +229,11 @@
       call ESMF_ConfigGetString ( cf, u_dataType, rc=rc )  ! first token
       print *,'ESMF_ConfigGetString: u_dataType= ', u_dataType, ' rc =', rc
 
-      call ESMF_ConfigGetInt ( cf, nu, rc=rc )             ! second token
-      print *,'ESMF_ConfigGetInt: nu =', nu, ' rc =', rc
+      nu = ESMF_ConfigGetInt ( cf, rc=rc )                 ! second token
+      print *,'ESMF_ConfigGetInts: nu =', nu, ' rc =', rc
 
-      call ESMF_ConfigGetFloat ( cf, sigU, nsize=6, rc=rc ) ! tokens 3 thru 8 
-      print *,'ESMF_ConfigGetFloat: sigU(1,6) =', sigU(1:6), ' rc =', rc
+      call ESMF_ConfigGetFloats ( cf, sigU, nsize=6, rc=rc ) ! tokens 3 thru 8 
+      print *,'ESMF_ConfigGetFloats: sigU(1,6) =', sigU(1:6), ' rc =', rc
 
 !      Similarly for v
 
@@ -243,11 +243,11 @@
       call ESMF_ConfigGetString ( cf, v_dataType, rc=rc )
       print *,'ESMF_ConfigGetString: v_dataType= ', v_dataType, ' rc =', rc
 
-      call ESMF_ConfigGetInt ( cf, nv, rc=rc )
-      print *,'ESMF_ConfigGetInt: nv =', nv, ' rc =', rc
+      nv = ESMF_ConfigGetInt ( cf, rc=rc )
+      print *,'ESMF_ConfigGetInts: nv =', nv, ' rc =', rc
 
-      call ESMF_ConfigGetFloat ( cf, sigV, nsize=6,rc=rc )
-      print *,'ESMF_ConfigGetFloat: sigV(1,6) =', sigV(1:6), ' rc =', rc 
+      call ESMF_ConfigGetFloats ( cf, sigV, nsize=6,rc=rc )
+      print *,'ESMF_ConfigGetFloats: sigV(1,6) =', sigV(1:6), ' rc =', rc 
 
 
 ! Retrieval of Tables of unknown length
@@ -284,7 +284,7 @@
             
 !               Retrieve pressure level
 !               -----------------------
-            call ESMF_ConfigGetFloat ( cf, plev(line), rc=rc )
+            plev(line) = ESMF_ConfigGetFloat ( cf, rc=rc )
             if (rc /= 0) exit
             
             print *,' Line ', line, 'plev =', plev
@@ -292,7 +292,7 @@
 !               Looping over columns
 !               --------------------
             do col =1, ncol(line) - 1
-               call ESMF_ConfigGetFloat ( cf, temp, rc=rc)
+               temp = ESMF_ConfigGetFloat ( cf, rc=rc)
                if (rc == 0) then 
                   vCorr(line,col) = temp 
                end if

@@ -194,8 +194,10 @@
        public :: ESMF_ConfigLoadFile   ! loads resource file into memory
        public :: ESMF_ConfigFindLabel  ! selects a label (key)
        public :: ESMF_ConfigNextLine   ! selects next line (for tables)
-       public :: ESMF_ConfigGetFloat ! returns next float number (function) 
-       public :: ESMF_ConfigGetInt   ! returns next integer number (function)
+       public :: ESMF_ConfigGetFloat   ! returns next float number (function)
+       public :: ESMF_ConfigGetFloats  ! returns float array  
+       public :: ESMF_ConfigGetInt     ! returns next integer number (function)
+       public :: ESMF_ConfigGetInts    ! returns integer array
        public :: ESMF_ConfigGetChar  ! returns next char or char array
        public :: ESMF_ConfigGetString     ! retutns next string (word)
        public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
@@ -207,16 +209,6 @@
 !------------------------------------------------------------------------------
        public :: ESMF_Config     ! WHY DO WE NEED IT PUBLIC?
 !EOP
-
-       interface ESMF_ConfigGetFloat
-          module procedure ESMF_ConfigGetFloat_one
-          module procedure ESMF_ConfigGetFloat_array
-       end interface
-
-       interface ESMF_ConfigGetInt
-          module procedure ESMF_ConfigGetInt_one
-          module procedure ESMF_ConfigGetInt_array
-       end interface
 
 ! PRIVATE PARAMETER  SETTINGS:
 !------------------------------------------------------------------------------
@@ -718,22 +710,22 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetFloat - gets a floating point number/numbers
+! !IROUTINE: ESMF_ConfigGetFloat - gets a floating point number
 
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetFloat_one( cf, rvalue, label, default, rc )
+    real function ESMF_ConfigGetFloat( cf, label, default, rc )
+
       implicit none
 
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      real, intent(out)                      :: rvalue   ! return value
       character(len=*), intent(in), optional :: label    ! label 
       real, intent(in), optional             :: default  ! default value
 
       integer, intent(out), optional         :: rc       ! Error code
 !
-! !DESCRIPTION: Gets a floating point number/numbers
+! !DESCRIPTION: Gets a floating point number
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
@@ -763,11 +755,11 @@
             x = 0.
          endif
       endif
-      rvalue = x
+      ESMF_ConfigGetFloat = x
       if( present( rc )) rc = iret 
       return
 
-    end subroutine ESMF_ConfigGetFloat_one
+    end function ESMF_ConfigGetFloat
 
 
 
@@ -775,13 +767,13 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetFloat - gets a floating point number/numbers
+! !IROUTINE: ESMF_ConfigGetFloats - gets a floating point array
 
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetFloat_array( cf, array, nsize, label,  &
-                                          default, rc )
+    subroutine ESMF_ConfigGetFloats( cf, array, nsize, label,  &
+                                    default, rc )
       
       implicit none
       real, intent(inout)                 :: array(*)    ! real array 
@@ -793,7 +785,7 @@
 
       integer, intent(out), optional         :: rc       ! Error code
 !
-! !DESCRIPTION: Gets a floating point number/numbers
+! !DESCRIPTION: Gets a floating point array of a given size.
 !
 ! !REVISION HISTORY:
 ! 25anp2003  Zaslavsky  initial interface/prolog
@@ -815,47 +807,43 @@
          
          if (present( label )) then
             if(present( default )) then
-              call ESMF_ConfigGetFloat_one( cf, array(i), label, &
-                    default, iret)
+              array(i) = ESMF_ConfigGetFloat( cf, label, default, iret)
             else
-               call ESMF_ConfigGetFloat_one( cf, array(i), label, &
-                    rc = iret)
+               array(i) = ESMF_ConfigGetFloat( cf, label, rc = iret)
             endif
          else
             if(present( default )) then
-               call ESMF_ConfigGetFloat_one( cf, array(i), &
-                    default = default, rc = iret)
+               array(i) = ESMF_ConfigGetFloat( cf, default=default, rc=iret )
             else
-               call ESMF_ConfigGetFloat_one( cf, array(i), rc = iret)
+               array(i) = ESMF_ConfigGetFloat( cf, rc = iret)
             endif
          endif
       enddo
 
       if(present( rc )) rc = iret
       return
-    end subroutine ESMF_ConfigGetFloat_array
+    end subroutine ESMF_ConfigGetFloats
 
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetInt - gets an integer number/numbers
+! !IROUTINE: ESMF_ConfigGetInt - gets an integer number
 
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetInt_one( cf, ivalue, label, default, rc )
+    integer function ESMF_ConfigGetInt( cf, label, default, rc )
       implicit none
 
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      integer, intent(out)                   :: ivalue   ! return value
       character(len=*), intent(in), optional :: label    ! label
       integer, intent(in), optional          :: default  ! default value
 
       integer, intent(out), optional         :: rc       ! Error code
 
 !
-! !DESCRIPTION: Gets a integer point number/numbers
+! !DESCRIPTION: Gets an integer number
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
@@ -887,23 +875,23 @@
          endif
       endif
 
-      ivalue = n
+      ESMF_ConfigGetInt = n
       if( present( rc )) rc = iret
       
       return
-    end subroutine ESMF_ConfigGetInt_one
+    end function ESMF_ConfigGetInt
 
 
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetInt - gets a integer number/numbers
+! !IROUTINE: ESMF_ConfigGetInts - gets an integer array
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetInt_array( cf, array, nsize, label,  &
-                                          default, rc )
+    subroutine ESMF_ConfigGetInts( cf, array, nsize, label,  &
+                                   default, rc )
       
       implicit none
       integer, intent(inout)              :: array(*)    ! real array 
@@ -915,7 +903,7 @@
 
       integer, intent(out), optional         :: rc       ! Error code
 !
-! !DESCRIPTION: Gets integer point numbers
+! !DESCRIPTION: Gets an integer array of given size.
 !
 ! !REVISION HISTORY:
 ! 25anp2003  Zaslavsky  initial interface/prolog
@@ -937,25 +925,22 @@
          
          if (present( label )) then
             if(present( default )) then
-              call ESMF_ConfigGetInt_one( cf, array(i), label, &
-                    default, iret)
+              array(i) = ESMF_ConfigGetInt( cf, label, default, iret)
             else
-               call ESMF_ConfigGetInt_one( cf, array(i), label, &
-                    rc = iret)
+               array(i) = ESMF_ConfigGetInt( cf, label, rc = iret)
             endif
          else
             if(present( default )) then
-               call ESMF_ConfigGetInt_one( cf, array(i), &
-                    default = default, rc = iret)
+               array(i) = ESMF_ConfigGetInt( cf, default = default, rc = iret)
             else
-               call ESMF_ConfigGetInt_one( cf, array(i), rc = iret)
+               array(i) = ESMF_ConfigGetInt( cf, rc = iret)
             endif
          endif
       enddo
 
       if(present( rc )) rc = iret
       return
-    end subroutine ESMF_ConfigGetInt_array
+    end subroutine ESMF_ConfigGetInts
 
 
 
