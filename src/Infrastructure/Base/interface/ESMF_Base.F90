@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.10 2002/11/08 22:34:50 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.11 2002/11/08 22:40:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,6 +182,7 @@
  
 !  Misc methods
       public ESMF_SetPointer
+      public ESMF_SetNullPointer
       public ESMF_GetPointer
 !
 !
@@ -190,7 +191,7 @@
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_Base.F90,v 1.10 2002/11/08 22:34:50 nscollins Exp $'
+      character(*), parameter, private :: version = '$Id: ESMF_Base.F90,v 1.11 2002/11/08 22:40:51 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -505,6 +506,33 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_SetPointer
+
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMC_SetNullPointer - set an opaque value
+
+!
+! !INTERFACE:
+      subroutine ESMF_SetNullPointer(ptype, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Pointer) :: ptype 
+      integer, intent(out), optional :: rc  
+
+!
+! !DESCRIPTION:
+!   Set the contents of an opaque pointer type.
+
+!
+!EOP
+! !REQUIREMENTS:
+      integer*8 :: nullp = 0
+
+      ptype%ptr = nullp
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_SetNullPointer
 !-------------------------------------------------------------------------
 !BOP
 !
