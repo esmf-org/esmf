@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.22 2004/03/02 21:27:11 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.23 2004/03/03 00:26:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -260,7 +260,7 @@
 ! !IROUTINE: ESMF_BundleGetField - Retrieve Fields from a Bundle
 !
 ! !INTERFACE:
-     interface ESMF_BundleGetFields
+     interface ESMF_BundleGetField
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_BundleGetFieldByName
