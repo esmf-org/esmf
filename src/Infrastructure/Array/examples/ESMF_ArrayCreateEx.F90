@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.2 2003/11/26 21:51:49 svasquez Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.3 2003/12/03 21:44:58 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -23,12 +23,13 @@
     implicit none
 
 !   ! Local variables
-    integer :: nx, ny, arank, rc 
+    integer :: nx, ny, arank, rc, finalrc 
     integer :: i, j, ni, nj
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2, array3
     real(selected_real_kind(6,45)), dimension(:,:), pointer :: realptr, realptr2
     integer(selected_int_kind(5)), dimension(:), pointer :: intptr, intptr2
+    finalrc = ESMF_SUCCESS
 
     
 !-------------------------------------------------------------------------------
@@ -45,12 +46,27 @@
     print *, "intptr data = ", intptr
 
     array1 = ESMF_ArrayCreate(intptr, ESMF_DATA_REF, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "array 1 create returned"
 
     call ESMF_ArrayPrint(array1, "foo", rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "array 1 print returned"
 
     call ESMF_ArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "array 1 getdata returned"
     print *, "intptr2 data = ", intptr2
 
@@ -75,16 +91,36 @@
     print *, "realptr data = ", realptr
 
     array2 = ESMF_ArrayCreate(realptr, ESMF_DATA_REF, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "array 2 create returned"
 
     call ESMF_ArrayPrint(array2, "foo", rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "array 2 print returned"
 
     call ESMF_ArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "array 2 getdata returned"
     print *, "realptr2 data = ", realptr2
 
     call ESMF_ArrayDestroy(array2)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "array 2 destroy returned"
 
 
@@ -97,6 +133,14 @@
     !                                         nx, ny, rc)
 
 !   !   array2 = ESMF_ArrayCreate(arrayspec, ESMF_NO_DATA, rc)
+
+    if (finalrc.EQ.ESMF_SUCCESS) then
+        print *, "PASS: ESMF_ArrayCreateEx.F90"
+    else
+        print *, "FAIL: ESMF_ArrayCreateEx.F90"
+    end if
+
+
 
      end program ESMF_ArrayCreateEx
     
