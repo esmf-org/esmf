@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.24 2003/04/07 21:36:46 flanigan Exp $ 
+# $Id: common_variables,v 1.25 2003/04/08 16:32:37 flanigan Exp $ 
 #
 # LIBNAME       - library name
 # SOURCE        - source files
@@ -58,7 +58,7 @@ ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMC_MODDIR} \
 		  ${LOCAL_INCLUDE} \
 		  -I${ESMF_TOP_DIR}/src/timing \
-		  -I$(ESMF_IDIR) -I$(ESMF_MDIR) 
+		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) 
 
 CCPPFLAGS	= ${PCONF} ${ESMC_PARCH} ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'
