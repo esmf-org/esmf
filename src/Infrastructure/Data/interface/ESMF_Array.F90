@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.3 2002/11/05 23:26:33 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.4 2002/11/07 22:18:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,13 +81,13 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_Array
 !
-!     ! Actual data array type.  The array specification is duplicated on 
-!     ! purpose for simplicity and performance reasons.
+!     ! Array data type.  All information is kept on the C++ side inside
+!     ! the class structure.
 
       type ESMF_Array
       sequence
       private
-        type(ESMF_Pointer) :: cstruct      ! the dope vector in the C class
+        type(ESMF_Pointer) :: this      ! the dope vector is in the C++ class
       end type
 
 !------------------------------------------------------------------------------
@@ -100,10 +100,9 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 
       public ESMF_ArrayCreate, ESMF_ArrayDestroy
-      public ESMF_ArrayConstruct,  ESMF_ArrayDestruct
  
-      public ESMF_ArraySpecCreate, ESMF_ArraySpecConstruct
-      !public ESMF_ArraySpecDestroy, ESMF_ArraySpecDestruct
+      public ESMF_ArraySpecCreate
+      !public ESMF_ArraySpecDestroy
 
       public ESMF_ArraySetData, ESMF_ArrayGet
  
@@ -118,7 +117,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.3 2002/11/05 23:26:33 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.4 2002/11/07 22:18:26 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -135,36 +134,15 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ArrayCreateNew
         module procedure ESMF_ArrayCreateBySpec
-!        module procedure ESMF_ArrayCreateByArray1Dr4
-!        module procedure ESMF_ArrayCreateByArray1Dr8
-!        module procedure ESMF_ArrayCreateByArray1Di4
-!        module procedure ESMF_ArrayCreateByArray1Di8
-        module procedure ESMF_ArrayCreateByArray2DR4
-!        module procedure ESMF_ArrayCreateByArray2Dr8
-!        module procedure ESMF_ArrayCreateByArray2Di4
-!        module procedure ESMF_ArrayCreateByArray2Di8
+!        module procedure ESMF_ArrayCreateByPtr1Dr4
+!        module procedure ESMF_ArrayCreateByPtr1Dr8
+!        module procedure ESMF_ArrayCreateByPtr1Di4
+!        module procedure ESMF_ArrayCreateByPtr1Di8
+        module procedure ESMF_ArrayCreateByPtr2DR4
+!        module procedure ESMF_ArrayCreateByPtr2Dr8
+!        module procedure ESMF_ArrayCreateByPtr2Di4
+!        module procedure ESMF_ArrayCreateByPtr2Di8
 ! ...to be expanded to all types, kinds, ranks
-
-! !DESCRIPTION:
-! This interface provides a single entry point for the various
-!  types of ArrayCreate functions.
-!EOP
-      end interface
-
-!------------------------------------------------------------------------------
-! interface block for construct
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayConstruct-- Generic interface to initialize Array object
-
-! !INTERFACE:
-     interface ESMF_ArrayConstruct
-
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayConstructNew
-        module procedure ESMF_ArrayConstructBySpec
-!        module procedure ESMF_ArrayConstructByArray
-        module procedure ESMF_ArrayConstructByArray2DR4
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -209,7 +187,7 @@ end function
                                    bufaddr, copyflag, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Array), pointer :: ESMF_ArrayCreateNew
+      type(ESMF_Array) :: ESMF_ArrayCreateNew
 !
 ! !ARGUMENTS:
       integer, intent(in) :: rank
@@ -258,10 +236,9 @@ end function
 !    A pointer to the start of the contents of the Array.
 !
 !  \item[copyflag]
-!    Set to either copy the contents of the data buffer, or set a reference
-!    and assume ownership of the buffer.  It must be able to be deallocated
-!    by the ESMF.  Valid values are {\tt ESMF\_DO\_COPY} or 
-!    {\tt ESMF\_NO\_COPY}.
+!    Set to either copy the contents of the data array, or simply share a
+!    a pointer to the same space.  Valid values are {\tt ESMF\_DO\_COPY} or 
+!    {\tt ESMF\_DO\_REF}.  (TODO: check to see if these are the right names)
 !
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -273,36 +250,28 @@ end function
 
 
 !       local vars
-        type (ESMF_Array), pointer :: a     ! pointer to new Array
+        type (ESMF_Pointer) :: ptr          ! opaque pointer to new C++ Array
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
-!       initialize pointer
-        nullify(a)
+!       TODO: need a null pointer to assign to initialize ptr
+!       ptr = NULLPTR
 
-!       initialize return code; assume failure until success is certain
+!       Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
-!       allocate space for Array object and call Construct method to initalize
-        allocate(a, stat=status)
-        if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
-          print *, "Array allocation error"
-          return
-        endif
-
-        call ESMF_ArrayConstructNew(a, rank, type, kind, &
-                                      lbounds, ubounds, strides, &
-                                      bufaddr, copyflag, status)
+        call c_ESMC_ArrayCreate(ptr, rank, type, kind, &
+                                lbounds, ubounds, strides, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array construction error"
           return
         endif
 
 !       set return values
-        ESMF_ArrayCreateNew => a
+        ESMF_ArrayCreateNew%this = ptr 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayCreateNew
@@ -374,7 +343,7 @@ end function
           return
         endif
 
-        call ESMF_ArrayConstructBySpec(a, spec, bufaddr, copyflag, status)
+        call c_ESMC_ArrayConstructBySpec(a, spec, bufaddr, copyflag, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array construction error"
           return
@@ -389,43 +358,39 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayCreateByArray2DR4 - make an ESMF array from an F90 ptr
+! !IROUTINE: ESMF_ArrayCreateByPtr2DR4 - make an ESMF array from an F90 ptr
 
 ! !INTERFACE:
-      function ESMF_ArrayCreateByArray2DR4(f90ptr, ni, nj, docopy, rc)
+      function ESMF_ArrayCreateByPtr2DR4(f90ptr, ni, nj, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Array), pointer :: ESMF_ArrayCreateByArray2DR4
+      type(ESMF_Array) :: ESMF_ArrayCreateByPtr2DR4
 !
 ! !ARGUMENTS:
       real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
       integer, intent(in) :: ni
       integer, intent(in) :: nj
-      type(ESMF_CopyFlag), intent(in) :: docopy  ! use existing buf or copy
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-! Creates an {\tt Array} based on an existing FORTRAN 90 
-! array.  The flag says whether to make a copy of the data in the array, or 
-! simply make a reference to the existing buffer.
+! Creates an {\tt Array} based on an existing Fortran 90 pointer, and
+!  the requested sizes.
 !
-! The function return is a pointer to an ESMF\_Array type.
+! The function return is an ESMF\_Array type.
 !
 ! The arguments are:
 !  \begin{description}
-!  \item[f90array]
-!   An existing Fortran 90 array which can be queried for info about
-!    type/kind/rank/strides/bounds/base addr, instead of having to specify
-!    them each individually.
+!  \item[f90ptr]
+!   A Fortran 90 array pointer which can be queried for info about
+!    type/kind/rank.  This routine will allocate data space so that when
+!    it returns the pointer will be associated and the memory can be
+!    filled with values.
 !
-!  \item[docopy]
-!    If set to {\tt DO\_COPY}, then the contents of the input array are copied
-!    to a new memory location, so when this routine returns the caller can
-!    modify or delete the original array without affecting the contents of
-!    this array.  If the copyflag is set to {\tt NO\_COPY}, then the caller 
-!    relinquishes the memory to this array, and when the ESMF is done with
-!    the array it can delete it.  The caller must no longer update the
-!    contents of the array in this case.
+!  \item[ni]
+!    Number of elements in the first dimension.
+!
+!  \item[nj]
+!    Number of elements in the second dimension.
 !
 !  \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -437,12 +402,12 @@ end function
 ! !REQUIREMENTS:
 
 !       local vars
-        type (ESMF_Array), pointer :: a     ! pointer to new Array
+        type (ESMF_Pointer) :: ptr          ! what C++ is going to return
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
-!       initialize pointer
-        nullify(a)
+!       TODO: need a null pointer to assign to initialize ptr
+!       ptr = NULLPTR
 
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -450,24 +415,17 @@ end function
           rc = ESMF_FAILURE
         endif
 
-!       allocate space for Array object and call Construct method to initalize
-        allocate(a, stat=status)
-        if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
-          print *, "Array allocation error"
-          return
-        endif
-
-        call ESMF_ArrayConstructByArray2DR4(a, f90ptr, ni, nj, docopy, status)
+        call c_ESMC_ArrayCreateByPtr2D(ptr, f90ptr, ni, nj, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array construction error"
           return
         endif
 
 !       set return values
-        ESMF_ArrayCreateByArray2DR4 => a
+        ESMF_ArrayCreateByPtr2DR4%this = ptr 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_ArrayCreateByArray2DR4  
+        end function ESMF_ArrayCreateByPtr2DR4  
 
 
 
@@ -478,7 +436,7 @@ end function
       subroutine ESMF_ArrayDestroy(array, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), pointer :: array
+      type(ESMF_Array) :: array
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -509,15 +467,9 @@ end function
         endif
 
 !       call Destruct first, then free this memory
-        call ESMF_ArrayDestruct(array, status)
+        call c_ESMC_ArrayDestroy(array, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array destruction error"
-          return
-        endif
-
-        deallocate(array, stat=status)
-        if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
-          print *, "Array allocation error"
           return
         endif
 
@@ -526,240 +478,6 @@ end function
 
         end subroutine ESMF_ArrayDestroy
 
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayConstructNew(array, rank, type, kind, &
-                                        lbounds, ubounds, strides, &
-                                        bufaddr, copyflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), pointer :: array 
-      integer, intent(in) :: rank
-      type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
-      integer, dimension(:), intent(in) :: lbounds
-      integer, dimension(:), intent(in) :: ubounds
-      integer, dimension(:), intent(in) :: strides
-      type(ESMF_Pointer), intent(in) :: bufaddr
-      type(ESMF_CopyFlag), intent(in) :: copyflag
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  ESMF routine to initialize the contents of a Array type.
-!  The corresponding internal routine is Destruct.
-!
-!  The return value is a new Array.
-!    
-!  The arguments are:
-!  \begin{description}
-!
-!  \item[array]
-!    An allocated {\tt Array} type where the contents are uninitialized.
-!
-!  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
-!
-!  \item[type]
-!    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
-!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
-!    {\tt ESMF\_DATA\_CHARACTER}.
-!
-!  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_4}
-!     and {\tt ESMF\_KIND\_8}.
-!
-!  \item[lbounds]
-!    The lower bounds for valid indices in the array.  This is a 1D
-!    integer array the same length as the rank.
-!
-!  \item[ubounds]
-!    The upper bounds for valid indices in the array.  This is a 1D
-!    integer array the same length as the rank.
-!
-!  \item[strides]
-!    The strides for each rank of the array. This is a 1D
-!    integer array the same length as the rank.
-!
-!  \item[bufaddr]
-!    A pointer to the start of the contents of the Array.
-!
-!  \item[copyflag]
-!    Set to either copy the contents of the data buffer, or set a reference
-!    and assume ownership of the buffer.  It must be able to be deallocated
-!    by the ESMF.  Valid values are {\tt ESMF\_DO\_COPY} or 
-!    {\tt ESMF\_NO\_COPY}.
-!
-!   \item[[rc]]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-
-!       local vars
-        integer :: i
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
-
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-
-!       extract any info needed to pass into C++ interface
-      
-        if (copyflag .eq. ESMF_DO_COPY) then
-            ! compute array size
-            ! allocate that amount of space
-            ! copy contents from bufaddr into new space
-        else
-            ! array%base_address = bufaddr
-        endif
-!     
-!
-!       call C++ Construct routine here
-!
-!
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayConstructNew
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayConstructBySpec(array, spec, bufaddr, copyflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), pointer :: array 
-      type(ESMF_ArraySpec), intent(in) :: spec
-      type(ESMF_Pointer), intent(in) :: bufaddr
-      type(ESMF_CopyFlag), intent(in) :: copyflag
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      ESMF routine to initialize the contents of a Array type.
-!      The corresponding internal routine is Destruct.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item[array]
-!       Uninitialized Array type to be filled in.
-!
-!     \item[spec]
-!     \item[bufaddr]
-!     \item[copyflag]
-!     \item[[rc]]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-
-!
-! code goes here
-!
-        end subroutine ESMF_ArrayConstructBySpec
-
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayConstructByArray2DR4(array, f90ptr, ni, nj, copyflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), pointer :: array 
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
-      integer, intent(in) :: ni
-      integer, intent(in) :: nj
-      type(ESMF_CopyFlag), intent(in) :: copyflag
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      ESMF routine to initialize the contents of a Array type.
-!      The corresponding internal routine is Destruct.
-!EOP
-!
-
-      ! extract rank, shape, etc out of F90 array and call the C++
-      ! interface to create the ESMF_Array class data.
-
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
-
-!     initialize the return code
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     make sure the pointer isn't already associated w/ something
-!     if ok, start with a null ptr
-      if (associated(f90ptr)) then
-          print *, "ERROR in ESMF_Allocate: pointer already associated"
-          return
-      endif
-      nullify(f90ptr)
-
-!     call the fortran intrinsic allocation function
-      allocate(f90ptr(ni, nj), stat=status)
-!     Formal error handling will be added asap.
-      if(status .NE. 0) then   ! this is the fortran rc, not ESMF's rc
-        print *, "ERROR in ESMF_Allocate: Allocation failed, status =", status
-        return
-      endif
-
-!     set return value.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-
-
-        end subroutine ESMF_ArrayConstructByArray2DR4
-
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayDestruct(array, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), pointer :: array
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      ESMF routine to release all resources except the Array datatype itself.
-!
-!EOP
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
-
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-!       get the real F90 pointer back from struct, and call deallocate
-!       this will need one interface per type/kind/rank
-        !deallocate(base_address, stat=status)
-        if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
-          print *, "Array allocation error"
-          return
-        endif
-
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayDestruct
 
 
 !------------------------------------------------------------------------------

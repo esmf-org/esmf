@@ -1,56 +1,55 @@
-# $Id: makefile,v 1.1 2002/11/04 22:15:51 nscollins Exp $
-
-# makefile template for the examples directory.
+# $Id: makefile,v 1.2 2002/11/07 22:18:26 nscollins Exp $ 
 
 ALL: 
 
-# don't set these unless absolutely necessary - they've got to be
-#  architecture and compiler independent and should be inherited
-#  from the upper level makefile if possible.
 CFLAGS    =
 FFLAGS    =
-
-# in general, leave these blank at this point.
 SOURCEC	  = 
-SOURCEF	  = 
+SOURCEF	  =
+
 SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-
-# fill in the names of the F90 source files for the tests/examples
-EXAMPLESF =
-# fill in the names of the C++ source files for the tests/examples
-EXAMPLESC =
-
-# leave the following lines blank.
+OBJSC	  =  
+OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
 DIRS	  = 
-
-# fill in the following with the executable names
-TESTEXAMPLES =
-
-# the following line must be set to the current subdir name relative
-# to the top level esmf directory. 
 LOCDIR	  = src/Infrastructure/Data/examples
 
-# leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+TESTEXAMPLES_3  = \
+	ESMF_ArrayCreateEx RUN_ESMF_ArrayCreateEx ESMF_ArrayCreateEx.rm
+
+TESTEXAMPLES_9  = \
+	ESMF_ArrayCreateEx RUN_ESMF_ArrayCreateExUNI ESMF_ArrayCreateEx.rm
+
+EXAMPLESF       = ESMF_ArrayCreateEx.F90
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
+ESMF_ArrayCreateDir:
+	mkdir -p ${ESMC_TESTDIR}
 
-# if you have dependencies between source files in this dir,
-#   list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
+ESMF_ArrayCreateEx: ESMF_ArrayCreateEx.o  chkopts
+	${F90CXXLD} -v -o ESMF_ArrayCreateEx ESMF_ArrayCreateEx.o ${ESMC_TIME_LIB} -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	${RM} -f ESMF_ArrayCreateEx.o
 
+RUN_ESMF_ArrayCreateEx:
+	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayCreateEx.tmps
+	${MPIRUN} -np 4 ESMF_ArrayCreateEx > ESMF_ArrayCreateEx.stdout
+	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_ArrayCreateEx.tmp
+	#@if (diff ESMF_ArrayCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_ArrayCreateEx.out) then \
+	#echo "PASS ArrayCreateger test" > ${ESMC_TESTDIR}/ESMF_ArrayCreateEx.log; else \
+	#echo "FAIL ArrayCreateger test" > ${ESMC_TESTDIR}/ESMF_ArrayCreateEx.log; fi
+	#@rm -f testlog stdlog.* logfile.* ESMF_ArrayCreateEx.tmp optlog
 
+RUN_ESMF_ArrayCreateExUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayCreateEx.tmps
+	${MPIRUN} -np 1 ESMF_ArrayCreateEx > ESMF_ArrayCreateEx.stdout
+	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_ArrayCreateEx.tmp
+	#@if (diff ESMF_ArrayCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_ArrayCreateEx.outuni) then \
+	#echo "PASS ArrayCreateEx test" > ${ESMC_TESTDIR}/ESMF_ArrayCreateEx.log; else \
+	#echo "FAIL ArrayCreateEx test" > ${ESMC_TESTDIR}/ESMF_ArrayCreateEx.log; fi
+	#@rm -f testlog stdlog.* logfile.* ESMF_ArrayCreateEx.tmp optlog
 
+ESMF_ArrayCreateEx.rm:
+	echo "ESMF_ArrayCreateEx.rm target called here."
 

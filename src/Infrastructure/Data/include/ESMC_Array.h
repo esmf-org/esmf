@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.2 2002/11/05 23:38:50 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.3 2002/11/07 22:18:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,15 +55,19 @@ class ESMC_ArrayConfig {
 class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
-    int rank;
-    enum ESMC_DataType type;
-    enum ESMC_DataKind kind;
-    void *ESMC_base_addr;
-    int ESMC_offset[ESMF_MAXDIM];
-    int ESMC_length[ESMF_MAXDIM];
-    int ESMC_stride[ESMF_MAXDIM];
-    enum ESMC_Logical iscontig;
-    void *ESMF_f90array;
+    int rank;                      // dimensionality
+    enum ESMC_DataType type;       // int, real, etc.
+    enum ESMC_DataKind kind;       // short, long
+    void *base_addr;               // real start of memory
+    int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
+    int length[ESMF_MAXDIM];       // number of elements/dim
+    int stride[ESMF_MAXDIM];       // byte spacing between elements/dim
+    enum ESMC_Logical iscontig;    // optimization possible if all contig
+    void *f90dopev;                // opaque object which is real f90 ptr
+                                   // potentially these could be needed... 
+ // int lbounds[ESMF_MAXDIM];      // real lower indicies
+ // int ubounds[ESMF_MAXDIM];      // real upper indicies
+ // void *first_element;           // memory address of the first element
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -74,16 +78,11 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 //  other than deleting the memory for the object/derived type itself.
 
   public:
- // the following methods apply to deep classes only
-    ESMC_Array *ESMC_ArrayCreate(int rank, 
-                           enum ESMC_DataType dt, enum ESMC_DataKind dk,
-                           void *base, int *offsets, int *lengths, int *strides, 
-                           void *f90ptr, int *rc);
-    int ESMC_ArrayDestroy(void);
-    void ESMC_ArrayConstruct(ESMC_Array *a, int rank, 
-                           enum ESMC_DataType dt, enum ESMC_DataKind dk,
-                           void *base, int *offsets, int *lengths, int *strides, 
-                           void *f90ptr, int *rc);
+    void ESMC_ArrayConstruct(ESMC_Array *a, int rank,
+                          enum ESMC_DataType dt, enum ESMC_DataKind dk,
+                          void *base, int *offsets, int *lengths, int *strides, 
+                          void *f90ptr, int *rc);
+    //void ESMC_ArrayConstruct(void);
     int ESMC_ArrayDestruct(void);
 
  // optional configuration methods
@@ -115,4 +114,13 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 
  };   // end class ESMC_Array
 
+// these are functions, but not class methods.
+ESMC_Array *ESMC_ArrayCreate(int rank, enum ESMC_DataType dt, 
+                             enum ESMC_DataKind dk, void *base, 
+                             int *offsets, int *lengths, int *strides, int *rc);
+int ESMC_ArrayDestroy(ESMC_Array *array);
+ESMC_Array *ESMC_ArrayCreate_F(int rank, enum ESMC_DataType dt, 
+                               enum ESMC_DataKind dk, void *base, 
+                               int *offsets, int *lengths, int *strides, 
+                               void *f90ptr, int *rc);
  #endif  // ESMC_Array_H

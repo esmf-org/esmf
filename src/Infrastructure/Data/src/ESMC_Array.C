@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.2 2002/11/05 17:46:15 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.3 2002/11/07 22:18:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,8 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.2 2002/11/05 17:46:15 nscollins Exp $";
+ static const char *const version = 
+            "$Id: ESMC_Array.C,v 1.3 2002/11/07 22:18:27 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -44,29 +45,29 @@
 // !IROUTINE:  ESMC_ArrayCreate - Create a new Array
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_Array::ESMC_ArrayCreate(
+      ESMC_Array *ESMC_ArrayCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_Array
 //
 // !ARGUMENTS:
-    int rank,
-    enum ESMC_DataType dt, 
-    enum ESMC_DataKind dk,
-    void *base, 
-    int *offsets, 
-    int *lengths, 
-    int *strides,
-    void *f90ptr, 
-    int *rc) {
+    int rank,                  // dimensionality
+    enum ESMC_DataType dt,     // int, float, etc
+    enum ESMC_DataKind dk,     // short/long, etc
+    void *base,                // if non-null, this is already allocated memory
+    int *offsets,              // offset in bytes to start of each dim
+    int *lengths,              // number of items in each dim
+    int *strides,              // number of bytes between successive items/dim
+    int *rc) {                 // return code
 //
 // !DESCRIPTION:
-//      Create a new Array from ... Allocates memory for a new Array
-//      object and uses the internal routine ESMC_ArrayContruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC_ArrayInit.
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
+//      This routine is the C++ entry point for creating an ESMF_Array
+//      object.  Unlike natural C++ arrays which can be as simple as the
+//      base address pointer and the number of bytes necessary to move to
+//      the next item, ESMF_Arrays are richer in the associated metadata
+//      which allows them to behave more like Fortran arrays.  They store
+//      the size of each dimension, allow non-contiguous strides per
+//      dimension, and allow whole-array or subsectional operations.
 //
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
@@ -74,19 +75,27 @@
 // TODO: Add code here which does:
 //
 //   This code needs to make space for the private class data and store the
-//   arguments given.  Either malloc the existing list longer, or use an
-//   unused entry in an already allocated list.
+//   arguments given.  Decide if constructor is going to do much or not.
 //
-//   It then call a *Fortran* allocate routine to get space - not malloc - and 
-//   it needs to call with a pointer of the correct type/kind/rank so
-//   that this array is useable from F90 as well as C++.  
-     //ESMF_Allocate();
+//   There will need to be a #if USING_MIXED_FORTRAN_AND_C++ section.  If
+//   we are running with fortran, then it needs to do:
+//   - call a *Fortran* allocate routine to get space - not malloc - and
+//     it needs to call with a pointer of the correct type/kind/rank so
+//     that this array is useable from F90 as well as C++.  
+//         f90ptr = ESMF_Allocate(type, kind, rank, shape, ..., &rc);
+//     This is overloaded to call a specific routine on the F90 side which
+//     is per type/kind/rank.  The new F90 pointer is stored in the private 
+//     data for this class as an opaque object; to be returned on demand 
+//     for use by fortran code.
 //
-//   It then needs to store the real F90 array pointer (dope vector), so that
-//   it can be returned to a fortran routine on demand.  From the C++ side
-//   it can return a handle or pointer which describes the private data, and
-//   from C++ you can get the real memory address and use it directly.
+//   else, if this is a C++ only build then it has to call malloc to get
+//   space, and it can ignore F90 pointers completely.
 //
+//   The return from this routine is a pointer to the new Array data.
+//
+     ESMC_Array *a = new ESMC_Array;
+  
+     return a;
 
  } // end ESMC_ArrayCreate
 
@@ -95,7 +104,7 @@
 // !IROUTINE:  ESMC_ArrayDestroy - free a Array created with Create
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayDestroy(void) {
+      int ESMC_ArrayDestroy(ESMC_Array *array) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -113,8 +122,72 @@
 //
 //  code goes here
 //
+    delete array;
+
+    return 0;
 
  } // end ESMC_ArrayDestroy
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayCreate_F - internal routine for fortran use
+//
+// !INTERFACE:
+      ESMC_Array *ESMC_ArrayCreate_F(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Array
+//
+// !ARGUMENTS:
+    int rank,                  // dimensionality
+    enum ESMC_DataType dt,     // int, float, etc
+    enum ESMC_DataKind dk,     // short/long, etc
+    void *base,                // real start of memory 
+    int *offsets,              // offset in bytes to start of each dim
+    int *lengths,              // number of items in each dim
+    int *strides,              // number of bytes between successive items/dim
+    void *f90ptr,              // opaque type which fortran understands (dope v)
+    int *rc) {                 // return code
+//
+// !DESCRIPTION:
+//      This version of Create is only intended for internal use by
+//      the ESMF_ArrayCreate fortran routine.  This routine works in a
+//      similar manner as the regular ESMC_ArrayCreate routine, but the
+//      differences include:  it gets a real fortran 90 array pointer as
+//      one of the arguments; instead of calling malloc to make space for
+//      the array contents, it passes the f90 pointer back to a fortran
+//      routine to do the allocation.  This is so the fortran routine
+//      can create the corresponding 'dope vector' in a completely compiler-
+//      independent manner.  If we tried to do it here, we would have to
+//      reverse-engineer the structure for each version of each compiler
+//      we used.
+//
+//EOP
+// !REQUIREMENTS:  AAAn.n.n
+
+// TODO: Add code here which does:
+//
+//   This code needs to make space for the private class data and store the
+//   arguments given.  Decide if constructor is going to do much or not.
+//
+//   It then call a *Fortran* allocate routine to get space - not malloc - and 
+//   it needs to call with a pointer of the correct type/kind/rank so
+//   that this array is useable from F90 as well as C++.  
+     //ESMF_Allocate();
+//   This is overloaded to call a specific routine on the F90 side which
+//    is per type/kind/rank.
+//
+//   It then needs to store an opaque pointer to the real F90 array pointer 
+//   (also called the dope vector), so that it can be returned to any 
+//   fortran routine on demand. 
+// 
+//   The return from this routine is a pointer to the new Array data.
+//
+     ESMC_Array *a = new ESMC_Array;
+  
+     return a;
+
+ } // end ESMC_ArrayCreate_F
 
 //-----------------------------------------------------------------------------
 //BOP
