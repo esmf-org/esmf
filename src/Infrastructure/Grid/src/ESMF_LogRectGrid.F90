@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.68 2004/05/25 20:08:18 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.69 2004/05/25 23:07:10 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -849,10 +849,12 @@
       endif
 
       allocate(coords(3))
+      if (associated(grid%gridSpecific%logRectGrid%coords)) then
         coords(1) = grid%gridSpecific%logRectGrid%coords(1)
         coords(2) = grid%gridSpecific%logRectGrid%coords(2)
+      endif
 
-     ! coords => grid%gridSpecific%logRectGrid%coords
+      grid%gridSpecific%logRectGrid%coords => coords
 
       ! Two ways to make a subgrid here: by coordinates or by minimum and delta
       ! by coordinates:
@@ -1931,13 +1933,9 @@
         dimNames(i) = grid%dimNames(i)
         dimUnits(i) = grid%dimUnits(i)
       enddo
-      if (associated(coords)) then
-        call ESMF_LocalArrayGetData(coords(1), coord1, ESMF_DATA_COPY, status)
-        if (dimCount.ge.2) &
-          call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_COPY, status)
-        if (dimCount.ge.3) &
-          call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_COPY, status)
-      else              ! assume uniform grid, so no coords stored
+
+      if (grid%horzGridType.eq.ESMF_GRID_TYPE_LATLON_UNI .OR. &
+          grid%horzGridType.eq.ESMF_GRID_TYPE_XY_UNI) then ! uniform
         allocate(coord1(counts(1)+1))
         coord1(1) = min(1)
         delta     = (max(1) - min(1)) / real(counts(1))
@@ -1952,15 +1950,15 @@
             coord2(i+1) = coord2(i) + delta
           enddo
         endif
-        if (dimCount.ge.3) then
-          allocate(coord3(counts(3)+1))
-          coord3(1) = min(3)
-          delta     = (max(3) - min(3)) / real(counts(3))
-          do i = 1,counts(3)
-            coord3(i+1) = coord3(i) + delta
-          enddo
-        endif
+      else   ! not uniform
+        call ESMF_LocalArrayGetData(coords(1), coord1, ESMF_DATA_COPY, status)
+        if (dimCount.ge.2) &
+          call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_COPY, status)
       endif
+
+      ! the vertical grid is never uniform, so get its coordinates if 3d grid
+      if (dimCount.ge.3) &
+          call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_COPY, status)
 
       ! Fill in defaults for necessary but optional variables
       allocate(decompIdsUse(dimCount))
