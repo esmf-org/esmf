@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.27 2004/08/11 22:54:01 svasquez Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.28 2004/08/26 20:48:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.27 2004/08/11 22:54:01 svasquez Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.28 2004/08/26 20:48:51 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -63,7 +63,7 @@
       integer :: nDE_i, nDE_j
       type(ESMF_GridHorzStagger) :: horz_stagger, Rhorz_stagger
       type(ESMF_GridVertStagger) :: vert_stagger
-      integer :: status
+      integer :: status, npets
       integer, dimension (1) :: DEDim1
       integer, dimension (10000) :: DEDim2
       real(ESMF_KIND_R8) :: delta(15), grid_min(3), grid_max(3)
@@ -84,11 +84,13 @@
 !--------------------------------------------------------------------------------
 
       !NEX_UTest
-      call ESMF_Initialize(rc=status)
+      call ESMF_Initialize(vm = vm, rc=status)
       write(name, *) "ESMF_Initialize Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      print *, "NUMBER_OF_PROCESSORS ", npets
 
       !NEX_UTest
       call ESMF_VMGetGlobal(vm, status)

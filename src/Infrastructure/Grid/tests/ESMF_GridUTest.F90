@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.43 2004/08/03 20:26:36 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.44 2004/08/26 20:52:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.43 2004/08/03 20:26:36 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.44 2004/08/26 20:52:54 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,7 +68,7 @@
       integer :: nDE_i, nDE_j
       type(ESMF_GridType) :: horz_gridtype
       type(ESMF_GridHorzStagger) :: horz_stagger
-      integer :: status
+      integer :: status, npets
       real(ESMF_KIND_R8) :: grid_min(3), grid_max(3)
       type(ESMF_Grid) :: grid, grid1
       type(ESMF_DELayout) :: layout, layout2
@@ -84,7 +84,9 @@
 !     added to allow a script to count the number and types of unit tests.
 !--------------------------------------------------------------------------------
 
-      call ESMF_Initialize(rc=status)
+      call ESMF_Initialize(vm=vm, rc=status)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      print *, "NUMBER_OF_PROCESSORS ", npets
 
 #ifdef ESMF_EXHAUSTIVE
       call ESMF_VMGetGlobal(vm, status)
