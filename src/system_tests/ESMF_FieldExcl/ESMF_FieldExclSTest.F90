@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.7 2004/10/12 21:16:49 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.8 2004/10/14 17:28:36 theurich Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -46,6 +46,7 @@
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
+    logical :: firstflag = .true.
 
     ! instantiate a clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -208,7 +209,7 @@
     call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Coupler Initialize finished, rc =", rc
- 
+!goto 10 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Run section
@@ -216,28 +217,34 @@
 !-------------------------------------------------------------------------
 
     do while (.not. ESMF_ClockIsStopTime(clock, rc))
-
+    
+      print *, 'gjt: clock tick'
+      
       call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, &
-                            blockingFlag=ESMF_BLOCKING, rc=rc)
-                            !blockingFlag=ESMF_NONBLOCKING, rc=rc)
+                            !blockingFlag=ESMF_BLOCKING, rc=rc)
+                            blockingFlag=ESMF_NONBLOCKING, rc=rc)
+      print *, "Comp 1 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
  
       call ESMF_GridCompWait(comp1, rc)
+      print *, "Comp 1 Wait returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp 1 Run returned, rc =", rc
 
-      call ESMF_GridCompWait(comp2, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp 2 Run returned, rc =", rc
+      if (firstflag .neqv. .true.) then
+      	call ESMF_GridCompWait(comp2, rc)
+      	print *, "Comp 2 Wait returned, rc =", rc
+      	if (rc .ne. ESMF_SUCCESS) goto 10
+      endif
 
       call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, &
                             blockingFlag=ESMF_BLOCKING, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Run returned, rc =", rc
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, &
-                            blockingFlag=ESMF_BLOCKING, rc=rc)
-                            !blockingFlag=ESMF_NONBLOCKING, rc=rc)
+                            !blockingFlag=ESMF_BLOCKING, rc=rc)
+                            blockingFlag=ESMF_NONBLOCKING, rc=rc)
+      print *, "Comp 2 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -246,13 +253,13 @@
 
     enddo
  
-    call ESMF_GridCompWait(comp1, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    print *, "Comp 1 Run returned, rc =", rc
+!    call ESMF_GridCompWait(comp1, rc)
+!    print *, "Comp 1 Wait returned, rc =", rc
+!    if (rc .ne. ESMF_SUCCESS) goto 10
 
     call ESMF_GridCompWait(comp2, rc)
+    print *, "Comp 2 Wait returned, rc =", rc
     if (rc .ne. ESMF_SUCCESS) goto 10
-    print *, "Comp 2 Run returned, rc =", rc
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
