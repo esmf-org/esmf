@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.5 2001/11/29 17:11:40 dneckels Exp $
+% $Id: ESMF_install.tex,v 1.6 2001/11/29 23:55:31 dneckels Exp $
 
 \section{Installation}
 
@@ -67,6 +67,12 @@ Output files from the test examples will be directed to files in:
 \begin{verbatim}
 ${ESMF_DIR}/test${BOPT}/${ESMF_ARCH}
 \end{verbatim}
+
+Exhaustive tests exist that may be activated by setting the environment variable
+{\tt ESMF\_EXHTEST} to {\tt on}.  While this activation will test the library more thoroughly,
+it will take significantly longer to complete than the basic tests.
+
+\smallskip
 
 \noindent To build documentation:
 \begin{verbatim}
