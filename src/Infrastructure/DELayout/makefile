@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2004/04/29 15:39:43 cdeluca Exp $
+# $Id: makefile,v 1.9 2004/05/14 15:27:49 theurich Exp $
 
 ALL: build_here
 
@@ -16,3 +16,6 @@ include ${ESMF_DIR}/makefile
 
 DIRS	  = src interface doc
 
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =
