@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.9 2004/05/12 22:52:16 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.10 2004/05/14 21:13:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.9 2004/05/12 22:52:16 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.10 2004/05/14 21:13:15 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -486,6 +486,37 @@
       call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Test adding a State to a State 
+      call ESMF_StateAddState(state2, state1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a State to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call  ESMF_StatePrint(state2, rc=rc)
+
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test getting a State from a State 
+      call ESMF_StateGetState(state2, "Atmosphere Out", state1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a State from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call  ESMF_StatePrint(state2, rc=rc)
+
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test State Validation
+      call ESMF_StateValidate(state2, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validating a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
 #ifdef ESMF_EXHAUSTIVE
 
       !EX_UTest
@@ -562,6 +593,15 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Test State Validation
+      call ESMF_StateValidate(state1, rc=rc)
+      write(failMsg, *) "Should not return ESMF_SUCCESS"
+      write(name, *) "Validating a State Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !NEX_UTest
       ! Test Creation of an export State with an array list
       statename = "Export State"
