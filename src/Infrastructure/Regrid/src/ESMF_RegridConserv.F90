@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.46 2004/11/18 22:46:33 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.47 2004/11/23 22:01:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,11 +55,11 @@
 !------------------------------------------------------------------------------
 
       ! TODO:  these should really be in Base or somewhere else
-      real(ESMF_KIND_R8), parameter ::  pi             = 3.1416d0
-      real(ESMF_KIND_R8), parameter ::  pi2            = 2.0d0 * pi
-      real(ESMF_KIND_R8), parameter ::  offset         = 1.0d-14
-      real (ESMF_KIND_R8), parameter :: northThreshold =  1.48d0
-      real (ESMF_KIND_R8), parameter :: southThreshold = -1.48d0
+      real(ESMF_KIND_R8), parameter ::  pi            = 3.1416d0
+      real(ESMF_KIND_R8), parameter ::  pi2           = 2.0d0 * pi
+      real(ESMF_KIND_R8), parameter ::  offset        = 1.0d-12
+      real(ESMF_KIND_R8), parameter :: northThreshold =  1.48d0
+      real(ESMF_KIND_R8), parameter :: southThreshold = -1.48d0
                             ! threshold latitude above/below which to use polar
                             ! transformation for finding intersections in
                             ! spherical coordinates
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.46 2004/11/18 22:46:33 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.47 2004/11/23 22:01:03 jwolfe Exp $'
 
 !==============================================================================
 
@@ -832,7 +832,9 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! Create the RegridIndex structure for use in the AddLink calls
-      index = ESMF_RegridIndexCreate(srcSize, (/dstSizeX, dstSizeY/), localrc)
+      index = ESMF_RegridIndexCreate(srcSize, (/dstSizeX+2*dstIndexMod(1), &
+                                                dstSizeY+2*dstIndexMod(2)/), &
+                                                localrc)
 
       ! determine number of weights for each entry based
       ! on input order of interpolation
@@ -929,8 +931,7 @@
 
             ! integrate along this segment, detecting intersections
             ! and computing the line integral for each sub-segment
-!            do while (ybeg.ne.yend .or. xbeg.ne.xend)
-            do while (abs(ybeg-yend).gt.offset .OR. abs(xbeg-xend).gt.offset)
+            do while (ybeg.ne.yend .or. xbeg.ne.xend)
 
               ! prevent infinite loops if integration gets stuck
               ! near cell or threshold boundary
@@ -1089,8 +1090,7 @@
 
             ! integrate along this segment, detecting intersections
             ! and computing the line integral for each sub-segment
-  !jw          do while (ybeg.ne.yend .OR. xbeg.ne.xend)
-            do while (abs(ybeg-yend).gt.offset .OR. abs(xbeg-xend).gt.offset)
+            do while (ybeg.ne.yend .OR. xbeg.ne.xend)
 
               ! prevent infinite loops if integration gets stuck near cell or
               ! threshold boundary
@@ -1137,8 +1137,8 @@
 
               ! store the appropriate addresses and weights.
               ! also add contributions to cell areas and centroids.
-      !jw        if (srcAdd.ne.0 .AND. (.not.coinc)) then   ??????
-              if (srcAdd.ne.0) then
+              if (srcAdd.ne.0 .AND. (.not.coinc)) then
+      !jw        if (srcAdd.ne.0) then
                 if (srcMask(srcAdd)) then
                   dstAdd(dstOrder(1)) = iDst + dstIndexMod(1)
                   dstAdd(dstOrder(2)) = jDst + dstIndexMod(2)
@@ -1863,11 +1863,11 @@
         numCorners        ! number of corners in each search grid cell
       integer :: nStrt=1
 
-      logical ::      & 
+      logical ::    & 
         reverse,    &! segment in opposite direction of full segment
         thresh,     &! flags segments crossing threshold bndy
         outside,    &! true if beg point outside grid
-        found         ! true if grid cell found
+        found        ! true if grid cell found
 
       real (ESMF_KIND_R8) ::     &
         refx,                   &! temporary for manipulating longitudes
@@ -1923,7 +1923,9 @@
         enddo
 
         ! if point is outside the cell bounding box, move on to the next cell
-        if (xb.gt.maxval(cornerX) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
+        if (xe.lt.minval(cornerX) .OR. xb.gt.maxval(cornerX) .OR. &
+            ye.lt.minval(cornerY) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
+     !   if (xb.gt.maxval(cornerX) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
 
         ! congratulations.  you have jumped through another hoop successfully.
         ! now check this cell more carefully to see if the point is inside
@@ -2087,7 +2089,6 @@
                 s2 = (mat1*rhs2 - rhs1*mat3)/determ
  
                 xoff = abs(offset/determ)
-                if (outside) xoff = -xoff
                 if ((s1 + xoff).gt.1.0d0) xoff = 1.0d0 - s1
                 yoff = mat3*xoff
                 xoff = mat1*xoff
@@ -2315,7 +2316,9 @@
         enddo
 
         ! if point is outside the cell bounding box, move on to the next cell
-        if (xb.gt.maxval(cornerX) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
+        if (xe.lt.minval(cornerX) .OR. xb.gt.maxval(cornerX) .OR. &
+            ye.lt.minval(cornerY) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
+     !   if (xb.gt.maxval(cornerX) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
 
         ! congratulations.  you have jumped through another hoop successfully.
         ! now check this cell more carefully to see if the point is inside
@@ -2506,7 +2509,6 @@
                 s2 = (mat1*rhs2 - rhs1*mat3)/determ
  
                 xoff = abs(offset/determ)
-                if (outside) xoff = -xoff
                 if ((s1 + xoff).gt.1.0d0) xoff = 1.0d0 - s1
                 yoff = mat3*xoff
                 xoff = mat1*xoff
@@ -2728,7 +2730,9 @@
           enddo
 
           ! if point is outside the cell bounding box, move on to the next cell
-          if (xb.gt.maxval(cornerX) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
+          if (xe.lt.minval(cornerX) .OR. xb.gt.maxval(cornerX) .OR. &
+              ye.lt.minval(cornerY) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
+       !   if (xb.gt.maxval(cornerX) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
 
           ! congratulations.  you have jumped through another hoop successfully.
           ! now check this cell more carefully to see if the point is inside
@@ -2831,8 +2835,8 @@
       s2 = s2 + s1
       if (s2.ge.1.0d0) go to 10
       outside = .true.
-      xb   = xb + s1*dx
-      yb   = yb + s1*dy
+      xb      = xb + s1*dx
+      yb      = yb + s1*dy
       go to 5
 
    10 continue
@@ -2900,7 +2904,6 @@
                 s2 = (mat1*rhs2 - rhs1*mat3)/determ
  
                 xoff = abs(offset/determ)
-                if (outside) xoff = -xoff
                 if ((s1 + xoff).gt.1.0d0) xoff = 1.0d0 - s1
                 yoff = mat3*xoff
                 xoff = mat1*xoff
@@ -2933,12 +2936,12 @@
 ! !INTERFACE:
 
       subroutine ESMF_RegridConservXSphr2D(iLoc, jLoc, srcCorner, &
-                                               xIntersect, yIntersect, &
-                                               xoff, yoff, coinc, &
-                                               xbeg, ybeg, xend, yend, fullLine,  &
-                                               srchCenterX, srchCenterY, &
-                                               srchCornerX, srchCornerY, &
-                                               mask, cornerX, cornerY, rc) 
+                                           xIntersect, yIntersect, &
+                                           xoff, yoff, coinc, &
+                                           xbeg, ybeg, xend, yend, fullLine,  &
+                                           srchCenterX, srchCenterY, &
+                                           srchCornerX, srchCornerY, &
+                                           mask, cornerX, cornerY, rc) 
 
 !
 ! !ARGUMENTS:
@@ -3333,7 +3336,6 @@
                 s2 = (mat1*rhs2 - rhs1*mat3)/determ
  
                 xoff = abs(offset/determ)
-                if (outside) xoff = -xoff
                 if ((s1 + xoff).gt.1.0d0) xoff = 1.0d0 - s1
                 yoff = mat3*xoff
                 xoff = mat1*xoff
@@ -3481,9 +3483,6 @@
         reverse,           &! segment opposite direction of full segment
         outside,           &! point outside of search grid
         found               ! true if grid cell found
-
-      real (ESMF_KIND_R8), parameter :: &
-        offset = 1.d-8
 
       real (ESMF_KIND_R8) ::         &
         xb, yb, xe, ye,         &! local coordinates for segment endpoints
@@ -3909,9 +3908,6 @@
         reverse,           &! segment opposite direction of full segment
         outside,           &! point outside of search grid
         found               ! true if grid cell found
-
-      real (ESMF_KIND_R8), parameter :: &
-        offset = 1.d-8
 
       real (ESMF_KIND_R8) ::         &
         xb, yb, xe, ye,         &! local coordinates for segment endpoints
