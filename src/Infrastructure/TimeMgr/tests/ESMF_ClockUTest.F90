@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.66 2004/04/09 20:13:58 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.67 2004/04/15 22:46:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.66 2004/04/09 20:13:58 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.67 2004/04/15 22:46:16 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,9 +52,9 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
-      logical :: bool
+      logical :: bool, clocksEqual, clocksNotEqual
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1, clock_gregorian, clock_julian, &
+      type(ESMF_Clock) :: clock, clock1, clock2, clock_gregorian, clock_julian, &
                           clock_no_leap, clock_360day
 
       ! Random number
@@ -490,6 +490,63 @@
 
       ! ----------------------------------------------------------------------------
  
+      !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Clock Initialization Test"
+      clock2 = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
+                               stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+ 
+      !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Create Clock copy Test"
+      clock1 = ESMF_ClockCreate(clock,  rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for clock equality
+      ! clocksEqual = ESMF_ClockOperator(==)(clock1,clock2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Clocks Equal Test"
+      clocksEqual = (clock == clock1)
+      call ESMF_Test((clocksEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for clock inequality
+      ! clocksEqual = ESMF_ClockOperator(==)(clock1,clock2)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Clocks Not Equal Test"
+      clocksEqual = (clock == clock2)
+      call ESMF_Test((.not.clocksEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for clock inequality
+      ! clocksEqual = ESMF_ClockOperator(/=)(clock1,clock2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Clocks Not Equal Test"
+      clocksNotEqual = (clock /= clock2)
+      call ESMF_Test((clocksNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for clock equality
+      ! clocksEqual = ESMF_ClockOperator(/=)(clock1,clock2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Clocks Equal Test"
+      clocksNotEqual = (clock /= clock1)
+      call ESMF_Test((.not.clocksNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
       !NEX_UTest
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Stop Time Print Test"
