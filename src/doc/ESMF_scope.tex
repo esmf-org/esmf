@@ -35,17 +35,22 @@ as the ESMF utility {\it infrastructure}.\\
 \noindent The ESMF consists of:
 \begin{itemize}
 \item an interface specification for coupling components \footnote{
-The science needs of different users implies a wide variety of continually
-evolving component interfaces, for example aeolian dust
-deposition is currently being studies as a potentially singnificant
-process in climate evolution. Ten years ago almost no atmospheric general
-circulation models included these processes, ten years from now there will 
-almost certainly be other feedbacks to incorporate. The ESMF component 
-interface specifcation will provide generic mechanisms, with
-standard signatures and semantics, that support extensible, flexible and
-self-describing component model interfaces. Conceptually the approach we
-envisage has parallels wiith the SOAP and WSDL systems that are used 
-to {\bf wire} together e-Business internet applications.
+The science needs of different users
+implies a wide variety of continually evolving component interface, for
+example Aeolian dust deposition is currently being studied as a
+potentially significant process in climate evolution. Ten years ago
+almost no atmospheric models or ocean models included these processes,
+ten years from now there will almost certainly be other feedbacks to
+incorporate. The component interface specification will provide generic
+mechanisms, with standard signatures and semantics that support
+extensible, flexible and self-describing component model interfaces.
+[my new text] There are conceptual parallels to such Web projects as the
+Rseource Description Format (http://www.w3.org/RDF). Rather than
+attempting to fix domain-wide vocabularies, by enforcing standardized
+interfaces, the RDF provides a layer on which
+such vocabularies may be expressed, and allowed to evolve. ESMF
+component interfaces likewise will provide the bedrock on which specific
+component interfaces (e.g an atmospheric model interface) may be expressed.
 }
 ; 
 \item a complete, portable, high-quality reference implementation
@@ -81,16 +86,26 @@ but, the initial development will not deliver then as part of its milestones.
 }
 .
 Each compliant component will provide a specified set of methods that
-will enable it to interoperate with other components.  For the most
+will enable it to interoperate with other components \footnote{
+Extensible, self-describing method interfaces will be used that draw
+{\bf conceptually} on the ideas employed by systems for internet
+wide interoperability such as RDF - see http://www.w3.org/RDF and HTTP)
+}
+.  For the most
 part, we expect components to be able to provide the required
 interface functionality through wrapping of internal data structures
-and methods.
+and methods. 
 
 \section{ESMF superstructure}
 \label{sec:ESMF_superstructure}
 
 All inter-component communication in the framework occurs through 
-component calls to the superstructure. \\
+component calls to the superstructure. Here we provide a synopsis of the
+requirements that the superstructure layer will have to meet.
+Detailed, tangible requirements for the superstructure, that can
+be validated, are given in the {\it Control} and the {\it Coupler and
+Gridded Component Interfaces} detailed requirements sections -
+parts \ref{part:Superstructure:_Control} and \ref{part:Superstructure:_Components} of this document. \\
 
 \noindent The main functions of the ESMF coupling superstructure are:
 
