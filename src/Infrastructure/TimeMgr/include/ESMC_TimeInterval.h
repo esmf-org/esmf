@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.8 2003/04/02 17:24:53 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.9 2003/04/05 01:50:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,25 +109,38 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     //   can map to F90 named-optional-arguments interface
 
     // (TMG 1.1)
-    int ESMC_TimeIntervalGet(const char *TimeList, ...);
+    int ESMC_TimeIntervalGet(const char *TimeList, ...) const;
     // e.g. Get("D:S",(int *)D, (int *)S);
 
     int ESMC_TimeIntervalSet(const char *TimeList, ...);
     // e.g. Set("s" , (double) s);
 
-    int ESMC_TimeIntervalGetCalendar(ESMC_Calendar *Cal);
+    // Get/Set methods to support the F90 optional arguments interface
+    int ESMC_TimeIntervalGet(int *YY, int *MO, int *D, int *H, int *M,
+                             ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                             double *d_, double *h_, double *m_, double *s_,
+                             double *ms_, double *us_, double *ns_,
+                             int *Sn, int *Sd) const;
+
+    int ESMC_TimeIntervalSet(int *YY, int *MO, int *D, int *H, int *M,
+                             ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                             double *d_, double *h_, double *m_, double *s_,
+                             double *ms_, double *us_, double *ns_,
+                             int *Sn, int *Sd);
+
+    int ESMC_TimeIntervalGetCalendar(ESMC_Calendar *Cal) const;
     int ESMC_TimeIntervalSetCalendar(ESMC_Calendar *Cal);
 
-    bool ESMC_TimeIntervalIsSameCal(ESMC_TimeInterval *);
+    bool ESMC_TimeIntervalIsSameCal(ESMC_TimeInterval *) const;
 
     // return in string format (TMG 1.5.9)
-    int ESMC_TimeIntervalGetString(char *Ts);
+    int ESMC_TimeIntervalGetString(char *Ts) const;
 
     // return positive value (TMG 1.5.8)
-    ESMC_TimeInterval *ESMC_TimeIntervalGetAbsValue(ESMC_TimeInterval *);
+    ESMC_TimeInterval *ESMC_TimeIntervalGetAbsValue(ESMC_TimeInterval *) const;
 
     // return negative value (TMG 1.5.8)
-    ESMC_TimeInterval *ESMC_TimeIntervalGetNegAbsVal(ESMC_TimeInterval *);
+    ESMC_TimeInterval *ESMC_TimeIntervalGetNegAbsVal(ESMC_TimeInterval *) const;
 
     // division (TMG 1.5.5)
     double& operator/(ESMC_TimeInterval &);
@@ -135,17 +148,17 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // subdivision (TMG 1.5.6, 5.3, 7.2)
     ESMC_TimeInterval& operator/=(int &);
-    ESMC_TimeInterval& operator/ (int &);
+    ESMC_TimeInterval& operator/ (int &) const;
     ESMC_TimeInterval& operator/=(double &);
-    ESMC_TimeInterval& operator/ (double &);
+    ESMC_TimeInterval& operator/ (double &) const;
 
     // multiplication (TMG 1.5.7, 7.2)
     ESMC_TimeInterval& operator*=(int &);
-    ESMC_TimeInterval& operator* (int &);
+    ESMC_TimeInterval& operator* (int &) const;
     ESMC_TimeInterval& operator*=(ESMC_Fraction &);
-    ESMC_TimeInterval& operator* (ESMC_Fraction &);
+    ESMC_TimeInterval& operator* (ESMC_Fraction &) const;
     ESMC_TimeInterval& operator*=(double &);
-    ESMC_TimeInterval& operator* (double &);
+    ESMC_TimeInterval& operator* (double &) const;
 
     // required methods inherited and overridden from the ESMC_Base class
 
