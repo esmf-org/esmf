@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.4 2003/12/09 22:30:59 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.5 2003/12/12 20:25:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.4 2003/12/09 22:30:59 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.5 2003/12/12 20:25:35 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -455,6 +455,7 @@ static int verbose = 1;
 
   this->length = new int[ESMF_MAXDECOMPDIM];
   this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
+  this->nDEs = 1;   // must do this if mult below by len
   for(ii=0; ii<ndim; ii++) {
     this->commType[ii]=commtypes[ii];
     this->length[ii]=lengths[ii];
@@ -2197,7 +2198,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
                         (j_tot*rsize_tot[rankx] + AIPtr[rankx].min) * bytesperitem);
   
           sendcount = rsize[rankx];
-          if (j > rsize[rbreak[0]]) {
+          if (j >= rsize[rbreak[0]]) {
             sendcount = 0;
           }
           recvbuf = GlobalArray;   // ditto comment above
@@ -2211,6 +2212,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
                 recvcounts[k] = rsize[rankx];
               } else {
                 recvcounts[k] = localDimCounts[rankx*nde + k];
+                if (j >= localDimCounts[ranky*nde + k]) recvcounts[k] = 0;
               }
               displs[k] = displsX + displsY;
               displsX  += recvcounts[k];
@@ -2282,7 +2284,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
             sendbuf = (void *)((char *)sendbuf + 
                     (j*rsize[rankx] + i*rsize[rankx]*rsize[rbreak[0]]) * bytesperitem);
             sendcount = rsize[rankx];
-            if (i > rsize[rbreak[1]] || j > rsize[rbreak[0]]) {
+            if (i >= rsize[rbreak[1]] || j >= rsize[rbreak[0]]) {
               sendcount = 0;
             }
             recvbuf = GlobalArray;   // ditto comment above
@@ -2297,6 +2299,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
                   recvcounts[k] = rsize[rankx];
                 } else {
                   recvcounts[k] = localDimCounts[rankx*nde + k];
+                  if (j >= localDimCounts[ranky*nde + k]) recvcounts[k] = 0;
                 }
                 displs[k] = displsX + displsY;
                 displsX  += recvcounts[k];
