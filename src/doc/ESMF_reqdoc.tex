@@ -1,94 +1,71 @@
-\documentclass[english]{article}
+% $ Id: $
 
-\usepackage{epsf}
+\documentclass[english]{article}
+\usepackage{babel}
+\usepackage{supertabular}
 \usepackage{html}
 \usepackage[T1]{fontenc}
 
-\usepackage{babel}
-\usepackage{theorem}
-\usepackage{fancyhdr}
-\usepackage{lastpage}
-\usepackage{supertabular}
-
-
-
-
-\textwidth 6.5in
-\textheight 8.5in
-\addtolength{\oddsidemargin}{-.75in}
-
-
-
-%\pagestyle{fancy}
-%\lhead{\abbr Requirements: \docversion }
-
-\chead{}
-
-%\rhead{}
-%\lfoot{\abbr Requirements: \docversion }
-%\cfoot{}
-%\rfoot{\thepage\ of \pageref{LastPage}}
-
-
-\newtheorem{requirement}{\Large REQ}
-\newtheorem{subreq}{REQ}[requirement]
+\newcommand{\docmttype}{Requirements}
+\newcommand{\req}[1]{\section{\hspace{.2in}#1}}
+\newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
+\newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
+\newcommand{\mytitle}{\longname \docmttype ~~}
 
 \newenvironment
 {reqlist}
 {\begin{list} {} {} \rm \item[]}
 {\end{list}}
 
-\newcommand{\req}[1]{
-\begin{requirement}
-\addcontentsline{toc}{section}{REQ \arabic{requirement}{\it\bf\ #1}}
-{\Large #1}
-\end{requirement}
-}
-
-\newcommand{\sreq}[1]{
-\begin{subreq}
-\addcontentsline{toc}{section}{REQ \arabic{requirement}.\arabic{subreq}{\it\ #1}}
-{#1}
-\end{subreq}
-}
-%%
-
-
-
-\makeatletter
-\makeatother
-
+%===============================================================================
+% User-defined commands
+%-------------------------------------------------------------------------------
+\newcommand{\longname}{ESMF }
+\newcommand{\funcname}{ESMF }
+\newcommand{\shortname}{GR}
+\newcommand{\myauthors}{ESMF Joint Specification Team}
+%===============================================================================
 
 \begin{document}
+
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
-\begin{titlepage}
+% Title page
+\input{../../scripts/doc_templates/templates/title_alldoc}
 
-\begin{center}
-{\Large  Earth System Modeling Framework} \\
-{\Large {\bf General Requirements}} \\ 
-\vspace{.2in}
-prepared by \\ 
-\vspace{0.05in}
-{\bf Cecilia DeLuca} \\
-{\bf Leonid Zaslavsky}
-\vspace{.5in}
-\end{center}
-
-\begin{latexonly}
-\vspace{6in}
-\begin{tabular}{p{5in}p{.9in}}
-\hrulefill \\
-\noindent {\bf NASA High Performance Computing and Communications Program} \\
-\noindent Earth and Space Sciences Project \\
-\noindent CAN 00-OES-01 \\
-\noindent http://www.scd.ucar.edu/css/nasa\_can/main\_site/esmf\_nasacan.html \\
-\end{tabular}
-\end{latexonly}
-
-\end{titlepage}
-
+\newpage
 \tableofcontents
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{\longname Overview}
+\end{htmlonly}
+\part{\longname Overview}
+
+%===============================================================================
+\section{Target Codes and Review Team}
+%-------------------------------------------------------------------------------
+
+\begin{tabular}{l l}
+
+{\bf Sign-Off Date:}          & <Date> \\ \\
+
+{\bf Target Codes}            & {\bf Reviewers} \\
+GFDL-SPEC, BGRID, MOM4        & Balaji \\ 
+HIM                           & Hallberg \\
+CAM-EUL, CLM                  & Eaton \\
+CAM-FV, PSAS                  & da Silva\\
+POP, CICE                     & Jones \\
+WRF                           & Michalakes \\
+MIT-REG, MIT-CPL, ADJ         & Hill \\
+NSIPP-ATM, NSIPP-OCN          & Suarez \\
+NCEP-ATM, SSI                 & Iredell \\ \\
+
+{\bf Other Reviewers:}        & DeLuca, Neckels
+
+\end{tabular}
+
+%===============================================================================
 
 \newpage
 %\section{Synopsis}
@@ -100,29 +77,34 @@ prepared by \\
 %\section{Objectives}
 \input{ESMF_obj}
 
-%\section{Requirements}
+%\section{Scope}
+\input{ESMF_scope}
+
+\newpage
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Framework-Wide Requirements}
+\end{htmlonly}
+\part{Framework-Wide Requirements}
+
 \input{ESMF_req}
 
-\section{Review Status}
-
-\noindent {\bf Requirements Review} \\
-
-\begin{tabular}{r p{1.3in} p{2in}}
-{\bf Review Date:} & <Date> \\ \\
-{\bf Reviewers:}   & <Reviewer>          & <Institution> \\
-                   & <Reviewer>          & <Institution> \\
-                   & <Reviewer>          & <Institution>
-\end{tabular}
-
-%\section{Glossary}
-%\input{comp_glos}
-
 %\section{Bibliography}
-%\bibliography{comp} 
-%\bibliographystyle{plain}
-%\addcontentsline{toc}{section}{Bibliography}
+\bibliography{ESMF} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{References}
 
 \end{document}
+
+
+
+
+
 
 
 

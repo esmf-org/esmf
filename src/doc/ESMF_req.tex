@@ -1,560 +1,175 @@
-\section{Scope of the Earth System Modeling Framework}
+% $ Id: $
 
-The Earth System Modeling Framework (ESMF) will be designed as a robust, 
-flexible set of software tools to enhance ease of use, performance 
-portability, interoperability, and reuse in Earth system models. The ESMF 
-will support predictive models of the atmosphere, ocean, land and sea ice, 
-as well as data assimilation systems.
+Here we describe the requirements that apply to the whole body of 
+ESMF software.  We adopt the standard requirements format described in 
+the ESMF Software Developer's Guide.
 
-The ESMF will allow diverse scientific groups to leverage common software to 
-solve routine computational problems. Its interface specification will allow 
-groups working at different institutions and in different disciplines to
-generate interoperable software components.  
+\req{Language Bindings}
+ESMF software shall support the following language bindings:
 
-Two major services provided by the ESMF will be
-\begin{itemize}
-\item to facilitate coupling of model components, and 
-\item to support lower-level tasks widely used in Earth Science modeling on 
-high performance computer platforms. 
-\end{itemize}
-ESMF will consist of 
-\begin{itemize}
-\item an interface specification, and 
-\item a reference implementation.
-\end{itemize}
-This document outlines the initial set of requirements. More detailed 
-functional requirements will be prepared as the project proceeds.
-
-\subsection{Functional Requirements}
-
-
-
-\subsubsection{Support for Grids and Irregular Data Flows}
-
-
-
-
-\req{The ESMF must support inter-grid transfer of data of that are 
-discretized on different types of grids.}
+\sreq{Fortran 90 Interface}
 \begin{reqlist}
-{\bf Background.} 
-A wide variety of grids as well as non-grid sets of data will be supported by 
-the ESMF. The ESMF will support handling of gridded and irregular data as 
-well as efficient parallel of transfer of data between grid and from grid to 
-observational data set.
-
-{\bf Risk factors.} Difficult to test all kinds of (grid, grid) combinations 
-and garantee correctness of inter-grid operations.
+{\bf Priority:} 1. \\
+{\bf Source:} All codes except GFDL-HIM require F90 interfaces. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Interface inspection. 
 \end{reqlist}
 
-\sreq{The ESMF must support logically rectangular grids.}
+\sreq{C Interface} 
 \begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-\sreq{The ESMF must support reduced (cut-out) and regional grids.}
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist} 
-\sreq{The ESMF must support unstructured grids (such as land grids).}
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist} 
-\sreq{The ESMF must support phase space grids (e.g., spectral, Fourier).}
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist} 
-\req{The ESMF must support nested grids.}
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-\req{The ESMF must support adaptive grids.}
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist} 
-\req{The ESMF must support cubed sphere and icosahedral grids.}
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist} 
-
-
-\req{The ESMF must provide a variety of interpolation algorithms between 
-grids.}
-\begin{reqlist}
-{\bf Background.} All interpolation algorithms included in ESMF will be 
-{\it linear}, independent of data. Adaptive procedures are not planned to be 
-part the ESMF at this stage. Thus, reconstruction of gridded data from 
-observations (e.g., analysis) is will not be a part of framework and will be 
-rather provided by the data assimilation component.\\
-{\bf Risk factors.} Difficult to test all kinds of (grid, grid) combinations 
-and garantee correctness of inter-grid operations.
+{\bf Priority:} 2. \\
+{\bf Source:} GFDL-HIM \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Interface inspection. 
 \end{reqlist}
 
-\sreq{The ESMF must provide first-order and interpolation methods.} 
-
+\sreq{C++ Interface}
 \begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
+{\bf Priority:} 3. \\
+{\bf Source:} None of our codes currently require this. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Interface inspection.
 \end{reqlist}
 
-\sreq{The ESMF must provide high-order interpolation methods.} 
+\req{Platforms}
+The ESMF shall operate on the following platforms:
 
-
+\sreq{Cray T3E}
 \begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
+{\bf Priority:} 2. \\
+{\bf Source:} NSIPP home system. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-
-\sreq{The ESMF must support both non-conservative remapping/interpolation 
-between any two grids on the sphere.}
-
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-\sreq{The ESMF must support conservative remapping/interpolation between any 
-two grids on the sphere.}
-
-
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-\sreq{ESMF must provide methods for both vector and scalar fields.} 
-
-
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-\sreq{ESMF must provide methods for both vector and scalar fields.} 
-
-
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Above. \\
-{\bf Verification.} Testset for this kind of grids. Testset for interaction 
-with other kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-\req{The ESMF must provide support for describing masked regions and halo 
-regions.}
-
-
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} None. \\
-{\bf Verification.} Testset for this kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-\req{The ESMF will support  non-gridded data sets, such as 
-observational data flow.}
-
-
-\sreq{The ESMF must provide efficient support for pre-defined irregular set 
-of data. It includes grid-to-observational set interolation.}
-
-\begin{reqlist}
-{\bf Originator.} DAO. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Difficult to test for different kinds of grid and types 
-of observational data. \\
-{\bf Verification.} Testset for different kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-\sreq {ESMF must provide efficient support for observational data that are 
-irregular and changing in time. It includes grid-to-observational set 
-interolation.}
-
-
-\begin{reqlist}
-{\bf Originator.} DAO. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Difficult to test for different kinds of grid and types 
-of observational data. \\
-{\bf Verification.} Testset for different kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-
-\subsubsection{Parallel Support Layer}
-
-The ESMF will provide the software necessary to support the data
-decomposition and communication requirements of the individual components:
-
-
-\req{The architecture of the ESMF parallel support software will must
-consistent with the ESMF superstructure.}
-
-\req{The parallel support layer must include tools for describing a wide 
-variety of grids and decompositions.}
-
-\sreq{The software for specifying decompositions should efficiently support 
-default decompositions.}
-
-\sreq{The software for specifying decompositions should allow to include new 
-types decompositions.}
- 
-\req{ The parallel support layer must support high-level collective 
-manipulations of fields defined on those grids.}
-
-\sreq{Functionality for collective manipulations must be provides.}
-
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Difficult to test for different kinds of grid and types 
-of observational data. \\
-{\bf Verification.} Testset for different kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-\sreq{Dynamic load balancing should be provided for default decompositions.}
-
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Difficult to test for different kinds of grid and types 
-of observational data. \\
-{\bf Verification.} Testset for different kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-\sreq{General dynamic load-balancing tools for non-default types of 
-decomposition should be included.}
-
-
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Essential. \\
-{\bf Risk factors.} Difficult to test for different kinds of grid and types 
-of observational data. \\
-{\bf Verification.} Testset for different kind of grids. \\
-{\bf Status.} 
-\end{reqlist}
-
-\req{The parallel support layer will provide effective 
-parallelization}
-
-\sreq{in distributed-memory environment} 
-\sreq{in shared memory environment} 
-\sreq{in the hybrid computational environment when a cluster of shared-memory 
-multiprocessors is used.}
-
-\sreq{Use thread-safe algorithms and implementations.}
-
-\sreq{Provide instruction-level optimization for different platforms.}
-
-\sreq{ Tools for parallelization of individual components must work 
-consistently with concurrent execution of components scheduled by the ESMF 
-coupler.}
-
-\req{It is desirable to be able to provide, in a special execution 
-mode, bit-to-bit reproducibility of the same executed on different platforms 
-and/or with different parallelization techniques applied.}
-
-\begin{reqlist}
-{\bf Originator.} All participants. \\
-{\bf Importance.} Feature. \\
-{\bf Risk factors.} Difficult to test for different kinds of grid and types 
-of observational data. May require use of algorithms different from the mainstream implementation. \\
-{\bf Verification.} Testset for different kind of grids and operations. \\
-{\bf Status.} 
-\end{reqlist}
-
-
-\subsubsection{Coupling Superstructure}
-
-The primary function of a coupler is to coordinate execution of models 
-(such as atmosphere, ocean and data assimilation), and facilitate there 
-interaction. Two major functions of the coupler are {\it data transfer}
-and {\it component model control}. The following requirements must be 
-satisfied in the ESMF coupler design.
-
-\req{The ESMF must provide a mechanism to perform interpolation and 
-communication of distributed  gridded data (``regridding'') for on kinds of 
-grids and non-gridded data sets, and by multiple interolation methods 
-described above.}  
-
-\sreq{The ESMF must provide regridding functionality for a single field.}
-
-\sreq{The ESMF must provide regridding functionality for multiple fields.}
-
-\sreq{The ESMF must be able to operate with data in the same executable.}
-
-\sreq{The ESMF must be able to operate with data in multiple executables.}
-
-\sreq{The ESMF must be able to operate with code segments executing 
-synchroniosly.}
-
-\sreq{The ESMF must be able to operate with code segments executing 
-asynchroniosly.}
-
-\sreq{The ESMF must be be able to operate with data distributed among nodes.}
-
-\sreq{The ESMF operations must be implemented in a thread-safe fashion.} 
-
-\req{Operations performed by the coupler also include merging of data 
-originated from multiple source grids}
-
-\req{The coupling library provides functionality to perform spatial and 
-temporal averaging of data.}
-
-
-
-
-\req{The ESMF will be able coordinate transfer of data between 
-components in a way that information on the value of time-step and grid 
-structure is kept private from other component. Inter-component communication 
-is done exclusively through the coupler.}
-
-\req{The coupler will provide support for sequential and concurrent 
-execution of component models with proper synchronization mechanisms.}
-
-\req{The ESMF coupler will provide the mechanism for component 
-models to ``negotiate'' the values of their time steps. 
-With ``time-step negotiations'', each component remains sovereign in choice 
-of its own time step under imposed constrains, keeping ``autonomy'' described 
-} 
-
-\begin{reqlist}
-{\bf Background.}
-For example, the data assimilation time step is usually a multiple of 
-atmospheric dynamics one. The fact data assimilation is usually performed at 
-synoptic times, imposes a requirement on time step of atmospheric dynamics to 
-be a fraction of the synoptic time interval.
-
-{\bf Originator.} DAO.\\
-{\bf Importance:} Essantial.\\
-{\bf Risk factors.} None. \\
-
-\end{reqlist}
-
-
-\req{The coupling interface must be well defined to allow 
-substitution of current components by new models in a reasonable 
-straightforward manner. Also, the coupler should allow user to modify 
-(add/delete/change) the type and amounts of data exchanged between components.}
-
-
-{\bf Originator.} All participants.\\
-{\bf Importance:} Essential.\\
-{\bf Verification.} Experience of use by framework users at different stages of testing. \\
-{\bf Risk factors.} ``Cultural'' differences between core developers and 
-component developers/framework users.  Misunderstanding of modeling practice 
-by the developers of core ESMF at the stage of achitecture development. 
-
-
-\req{The coupler must allow to perform coherence checks to ensure 
-that components models are set up in proper manner.}
-
-\req{The mechanism to detect component failure and shut down the 
-entire application will be provided.}
-
-
-
-
-\subsubsection{Utility Infrastructure}
-
-The ESMF will include general purpose utility routines for use by both 
-the ESMF coupler and application codes.
-  
-\req{ The general purpose utility routines within ESMF including:}
-		\sreq{I/O utilities,}		
-		\sreq{ performance profiling,} 
-		\sreq{time management, and}
-		\sreq{error handling.}
-
-\req{The ESMF I/O utilities will have generic interfaces for ease of 
-use, and will be high-performance.Possibilities of scalable parallel I/O will 
-be explored.}
-
-\req{The ESMF will support I/O of self-describing data the different formats.}
-
-\sreq{netCDF} 
-\sreq{HDF}, \sreq{binary}, 
-\sreq{GRIB} \sreq{BUFR.}
-\sreq{Others such as the EOS HDF and ODF data formats are desired but not required.}
-
-\req{The performance profiling with be done through developing a 
-class whose member functions provide time check-points, measurements, 
-accumulation 
-of data, processing and profile representation (e.g., explicit calls to the 
-member functions of the profiling class are assumed to be placed in the code 
-of the ESMF coupler and a user code, in order to exploit the ESMF mechanism 
-of performance profiling at different levels of granularity).}
-
-\sreq{It is desirable that the profiling class described in Util.4 be 
-able to detect in run-time if too fine level of profiling is used and how 
-significant is the portion of execution time spent on profiling itself 
-(overall and locally). }
-
-\sreq{The profiler should be able to identify in runtime and report after the 
-run locations of ``too frequent'' profiling calls.}
-  
-
-
-\subsubsection{Evaluation Suite}
-
-
-\req{
-The ESMF will be distributed with a suite of representative components
-that will demonstrate its usage.
-}
-
-
-\subsection{General Computational Requirements}
-
-\subsubsection{Performance Portability}
-
-Portability and computational efficiency over a wide range of platforms
-is essential. Thus, following requirements must be satisfied:
-
-
-\req{The ESMF must be supported on the following platforms:}
-
-\sreq{ Cray T3E (initial ESS testbed)}
 \sreq{IBM SP}
-\sreq{SGI Origin 2000}
-\sreq{Compaq ES40}
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} NCAR home system. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test and system test.
+\end{reqlist}
+
+\sreq{SGI Origin 3000}
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} GFDL home system.  May be part of ESMF testbed system. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test and system test.
+\end{reqlist}
+
+\sreq{Compaq ES65}
+\begin{reqlist}
+{\bf Priority:} TBD. \\
+{\bf Source:} May be part of ESMF testbed system. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test and system test.
+\end{reqlist}
+
 \sreq{PC Linux platforms (including cluster)}
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} Required for cluster milestones. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test and system test.
+\end{reqlist}
 
-\req{The framework will not increase the execution time of an existing code 
-written without the framework by more than 10\%   at least on scalar 
-architectures with moderate numbers of processors (100-1000).}
+\req{Performance}
+The framework shall not increase the execution time of an existing code 
+written without the framework by more than 10\% on scalar 
+architectures with moderate numbers of processors (100-1000).
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} Required for milestone G. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} At minimum, test using NCEP-ATM.
+\end{reqlist}
 
+\req{Runtime Configurability}
+The ESMF shall allow the user to set certain application parameters at runtime.
 
+\sreq{Decomposition}
+ESMF shall allow domain decomposition and the number of processors, 
+nodes, and/or threads to be configurable at runtime.  The choice of
+parallelization mechanism (message passing/multithreading/combination)
+must be configurable at runtime.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} Required for CAM-EUL. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test.
+\end{reqlist}
 
+\sreq{Resolution}
+ESMF shall allow model resolution to be configurable at runtime.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} Required for Milestone G. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test.
+\end{reqlist}
 
-\req{ The framework should be configurable in run time to provide 
-adaptation to a particular architecture. The best technology to produce a 
-single ESMF code for diverse number of platforms must be determined and used.}
+\req{Bit Reproducibility}
+It is desirable to be able to provide, in a special execution 
+mode, bit-to-bit reproducibility of the same executable on different 
+platforms and/or with different parallelization techniques applied.
+\begin{reqlist}
+{\bf Priority:} \\
+{\bf Source:} \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test.
+\end{reqlist}
 
+\req{Fault Tolerance}
+The ESMF shall be instrumented for error handling consistly across the
+framework.  The user shall receive ample information on errors.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} Required by all codes. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Interface inspection, code inspection, unit test, system test.
+\end{reqlist}
 
-
-
-\req{
-The framework must include performance measurement tools as described in 
-Util.4-Util.5.}
-
-\subsubsection{Language}
-
-\req{ESMF utility and coupling software must have both Fortran 90 and
-C/C++ bindings.}
-
-
-\subsubsection{Runtime Configurability}
-
-
-\req{ ESMF must allow domain decomposition and the number of processors 
-and/or nodes to be configurable at runtime.}
-
-\req{The choice a parallelization mechanism (pure message passing/pure 
-multithreading/combination) for a particular platform must 
-be configurable at runtime, or through the environment variables before the 
-execution.}
-  
-Other types of runtime configurability may be permitted if acceptable 
-performance is sustained.
-
-\subsubsection{Fault Tolerance}
-
-
-\req{ Error reporting must be handled consistently and with ample 
-information relayed to the user. See also Coupl.7.}
-
-\req{In situations where the components fail, the ESMF will have a 
-mechanism to detect the failure and shut down the entire application. 
-See Coupl.8.}
-
-\req{ Safe restart mechanism must be provided.}
-
-\subsection{Design, Implementation and Maintenance Requirements}
-
-\subsubsection{Flexibility, Extensibility, and Ease of Adoption}
-
-
-\req{Layers of the framework will be designed to survive 
+\req{Modularity}
+Layers of the framework will be designed to adapt to
 restructuring of other parts of the framework and user-supplied components.  
 For example, the coupling layers should be able to adapt to different 
-implementations and data structures of component models.}
+implementations and data structures of component models.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} Required for interoperability Milestones I and J. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Interoperability experiments.
+\end{reqlist}
 
-\req{It must be straightforward to integrate ESMF into an application 
+\req{Ease of Adoption}
+It must be straightforward to integrate ESMF into an application 
 that is reasonably modular.  We adopt as a goal that such applications should
 need to modify no more than 2\% of their source code to utilize the coupling
-features of ESMF.}
+features of ESMF.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} GFDL codes. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Line count!
+\end{reqlist}
 
-\subsubsection{Ongoing Support}
-
-\req{
+\req{Maintenance}
 The ESMF must be maintained as a long-term commitment by at least one
-institution.}  
-\sreq{Long-term support must be garanteed.}
-
-\sreq{This maintenance must extend beyond adaptation to the 
+institution.  This maintenance must extend beyond adaptation to the 
 computational environment, and must include an ongoing research component
 dedicated to increasing the performance, flexibility and functionality of
-the software.}
+the software.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} GFDL codes. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Publicly documented commitment, line item in 
+projected budgets.
+\end{reqlist}
+
+
+
+
+
+

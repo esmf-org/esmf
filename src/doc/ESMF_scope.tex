@@ -1,0 +1,178 @@
+\section{Scope}
+
+This section describes the scope of the ESMF software. Specific
+requirements will be derived from the functionality described here,
+and presented in more detail in other requirements documents.
+
+The ESMF provides two primary services: to facilitate 
+coupling of Earth system model (ESM) components, and to support 
+lower-level tasks widely used in Earth Science modeling on 
+high performance computer platforms.  We refer to the first of these 
+services as the ESMF coupling {\it superstructure} and the second 
+as the ESMF utility {\it infrastructure}.\\
+
+\noindent The ESMF consists of:
+\begin{itemize}
+\item an interface specification for coupling ESM components; 
+\item a reference implementation accompanied by extensive documentation; 
+\item a suite of application examples demonstrating how the 
+ESMF software is used in practice.
+\end{itemize}
+
+Initially the model components that the ESMF will support will be atmosphere, 
+ocean, land and sea ice models, and data assimilation systems.  Other 
+well-defined high-level functions, such as I/O, may also be represented 
+as components in the ESMF superstructure.  It is at the leve of these large-scale
+components that the ESMF interface specification applies.  Each compliant
+component will provide a specified set of methods that will enable it to 
+interoperate with other components.  For the most part, we expect components
+to be able to provide the desired interface functionality through wrapping
+of internal data structures and methods, not through massive reconfiguration
+of model code.
+
+\subsection{Coupling Superstructure}
+
+All inter-component communication in the framework occurs through 
+component calls to the superstructure. \\
+
+\noindent The main functions of the ESMF coupling superstructure are:
+\begin{itemize}
+\item to perform any merging, interpolation, or regridding 
+of data necessary for communication between ESM components;
+\item to transfer data between ESM components;
+\item to coordinate execution of ESM components. 
+\end{itemize}
+
+The superstructure provides a high-level interface that enables 
+applications to be assembled from multiple components.  It coordinates
+the transfer of gridded, distributed field data and ungridded 
+observational data between components.  The superstructure will be able 
+to merge data originating from multiple source grids, and will 
+provide spatial and temporal averaging of data.
+
+The ESMF will be capable of operating in multiple modes of execution.
+ESM components may exist within the same executable, within multiple 
+executables, and in mixed modes.  Components may execute sequentially, 
+concurrently, and in mixed modes.  
+
+Functionality for regridding, interpolation, redistribution and other 
+data communication will be abstracted away from the high-level coupling
+interface.  It is provided by a parallel support layer, described next.  
+This support layer can be used within applications 
+to perform efficient parallel grid operations.
+
+\subsection{Parallel Support Layer}
+
+The ESMF contains the software necessary to support the data
+decomposition and communication requirements of the superstructure and
+individual components.  This includes tools for describing field
+data discretized on a wide variety of distributed grids.  The ESMF
+supports distributed data operations in a distributed-memory environment, 
+in a shared memory environment, and in a hybrid computational environment 
+where the platform is a cluster of shared-memory multiprocessors.
+
+\subsubsection{Fields}
+The ESMF supports representation, regridding, and other high-level
+collective operations on vector and scalar fields.  A field is represented 
+by metadata, a description of its associated distributed grid, and field 
+data itself.
+
+\subsubsection{Gridded and Observational Data}
+
+The ESMF supports regridding, interpolation, redistribution,
+transfer, and merging of data discretized on the following types of grids:
+
+\begin{itemize}
+\item logically rectangular grids;
+\item reduced (cut-out) and regional grids;
+\item unstructured grids (e.g., land grids);
+\item phase space grids (e.g., spectral, Fourier);
+\item nested grids;
+\item masked regions and halo regions;
+\item non-gridded data sets that are changing in time;
+\item cubed sphere and icosahedral grids.
+\end{itemize}
+
+\subsubsection{Grid Operations}
+
+The ESMF provides interpolation algorithms for supported grids.
+All interpolation algorithms included in ESMF are {\it linear} 
+and independent of data. Adaptive procedures are not planned to be 
+part the ESMF at this stage. Thus, reconstruction of gridded data from 
+observations (analysis) will not be a part of framework and will be 
+rather provided by data assimilation components.
+
+The ESMF provides first-order and higher-order interpolation 
+methods.  The ESMF supports conservative remapping/interpolation 
+between any two grids. Non-conservative methods will also 
+be supported.
+
+Dynamic load balancing will be provided for default decompositions, 
+and general dynamic load-balancing tools for specialized decompositions.
+
+\subsection{Utility Infrastructure}
+
+The ESMF includes general purpose utility routines for use by both 
+the ESMF coupler and application codes.  These utilities include 
+but are not limited to:
+\begin{itemize}
+\item I/O utilities;
+\item performance profiling;
+\item time management; and
+\item error handling.
+\end{itemize}
+
+\subsubsection{I/O}
+
+The ESMF I/O utilities will have generic interfaces to enable greater
+component interoperability, flexibility, and ease of use, and will be 
+high-performance.  As much as possible, the utilities will offer scalable 
+parallel I/O.
+
+The ESMF will support I/O of self-describing data the following formats:
+netCDF, HDF, binary, GRIB, and BUFR.  Others such as the EOS HDF and ODF 
+data formats are desired as well but may be lower priority.
+
+\subsubsection{Performance Profiling}
+
+A performance profiling utility will enable application developers to 
+instrument code segments with timers for both CPU and wallclock 
+times.  The profiling utility will also offer access to harware statistics 
+by offering an interface to a package such as PAPI or PCL.  Profiling
+utilities will be integrated into a general logging service that will 
+provide timing, informational and debugging output in several useful formats.
+
+\subsubsection{Time Management}
+
+The ESMF will include a library for performing routine 
+calculations with dates and time intervals.  For higher level model
+time management, the ESMF will include clocks for advancing and 
+reporting model time and retaining model integration information, 
+and alarms for initiating both unique and periodic events.
+
+\subsubsection{Fault Tolerance}
+
+The ESMF will offer comprehensive and integrated error handling services.  
+A mechanism to detect component failure and shut down the entire 
+application will be provided.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
