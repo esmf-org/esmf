@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.12 2003/09/02 16:24:29 jwolfe Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.13 2003/09/02 17:08:12 nscollins Exp $
 !
 ! System test code #79497
 
@@ -85,8 +85,12 @@
     endif
 
     !! BYPASS CODE:  This system test isn't working yet.
-    !!  remove the next line to run the actual test and debug it.
+    !!  remove the lines up to the "goto" to enable it again.
     rc = ESMF_SUCCESS
+    print *,   "BYPASS: This system test is being bypassed because the"
+    print *,   "  necessary functions are not complete at this time."
+    write(0,*) "BYPASS: This system test is being bypassed because the"
+    write(0,*) "  necessary functions are not complete at this time."
     ! Figure out our local processor id for message below.
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
     goto 10
