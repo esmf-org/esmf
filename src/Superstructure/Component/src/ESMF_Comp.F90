@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.119 2004/12/15 05:27:58 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.120 2004/12/21 00:58:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -156,6 +156,10 @@
          type(ESMF_Pointer) :: vm_info            ! holding pointer to info
          type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
          logical            :: vm_released        ! flag whether vm is running
+! gjt - added these here to make things safe for non-blocking mode...
+         type(ESMF_State)   :: is, es
+         logical            :: isdel, esdel
+         integer            :: status
       end type
 
 !------------------------------------------------------------------------------
@@ -236,7 +240,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.119 2004/12/15 05:27:58 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.120 2004/12/21 00:58:40 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -643,8 +647,8 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-        type(ESMF_State) :: is, es
-        logical :: isdel, esdel
+!        type(ESMF_State) :: is, es
+!        logical :: isdel, esdel
         integer :: dummy
         logical :: blocking
         integer :: callrc
@@ -678,21 +682,21 @@ end function
         
         ! supply default objects if unspecified by the caller
         if (present(importState)) then
-          is = importState
-          isdel = .FALSE.
+          compp%is = importState
+          compp%isdel = .FALSE.
         else
           ! create an empty state
-          is = ESMF_StateCreate("dummy import", ESMF_STATE_IMPORT, rc=rc)
-          isdel = .TRUE.
+          compp%is = ESMF_StateCreate("dummy import", ESMF_STATE_IMPORT, rc=rc)
+          compp%isdel = .TRUE.
         endif
 
         if (present(exportState)) then
-          es = exportState
-          esdel = .FALSE.
+          compp%es = exportState
+          compp%esdel = .FALSE.
         else
           ! create an empty state
-          es = ESMF_StateCreate("dummy export", ESMF_STATE_EXPORT, rc=rc)
-          esdel = .TRUE.
+          compp%es = ESMF_StateCreate("dummy export", ESMF_STATE_EXPORT, rc=rc)
+          compp%esdel = .TRUE.
         endif
 
         ! and something for clocks?
@@ -705,14 +709,14 @@ end function
 
         ! set the ID of the currently executing component, saving the 
         ! previous one to be restored afterwards.
-        call c_ESMC_CompGetVMID(oldvmid, status)
+!gjt        call c_ESMC_CompGetVMID(oldvmid, status)
         ! TODO: fix this.   same comment in run and finalize.
         ! this is wrong - it must be the child vm, not the parent.
         ! but i cannot find when the vm argument has a valid value...
         ! it is null in some of my test cases.
         !call ESMF_VMGet(compp%vm, mpiCommunicator=vmid, rc=status)
-        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
-        call c_ESMC_CompSetVMID(vmid, status)
+!gjt        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
+!gjt        call c_ESMC_CompSetVMID(vmid, status)
 
         call ESMF_GetName(compp%base, cname, status)
 
@@ -721,11 +725,12 @@ end function
 
         ! Set up the arguments, then make the call
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETINIT, phase, &
-                                       compp%compw, is, es, clock, status)
+                                       compp%compw, compp%is, compp%es, clock, &
+                                       compp%status)
           
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETINIT, phase, &
-          status)
+          compp%status)
           
         compp%vm_released = .true.
           
@@ -733,6 +738,8 @@ end function
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
+          if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
+          if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
           compp%vm_released = .false.
         endif
 
@@ -749,11 +756,11 @@ end function
         ! fall thru intentionally - we still have cleanup to do
 
         ! restore previous comp id.
-        call c_ESMC_CompSetVMID(oldvmid, status)
+!gjt        call c_ESMC_CompSetVMID(oldvmid, status)
 
         ! if we created dummy states, delete them here.
-        if (isdel) call ESMF_StateDestroy(is, rc=dummy)
-        if (esdel) call ESMF_StateDestroy(es, rc=dummy)
+!gjt        if (isdel) call ESMF_StateDestroy(is, rc=dummy)
+!gjt        if (esdel) call ESMF_StateDestroy(es, rc=dummy)
       
         ! Set return values
         if (rcpresent) rc = status
@@ -1016,8 +1023,8 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-        type(ESMF_State) :: is, es
-        logical :: isdel, esdel
+!        type(ESMF_State) :: is, es
+!        logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
         integer :: callrc
@@ -1052,21 +1059,21 @@ end function
 
         ! supply default objects if unspecified by the caller
         if (present(importState)) then
-          is = importState
-          isdel = .FALSE.
+          compp%is = importState
+          compp%isdel = .FALSE.
         else
           ! create an empty state
-          is = ESMF_StateCreate(rc=rc)
-          isdel = .TRUE.
+          compp%is = ESMF_StateCreate(rc=rc)
+          compp%isdel = .TRUE.
         endif
 
         if (present(exportState)) then
-          es = exportState
-          esdel = .FALSE.
+          compp%es = exportState
+          compp%esdel = .FALSE.
         else
           ! create an empty state
-          es = ESMF_StateCreate(rc=rc)
-          esdel = .TRUE.
+          compp%es = ESMF_StateCreate(rc=rc)
+          compp%esdel = .TRUE.
         endif
 
         ! and something for clocks?
@@ -1079,11 +1086,11 @@ end function
 
         ! set the ID of the currently executing component, saving the 
         ! previous one to be restored afterwards.
-        call c_ESMC_CompGetVMID(oldvmid, status)
+!gjt        call c_ESMC_CompGetVMID(oldvmid, status)
         ! TODO: see comment in init
         !call ESMF_VMGet(compp%vm, mpiCommunicator=vmid, rc=status)
-        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
-        call c_ESMC_CompSetVMID(vmid, status)
+!gjt        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
+!gjt        call c_ESMC_CompSetVMID(vmid, status)
 
         call ESMF_GetName(compp%base, cname, status)
 
@@ -1092,11 +1099,11 @@ end function
 
         ! Set up the arguments before the call     
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETFINAL, phase, &
-                       compp%compw, importState, exportState, clock, status)
+                       compp%compw, compp%is, compp%es, clock, compp%status)
         
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETFINAL, phase, &
-          status)
+          compp%status)
           
         compp%vm_released = .true.
          
@@ -1104,6 +1111,8 @@ end function
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
+          if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
+          if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
           compp%vm_released = .false.
         endif
 #if 0
@@ -1119,11 +1128,11 @@ end function
         ! fall thru intentionally - we have more cleanup to do.
 
         ! restore previous comp id.
-        call c_ESMC_CompSetVMID(oldvmid, status)
+!gjt        call c_ESMC_CompSetVMID(oldvmid, status)
 
         ! if we created dummy states, delete them here.
-        if (isdel) call ESMF_StateDestroy(is, rc=dummy)
-        if (esdel) call ESMF_StateDestroy(es, rc=dummy)
+!gjt        if (isdel) call ESMF_StateDestroy(is, rc=dummy)
+!gjt        if (esdel) call ESMF_StateDestroy(es, rc=dummy)
       
         ! Set return values
         if (rcpresent) rc = status
@@ -1182,8 +1191,8 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-        type(ESMF_State) :: is, es
-        logical :: isdel, esdel
+!        type(ESMF_State) :: is, es
+!        logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
         integer :: callrc
@@ -1218,21 +1227,21 @@ end function
 
         ! handle creating defaults if not specified by the user
         if (present(importState)) then
-          is = importState
-          isdel = .FALSE.
+          compp%is = importState
+          compp%isdel = .FALSE.
         else
           ! create an empty state
-          is = ESMF_StateCreate(rc=rc)
-          isdel = .TRUE.
+          compp%is = ESMF_StateCreate(rc=rc)
+          compp%isdel = .TRUE.
         endif
 
         if (present(exportState)) then
-          es = exportState
-          esdel = .FALSE.
+          compp%es = exportState
+          compp%esdel = .FALSE.
         else
           ! create an empty state
-          es = ESMF_StateCreate(rc=rc)
-          esdel = .TRUE.
+          compp%es = ESMF_StateCreate(rc=rc)
+          compp%esdel = .TRUE.
         endif
 
         ! and something for clocks?
@@ -1245,11 +1254,11 @@ end function
 
         ! set the ID of the currently executing component, saving the 
         ! previous one to be restored afterwards.
-        call c_ESMC_CompGetVMID(oldvmid, status)
+!gjt        call c_ESMC_CompGetVMID(oldvmid, status)
         ! TODO: see comment in init
         !call ESMF_VMGet(compp%vm, mpiCommunicator=vmid, rc=status)
-        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
-        call c_ESMC_CompSetVMID(vmid, status)
+!gjt        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
+!gjt        call c_ESMC_CompSetVMID(vmid, status)
 
         call ESMF_GetName(compp%base, cname, status)
 
@@ -1258,10 +1267,11 @@ end function
 
         ! Set up the arguments before the call     
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETRUN, phase, &
-                       compp%compw, importState, exportState, clock, status)
+                       compp%compw, compp%is, compp%es, clock, compp%status)
         
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
-          compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETRUN, phase, status)
+          compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETRUN, phase, &
+          compp%status)
           
         compp%vm_released = .true.          
                                             
@@ -1269,6 +1279,8 @@ end function
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
+          if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
+          if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
           compp%vm_released = .false.
         endif
 #if 0
@@ -1284,11 +1296,11 @@ end function
         ! fall thru intentionally - we have cleanup to do.
 
         ! restore previous comp id.
-        call c_ESMC_CompSetVMID(oldvmid, status)
+!gjt        call c_ESMC_CompSetVMID(oldvmid, status)
 
         ! if we created dummy states, delete them here.
-        if (isdel) call ESMF_StateDestroy(is, rc=dummy)
-        if (esdel) call ESMF_StateDestroy(es, rc=dummy)
+!gjt        if (isdel) call ESMF_StateDestroy(is, rc=dummy)
+!gjt        if (esdel) call ESMF_StateDestroy(es, rc=dummy)
       
         ! Set return values
         if (rcpresent) rc = status
@@ -1986,6 +1998,9 @@ end function
       ! call into C++ 
       call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
                            compp%vm_cargo, callrc, status)
+
+      if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
+      if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
 
       ! TODO: what is the relationship between callrc and status and rc
       if (ESMF_LogMsgFoundError(status, &
