@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.34 2004/07/22 22:41:40 nscollins Exp $
+! $Id: ESMF_GridTypes.F90,v 1.35 2004/08/03 17:55:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -492,7 +492,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.34 2004/07/22 22:41:40 nscollins Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.35 2004/08/03 17:55:25 svasquez Exp $'
 
 !==============================================================================
 !
@@ -677,7 +677,7 @@
 !! i think.  nsc.
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddAttribute"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridAddAttribute - sets some attributes of Grid
 
 ! !INTERFACE:
