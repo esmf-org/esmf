@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.2 2003/02/13 21:12:23 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/02/20 23:19:15 nscollins Exp $ 
 
-DIRS     = 62501 69527 70384
+DIRS     = 70384
 
 LOCDIR   = src/SystemTests
 
