@@ -1,10 +1,33 @@
-% $Id: ESMF_desc.tex,v 1.3 2003/03/17 21:15:54 btwomack Exp $
+% $Id: ESMF_desc.tex,v 1.4 2003/04/04 15:11:55 cdeluca Exp $
 
 \section{Description}
 
-This section will be filled in as the ESMF effort matures.
+The ESMF is a structured collection of software building blocks 
+that can be used or customized to develop model components, assemble them into an 
+application, and run the application.  Unlike a software library, in a framework some
+software elements are partly defined or unimplemented.  For example, a framework
+may require that a gridded model provide a {\tt GetGrid} method, and specify 
+a format for describing the grid, but leave the implementation of the method up
+to the framework user.  This relatively non-intrusive sort of standardization enables 
+different model components to interact with each other, and also
+use general methods provided by the framework (for example a framework supplied
+{\tt Regrid} method).
 
-
+The functional split between developing and combining components is the
+foremost feature of the ESMF architecture.  The simplest view of the ESMF 
+is that it consists of a layered {\it infrastructure} of utilities and data 
+structures for building model components and a {\it superstructure} for coupling 
+and running them.  User-provided components fit between these 
+layers like the filling in a sandwich.  Each successively higher layer builds
+on elements of the one below it.  Utilities such as communication
+primitives, logging and profiling tools are used in methods that
+manipulate field and grid data structures.  These data structures may be
+tightly integrated into user-supplied components, or they may simply 
+help to wrap a component's native data structures in order to provide 
+a standard interface for coupling.  The superstructure provides a systematic 
+approach to sequencing and synchronizing user-supplied components that 
+interact to form an application.  The main layers in the ESMF architecture are 
+shown in Figure~\ref{fig:sandwich}.  
 
 %\subsection{Shared Objects}
 \input{ESMF_shareobj}

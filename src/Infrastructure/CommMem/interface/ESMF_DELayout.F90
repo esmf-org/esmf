@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.9 2003/03/31 20:03:40 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.10 2003/04/04 15:11:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,6 +42,8 @@
       integer, parameter :: ESMF_NOHINT=0, ESMF_XFAST=1, ESMF_YFAST=2, &
                             ESMF_ZFAST=3
 
+      integer, parameter :: ESMF_COMMTYPE_MP=0, ESMF_COMMTYPE_SHR=2
+
       integer, parameter :: ESMF_SUM=0, ESMF_MIN=1, ESMF_MAX=2
 
       integer, parameter :: ESMF_INT=0, ESMF_LONG=1, ESMF_FLOAT=2, &
@@ -70,6 +72,7 @@
 ! !PUBLIC TYPES:
       public ESMF_DELayout
       public ESMF_NOHINT, ESMF_XFAST, ESMF_YFAST, ESMF_ZFAST
+      public ESMF_COMMTYPE_MP, ESMF_COMMTYPE_SHR
       public ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_NONEXCL, ESMF_EXCL
 !------------------------------------------------------------------------------
@@ -105,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.9 2003/03/31 20:03:40 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.10 2003/04/04 15:11:51 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -122,9 +125,9 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_DELayoutCreateIntDE2D
       module procedure ESMF_DELayoutCreateDefault1D
-      module procedure ESMF_DELayoutCreateLayout2D
+      module procedure ESMF_DELayoutCreateCartFromParent
+      module procedure ESMF_DELayoutCreateCartFromDEList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -173,7 +176,7 @@
 !EOP
       
 !     Local variables.
-      type (ESMF_DELayout) :: layout      ! opaque pointer to new C++ DELayout
+      type (ESMF_DELayout) :: layout   ! opaque pointer to new C++ DELayout
       integer :: status                ! Error status
       logical :: rcpresent             ! Return code present
 
@@ -203,39 +206,54 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutCreateLayout2D - Create 2D DELayout from a given layout
+! !IROUTINE: ESMF_DELayoutCreateCartFromParent - Create DELayout from a given layout
 
 ! !INTERFACE:
-      function ESMF_DELayoutCreateLayout2D(nx, ny, parentLayout, commhint, &
-                                           exclusive, rc)
+      function ESMF_DELayoutCreateCartFromParent(parent, parent_offsets, &
+               de_indices, ndim, lengths, commtypes, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DELayout) :: ESMF_DELayoutCreateLayout2D
+      type(ESMF_DELayout) :: ESMF_DELayoutCreateCartFromParent
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: nx, ny                 ! x, y layout dimensions
-      type(ESMF_DELayout), intent(inout) :: parentLayout ! to allocate DEs from
-      integer, intent(in) :: commhint               ! communications hint
-      integer, intent(in), optional :: exclusive    ! consume parent layout DEs?
+      type(ESMF_DELayout), intent(inout) :: parent  ! to allocate DEs from
+      integer, intent(in) :: parent_offsets(:)      ! offsets from parent 
+      integer, intent(in) :: de_indices(:)          ! parent de indices 
+      integer, intent(in) :: ndim                   ! number of dimensions
+      integer, intent(in) :: lengths(:)             ! number of des in each dim
+      integer, intent(in) :: commtypes(:)           ! comm types in each dim
       integer, intent(out), optional :: rc          ! return code
 !
 ! !DESCRIPTION:
-!  Create a new DELayout using a parent layout's DEs.  If exclusive, the parent's
-!  DE's are consumed; they are not available for subsequent calls to this
-!  method.  Typically, the parent layout will contain a 1D list of DEs avaliable
-!  for allocation to sub-layouts within components.
+!  Create a new {\tt DELayout} using a parent {\tt DELayout}'s {\tt DE}s.  
 !
-!  The return value is a new DELayout.
+!  The return value is a new {\tt DELayout}.
 !    
 !  The arguments are:
 !  \begin{description}
 ! 
-!   \item[nx]
-!     Number of {\tt DE}s in the {\tt I} dimension.
+!   \item[parent]
+!     Parent {\tt DELayout}.
 ! 
-!   \item[ny]
-!     Number of {\tt DE}s in the {\tt J} dimension.
+!   \item[parent_offsets]
+!     Offset in each parent {\tt DELayout} dimension.
 ! 
+!   \item[de_indices]
+!     Selection of {\tt DE} indices to use.
+!     
+!   \item[ndim]
+!     Dimension of new {\tt DELayout}.
+!     
+!   \item[lengths]
+!     Array of length {\tt ndim} that contains the number of
+!     {\tt DE}s in each dimension.
+!
+!   \item[commtypes]
+!     Array of length {\tt ndim} that contains the communication
+!     type of each dimension.  Valid values are {\tt ESMF\_COMMTYPE\_SHR},
+!     {\tt ESMF\_COMMTYPE\_MP}, and {\tt ESMF\_COMMTYPE\_SHR}+
+!     {\tt ESMF\_COMMTYPE\_MP}.
+!
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -244,7 +262,7 @@
 !EOP
 
 !     Local variables.
-      type (ESMF_DELayout) :: layout      ! opaque pointer to new C++ DELayout
+      type (ESMF_DELayout) :: layout   ! opaque pointer to new C++ DELayout
       integer :: status                ! Error status
       logical :: rcpresent             ! Return code present
 
@@ -260,14 +278,8 @@
       endif
 
 !     Routine which interfaces to the C++ creation routine.
-      if (present(exclusive)) then
-        call c_ESMC_DELayoutCreateLayout2D(layout, nx, ny, parentLayout, &
-                                             commhint, exclusive, status)
-      else
-        call c_ESMC_DELayoutCreateLayout2Dne(layout, nx, ny, &
-                                               parentLayout, commhint, &
-                                               status)
-      endif
+      call c_ESMC_DELayoutCreateCartParent(layout, parent, parent_offsets, &
+           de_indices, ndim, lengths, commtypes, status)
 
       if (status .ne. ESMF_SUCCESS) then
         print *, "DELayout creation error"
@@ -275,46 +287,59 @@
       endif
 
 !     set return values
-      ESMF_DELayoutCreateLayout2D = layout 
+      ESMF_DELayoutCreateCartFromParent = layout 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_DELayoutCreateLayout2D
+      end function ESMF_DELayoutCreateCartFromParent
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutCreateIntDE2D - Create 2D DELayout from a integer DE list
+! !IROUTINE: ESMF_DELayoutCreateCartFromDEList - Create DELayout from a DE List
 
 ! !INTERFACE:
-      function ESMF_DELayoutCreateIntDE2D(nx, ny, delist, commhint, rc)
+      function ESMF_DELayoutCreateCartFromDEList(delist, ndim, lengths, &
+               commtypes, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DELayout) :: ESMF_DELayoutCreateIntDE2D
+      type(ESMF_DELayout) :: ESMF_DELayoutCreateCartFromDEList
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: nx, ny, delist(:), commhint
-      integer, intent(out), optional :: rc 
+      integer, intent(inout) :: delist              ! list of processing elements
+      integer, intent(in) :: ndim                   ! number of dimensions
+      integer, intent(in) :: lengths(:)             ! number of des in each dim
+      integer, intent(in) :: commtypes(:)           ! comm types in each dim
+      integer, intent(out), optional :: rc          ! return code
 !
 ! !DESCRIPTION:
-!  Create a new DELayout and set the decomposition characteristics.
+!  Create a new {\tt DELayout} from a list of {\tt DE} indices.  
 !
-!  The return value is a new DELayout.
+!  The return value is a new {\tt DELayout}.
 !    
 !  The arguments are:
 !  \begin{description}
 ! 
-!   \item[nx]
-!     Number of {\tt DE}s in the {\tt I} dimension.
+!   \item[delist]
+!     List of {\tt DE} indices.
 ! 
-!   \item[ny]
-!     Number of {\tt DE}s in the {\tt J} dimension.
-! 
+!   \item[ndim]
+!     Dimension of new {\tt DELayout}.
+!     
+!   \item[lengths]
+!     Array of length {\tt ndim} that contains the number of
+!     {\tt DE}s in each dimension.
+!
+!   \item[commtypes]
+!     Array of length {\tt ndim} that contains the communication
+!     type of each dimension.  Valid values are {\tt ESMF\_COMMTYPE\_SHR},
+!     {\tt ESMF\_COMMTYPE\_MP}, and {\tt ESMF\_COMMTYPE\_SHR}+
+!     {\tt ESMF\_COMMTYPE\_MP}.
+!
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
 !     Local variables.
       type (ESMF_DELayout) :: layout   ! opaque pointer to new C++ DELayout
@@ -328,22 +353,24 @@
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
       endif
 
 !     Routine which interfaces to the C++ creation routine.
-      call c_ESMC_DELayoutCreate(layout, nx, ny, delist, commhint, status)
+!      call c_ESMC_DELayoutCreateCartDE(layout, delist, ndim, &
+!           lengths, commtypes, status)
+
       if (status .ne. ESMF_SUCCESS) then
         print *, "DELayout creation error"
         return
       endif
 
 !     set return values
-      ESMF_DELayoutCreateIntDE2D = layout 
+      ESMF_DELayoutCreateCartFromDEList = layout 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_DELayoutCreateIntDE2D
+      end function ESMF_DELayoutCreateCartFromDEList
 
 !------------------------------------------------------------------------------
 !BOP
@@ -372,7 +399,7 @@
 !EOP
 
 !     ! Local variables
-      type (ESMF_DELayout) :: layout        ! new class being created
+      type (ESMF_DELayout) :: layout   ! new class being created
       integer :: status                ! Error status
       logical :: rcpresent             ! Return code present
 
@@ -603,58 +630,6 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DELayoutGetSize
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_DELayoutIsLocal - Is local DE part of DELayout
-
-! !INTERFACE:
-      function ESMF_DELayoutIsLocal(delayout, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_DELayoutIsLocal
-
-! !ARGUMENTS:
-      type(ESMF_DELayout) :: delayout
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!  Return {\tt .TRUE.} if the local {\tt DE} is part of the {\tt DELayout} and 
-!  {\tt .FALSE.} if it is not.
-!
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[delayout]
-!     A {\tt DELayout} object.
-!
-!  \end{description}
-!
-!EOP
-
-!     Local variables.
-      integer :: status                ! Error status
-      logical :: rcpresent             ! Return code present
-
-!     Initialize return code; assume failure until success is certain.
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-!     Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutIsLocal(delayout, ESMF_DELayoutIsLocal, status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "ESMF_DELayoutIsLocal error"
-        return
-      endif
-
-!     set return code if user specified it
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_DELayoutIsLocal
 
 !------------------------------------------------------------------------------
 !BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.13 2003/03/31 20:03:39 cdeluca Exp $
+// $Id: ESMC_DELayout_F.C,v 1.14 2003/04/04 15:11:50 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,40 +31,26 @@
 //
 //EOP
 
-
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
        void FTN(c_esmc_delayoutcreatedefault1d)(ESMC_DELayout **ptr,
                                                 int *status) {
-         *ptr = ESMC_DELayoutCreate(status);
+           *ptr = ESMC_DELayoutCreate(status);
        }
 
-       void FTN(c_esmc_delayoutcreatelayout2d)(ESMC_DELayout **ptr, int *nx,
-                                               int *ny,
-                                               ESMC_DELayout **parentlayout,
-                                               int *commhint, int *exclusive,
-                                               int *status) {
-         *ptr = ESMC_DELayoutCreate(*nx, *ny, *parentlayout,
-                                    (ESMC_CommHint_e) *commhint,
-                                    (ESMC_Exclusivity_e) *exclusive,
-                                    status);
+       void FTN(c_esmc_delayoutcreatecartparent)(ESMC_DELayout **ptr, ESMC_DELayout *parent,
+					      int *parent_offsets, int *de_indices,
+					      int *ndim, int *lengths, ESMC_CommType 
+					      *commtypes, int *status) {
+  	   *ptr = ESMC_DELayoutCreate(parent, parent_offsets, de_indices, *ndim, lengths, 
+				      commtypes, status);
        }
 
-       void FTN(c_esmc_delayoutcreatelayout2dne)(ESMC_DELayout **ptr, int *nx,
-                                                 int *ny,
-                                                 ESMC_DELayout **parentlayout,
-                                                 int *commhint,
-                                                 int *status) {
-         *ptr = ESMC_DELayoutCreate(*nx, *ny, *parentlayout,
-                                    (ESMC_CommHint_e) *commhint,
-                                    status);
-       }
-
-       void FTN(c_esmc_delayoutcreate)(ESMC_DELayout **ptr, int *nx, int *ny,
-                                     int *delist, int *commhint, int *status) {
-         *ptr = ESMC_DELayoutCreate(*nx, *ny, delist,
-                                    (ESMC_CommHint_e) *commhint, status);
+       void FTN(c_esmc_delayoutcreatecartde)(ESMC_DELayout **ptr, int *delist,
+					      int *ndim, int *lengths, ESMC_CommType 
+					      *commtypes, int *status) {
+  	   *ptr = ESMC_DELayoutCreate(delist, *ndim, lengths, commtypes, status);
        }
 
        void FTN(c_esmc_delayoutdestroy)(ESMC_DELayout **ptr, int *status) {
@@ -79,11 +65,6 @@ extern "C" {
        void FTN(c_esmc_delayoutgetsize)(ESMC_DELayout **ptr, int *nx, int *ny,
                                         int *status) {
            *status = (*ptr)->ESMC_DELayoutGetSize(nx, ny);
-       }
-
-       void FTN(c_esmc_delayoutislocal)(ESMC_DELayout **ptr, int *islocal, 
-                                        int *status) {
-	 //   *status = (*ptr)->ESMC_DELayoutIsLocal(islocal);
        }
 
        void FTN(c_esmc_delayoutgetdeposition)(ESMC_DELayout **ptr, int *x,

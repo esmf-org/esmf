@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.11 2003/04/02 15:52:34 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.12 2003/04/04 15:11:50 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,37 +67,36 @@
   };
 
 // hint type about the most performance critical communication direction
-enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
+enum ESMC_CommHint {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 
- // class definition type
+typedef int ESMC_CommType;  
+#define ESMC_COMMTYPE_MP=0
+#define ESMC_COMMTYPE_SHR=2
+
+ // class definitions
  class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
 
-   private:
- //  < insert class members here >  corresponds to type ESMF_DELayout members
- //                                 in F90 modules
+  private:
+                                 
     ESMC_DE ***layout;        // Topology of DE's -- aligns
-                              //   with (maps to) a Distributed Grid
-    int nxDELayout;           // number of DE's laid out in the x-direction
-    int nyDELayout;           // number of DE's laid out in the y-direction
-    int nzDELayout;           // number of DE's laid out in the z-direction
-    int nDEs;                 // total number of DE's in layout
-    ESMC_PEList *peList;      // PE list on which the layout maps. 
-    ESMC_CommHint_e commHint; // hint about direction of the most performance
-                              //   critical (frequent and/or voluminous)
-                              //   communication direction: x, y or z
+                              //   with a Distributed Grid
+    int ndim;                 // number of dimensions in DELayout
+    int nDEs;                 // total number of DE's in DELayout
+    int *length;              // array of length ndim with number of DEs in each dim
+    ESMC_CommType *commType;  // array of length ndim with commType for each dim    
+    ESMC_CommHint commHint;   // communication hint (obsolete)
+    ESMC_PEList *peList;      // PE list on which the DELayout maps 
 
-                              // TODO: should these really be part of DELayout, or 
-                              //       standalone ?
-    ESMC_DE myDE;             // the DE on which this DELayout copy (instance) resides
-    ESMC_PE myPE;             // the PE on which this DELayout copy (instance) resides
-    ESMC_Comm comm;           // comm object for this DE (TODO: make property of DE ? )
-    ESMC_DEComm decomm;      // Communicator for set of DEs in this layout 
-    ESMC_Machine Mach;// machine model for this layout
-                      //  (TODO: make property of DE or PE ? heterogenous PEs)
+    ESMC_DE myDE;             // list of my local DEs
+    ESMC_PE myPE;             // the PE on which this DELayout resides
+    ESMC_Comm comm;           // communication object
+    ESMC_DEComm decomm;       // communicator for set of DEs in this layout 
+    ESMC_DELayout *parent;    // pointer to my parent DELayout
+    ESMC_Machine Mach;        // machine model
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
-// pick one or the other of the init/create sections depending on
+//  pick one or the other of the init/create sections depending on
 //  whether this is a deep class (the class/derived type has pointers to
 //  other memory which must be allocated/deallocated) or a shallow class
 //  (the class/derived type is self-contained) and needs no destroy methods
@@ -106,13 +105,13 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
   public:
  // the following methods apply to deep classes only
     int ESMC_DELayoutConstruct(void);
-    int ESMC_DELayoutConstruct(int nx, int ny, ESMC_DELayout *parentDELayout,
-                             ESMC_CommHint_e commhint,
-                             ESMC_Exclusivity_e exclusive); 
-    int ESMC_DELayoutConstruct(int nx, int ny, int *delist,
-                             ESMC_CommHint_e commhint); 
-    int ESMC_DELayoutConstruct(int nx, int ny, int nz, ESMC_PEList *pelist,
-                             ESMC_CommHint_e commhint); 
+    int ESMC_DELayoutConstruct(ESMC_DELayout *parent, int *parent_offsets,
+			       int *de_indices, int ndim, int *lengths,
+                               ESMC_CommType *commtypes); 
+    int ESMC_DELayoutConstruct(int *delist, int ndim, int *lengths,
+                             ESMC_CommType *commtypes); 
+    int ESMC_DELayoutConstruct(ESMC_PEList *pelist, int ndim, int *lengths,
+                             ESMC_CommType *commtypes); 
                                              // internal only, deep class
     int ESMC_DELayoutDestruct(void);           // internal only, deep class
     int ESMC_DELayoutInit(void);
@@ -127,8 +126,8 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
     int ESMC_DELayoutGetDEPosition(int *x, int *y) const;
     int ESMC_DELayoutGetDEID(int *deid) const;
     int ESMC_DELayoutGetDE(int x, int y, int z, ESMC_DE *de) const;
-    
-    int ESMC_DELayoutGetDEExclusive(ESMC_DE *de) const;
+
+    int ESMC_DELayoutGetDEExclusive(ESMC_DE *de) const;    
     int ESMC_DELayoutSetAxisIndex(int global_counts[], int size_gcount,
                                 int decompids[], int size_decomp,
                                 ESMC_AxisIndex *AIPtr);
@@ -173,19 +172,27 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
     // create default 1D layout
     ESMC_DELayout *ESMC_DELayoutCreate(int *rc); 
 
-    // create sub-layout from parent, non-exclusively (don't consume parent DEs)
-    ESMC_DELayout *ESMC_DELayoutCreate(int nx, int ny, ESMC_DELayout *parentDELayout,
-                                   ESMC_CommHint_e commhint, int *rc);
+    // create DELayout from PE List
+    ESMC_DELayout *ESMC_DELayoutCreate(ESMC_PEList *pelist, int ndim, int *lengths, 
+				       ESMC_CommType *commtypes, int *rc);
 
-    // create sub-layout from parent, exclusively (consumes parent DEs)
-    ESMC_DELayout *ESMC_DELayoutCreate(int nx, int ny, ESMC_DELayout *parentDELayout,
-                                   ESMC_CommHint_e commhint,
-                                   ESMC_Exclusivity_e exclusive, int *rc);
+    // create DELayout from DE List
+    ESMC_DELayout *ESMC_DELayoutCreate(int *delist, int ndim, int *lengths, 
+				       ESMC_CommType *commtypes, int *rc);
 
-    ESMC_DELayout *ESMC_DELayoutCreate(int nx, int ny, int *delist,
-                                   ESMC_CommHint_e commhint, int *rc);
-    ESMC_DELayout *ESMC_DELayoutCreate(int nx, int ny, int nz, ESMC_PEList *pelist,
-                                   ESMC_CommHint_e commhint, int *rc);
+    // create sub-layout from parent
+    ESMC_DELayout *ESMC_DELayoutCreate(ESMC_DELayout *parent, int *parent_offsets,
+				       int *de_indices, int ndim, int *lengths, 
+				       ESMC_CommType *commtypes, int *rc);
+ 
     int ESMC_DELayoutDestroy(ESMC_DELayout *layout);
 
  #endif  // ESMC_DELayout_H
+
+
+
+
+
+
+
+

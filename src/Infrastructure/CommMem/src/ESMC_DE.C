@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.C,v 1.8 2003/03/13 22:56:13 cdeluca Exp $
+// $Id: ESMC_DE.C,v 1.9 2003/04/04 15:11:51 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DE.C,v 1.8 2003/03/13 22:56:13 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DE.C,v 1.9 2003/04/04 15:11:51 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -61,7 +61,7 @@
       ESMC_DEType_e detype,        // in - process or thread
       bool proc,                   // in - true if DE is a process
       bool thrd,                   // in - true if DE is a thread
-      ESMC_Exclusivity_e excl,     // in - exclusively used flag
+      ESMC_DETaken excl,     // in - exclusively used flag
       ESMC_PE *pe) {               // in - assigned PE from peList
 //
 // !DESCRIPTION:
@@ -379,7 +379,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Exclusivity_e excl) {     // in - exclusivity
+      ESMC_DETaken excl) {     // in - exclusivity
 //
 // !DESCRIPTION:
 //     Sets the DE's exclusivity
@@ -405,7 +405,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Exclusivity_e *excl) const {     // out - exclusivity
+      ESMC_DETaken *excl) const {     // out - exclusivity
 //
 // !DESCRIPTION:
 //     Gets the DE's exclusivity

@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.h,v 1.5 2003/03/13 22:56:11 cdeluca Exp $
+// $Id: ESMC_DE.h,v 1.6 2003/04/04 15:11:49 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 enum ESMC_DEType_e {ESMC_PROCESS, ESMC_THREAD};
 
 // exclusivity type used for allocating DEs within a layout to sub-layouts
-enum ESMC_Exclusivity_e {ESMC_NONEXCL, ESMC_EXCL};
+enum ESMC_DETaken {ESMC_NONEXCL, ESMC_EXCL};
 
 // !PUBLIC TYPES:
 // class ESMC_DEConfig;
@@ -74,14 +74,14 @@ enum ESMC_Exclusivity_e {ESMC_NONEXCL, ESMC_EXCL};
      ESMC_DEType_e deType;  // associated with a process or thread
      bool process;   // true if DE is associated with a process
      bool thread;    // true if DE is associated with a thread
-     ESMC_Exclusivity_e exclusive; // exclusively used (e.g. by sublayout)
+     ESMC_DETaken exclusive; // exclusively used (e.g. by sublayout)
      ESMC_PE *PE;    // assigned PE from peList
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
   public:
     int ESMC_DEInit(int esmfid, int pid, int tid, ESMC_DEType_e detype,
-                    bool proc, bool thrd, ESMC_Exclusivity_e excl, ESMC_PE *pe);
+                    bool proc, bool thrd, ESMC_DETaken excl, ESMC_PE *pe);
 
  // optional configuration methods
 //    int ESMC_DEGetConfig(ESMC_DEConfig *config) const;
@@ -97,8 +97,8 @@ enum ESMC_Exclusivity_e {ESMC_NONEXCL, ESMC_EXCL};
     int ESMC_DEGetpID(int *pid) const;
     int ESMC_DESetType(ESMC_DEType_e detype);
     int ESMC_DEGetType(ESMC_DEType_e *detype) const;
-    int ESMC_DESetExclusivity(ESMC_Exclusivity_e excl);
-    int ESMC_DEGetExclusivity(ESMC_Exclusivity_e *excl) const;
+    int ESMC_DESetExclusivity(ESMC_DETaken excl);
+    int ESMC_DEGetExclusivity(ESMC_DETaken *excl) const;
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_DEValidate(void) const;
