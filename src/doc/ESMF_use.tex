@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.6 2003/08/21 23:30:48 flanigan Exp $
+% $Id: ESMF_use.tex,v 1.7 2003/08/26 17:40:18 flanigan Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -7,7 +7,7 @@ To use ESMF from Fortran, add the directory that contains
 the ESMF {\tt *.mod} file(s),
 
 \begin{verbatim}
-${ESMF_DIR}/mod/mod${BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
+$ESMF_DIR/mod/mod$ESMF\_BOPT/$ESMF_ARCH.$ESMF_PREC.$ESMF_SITE
 \end{verbatim} 
 
 to your search path for {\tt *.mod} files.  For most compilers this path 
@@ -16,7 +16,7 @@ with the ESMF shared object library.  This is a file called
 {\tt libesmf.so} that is located in the following directory:
 
 \begin{verbatim}
-${ESMF_DIR}/lib/lib${BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
+$ESMF_DIR/lib/lib$ESMF_BOPT/$ESMF_ARCH.$ESMF_PREC.$ESMF_SITE
 \end{verbatim} 
 
 The details of how to link on specific platforms are included in the 
@@ -58,8 +58,8 @@ In the example, the Fortran90 application is called {\tt myModel}.
 \noindent We first define the following:
 
 \begin{verbatim}
-MODDIR = ${ESMF_DIR}/mod/mod${BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
-LIBDIR = ${ESMF_DIR}/lib/lib${BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
+MODDIR = ${ESMF_DIR}/mod/mod${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
+LIBDIR = ${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
 \end{verbatim}
 
 \noindent{\it Linking using the SGI with 64-bit addressing:} 

@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.28 2003/08/19 22:19:26 flanigan Exp $
+% $Id: ESMF_install.tex,v 1.29 2003/08/26 17:40:18 flanigan Exp $
 
 \subsection{ESMF Download Options}
 
@@ -38,31 +38,38 @@ Currently the ESMF\_DIR environment variable must be set on all
 platforms.  ESMF\_DIR should be set to the path of the top
 level ESMF directory.  
 
-The following environment variables need to be set only if the
-default values are not acceptable.
+There are four other environment variables that the build system uses.
+In most cases they do not have to be set by the user.  If they are not
+set, then the build system will assign default values to them.  For the
+current supported platforms, the default values are fine.  The other
+environment variables are:
+\begin{quote}
+\begin{description}
 
-\begin{verbatim}
+  \item[ESMF\_ARCH] Value of uname -s.  This will by AIX for IBM
+                 RS6000's.  There should be almost no reason for the
+                 user to set ESMF\_ARCH.
+      
 
-  ESMF_ARCH      Value of uname -s.  This will by AIX for IBM RS6000's.
+  \item[ESMF\_SITE] Build configure file site name or the value
+                 default.  If not set, then the value of default is
+                 assumed.
 
-  ESMF_SITE      Build configure file site name or the value default.
-                 If not set, then the value of default is assumed.
+  \item[ESMF\_PREC] Precision value of 32 or 64.  When possible the
+                 default value will be 64, otherwise it will be 32.
 
-  ESMF_PREC      Precision value of 32 or 64.  When possible the default
-                 value will be 64, otherwise it will be 32.
+  \item[ESMF\_BOPT] Build option value of g (for debug) or O (for
+                 Optimize).  Default value will be O.
 
-  ESMF_BOPT      Build option value of g (for debug) or O (for Optimize). 
-                 Default value will be O.
-
-\end{verbatim}
-
+\end{description}
+\end{quote}
 
 On Alpha machines an additional environment variable needs
 to be set:
 
-\begin{verbatim}
-  ESMF_PROJECT  Load Sharing Facility (LSF) project name 
-\end{verbatim}
+\begin{description}
+  \item[ESMF\_PROJECT] Load Sharing Facility (LSF) project name
+\end{description}
 
 On an Alpha machine, test and demo applications are run using 
 the bsub command.  The value of ESMF\_PROJECT is used as the 
@@ -80,6 +87,10 @@ In ksh shell environment variables are set this way:
   export ESMF_PREC=32
 \end{verbatim}
 
+Environment variables can also be set from the gmake command line:
+\begin{verbatim}
+  gmake ESMF_PREC=32
+\end{verbatim}
 
 \subsubsection{Supported Platforms}
 \input{user_arch.tex}
@@ -90,16 +101,16 @@ one restriction; the test cases may only be run on one platform at a time.
 \subsubsection{Building the ESMF Libraries}
 \label{BuildESMF}
 
-% GNU make requirement.  File in build/doc
+% GNU make requirement.  File in esmf_build/doc
 \input{user_make.tex}
 
 Build the library with the command:
 \begin{verbatim}
-  gmake BOPT=g  
+  gmake ESMF_BOPT=g  
 \end{verbatim}
   for a debug version or
 \begin{verbatim}
-  gmake BOPT=O  
+  gmake ESMF_BOPT=O  
 \end{verbatim}
   for an optimized version.
 
@@ -112,7 +123,6 @@ specified directories are explained in Section~\ref{BuildOptions}.
 
 \noindent To build documentation:
 \begin{verbatim}
-  gmake dvi           ! Makes the dvi files.
   gmake pdf           ! Makes the pdf files.
   gmake html          ! Creates the html directory.
   gmake alldoc        ! Builds all the above documents.
@@ -120,23 +130,23 @@ specified directories are explained in Section~\ref{BuildOptions}.
 
 \noindent To build documentation for one module:
 
-\noindent First change directory to the where the desired module's documentation resides;  for
-example, to build the {\tt TimeMgr} documentation start with:
+\noindent First change directory to the where the desired module's documentation 
+resides; for example, to build the {\tt TimeMgr} documentation start
+with:
 
 \begin{verbatim}
-cd ${ESMF_DIR}/src/Infrastructure/TimeMgr/doc
+cd $ESMF_DIR/src/Infrastructure/TimeMgr/doc
 \end{verbatim}
 
 \noindent Next issue one of the following commands:
 \begin{verbatim}
-  gmake dvi      ! Builds local dvi files.
   gmake pdf      ! Builds local pdf files.
   gmake html     ! Builds local html files.
   gmake alldoc   ! Builds all of the local documents.
 \end{verbatim}
 
-\noindent The output from this local documentation build is in the top level {\tt doc}
-directory, as with the previous commands.
+\noindent The output from this local documentation build is in the top 
+level {\tt doc} directory, as with the previous commands.
 
 
 

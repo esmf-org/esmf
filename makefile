@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2003/08/19 22:19:26 flanigan Exp $
+# $Id: makefile,v 1.32 2003/08/26 17:40:15 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -30,7 +30,7 @@ TOPALL: all
 ESMF_TOP_DIR   = $(ESMF_DIR)
 ESMF_BUILD_DIR = $(ESMF_DIR)
 
-include $(ESMF_BUILD_DIR)/esmf_build/common.mk
+include $(ESMF_BUILD_DIR)/build/common.mk
 
 #
 #  End Build Update 1
