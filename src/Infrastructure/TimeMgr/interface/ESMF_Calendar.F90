@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.35 2003/11/05 18:37:18 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.36 2003/11/06 17:45:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.35 2003/11/05 18:37:18 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.36 2003/11/06 17:45:58 eschwab Exp $'
 
 !==============================================================================
 
@@ -187,13 +187,12 @@
 ! !IROUTINE: ESMF_CalendarSetGeneric - Initialize or set a custom Calendar
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarSetGeneric(calendar, monthsPerYear, &
-                                         daysPerMonth, secondsPerDay, &
+      subroutine ESMF_CalendarSetGeneric(calendar, daysPerMonth, &
+                                         secondsPerDay, &
                                          daysPerYear, daysPerYearDn, &
                                          daysPerYearDd, rc)
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(inout)         :: calendar
-      integer,               intent(in),  optional :: monthsPerYear
       integer, dimension(:), intent(in),  optional :: daysPerMonth
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear
@@ -208,12 +207,13 @@
 !     \begin{description}
 !     \item[calendar]
 !          The object instance to initialize.
-!     \item[{[monthsPerYear]}]
-!          Integer number of months per year.
 !     \item[{[daysPerMonth]}]
 !          Integer array of days per month, for each month of the year.
+!          The number of months per year is variable and taken from the
+!          size of the array.
 !     \item[{[secondsPerDay]}]
-!          Integer number of seconds per day.
+!          Integer number of seconds per day.  Defaults to 86400 if not 
+!          specified.
 !     \item[{[daysPerYear]}]
 !          Integer number of days per year.  Use with daysPerYearDn and
 !          daysPerYearDd (see below) to specify a days-per-year calendar
@@ -233,6 +233,15 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG2.3.4
+
+      ! initialize number of months per year to zero for not-present
+      !   daysPerMonth
+      integer :: monthsPerYear = 0
+
+      ! get size of given ringing alarm list for C++ validation
+      if (present(daysPerMonth)) then
+        monthsPerYear = size(daysPerMonth)
+      end if
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSetGeneric(calendar, monthsPerYear, daysPerMonth, &
