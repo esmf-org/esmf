@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.44 2003/04/28 17:37:36 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.45 2003/04/28 20:10:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -180,7 +180,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.44 2003/04/28 17:37:36 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.45 2003/04/28 20:10:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -543,10 +543,10 @@ end function
         ! Set up the arguments before the call     
         if (compp%ctype .eq. ESMF_GRIDCOMPTYPE) then
           call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETINIT, phase, &
-                               compp, importstate, exportstate, clock, status)
+                               compw, importstate, exportstate, clock, status)
         else
           call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETINIT, phase, &
-                                              compp, statelist, clock, status)
+                                              compw, statelist, clock, status)
         endif
 
         ! Call user-defined init routine
@@ -650,11 +650,11 @@ end function
 
         ! Set up the arguments before the call     
         if (compp%ctype .eq. ESMF_GRIDCOMPTYPE) then
-          call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETRUN, phase, compp, &
+          call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETRUN, phase, compw, &
                                        importstate, exportstate, clock, status)
         else
           call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETRUN, phase, &
-                                              compp, statelist, clock, status)
+                                              compw, statelist, clock, status)
         endif
 
         ! Call user-defined run routine
@@ -760,10 +760,10 @@ end function
         ! Set up the arguments before the call     
         if (compp%ctype .eq. ESMF_GRIDCOMPTYPE) then
           call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETFINAL, phase, &
-                                compp, importstate, exportstate, clock, status)
+                                compw, importstate, exportstate, clock, status)
         else
           call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETFINAL, phase, &
-                                              compp, statelist, clock, status)
+                                              compw, statelist, clock, status)
         endif
 
         ! Call user-defined finalize routine
