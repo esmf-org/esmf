@@ -1,38 +1,394 @@
-% $Id: CommMem_req.tex,v 1.2 2002/06/17 16:57:20 cnh Exp $
+% $Id: CommMem_req.tex,v 1.3 2002/07/18 02:58:36 cnh Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
 %===============================================================================
 %===============================================================================
 
-\req{Basic, portable MPI based transport}
-
-\sreq{A baseline MPI based build must be available}
-
-
+\req{The {\bf \shortname} shall provide a complementary
+set of {\it setup} and {\it performance critical} communication primitives}
 \begin{reqlist}
 {\bf Priority:} Priority 1 \\
-{\bf Source:}  \\
+{\bf Source:}  MIT \\
 {\bf Status:}  \\
-{\bf Verification:} \\
-{\bf Notes:}  
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+The {\bf \shortname} should sepaarate {\it setup} functions
+and {\it performance critical} compute phase functions. The {\it setup}
+functions are used to establish communication patterns following
+distribution or redistribution. It is assumed that their impact
+on scaling is limited. The {\it performance critical} functions
+are performed within iterative simulation loops. In a typical
+ESMF application a the ratio of {\it setup} function occurences
+to {\it performance critical} function occurences will be at least
+$1:10^6$.\\
+The {\bf \shortname} {\it setup} functions may internally query system attributes 
+to determine what communications paths and mechanisms to employ. These
+attributes include information on internal communication
+mechanics available within a single computer system and on network 
+parameters for the interconnect(s) between computer systems.
+\end{reqlist}
+
+\sreq{ {\it Setup} primitives for constructing data domain point-to-point communication mechanisms are required.}
+Given a pair of data domains the {\bf CMK} should be able to determine the
+optimal communication method for point to point communication
+between the domains and to reserve appropriate resources for a collection of one
+or more such operations.
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+This function should include establishing and preallocating/reserving 
+resources for communication pathways to support
+\begin{itemize}
+\item {\it Halo} and {\it Transpose} operations that are required in 
+{\it performance critical} communication phases.
+\item Transfers between two different components using different decompositions -
+for example in support of regrid/coupling operations.
+\end{itemize}
+\end{reqlist}
+
+\sreq{ {\it Setup} primitives for constructing data domain collective communication mechanisms are required.}
+Given a set of data domains, all belonging to a single component, the {\bf CMK} should be able to determine the
+optimal communication method for collective communication
+operations.
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+This function should include establishing and preallocating/reserving 
+resources for communication pathways to support
+\begin{itemize}
+\item A 64-bit sum, max. or min. over a set of data domains all belonging to a single component.
+\item A barrier synchronization over a set of data domains all belonging to a single component.
+\end{itemize}
+\end{reqlist}
+
+\sreq{ {\it Setup} primitives for determining key PE attributes are required.}
+\begin{reqlist}
+{\bf Priority:} Priority ? \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+In order to determine what resources to use to communicate between data domains 
+{\bf \shortname} needs to know information about the PE associated with the
+data domains. The binding of data domains to PE's is driven by the Control element
+(if it exists!) and by components. The {\bf \shortname} needs to determine what
+bindings were made.
+These include
+\begin{itemize}
+\item Identifier of the PE associated with a data domain.
+\item Identifiers of the memory and communication groupings a PE
+belongs to e.g. m-node.1, a-node.1, p-node.3 etc...
+\item Identifiers of the physical resources (CPU, memory, storage) associated with a PE.
+\item Identifiers of the virtual attributes associated with a PE e.g. coodinate in a PElayout.
+\end{itemize}
+These may not belong in {\bf \shortname} but I'm not sure where else they
+are at the moment!
+\end{reqlist}
+
+\sreq{{\it Performance critical} primitives are required for {\it Halo} operations.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+\end{reqlist}
+
+\sreq{{\it Performance critical} primitives are required for {\it Transpose} operations.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+\end{reqlist}
+
+\sreq{{\it Performance critical} primitives are required for {\it Sum} operations.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+\end{reqlist}
+
+\sreq{{\it Performance critical} primitives are required for {\it Max} operations.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+\end{reqlist}
+
+\sreq{{\it Performance critical} primitives are required for {\it Min} operations.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+\end{reqlist}
+
+\sreq{Support for pipelined communication is required.}
+\begin{reqlist}
+{\bf Priority:} Priority ? \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+For both field and field bundle communication mechanisms to allow communication
+startup costs to be amortized over large transfers must be supported.
+\end{reqlist}
+
+\sreq{Support non-blocking communication is required.}
+\begin{reqlist}
+{\bf Priority:} Priority ? \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+It should be possible to switch between blocking and non-blocking
+communication at runtime. Buffering for non-blocking communication should
+be provided automatically as needed i.e. user code should not need to
+specify buffer space.
+\end{reqlist}
+
+\sreq{Support for one sided communication is required.}
+\begin{reqlist}
+{\bf Priority:} Priority ? \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+This could be either put or get style one sided operations.
+\end{reqlist}
+
+\req{Memory primitives for managing ESMF memory are required.}
+\sreq{Primitives are required for allocating ESMF memory.}
+
+\sreq{Primitives are required for deallocating ESMF memory.}
+
+\sreq{The ESMF memory pool should grow automatically up to some runtime controllable upper limit.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+Additionally, memory resources should only be requested from the OS when they are needed so that,
+even if the upper limit is high, an application memory footprint is proportionate
+to the true application needs.
+\end{reqlist}
+
+\req{Built-in reporting, managing and monitoring mechanisms are required.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:}
+\end{reqlist}
+
+\sreq{Bytes sent and received should be monitored and reported on request.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:} Reports should include total data transfer quantities and detailed
+break downs of quantitites per component, per data domain, per PE and per transfer type.
+Sub-samples for periods between marker points as well as overall totals
+should be available.
+\end{reqlist}
+
+\sreq{Min., max. and average time per {\bf \shortname} communication, between each {\bf \shortname} communication
+and per byte transferred should be monitored and reported on request.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\ 
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:} Reports should include detailed
+break downs of quantitites per component, per data domain, per PE and per transfer type.
+Sub-samples for periods between marker points as well as overall totals
+should be available.
+\end{reqlist}
+
+\sreq{Numbers of transfer of different types (halo, transpose etc..) should be monitored and
+reported on request.}
+\sreq{ESMF memory bytes allocated and deallocated should be monitored and reported on request.}
+\sreq{ESMF memory allocate and deallocate operation counts should be monitored and reported on request.}
+
+\sreq{Support and adherence to a heart-beat function is required.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\ 
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:} Again I'm not sure where this lives?
+Some mechanism should be available to detect the failure or dead-lock of one or more
+communication end-points. When this happens the ESMF application should either
+take a recovery action or shutdown gracefully. This should include freeing of system resources
+reserved for {\bf \shortname} purposes.
+\end{reqlist}
+
+\req{Support for a variety of data transport mechanisms is required.}
+The {\bf \shortname} services can bind to different system level facilities
+to transport data between either data domains and between components.
+Which facilties are used will depend on the system software available and
+on performance mesaures for the system. One of two basic mechanisms is assumed to
+exist on every platform to ensure portability. These mechanisms
+are MPI 1.2, pthreads or OpenMP based threads. An ESMF application
+should be able to run competitively in multi-processor mode on any system 
+with just MPI 1.2. An ESMF 
+
+\sreq{A pure MPI 1.2 binding must be available for all {\bf \shortname} primitives.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:} It is assumed that an MPI 1.2 compatible library
+will be available on all platforms on which ESMF is used for {\it multi-process}
+(with SPMD or MPMD) parallelism. All the {\bf \shortname} 
+communication primitives should include MPI 1.2 compatible implementations
+to ensure portability. These may not be optimal on a particular
+platform.\\
+For an ESMF build with other communications bindings available
+selection of pure threads binding should be selectable at runtime.\\
+An ESMF build that uses only MPI should be possible.\\
+All {\it multi-process} ESMF applications (with either SPMD or MPMD)
+will assume that MPI is available to provide basic boot-strapping
+capabilities.
 \end{reqlist}
 
 %===============================================================================
 % Or requirements may be itemized under a subtopic:
 %===============================================================================
 %===============================================================================
-\req{Basic, portable threads based parallelism}
+\sreq{A pure pthreads or OpenMP threads binding must be available for all {\bf \shortname} primtives.}
 %-------------------------------------------------------------------------------
 \begin{reqlist}
 {\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit test, EVA tests \\
+{\bf Notes:}  It is assumed that a pthreads compatible library
+or a Fortran 90 compatible OpenMP compiler
+will be available on all platforms on which ESMF is used
+for {\it multi-threaded} parallelism. All the {\bf \shortname}
+communication primitives should include a true shared address space based
+implementation to ensure portability. \\
+For an ESMF build with other communications bindings available
+selection of this binding should be selectable at runtime.\\
+An ESMF build that uses only pthreads or OpenMP based threads should be possible.\\
+Is pthreads required - CNH?
+\end{reqlist}
+
+\sreq{ESMF is not required to function on a system without either of
+MPI 1.2 or OpenMP/pthreads available}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit test, EVA tests \\
+{\bf Notes:} On a system without any of the three parallelism
+mechanisms given above basic bootup functions like determining
+unique identities and ranks for processes or threads may not be available.
+ESMF is not required to provide these features. Instead it assumes that
+the at least one of MPI 1.2, OpenMP or pthreads will always be available.
+\end{reqlist}
+
+\sreq{A direct binding to System V IPC must be available.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} \\
+{\bf Notes:} Bindings of {\it performance critical} communication primitives only
+to System V IPC must be available. These should allow the communication
+primtives transporting data between data domains or components to
+utilize IPC shared memory segments on request (assuming system support
+is available). \\
+This requirement is really asking for a certain implementation.
+Arguably the requirement could be stated as ESMF performance
+and resource utilization on a system which has System V IPC available must be
+competitive to an approach that binds ESMF communication directly to System V IPC shared
+memory region reads and writes (with appropriate memory
+instructions inserted to ensure memory consistency).
+\end{reqlist}
+
+\sreq{A direct binding to mmap shared memory must be available.}
+\begin{reqlist}
+{\bf Priority:} Priority ? \\
 {\bf Source:}  \\
 {\bf Status:}  \\
 {\bf Verification:} \\
-{\bf Notes:}  
+{\bf Notes:} Bindings of {\it performance critical} communication primitives only
+to mmap() regions must be available. These should allow the communication
+primtives transporting data between data domains or components to
+utilize mmap regions on request (assuming system support
+is available).\\
+This requirement is really asking for a certain implementation.
+Arguably the requirement could be stated as ESMF performance
+and resource utilization on a system which has mmap available must be
+competitive to an approach that binds ESMF communication directly to mmap
+reads and writes (with appropriate memory
+instructions inserted to ensure memory consistency).
 \end{reqlist}
 
+\sreq{A direct binding to shmem pointers must be available.}
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  GFDL \\
+{\bf Status:}  \\
+{\bf Verification:} \\
+{\bf Notes:} Bindings of {\it performance critical} communication primitives only
+to shmem shared heap memory through shmem pointers must be available. These 
+should allow the communication primtives transporting data between data domains 
+or components to utilize mmap regions on request (assuming system support
+is available).\\
+This requirement is really asking for a certain implementation.
+Arguably the requirement could be stated as ESMF performance
+and resource utilization on a system which has shmem pointers available must be
+competitive to an approach that binds ESMF communication directly to shmem pointers
+reads and writes (with appropriate memory
+instructions inserted to ensure memory consistency).
+\end{reqlist}
 
+\sreq{A direct binding to MPI one-sided RDMA communication must be available.}
+\begin{reqlist}
+{\bf Priority:} Priority ? \\
+{\bf Source:}  \\
+{\bf Status:}  \\
+{\bf Verification:} \\
+{\bf Notes:} Bindings of {\it performance critical} communication primitives only
+to MPI 2 RDMA one-sided communication for transporting data between data domains 
+or components should be possible (assuming system support
+is available).\\
+This requirement is really asking for a certain implementation.
+Arguably the requirement could be stated as ESMF performance
+and resource utilization on a system which has MPI 2.0 one-sided communication available must be
+competitive to an approach that binds ESMF communication directly to MPI 2.0.
+\end{reqlist}
+
+\sreq{An extensible architecture to allow direct binding to other high-speed communication systems must be employed.}
+\begin{reqlist}
+{\bf Priority:} Priority ? \\
+{\bf Source:}  \\
+{\bf Status:}  \\
+{\bf Verification:} \\
+{\bf Notes:} Extension to allow bindings of {\it performance critical} communication primitives to
+systems like LAPI, elan3, Myrinet GM, raw ethernet and to Infiniband and VIA like systems should be possible.
+\end{reqlist}
 
 
 
