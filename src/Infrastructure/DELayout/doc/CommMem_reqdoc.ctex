@@ -1,4 +1,4 @@
-% $Id: CommMem_reqdoc.ctex,v 1.1 2003/09/19 17:00:02 cdeluca Exp $
+% $Id: CommMem_reqdoc.ctex,v 1.2 2003/10/20 18:05:55 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -69,7 +69,7 @@
 #ifdef STANDALONE
 \input{CommMem_auth}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/CommMem_auth}
+\input{../Infrastructure/DELayout/doc/CommMem_auth}
 #endif
 
 #ifdef STANDALONE
@@ -81,7 +81,7 @@
 #ifdef STANDALONE
 \input{CommMem_background}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/CommMem_background}
+\input{../Infrastructure/DELayout/doc/CommMem_background}
 #endif
 
 #ifdef STANDALONE
@@ -101,7 +101,7 @@
 #ifdef STANDALONE
 %\input{CommMem_abbr}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/CommMem/doc/CommMem_abbr}
+%\input{../Infrastructure/DELayout/doc/CommMem_abbr}
 #endif
 
 #ifdef CONSTITUENT
@@ -118,7 +118,7 @@
 #ifdef STANDALONE
 \input{CommMem_req}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/CommMem_req}
+\input{../Infrastructure/DELayout/doc/CommMem_req}
 #endif
 
 #ifdef STANDALONE
