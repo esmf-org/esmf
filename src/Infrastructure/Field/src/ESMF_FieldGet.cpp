@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet_F90.cpp,v 1.2 2004/03/11 16:21:59 nscollins Exp $
+! $Id: ESMF_FieldGet.cpp,v 1.1 2004/03/15 23:58:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,8 +17,7 @@
 !
 ! This file contains the Field class methods which are automatically
 !  generated from macros to handle the type/kind/rank overloading.
-!  See ESMF_Field.F90 for non-macroized entry points.
-! class methods.
+!  See ESMF_Field.F90 for non-macroized functions and subroutines.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -48,7 +47,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet_F90.cpp,v 1.2 2004/03/11 16:21:59 nscollins Exp $'
+      '$Id: ESMF_FieldGet.cpp,v 1.1 2004/03/15 23:58:21 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -68,7 +67,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
-FieldInterfaceMacro(FieldGetDataPointer)
+InterfaceMacro(FieldGetDataPointer)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -86,58 +85,8 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-!! < start of macros which become actual subroutine bodies after expansion >
-
-FieldGetDataPointerMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
-
-FieldGetDataPointerMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
-
-FieldGetDataPointerMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
-
-FieldGetDataPointerMacro(integer, I2, 2, COL2, LEN2, RNG1, LOC2)
-
-FieldGetDataPointerMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
-
-FieldGetDataPointerMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
-
-FieldGetDataPointerMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
-
-FieldGetDataPointerMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
-
-FieldGetDataPointerMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
-
-FieldGetDataPointerMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
-
-FieldGetDataPointerMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
-
-FieldGetDataPointerMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
-
-FieldGetDataPointerMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
-
-FieldGetDataPointerMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
-
-FieldGetDataPointerMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
-
-FieldGetDataPointerMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
-
-FieldGetDataPointerMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
-
-FieldGetDataPointerMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
-
-FieldGetDataPointerMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
-
-FieldGetDataPointerMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
-
-FieldGetDataPointerMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
-
-FieldGetDataPointerMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
-
-FieldGetDataPointerMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
-
-FieldGetDataPointerMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
-
-FieldGetDataPointerMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
+      ! < declarations of subroutines for each T/K/R >
+DeclarationMacro(FieldGetDataPointer)
 
 
         end module ESMF_FieldGetMod
-
