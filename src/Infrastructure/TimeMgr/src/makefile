@@ -1,8 +1,9 @@
-# $Id: makefile,v 1.3 2002/10/15 23:39:42 eschwab Exp $ 
+# $Id: makefile,v 1.4 2002/11/08 17:24:22 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    =
 FFLAGS    =
+STOREH    = ../include/ESMC_Util.h
 SOURCEC	  = ESMC_Time.C ESMC_TimeInstant.C ESMC_TimeInterval.C ESMC_Clock.C ESMC_Alarm.C ESMC_Calendar.C
 SOURCEF	  = 
 SOURCEH	  = 
