@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.22 2003/07/29 16:40:00 jwolfe Exp $
+// $Id: ESMC_DELayout.h,v 1.23 2003/07/31 21:51:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -69,6 +69,16 @@
 
 // hint type about the most performance critical communication direction
 enum ESMC_CommHint {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
+
+// parameters for asynchronous/sync communication
+enum ESMC_AsyncFlag {ESMC_ASYNCHRONOUS=1, ESMC_SYNCHRONOUS};
+enum ESMC_Complete {ESMC_TEST_COMPLETE=1, ESMC_WAIT_COMPLETE};
+
+class ESMC_Async {
+  enum ESMC_Asyncflag aflag;
+  int mpi_handle;
+  enum ESMC_Complete cflag;
+};
 
 typedef int ESMC_CommType;  
 #define ESMC_COMMTYPE_MP 0
