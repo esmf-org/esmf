@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.42 2004/12/02 23:02:51 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.43 2004/12/03 09:42:55 cpboulder Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,6 +45,7 @@
 ! !USES:
     ! inherit from ESMF base class
     use ESMF_BaseTypesMod
+    use ESMF_VMMod
 
 implicit none
 !
@@ -95,7 +96,8 @@ type ESMF_LOGENTRY
     character(len=64)				msg	
     character(len=32) 				file,method	
     character(len=8) 				d		                                     
-    character(len=8)				lt  			   				
+    character(len=8)				lt  		
+    integer                                     petNumber	   				
     integer					        h,m,s,ms				        
     integer					        line   
     logical					        methodflag,lineflag,fileflag,stopprogram					
@@ -113,9 +115,10 @@ type ESMF_Log
 #endif                                         
     type(ESMF_HaltType)                             ::  halt
     type(ESMF_LogType)			            ::  logtype
+    type(ESMF_VM)                                   ::  vm
     type(ESMF_Logical)                              ::  FileIsOpen
     type(ESMF_Logical)                              ::  flushImmediately
-    type(ESMF_Logical)			                    ::  flushed     
+    type(ESMF_Logical)			            ::  flushed     
     type(ESMF_Logical)                              ::  rootOnly    
     type(ESMF_Logical)                              ::  verbose  
     type(ESMF_Logical)                              ::  dirty  
@@ -124,8 +127,15 @@ type ESMF_Log
     integer                                             stream 
     integer                                             unitNumber
     integer                                             fIndex 
+    integer                                             petCount
 
 end type ESMF_Log
+
+type ESMF_LogArray
+    private
+    type(ESMF_Log), dimension(:),ALLOCATABLE        ::  LOG_ARRAY
+end type ESMF_Logarray
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
     public ESMF_LOG_INFO
@@ -564,7 +574,7 @@ end subroutine ESMF_LogGet
 ! !ARGUMENTS:
       character(len=*)                          :: filename
       integer, intent(in),optional		:: lognone  
-      type(ESMF_LogType),, intent(in),optional  :: logtype  
+      type(ESMF_LogType), intent(in),optional  :: logtype  
       integer, intent(out),optional	        :: rc
 
 ! !DESCRIPTION:
@@ -587,7 +597,7 @@ end subroutine ESMF_LogGet
 ! 
 !EOPI
 	
-    integer 				          :: status, i, rc2	
+    integer 				          :: status, i, rc2,rc3	
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 	
     if (present(rc)) rc=ESMF_FAILURE
@@ -595,6 +605,8 @@ end subroutine ESMF_LogGet
     if (present(lognone)) then
       if (lognone .eq. ESMF_LOG_NONE) ESMF_LogDefault%logNone = ESMF_TRUE 
     endif
+    call ESMF_VMGetGlobal(ESMF_LogDefault%vm,rc3)
+    call ESMF_VMGet(ESMF_LogDefault%vm,petCount=ESMF_LogDefault%petCount)
     ESMF_LogDefault%FileIsOpen=ESMF_FALSE
     ESMF_LogDefault%nameLogErrFile=filename
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
