@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.54 2004/05/18 11:30:18 nscollins Exp $
+#  $Id: common.mk,v 1.55 2004/05/21 09:26:33 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -850,7 +850,7 @@ tree: $(ACTION)
 	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} ${F_FREECPP} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
