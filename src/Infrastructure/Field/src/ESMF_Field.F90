@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.47 2003/07/29 16:43:19 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.48 2003/07/30 21:50:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.47 2003/07/29 16:43:19 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.48 2003/07/30 21:50:19 nscollins Exp $'
 
 !==============================================================================
 !
@@ -923,7 +923,7 @@
         return
       endif 
            
-      deallocate(field%ftypep, stat=status)
+      if (associated(field%ftypep)) deallocate(field%ftypep, stat=status)
       ! If error write message and return.
       ! Formal error handling will be added asap.
       if(status .ne. 0) then 
@@ -2515,7 +2515,8 @@
           ! Create the route object.
           route = ESMF_RouteCreate(layout, rc) 
 
-          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, src_AI, dst_AI, &
+          call ESMF_RoutePrecomputeHalo(route, datarank, &
+                                        my_DE, src_AI, dst_AI, &
                                         AI_count, global_start, global_stride, &
                                         layout, rc=status)
 
@@ -2530,10 +2531,13 @@
         return
       endif 
 
-      ! TODO: if cached, we shouldn't delete the Route.  But until
-      !   the caching code is working correctly, reclaim the route
-      !   memory each time.
+      ! TODO: we are caching the route so don't delete it.
       !call ESMF_RouteDestroy(route, rc)
+
+      ! get rid of temporary arrays
+      if (allocated(global_start)) deallocate(global_start, stat=status)
+      if (associated(src_AI)) deallocate(src_AI, stat=status)
+      if (associated(dst_AI)) deallocate(dst_AI, stat=status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -2679,6 +2683,10 @@
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
+      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_stride
+      integer, dimension(:,:), allocatable :: src_global_start
+      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_stride
+      integer, dimension(:,:), allocatable :: dst_global_start
       integer :: AI_snd_count, AI_rcv_count
 
    
@@ -2774,16 +2782,34 @@
 
       ! set up things we need to find a cached route or precompute one
       if (hassrcdata) then
-!jw  need to get all src AI's
           call ESMF_DELayoutGetSize(srclayout, nx, ny);
           AI_snd_count = nx * ny
+
+          allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_stride, &
+                            global_start=src_global_start, rc=status)
+
+          allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          call ESMF_ArrayGetAllAxisIndices(stypep%localfield%localdata, &
+                                           stypep%grid, src_AI_tot, &
+                                           src_AI_exc, rc=rc)
       else
           AI_snd_count = 0
       endif
       if (hasdstdata) then
-!jw  need to get all dst AI's
           call ESMF_DELayoutGetSize(dstlayout, nx, ny);
           AI_rcv_count = nx * ny
+
+          allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
+          call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_stride, &
+                            global_start=dst_global_start, rc=status)
+
+          allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
+          call ESMF_ArrayGetAllAxisIndices(dtypep%localfield%localdata, &
+                                           dtypep%grid, dst_AI_tot, &
+                                           dst_AI_exc, rc=rc)
       else
           AI_rcv_count = 0
       endif
@@ -2802,11 +2828,13 @@
           ! includes the DEs from both fields.
           route = ESMF_RouteCreate(parentlayout, rc) 
 
-          call ESMF_RoutePrecompute(route, datarank, my_dst_DE, &
-                                   dst_AI_exc, dst_AI_tot, &
-                                   AI_rcv_count, dstlayout, my_src_DE, &
-                                   src_AI_exc, src_AI_tot, &
-                                   AI_snd_count, srclayout)
+          call ESMF_RoutePrecompute(route, datarank, &
+                                    my_dst_DE, dst_AI_exc, dst_AI_tot, &
+                                    AI_rcv_count, dst_global_start, &
+                                    dst_global_stride, dstlayout,  &
+                                    my_src_DE, src_AI_exc, src_AI_tot, &
+                                    AI_snd_count, src_global_start, &
+                                    src_global_stride, srclayout, rc=status)
 
       endif
 
@@ -2831,11 +2859,16 @@
         return
       endif 
 
-      ! TODO: if cached, we shouldn't delete the Route.  But until
-      !   the caching code is working correctly, reclaim the route
-      !   memory each time.
+      ! TODO: do not delete the route because we are caching it.
       !call ESMF_RouteDestroy(route, rc)
 
+      ! get rid of temporary arrays
+      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
+      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
+      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
+      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
+      if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
+      if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
