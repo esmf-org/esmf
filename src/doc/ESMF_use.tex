@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.8 2003/08/28 17:14:37 flanigan Exp $
+% $Id: ESMF_use.tex,v 1.9 2003/10/14 22:00:25 svasquez Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -69,17 +69,24 @@ LIBDIR = ${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
    -L${LIBDIR}  -rpath ${LIBDIR} -lesmf -lC -lCio -lmpi -lmpi++ -o myModel  
 \end{verbatim}
 
+\noindent{\it Linking using the SGI with 32-bit addressing:} 
+
+\begin{verbatim}
+   f90 -freeform -mips4 -I${MODDIR} myModel.F  \
+   -L${LIBDIR}  -rpath ${LIBDIR} -lesmf -lC -lCio -lmpi -lmpi++ -o myModel  
+\end{verbatim}
+
 \noindent{\it Linking using the IBM with 64-bit addressing:}
 
 \begin{verbatim}
-   xlf90_r -q64 -qsuffix=f=F90 -I${MODDIR} myModel.F -brtl \
+   mpxlf90_r -q64 -qsuffix=f=F90 -I${MODDIR} myModel.F -brtl \
    -L${LIBDIR}  -lesmf -lC -o myModel
 \end{verbatim}
 
 \noindent{\it Linking using the IBM with 32-bit addressing:}
 
 \begin{verbatim}
-   xlf90_r -qsuffix=f=F90 -I${MODDIR} myModel.F \
+   mpxlf90_r -qsuffix=f=F90 -I${MODDIR} myModel.F \
    -L${LIBDIR} -lesmf -brtl -lC -o myModel
 \end{verbatim}
 
