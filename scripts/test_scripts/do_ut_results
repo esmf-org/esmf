@@ -1,4 +1,4 @@
-# $Id: do_ut_results,v 1.8 2003/04/23 20:40:24 svasquez Exp $
+# $Id: do_ut_results,v 1.9 2003/04/23 23:11:45 svasquez Exp $
 #!/bin/ksh
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
@@ -54,7 +54,7 @@ else
 		then
 			echo ""
 		else
-			echo "No Unit Test failures were found." 
+			echo "No Unit Tests Failed." 
 			echo "" 
 
 		fi #end of if diff stdoutfiles zerofiles
