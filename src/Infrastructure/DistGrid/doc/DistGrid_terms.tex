@@ -1,4 +1,4 @@
-% $Id: DistGrid_terms.tex,v 1.2 2002/03/11 01:07:43 vbalaji Exp $
+% $Id: DistGrid_terms.tex,v 1.3 2002/03/18 10:07:54 wsawyer Exp $
 
 \begin{description}
 \item[PElist] a list of processor IDs associated with a component. (We
@@ -11,14 +11,14 @@
   grid. These may be arrays where one of the dimensions represents the
   vector component axis, or there may be separate data arrays for each
   vector component.
-\item[Grid stencil] a descriptor of relative locations of scalar and
+\item[Grid staggering] a descriptor of relative locations of scalar and
   vector data on a structured grid. On different staggered grids,
   vector data may lie at cell faces or vertices, while scalar data may
   lie in the interior. The staggered locations are often written
   in a notation like $(i+\frac12,j+\frac12)$ to describe the offset of
   a corner with respect to the cell $(i,j)$.
 \item[Data dependency] the property of the numerics that expresses the
-  requirement of non-local data values in order to perform a
+  requirement of data values in order to perform a
   computation at a data point. For instance, a forward differencing
   operation in X at $(i,j)$ has a dependency on $(i+1,j)$.
 \item[Distributed grid] Given the global range of indices associated
@@ -40,6 +40,8 @@
   synchronization of halo points with other PEs. The data domain
   extents typically specify the index range used to allocated data
   arrays on a PE.
+\item[Communication pattern] data connectivities on the pelist for
+scheduling communication.
 \item[Transpose] Transfer of data arrays between two distributed grids
   sharing the same global domain.
 \item[Global reduction] Reduction operations (sum, max, min, etc.) on

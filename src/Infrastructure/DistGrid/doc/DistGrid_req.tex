@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.3 2002/03/11 02:05:53 vbalaji Exp $
+% $Id: DistGrid_req.tex,v 1.4 2002/03/18 10:07:54 wsawyer Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -21,7 +21,8 @@ by direct user specification.
 
 \sreq{1D decomposition}
 
-ESMF permits 1D domain decomposition.
+ESMF permits 1D domain decomposition, i.e. the distribution of a
+(possibly multidimensional) array over a 1D PE layout.
 
 \begin{reqlist}
 \item[Priority]
@@ -49,7 +50,8 @@ etc).
 
 \sreq{2D decomposition}
 
-ESMF permits 2D domain decomposition.
+ESMF permits 2D domain decomposition, i.e. the distribution of a
+(2- or more dimensional) array over a 2D PE layout.
 
 \begin{reqlist}
 \item[Priority]
@@ -76,7 +78,8 @@ etc).
 
 \sreq{3D decomposition}
 
-ESMF permits 3D domain decomposition.
+ESMF permits 3D domain decomposition, i.e. the distribution of a
+(3- or more dimensional) array over a 3D PE layout.
 
 \begin{reqlist}
 \item[Priority]
@@ -107,6 +110,19 @@ It will be possible to override the internally generated computational
 domain decomposition above by direct user specification of domain
 extents.
 
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]  WS: Is it really necessary to mention this? There will
+be different methods to create decompositions, some more automated
+(``distributed a 3-D XYZ array over a 2-D PE layout in a block-block
+manner'') and others which are more user-specified (``map the global domain
+to the following PE and local indices'').
+
+\end{reqlist}
+
 \sreq{Computational domain masks}
 
 It shall be possible to mask domains from the computation: i.e
@@ -128,6 +144,9 @@ domains are assigned to no PE.
 Given the data dependencies of the numerics, ESMF will be capable of
 computing the connectivities required for data sharing and
 synchronization of computational domains across a distributed grid.
+
+WS:  "topology" (BLACS terminology) implies process layout.
+Can we use ``communication pattern''?
 
 \sreq{Validity of grid topology}
 
@@ -171,7 +190,9 @@ indices of a data point are independent of the decomposition.
   involves setting appropriate lower bounds to the dimensions of an
   array, and thus may be F90-specific... it can also conceivably be
   done in C++ but array lower bounds are not naturally expressed
-  there.
+  there.  WS: Why should this be F90-specific?  
+  It requires an efficient mechanism to ask for (80,13) and get 
+  back the associated data point.
 \end{reqlist}
 
 \req{Grid information retrieval}
@@ -199,7 +220,9 @@ computational domains associated with each PE of a distributed grid.
 \item[Source]
 \item[Status]
 \item[Verification]
-\item[Notes]
+\item[Notes]  WS: can each PE get information about 
+computational (or data) domains on other PEs, or can it only access 
+info about its own domain?
 \end{reqlist}
 
 \sreq{Data domain retrieval}
@@ -225,7 +248,9 @@ domain of a distributed grid.
 \item[Source]
 \item[Status]
 \item[Verification]
-\item[Notes]
+\item[Notes] WS: Is it required that the global domain information 
+be replicated on every PE?
+
 \end{reqlist}
 
 \sreq{Grid topology retrieval}
@@ -245,7 +270,10 @@ distributed grid.
 \item[Source]
 \item[Status]
 \item[Verification]
-\item[Notes]
+\item[Notes] WS: which PE is it on and (optionally?) what 
+is its local index.  Also: if one is given the PE and the local index, 
+it should be possible to get the global index.  Is it a requirement that
+these mappings be highly efficient (a challenging programming task)?
 \end{reqlist}
 
 \sreq{Cross-component queries}
@@ -350,7 +378,9 @@ ESMF shall provide methods to declare halo points valid or invalid
   update. This may also be used to reduce the frequency of halo
   updates on high-latency networks, by declaring wide halos and
   performing redundant computations within them. See \cite{ref:b2001}
-  for details.
+  for details.  WS:  can this be simplified to halo is invalid
+  if at least one point in halo is invalid?  Partial halo updates
+  will complicate matters considerably.
 \end{reqlist}
 
 \req{Data transpose}
@@ -426,10 +456,10 @@ from a copy on any PE of the entire global array.
 ESMF shall provide methods to compute the global sum of a distributed
 integer array.
 
-\sreq{FP global sum}
+\sreq{FP and complex global sum}
 
 ESMF shall provide methods to compute the global sum of a distributed
-floating-point array.
+floating-point or complex array.
 
 \begin{reqlist}
 \item[Priority]
@@ -439,10 +469,10 @@ floating-point array.
 \item[Notes]
 \end{reqlist}
 
-\ssreq{FP global sum along one axis}
+\ssreq{FP and complex global sum along one axis}
 
 ESMF shall provide methods to compute the global sum of a 2D-decomposed
-floating-point array along either axis of decomposition.
+floating-point or complex array along either axis of decomposition.
 
 \begin{reqlist}
 \item[Priority]
@@ -452,24 +482,25 @@ floating-point array along either axis of decomposition.
 \item[Notes] required for computing zonal means.
 \end{reqlist}
 
-\ssreq{FP bit-reproducible global sum}
+\ssreq{FP and complex bit-reproducible global sum}
 
 ESMF shall provide methods to compute the global sum of a
-2D-decomposed floating-point array where the result is bitwise
-identical on different decompositions.
+2D-decomposed floating-point or complex array where the result is bitwise
+identical on different decompositions. 
 
 \begin{reqlist}
 \item[Priority]
 \item[Source] trace to GR.
 \item[Status]
 \item[Verification]
-\item[Notes]
+\item[Notes] Possibly a compile-time option of normal (optimized)
+             global sum.
 \end{reqlist}
 
-\sreq{FP global checksum}
+\sreq{FP and complex global checksum}
 
 ESMF shall provide methods to compute the global checksum of a
-distributed floating-point array. 
+distributed floating-point or complex array. 
 
 \begin{reqlist}
 \item[Priority]
@@ -477,66 +508,69 @@ distributed floating-point array.
 \item[Status]
 \item[Verification]
 \item[Notes] A checksum is different from a sum in that there is no
-  data loss when the FP data has a dynamic range exceeding the FP
-  precision. It is done by casting all FP numbers as integers before
+  data loss when thedata has a dynamic range exceeding the FP or
+  complex precision. It is done by casting all FP numbers as integers before
   summing.
 \end{reqlist}
 
-\sreq{Complex global sum}
+%
+%  2002.03.18 WS: consolidated with FP to shorten document
+%
+% \sreq{Complex global sum}
 
-ESMF shall provide methods to compute the global sum of a distributed
-complex array.
+%ESMF shall provide methods to compute the global sum of a distributed
+%complex array.
 
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes]
-\end{reqlist}
+%\begin{reqlist}
+%\item[Priority]
+%\item[Source]
+%\item[Status]
+%\item[Verification]
+%\item[Notes]
+%\end{reqlist}
 
-\ssreq{Complex global sum along one axis}
+%\ssreq{Complex global sum along one axis}
 
-ESMF shall provide methods to compute the global sum of a 2D-decomposed
-complex array along either axis of decomposition.
+%ESMF shall provide methods to compute the global sum of a 2D-decomposed
+%complex array along either axis of decomposition.
 
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes]
-\end{reqlist}
+%\begin{reqlist}
+%\item[Priority]
+%\item[Source]
+%\item[Status]
+%\item[Verification]
+%\item[Notes]
+%\end{reqlist}
 
-\ssreq{Complex bit-reproducible global sum}
+%\ssreq{Complex bit-reproducible global sum}
 
-ESMF shall provide methods to compute the global sum of a
-2D-decomposed complex array where the result is bitwise identical on
-different decompositions.
+%ESMF shall provide methods to compute the global sum of a
+%2D-decomposed complex array where the result is bitwise identical on
+%different decompositions.
 
-\begin{reqlist}
-\item[Priority]
-\item[Source] trace to GR.
-\item[Status]
-\item[Verification]
-\item[Notes]
-\end{reqlist}
+%\begin{reqlist}
+%\item[Priority]
+%\item[Source] trace to GR.
+%\item[Status]
+%\item[Verification]
+%\item[Notes]
+%\end{reqlist}
 
-\sreq{Complex global checksum}
+%\sreq{Complex global checksum}
 
-ESMF shall provide methods to compute the global checksum of a
-distributed complex array. 
+%ESMF shall provide methods to compute the global checksum of a
+%distributed complex array. 
 
-\begin{reqlist}
-\item[Priority]
-\item[Source]
-\item[Status]
-\item[Verification]
-\item[Notes] A checksum is different from a sum in that there is no
-  data loss when the FP data has a dynamic range exceeding the FP
-  precision. It is done by casting all FP numbers as integers before
-  summing.
-\end{reqlist}
+%\begin{reqlist}
+%\item[Priority]
+%\item[Source]
+%\item[Status]
+%\item[Verification]
+%\item[Notes] A checksum is different from a sum in that there is no
+%  data loss when the FP data has a dynamic range exceeding the FP
+%  precision. It is done by casting all FP numbers as integers before
+%  summing.
+%\end{reqlist}
 
 \sreq{Global maximum of integer or FP data}
 
@@ -558,29 +592,50 @@ distributed integer or FP array.
 The location of this minimum on the distributed grid is also
 retrievable.
 
-\req{Grid stencils}
+\req{Grid staggering}
 
-Many possible grid stencils exist to specify staggered grids.
-Currently grid stencils are only supported on logically rectilinear
-grids. We use the notation of \cite{ref:a1966} to specify staggering,
-together with a directional qualifier, e.g \texttt{NE} to specify a
-forward index offset in \texttt{X} and \texttt{Y}.
+There are many possible ways to specify staggered grids.  Currently
+grid staggering are only required for logically rectilinear grids. We
+use the notation of \cite{ref:a1966} to specify staggering (e.g. A-,
+B-, C- and D-grids) together with a directional qualifier, e.g
+\texttt{NE} to specify a forward index offset in \texttt{X} and
+\texttt{Y}.
 
-\newcommand{\bgridne}{\texttt{BGRID\_NE}{}}
-\newcommand{\cgridne}{\texttt{CGRID\_NE}{}}
-\sreq{\bgridne}
+\newcommand{\agrid}{\texttt{AGRID}{}}
+\newcommand{\bgrid}{\texttt{BGRID}{}}
+\newcommand{\cgrid}{\texttt{CGRID}{}}
+\newcommand{\dgrid}{\texttt{DGRID}{}}
 
-ESMF will support a \bgridne stencil: where the vector
+\sreq{\agrid}
+
+ESMF will support a \agrid stencil: where the vector
+component array locations $u_{ij}$ and $v_{ij}$ are located at the
+cell center $(i,j)$.
+
+\sreq{\bgrid}
+
+ESMF will support a \bgrid stencil: where the vector
 component array locations $u_{ij}$ and $v_{ij}$ are located at the NE
 cell corner $(i+\frac12,j+\frac12)$.
 
-\sreq{\cgridne}
+\sreq{\cgrid}
 
-ESMF will support a \cgridne stencil: where the vector
+ESMF will support a \cgrid stencil: where the vector
 component array locations $u_{ij}$ and $v_{ij}$ are located on the N
 and E faces $(i+\frac12,j)$ and $(i,j+\frac12)$ respectively.
 
+\sreq{\dgrid}
+
+ESMF will support a \dgrid stencil: where the vector
+component array locations $u_{ij}$ and $v_{ij}$ are located on the E
+and N faces $(i,j+\frac12)$ and $(i+\frac12,j)$ respectively.
+
 \part{Requirements for specific grid types} \label{DG:gridtypes}
+
+The distributed grid module will provide support the following 
+physical grids:
+
+WS: should these be mentioned explicitly and in such detail here?
 
 \req{Logically rectilinear grids}
 
@@ -606,7 +661,7 @@ methods to enforce exact redundancy.
 \sreq{Validity of stencil}
 
 It must be possible to check if the stencil and fold are conformant:
-for instance, a southern fold with a \bgridne stencil is
+for instance, a southern fold with a \bgrid stencil is
 invalid.
 
 \req{Cubed-sphere grid}
@@ -636,8 +691,28 @@ methods to enforce exact redundancy.
 
 \req{Icosahedral grid}
 
+See \cite{art:heikes+:geodesic,art:majewski+:gme} for extensive
+discussions on these grids.
+
 \req{Reduced grids}
 
 \req{Nested grids}
 
 \req{Unstructured grids and ungridded data}
+
+WS: Arlindo and Jing Guo have explained the PSAS
+observations are ``ungridded data.'' Their reasons are (i) there are
+(initially) no data dependencies between the observations, and (2) an
+"observation" location can have numerous data points.  From the
+literature, it seems common in the remote sensing community to refer
+to such data as ``ungridded.''  An observation vector is a derived
+type, and communicating parts of it may not be as straightforward as for
+gridded data.  This can be circumvented by copying data to 1-D arrays
+when communication is required.  Keep in mind that an ESMF-compliant
+PSAS is not in the list of milestones, so ``ungridded data'' might not
+even be a requirement.  As for unstructured grids, it would be
+worthwhile to support these in a general way which requires
+considerable user specification of the mapping of global indices to
+their PE, local index equivalents.
+
+
