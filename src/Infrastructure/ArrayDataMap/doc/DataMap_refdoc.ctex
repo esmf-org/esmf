@@ -1,0 +1,119 @@
+% $Id: DataMap_refdoc.ctex,v 1.1 2004/05/03 16:12:41 nscollins Exp $
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{DataMap Design}
+\newcommand{\myauthors}{Nancy Collins}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+%\section{Overview}
+%#ifdef STANDALONE
+%\input{Field_syn}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Field/doc/Field_syn}
+%#endif
+
+%\section{Programming Model}
+%#ifdef STANDALONE
+%\input{Field_prog}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Field/doc/Field_prog}
+%#endif
+
+%
+% Field_obj.tex wants to include the graphics  file
+% fieldclassNH.eps.  In processing in CONSTITUENT
+% mode, this file can not be found.
+%
+%
+%% \section{Object Model}
+%% #ifdef STANDALONE
+%% \input{Field_obj}
+%% #elif defined(CONSTITUENT)
+%% \input{../Infrastructure/Field/doc/Field_obj}
+%% #endif
+
+% %\section{Global Parameters and Definitions}
+% #ifdef STANDALONE
+% %\input{Field_param}
+% #elif defined(CONSTITUENT)
+% %\input{../Infrastructure/Field/doc/Field_param}
+% #endif
+
+\section{DataMap Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{DataMap_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DataMap/doc/DataMap_desc}
+#endif
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{DataMap_usage}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DataMap/doc/DataMap_usage}
+#endif
+
+%\subsubsection{Restrictions and Future Work}
+#ifdef STANDALONE
+%\input{DataMap_rest}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/DataMap/doc/DataMap_rest}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{../../DataMap/doc/ESMF_DataMap_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DataMap/doc/ESMF_DataMap_fapi}
+#endif
+
+%#ifdef STANDALONE
+%\section{Review Status}
+%\input{Field_desrev}
+%#endif
+
+%#ifdef STANDALONE
+%\section{Glossary}
+%\input{Field_glos}
+%#endif
+
+#ifdef STANDALONE
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
