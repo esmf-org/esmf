@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.31 2003/04/14 16:01:32 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.32 2003/04/14 16:40:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -160,15 +160,20 @@ extern "C" {
      void FTN(c_esmc_arrayprint)(ESMC_Array **ptr, char *opts, int *status, 
                                                                  int clen) {
          char *temp = NULL;
+
          cout << "array print called, clen = " << clen << " ";
-         // TODO: make sure this isn't writing past end of buffer
+         // make a local copy because opts may be non-writable or not
+         // long enough to add a trailing null safely.
          if (opts && (clen > 0)) {
-             temp = new char[clen];
+             temp = new char[clen+1];
              strncpy(temp, opts, clen);
              temp[clen] = '\0';
-             cout << "null term opts = " << opts << endl;
-         } else cout << endl;
+             cout << "null term opts = " << temp << endl;
+         } else 
+             cout << endl;
+
          *status = (*ptr)->ESMC_ArrayPrint(temp);
+
          if (temp)
              delete[] temp;
      }
