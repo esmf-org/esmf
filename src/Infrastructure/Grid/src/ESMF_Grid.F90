@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.73 2003/08/04 17:20:14 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.74 2003/08/04 20:29:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -207,7 +207,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.73 2003/08/04 17:20:14 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.74 2003/08/04 20:29:53 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1613,8 +1613,18 @@
       endif
       physgrid_id = grid%num_physgrids 
 
-      delta(1) = (x_max - x_min) / real(counts(1))
-      delta(2) = (y_max - y_min) / real(counts(2))
+      if (real(counts(1)).ne.0.0) then
+        delta(1) = (x_max - x_min) / real(counts(1))
+      else
+        print *, "ERROR in ESMF_GridAddPhysGrid: counts(1)=0"
+        return
+      endif
+      if (real(counts(2)).ne.0.0) then
+        delta(2) = (y_max - y_min) / real(counts(2))
+      else
+        print *, "ERROR in ESMF_GridAddPhysGrid: counts(2)=0"
+        return
+      endif
       do i = 1,2
         local_min_coord(i) = delta(i) * &
                              real(grid%distgrid%ptr%MyDE%ai_global(i)%min - 1)
