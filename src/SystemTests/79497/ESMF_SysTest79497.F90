@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.7 2003/08/28 17:32:04 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.8 2003/08/28 20:19:29 nscollins Exp $
 !
 ! System test code #79497
 
@@ -89,7 +89,7 @@
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     delist = (/ (i, i=0, ndes-1) /)
-    layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, ndes/4 /), (/ 0, 0 /), &
+    layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, mid /), (/ 0, 0 /), &
                                   de_indices=delist, rc=rc)
     comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
@@ -98,7 +98,7 @@
 
     cname2 = "user model 2"
     delist = (/ (i, i=0, ndes-1) /)
-    layout3 = ESMF_DELayoutCreate(layout1, 2, (/ 1, ndes/2 /), (/ 0, 0 /), &
+    layout3 = ESMF_DELayoutCreate(layout1, 2, (/ 1, ndes /), (/ 0, 0 /), &
                                   de_indices=delist, rc=rc)
 
     comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
