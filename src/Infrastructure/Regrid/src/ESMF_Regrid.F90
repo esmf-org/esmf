@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.3 2002/11/04 06:13:42 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.4 2002/11/06 22:29:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF_Regrid.h>
+#include <ESMF_Macros.inc>
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_RegridMod - One line general statement about this class
@@ -34,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
-!     use ESMF_<XXX>Mod   ! any other dependencies
+      use ESMF_GridMod    ! ESMF grid class
       implicit none
 
 !------------------------------------------------------------------------------
@@ -53,16 +54,27 @@
       end type
 
 !------------------------------------------------------------------------------
+!     !  ESMF_RegridType
+!
+!     ! Description of ESMF_Regrid.
+
+      type ESMF_RegridType
+      sequence
+      private
+        type (ESMF_Base) :: base
+        integer :: dummy
+!       < insert other class members here >
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_Regrid
 !
-!     ! Description of ESMF_Regrid. 
+!     !  The Regrid data structure that is passed between languages. 
 
       type ESMF_Regrid
       sequence
       private
-!       type (ESMF_Base) :: base
-        integer :: dummy
-!       < insert other class members here >
+        type (ESMF_RegridType), pointer :: ptr     ! pointer to a regrid type
       end type
 
 !------------------------------------------------------------------------------
@@ -82,19 +94,14 @@
 ! the following routines apply to deep classes only
     public ESMF_RegridCreate                 ! interface only, deep class
     public ESMF_RegridDestroy                ! interface only, deep class
-    public ESMF_RegridConstruct              ! internal only, deep class
-    public ESMF_RegridDestruct               ! internal only, deep class
 
-! the following routine applies to a shallow class
-    public ESMF_RegridInit                   ! shallow class
-
-    public ESMF_RegridGetConfig
-    public ESMF_RegridSetConfig
-    public ESMF_RegridGetValue               ! Get<Value>
-    public ESMF_RegridSetValue               ! Set<Value>
+!   public ESMF_RegridGetConfig
+!   public ESMF_RegridSetConfig
+!   public ESMF_RegridGetValue               ! Get<Value>
+!   public ESMF_RegridSetValue               ! Set<Value>
  
-    public ESMF_RegridValidate
-    public ESMF_RegridPrint
+!   public ESMF_RegridValidate
+!   public ESMF_RegridPrint
  
 ! < list the rest of the public interfaces here >
 !
@@ -104,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Regrid.F90,v 1.3 2002/11/04 06:13:42 cdeluca Exp $'
+      '$Id: ESMF_Regrid.F90,v 1.4 2002/11/06 22:29:11 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -121,6 +128,21 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for Regrid create
 !     methods.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_RegridConstruct
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_RegridConstructNew
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that construct a
+!     complete {\tt Regrid}.
 !
 !EOP
       end interface 
@@ -143,25 +165,26 @@
 !     ESMF_RegridCreateNew - Create a new Regrid
 
 ! !INTERFACE:
-      function ESMF_RegridCreateNew(arg1, arg2, arg3, rc)
+      function ESMF_RegridCreateNew(name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Regrid) :: ESMF_RegridCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        
-      integer, intent(in) :: arg2                        
-      character (len = *), intent(in), optional :: arg3  
+      character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
+
+!     integer, intent(in) :: arg1                        
+!     integer, intent(in) :: arg2                        
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Regrid} object and constructs its
-!     internals.
+!     internals.  Return a pointer to a new {\tt Regrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[arg1] 
-!          Argument 1.
+!     \item[name] 
+!          {\tt Regrid} name.
 !     \item[arg2]
 !          Argument 2.         
 !     \item[[arg3]] 
@@ -170,12 +193,42 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
+! !REQUIREMENTS:  TODO
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
-!
-!  code goes here
-!
+      type(ESMF_RegridType), pointer :: regrid    ! Pointer to new regrid
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize pointers
+      nullify(regrid)
+      nullify(ESMF_RegridCreateNew%ptr)
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(regrid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_RegridCreateNew: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_RegridConstructNew(regrid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_RegridCreateNew: Regrid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_RegridCreateNew%ptr => regrid
+      if(rcpresent) rc = ESMF_SUCCESS
+
       end function ESMF_RegridCreateNew
 
 !------------------------------------------------------------------------------
@@ -213,16 +266,14 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
-!     ESMF_RegridConstruct - Construct the internals of an allocated Regrid
+!     ESMF_RegridConstructNew - Construct the internals of an allocated Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridConstruct(regrid, arg1, arg2, arg3, rc)
+      subroutine ESMF_RegridConstructNew(regrid, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid   ! regrid to be initialized
-      integer, intent(in) :: arg1                        ! arg1
-      integer, intent(in) :: arg2                        ! arg2
-      character (len = *), intent(in), optional :: arg3  ! arg3
+      type(ESMF_RegridType), intent(in) :: regrid
+      character (len = *), intent(in), optional :: name  ! arg3
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
@@ -236,24 +287,37 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[regrid] 
-!          The class to be constructed.
+!          Pointer to a {\tt Regrid}
 !     \item[arg1]
 !          Argument 1.
 !     \item[arg2]
 !          Argument 2.         
-!     \item[[arg3]] 
-!          Argument 3.
+!     \item[[name]] 
+!          {\tt Regrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+! !REQUIREMENTS: TODO
 !EOP
-! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridConstruct
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_RegridConstructNew: Regrid construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridConstructNew
 
 !------------------------------------------------------------------------------
 !BOP
