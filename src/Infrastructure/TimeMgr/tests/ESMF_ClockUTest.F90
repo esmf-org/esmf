@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.77 2004/10/27 18:54:28 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.78 2004/11/03 22:30:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.77 2004/10/27 18:54:28 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.78 2004/11/03 22:30:44 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -81,7 +81,7 @@
 
 
       ! initialize ESMF framework
-      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
 
@@ -1033,6 +1033,10 @@
         	call ESMF_ClockGet(clock_gregorian, currTime=currentTime, rc=rc)
         	call ESMF_ClockGet(clock_gregorian, prevTime=previousTime, rc=rc)
         	timeDiff =  currentTime - previousTime 
+
+                ! Note: this timeInterval comparison depends on
+                ! ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN) being set
+                ! so the timeIntervals' (timeStep) magnitude can be determined.
         	if((timeDiff.ne.timeStep).and.(testResults.eq.0)) then	
 	     		testResults=1
              		call ESMF_TimeIntervalPrint(timeStep, rc=rc)
