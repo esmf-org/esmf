@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.20 2004/04/26 14:35:10 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.21 2004/04/26 15:03:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.20 2004/04/26 14:35:10 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.21 2004/04/26 15:03:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1013,6 +1013,108 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
 //-----------------------------------------------------------------------------
   int blen = len * ESMC_DataKindSize(dtk);
   return ESMC_newDELayoutGather(srcdata, destdata, blen, rootDE, oneToOneFlag);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutGatherV
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutGatherV(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata, // input array
+  void **destdata,// output array
+  int *blen,      // array of message sizes in bytes for each DE
+                  // - the PET that holds rootDE must provide all blen elementes
+                  // - all other PETs only need to fill elements for their DEs
+  int *bdestdispl,// displacement vector for destdata for each DE mes. in bytes
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
+  // very crude implementation of a layout wide gather
+  int mypet = vm.vmachine_mypet();
+  if (des[rootDE].petid==mypet){
+    // my PET holds the rootDE -> receive chunks from all other DEs
+    if (oneToOneFlag==ESMF_TRUE){
+      char *tempdata;
+      for (int i=0; i<ndes; i++){
+        tempdata = (char *)destdata + bdestdispl[i];
+        ESMC_newDELayoutCopy(srcdata, (void **)tempdata, blen[i], i, rootDE,
+          ESMF_TRUE);
+      }
+    }else{
+      int j;
+      for (j=0; j<nmydes; j++)
+        if (mydes[j]==rootDE) break;
+      void *rootdata = destdata[j]; // backup the correct start of rootDE's data
+      for (int i=0; i<ndes; i++){
+        destdata[j] = (char *)rootdata + bdestdispl[i];;
+        ESMC_newDELayoutCopy(srcdata, destdata, blen[i], i, rootDE, ESMF_FALSE);
+      }
+      destdata[j] = rootdata;  // restore correct start of root's destdata
+    }
+  }else{
+    if (oneToOneFlag==ESMF_TRUE){
+      for (int i=0; i<ndes; i++)
+        ESMC_newDELayoutCopy(srcdata, destdata, blen[i], i, rootDE, ESMF_TRUE);
+    }else{
+      for (int i=0; i<ndes; i++)
+        ESMC_newDELayoutCopy(srcdata, destdata, blen[i], i, rootDE, ESMF_FALSE);
+    }
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutGatherV
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutGatherV(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata, // input array
+  void **destdata,// output array
+  int *len,       // array of message sizes in elements for each DE
+                  // - the PET that holds rootDE must provide all blen elementes
+                  // - all other PETs only need to fill elements for their DEs
+  int *destdispl, // displacement vector for destdata for each DE mes. in elem.
+  ESMC_DataKind dtk,// data type kind
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int *blen = new int[ndes];
+  int *bdestdispl = new int[ndes];
+  int dtk_size = ESMC_DataKindSize(dtk);
+  for (int i=0; ndes; i++){
+    blen[i] = len[i] * dtk_size;
+    bdestdispl[i] = destdispl[i] * dtk_size;
+  }
+  return ESMC_newDELayoutGatherV(srcdata, destdata, blen, bdestdispl, rootDE,
+    oneToOneFlag);
 }
 //-----------------------------------------------------------------------------
 
