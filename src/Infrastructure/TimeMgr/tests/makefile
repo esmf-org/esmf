@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/05/21 16:42:12 flanigan Exp $
+# $Id: makefile,v 1.12 2003/05/23 16:12:47 flanigan Exp $
 
 ALL:  tests
 
@@ -12,7 +12,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  =
 LOCDIR	  = src/Infrastructure/TimeMgr/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ClockUTest \
@@ -34,17 +33,16 @@ TESTS_RM      = ESMF_ClockUTest.rm \
 
 include ${ESMF_DIR}/makefile
 
-CLEANDIRS   =$
-CLEANFILES  = *.o *.mod $(TESTS_BUILD) 
-CLOBBERDIRS =$
+DIRS	  =
+
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt stdoutfiles NULL core $(TESTS_BUILD) 
+CLOBBERDIRS =
 
 
 #
 #
 #
-$(ESMC_TESTDIR)/ESMF_ClockUTest: ESMF_ClockUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_ClockUTest ESMF_ClockUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_ClockUTest.o
 
 RUN_ESMF_ClockUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ClockUTest.tmps
@@ -79,9 +77,6 @@ ESMF_ClockUTest.rm:
 #
 #
 #
-$(ESMC_TESTDIR)/ESMF_CalRangeUTest: ESMF_CalRangeUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CalRangeUTest ESMF_CalRangeUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_CalRangeUTest.o
 
 RUN_ESMF_CalRangeUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_CalRangeUTest.tmps

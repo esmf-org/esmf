@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/04/15 20:30:36 svasquez Exp $ 
+# $Id: makefile,v 1.5 2003/05/23 16:12:46 flanigan Exp $ 
 
 ALL:  tests
 
@@ -25,18 +25,14 @@ TESTS_RM      = ESMF_GridUTest.rm
 
 include $(ESMF_DIR)/makefile
 
-CLEANDIRS   =
-CLEANFILES  = *.o *.mod 
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt NULL stdoutfiles core $(TESTS_BUILD)
 CLOBBERDIRS =
 
 
 #
 #  Grid
 #
-$(ESMC_TESTDIR)/ESMF_GridUTest: ESMF_GridUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_GridUTest ESMF_GridUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_GridUTest.o
-
 RUN_ESMF_GridUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_GridUTest > $(ESMC_TESTDIR)/ESMF_GridUTest.stdout

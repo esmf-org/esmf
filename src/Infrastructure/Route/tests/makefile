@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/04/25 20:49:44 nscollins Exp $
+# $Id: makefile,v 1.12 2003/05/23 16:12:46 flanigan Exp $
 
 ALL:  tests
 
@@ -28,18 +28,14 @@ include ${ESMF_DIR}/makefile
 
 DIRS = 
 
-CLEANDIRS   =
-CLEANFILES  = *.o *.mod *.tmps
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.tmps *.txt $(TESTS_BUILD) NULL core stdoutfiles
 CLOBBERDIRS =
 
 
 #
+# F Packet 
 #
-#
-$(ESMF_TESTDIR)/ESMF_XPacketUTest: chkopts ESMF_XPacketUTest.o
-	-$(SL_F_LINKER) -o $(ESMF_TESTDIR)/ESMF_XPacketUTest ESMF_XPacketUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_XPacketUTest.o
-
 RUN_ESMF_XPacketUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_XPacketUTest > $(ESMF_TESTDIR)/ESMF_XPacketUTest.stdout
 
@@ -50,7 +46,7 @@ ESMF_XPacketUTest.rm:
 	echo "ESMF_XPacketUTest.rm target called here."
 
 #
-#
+#  C++ Packet
 #
 $(ESMF_TESTDIR)/ESMC_XPacketUTest: chkopts ESMC_XPacketUTest.o
 	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_XPacketUTest ESMC_XPacketUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
@@ -67,12 +63,8 @@ ESMC_XPacketUTest.rm:
 
 
 #
+#  F Route
 #
-#
-$(ESMF_TESTDIR)/ESMF_RouteUTest: chkopts ESMF_RouteUTest.o
-	-$(SL_F_LINKER) -o $(ESMF_TESTDIR)/ESMF_RouteUTest ESMF_RouteUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_RouteUTest.o
-
 RUN_ESMF_RouteUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_RouteUTest > $(ESMF_TESTDIR)/ESMF_RouteUTest.stdout
 
@@ -84,7 +76,7 @@ ESMF_RouteUTest.rm:
 
 
 #
-#
+# C++ Route
 #
 $(ESMF_TESTDIR)/ESMC_RouteUTest: chkopts ESMC_RouteUTest.o
 	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_RouteUTest ESMC_RouteUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/05/08 14:56:41 flanigan Exp $ 
+# $Id: makefile,v 1.8 2003/05/23 16:12:45 flanigan Exp $ 
 
 ALL:  tests
 
@@ -12,7 +12,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Base/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_BaseUTest \
@@ -29,17 +28,16 @@ TESTS_RM      = ESMF_BaseUTest.rm \
 
 include ${ESMF_DIR}/makefile
 
-CLEANDIRS   =
-CLEANFILES  = *.o *.mod 
+DIRS        =
+
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt NULL core $(TESTS_BUILD)
 CLOBBERDIRS =
 
 
 #
 #  Base class
 #
-$(ESMC_TESTDIR)/ESMF_BaseUTest: ESMF_BaseUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_BaseUTest ESMF_BaseUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_BaseUTest.o
 
 RUN_ESMF_BaseUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BaseUTest.tmps
@@ -55,11 +53,8 @@ ESMF_BaseUTest.rm:
 #
 # Special for strings passed between C++ and F90
 #
+UTEST_String_OBJS = ESMC_StringSubr.o
 ESMF_StringUTest.o : ESMC_StringSubr.o
-
-$(ESMC_TESTDIR)/ESMF_StringUTest: ESMC_StringSubr.o ESMF_StringUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StringUTest ESMF_StringUTest.o ESMC_StringSubr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_StringUTest.o ESMC_StringSubr.o 
 
 RUN_ESMF_StringUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StringUTest.tmps

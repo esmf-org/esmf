@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/04/15 20:20:13 svasquez Exp $
+# $Id: makefile,v 1.8 2003/05/23 16:12:45 flanigan Exp $
 
 ALL:  tests
 
@@ -27,9 +27,10 @@ include ${ESMF_DIR}/makefile
 
 DIRS	  = 
 
-$(ESMC_TESTDIR)/ESMF_DELayoutUTest: chkopts ESMF_DELayoutUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_DELayoutUTest ESMF_DELayoutUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_DELayoutUTest.o
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt NULL core $(TESTS_BUILD)
+CLOBBERDIRS =
+
 
 RUN_ESMF_DELayoutUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_DELayoutUTest.tmps
