@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.42 2003/04/17 20:25:51 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.43 2003/04/17 20:40:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.42 2003/04/17 20:25:51 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.43 2003/04/17 20:40:57 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2689,7 +2689,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: srcarray
+      type(ESMF_Array), intent(inout) :: srcarray
       type(ESMF_Array), intent(out) :: dstarray
       integer, intent(out), optional :: rc
 !
@@ -2701,7 +2701,10 @@
 !     \item [grid]
 !           Grid on which data is defined.
 !     \item [srcarray]
-!           Array containing data to be allgather'ed.
+!           Array containing data to be allgather'ed.  The data inside the
+!           array is not altered, but annotation is attached to the array
+!           for later use (thus the intent must be 'inout'.)
+! 
 !     \item [dstarray]
 !           Array containing the resulting data.
 !     \item [{[rc]}]

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.14 2003/04/17 20:19:34 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.15 2003/04/17 20:41:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -210,7 +210,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.14 2003/04/17 20:19:34 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.15 2003/04/17 20:41:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1999,7 +1999,7 @@ end interface
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field                 
+      type(ESMF_Field), intent(inout) :: field                 
       type(ESMF_Array), intent(out) :: array
       integer, intent(out), optional :: rc               
 !
