@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.26 2004/06/05 00:17:33 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.27 2004/06/08 21:23:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -438,6 +438,8 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
+      call ESMF_TimeSet(startTime, yy=1, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=100000, calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(curr_time, yy=1776, &
                         mm=7, dd=4, calendar=gregorianCalendar, rc=rc)
 !EOC
@@ -445,7 +447,8 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      call ESMF_ClockSet(clock, currTime=curr_time, rc=rc)
+      call ESMF_ClockSet(clock, currTime=curr_time, startTime=startTime, &
+                         stopTime=stopTime, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
