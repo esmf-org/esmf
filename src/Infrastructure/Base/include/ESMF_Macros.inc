@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Macros.inc,v 1.1 2003/04/08 22:45:41 nscollins Exp $
+$Id: ESMF_Macros.inc,v 1.2 2003/09/09 20:07:31 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@ the preprocessor.
 #endif 
 
 #if 0
-i left the following macro here in case it is needed for our internal use.
+i left the following macro here for our own internal use.
 #endif
 
 #define ESMF_SRCLINE __FILE__, __LINE__
