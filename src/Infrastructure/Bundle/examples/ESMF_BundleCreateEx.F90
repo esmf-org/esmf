@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.20 2004/05/27 11:39:17 nscollins Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.21 2004/06/13 02:40:03 svasquez Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -111,19 +111,19 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
+    bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 !BOC
-    call ESMF_BundleAddField(bundle2, simplefield, rc);
+    call ESMF_BundleAddField(bundle2, simplefield, rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc);
+    call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc)
 
     print *, "Bundle example 2 returned, fieldcount =", fieldcount
 !EOC
@@ -135,19 +135,19 @@
 !   !  Create an empty Bundle and then add multiple fields to it.
 
 
-    bundle3 = ESMF_BundleCreate(name="southern hemisphere", rc=rc);
+    bundle3 = ESMF_BundleCreate(name="southern hemisphere", rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleAddField(bundle3, 3, field, rc);
+    call ESMF_BundleAddField(bundle3, 3, field, rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleGet(bundle3, fieldCount=fieldcount, rc=rc);
+    call ESMF_BundleGet(bundle3, fieldCount=fieldcount, rc=rc)
 
     print *, "Bundle example 3 returned, fieldcount =", fieldcount
 !EOC
