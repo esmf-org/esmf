@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2004/08/23 16:23:44 nscollins Exp $
+! $Id: user_model2.F90,v 1.2 2004/09/23 21:47:52 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -299,10 +299,12 @@
       call ESMF_GridGetDELocalInfo(grid, myDE=myDE, &
                                    localCellCountPerDim=counts, &
                                    horzRelLoc=relloc, rc=status)
-      call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
-                             centerCoord=coordArray, rc=status)
-      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+      if (counts(1)*counts(2).ne.0) then
+        call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
+                               centerCoord=coordArray, rc=status)
+        call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+      endif
 
       ! update field values here
       call ESMF_FieldGetArray(humidity, array, rc=rc)
@@ -315,13 +317,15 @@
       print *, "data in validate: ", data(1,1), data(1, 2), data(2, 1)
 
       ! allocate array for computed results and fill it
-      allocate(calc(counts(1), counts(2)))
-      do j   = 1,counts(2)
-        do i = 1,counts(1)
-          calc(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                           + 2.0*sin(coordY(i,j)/50.0*pi)
+      if (counts(1)*counts(2).ne.0) then
+        allocate(calc(counts(1), counts(2)))
+        do j   = 1,counts(2)
+          do i = 1,counts(1)
+            calc(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                             + 2.0*sin(coordY(i,j)/50.0*pi)
+          enddo
         enddo
-      enddo
+      endif
 
      ! calculate data error from computed results
       maxError    = 0.0
@@ -330,17 +334,19 @@
       minCValue   = 1000.0
       maxDValue   = 0.0
       minDValue   = 1000.0
-      do j   = 1,counts(2)
-        do i = 1,counts(1)
-          error       = abs(data(i,j)) - abs(calc(i,j))
-          minCValue   = min(minCValue, abs(calc(i,j)))
-          maxCValue   = max(maxCValue, abs(calc(i,j)))
-          minDValue   = min(minDValue, abs(data(i,j)))
-          maxDValue   = max(maxDValue, abs(data(i,j)))
-          maxError    = max(maxError, abs(error))
-          maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
+      if (counts(1)*counts(2).ne.0) then
+        do j   = 1,counts(2)
+          do i = 1,counts(1)
+            error       = abs(data(i,j)) - abs(calc(i,j))
+            minCValue   = min(minCValue, abs(calc(i,j)))
+            maxCValue   = max(maxCValue, abs(calc(i,j)))
+            minDValue   = min(minDValue, abs(data(i,j)))
+            maxDValue   = max(maxDValue, abs(data(i,j)))
+            maxError    = max(maxError, abs(error))
+            maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
+          enddo
         enddo
-      enddo
+      endif
 
       write(*,*) "Results for DE #", myDE, ":"
       write(*,*) "   minimum regridded value = ", minDValue
