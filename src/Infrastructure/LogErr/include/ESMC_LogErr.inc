@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMC_LogErr.inc,v 1.5 2004/05/13 22:48:24 cpboulder Exp $
+$Id: ESMC_LogErr.inc,v 1.6 2004/05/17 19:25:40 eschwab Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ by both C++ and F90 compilers.
 
 #endif
 
-#include "ESMF_ErrConstants.inc"
+#include "ESMF_ErrReturnCodes.inc"
 #include "ESMF_LogConstants.inc"
 
 #ifndef PARCH_IRIX64

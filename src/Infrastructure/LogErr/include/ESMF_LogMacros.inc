@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.11 2004/05/14 23:31:56 eschwab Exp $
+ $Id: ESMF_LogMacros.inc,v 1.12 2004/05/17 19:25:40 eschwab Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -18,7 +18,7 @@
 
 #endif
 
-#include "ESMF_ErrConstants.inc"
+#include "ESMF_ErrReturnCodes.inc"
 #include "ESMF_LogConstants.inc"
 
 
