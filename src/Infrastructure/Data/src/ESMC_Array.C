@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.23 2003/02/14 18:39:45 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.24 2003/02/14 21:35:38 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.23 2003/02/14 18:39:45 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.24 2003/02/14 21:35:38 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -853,7 +853,8 @@
                     if ((tcount > 22) && (rcount==10)) {
                        printf(" skipping to end ...\n");
                        k = (tcount-11) / (imax*jmax);
-                       j = ((tcount-11) / (imax*jmax)) % jmax;
+                       //j = ((tcount-11) % (imax*jmax)) / imax;
+                       j = ((tcount-11) - (k*imax)) % jmax;
                        i = (tcount-11) % imax;
                     }
                 }
@@ -914,7 +915,8 @@
                     if ((tcount > 22) && (rcount==10)) {
                        printf(" skipping to end ...\n");
                        k = (tcount-11) / (imax*jmax);
-                       j = ((tcount-11) / (imax*jmax)) % jmax;
+                       //j = ((tcount-11) % (imax*jmax)) / imax;
+                       j = ((tcount-11) - (k*imax)) % jmax;
                        i = (tcount-11) % imax;
                     }
                 }
