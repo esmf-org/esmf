@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout.F90,v 1.10 2003/02/26 20:14:26 jwolfe Exp $
+! $Id: ESMF_Layout.F90,v 1.11 2003/02/28 23:36:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Layout.F90,v 1.10 2003/02/26 20:14:26 jwolfe Exp $'
+      '$Id: ESMF_Layout.F90,v 1.11 2003/02/28 23:36:03 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -581,15 +581,28 @@ end interface
 ! !REQUIREMENTS:
 
 !       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
         integer :: size_decomp              ! size of the decompids array
+        integer :: size_AI                  ! size of the axis indices arrays
+        integer :: i
 
 !       initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+! subtract one from location parts of indices to translate to C++
+        size_AI = size(AIPtr)
+        do i = 1,size_AI
+          AIPtr(i)%l  = AIPtr(i)%l  - 1
+          AIPtr(i)%r  = AIPtr(i)%r  - 1
+          AIPtr2(i)%l = AIPtr2(i)%l - 1
+          AIPtr2(i)%r = AIPtr2(i)%r - 1
+        enddo
 
 !       Routine which interfaces to the C++ routine.
         size_decomp = size(decompids)
@@ -600,6 +613,14 @@ end interface
           print *, "ESMF_LayoutGatherArrayI error"
           return
         endif
+
+! add one back to location parts of indices to translate from C++
+        do i = 1,size_AI
+          AIPtr(i)%l  = AIPtr(i)%l  + 1
+          AIPtr(i)%r  = AIPtr(i)%r  + 1
+          AIPtr2(i)%l = AIPtr2(i)%l + 1
+          AIPtr2(i)%r = AIPtr2(i)%r + 1
+        enddo
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
