@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.8 2004/06/11 19:21:37 cdeluca Exp $
+! $Id: ESMF_StateCreate.F90,v 1.9 2004/06/12 04:18:05 cdeluca Exp $
 !
 ! Test code which creates a new State.
 
@@ -164,7 +164,7 @@
 
     sname = "Downward wind"
     P_IN("ESMF_StateSetNeeded")
-    call ESMF_StateSetNeeded(state3, sname, ESMF_STATEDATA_NEEDED, rc=rc)
+    call ESMF_StateSetNeeded(state3, sname, ESMF_STATEITEM_NEEDED, rc=rc)
     P_OUT2("ESMF_StateSetNeeded", trim(sname))
     
     P_IN("ESMF_StatePrint")
@@ -235,7 +235,7 @@
     P_OUT2("StateAddData (Name only)", trim(sname))
     
     P_IN("ESMF_StateSetNeeded")
-    call ESMF_StateSetNeeded(state4, sname, ESMF_STATEDATA_NEEDED, rc=rc)
+    call ESMF_StateSetNeeded(state4, sname, ESMF_STATEITEM_NEEDED, rc=rc)
     P_OUT("ESMF_StateSetNeeded")
     
     sname = "Energy Flux"
@@ -244,7 +244,7 @@
     P_OUT2("StateAddData (Name only)", trim(sname))
     
     P_IN("ESMF_StateSetNeeded")
-    call ESMF_StateSetNeeded(state4, sname, ESMF_STATEDATA_NEEDED, rc=rc)
+    call ESMF_StateSetNeeded(state4, sname, ESMF_STATEITEM_NEEDED, rc=rc)
     P_OUT("ESMF_StateSetNeeded")
     
     sname = "Humidity"
@@ -253,7 +253,7 @@
     P_OUT2("StateAddData (Name only)", trim(sname))
     
     P_IN("ESMF_StateSetNeeded")
-    call ESMF_StateSetNeeded(state4, sname, ESMF_STATEDATA_NEEDED, rc=rc)
+    call ESMF_StateSetNeeded(state4, sname, ESMF_STATEITEM_NEEDED, rc=rc)
     P_OUT("ESMF_StateSetNeeded")
     
     P_IN("ESMF_StatePrint")

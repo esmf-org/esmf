@@ -1,20 +1,4 @@
-% $Id: State_options.tex,v 1.7 2004/06/11 19:21:37 cdeluca Exp $
-
-\subsubsection{ESMF\_StateType}
-
-{\sf DESCRIPTION:\\}
-Specifies whether an {\tt ESMF\_State} contains data to be imported
-into a component or exported from a component. 
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_STATE\_IMPORT] 
-         Contains data to be imported into a component.
-   \item [ESMF\_STATE\_EXPORT]
-         Contains data to be exported out of a component.
-   \item [ESMF\_STATE\_INVALID]
-         Does not contain valid data.
-\end{description}
+% $Id: State_options.tex,v 1.8 2004/06/12 04:18:05 cdeluca Exp $
 
 \subsubsection{ESMF\_StateItem}
 \label{opt:stateitem}
@@ -40,19 +24,88 @@ Valid values are:
          Object type within an {\tt ESMF\_State} is unknown.
 \end{description}
 
-\subsubsection{ESMF\_StateDataNeeded}
-
+\subsubsection{ESMF\_StateItemNeeded}
+\label{opt:stateitemneeded}
 {\sf DESCRIPTION:\\}
-Specifies whether or not an {\tt ESMF\_State} entry is needed for a 
+Specifies whether or not an {\tt ESMF\_State} item is needed for a 
 particular application configuration.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_STATEDATA\_NEEDED] 
+   \item [ESMF\_STATEITEM\_NEEDED] 
          Data is needed.
-   \item [ESMF\_STATEDATA\_NOTNEEDED]
+   \item [ESMF\_STATEITEM\_NOTNEEDED]
          Data is not needed.
 \end{description}
+
+\subsubsection{ESMF\_StateItemReady}
+\label{opt:stateitemready}
+{\sf DESCRIPTION:\\}
+Specifies whether an item in an {\tt ESMF\_State} is ready to 
+read or write.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_STATEITEM\_READYTOREAD] 
+         Data is ready to read.
+   \item [ESMF\_STATEITEM\_READYTOWRITE]
+         Data is ready to write.
+   \item [ESMF\_STATEITEM\_NOTREADY]
+         Data is not ready.
+\end{description}
+
+\subsubsection{ESMF\_StateItemRestart}
+\label{opt:stateitemrestart}
+{\sf DESCRIPTION:\\}
+Specifies whether an item in an {\tt ESMF\_State} is necessary
+for restart.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_REQUIRED\_FOR\_RESTART] 
+         Data is required for restart.
+   \item [ESMF\_NOTREQUIRED\_FOR\_RESTART]
+         Data is not required for restart.
+\end{description}
+
+\subsubsection{ESMF\_StateItemValid}
+\label{opt:stateitemvalid}
+{\sf DESCRIPTION:\\}
+Specifies whether an item in an {\tt ESMF\_State} contains valid data.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_STATEITEM\_VALID] 
+         Data is ready to read.
+   \item [ESMF\_STATEITEM\_INVALID]
+         Data is ready to write.
+   \item [ESMF\_STATEITEM\_NOTREADY]
+         Data is not ready.
+\end{description}
+
+\subsubsection{ESMF\_StateType}
+\label{opt:statetype}
+{\sf DESCRIPTION:\\}
+Specifies whether an {\tt ESMF\_State} contains data to be imported
+into a component or exported from a component. 
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_STATE\_IMPORT] 
+         Contains data to be imported into a component.
+   \item [ESMF\_STATE\_EXPORT]
+         Contains data to be exported out of a component.
+   \item [ESMF\_STATE\_INVALID]
+         Does not contain valid data.
+\end{description}
+
+
+
+
+
+
+
+
 
 
 
