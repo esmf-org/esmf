@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.90 2005/01/10 23:59:50 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.91 2005/01/12 06:04:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.90 2005/01/10 23:59:50 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.91 2005/01/12 06:04:45 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -419,36 +419,6 @@
       ! end of hours, minutes, seconds within the year tests
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! From Shujia Zhou in Support #1091846, Bug #1099731
-      write(name, *) "ESMF_TimeGet() Seconds Beyond a Day Test"
-      write(failMsg, *) " currentTime seconds incorrect or ESMF_FAILURE"
-
-      call ESMF_TimeIntervalSet(timeStep, s=600, calendar=no_leapCalendar,rc=rc)
-      call ESMF_TimeSet(startTime, s=0, calendar=no_leapCalendar, rc=rc)
-      call ESMF_TimeSet(stopTime, s=180000, calendar=no_leapCalendar, rc=rc)
-
-      topClock = ESMF_ClockCreate("Top Level Clock", timeStep, startTime, &
-                                  stopTime=stopTime, rc=rc)
-
-      checkSec = 0
-      testPass = .true.
-      do while (.not. ESMF_ClockIsStopTime(topClock, rc ))
-        call ESMF_ClockGet(topClock, currTime=currentTime)
-        call ESMF_TimeGet(currentTime, s=secs)
-        if (secs .ne. checkSec) then
-          testPass = .false. 
-        end if
-        checkSec = checkSec + 600
-        call ESMF_ClockAdvance(topClock, rc=rc)
-      end do
-
-      call ESMF_ClockDestroy(topClock, rc)
-
-      call ESMF_Test(testPass.and.(rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! ----------------------------------------------------------------------------
-      !EX_UTest
       ! Test Setting the Start Time
       day = 25
       write(failMsg, *) " Returned ESMF_FAILURE"
@@ -823,9 +793,8 @@
       	write(name, *) "Clock Advance Test"
       	call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(bool)), &
                       name, failMsg, result, ESMF_SRCLINE)
-      	! print out ending clock state
-      	call ESMF_ClockPrint(clock, rc=rc)
        end if
+
 
       ! ----------------------------------------------------------------------------
  
@@ -1933,6 +1902,47 @@
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock, rc)
       print *, "1/3 second clock advanced ", advanceCounts, " times."
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! From Shujia Zhou in Support #1091846, Bug #1099731
+      write(name, *) "ESMF_TimeGet() Seconds Beyond a Day Test"
+      write(failMsg, *) " currentTime seconds incorrect or ESMF_FAILURE"
+
+      call ESMF_TimeIntervalSet(timeStep, s=600, calendar=no_leapCalendar,rc=rc)
+      call ESMF_TimeSet(startTime, s=0, calendar=no_leapCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, s=180000, calendar=no_leapCalendar, rc=rc)
+
+      topClock = ESMF_ClockCreate("Top Level Clock", timeStep, startTime, &
+                                  stopTime=stopTime, rc=rc)
+
+      checkSec = 0
+      testPass = .true.
+      do while (.not. ESMF_ClockIsStopTime(topClock, rc ))
+        call ESMF_ClockGet(topClock, currTime=currentTime)
+        call ESMF_TimeGet(currentTime, s=secs)
+        if (secs .ne. checkSec) then
+          testPass = .false. 
+        end if
+        checkSec = checkSec + 600
+        call ESMF_ClockAdvance(topClock, rc=rc)
+      end do
+
+      call ESMF_Test(testPass.and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      ! This checks Tom Henderson's WRF request that a clock be valid at
+      ! the end of a timestep loop when currTime == stopTime
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Clock Valid at end of Advance Loop Test"
+      call ESMF_ClockValidate(topClock, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_ClockDestroy(topClock, rc)
 
       ! ----------------------------------------------------------------------------
 #endif
