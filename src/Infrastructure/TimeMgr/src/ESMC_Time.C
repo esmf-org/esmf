@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.24 2003/04/25 09:03:58 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.25 2003/04/28 23:19:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.24 2003/04/25 09:03:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.25 2003/04/28 23:19:30 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -41,43 +41,6 @@
 // This section includes all the ESMC_Time routines
 //
 //
-
-#if 0
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimeInit - shallow class initializer 1
-//
-// !INTERFACE:
-      int ESMC_Time::ESMC_TimeInit(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMF_IKIND_I8 S,      // in - integer seconds
-      int Sn,               // in - fractional seconds, numerator
-      int Sd,               // in - fractional seconds, denominator
-      ESMC_Calendar *Cal,   // in - associated calendar
-      int Tz) {             // in - timezone
-//
-// !DESCRIPTION:
-//      Initialzes a {\tt Time} with given values
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // use base class Init()
-    if (ESMC_BaseTime::ESMC_BaseTimeInit(S, Sn, Sd) == ESMF_SUCCESS)
-    {
-        this->Calendar = Cal;
-        this->Timezone = Tz;
-
-        return(ESMF_SUCCESS);
-    }
-    else return(ESMF_FAILURE);
-
- }  // end ESMC_TimeInit
-#endif
 
 //-------------------------------------------------------------------------
 //BOP
@@ -124,7 +87,7 @@
       ESMF_IKIND_I8 *D,         // in - integer days
       int *H,                   // in - integer hours
       int *M,                   // in - integer minutes
-      int *S,                   // in - integer seconds 
+      ESMF_IKIND_I8 *S,         // in - integer seconds 
       int *MS,                  // in - integer milliseconds
       int *US,                  // in - integer microseconds
       int *NS,                  // in - integer nanoseconds
@@ -160,8 +123,6 @@
 
     // TODO: fractional, sub-seconds
 
-    // TODO: timezone
-
     // set calendar type
     if (cal != ESMC_NULL_POINTER) {
       Calendar = cal;
@@ -176,67 +137,49 @@
     // set timezone
     Timezone = (tz != ESMC_NULL_POINTER) ? *tz : ESMC_NULL_POINTER;
 
-    // TODO:  share code from here down with ESMC_TimeSet ?
-
-    //
-    // integer units
-    //
-
-    // convert date to base time according to calendar type
-    // TODO: create two calendar conversion method entry points ?
-    if (YR != ESMC_NULL_POINTER && MM !=ESMC_NULL_POINTER &&
-        DD != ESMC_NULL_POINTER) {
-      if (Calendar != ESMC_NULL_POINTER) {
-        if (Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this) ==
-            ESMF_FAILURE) return (ESMF_FAILURE);
-      } else return (ESMF_FAILURE);
-    }
-    if (D != ESMC_NULL_POINTER) {
-      if (Calendar != ESMC_NULL_POINTER) {
-        if (Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this) ==
-            ESMF_FAILURE) return (ESMF_FAILURE);
-      } else return (ESMF_FAILURE);
-    }
-    
-    if (H != ESMC_NULL_POINTER) {
-      this->S += *H * SECONDS_PER_HOUR;
-    }
-    if (M != ESMC_NULL_POINTER) {
-      this->S += *M * SECONDS_PER_MINUTE;
-    }
-    if (S != ESMC_NULL_POINTER) {
-      this->S += *S;
-    }
-
-    //
-    // floating point units
-    //
-
-    if (d_ != ESMC_NULL_POINTER) {
-      // integer part
-      if (Calendar != ESMC_NULL_POINTER) {
-        if (Calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_, this) ==
-            ESMF_FAILURE) return (ESMF_FAILURE);
-      } else return (ESMF_FAILURE);
-
-      // fractional part
-      this->S +=
-              (ESMF_IKIND_I8) (modf(*d_, ESMC_NULL_POINTER) * SECONDS_PER_DAY);
-    }
-    
-    if (h_ != ESMC_NULL_POINTER) {
-      this->S += (ESMF_IKIND_I8) (*h_ * SECONDS_PER_HOUR);
-    }
-    if (m_ != ESMC_NULL_POINTER) {
-      this->S += (ESMF_IKIND_I8) (*m_ * SECONDS_PER_MINUTE);
-    }
-    if (s_ != ESMC_NULL_POINTER) {
-      this->S += (ESMF_IKIND_I8) *s_;
-    }
+    ESMC_TimeSet(YR, MM, DD, D, H, M, S, MS, US, NS, d_, h_, m_, s_,
+                 ms_, us_, ns_, Sn, Sd);
 
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeInit
+
+#if 0
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInit - shallow class initializer 1
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeInit(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMF_IKIND_I8 S,      // in - integer seconds
+      int Sn,               // in - fractional seconds, numerator
+      int Sd,               // in - fractional seconds, denominator
+      ESMC_Calendar *Cal,   // in - associated calendar
+      int Tz) {             // in - timezone
+//
+// !DESCRIPTION:
+//      Initialzes a {\tt Time} with given values
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // use base class Init()
+    if (ESMC_BaseTime::ESMC_BaseTimeInit(S, Sn, Sd) == ESMF_SUCCESS)
+    {
+        this->Calendar = Cal;
+        this->Timezone = Tz;
+
+        return(ESMF_SUCCESS);
+    }
+    else return(ESMF_FAILURE);
+
+ }  // end ESMC_TimeInit
+#endif
 
 //-------------------------------------------------------------------------
 //BOP
@@ -307,7 +250,7 @@
       ESMF_IKIND_I8 *D,         // out - integer days
       int *H,                   // out - integer hours
       int *M,                   // out - integer minutes
-      int *S,                   // out - integer seconds 
+      ESMF_IKIND_I8 *S,         // out - integer seconds 
       int *MS,                  // out - integer milliseconds
       int *US,                  // out - integer microseconds
       int *NS,                  // out - integer nanoseconds
@@ -328,68 +271,29 @@
 //EOP
 // !REQUIREMENTS:  
 
-    //
-    // integer units
-    //
-
-    // convert date to base time according to calendar type
     // TODO: fractional, sub-seconds
+
+    // convert base time to date according to calendar type
     if (YR != ESMC_NULL_POINTER || MM != ESMC_NULL_POINTER ||
-        DD != ESMC_NULL_POINTER || D  != ESMC_NULL_POINTER) {
+        DD != ESMC_NULL_POINTER || D  != ESMC_NULL_POINTER ||
+        d_ != ESMC_NULL_POINTER) {
       if (Calendar != ESMC_NULL_POINTER) {
-        Calendar->ESMC_CalendarConvertToDate(this, YR, MM, DD, D);
+        Calendar->ESMC_CalendarConvertToDate(this, YR, MM, DD, D, d_);
       }
       else {
         return (ESMF_FAILURE);
       }
     }
 
-    // for sub-day units, start with number of seconds into the date
-    ESMF_IKIND_I8 remainder = this->S % SECONDS_PER_DAY;
-
-    if (H != ESMC_NULL_POINTER) {
-      *H = remainder / SECONDS_PER_HOUR;
-      remainder %= SECONDS_PER_HOUR;
-    }
-    if (M != ESMC_NULL_POINTER) {
-      *M = remainder / SECONDS_PER_MINUTE;
-      remainder %= SECONDS_PER_MINUTE;
-    }
-    if (S != ESMC_NULL_POINTER) {
-      *S = remainder;
+    // get number of seconds in a day
+    int secPerDay = SECONDS_PER_DAY;  // default
+    if (Calendar != ESMC_NULL_POINTER) {
+      secPerDay = Calendar->SecondsPerDay;
     }
 
-    //
-    // floating point units
-    //
-
-    // for sub-day units, start with number of seconds into the date
-    remainder = this->S % SECONDS_PER_DAY;
-
-    if (d_ != ESMC_NULL_POINTER) {
-      if (Calendar != ESMC_NULL_POINTER) {
-        ESMF_IKIND_I8 tmpD;
-        Calendar->ESMC_CalendarConvertToDate(this, ESMC_NULL_POINTER,
-                                                   ESMC_NULL_POINTER,
-                                                   ESMC_NULL_POINTER, &tmpD);
-        *d_ = (double) tmpD + (double) remainder / (double) SECONDS_PER_DAY;
-      }
-      else {
-        return (ESMF_FAILURE);
-      }
-    }
-
-    if (h_ != ESMC_NULL_POINTER) {
-      *h_ = (double) remainder / (double) SECONDS_PER_HOUR;
-      remainder %= SECONDS_PER_HOUR;
-    }
-    if (m_ != ESMC_NULL_POINTER) {
-      *m_ = (double) remainder / (double) SECONDS_PER_MINUTE;
-      remainder %= SECONDS_PER_MINUTE;
-    }
-    if (s_ != ESMC_NULL_POINTER) {
-      *s_ = (double) remainder;
-    }
+    // use base class to get sub-day values
+    ESMC_BaseTimeGet(secPerDay, H, M, S, MS, US, NS,
+                     h_, m_, s_, ms_, us_, ns_, Sn, Sd);
 
     return(ESMF_SUCCESS);
 
@@ -412,7 +316,7 @@
       ESMF_IKIND_I8 *D,         // in - integer days
       int *H,                   // in - integer hours
       int *M,                   // in - integer minutes
-      int *S,                   // in - integer seconds 
+      ESMF_IKIND_I8 *S,         // in - integer seconds 
       int *MS,                  // in - integer milliseconds
       int *US,                  // in - integer microseconds
       int *NS,                  // in - integer nanoseconds
@@ -436,11 +340,7 @@
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    // TODO:  share code with ESMC_TimeInit ?
-
-    //
-    // integer units
-    //
+    // TODO: Timezone adjust
 
     // convert date to base time according to calendar type
     // TODO: fractional, sub-seconds
@@ -458,21 +358,6 @@
             ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
     }
-    
-    if (H != ESMC_NULL_POINTER) {
-      this->S += *H * SECONDS_PER_HOUR;
-    }
-    if (M != ESMC_NULL_POINTER) {
-      this->S += *M * SECONDS_PER_MINUTE;
-    }
-    if (S != ESMC_NULL_POINTER) {
-      this->S += *S;
-    }
-
-    //
-    // floating point units
-    //
-
     if (d_ != ESMC_NULL_POINTER) {
       // integer part
       if (Calendar != ESMC_NULL_POINTER) {
@@ -480,21 +365,20 @@
             ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
 
+      // get number of seconds in a day
+      int secPerDay = SECONDS_PER_DAY;  // default
+      if (Calendar != ESMC_NULL_POINTER) {
+        secPerDay = Calendar->SecondsPerDay;
+      }
+
       // fractional part
       this->S +=
-              (ESMF_IKIND_I8) (modf(*d_, ESMC_NULL_POINTER) * SECONDS_PER_DAY);
+              (ESMF_IKIND_I8) (modf(*d_, ESMC_NULL_POINTER) * secPerDay);
     }
     
-    if (h_ != ESMC_NULL_POINTER) {
-      this->S += (ESMF_IKIND_I8) (*h_ * SECONDS_PER_HOUR);
-    }
-    if (m_ != ESMC_NULL_POINTER) {
-      this->S += (ESMF_IKIND_I8) (*m_ * SECONDS_PER_MINUTE);
-    }
-    if (s_ != ESMC_NULL_POINTER) {
-      this->S += (ESMF_IKIND_I8) *s_;
-    }
-
+    // use base class for sub-day values
+    ESMC_BaseTimeSet(H, M, S, MS, US, NS, h_, m_, s_, ms_, us_, ns_, Sd, Sn);
+    
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeSet
@@ -807,7 +691,15 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO
+    // TODO: use native C++ Get() when ready
+    ESMC_TimeGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER, dayOfMonth, 
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER);
+ 
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeGetDayOfMonth
@@ -861,12 +753,12 @@
     // get wall clock (system) time
     if (time(&tm) < 0) return (ESMF_FAILURE);
     wallClock = *localtime(&tm);          
-    int YR = wallClock.tm_year + 1900;
-    int MM = wallClock.tm_mon + 1;
-    int DD = wallClock.tm_mday;
-    int H  = wallClock.tm_hour;
-    int M  = wallClock.tm_min;
-    int S  = wallClock.tm_sec;
+    int           YR = wallClock.tm_year + 1900;
+    int           MM = wallClock.tm_mon + 1;
+    int           DD = wallClock.tm_mday;
+    int           H  = wallClock.tm_hour;
+    int           M  = wallClock.tm_min;
+    ESMF_IKIND_I8 S  = wallClock.tm_sec;
 
     // set this time to wall clock time
     // TODO: use native C++ version when ready
@@ -1066,7 +958,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-//   ESMC_BaseTime(0, 0, 1) {   // use base class constructor
+//   ESMC_BaseTime(0, 0, 1) {  // TODO: F90 issue with base class constructor?
    S  = 0;
    Sn = 0;
    Sd = 0;
