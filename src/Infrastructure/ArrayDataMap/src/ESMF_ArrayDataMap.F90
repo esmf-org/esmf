@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.16 2004/06/13 05:25:42 cdeluca Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.17 2004/06/14 20:10:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.16 2004/06/13 05:25:42 cdeluca Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.17 2004/06/14 20:10:29 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -498,6 +498,13 @@ end function
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
 !           (because the {\tt ESMF\_Array} has a higher rank than the
 !           {\tt ESMF\_Grid}) the index value must be 0. 
+!
+!           For example, if the data array is 3D and the grid is 2D,
+!           and the first and second data indices correspond to the grid
+!           and the last data index is to store duplicate values for the
+!           same grid location, then the value for this input would be
+!           {\tt 1, 2, 0}.  If the middle index was the one which was
+!           for the duplicate values, it would be {\tt 1, 0, 2}.
 !     \item [{[counts]}]
 !           An integer array, with length ({\tt datarank} minus the grid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
@@ -593,6 +600,15 @@ end function
 !           (because the {\tt ESMF\_Array} has a higher rank than the
 !           {\tt ESMF\_Grid}) the index value must be 0.  The default is
 !           a 1-to-1 mapping with the {\tt ESMF\_Grid}.
+!
+!           For example, if the data array is 3D and the grid is 2D,
+!           and the first and second data indices correspond to the grid
+!           and the last data index is to store duplicate values for the
+!           same grid location, then the value for this input would be
+!           {\tt 1, 2, 0}.  If the middle index was the one which was
+!           for the duplicate values, it would be {\tt 1, 0, 2}.
+!           The default values for this are {\tt 1, 0, ...} for a 1D grid
+!           and {\tt 1, 2, 0, ... } for a 2D grid.
 !     \item [{[counts]}]
 !           An integer array, with length ({\tt datarank} minus the grid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
