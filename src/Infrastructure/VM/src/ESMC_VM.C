@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.20 2004/12/23 04:34:58 theurich Exp $
+// $Id: ESMC_VM.C,v 1.21 2004/12/23 18:15:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.20 2004/12/23 04:34:58 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.21 2004/12/23 18:15:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -72,60 +72,52 @@ static int matchArray_count = 0;
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_VMGetGlobal - Get Global VM
+// !IROUTINE:  ESMC_VMStartup
 //
 // !INTERFACE:
-ESMC_VM *ESMC_VMGetGlobal(
+void *ESMC_VM::ESMC_VMStartup(
 //
 // !RETURN VALUE:
-//    Pointer to global VM
+//    void* to info structure
 //
 // !ARGUMENTS:
 //
-  int *rc){   // return code
+  class ESMC_VMPlan *vmp,         // plan for this child VM
+  void *(fctp)(void *, void *),   // fnction pointer to 1st stage callback
+  void *cargo){                   // pointer to cargo structure for in/out data
 //
 // !DESCRIPTION:
-//   Get the global default {\tt ESMC\_VM} object. This is the {\tt ESMC\_VM}
-//   object that was created during {\tt ESMC\_Initialize()} and is the ultimate
-//   parent of all {\tt ESMC\_VM} objects in an ESMF application.
+//    Startup a new child VM according to plan.
 //
 //EOP
 //-----------------------------------------------------------------------------
-  *rc = ESMF_SUCCESS;
-  return GlobalVM;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_VMGetCurrent - Get Current VM
-//
-// !INTERFACE:
-ESMC_VM *ESMC_VMGetCurrent(
-//
-// !RETURN VALUE:
-//    Pointer to curent VM
-//
-// !ARGUMENTS:
-//
-  int *rc){   // return code
-//
-// !DESCRIPTION:
-//   Get the {\tt ESMC\_VM} object of the current context.
-//
-//EOP
-//-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE; // assume failure
-  pthread_t mytid = pthread_self();
-  int i;
-  for (i=0; i<matchArray_count; i++)
-    if (matchArray_tid[i] == mytid) break;
-  if (i == matchArray_count)
-    return NULL;
-  // found a match
-  *rc = ESMF_SUCCESS;
-  return matchArray_vm[i];
+  // startup the VM
+  void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, NULL);
+  
+  // enter information for all threads of this new VM into the matchArray
+  // TODO: make this thread-safe for when we allow ESMF-threading!
+  for (int i=0; i<vmp->nspawn; i++){
+    matchArray_tid[matchArray_count]  = vmp->myvms[i]->vmk_mypthid(); // pthid
+    matchArray_vm[matchArray_count]   = vmp->myvms[i];
+    // TODO: unique ID, for now use the (int) cast of the MPI communicator for
+    //       an ID. This will not hold up for more complicated VM hierarchies
+    //       where communicators are going to be defined in subsets of the
+    //       globalVM's pets. In fact it is not even guranteed that a
+    //       communicator has the same handle on all of the PETs its defined on.
+    //    -> Yup, I tested it across my Linux cluster and found that you only
+    //       get identical IDs out of communicators that are on the same SMP
+    //       box, otherwise you don't!!!!
+#ifdef VM_DONT_HAVE_MPI_COMM_C2F
+    matchArray_vmID[matchArray_count] = (int)(vmp->myvms[i]->vmk_mypthid());
+#else
+    matchArray_vmID[matchArray_count] = 
+      (int)MPI_Comm_c2f(vmp->myvms[i]->vmk_mypthid());
+#endif
+    ++matchArray_count;
+  }
+  
+  // return pointer to info structure
+  return info;
 }
 //-----------------------------------------------------------------------------
 
@@ -264,6 +256,99 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_VMGetGlobal - Get Global VM
+//
+// !INTERFACE:
+ESMC_VM *ESMC_VMGetGlobal(
+//
+// !RETURN VALUE:
+//    Pointer to global VM
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Get the global default {\tt ESMC\_VM} object. This is the {\tt ESMC\_VM}
+//   object that was created during {\tt ESMC\_Initialize()} and is the ultimate
+//   parent of all {\tt ESMC\_VM} objects in an ESMF application.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_SUCCESS;
+  return GlobalVM;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMGetCurrent - Get Current VM
+//
+// !INTERFACE:
+ESMC_VM *ESMC_VMGetCurrent(
+//
+// !RETURN VALUE:
+//    Pointer to current VM
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Get the {\tt ESMC\_VM} object of the current context.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE; // assume failure
+  pthread_t mytid = pthread_self();
+  int i;
+  for (i=0; i<matchArray_count; i++)
+    if (matchArray_tid[i] == mytid) break;
+  if (i == matchArray_count)
+    return NULL;
+  // found a match
+  *rc = ESMF_SUCCESS;
+  return matchArray_vm[i];
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMGetCurrentID - Get ID of current VM
+//
+// !INTERFACE:
+int ESMC_VMGetCurrentID(
+//
+// !RETURN VALUE:
+//    ID of current VM
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Get the ID of the current {\tt ESMC\_VM} object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE; // assume failure
+  pthread_t mytid = pthread_self();
+  int i;
+  for (i=0; i<matchArray_count; i++)
+    if (matchArray_tid[i] == mytid) break;
+  if (i == matchArray_count)
+    return -1;
+  // found a match
+  *rc = ESMF_SUCCESS;
+  return matchArray_vmID[i];
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_VMInitialize
 //
 // !INTERFACE:
@@ -324,26 +409,3 @@ void ESMC_VMFinalize(
   *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
 }
 //-----------------------------------------------------------------------------
-
-
-// new stuff...
-
-
-void *ESMC_VM::ESMC_VMStartup(class ESMC_VMPlan *vmp, 
-  void *(fctp)(void *, void *), void *cargo){
-  
-  // startup the VM
-  void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, NULL);
-  
-  // enter information for all threads of this new VM into the matchArray
-  // TODO: make this thread-safe for when we allow ESMF-threading!
-  for (int i=0; i<vmp->nspawn; i++){
-    matchArray_tid[matchArray_count]  = vmp->myvms[i]->vmk_mypthid(); // pthid
-    matchArray_vm[matchArray_count]   = vmp->myvms[i];
-    matchArray_vmID[matchArray_count] = 0;                // TODO: unique ID
-    ++matchArray_count;
-  }
-  
-  // return pointer to info structure
-  return info;
-}
