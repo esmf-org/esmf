@@ -1,4 +1,4 @@
-%$Id: PhysGrid_req.tex,v 1.24 2002/06/21 21:26:51 cnh Exp $
+%$Id: PhysGrid_req.tex,v 1.25 2002/06/24 20:17:56 cnh Exp $
 
 %===============================================================================
 \req{Physical locations}
@@ -537,7 +537,7 @@ associated with a single distributed grid.  It may have undistributed dimensions
 are not present in the underlying distributed grid. Multiple local 
 physical grids may be derived from the same global, undistributed physical grid. 
 
-Physical grids may be purely horizontal, purely vertical, or 3-dimensional. 
+Physical grids may be purely horizontal (one dimensional or two dimensional), purely vertical, or 3-dimensional. 
 Structured grids assume that adjacent locations in index space share boundaries
 in a predictable way.  Unstructured grids also have concepts of neighboring
 cells, but the relative indices of neighbors are unpredictable.
@@ -570,7 +570,8 @@ Physical grids can be output to standard files.
               CAM-FV, PSAS, MIT, GFDL. \\
 {\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.\\
-{\bf Notes:} 
+{\bf Notes:}  Here a standard file means that the file will
+be suitable for holding global physical grid, independent of distribution.
 \end{reqlist}
 
 \sreq{Local physical grids may be internally generated}
@@ -591,18 +592,20 @@ providing the data that a physical grid will contain.
 \begin{reqlist}
 {\bf Priority:} 3\\
 {\bf Source:} Required by CCSM-CPL, MIT. \\
-{\bf Status:} Proposed. \\
-{\bf Verification:} Unit test. 
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Could be useful for testing.
 \end{reqlist}
 
 \sreq{Physical grid query.}
-Methods shall be provided to query a physical grid for all information in contains.
+Methods shall be provided to query a physical grid for all information it contains.
 \begin{reqlist}
 {\bf Priority:} 1\\
 {\bf Source:} Required by CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
               CAM-FV, PSAS, MIT, WRF, GFDL. \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test.
+{\bf Verification:} Unit test.\\
+{\bf Notes:} Obvious
 \end{reqlist}
 
 \sreq{Cell specification}
@@ -621,7 +624,7 @@ A physical grid may be interpolated to generate a physical grid with an equivale
  at finer or coarser resolution.  Methods should be provided to accomplish such
 interpolation via a simple interface that uses the Regrid facility.
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 2. \\
 {\bf Source:} Required by MIT(handled by regrid), GFDL(handled by regrid) \\
 {\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.\\
@@ -630,6 +633,13 @@ there may be a Catch-22 here, as Regrid would naturally provide the facility
 for Regridding, but Regrid will typically require the target physical grid for
 creating the Regridding.  This requirement is also explicitly addressed within the
 Regrid requirement document.
+
+** NEED TO CHECK THE INDEX SPACE REGRIDDING *** \\
+
+** NEED A SPCIFICATION FOR HOW TO MAP BETWEEN TWO COMPATIBLE GRIDS SO THAT \\
+** REGRID CAN FIGURE OUT ALIGNMENT BETWEEN TWO SPHERICAL POLAR GRIDS OR \\
+** BETWEEN CARTESIAN AND CYLINDRICAL. MAYBE THE NOTION OF A "COMMON POINT" \\
+** THAT COULD REPRESENT THE SAME LOCATION IN SPACE. \\
 \end{reqlist}
 
 \sreq{Regeneration}
@@ -638,9 +648,9 @@ physical grid.
 The span of the source physical grid may be the same as or a superset of
 the span of the target.
 \begin{reqlist}
-{\bf Priority:} 1. \\
+{\bf Priority:} 2. \\
 {\bf Source:} MIT, GFDL. \\
-{\bf Status:} Approved-1. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.\\
 {\bf Notes:} Necessary for support of transposes, or of moving nests.
 \end{reqlist}
@@ -650,7 +660,7 @@ A local physical grid may be queried for the distributed grid upon which it is b
 \begin{reqlist}
 {\bf Priority:} 2. \\
 {\bf Source:}  MIT, GFDL.\\
-{\bf Status:} Approved-2. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
@@ -664,7 +674,9 @@ in thick-shell spherical coordinates.
 {\bf Status:} Approved-1. \\
 {\bf Verification:} Code inspection.\\
 {\bf Notes:} If this assumption can be made, it greatly simplifies implementation.
-No widely used counterexamples are known.
+No widely used counterexamples are known. This is a negative
+requirement, i.e. something we are not going to do, there are no feaatures
+required to support this.
 \end{reqlist}
 
 \sreq{Vertical coordinate potentially dependent on horizontal.}
@@ -689,7 +701,7 @@ distributed grid.  The new dimension may be in any order with respect to existin
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, GFDL, MIT \\
-{\bf Status:} Approved-2 \\
+{\bf Status:} Approved-1 \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Valuable for separating generation of vertical and horizontal
 coordinates.
@@ -704,9 +716,10 @@ grid is based on the same distributed grid as the original physical grid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, GFDL, MIT \\
-{\bf Status:} Approved-2 \\
+{\bf Status:} Approved-1 \\
 {\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Notes:} This and {\it Dimension extension} have been made
+Approved-1 beacuse the feature could be hard to add later.
 \end{reqlist}
 
 \sreq{Arbitrary dimensional physical grids}
@@ -751,7 +764,7 @@ PSAS (XYZ,XZY), GFDL (XYZ, ZXY, XZY, YZX) \\
 \sreq{Dimension reordering}
 A new local physical grid may be generated with reordered dimensions from another local physical grid.
 If the new dimension order is inconsistent with the original distributed grid, a new
-consistent local physical grid must also be provided.  To be consistent, all dimensions present
+consistent distributed grid must also be provided.  To be consistent, all dimensions present
 in a distributed grid must have the same relative order in the local physical grid.  (i.e. if the
 distributed grid uses XY, local physical grids using XYZ, ZXY, or XZY are all consistent, while one using
 ZYX is not.)
@@ -760,7 +773,7 @@ ZYX is not.)
 {\bf Source:} GFDL, MIT\\
 {\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.\\
-{\bf Notes:} Necessary for support of transposes.
+{\bf Notes:} Necessary for support of transposes. We assume left most fastest memory ordering here.
 \end{reqlist}
 
 \sreq{Location index determination}
@@ -786,7 +799,8 @@ and off of the local physical grid.
 {\bf Priority:} 1\\
 {\bf Source:} Regrid (maybe - depending on implementation). \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test.
+{\bf Verification:} Unit test. \\
+{\bf Notes:} ** CLARIFY WITH REGRID **
 \end{reqlist}
 
 \sreq{Horizontal physical grids}
@@ -804,6 +818,9 @@ PSAS, MIT, GFDL. \\
 {\bf Verification:} Unit test.\\
 {\bf Notes:}  Perhaps some of these should be read in from a file, rather than
 internally generated - CNH?  The underlying (background?) grid associated with a location stream may be in one of these map projections - Arlindo.
+** REVIEW NOTE ** \\
+** WE NEED TO SPECIFY AN ORDER AND PRIORITY IN WHICH THE SPECIFIC GRIDS WILL BE IMPLEMENTED ** \\
+** ONCE THE BASIC FEATURE IS IN PLACE                                                       ** \\
 \end{reqlist}
 
 \ssreq{Unstretched cartesian internal generation}
@@ -862,12 +879,12 @@ property of a distributed grid, which is then inherited and checked by a local p
 \ssreq{Local physical grid topology consistency checking}
 A mechanism shall be provided to verify that the locations of the points in
 a local physical grid are consistent with the topology of the underlying distributed grid.  An
-exception shall be generated in case of inconsistency.
+exception or warning shall be generated in case of inconsistency.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} Required by CCSM-CPL, POP, CICE, 
 CAM-FV, PSAS, MIT, GFDL.  \\
-{\bf Status:} Approved-1. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -927,9 +944,9 @@ PSAS, MIT, GFDL.  \\
 A spectral horizontal description may be used.  More generally, the horizontal
 structure of information may be given by specifying functional decompositions.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} MIT, GFDL.  \\
-{\bf Status:} Approved-2. \\
+{\bf Priority:} 1 \\
+{\bf Source:} MIT, GFDL, NCEP-GSM.  \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -940,7 +957,9 @@ wavenumbers (in units of $m^{-1}$) of each of the elements on the grid.
 {\bf Priority:} 3 \\
 {\bf Source:} GFDL (desired)\\
 {\bf Status:} Proposed. \\
-{\bf Verification:} Unit test.
+{\bf Verification:} Unit test.\\
+{\bf Note:} This could be implemented for very little cost on the way to full spherical polar
+spectral representation. However, no milestone requires this.\\
 \end{reqlist}
 
 \ssreq{Horizontal spherical harmonics grids} 
@@ -990,7 +1009,8 @@ inverse transform, and the adjoint transform.
 {\bf Priority:} 1. \\
 {\bf Source:} NCEP-SSI. \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Code inspection.
+{\bf Verification:} Code inspection. \\
+{\bf Notes:} DO WE REALLY NEED THIS AS P1, A-1.
 \end{reqlist}
 
 \sreq{Area overlap checking}
