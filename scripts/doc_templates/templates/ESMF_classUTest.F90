@@ -1,4 +1,4 @@
-! $Id: ESMF_classUTest.F90,v 1.4 2003/03/26 14:48:50 nscollins Exp $
+! $Id: ESMF_classUTest.F90,v 1.5 2003/04/03 22:43:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,11 +12,12 @@
 !
       program ESMF_<Class>UTest
 
-!------------------------------------------------------------------------------
-! INCLUDES
-#include <ESMF.h>
-!
-!==============================================================================
+-----------------------------------------------------------------------
+! Include file, for ESMF_SRCLINE which must be done by the preprocessor
+
+#include <ESMF_Macros.inc>
+
+-----------------------------------------------------------------------
 !BOP
 ! !PROGRAM: ESMF_<Class>UTest - One line general statement about this test
 !
@@ -29,13 +30,13 @@
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod     ! test methods
-      use ESMF_<Class>Mod  ! the class to test
+      use ESMF_Mod         ! the ESMF framework, including the class to test
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_classUTest.F90,v 1.4 2003/03/26 14:48:50 nscollins Exp $'
+      '$Id: ESMF_classUTest.F90,v 1.5 2003/04/03 22:43:25 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
