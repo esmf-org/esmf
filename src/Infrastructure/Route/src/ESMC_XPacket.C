@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.29 2003/08/04 22:54:52 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.30 2003/08/04 23:01:01 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.29 2003/08/04 22:54:52 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.30 2003/08/04 23:01:01 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -302,7 +302,7 @@
       int *global_stride,         // in  - array of global strides per
                                   //       dimension
       ESMC_Logical *periodic,     // in  - for each dim, is it periodic?
-      ESMC_XPacket *xp_list,      // out - list of xp's created
+      ESMC_XPacket **xp_list,     // out - list of xp's created
       int *xp_count) {            // out - count of xp's created
 //
 // !DESCRIPTION:
@@ -314,6 +314,7 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     int i, nxp, nextxp;
+    ESMC_XPacket *xps;
     int rc = ESMF_FAILURE;
 
     // switch based on array rank  TODO: is this necessary?
@@ -334,7 +335,9 @@
           if ((periodic[1] == ESMF_TF_TRUE) && 
               (indexlist[1].min < global_start[1])) nxp++;
 
-          xp_list = new ESMC_XPacket[nxp];
+          xps = new ESMC_XPacket[nxp];
+        
+           *xp_list = xps; 
            *xp_count = nxp;
 
           // there's always 1.
@@ -346,11 +349,11 @@
             global_r[i] = indexlist[i].max + global_start[i];
           }
 
-          xp_list[nextxp].rank = 2;
-          xp_list[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
-          xp_list[nextxp].contig_length = global_r[0] - global_l[0] + 1;
-          xp_list[nextxp].stride[0] = global_stride[0];
-          xp_list[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+          xps[nextxp].rank = 2;
+          xps[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
+          xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
+          xps[nextxp].stride[0] = global_stride[0];
+          xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
 
           // if periodic along the first axis and this piece along boundary:
           if ((periodic[0] == ESMF_TF_TRUE) && 
@@ -358,7 +361,7 @@
  
               nextxp++;
 
-              xp_list[nextxp].rank = 2;
+              xps[nextxp].rank = 2;
 
               // calculate global offsets and contig_lengths for the index space
               for (i=0; i<size_axisindex; i++) {
@@ -368,10 +371,10 @@
               global_l[0] += global_stride[0];
               global_r[0] += global_stride[0];
     
-              xp_list[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
-              xp_list[nextxp].contig_length = global_r[0] - global_l[0] + 1;
-              xp_list[nextxp].stride[0] = global_stride[0];
-              xp_list[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+              xps[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
+              xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
+              xps[nextxp].stride[0] = global_stride[0];
+              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
     
           }
 
@@ -381,7 +384,7 @@
 
               nextxp++;
 
-              xp_list[nextxp].rank = 2;
+              xps[nextxp].rank = 2;
 
               // calculate global offsets and contig_lengths for the index space
               for (i=0; i<size_axisindex; i++) {
@@ -391,16 +394,16 @@
               global_l[1] += global_stride[1];
               global_r[1] += global_stride[1];
     
-              xp_list[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
-              xp_list[nextxp].contig_length = global_r[0] - global_l[0] + 1;
-              xp_list[nextxp].stride[0] = global_stride[0];
-              xp_list[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+              xps[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
+              xps[nextxp].contig_length = global_r[0] - global_l[0] + 1;
+              xps[nextxp].stride[0] = global_stride[0];
+              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
     
           }
 
  //    printf("outgoing ");
  //    for (j=0; j<nxp; j++)
- //        xp_list[j].ESMC_XPacketPrint();
+ //        xps[j].ESMC_XPacketPrint();
 
         }
       break;

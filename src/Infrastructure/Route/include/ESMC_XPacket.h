@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.21 2003/08/04 22:54:52 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.22 2003/08/04 23:01:01 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
                                          int size_axisindex, 
                                          int *global_start, int* global_stride,
                                          ESMC_Logical *periodic,
-                                         ESMC_XPacket *xp_list, int *xp_count);
+                                         ESMC_XPacket **xp_list, int *xp_count);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
@@ -111,6 +111,6 @@ int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
                               int size_axisindex, 
                               int *global_start, int* global_stride,
                               ESMC_Logical *periodic,
-                              ESMC_XPacket *xp_list, int *xp_count);
+                              ESMC_XPacket **xp_list, int *xp_count);
 
  #endif  // ESMC_XPacket_H
