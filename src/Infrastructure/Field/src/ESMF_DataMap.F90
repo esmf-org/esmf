@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.8 2003/06/19 15:13:35 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.9 2003/06/26 21:17:48 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.8 2003/06/19 15:13:35 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.9 2003/06/26 21:17:48 rstaufer Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -230,7 +230,7 @@
        module procedure ESMF_DataMapCreateFastest
 
 ! !DESCRIPTION:
-! This interface provides a single entry point for {\tt DataMap}
+! This interface provides a single entry point for {\tt ESMF\_DataMap}
 !  creation methods.
 !EOP
 
@@ -250,7 +250,7 @@
 !       module procedure ESMF_DataMapConstructFastest
 
 ! !DESCRIPTION:
-! This interface provides a single entry point for {\tt DataMap}
+! This interface provides a single entry point for {\tt ESMF\_DataMap}
 !  construction methods.
 !EOPI
 
@@ -336,9 +336,9 @@ end function
 ! !DESCRIPTION:
 !      Allocates space for and initializes an {\tt ESMF\_DataMap} object.
 !
-!      This version assumes the data is scalar and matches the Grid
-!      in order of Grid index vs. Array rank.  This creates a map
-!      suitable for a Field and not for a Packed Array associated with
+!      This version assumes the data is scalar and matches the {\tt ESMF\_Grid}
+!      in order of {\tt ESMF\_Grid} index vs. {\tt ESMF\_Array} rank.  This creates a map
+!      suitable for a {\tt ESMF\_Field} and not for a Packed Array associated with
 !      a Bundle.
 !
 !      \begin{description}
@@ -409,14 +409,14 @@ end function
 ! !DESCRIPTION:
 !      Allocates space for and initializes an {\tt ESMF\_DataMap} object.
 !
-!      This version assumes the data is scalar and matches the Grid
-!      in order of Grid index vs. Array rank.  This creates a map
-!      suitable for a Field (but not for a Packed Array associated with
+!      This version assumes the data is scalar and matches the {\tt ESMF\_Grid}
+!      in order of {\tt ESMF\_Grid} index vs. {\tt ESMF\_Array} rank.  This creates a map
+!      suitable for a {\tt ESMF\_Field} (but not for a Packed Array associated with
 !      a Bundle).
 !
 !      \begin{description}
 !      \item[grid]
-!          Pointer to Grid object which {\tt DataMap} will match.
+!          Pointer to {\tt ESMF\_Grid} object which {\tt ESMF\_DataMap} will match.
 !      \item[relloc]
 !          Relative location of data per cell/vertex.
 !      \item[[rc]] 
@@ -478,8 +478,8 @@ end function
       integer, intent(out), optional :: rc           ! return code
 !
 ! !DESCRIPTION:
-!      Returns rc=OK if the datamap was created without error.
-!      Returns an datamap which should allow the data array to be
+!      Returns rc=OK if the {\tt ESMF\_DataMap} was created without error.
+!      Returns an {\tt ESMF\_DataMap} which should allow the data array to be
 !      iterated in the fastest access method possible on this hardware
 !      and in this language.
 !
@@ -511,8 +511,8 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Returns rc=OK if the datamap was destroyed without error.
-!     Releases all resources associated with this datamap.
+!     Returns rc=OK if the {\tt ESMF\_DataMap} was destroyed without error.
+!     Releases all resources associated with this {\tt ESMF\_DataMap}.
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -562,7 +562,7 @@ end function
 !
 ! !DESCRIPTION:
 !      ESMF routine to initialize the contents of a {\tt ESMF\_DataMap} type.
-!      The corresponding internal routine is Destruct.
+!      The corresponding internal routine is {\tt ESMF\_Destruct}.
 !
 !EOPI
 ! !REQUIREMENTS: internal
@@ -674,7 +674,7 @@ end function
 !
 ! !DESCRIPTION:
 !      ESMF routine to initialize the contents of a {\tt ESMF\_DataMap} type.
-!      The corresponding internal routine is Destruct.
+!      The corresponding internal routine is {\tt ESMF\_Destruct}.
 !
 !EOPI
 ! !REQUIREMENTS: internal
@@ -779,7 +779,7 @@ end function
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!      Release all resources except the DataMap datatype itself.
+!      Release all resources except the {\tt ESMF\_DataMap} datatype itself.
 !
 !
 !EOPI
@@ -825,7 +825,7 @@ end function
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!      Return info about the current datamap described by this object.
+!      Return info about the current {\tt ESMF\_DataMap} described by this object.
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -880,7 +880,7 @@ end function
       integer, intent(out), optional :: rc    
 !
 ! !DESCRIPTION:
-!      Return info about the current datamap described by this object.
+!      Return info about the current {\tt ESMF\_DataMap} described by this object.
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -940,7 +940,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a DataMap from the last call to Checkpoint.
+!      all data associated with a {\tt ESMF\_DataMap} from the last call to Checkpoint.
 !
 !EOP
 ! !REQUIREMENTS: FLD1.6.8
@@ -1027,7 +1027,7 @@ end function
       integer, intent(out), optional :: rc             ! return code
 !
 ! !DESCRIPTION:
-!      Routine to validate the internal state of a datamap.
+!      Routine to validate the internal state of a {\tt ESMF\_DataMap}.
 !
 !EOP
 ! !REQUIREMENTS:  FLD4.1
@@ -1051,7 +1051,7 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Routine to print information about a datamap.
+!      Routine to print information about a {\tt ESMF\_DataMap}.
 !
 !EOP
 ! !REQUIREMENTS:
