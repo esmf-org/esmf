@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.8 2004/05/10 22:59:35 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.9 2004/05/12 22:52:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,18 +34,19 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.8 2004/05/10 22:59:35 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.9 2004/05/12 22:52:16 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
-      integer :: x, y, rc, num
+      integer :: x, y, rc, num, number
       logical :: IsNeeded
       character(ESMF_MAXSTR) :: statename, bundlename, dataname, bname
-      character(ESMF_MAXSTR) :: fieldname, fname, aname
+      character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
       type(ESMF_Field) :: field1, field2, field3(3), field4
       type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3(1), bundle4(1), bundle5, bundle6
       type(ESMF_State) :: state1, state2, state3, state4
-      type(ESMF_Array) :: array1, array2(2), array3
+      type(ESMF_Array) :: array1, array2(2), array3, array4
+      type(ESMF_StateDataNeeded) :: needed
       real, dimension(:,:), pointer :: f90ptr1
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -170,7 +171,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
       !NEX_UTest
       ! Test printing of State
       call  ESMF_StatePrint(state1, rc=rc)
@@ -180,6 +180,34 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Test Adding a name to a State
+      call ESMF_StateAddNameOnly(state1, name="StateOne", rc=rc)
+      write(failMsg, *) "DId not return ESMF_SUCCESS"
+      write(name, *) "Adding a name to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test printing of State
+      call  ESMF_StatePrint(state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing of a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test getting Attribute Count from a state
+      call  ESMF_StateGetAttributeCount(state1, num, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
+      write(name, *) "Getting an attribute count from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.0), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "Attribute count =", num
+
+      !------------------------------------------------------------------------
       !NEX_UTest
       ! Test adding an Attribute to a state
       call  ESMF_StateAddAttribute(state1, name="newAttribute", value=12345, rc=rc)
@@ -198,6 +226,28 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.12345), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "Attribute num =", num
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test getting Attribute Count from a state
+      call  ESMF_StateGetAttributeCount(state1, num, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
+      write(name, *) "Getting an attribute count from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "Attribute count =", num
+
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test getting Attribute Info from a state
+      call  ESMF_StateGetAttributeInfo(state1, name="newAttribute", count=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
+      write(name, *) "Getting attribute Info from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "Attribute count =", number
+
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Test getting Bundle from State
@@ -234,6 +284,14 @@
       print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Test State for Field being needed
+      call ESMF_StateGetNeeded(state1, "Humidity", needed, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Query if Field is needed in a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(needed.eq.ESMF_STATEDATAISNEEDED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 #ifdef ESMF_EXHAUSTIVE
 
       !EX_UTest
@@ -301,6 +359,23 @@
       call ESMF_Test((.not.IsNeeded), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test getting Array from State
+      call  ESMF_StateGetArray(state1, aname, array3, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting Arrray from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
+      call ESMF_ArrayGet(array3, name=arrayname, rc=rc)
+      write(failMsg, *) "Wrong Array name "
+      write(name, *) "Verifying that the Array has correct name Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(arrayname.eq.aname), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
 
       !NEX_UTest
