@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.156 2004/04/05 17:28:46 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.157 2004/04/08 17:33:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,6 +40,9 @@
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_DataMapMod     ! ESMF data map class
       use ESMF_DELayoutMod    ! ESMF layout class
+#ifdef ESMF_ENABLE_VM
+      use ESMF_newDELayoutMod    ! ESMF layout class
+#endif
       use ESMF_ArrayMod
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_PhysCoordMod   ! ESMF physical coord class
@@ -92,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.156 2004/04/05 17:28:46 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.157 2004/04/08 17:33:54 theurich Exp $'
 
 !==============================================================================
 !
@@ -1041,7 +1044,11 @@
                               coordOrder, dimCount, minGlobalCoordPerDim, &
                               maxGlobalCoordPerDim, globalCellCountPerDim, &
                               globalStartPerDEPerDim, maxLocalCellCountPerDim, &
-                              cellCountPerDEPerDim, periodic, name, rc)
+                              cellCountPerDEPerDim, periodic, name, rc &
+#ifdef ESMF_ENABLE_VM                                
+                              , delayout &
+#endif
+                              )
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -1066,6 +1073,9 @@
       type(ESMF_Logical), intent(out), dimension(:), optional :: periodic
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
+#ifdef ESMF_ENABLE_VM                                
+      type(ESMF_newDELayout), intent(out), optional:: delayout
+#endif
 !
 ! !DESCRIPTION:
 !     This version sets a variety of information about a {\tt ESMF\_Grid}, depending
@@ -1156,7 +1166,11 @@
                             coordOrder, dimCount, minGlobalCoordPerDim, &
                             maxGlobalCoordPerDim, globalCellCountPerDim, &
                             globalStartPerDEPerDim, maxLocalCellCountPerDim, &
-                            cellCountPerDEPerDim, periodic, name, status)
+                            cellCountPerDEPerDim, periodic, name, status &
+#ifdef ESMF_ENABLE_VM
+                            , delayout &       
+#endif
+                            )
 
       !-------------
       ! ESMF_GridStructure_LogRectBlock
