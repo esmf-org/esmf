@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.C,v 1.2 2003/10/01 22:17:43 nscollins Exp $
+// $Id: ESMC_GridComp.C,v 1.3 2003/11/09 00:07:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.2 2003/10/01 22:17:43 nscollins Exp $";
+           "$Id: ESMC_GridComp.C,v 1.3 2003/11/09 00:07:55 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -55,7 +55,7 @@
 // This section includes all the Component routines
 //
 //
-extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_Comp *, int *), int *); }
+extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, int *), int *); }
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -68,7 +68,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_Comp *, int 
 //    int error return code
 //
 // !ARGUMENTS:
-     void (*func)(ESMC_Comp *, int *) ) {  // in: function which registers init/run/final
+     void (*func)(ESMC_GridComp *, int *) ) {  // in: function which registers init/run/final
 //
 // !DESCRIPTION:
 //    Invokes the Initialize routine for an {\tt ESMC\_Component}.
