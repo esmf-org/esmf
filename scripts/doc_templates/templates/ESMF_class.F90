@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.3 2002/10/09 20:31:19 nscollins Exp $
+! $Id: ESMF_class.F90,v 1.4 2002/10/10 18:54:46 nscollins Exp $
 !
 ! ESMF <Class> Module
 !
@@ -6,8 +6,26 @@
 !  This code developed by NASA/NCAR/ESMF whatever, and is covered by
 !  the terms of the GNU public license.  See license file for more details. >
 !
+!-------------------------------------------------------------------------
+! (all lines below between the !BOP and !EOP markers will be included in 
+!  the automated document processing.)
+!
 
 !-------------------------------------------------------------------------
+! put any constants or macros which apply to the whole component in this 
+!  include file.  anything public or esmf-wide should be up higher at
+!  the top level include files.
+
+#include <ESMF_<Comp>.h>
+
+
+!-------------------------------------------------------------------------
+! module definition
+
+      module ESMF_<Class>Mod
+
+!BOP
+! !MODULE: ESMF_<Class>Mod - one line general statement about this class
 !
 ! !PURPOSE:
 !
@@ -15,39 +33,15 @@
 !
 ! < insert a paragraph or two explaining what you'll find in this file >
 !
-! (all lines below between the !BOP and !EOP markers will be included in 
-!  the automated document processing.)
+!
 !
 !-------------------------------------------------------------------------
-!
-
-! put any constants or macros which apply to the whole component in this file
-
-#include <ESMF_<Comp>.h>
-
-
-! module definition
-
-      module ESMF_<Class>Mod
-
-! 
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-!
-! This section contains ...
-!
-!
-
-!-------------------------------------------------------------------------
-!BOP
-! !MODULE: ESMF_<Class>Mod
-!
 ! !USES:
       use ESMF_Base    ! ESMF base class
 !     use ESMF_XXXMod  < if needed >
-!
-! !PUBLIC TYPES:
       implicit none
+!
+! !PRIVATE TYPES:
       private
 
       type ESMF_<Class>Config
@@ -64,6 +58,7 @@
 !       < insert other class members here >
       end type
 
+! !PUBLIC TYPES:
       public ESMF_<Class>Config
       public ESMF_<Class>
 
@@ -102,7 +97,7 @@
 !-------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.3 2002/10/09 20:31:19 nscollins Exp $'
+      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.4 2002/10/10 18:54:46 nscollins Exp $
 !-------------------------------------------------------------------------
 
 ! interface blocks for functions which are going to have a single
