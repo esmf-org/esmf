@@ -1,4 +1,4 @@
-% $Id: Config_reqdoc.ctex,v 1.2 2003/05/07 07:16:22 cdeluca Exp $
+% $Id: Config_reqdoc.ctex,v 1.3 2003/05/07 23:27:33 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -61,7 +61,7 @@
 
 \section{Target Codes and Review Team}
 #ifdef STANDALONE
-\input{ConfigAttr_auth}
+\input{Config_auth}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/ConfigAttr/doc/Config_auth}
 #endif
@@ -73,14 +73,14 @@
 
 %\section{Background}
 #ifdef STANDALONE
-\input{ConfigAttr_background}
+\input{Config_background}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/ConfigAttr/doc/Config_background}
 #endif
 
 \section{Terms}
 #ifdef STANDALONE
-\input{ConfigAttr_terms}
+\input{Config_terms}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/ConfigAttr/doc/Config_terms}
 #endif
@@ -95,7 +95,7 @@
 
 %\section{Abbreviations}
 #ifdef STANDALONE
-%\input{ConfigAttr_abbr}
+%\input{Config_abbr}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/ConfigAttr/doc/Config_abbr}
 #endif
@@ -112,14 +112,14 @@
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #ifdef STANDALONE
-\input{ConfigAttr_req}
+\input{Config_req}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/ConfigAttr/doc/Config_req}
 #endif
 
 #ifdef STANDALONE
 %\section*{Glossary}
-%\input{ConfigAttr_glos}
+%\input{Config_glos}
 %\addcontentsline{toc}{section}{Glossary}
 #endif
 
