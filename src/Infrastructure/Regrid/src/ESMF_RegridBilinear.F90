@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.77 2004/10/14 16:55:57 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.78 2004/10/14 19:01:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.77 2004/10/14 16:55:57 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.78 2004/10/14 19:01:22 nscollins Exp $'
 
 !==============================================================================
 
@@ -770,15 +770,15 @@
                 weights(4) = (one-iguess)*jguess
 
               else  ! iteration failed
-                print logMsg, "ERROR in ESMF_RegridBilinearSearch"
+                write(logMsg,*) "ERROR in ESMF_RegridBilinearSearch"
                 call ESMF_LogWrite(logMsg, ESMF_LOG_ERROR)
-            !    print logMsg, "Point coords: ",dstX,dstY
+            !    write(logMsg,*) "Point coords: ",dstX,dstY
             !    call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
-            !    print logMsg, "Source cell coords: ",srcX(:),srcY(:)
+            !    write(logMsg,*) "Source cell coords: ",srcX(:),srcY(:)
             !    call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
-            !    print logMsg, "Current i,j : ",iguess, jguess
+            !    write(logMsg,*) "Current i,j : ",iguess, jguess
             !    call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
-            !    print logMsg, "Iteration for i,j exceed max iteration count"
+            !    write(logMsg,*) "Iteration for i,j exceed max iteration count"
             !    call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
                 if (present(rc)) rc = ESMF_RC_ARG_VALUE
                 return
