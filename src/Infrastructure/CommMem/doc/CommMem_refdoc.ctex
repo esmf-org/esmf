@@ -1,4 +1,4 @@
-% $Id: CommMem_refdoc.ctex,v 1.4 2003/04/28 20:13:45 cdeluca Exp $
+% $Id: CommMem_refdoc.ctex,v 1.5 2003/04/28 20:20:35 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -378,12 +378,12 @@
 \input{../Infrastructure/CommMem/doc/ESMC_DELayout_def}
 #endif
 
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{ESMC_DELayout_rest}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_DELayout_rest}
-#endif
+%\subsubsection{Restrictions}
+%#ifdef STANDALONE
+%\input{ESMC_DELayout_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_rest}
+%#endif
 
 \section{DELayout Class F90 Interface}
 
