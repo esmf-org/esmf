@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.54 2005/01/13 18:30:12 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.55 2005/01/13 21:52:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -162,6 +162,7 @@ module ESMF_VMMod
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
+  public ESMF_VMIdCompare
   public ESMF_VMIdPrint
   public ESMF_VMIdCreate
   public ESMF_VMIdDestroy
@@ -172,7 +173,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.54 2005/01/13 18:30:12 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.55 2005/01/13 21:52:19 theurich Exp $'
 
 !==============================================================================
 
@@ -4222,6 +4223,58 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMPlanMinThreads
+!------------------------------------------------------------------------------
+
+
+
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdCompare()"
+!BOPI
+! !IROUTINE: ESMF_VMIdCompare - Compare two ESMF_VMId objects
+
+! !INTERFACE:
+  function ESMF_VMIdCompare(vmId1, vmId2, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Logical) :: ESMF_VMIdCompare
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(in)            :: vmId1
+    type(ESMF_VMId),   intent(in)            :: vmId2
+    integer,           intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Compare two ESMF_VMId objects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId1]
+!        ESMF_VMId object 1
+!   \item[vmId2]
+!        ESMF_VMId object 2
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface
+    call c_ESMC_VMIdCompare(vmId1, vmId2, ESMF_VMIdCompare, localrc)
+   
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end function ESMF_VMIdCompare
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.25 2005/01/13 18:30:14 theurich Exp $
+// $Id: ESMC_VM.C,v 1.26 2005/01/13 21:52:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.25 2005/01/13 18:30:14 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.26 2005/01/13 21:52:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -455,6 +455,13 @@ ESMC_VMId *ESMC_VMGetCurrentID(
   return &matchArray_vmID[i];
 }
 //-----------------------------------------------------------------------------
+
+
+int ESMC_VMIdCompare(ESMC_VMId *vmID1, ESMC_VMId *vmID2){
+  if (vmID1==NULL || vmID2==NULL) return ESMF_FALSE;
+  if (vmID1->localID != vmID2->localID) return ESMF_FALSE;
+  return ESMC_VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+}
 
 
 void ESMC_VMIdPrint(ESMC_VMId *vmID){

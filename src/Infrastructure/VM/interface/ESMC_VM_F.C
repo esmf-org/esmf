@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.30 2005/01/13 18:30:12 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.31 2005/01/13 21:52:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -467,6 +467,14 @@ extern "C" {
     int localrc;
     *vmid = ESMC_VMGetCurrentID(&localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+  }
+
+  void FTN(c_esmc_vmidcompare)(ESMC_VMId **vmid1, ESMC_VMId **vmid2,
+    ESMC_Logical *result, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmidcompare()"
+    *result = ESMC_VMIdCompare(*vmid1, *vmid2);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vmidprint)(ESMC_VMId **vmid, int *rc){
