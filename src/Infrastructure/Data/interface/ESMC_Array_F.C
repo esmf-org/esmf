@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.19 2003/02/13 22:44:29 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.20 2003/02/13 23:48:24 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,7 @@
 #include "ESMC_Base.h"
 #include "ESMC_Array.h"
 #include "ESMC_Alloc.h"
+#include "ESMC_Layout.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -90,6 +91,16 @@ extern "C" {
 
      void FTN(c_esmc_arraygetaxisindex)(ESMC_Array **ptr, ESMC_AxisIndex *ai, int *status) {
           *status = (*ptr)->ESMC_ArrayGetAxisIndex(ai);
+     }
+
+     void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_Layout *layout,
+                                  int *rank_trans,
+                                  int *size_rank_trans, int *decompids,
+                                  int *size_decomp, ESMC_Array *RedistArray,
+                                  int *status) {
+          *status = (*ptr)->ESMC_ArrayRedist(layout, rank_trans, *size_rank_trans,
+                                             decompids, *size_decomp,
+                                             RedistArray);
      }
 
      void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {

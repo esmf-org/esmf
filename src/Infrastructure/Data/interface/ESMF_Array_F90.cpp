@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.5 2003/02/13 15:10:37 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.6 2003/02/13 23:40:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,6 +44,7 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_AllocMod
+      use ESMF_LayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -80,6 +81,7 @@
         logical :: hascounts                ! counts optional
         integer, dimension(ESMF_MAXDIM, 3) :: rinfo ! (lower/upper/stride) per rank
         logical :: has_rinfo                ! rinfo optional
+        type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: ai ! axis indices
 
       end type
 
@@ -141,6 +143,7 @@
 
       public ESMF_ArraySetData, ESMF_ArrayGetData
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex
+      public ESMF_ArrayRedist
       public ESMF_ArrayGet, ESMF_ArrayGetName
  
       public ESMF_ArrayCheckpoint
@@ -154,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.5 2003/02/13 15:10:37 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.6 2003/02/13 23:40:16 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -852,6 +855,53 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 
         end subroutine ESMF_ArrayGetAxisIndex
 
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayRedist(array, layout, rank_trans, decompids, \
+                                  redistarray, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array) :: array
+      type(ESMF_Layout) :: layout
+      integer, dimension(:), intent(in) :: rank_trans
+      integer, dimension(:), intent(in) :: decompids
+      type(ESMF_Array), intent(in) :: redistarray
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Used to redistribute an Array.
+!
+!
+!EOP
+! !REQUIREMENTS:
+        integer :: status         ! local error status
+        logical :: rcpresent      ! did user specify rc?
+        integer :: size_rank_trans
+        integer :: size_decomp
+
+! initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+! call c routine to query indexA
+        size_rank_trans = size(rank_trans)
+        size_decomp = size(decompids)
+        call c_ESMC_ArrayRedist(array, layout, rank_trans, size_rank_trans, \
+                                decompids, size_decomp, redistarray, rc)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_LayoutSetAxisIndex error"
+          return
+        endif
+
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayRedist
 
 !------------------------------------------------------------------------------
 !BOP
