@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.35 2004/12/14 23:22:56 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.36 2005/04/02 00:25:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,6 +27,9 @@
 ! The companion file ESMF\_Calendar.F90 contains the definitions for the
 ! Clock methods.
 !
+! A good test reference tool is a day & date calculator at
+!   http://www.numerical-recipes.com/julian.html
+!
 !EOP
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -37,14 +40,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.35 2004/12/14 23:22:56 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.36 2005/04/02 00:25:39 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, days, totalDays
+      integer :: rc, MM, DD, YY, days, totalDays, dayOfWeek
       integer(ESMF_KIND_I8) :: year
       integer(ESMF_KIND_I8) :: julianDay, advanceCounts
 
@@ -54,7 +57,8 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
-      logical :: calendarsEqual, calendarsNotEqual
+      logical :: calendarsEqual, calendarsNotEqual, bool
+
       ! instantiate a clock 
       type(ESMF_Clock) :: clock_gregorian, &
                           clock_no_leap, clock_360day
@@ -62,7 +66,8 @@
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, gregorianCalendar1, &
-                             gregorianCalendar2, julianDayCalendar, &
+                             gregorianCalendar2, julianCalendar, &
+                             julianDayCalendar, &
                              no_leapCalendar, esmf_360dayCalendar
       type(ESMF_Calendar) :: customCalendar
       type(ESMF_CalendarType) :: cal_type, cal_type1, cal_type2
@@ -78,7 +83,7 @@
 !     The unit tests are divided into Sanity and Exhaustive. The Sanity tests
 !     are always run.  When the environment variable, EXHAUSTIVE, is set to ON
 !     then the EXHAUSTIVE and sanity tests both run.  If the EXHAUSTIVE
-!     variable is set to OFF, then only the sanity unit tests.
+!     variable is set to OFF, then only the sanity unit tests run.
 !     Special strings (Non-exhaustive and exhaustive) have been
 !     added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
@@ -785,17 +790,30 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
+      ! TODO: For the following 2 tests, determine JD equivalent to 3/1/-4900
+      ! (not -4800) Gregorian, which is lower limit of JD->Gregorian date
+      ! conversion algorithm.
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test Setting the Start Time for the Julian Day Calendar
-      write(failMsg, *) " Should not return ESMF_SUCCESS"
-      write(name, *) "Set Start Time at lower limit minus 1 day of Julian Day Calendar Test"
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Set Start Time at lower limit (of Gregorian) minus 1 day of Julian Day Calendar Test"
       call ESMF_TimeSet(startTime, d=-32045, &
                                    calendar=julianDayCalendar, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), & 
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
       
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting the Start Time to Gregorian Calendar
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Convert Start Time to Gregorian Calendar Test"
+      call ESMF_TimeSet(startTime, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(startTime, mm=MM, dd=DD, yy=YY, rc=rc)
+      !call ESMF_Test((rc.ne.ESMF_SUCCESS), &  ! TODO: replace when above test
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &   !       fixed.
+                      name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -1029,14 +1047,276 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Gregorian date to Julian Day
+      !   from http://www.friesian.com/numbers.htm
+      write(failMsg, *) " Did not return days = 2450713 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=1997, mm=9, dd=21, & 
+                                  calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d=days, rc=rc)
+      write(name, *) "Convert Gregorian to Julian Day Test 1"
+      call ESMF_Test((days.eq.2450713).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------  
+      !EX_UTest
+      ! Test Converting Gregorian date to Julian Day
+      !   from Henry F. Fliegel and Thomas C. Van Flandern, in
+      !   Communications of the ACM, CACM, volume 11, number 10,
+      !   October 1968, p. 657.
+      write(failMsg, *) " Did not return days = 2440588 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=1970, mm=1, dd=1, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d=days, rc=rc)
+      write(name, *) "Convert Gregorian to Julian Day Test 2"
+      call ESMF_Test((days.eq.2440588).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
+      ! ------------------------------------------------------------------------
 
+      !EX_UTest
+      write(name, *) "Create Julian Type Calendar Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      julianCalendar = ESMF_CalendarCreate("Julian", ESMF_CAL_JULIAN, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Julian date to Julian Day
+      !   Last "official" day of the Julian calendar
+      write(failMsg, *) " Did not return days = 2299160 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=1582, mm=10, dd=4, & 
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d=days, rc=rc)
+      write(name, *) "Convert Julian to Julian Day Test 1"
+      call ESMF_Test((days.eq.2299160).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "10/4/1582 Julian = ", days, " Julian days."
 
-      call ESMF_CalendarDestroy(gregorianCalendar, rc)
-      call ESMF_CalendarDestroy(julianDayCalendar, rc)
-      call ESMF_CalendarDestroy(no_leapCalendar, rc)
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test day of the week
+      ! Last day of Julian calendar 10/4/1582 was a Thursday
+      ! http://www.hermetic.ch/cal_stud/cal_art.html
+      write(failMsg, *) " Did not return dayOfWeek = 4 and ESMF_SUCCESS"
+      call ESMF_TimeGet(stopTime, dayOfWeek=dayOfWeek, rc=rc)
+      write(name, *) "Julian Time Get day of the week test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(dayOfWeek.eq.4), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Julian Day to Julian date
+      !   Last "official" day of the Julian calendar
+      write(failMsg, *) " Did not return 10/4/1582 and ESMF_SUCCESS"
+      call ESMF_TimeGet(stopTime, mm=MM, dd=DD, yy=YY, rc=rc)
+      write(name, *) "Convert Julian Day to Julian Date Test 1"
+      call ESMF_Test(MM.eq.10 .and. DD.eq.4 .and. YY.eq.1582 .and. &
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      print *, "Julian Date = ", MM, "/", DD, "/", YY
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Julian Date to Gregorian date
+      !   Last "official" day of the Julian calendar is 10/14/1582 in
+      !   the proleptic Gregorian calendar.
+      write(failMsg, *) " Did not return 10/14/1582 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, mm=MM, dd=DD, yy=YY, rc=rc)
+      write(name, *) "Convert Julian Date to Gregorian Date Test 1"
+      call ESMF_Test(MM.eq.10 .and. DD.eq.14 .and. YY.eq.1582 .and. &
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      print *, "10/4/1582 Julian = Proleptic Gregorian Date ", &
+                MM, "/", DD, "/", YY
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Gregorian date to Proleptic Julian Date
+      !   First "official" day of the Gregorian calendar 10/15/1582 is
+      !   10/5/1582 in the Proleptic Julian calendar.
+      write(failMsg, *) " Did not return 10/5/1582 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=1582, mm=10, dd=15, & 
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, calendar=julianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, mm=MM, dd=DD, yy=YY, rc=rc)
+      write(name, *) "Convert Gregorian Date to Proleptic Julian Date Test 1"
+      call ESMF_Test(MM.eq.10 .and. DD.eq.5 .and. YY.eq.1582 .and. &
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      print *, "10/15/1582 Gregorian = Proleptic Julian Date ", &
+                MM, "/", DD, "/", YY
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test day of the week
+      ! First day of Gregorian calendar 10/15/1582 was a Friday
+      ! http://www.hermetic.ch/cal_stud/cal_art.html
+      write(failMsg, *) " Did not return dayOfWeek = 5 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=1582, mm=10, dd=15, & 
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, dayOfWeek=dayOfWeek, rc=rc)
+      write(name, *) "Gregorian Time Get day of the week test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(dayOfWeek.eq.5), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Julian date to Julian Day
+      !   Oldest Julian date, 3/1/-4712, convertible to Julian Day 60
+      !   D.A. Hatcher algorithm limit
+      write(failMsg, *) " Did not return days = 60 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=-4712, mm=3, dd=1, & 
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d=days, rc=rc)
+      write(name, *) "Convert Julian to Julian Day Test 2"
+      call ESMF_Test((days.eq.60).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "3/1/-4712 Julian = ", days, " Julian days."
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Julian Day to Julian date
+      !   Smallest Julian Day, 60 convertible to Julian Date 3/1/-4712
+      !   D.A. Hatcher algorithm limit
+      write(failMsg, *) " Did not return 3/1/-4712 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, d=60, calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, calendar=julianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, mm=MM, dd=DD, yy=YY, rc=rc)
+      write(name, *) "Convert Julian Day to Julian Date Test 2"
+      call ESMF_Test(MM.eq.3 .and. DD.eq.1 .and. YY.eq.-4712 .and. &
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      print *, "Julian Day 60 is Julian Date ", MM, "/", DD, "/", YY
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Julian Leap Year in a negative year.
+      write(failMsg, *) " Did not return 2/29/-4 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, mm=2, dd=29, yy=-4, &
+                        calendar=julianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, mm=MM, dd=DD, yy=YY, rc=rc)
+      write(name, *) "Negative Leap Year Test"
+      call ESMF_Test(MM.eq.2 .and. DD.eq.29 .and. YY.eq.-4 .and. &
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      print *, "Leap Year Test returned ", MM, "/", DD, "/", YY
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Julian date to Julian Day
+      !   Solar eclipse at Nineveh on 6/15/-762, JD 1442903
+      !   http://www.hermetic.ch/cal_stud/jdn.htm#julian_day_number
+      write(failMsg, *) " Did not return days = 1442903 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=-762, mm=6, dd=15, & 
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d=days, rc=rc)
+      write(name, *) "Convert Julian to Julian Day Test 3"
+      call ESMF_Test((days.eq.1442903).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "6/15/-762 Julian = ", days, " Julian days."
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Julian date to Julian Day
+      !   Lunar eclipse at Nineveh on 4/15/-424, JD 1566297
+      !   http://www.hermetic.ch/cal_stud/jdn.htm#julian_day_number
+      write(failMsg, *) " Did not return days = 1566297 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=-424, mm=4, dd=15, & 
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d=days, rc=rc)
+      write(name, *) "Convert Julian to Julian Day Test 4"
+      call ESMF_Test((days.eq.1566297).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "4/15/-424 Julian = ", days, " Julian days."
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I4 test 1
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      bool = ESMF_CalendarIsLeapYear(gregorianCalendar, 2000, rc=rc)
+      write(name, *) "IsLeapYear test 1"
+      call ESMF_Test(bool .and. (rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I4 test 2
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      bool = ESMF_CalendarIsLeapYear(gregorianCalendar, 2100, rc=rc)
+      write(name, *) "IsLeapYear test 2"
+      call ESMF_Test(.not.bool .and. (rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I8 test 3
+      year = 500000000  ! break up initialization,
+      year = year * 10  !  since F90 constants are 32-bit
+      bool = ESMF_CalendarIsLeapYear(gregorianCalendar, year, rc=rc)
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      write(name, *) "IsLeapYear test 3"
+      call ESMF_Test(bool .and. (rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I8 test 4
+      year = 500000000  ! break up initialization,
+      year = year * 10  !  since F90 constants
+      year = year + 100 !    are 32-bit
+      bool = ESMF_CalendarIsLeapYear(gregorianCalendar, year, rc=rc)
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      write(name, *) "IsLeapYear test 4"
+      call ESMF_Test(.not.bool .and. (rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I4 test 5
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      bool = ESMF_CalendarIsLeapYear(julianCalendar, 2100, rc=rc)
+      write(name, *) "IsLeapYear test 5"
+      call ESMF_Test(bool .and. (rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I4 test 6
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      bool = ESMF_CalendarIsLeapYear(julianCalendar, 2005, rc=rc)
+      write(name, *) "IsLeapYear test 6"
+      call ESMF_Test(.not.bool .and. (rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I8 test 7
+      year = 500000000  ! break up initialization,
+      year = year * 10  !  since F90 constants
+      year = year + 100 !    are 32-bit
+      bool = ESMF_CalendarIsLeapYear(julianCalendar, year, rc=rc)
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      write(name, *) "IsLeapYear test 7"
+      call ESMF_Test(bool .and. (rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I8 test 8
+      year = 500000000  ! break up initialization,
+      year = year * 10  !  since F90 constants
+      year = year + 10  !   are 32-bit
+      bool = ESMF_CalendarIsLeapYear(julianCalendar, year, rc=rc)
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      write(name, *) "IsLeapYear test 8"
+      call ESMF_Test(.not.bool .and. (rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      call ESMF_CalendarDestroy(julianCalendar, rc)
       call ESMF_CalendarDestroy(esmf_360dayCalendar, rc)
+      call ESMF_CalendarDestroy(no_leapCalendar, rc)
+      call ESMF_CalendarDestroy(julianDayCalendar, rc)
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 #endif 
 
       ! return number of failures to environment; 0 = success (all pass)
