@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.10 2004/03/04 18:19:27 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.11 2004/03/04 18:21:26 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -109,7 +109,7 @@
                               horzCoordSystem=horz_coord_system, &
                               name=gname, rc=status)
 
-      print *, "Grid Create returned ", status
+      print *, "Grid Create returned ", status,  "(0=SUCCESS, -1=FAILURE)"
 
 
     ! figure out our local processor id
