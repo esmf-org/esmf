@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.113 2004/06/14 14:01:06 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.114 2004/06/15 12:51:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,6 +78,7 @@
 !      public ESMF_BaseGetStatus
 
        public ESMF_BasePrint
+       public ESMF_BaseValidate
 
 !   Virtual methods to be defined by derived classes
 !      public ESMF_Read
@@ -153,7 +154,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.113 2004/06/14 14:01:06 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.114 2004/06/15 12:51:06 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -871,6 +872,57 @@
       if (present(rc)) rc = status
 
       end subroutine ESMF_BasePrint
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseValidate"
+!BOPI
+! !IROUTINE:  ESMF_BaseValidate - Call into C++ code to print base object
+!
+! !INTERFACE:
+      subroutine ESMF_BaseValidate(base, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base), intent(in) :: base
+      character(len=*), intent(in), optional :: options
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!  Interface to call through to C++ and validate base object values.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[options]
+!       Validate options.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: status
+      character(len=ESMF_MAXSTR) :: opts
+      logical :: dummy
+
+      if (present(options)) then
+          opts = options
+      else
+          opts = ''
+      endif
+
+      if (base%this .eq. ESMF_NULL_POINTER) then
+        dummy=ESMF_LogWrite("Uninitialized Base object", &
+                             ESMF_LOG_INFO) 
+        rc = ESMF_FAILURE
+        return
+      endif
+
+      call c_ESMC_BaseValidate(base, opts, status)
+      if (present(rc)) rc = status
+
+      end subroutine ESMF_BaseValidate
 
 !=========================================================================
 ! Domain List routines.

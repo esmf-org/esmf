@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.18 2004/06/08 12:12:06 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.19 2004/06/15 12:51:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.18 2004/06/08 12:12:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.19 2004/06/15 12:51:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -185,6 +185,56 @@ extern "C" {
   return;
 
 }  // end c_ESMC_BasePrint
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_BaseValidate - print Base object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_basevalidate)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *opts,               // in - F90, non-null terminated string
+      int *rc,                  // out - return code
+      int nlen) {               // hidden/in - strlen count for options
+// 
+// !DESCRIPTION:
+//     Validate the contents of a base object.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status;
+  char *copts = NULL;
+
+  if (!base) {
+    //printf("uninitialized Base object\n");
+    ESMC_LogDefault.ESMC_LogWrite("Base object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  if (opts && (nlen > 0) && (opts[0] != '\0')) {
+      copts = ESMC_F90toCstring(opts, nlen);
+      if (!copts) {
+          if (rc) *rc = ESMF_FAILURE;
+          return;
+      }
+  }
+
+  *rc = (*base)->ESMC_Validate(copts);
+
+  if (copts)
+      delete [] copts;
+  return;
+
+}  // end c_ESMC_BaseValidate
 
 
 //-----------------------------------------------------------------------------
