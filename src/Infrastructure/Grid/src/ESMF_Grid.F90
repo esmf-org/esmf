@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.11 2002/12/05 18:52:13 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.12 2002/12/06 16:23:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -118,15 +118,15 @@
     public ESMF_GridDestroy
     public ESMF_GridGetConfig
     public ESMF_GridSetConfig
-    public ESMF_GridGetCoordinate
+    !public ESMF_GridGetCoordinate
     public ESMF_GridSetCoordinate
-    public ESMF_GridGetLMask
+    !public ESMF_GridGetLMask
     public ESMF_GridSetLMask
-    public ESMF_GridGetMMask
+    !public ESMF_GridGetMMask
     public ESMF_GridSetMMask
-    public ESMF_GridGetMetric
+    !public ESMF_GridGetMetric
     public ESMF_GridSetMetric
-    public ESMF_GridGetRegionID
+    !public ESMF_GridGetRegionID
     public ESMF_GridSetRegionID
     public ESMF_GridValidate
     public ESMF_GridPrint
@@ -136,43 +136,43 @@
 ! !PUBLIC DATA MEMBERS:
 
    integer, parameter ::                   &! recognized grid types
-      ESMF_GridType_Unknown           =  0 &! unknown or undefined grid
-      ESMF_GridType_LatLon            =  1 &! equally-spaced lat/lon grid
-      ESMF_GridType_Mercator          =  2 &! Mercator lat/lon grid
-      ESMF_GridType_Dipole            =  3 &! Displaced-pole dipole grid
-      ESMF_GridType_Tripole           =  4 &! Tripolar grids
-      ESMF_GridType_XY                =  5 &! Cartesian equally-space x-y grid
-      ESMF_GridType_DataStream        =  6 &! Data stream
-      ESMF_GridType_PhysFourier       =  7 &! Mixed Fourier Space/Phys Space grid
-      ESMF_GridType_LatLonGauss       =  8 &! lat/lon grid with Gaussian latitudes
-      ESMF_GridType_SphericalSpectral =  9 &! spectral space for spherical harmonics
-      ESMF_GridType_Geodesic          = 10 &! spherical geodesic grid
+      ESMF_GridType_Unknown           =  0, &! unknown or undefined grid
+      ESMF_GridType_LatLon            =  1, &! equally-spaced lat/lon grid
+      ESMF_GridType_Mercator          =  2, &! Mercator lat/lon grid
+      ESMF_GridType_Dipole            =  3, &! Displaced-pole dipole grid
+      ESMF_GridType_Tripole           =  4, &! Tripolar grids
+      ESMF_GridType_XY                =  5, &! Cartesian equally-space x-y grid
+      ESMF_GridType_DataStream        =  6, &! Data stream
+      ESMF_GridType_PhysFourier       =  7, &! Mixed Fourier Space/Phys Space grid
+      ESMF_GridType_LatLonGauss       =  8, &! lat/lon grid with Gaussian latitudes
+      ESMF_GridType_SphericalSpectral =  9, &! spectral space for spherical harmonics
+      ESMF_GridType_Geodesic          = 10, &! spherical geodesic grid
       ESMF_GridType_CubedSphere       = 11  ! cubed sphere grid
 
    integer, parameter ::                   &! recognized staggering types
-      ESMF_GridStagger_Unknown        =  0 &! unknown or undefined staggering
-      ESMF_GridStagger_A              =  1 &! Arakawa A (centered velocity)
-      ESMF_GridStagger_B              =  2 &! Arakawa B (velocities at grid corner)
-      ESMF_GridStagger_C              =  3 &! Arakawa C (velocities at cell faces)
-      ESMF_GridStagger_Z              =  4 &! C grid equiv for geodesic grid
-      ESMF_GridStagger_VertCenter     =  5 &! vert velocity at vertical midpoints
+      ESMF_GridStagger_Unknown        =  0, &! unknown or undefined staggering
+      ESMF_GridStagger_A              =  1, &! Arakawa A (centered velocity)
+      ESMF_GridStagger_B              =  2, &! Arakawa B (velocities at grid corner)
+      ESMF_GridStagger_C              =  3, &! Arakawa C (velocities at cell faces)
+      ESMF_GridStagger_Z              =  4, &! C grid equiv for geodesic grid
+      ESMF_GridStagger_VertCenter     =  5, &! vert velocity at vertical midpoints
       ESMF_GridStagger_VertFace       =  6  ! vert velocity/Pgrad at top(bottom)face
 
    integer, parameter ::                   &! recognized coordinate systems
-      ESMF_CoordSystem_Unknown        =  0 &! unknown or undefined coord system
-      ESMF_CoordSystem_Spherical      =  1 &! spherical coordinates (lat/lon)
-      ESMF_CoordSystem_Cartesian      =  2 &! Cartesian coordinates (x,y)
-      ESMF_CoordSystem_Cylindrical    =  3 &! cylindrical coordinates
-      ESMF_CoordSystem_LatFourier     =  4 &! mixed latitude/spectral space
-      ESMF_CoordSystem_Spectral       =  5 &! wavenumber space
-      ESMF_CoordSystem_Depth          =  6 &! vertical z coord. depth (0 at surface)
-      ESMF_CoordSystem_Height         =  7 &! vertical z coord. height (0 at bottom)
-      ESMF_CoordSystem_Pressure       =  8 &! vertical pressure coordinate
-      ESMF_CoordSystem_Sigma          =  9 &! vertical sigma coordinate
-      ESMF_CoordSystem_Theta          = 10 &! vertical theta coordinate
-      ESMF_CoordSystem_Eta            = 11 &! vertical eta coordinate
-      ESMF_CoordSystem_Isopycnal      = 12 &! vertical density coordinate
-      ESMF_CoordSystem_Hybrid         = 13 &! hybrid vertical coordinates
+      ESMF_CoordSystem_Unknown        =  0, &! unknown or undefined coord system
+      ESMF_CoordSystem_Spherical      =  1, &! spherical coordinates (lat/lon)
+      ESMF_CoordSystem_Cartesian      =  2, &! Cartesian coordinates (x,y)
+      ESMF_CoordSystem_Cylindrical    =  3, &! cylindrical coordinates
+      ESMF_CoordSystem_LatFourier     =  4, &! mixed latitude/spectral space
+      ESMF_CoordSystem_Spectral       =  5, &! wavenumber space
+      ESMF_CoordSystem_Depth          =  6, &! vertical z coord. depth (0 at surface)
+      ESMF_CoordSystem_Height         =  7, &! vertical z coord. height (0 at bottom)
+      ESMF_CoordSystem_Pressure       =  8, &! vertical pressure coordinate
+      ESMF_CoordSystem_Sigma          =  9, &! vertical sigma coordinate
+      ESMF_CoordSystem_Theta          = 10, &! vertical theta coordinate
+      ESMF_CoordSystem_Eta            = 11, &! vertical eta coordinate
+      ESMF_CoordSystem_Isopycnal      = 12, &! vertical density coordinate
+      ESMF_CoordSystem_Hybrid         = 13, &! hybrid vertical coordinates
       ESMF_CoordSystem_Lagrangian     = 14  ! Lagrangian coordinates
       ! I'm sure there are more - I'm not sure
       ! what the atmospheric ESMF models are using for vertical coords
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.11 2002/12/05 18:52:13 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.12 2002/12/06 16:23:40 nscollins Exp $'
 
 !==============================================================================
 !
