@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.31 2004/08/26 19:46:35 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.32 2004/08/28 00:10:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.31 2004/08/26 19:46:35 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.32 2004/08/28 00:10:24 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -111,6 +111,10 @@
       !EX_UTest
       ! Test Requirement FLD2.4 Deletion
       ! Verify getting the name of an uninitialized Bundle is handled properly.
+#if !defined(ESMF_NO_INITIALIZERS)
+      bundle1 = ESMF_BundleCreate()
+      call ESMF_BundleDestroy(bundle1)
+#endif
       call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
       write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
       write(name, *) "Getting name of uninitalized Bundle Test"
@@ -151,6 +155,10 @@
 
 
       !EX_UTest
+#if !defined(ESMF_NO_INITIALIZERS)
+      simplefield = ESMF_FieldCreateNoData()
+      call ESMF_FieldDestroy(simplefield)
+#endif
       call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
       write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
       write(name, *) "Adding an uninitialized Field to an uncreated Bundle Test"
@@ -416,12 +424,12 @@
       call ESMF_FieldGet(returnedfield3, name=fname3, rc=rc)
 
       !------------------------------------------------------------------------
-      ! Get a Bundle Data Pointer
+      ! Get a Bundle Data Pointer from a field with no data - should fail
       !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Get a Bundle Data Pointer Test"
+      write(failMsg, *) "Returned ESMF_SUCCESS incorrectly"
+      write(name, *) "Get a Bundle Data Pointer Test from empty Field"
       call ESMF_BundleGetDataPointer(bundle1, fieldName="heat flux", dataPointer=f90ptr2, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, "rc =",  rc
       !------------------------------------------------------------------------
 
