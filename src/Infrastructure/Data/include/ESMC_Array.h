@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.16 2003/02/13 23:39:43 jwolfe Exp $
+// $Id: ESMC_Array.h,v 1.17 2003/02/15 00:09:07 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -219,7 +219,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
  // misc methods that act on arrays
     int ESMC_ArrayRedist(ESMC_Layout *layout,
                          int rank_trans[], int size_rank_trans,
-                         int decompids[], int size_decomp,
+                         int olddecompids[], int decompids[], int size_decomp,
                          ESMC_Array *RedistArray);
     
  // < declare the rest of the public interface methods here >

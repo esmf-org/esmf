@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.10 2003/02/13 23:06:47 eschwab Exp $
+// $Id: ESMC_Layout.C,v 1.11 2003/02/15 00:09:34 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.10 2003/02/13 23:06:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.11 2003/02/15 00:09:34 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -851,7 +851,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
     // if decomp is 0, no decomposition of the axis
     if (decompids[i] == 0) {
       AIPtr->l = 0;
-      AIPtr->r = global_counts[i];
+      AIPtr->r = global_counts[i]-1;
       AIPtr->max = global_counts[i];
     }
     // if decomp is 1, use nxLayout

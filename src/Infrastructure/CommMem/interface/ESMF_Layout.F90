@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout.F90,v 1.7 2003/02/14 01:00:01 eschwab Exp $
+! $Id: ESMF_Layout.F90,v 1.8 2003/02/15 00:10:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,6 +77,7 @@
       public ESMF_LayoutGetSize
       public ESMF_LayoutGetDEPosition
       public ESMF_LayoutGetDEid
+      public ESMF_LayoutSetAxisIndex
  
       public ESMF_LayoutCheckpoint
       public ESMF_LayoutRestore
@@ -92,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Layout.F90,v 1.7 2003/02/14 01:00:01 eschwab Exp $'
+      '$Id: ESMF_Layout.F90,v 1.8 2003/02/15 00:10:02 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -517,7 +518,7 @@ end interface
       type(ESMF_Layout) :: layout
       integer, dimension(:), intent(in) :: global_counts
       integer, dimension(:), intent(in) :: decompids
-      type(ESMF_AxisIndex), dimension(:), pointer :: AIPtr
+      type(ESMF_AxisIndex), dimension(:) :: AIPtr
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:

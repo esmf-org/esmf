@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.7 2003/02/14 16:37:21 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.8 2003/02/15 00:08:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.7 2003/02/14 16:37:21 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.8 2003/02/15 00:08:38 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -896,7 +896,7 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayRedist(array, layout, rank_trans, decompids, \
+      subroutine ESMF_ArrayRedist(array, layout, rank_trans, decompids, &
                                   redistarray, rc)
 !
 ! !ARGUMENTS:
@@ -913,6 +913,7 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 !
 !EOP
 ! !REQUIREMENTS:
+  external :: c_ESMC_ArrayRedist
         integer :: status         ! local error status
         logical :: rcpresent      ! did user specify rc?
         integer :: size_rank_trans
@@ -929,7 +930,7 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 ! call c routine to query indexA
         size_rank_trans = size(rank_trans)
         size_decomp = size(decompids)
-        call c_ESMC_ArrayRedist(array, layout, rank_trans, size_rank_trans, \
+        call c_ESMC_ArrayRedist(array, layout, rank_trans, size_rank_trans, &
                                 decompids, size_decomp, redistarray, rc)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_LayoutSetAxisIndex error"
