@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.42 2004/05/24 12:48:18 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.43 2004/05/24 15:29:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.42 2004/05/24 12:48:18 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.43 2004/05/24 15:29:46 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -677,7 +677,7 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!     Add multiple {\tt ESMF\Array}s to an {\tt ESMF\_State}.
+!     Add multiple {\tt ESMF\_Array}s to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
