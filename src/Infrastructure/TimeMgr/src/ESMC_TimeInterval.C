@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.30 2003/06/13 19:26:11 rstaufer Exp $
+// $Id: ESMC_TimeInterval.C,v 1.31 2003/06/30 21:30:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.30 2003/06/13 19:26:11 rstaufer Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.31 2003/06/30 21:30:41 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -504,6 +504,71 @@
     return(quotient);
 
 }  // end ESMC_TimeInterval::ESMC_TimeIntervalDiv
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(%) - Divide two time intervals, return time interval remainder
+//
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator%(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //        to modulo by
+//
+// !DESCRIPTION:
+//    Returns this time interval modulo by given time interval as a 
+//    {\tt ESMC\_TimeInterval}
+//
+//EOP
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval remainder;
+
+    // TODO: fractional & calendar interval parts
+
+    if (timeInterval.S != 0) {
+      remainder.S = this->S % timeInterval.S;
+    }
+    // TODO:  else throw exception ?
+
+    return(remainder);
+
+}  // end ESMC_TimeInterval::operator%
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(%=) - Takes the modulus of two time intervals
+//
+// !INTERFACE:
+      ESMC_TimeInterval& ESMC_TimeInterval::operator%=(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval& result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
+                                                //        to modulo by
+//
+// !DESCRIPTION:
+//    Returns this time interval modulo by given time interval
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO: fractional & calendar interval parts
+
+    if (timeInterval.S != 0) {
+      this->S %= timeInterval.S;
+    }
+    // TODO:  else throw exception ?
+
+    return(*this);
+
+}  // end ESMC_TimeInterval::operator%=
 
 //-------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.15 2003/06/07 00:41:59 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.16 2003/06/30 21:30:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,6 +91,12 @@ extern "C" {
                                           ESMC_TimeInterval *timeInterval2,
                                           double *timeIntervalRQuot) {
            *timeIntervalRQuot = (*timeInterval1 / *timeInterval2);
+       }
+
+       void FTN(c_esmc_timeintervalremainder)(ESMC_TimeInterval *timeInterval1,
+                                              ESMC_TimeInterval *timeInterval2,
+                                    ESMC_TimeInterval *timeIntervalRemainder) {
+           *timeIntervalRemainder = (*timeInterval1 % *timeInterval2);
        }
 
        void FTN(c_esmc_timeintervalquoti)(ESMC_TimeInterval *timeInterval,
