@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.38 2004/11/02 20:02:46 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.39 2004/11/09 21:43:36 cpboulder Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -119,6 +119,7 @@ type ESMF_Log
     type(ESMF_Logical)                              ::  rootOnly    
     type(ESMF_Logical)                              ::  verbose  
     type(ESMF_Logical)                              ::  dirty  
+    type(ESMF_Logical)                              ::  logNone
     integer                                             maxElements
     integer                                             stream 
     integer                                             unitNumber
@@ -558,10 +559,11 @@ end subroutine ESMF_LogGet
 ! !IROUTINE: ESMF_LogInitialize - Initialize Log file(s)
 
 ! !INTERFACE: 
-      subroutine ESMF_LogInitialize(filename, rc)
+      subroutine ESMF_LogInitialize(filename, lognone, rc)
 !
 ! !ARGUMENTS:
       character(len=*)                          :: filename
+      integer, intent(in),optional		:: lognone  
       integer, intent(out),optional	        :: rc
 
 ! !DESCRIPTION:
@@ -574,6 +576,8 @@ end subroutine ESMF_LogGet
 ! 
 !      \item [{[filename]}]
 !            Name of file.
+!      \item [{[flognone]}]
+!            Turns off logging if equal to {\tt ESMF\_LOGNONE}
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -584,6 +588,7 @@ end subroutine ESMF_LogGet
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 	
     if (present(rc)) rc=ESMF_FAILURE
+    if (lognone .eq. ESMF_LOG_NONE) ESMF_LogDefault%logNone = ESMF_TRUE 
     ESMF_LogDefault%FileIsOpen=ESMF_FALSE
     ESMF_LogDefault%nameLogErrFile=filename
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
@@ -986,6 +991,7 @@ end subroutine ESMF_LogSet
     integer                         ::h,m,s,ms,y,mn,dy
     integer			    ::rc2
     
+    if (ESMF_LogDefault%logNone .ne. ESMF_TRUE) then
     ESMF_LogDefault%dirty = ESMF_TRUE
     call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
     call DATE_AND_TIME(d,t)	
@@ -1037,6 +1043,7 @@ end subroutine ESMF_LogSet
         ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1	
     endif	
     ESMF_LogDefault%flushed = ESMF_FALSE
+    endif
     if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
 
