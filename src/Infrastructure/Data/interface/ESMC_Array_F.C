@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.35 2003/04/17 21:32:51 jwolfe Exp $
+// $Id: ESMC_Array_F.C,v 1.36 2003/04/24 16:45:33 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,36 +36,39 @@
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
-     void FTN(c_esmc_storeallocfunc)(void (*func)(struct c_F90ptr *, int *, int *, int *), int *status) {
-         *status = ESMC_AllocFuncStore(func);
-     }
-     void FTN(c_esmc_storedeallocfunc)(void (*func)(struct c_F90ptr *, int *, int *, int *), int *status) {
-         *status = ESMC_DeallocFuncStore(func);
-     }
-     void FTN(c_esmc_arraycreate)(ESMC_Array **ptr, int rank, 
-                                        enum ESMC_DataType type, 
-                                        enum ESMC_DataKind kind,
-                                        int *lbounds, int *ubounds, 
-                                        int *strides, int *status) {
-             (*ptr) = ESMC_ArrayCreate_F(rank, type, kind, NULL,
-                                     lbounds, ubounds, strides, NULL, status);
+
+     void FTN(c_esmc_arraycreateall)(ESMC_Array **ptr, int *rank, 
+                                     ESMC_DataType *dt, ESMC_DataKind *dk,
+                                     int *counts, int *lbounds, int *ubounds,
+                                     int *strides, int *status)  {
+         (*ptr) = ESMC_ArrayCreate_F(*rank, *dt, *dk, counts, 
+                                    NULL, NULL, ESMC_DATA_NONE, 
+                                    lbounds, ubounds, strides, NULL, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
 
-     void FTN(c_esmc_arrayconstructbyspec)() {
-     }
-
-     void FTN(c_esmc_arraycreatebyptr)(ESMC_Array **ptr, 
-                                 enum ESMC_DataType *dt, enum ESMC_DataKind *dk,
-                                 int *rank, int *lengths, int *status) {
+     void FTN(c_esmc_arraycreatenodata)(ESMC_Array **ptr, int *rank, 
+                                        ESMC_DataType *dt, ESMC_DataKind *dk, 
+                                        ESMC_ArrayOrigin *oflag, int *status) {
              
-             (*ptr) = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, lengths,
-                                      NULL, NULL, status);
+             (*ptr) = ESMC_ArrayCreateNoData(*rank, *dt, *dk, *oflag, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
  
+     void FTN(c_esmc_arraysetinfo)(ESMC_Array **ptr, 
+                               struct c_F90ptr *fptr, void *base, int *counts,
+                               int *lbounds, int *ubounds,
+                               int *strides, int *offsets,
+                               ESMC_Logical *contig, ESMC_Logical *dealloc,
+                               int *status) {
+      
+         *status = (*ptr)->ESMC_ArraySetInfo(fptr, base, counts, 
+                                            lbounds, ubounds, strides, offsets, 
+                                            *contig, *dealloc);
+     }
+
      void FTN(c_esmc_arraysetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status) {
       
          *status = (*ptr)->ESMC_ArraySetLengths(*rank, lengths);
@@ -109,10 +112,10 @@ extern "C" {
      void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_DELayout **layout,
                                   int *rank_trans, int *size_rank_trans, 
                                   int *olddecompids, int *decompids,  int *size_decomp,
-                                  ESMC_Array **RedistArray, int *status) {
+                                  ESMC_Array ***RedistArray, int *status) {
           *status = (*ptr)->ESMC_ArrayRedist(*layout, rank_trans, *size_rank_trans,
                                              olddecompids, decompids, *size_decomp,
-                                             *RedistArray);
+                                             **RedistArray);
      }
 
      void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_DELayout **layout,
@@ -130,7 +133,7 @@ extern "C" {
                                      ESMC_Array **Array_out, int *status) {
           *status = (*ptr)->ESMC_ArrayAllGather(*layout, decompids, 
                                                 *size_decomp, AI_exc, AI_tot,
-                                                *Array_out);
+                                                 Array_out);
      }
 
      void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
@@ -231,6 +234,5 @@ extern "C" {
 
 
 };
-
 
 

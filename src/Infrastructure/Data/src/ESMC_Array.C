@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.42 2003/04/17 21:40:19 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.43 2003/04/24 16:45:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.42 2003/04/17 21:40:19 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.43 2003/04/24 16:45:44 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -60,12 +60,11 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    enum ESMC_DataType dt,     // int, float, etc
-    enum ESMC_DataKind dk,     // short/long, etc
+    ESMC_DataType dt,          // int, float, etc
+    ESMC_DataKind dk,          // short/long, etc
+    int *icounts,              // number of items in each dim
     void *base,                // if non-null, this is already allocated memory
-    int *offsets,              // offset in bytes to start of each dim
-    int *lengths,              // number of items in each dim
-    int *strides,              // number of bytes between successive items/dim
+    ESMC_DataCopy docopy,      // if base != NULL, copy data?
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
@@ -80,19 +79,15 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-// TODO: Add code here which does:
-//
 //   This code needs to make space for the private class data and store the
-//   arguments given.  Decide if constructor is going to do much or not.
+//   arguments given.
 //
 //   There will need to be a #if USING_MIXED_FORTRAN_AND_C++ section.  If
 //   we are running with fortran, then it needs to do:
 //   - call a *Fortran* allocate routine to get space - not malloc - and
-//     it needs to call with a pointer of the correct type/kind/rank so
-//     that this array is useable from F90 as well as C++.  
-//         f90ptr = ESMF_Allocate(type, kind, rank, shape, ..., &rc);
-//     This is overloaded to call a specific routine on the F90 side which
-//     is per type/kind/rank.  The new F90 pointer is stored in the private 
+//     it needs to create an F90 array pointer of the correct type/kind/rank 
+//     so this array is useable from F90 as well as C++.  
+//     The new F90 pointer is stored in the private 
 //     data for this class as an opaque object; to be returned on demand 
 //     for use by fortran code.
 //
@@ -102,8 +97,18 @@
 //   The return from this routine is a pointer to the new Array data.
 //
      ESMC_Array *a = new ESMC_Array;
-     a->ESMC_ArraySetOrigin(ESMC_FROM_CPLUSPLUS);
-  
+     int status;
+
+
+     status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
+                                     ESMC_FROM_CPLUSPLUS,
+                                     NULL, ESMC_ARRAY_DO_ALLOCATE, 
+                                     docopy, ESMF_TF_TRUE, 
+                                     NULL, NULL, NULL, NULL); 
+     
+     if (rc != NULL)
+         *rc = status;
+
      return a;
 
  } // end ESMC_ArrayCreate
@@ -128,14 +133,55 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+    array->ESMC_ArrayDestruct();
+
     delete array;
 
     return 0;
 
  } // end ESMC_ArrayDestroy
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_ArrayCreateNoData - internal routine for fortran use
+//
+// !INTERFACE:
+      ESMC_Array *ESMC_ArrayCreateNoData(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Array
+//
+// !ARGUMENTS:
+    int rank,                  // dimensionality
+    ESMC_DataType dt,          // int, float, etc
+    ESMC_DataKind dk,          // short/long, etc
+    ESMC_ArrayOrigin oflag,    // caller is fortran or C++?
+    int *rc) {                 // return code
+//
+// !DESCRIPTION:
+//      This version of Create is only intended for internal use by
+//      the {\tt ESMF\_ArrayCreate} fortran routine.  It creates a partially
+//      constructed array, then depends on the caller to come back and
+//      complete the array with the {\tt ESMF\_ArraySetInfo} call.  
+//      (It is broken up this way to try to minimize the amount of
+//      macro-generated code needed in the {\tt ESMF\_Array.F90} source file.)
+//
+//EOPI
+
+     ESMC_Array *a = new ESMC_Array;
+     int status;
+
+     status = a->ESMC_ArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
+                            NULL, ESMC_ARRAY_NO_ALLOCATE, 
+                            ESMC_DATA_NONE, ESMF_TF_FALSE, 
+                            NULL, NULL, NULL, NULL);
+
+     if (rc != NULL)
+         *rc = status;
+
+     return a;
+
+ } // end ESMC_ArrayCreateNoData
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -149,13 +195,16 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    enum ESMC_DataType dt,     // int, float, etc
-    enum ESMC_DataKind dk,     // short/long, etc
+    ESMC_DataType dt,          // int, float, etc
+    ESMC_DataKind dk,          // short/long, etc
+    int *icounts,              // counts along each dimension
+    struct c_F90ptr *f90ptr,   // opaque type which fortran uses (dope v)
     void *base,                // real start of memory 
-    int *offsets,              // offset in bytes to start of each dim
-    int *lens,                 // number of items in each dim
+    ESMC_DataCopy docopy,      // if base is null and this is Copy, alloc here
+    int *lbounds,              // lower index number per dim
+    int *ubounds,              // upper index number per dim
     int *strides,              // number of bytes between successive items/dim
-    struct c_F90ptr *f90ptr,     // opaque type which fortran understands (dope v)
+    int *offsets,              // number of bytes to start of data/dim
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
@@ -192,30 +241,25 @@
 // 
 //   The return from this routine is a pointer to the new Array data.
 //
-     int i;
      ESMC_Array *a = new ESMC_Array;
+     int status;
 
-     a->ESMC_ArraySetRank(rank);
-     a->ESMC_ArraySetType(dt);
-     a->ESMC_ArraySetKind(dk);
-     a->ESMC_ArraySetBaseAddr((void *)0);
-     switch(rank) {
-       case 1:
-         a->ESMC_ArraySetLengths(lens[0]); break;
-       case 2:
-         a->ESMC_ArraySetLengths(lens[0], lens[1]); break;
-       case 3:
-         a->ESMC_ArraySetLengths(lens[0], lens[1], lens[2]); break;
-       case 4:
-         a->ESMC_ArraySetLengths(lens[0], lens[1], lens[2], lens[3]); break;
-       default:
-         printf("no len support for rank %d\n", rank); assert(0); break;
-     }
-     a->ESMC_ArraySetOrigin(ESMC_FROM_FORTRAN);
+     if (base == NULL) 
+         status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
+                                     ESMC_FROM_FORTRAN, f90ptr, 
+                                     ESMC_ARRAY_DO_ALLOCATE,
+                                     ESMC_DATA_NONE, ESMF_TF_TRUE, 
+                                     lbounds, ubounds, strides, offsets); 
+     else
+         status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
+                                     ESMC_FROM_FORTRAN, f90ptr, 
+                                     ESMC_ARRAY_NO_ALLOCATE, 
+                                     docopy, ESMF_TF_FALSE, 
+                                     lbounds, ubounds, strides, offsets); 
 
-     //printf("in ESMC_ArrayCreate_F, a = 0x%08lx\n", (unsigned long)a);
+     if (rc != NULL)
+         *rc = status;
 
-     *rc = ESMF_SUCCESS;
      return a;
 
  } // end ESMC_ArrayCreate_F
@@ -225,22 +269,26 @@
 // !IROUTINE:  ESMC_ArrayConstruct - fill in an already allocated Array
 //
 // !INTERFACE:
-      void ESMC_Array::ESMC_ArrayConstruct(
+      int ESMC_Array::ESMC_ArrayConstruct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-    ESMC_Array *a,
-    int rank,
-    enum ESMC_DataType dt, 
-    enum ESMC_DataKind dk,
-    void *base, 
-    int *offsets, 
-    int *lengths, 
-    int *strides,
-    void *f90ptr, 
-    int *rc) {
+    int irank,                 // dimensionality
+    ESMC_DataType dt,          // int, float, etc
+    ESMC_DataKind dk,          // short/long, etc  (*2, *4, *8)
+    int *icounts,              // number of items in each dim
+    void *base,                // base memory address of data block
+    ESMC_ArrayOrigin oflag,    // create called from F90 or C++?
+    struct c_F90ptr *f90ptr,   // opaque type which fortran understands (dopev)
+    ESMC_ArrayDoAllocate aflag, // do we allocate space or not?
+    ESMC_DataCopy docopy,      // do we make a copy of the data?
+    ESMC_Logical dflag,        // do we deallocate space or not?
+    int *lbounds,              // lower index number per dim
+    int *ubounds,              // upper index number per dim
+    int *strides,              // number of bytes between successive items/dim
+    int *offsets) {            // offset in bytes to start of each dim
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -252,10 +300,48 @@
 //
 //EOP
 // !REQUIREMENTS:  
+    int i, status;
+    ESMC_Array *aptr;
 
-//
-//  code goes here
-//
+    rank = irank;
+    type = dt;
+    kind = dk;
+
+    base_addr = base;
+    for (i=0; i<rank; i++) {
+        counts[i] = icounts ? icounts[i] : 1;        
+        lbound[i] = lbounds ? lbounds[i] : 1;
+        ubound[i] = ubounds ? ubounds[i] : counts[i];
+        stride[i] = strides ? strides[i] : 1;
+        offset[i] = offsets ? offsets[i] : 0;
+    }
+    for (i=rank; i<ESMF_MAXDIM; i++) {
+        counts[i] = 1;
+        lbound[i] = 1;
+        ubound[i] = 1;
+        stride[i] = 1;
+        offset[i] = 0;
+    }
+
+    origin = oflag;
+    needs_dealloc = dflag;
+
+    if (f90ptr != NULL)
+        ESMC_ArraySetF90Ptr(f90ptr);
+ 
+    if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
+            aptr = this;
+            FTN(f_esmf_arrayf90allocate)(&aptr, &rank, &type, &kind, 
+                                                      counts, &status);
+    } 
+
+    
+    // TODO: memcpy from base to base_addr, proper number of bytes?
+    //  if docopy flag is set.
+
+    return ESMF_SUCCESS;
+
+
 
  } // end ESMC_ArrayConstruct
 
@@ -282,10 +368,19 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
     int rc = ESMF_FAILURE;
+    ESMC_Array *aptr = this;
+
+    // check origin and alloc flag, and call dealloc routine if needed 
+    if (!needs_dealloc)
+        return ESMF_SUCCESS;
+
+    // if there is an F90 dope vector, we have to call back into fortran
+    // to deallocate this.   if we want to support a C++ only library,
+    // then this code needs to be calling malloc/free or new/delete and
+    // needs conditional code to pick the fortran or C++ mem mgt system.
+
+    FTN(f_esmf_arrayf90deallocate)(&aptr, &rank, &type, &kind, &rc);
 
     return rc;
 
@@ -401,6 +496,69 @@
     //return rc;
 
  //} // end ESMC_ArraySet<Value>
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArraySetInfo - Set the most common F90 needs
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArraySetInfo(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    struct c_F90ptr *fptr,    // in - f90 pointer
+    void *base,               // in - base memory address
+    int *icounts,             // in - counts along each dim
+    int *lbounds,             // in - lowest valid index
+    int *ubounds,             // in - highest valid index
+    int *strides,             // in - numbytes between consecutive items/dim
+    int *offsets,             // in - numbytes from base to 1st item/dim
+    ESMC_Logical contig,      // in - is memory chunk contiguous?
+    ESMC_Logical dealloc) {   // in - do we need to deallocate at delete?
+//
+// !DESCRIPTION:
+//     Sets a list of values associated with an already created pointer.
+//     This particular set was chosen to mesh well with creation on the
+//     F90 side.  Other combinations will probably be useful.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int i, rank = this->rank;
+    int bytes = ESMF_F90_PTR_BASE_SIZE;
+  
+    // note - starts at 1; base includes rank 1 size
+    for (i=1; i<rank; i++)
+	bytes += ESMF_F90_PTR_PLUS_RANK;
+   
+   //fprintf(stderr, "setting f90 ptr from %lx to %lx, %d bytes for rank %d\n", 
+   //                (long int)fptr, (long int)(&this->f90dopev), bytes, rank);
+
+    memcpy((void *)(&this->f90dopev), (void *)fptr, bytes);
+
+    base_addr = base;
+    for (i=0; i<rank; i++) {
+        counts[i] = icounts ? icounts[i] : 0;
+        offset[i] = offsets ? offsets[i] : 0;
+        stride[i] = strides ? strides[i] : 0;
+        lbound[i] = lbounds ? lbounds[i] : 0;
+        ubound[i] = ubounds ? ubounds[i] : counts[i];
+    }
+    for (i=rank; i<ESMF_MAXDIM; i++) {
+        counts[i] = 1;
+        offset[i] = 0;
+        stride[i] = 1;
+        lbound[i] = 1;
+        ubound[i] = 1;
+    }
+    iscontig = contig;
+    needs_dealloc = dealloc;
+
+    return ESMF_SUCCESS; 
+
+ } // end ESMC_ArraySetInfo
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -847,7 +1005,7 @@
                                  //       of the Array
       ESMC_AxisIndex *AI_tot,    // in  - axis indices for the total domain of
                                  //       the Array
-      ESMC_Array *Array_out) {   // out - new Array on all DE's with the global data
+      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
 // !DESCRIPTION:
 //      
@@ -861,6 +1019,8 @@
     int i_exc, j_exc;
     float *fp, *fp0;
     int *ip, *ip0;
+    int counts[ESMF_MAXDIM];
+    ESMC_Array *gathered;
 
 //  allocate global-sized array on each DE and fill with distributed data
 //  from current Array
@@ -869,15 +1029,16 @@
     for (i=0; i<rank; i++) {
       gsize = gsize * AI_exc[i].max;
       lsize = lsize * (AI_exc[i].r - AI_exc[i].l+1);
+      counts[i] = AI_exc[i].max;
     }
 
     // switch based on datatype  TODO: this might be a good place to use templates
     switch (this->type) {
       case ESMF_DATA_REAL:
         // create array with global data buffer
-        Array_out = ESMC_ArrayCreate(this->rank, this->type, this->kind);
+        gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
         // allocate global array from this size
-        fp = (float *)Array_out->base_addr;
+        fp = (float *)(gathered->base_addr);
 
         // call layoutgather to fill this array
         fp0 = (float *)this->base_addr;
@@ -888,9 +1049,9 @@
 
       case ESMF_DATA_INTEGER:
         // create array with global data
-        Array_out = ESMC_ArrayCreate(this->rank, this->type, this->kind);
+        gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
         // allocate global array from this size
-        ip = (int *)Array_out->base_addr;
+        ip = (int *)(gathered->base_addr);
 
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
@@ -902,6 +1063,10 @@
         printf("no code to handle data type %d yet\n", this->type);
       break;
     }
+
+    gathered->ESMC_ArrayPrint();
+
+    *Array_out = gathered;
 
     rc = ESMF_SUCCESS;
     return rc;
@@ -1154,7 +1319,7 @@
     printf("base_addr = 0x%08lx\n", (unsigned long)this->base_addr);
     printf("            ");
     for (i=0; i<this->rank; i++) 
-        printf("dim[%d] = %d  ", i, this->length[i]);
+        printf("dim[%d] = %d  ", i, this->counts[i]);
     printf("\n");
     
     // TODO: make this look at one of the option letters to see if user
@@ -1164,7 +1329,7 @@
         switch (this->rank) {
           case 1:
             printf("  Real, Dim 1, Data values:\n");
-            imax = this->length[0];
+            imax = this->counts[0];
             tcount = imax;
             for (i=0; i<tcount; i++) {
                 printf("(%2d) =  %lg\n", i+1, *((float *)(this->base_addr) + i));
@@ -1176,8 +1341,8 @@
             break;
           case 2:
             printf("  Real, Dim 2, Data values:\n");
-            imax = this->length[0];
-            jmax = this->length[1];
+            imax = this->counts[0];
+            jmax = this->counts[1];
             tcount = imax * jmax;
             rcount = 0;
             for (j=0; j<jmax; j++) {
@@ -1195,9 +1360,9 @@
             break;
           case 3:
             printf("  Real, Dim 3, Data values:\n");
-            imax = this->length[0];
-            jmax = this->length[1];
-            kmax = this->length[2];
+            imax = this->counts[0];
+            jmax = this->counts[1];
+            kmax = this->counts[2];
             tcount = imax * jmax * kmax;
             rcount = 0; 
             for (k=0; k<kmax; k++) {
@@ -1226,7 +1391,7 @@
       case ESMF_DATA_INTEGER:
         switch (this->rank) {
           case 1:
-            imax = this->length[0];
+            imax = this->counts[0];
             tcount = imax;
             printf("  Integer, Dim 1, Data values:\n");
             for (i=0; i<imax; i++) {
@@ -1239,8 +1404,8 @@
             break;
           case 2:
             printf("  Integer, Dim 2, Data values:\n");
-            imax = this->length[0];
-            jmax = this->length[1];
+            imax = this->counts[0];
+            jmax = this->counts[1];
             tcount = imax * jmax;
             rcount = 0; 
             for (j=0; j<jmax; j++) {
@@ -1258,9 +1423,9 @@
             break;
           case 3:
             printf("  Integer, Dim 3, Data values:\n");
-            imax = this->length[0];
-            jmax = this->length[1];
-            kmax = this->length[2];
+            imax = this->counts[0];
+            jmax = this->counts[1];
+            kmax = this->counts[2];
             tcount = imax * jmax * kmax;
             rcount = 0; 
             for (k=0; k<kmax; k++) {
@@ -1341,7 +1506,7 @@
     fprintf(ffile, "rank = %d, type = %d, kind = %d\n", 
                              this->rank, this->type, this->kind);
     for (i=0; i<this->rank; i++) 
-        fprintf(ffile, " dim[%d] = %d  ", i, this->length[i]);
+        fprintf(ffile, " dim[%d] = %d  ", i, this->counts[i]);
     fprintf(ffile, "\n");
     
     // TODO: make this look at one of the option letters to see how user
@@ -1350,15 +1515,15 @@
       case ESMF_DATA_REAL:
         switch (this->rank) {
           case 1:
-            imax = this->length[0];
+            imax = this->counts[0];
             tcount = imax;
             for (i=0; i<tcount; i++) {
                 fprintf(ffile, "%lg\n", *((float *)(this->base_addr) + i));
             }
             break;
           case 2:
-            imax = this->length[0];
-            jmax = this->length[1];
+            imax = this->counts[0];
+            jmax = this->counts[1];
             tcount = imax * jmax;
             rcount = 0;
             for (j=0; j<jmax; j++) {
@@ -1370,9 +1535,9 @@
             }
             break;
           case 3:
-            imax = this->length[0];
-            jmax = this->length[1];
-            kmax = this->length[2];
+            imax = this->counts[0];
+            jmax = this->counts[1];
+            kmax = this->counts[2];
             tcount = imax * jmax * kmax;
             rcount = 0; 
             for (k=0; k<kmax; k++) {
@@ -1393,15 +1558,15 @@
       case ESMF_DATA_INTEGER:
         switch (this->rank) {
           case 1:
-            imax = this->length[0];
+            imax = this->counts[0];
             tcount = imax;
             for (i=0; i<imax; i++) {
                 fprintf(ffile, "%d\n", *((int *)(this->base_addr) + i));
             }
             break;
           case 2:
-            imax = this->length[0];
-            jmax = this->length[1];
+            imax = this->counts[0];
+            jmax = this->counts[1];
             tcount = imax * jmax;
             rcount = 0; 
             for (j=0; j<jmax; j++) {
@@ -1413,9 +1578,9 @@
             }
             break;
           case 3:
-            imax = this->length[0];
-            jmax = this->length[1];
-            kmax = this->length[2];
+            imax = this->counts[0];
+            jmax = this->counts[1];
+            kmax = this->counts[2];
             tcount = imax * jmax * kmax;
             rcount = 0; 
             for (k=0; k<kmax; k++) {
@@ -1447,75 +1612,8 @@
  } // end ESMC_ArrayWrite
 
 
-extern "C" {
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AllocFuncStore - internal routine
-//
-// !INTERFACE:
-      int ESMC_AllocFuncStore(
-//
-// !RETURN VALUE:
-//    return code
-//
-// !ARGUMENTS:
-      void (*func)(struct c_F90ptr *, int *, int *, int *)) {   // in - fortran function pointer
-//
-// !DESCRIPTION:
-//      stores a fortran function pointer used to call back into
-//      fortran to do an allocation.
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here
-//
-    
-    if (func != (void *)0)
-        allocfuncaddr = func;
-
-
-    return ESMF_SUCCESS;
-        
-
- } // end ESMC_AllocFuncStore
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DeallocFuncStore - internal routine
-//
-// !INTERFACE:
-      int ESMC_DeallocFuncStore(
-//
-// !RETURN VALUE:
-//    return code
-//
-// !ARGUMENTS:
-      void (*func)(struct c_F90ptr *, int *, int *, int *)) {   // in - fortran function pointer
-//
-// !DESCRIPTION:
-//      stores a fortran function pointer used to call back into
-//      fortran to do an allocation.
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here
-//
-    
-    if (func != (void *)0)
-        deallocfuncaddr = func;
-
-
-    return ESMF_SUCCESS;
-        
-
- } // end ESMC_DeallocFuncStore
-
-}
-
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_Array - native C++ constructor

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.8 2003/04/04 18:23:09 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.9 2003/04/24 16:45:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,7 +12,6 @@
 !==============================================================================
 !
 #endif
-
 #if 0
 !------------------------------------------------------------------------------
 ! Macros for the Array class.
@@ -29,11 +28,11 @@
 #define COL4 :,:,:,:
 #define COL5 :,:,:,:,:
 
-#define LEN1 lengths(1)
-#define LEN2 lengths(1), lengths(2)
-#define LEN3 lengths(1), lengths(2), lengths(3)
-#define LEN4 lengths(1), lengths(2), lengths(3), lengths(4)
-#define LEN5 lengths(1), lengths(2), lengths(3), lengths(4), lengths(5)
+#define LEN1 counts(1)
+#define LEN2 counts(1), counts(2)
+#define LEN3 counts(1), counts(2), counts(3)
+#define LEN4 counts(1), counts(2), counts(3), counts(4)
+#define LEN5 counts(1), counts(2), counts(3), counts(4), counts(5)
 
 #define LOC1 1
 #define LOC2 1,1
@@ -41,19 +40,144 @@
 #define LOC4 1,1,1,1
 #define LOC5 1,1,1,1,1
 
-
 #if 0
 !------------------------------------------------------------------------------
-! Declare a wrapper for an F90 array pointer
+! Declare a wrapper for an F90 array pointer, a local variable of that type,
+!  type which wraps every pointer type, and a declaration of local variables,
+!  one of each wrapper type.
 !------------------------------------------------------------------------------
 #endif
 
-#define ArrayWrapperMacro(mname, mtypekind, mrank, mdim) \
-! <Created by macro - do not edit directly > @  \
-      type ESMF_ArrWrap##mtypekind##mrank##D @  \
-        mname (ESMF_IKIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr @  \
-      end type ESMF_ArrWrap##mtypekind##mrank##D @  \
+#define ArrayTypeMacro(mname, mtypekind, mrank, mdim) \
+! <Created by macro - do not edit directly > @\
+      type ESMF_ArrWrap##mtypekind##mrank##D @\
+        mname (ESMF_IKIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr @\
+      end type ESMF_ArrWrap##mtypekind##mrank##D @\
 
+#define ArrayAllTypeMacro() \
+ @\
+      ArrayTypeMacro(integer, I2, 1, COL1) @\
+      ArrayTypeMacro(integer, I4, 1, COL1) @\
+      ArrayTypeMacro(integer, I8, 1, COL1) @\
+ @\
+      ArrayTypeMacro(integer, I2, 2, COL2) @\
+      ArrayTypeMacro(integer, I4, 2, COL2) @\
+      ArrayTypeMacro(integer, I8, 2, COL2) @\
+ @\
+      ArrayTypeMacro(integer, I2, 3, COL3) @\
+      ArrayTypeMacro(integer, I4, 3, COL3) @\
+      ArrayTypeMacro(integer, I8, 3, COL3) @\
+ @\
+      ArrayTypeMacro(integer, I2, 4, COL4) @\
+      ArrayTypeMacro(integer, I4, 4, COL4) @\
+      ArrayTypeMacro(integer, I8, 4, COL4) @\
+ @\
+      ArrayTypeMacro(integer, I2, 5, COL5) @\
+      ArrayTypeMacro(integer, I4, 5, COL5) @\
+      ArrayTypeMacro(integer, I8, 5, COL5) @\
+ @\
+      ArrayTypeMacro(real, R4, 1, COL1) @\
+      ArrayTypeMacro(real, R8, 1, COL1) @\
+ @\
+      ArrayTypeMacro(real, R4, 2, COL2) @\
+      ArrayTypeMacro(real, R8, 2, COL2) @\
+ @\
+      ArrayTypeMacro(real, R4, 3, COL3) @\
+      ArrayTypeMacro(real, R8, 3, COL3) @\
+ @\
+      ArrayTypeMacro(real, R4, 4, COL4) @\
+      ArrayTypeMacro(real, R8, 4, COL4) @\
+ @\
+      ArrayTypeMacro(real, R4, 5, COL5) @\
+      ArrayTypeMacro(real, R8, 5, COL5) @\
+! < end macro - do not edit directly >  @\
+ @\
+
+#define ArrayPointerMacro(mname, mtypekind, mrank, mdim) \
+        mname (ESMF_IKIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr
+
+#define ArrayAllPointerMacro() \
+! <Created by macro - do not edit directly > @\
+      type ESMF_ArrAllWrap @\
+        ArrayPointerMacro(integer, I2, 1, COL1) @\
+        ArrayPointerMacro(integer, I4, 1, COL1) @\
+        ArrayPointerMacro(integer, I8, 1, COL1) @\
+ @\
+        ArrayPointerMacro(integer, I2, 2, COL2) @\
+        ArrayPointerMacro(integer, I4, 2, COL2) @\
+        ArrayPointerMacro(integer, I8, 2, COL2) @\
+ @\
+        ArrayPointerMacro(integer, I2, 3, COL3) @\
+        ArrayPointerMacro(integer, I4, 3, COL3) @\
+        ArrayPointerMacro(integer, I8, 3, COL3) @\
+ @\
+        ArrayPointerMacro(integer, I2, 4, COL4) @\
+        ArrayPointerMacro(integer, I4, 4, COL4) @\
+        ArrayPointerMacro(integer, I8, 4, COL4) @\
+ @\
+        ArrayPointerMacro(integer, I2, 5, COL5) @\
+        ArrayPointerMacro(integer, I4, 5, COL5) @\
+        ArrayPointerMacro(integer, I8, 5, COL5) @\
+ @\
+        ArrayPointerMacro(real, R4, 1, COL1) @\
+        ArrayPointerMacro(real, R8, 1, COL1) @\
+ @\
+        ArrayPointerMacro(real, R4, 2, COL2) @\
+        ArrayPointerMacro(real, R8, 2, COL2) @\
+ @\
+        ArrayPointerMacro(real, R4, 3, COL3) @\
+        ArrayPointerMacro(real, R8, 3, COL3) @\
+ @\
+        ArrayPointerMacro(real, R4, 4, COL4) @\
+        ArrayPointerMacro(real, R8, 4, COL4) @\
+ @\
+        ArrayPointerMacro(real, R4, 5, COL5) @\
+        ArrayPointerMacro(real, R8, 5, COL5) @\
+      end type ESMF_ArrAllWrap @\
+ @\
+! < end macro - do not edit directly >  @\
+ @\
+
+#define ArrayLocalVarMacro(mname, mtypekind, mrank, mdim) \
+        type(ESMF_ArrWrap##mtypekind##mrank##D) :: local##mtypekind##mrank##D
+
+#define ArrayAllLocalVarMacro() \
+! <Created by macro - do not edit directly > @\
+        ArrayLocalVarMacro(integer, I2, 1, COL1) @\
+        ArrayLocalVarMacro(integer, I4, 1, COL1) @\
+        ArrayLocalVarMacro(integer, I8, 1, COL1) @\
+ @\
+        ArrayLocalVarMacro(integer, I2, 2, COL2) @\
+        ArrayLocalVarMacro(integer, I4, 2, COL2) @\
+        ArrayLocalVarMacro(integer, I8, 2, COL2) @\
+ @\
+        ArrayLocalVarMacro(integer, I2, 3, COL3) @\
+        ArrayLocalVarMacro(integer, I4, 3, COL3) @\
+        ArrayLocalVarMacro(integer, I8, 3, COL3) @\
+ @\
+        ArrayLocalVarMacro(integer, I2, 4, COL4) @\
+        ArrayLocalVarMacro(integer, I4, 4, COL4) @\
+        ArrayLocalVarMacro(integer, I8, 4, COL4) @\
+ @\
+        ArrayLocalVarMacro(integer, I2, 5, COL5) @\
+        ArrayLocalVarMacro(integer, I4, 5, COL5) @\
+        ArrayLocalVarMacro(integer, I8, 5, COL5) @\
+ @\
+        ArrayLocalVarMacro(real, R4, 1, COL1) @\
+        ArrayLocalVarMacro(real, R8, 1, COL1) @\
+ @\
+        ArrayLocalVarMacro(real, R4, 2, COL2) @\
+        ArrayLocalVarMacro(real, R8, 2, COL2) @\
+ @\
+        ArrayLocalVarMacro(real, R4, 3, COL3) @\
+        ArrayLocalVarMacro(real, R8, 3, COL3) @\
+ @\
+        ArrayLocalVarMacro(real, R4, 4, COL4) @\
+        ArrayLocalVarMacro(real, R8, 4, COL4) @\
+ @\
+        ArrayLocalVarMacro(real, R4, 5, COL5) @\
+        ArrayLocalVarMacro(real, R8, 5, COL5) @\
+ @\
 
 #if 0
 !------------------------------------------------------------------------------
@@ -94,42 +218,136 @@
 
 #if 0
 !------------------------------------------------------------------------------
-! Create a new array of the given type
+! Create a new array based on an unallocated F90 array and a list of counts.
 !------------------------------------------------------------------------------
 #endif
 
-#define ArrayCreateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define ArrayCreateByMTArrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreateByPtr##mtypekind##mrank##D - make an ESMF array from an F90 ptr @\
+! !IROUTINE: ESMF_ArrayCreateByMTArr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 array @\
  @\
 ! !INTERFACE: @\
-      function ESMF_ArrayCreateByPtr##mtypekind##mrank##D(f90ptr, docopy, rc) @\
+      function ESMF_ArrayCreateByMTArr##mtypekind##mrank##D(f90arr, counts, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_Array) :: ESMF_ArrayCreateByPtr##mtypekind##mrank##D @\
+      type(ESMF_Array) :: ESMF_ArrayCreateByMTArr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
-      mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
-      type(ESMF_CopyFlag), intent(in), optional :: docopy  @\
+      mname (ESMF_IKIND_##mtypekind), dimension(mdim), target :: f90arr @\
+      !mname (ESMF_IKIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
+      integer, dimension(:), intent(in) :: counts @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-! Creates an {\tt Array} based on an existing Fortran 90 pointer which @\
-!   is already associated with memory. @\
+! Creates an {\tt Array} based on an unallocated (but allocatable) Fortran @\
+!   90 array.  This routine allocates memory to the array and fills in @\
+!   the array object with all necessary information. @\
+! @\
+! The function return is an ESMF\_Array type with space allocated for data. @\
+! @\
+! The arguments are: @\
+!  \begin{description} @\
+!  \item[f90arr] @\
+!   An allocatable (but currently unallocated) Fortran 90 array.  @\
+! @\
+!  \item[counts] @\
+!   An integer array of counts.  Must be the same length as the rank. @\
+! @\
+!  \item[{[rc]}] @\
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!  \end{description} @\
+! @\
+ @\
+! @\
+!EOP @\
+! !REQUIREMENTS: @\
+ @\
+        ! Local variables @\
+        type (ESMF_Array) :: array          ! new array object @\
+        integer :: status                   ! local error status @\
+        logical :: rcpresent                ! did user specify rc? @\
+ @\
+        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: newp  @\
+ @\
+        ! Initialize return code; assume failure until success is certain @\
+        status = ESMF_FAILURE @\
+        rcpresent = .FALSE. @\
+        array%this = ESMF_NULL_POINTER @\
+ @\
+        if (present(rc)) then @\
+          rcpresent = .TRUE. @\
+          rc = ESMF_FAILURE @\
+        endif @\
+ @\
+        ! Test to see if array already allocated, and fail if so. @\
+        !if (allocated(f90arr)) then @\
+        !  print *, "Array cannot already be allocated" @\
+        !  return @\
+        !endif @\
+ @\
+        ! Call create routine @\
+        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+                                             ESMF_FROM_FORTRAN, status) @\
+        if (status .ne. ESMF_SUCCESS) then @\
+          print *, "Array initial construction error" @\
+          return @\
+        endif @\
+ @\
+        newp => f90arr    ! must be ptr assignment, => @\
+        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, newp,& @\
+                                  ESMF_DATA_SPACE, status) @\
+        @\
+ @\
+!       ! return value set by c_ESMC func above @\
+        ESMF_ArrayCreateByMTArr##mtypekind##mrank##D = array @\
+        if (rcpresent) rc = status @\
+ @\
+        end function ESMF_ArrayCreateByMTArr##mtypekind##mrank##D   @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+#if 0
+!------------------------------------------------------------------------------
+! Create a new array based on an allocated F90 array and a copy flag.
+!------------------------------------------------------------------------------
+#endif
+
+#define ArrayCreateByFullArrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly > @\
+!BOP @\
+! !IROUTINE: ESMF_ArrayCreateByFullArr##mtypekind##mrank##D - make an ESMF array from an Allocated F90 array @\
+ @\
+! !INTERFACE: @\
+      function ESMF_ArrayCreateByFullArr##mtypekind##mrank##D(f90arr, docopy, rc) @\
+! @\
+! !RETURN VALUE: @\
+      type(ESMF_Array) :: ESMF_ArrayCreateByFullArr##mtypekind##mrank##D @\
+! @\
+! !ARGUMENTS: @\
+      mname (ESMF_IKIND_##mtypekind), dimension(mdim), target :: f90arr @\
+      !mname (ESMF_IKIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
+      type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+      integer, intent(out), optional :: rc   @\
+! @\
+! !DESCRIPTION: @\
+! Creates an {\tt Array} based on an already allocated Fortran @\
+!   90 array.  This routine can make a copy or reference the existing data @\
+!   and fills in the array object with all necessary information. @\
 ! @\
 ! The function return is an ESMF\_Array type. @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\
-!  \item[f90ptr] @\
-!   A Fortran 90 array pointer which can be queried for info about @\
-!    type/kind/rank and sizes. @\
+!  \item[f90arr] @\
+!   An allocated Fortran 90 array.  @\
 ! @\
 !  \item[{[docopy]}] @\
-!   Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference @\
-!   the existing data array.  If set to {\tt ESMF\_DO\_COPY} this routine @\
+!   Default to {\tt ESMF\_DATA\_REF}, makes the {\tt ESMF\_Array} reference @\
+!   the existing data array.  If set to {\tt ESMF\_DATA\_COPY} this routine @\
 !   allocates new space and copies the data from the pointer into the @\
 !   new array. @\
 ! @\
@@ -142,112 +360,102 @@
 !EOP @\
 ! !REQUIREMENTS: @\
  @\
-        ! local variables @\
-        type (ESMF_Array) :: array          ! what C++ is going to return @\
-        integer :: i                        ! local variable @\
+        ! Local variables @\
+        type (ESMF_Array) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
-        logical :: copyreq                  ! did user specify copy? @\
+        type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
+        integer, dimension(mrank) :: counts ! per dim @\
  @\
-        type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
-        integer :: rank, lengths(mrank)         ! size info for the array @\
-        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
+        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: newp @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
         rcpresent = .FALSE. @\
+        array%this = ESMF_NULL_POINTER @\
+ @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
           rc = ESMF_FAILURE @\
         endif @\
  @\
-        copyreq = .FALSE. @\
-        array%this = ESMF_NULL_POINTER @\
+        ! Set default for copyflag @\
+        if (present(docopy)) then @\
+            copy = docopy @\
+        else @\
+            copy = ESMF_DATA_REF @\
+        endif @\
  @\
-!       ! call create routine @\
-        do i=1, mrank @\
-            lengths(i) = size(f90ptr, i) @\
-        enddo @\
+        ! TODO: will this work with a statically declared array if I take @\
+        !  this test out?  or will the function signature not match? @\
+        ! Test to see if array is not already allocated, and fail if so. @\
+        !if (.not.allocated(f90arr)) then @\
+        !  print *, "Array must already be allocated" @\
+        !  return @\
+        !endif @\
  @\
-        call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
-                                             mrank, lengths, status) @\
+        ! Get sizes from current array, although the construct routine @\
+        !   does not need it for an already allocated array.  @\
+        counts = shape(f90arr) @\
+ @\
+        ! Call create routine @\
+        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+                                             ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
           return @\
         endif @\
  @\
-        if (present(docopy)) then @\
-          if (docopy%docopy .eq. ESMF_DO_COPY%docopy) copyreq = .TRUE. @\
-        endif @\
-        if (copyreq) then @\
-          allocate(localp( mlen ), stat=status) @\
-          if (status .ne. 0) then     ! f90 status, not ESMF @\
-            print *, "Array do_copy allocate error" @\
-            return @\
-          endif @\
-          call c_ESMC_ArraySetDealloc(array, status) @\
-          localp = f90ptr   ! this needs to be a real contents copy @\
-        else @\
-          call c_ESMC_ArraySetNoDealloc(array, status) @\
-          localp => f90ptr  ! simply a reference to existing space @\
-        endif @\
+        newp => f90arr    ! must be ptr assignment, => @\
+        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, newp,& @\
+                                  copy, status) @\
         @\
  @\
-!       ! set base address @\
-        call c_ESMC_ArraySetBaseAddr(array, localp( mloc ), status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array base address construction error" @\
-          return @\
-        endif @\
- @\
-!       ! save an (uninterpreted) copy of the f90 array information @\
-        wrap%##mtypekind##mrank##Dptr => localp @\
-        call c_ESMC_ArraySetF90Ptr(array, wrap, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array internal info save error" @\
-          return @\
-        endif @\
- @\
 !       ! return value set by c_ESMC func above @\
-        ESMF_ArrayCreateByPtr##mtypekind##mrank##D = array @\
-        if (rcpresent) rc = ESMF_SUCCESS @\
+        ESMF_ArrayCreateByFullArr##mtypekind##mrank##D = array @\
+        if (rcpresent) rc = status @\
  @\
-        end function ESMF_ArrayCreateByPtr##mtypekind##mrank##D   @\
+        end function ESMF_ArrayCreateByFullArr##mtypekind##mrank##D   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
 
-
 #if 0
 !------------------------------------------------------------------------------
-! Create a new array of the given type from an array spec
+! Create a new array based on an unallocated F90 pointer and a list of counts.
 !------------------------------------------------------------------------------
 #endif
 
-#define ArrayCreateSpecMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define ArrayCreateByMTPtrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreateBySpec##mtypekind##mrank##D - make an ESMF array from a Spec @\
+! !IROUTINE: ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 pointer @\
  @\
 ! !INTERFACE: @\
-      function ESMF_ArrayCreateBySpec##mtypekind##mrank##D(lengths, rc) @\
+      function ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D(f90ptr, counts, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_Array) :: ESMF_ArrayCreateBySpec##mtypekind##mrank##D @\
+      type(ESMF_Array) :: ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
-      integer, dimension(:), intent(in) :: lengths  @\
+      mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
+      integer, dimension(:), intent(in) :: counts @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-! Creates an {\tt Array} based on a spec and counts. @\
+! Creates an {\tt Array} based on an unassociated Fortran 90 pointer. @\
+!   This routine allocates memory to the array pointer and fills in @\
+!   the array object with all necessary information. @\
 ! @\
-! The function return is an ESMF\_Array type. @\
+! The function return is an ESMF\_Array type with space allocated for data. @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\
-!  \item[lengths] @\
+!  \item[f90ptr] @\
+!   An unassociated Fortran 90 array pointer.  @\
+! @\
+!  \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
 ! @\
 !  \item[{[rc]}] @\
@@ -259,15 +467,226 @@
 !EOP @\
 ! !REQUIREMENTS: @\
  @\
-        ! local variables @\
-        type (ESMF_Array) :: array          ! what C++ is going to return @\
-        integer :: i                        ! local variable @\
+        ! Local variables @\
+        type (ESMF_Array) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
-        logical :: copyreq                  ! did user specify copy? @\
  @\
-        type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
-        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
+        ! Initialize return code; assume failure until success is certain @\
+        status = ESMF_FAILURE @\
+        rcpresent = .FALSE. @\
+        array%this = ESMF_NULL_POINTER @\
+ @\
+        if (present(rc)) then @\
+          rcpresent = .TRUE. @\
+          rc = ESMF_FAILURE @\
+        endif @\
+ @\
+        ! Test to see if array already allocated, and fail if so. @\
+        if (associated(f90ptr)) then @\
+          print *, "Pointer cannot already be allocated" @\
+          return @\
+        endif @\
+ @\
+        ! Call create routine @\
+        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+                                             ESMF_FROM_FORTRAN, status) @\
+        if (status .ne. ESMF_SUCCESS) then @\
+          print *, "Array initial construction error" @\
+          return @\
+        endif @\
+ @\
+        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, f90ptr,& @\
+                                  ESMF_DATA_SPACE, status) @\
+        @\
+ @\
+!       ! return value set by c_ESMC func above @\
+        ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D = array @\
+        if (rcpresent) rc = status @\
+ @\
+        end function ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D   @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+#if 0
+!------------------------------------------------------------------------------
+! Create a new array based on an allocated F90 pointer and a copy flag.
+!------------------------------------------------------------------------------
+#endif
+
+#define ArrayCreateByFullPtrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly > @\
+!BOP @\
+! !IROUTINE: ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D - make an ESMF array from an Allocated F90 pointer @\
+ @\
+! !INTERFACE: @\
+      function ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D(f90ptr, docopy, rc) @\
+! @\
+! !RETURN VALUE: @\
+      type(ESMF_Array) :: ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D @\
+! @\
+! !ARGUMENTS: @\
+      mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
+      type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+      integer, intent(out), optional :: rc   @\
+! @\
+! !DESCRIPTION: @\
+! Creates an {\tt Array} based on an already allocated Fortran 90 array @\
+!   pointer.  This routine can make a copy or reference the existing data @\
+!   and fills in the array object with all necessary information. @\
+! @\
+! The function return is an ESMF\_Array type. @\
+! @\
+! The arguments are: @\
+!  \begin{description} @\
+!  \item[f90ptr] @\
+!   An allocated Fortran 90 array pointer.  @\
+! @\
+!  \item[{[docopy]}] @\
+!   Default to {\tt ESMF\_DATA\_REF}, makes the {\tt ESMF\_Array} reference @\
+!   the existing data array.  If set to {\tt ESMF\_DATA\_COPY} this routine @\
+!   allocates new space and copies the data from the pointer into the @\
+!   new array. @\
+! @\
+!  \item[{[rc]}] @\
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!  \end{description} @\
+! @\
+ @\
+! @\
+!EOP @\
+! !REQUIREMENTS: @\
+ @\
+        ! Local variables @\
+        type (ESMF_Array) :: array          ! new array object @\
+        integer :: status                   ! local error status @\
+        logical :: rcpresent                ! did user specify rc? @\
+        type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
+        integer, dimension(mrank) :: counts ! per dim @\
+ @\
+        ! Initialize return code; assume failure until success is certain @\
+        status = ESMF_FAILURE @\
+        rcpresent = .FALSE. @\
+        array%this = ESMF_NULL_POINTER @\
+ @\
+        if (present(rc)) then @\
+          rcpresent = .TRUE. @\
+          rc = ESMF_FAILURE @\
+        endif @\
+ @\
+        ! Set default for copyflag @\
+        if (present(docopy)) then @\
+            copy = docopy @\
+        else @\
+            copy = ESMF_DATA_REF @\
+        endif @\
+ @\
+        ! TODO: will this work with a statically declared array if I take @\
+        !  this test out?  or will the function signature not match? @\
+        ! Test to see if array is not already allocated, and fail if so. @\
+        if (.not.associated(f90ptr)) then @\
+          print *, "Pointer must already be associated" @\
+          return @\
+        endif @\
+ @\
+        ! Get sizes from current array, although the construct routine @\
+        !   does not need it for an already allocated array.  @\
+        counts = shape(f90ptr) @\
+ @\
+        ! Call create routine @\
+        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+                                             ESMF_FROM_FORTRAN, status) @\
+        if (status .ne. ESMF_SUCCESS) then @\
+          print *, "Array initial construction error" @\
+          return @\
+        endif @\
+ @\
+        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, f90ptr,& @\
+                                  copy, status) @\
+        @\
+ @\
+!       ! return value set by c_ESMC func above @\
+        ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D = array @\
+        if (rcpresent) rc = status @\
+ @\
+        end function ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D   @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+#if 0
+!------------------------------------------------------------------------------
+! Create an F90 pointer of the proper type and set the corresponding values
+!  in the array object.
+!------------------------------------------------------------------------------
+#endif
+
+#define ArrayConstructF90PtrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly > @\
+!BOPI @\
+! !IROUTINE: ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D - Create an F90 Ptr of the proper T/K/R @\
+ @\
+! !INTERFACE: @\
+      subroutine ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, f90ptr, docopy, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(ESMF_Array), intent(inout) :: array @\
+      integer, dimension(:), intent(in) :: counts @\
+      mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer, optional :: f90ptr  @\
+      type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+      integer, intent(out), optional :: rc   @\
+! @\
+! !DESCRIPTION: @\
+!  Creates an F90 Pointer of the requested T/K/R.  After creating the @\
+!  pointer and doing the allocation based on counts, also goes ahead and @\
+!  calls into the C++ interfaces to set values on the {\tt ESMF\_Array} @\
+!  object. (This is to save on the total number of nested crossings of the @\
+!  F90/C++ boundary.) @\
+! @\
+!  Optional args are an existing F90 pointer which if given is used @\
+!  instead of a new one, and a docopy flag which if set to copy will @\
+!  do a contents copy or reference. @\
+! @\
+! The arguments are: @\
+!  \begin{description} @\
+!  \item[array] @\
+!   The {\tt ESMF\_Array} to set the values into. @\
+! @\
+!  \item[counts] @\
+!   An integer array of counts.  Must be the same length as the rank. @\
+! @\
+!  \item[{[f90ptr]}] @\
+!   An optional existing F90 pointer.  Will be used instead of an @\
+!   internally generated F90 pointer if given.  Must be given if the @\
+!   {\tt docopy} is specified. @\
+! @\
+!  \item[{[docopy]}] @\
+!   An optional copy flag which can be specified if an F90 pointer is also @\
+!   given.  Can either make a new copy of the data or ref existing data. @\
+! @\
+!  \item[{[rc]}] @\
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!  \end{description} @\
+! @\
+ @\
+! @\
+!EOPI @\
+! !REQUIREMENTS: @\
+ @\
+        ! Local variables @\
+        integer :: i                        ! temp var @\
+        integer :: status                   ! local error status @\
+        logical :: rcpresent                ! did user specify rc? @\
+        logical :: willalloc                ! do we need to alloc/dealloc? @\
+        logical :: willcopy                 ! do we need to copy data? @\
+ @\
+        type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap ! to pass f90 ptr to C++ @\
+        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: newp  @\
+        integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds @\
+        integer, dimension(ESMF_MAXDIM) :: strides, offsets @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
@@ -277,49 +696,64 @@
           rc = ESMF_FAILURE @\
         endif @\
  @\
-        copyreq = .FALSE. @\
-        array%this = ESMF_NULL_POINTER @\
+        ! Decide if we need to do: make a new allocation, copy existing data @\
+        if (.not. present(f90ptr)) then @\
+           willalloc = .true. @\
+           willcopy = .false. @\
+        else @\
+           if (docopy .eq. ESMF_DATA_SPACE) then @\
+               newp => f90ptr    ! ptr alias, important this be =>  @\
+               willalloc = .true. @\
+               willcopy = .false. @\
+           else if (docopy .eq. ESMF_DATA_COPY) then @\
+               willalloc = .true. @\
+               willcopy = .true. @\
+           else       ! ESMF_DATA_REF @\
+               newp => f90ptr    ! ptr alias, important this be =>  @\
+               willalloc = .false. @\
+               willcopy = .false. @\
+           endif @\
+        endif @\
  @\
-!       ! call create routine @\
-        call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
-                                             mrank, lengths, status) @\
+        if (willalloc) then @\
+            allocate(newp ( mlen ), stat=status) @\
+            if (status .ne. 0) then     ! f90 status, not ESMF @\
+              print *, "Array do_copy allocate error" @\
+              return @\
+            endif @\
+        endif @\
+ @\
+        if (willcopy) then @\
+            newp = f90ptr      ! contents copy, important that this be = @\
+        endif @\
+ @\
+        ! Now set all the new accumulated information about the array - the @\
+        ! F90 pointer, the base addr, the counts, etc. @\
+ @\
+        ! TODO: query the ptr for strides/lbounds/ubounds/offsets/whatever @\
+        !  and set them in the array object.  For now, used fixed values. @\
+        lbounds = 1 @\
+        ubounds = 1 @\
+        ubounds(1:mrank) = counts(1:mrank) @\
+        strides = 0 @\
+        offsets = 0 @\
+ @\
+        wrap%##mtypekind##mrank##Dptr => newp @\
+        call c_ESMC_ArraySetInfo(array, wrap, newp ( mloc ), counts, & @\
+                                 lbounds, ubounds, strides, offsets, & @\
+                                 ESMF_TF_TRUE, ESMF_TF_TRUE, status) @\
+ @\
         if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array initial construction error" @\
+          print *, "Array internal set info error" @\
           return @\
         endif @\
  @\
-        allocate(localp( mlen ), stat=status) @\
-        if (status .ne. 0) then     ! f90 status, not ESMF @\
-          print *, "Array do_copy allocate error" @\
-          return @\
-        endif @\
-        call c_ESMC_ArraySetDealloc(array, status) @\
-        @\
+        if (rcpresent) rc = status @\
  @\
-!       ! set base address @\
-        call c_ESMC_ArraySetBaseAddr(array, localp( mloc ), status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array base address construction error" @\
-          return @\
-        endif @\
- @\
-!       ! save an (uninterpreted) copy of the f90 array information @\
-        wrap%##mtypekind##mrank##Dptr => localp @\
-        call c_ESMC_ArraySetF90Ptr(array, wrap, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array internal info save error" @\
-          return @\
-        endif @\
- @\
-!       ! return value set by c_ESMC func above @\
-        ESMF_ArrayCreateBySpec##mtypekind##mrank##D = array @\
-        if (rcpresent) rc = ESMF_SUCCESS @\
- @\
-        end function ESMF_ArrayCreateBySpec##mtypekind##mrank##D   @\
+        end subroutine ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D  @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
-
 
 #if 0
 !------------------------------------------------------------------------------
@@ -352,7 +786,7 @@
         logical :: copyreq                  ! did user specify copy? @\
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
-        integer :: rank, lengths(mrank)         ! size info for the array @\
+        integer :: rank, counts(mrank)         ! size info for the array @\
         mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\
@@ -368,7 +802,7 @@
         ! check copyflag to see if we are making a reference @\
         ! or making a new array and a copy @\
         if (present(docopy)) then @\
-          if (docopy%docopy .eq. ESMF_DO_COPY%docopy) copyreq = .TRUE. @\
+          if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
         endif @\
  @\
         call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
@@ -379,7 +813,7 @@
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
-          call c_ESMC_ArrayGetLengths(array, mrank, lengths, status) @\
+          call c_ESMC_ArrayGetLengths(array, mrank, counts, status) @\
           if (status .ne. ESMF_SUCCESS) then @\
             print *, "Array - cannot retrieve array dim sizes" @\
             return @\
@@ -402,7 +836,6 @@
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
-
 
 #if 0
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.25 2003/04/21 22:37:38 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.26 2003/04/24 16:45:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,10 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
+! < ignore blank lines below.  they are created by the files which
+!   define various macros. >
 #include "ESMF_ArrayMacros.h"
+#include "ESMF_AllocMacros.h"
 !------------------------------------------------------------------------------
 !BOP
 ! !MODULE: ESMF_ArrayMod - Manage data arrays uniformly between F90 and C++     
@@ -41,7 +44,6 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
-      use ESMF_AllocMod
       use ESMF_DELayoutMod
       implicit none
 
@@ -52,6 +54,8 @@
 !     ! ESMF_CopyFlag
 !
 !     ! Indicates whether a data array should be copied or referenced. 
+!     ! TODO: Should this be moved down to the base class?  Is it useful
+!     !  anyplace else outside of the Array context?
 
       type ESMF_CopyFlag
       sequence
@@ -60,8 +64,26 @@
       end type
 
       type(ESMF_CopyFlag), parameter :: & 
-                            ESMF_DO_COPY = ESMF_CopyFlag(1), &
-                            ESMF_NO_COPY = ESMF_CopyFlag(2)
+                            ESMF_DATA_COPY  = ESMF_CopyFlag(1), &
+                            ESMF_DATA_REF   = ESMF_CopyFlag(2), &
+                            ESMF_DATA_SPACE = ESMF_CopyFlag(3)  ! private
+
+!------------------------------------------------------------------------------
+!     ! ESMF_ArrayOrigin
+!
+!     ! Private flag which indicates the create was initiated on the F90 side.
+!     !  This matches an enum on the C++ side and the values must match.
+!     !  Update ../include/ESMC_Array.h if you change these values.
+
+      type ESMF_ArrayOrigin
+      sequence
+      private
+        integer :: origin
+      end type
+
+      type(ESMF_ArrayOrigin), parameter :: & 
+                            ESMF_FROM_FORTRAN   = ESMF_ArrayOrigin(1), &
+                            ESMF_FROM_CPLUSPLUS = ESMF_ArrayOrigin(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_ArraySpec
@@ -75,12 +97,6 @@
         integer :: rank                     ! number of dimensions
         type(ESMF_DataType) :: type         ! real/float, integer, etc enum
         type(ESMF_DataKind) :: kind         ! fortran "kind" enum/integer
-
-        !integer, dimension(ESMF_MAXDIM) :: counts ! array dimension sizes
-        !logical :: hascounts                ! counts optional
-        !integer, dimension(ESMF_MAXDIM, 3) :: rinfo ! (lower/upper/stride) per rank
-        !logical :: has_rinfo                ! rinfo optional
-        !type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: ai ! axis indices
 
       end type
 
@@ -101,48 +117,13 @@
 !     ! guaranteeing they are passed by reference on all compilers and all
 !     ! platforms.  These are never seen outside this module.
 !
-      ! < these expand into pointer declarations >
-      ArrayWrapperMacro(integer, I2, 1, COL1)
-      ArrayWrapperMacro(integer, I4, 1, COL1)
-      ArrayWrapperMacro(integer, I8, 1, COL1)
+      ! < these expand into defined type declarations >
+ArrayAllTypeMacro()
 
-      ArrayWrapperMacro(integer, I2, 2, COL2)
-      ArrayWrapperMacro(integer, I4, 2, COL2)
-      ArrayWrapperMacro(integer, I8, 2, COL2)
-
-      ArrayWrapperMacro(integer, I2, 3, COL3)
-      ArrayWrapperMacro(integer, I4, 3, COL3)
-      ArrayWrapperMacro(integer, I8, 3, COL3)
-
-      ArrayWrapperMacro(integer, I2, 4, COL4)
-      ArrayWrapperMacro(integer, I4, 4, COL4)
-      ArrayWrapperMacro(integer, I8, 4, COL4)
-
-      ArrayWrapperMacro(integer, I2, 5, COL5)
-      ArrayWrapperMacro(integer, I4, 5, COL5)
-      ArrayWrapperMacro(integer, I8, 5, COL5)
-
-      ArrayWrapperMacro(real, R4, 1, COL1)
-      ArrayWrapperMacro(real, R8, 1, COL1)
-
-      ArrayWrapperMacro(real, R4, 2, COL2)
-      ArrayWrapperMacro(real, R8, 2, COL2)
-
-      ArrayWrapperMacro(real, R4, 3, COL3)
-      ArrayWrapperMacro(real, R8, 3, COL3)
-
-      ArrayWrapperMacro(real, R4, 4, COL4)
-      ArrayWrapperMacro(real, R8, 4, COL4)
-
-      ArrayWrapperMacro(real, R4, 5, COL5)
-      ArrayWrapperMacro(real, R8, 5, COL5)
-
-      ! TODO: add any additional type/kind/ranks here
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_CopyFlag, ESMF_DO_COPY, ESMF_NO_COPY
-      public ESMF_DataKind, ESMF_Pointer
+      public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF
       public ESMF_ArraySpec, ESMF_Array
 !------------------------------------------------------------------------------
 
@@ -155,10 +136,15 @@
       public ESMF_ArraySpecGet
 
       public ESMF_ArraySetData, ESMF_ArrayGetData
+      !public ESMF_ArraySetInfo, ESMF_ArrayGetInfo
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex
       public ESMF_ArrayRedist, ESMF_ArrayHalo, ESMF_ArrayAllGather
       public ESMF_ArrayGet, ESMF_ArrayGetName
  
+      public ESMF_ArrayF90Allocate
+      public ESMF_ArrayF90Deallocate
+      public ESMF_ArrayConstructF90Ptr    ! needed for C++ callback only
+
       public ESMF_ArrayCheckpoint
       public ESMF_ArrayRestore
       public ESMF_ArrayWrite
@@ -172,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.25 2003/04/21 22:37:38 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.26 2003/04/24 16:45:42 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -188,41 +174,47 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-!      !module procedure ESMF_ArrayCreateNewNoData
-        module procedure ESMF_ArrayCreateNewBuffer
-        module procedure ESMF_ArrayCreateBySpec
-        module procedure ESMF_ArrayCreateBySpecNoData
-!      !module procedure ESMF_ArrayCreateBySpecBuffer
+        module procedure ESMF_ArrayCreateByList      ! specify TKR
+        module procedure ESMF_ArrayCreateBySpec      ! specify ArraySpec
 
-       ! < this expands into declarations of interfaces for each T/K/R >
-ArrayInterfaceMacro(ArrayCreateByPtr)
+!       ! < interfaces for each T/K/R >
+! --Array--InterfaceMacro(ArrayCreateByMTArr)
+!
+!       ! < interfaces for each T/K/R >
+! --Array--InterfaceMacro(ArrayCreateByFullArr)
 
+       ! < interfaces for each T/K/R >
+ArrayInterfaceMacro(ArrayCreateByMTPtr)
 
-! ! TODO: add any additional type/kind/ranks here
+       ! < interfaces for each T/K/R >
+ArrayInterfaceMacro(ArrayCreateByFullPtr)
+
 
 ! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_ArrayCreate} functions.   
+! This interface provides a single (heavily overloaded) entry point for 
+!  the various types of {\tt ESMF\_ArrayCreate} functions.   
 !
-!  There are 4 options for setting the contents of the {\tt ESMF\_Array}
+!  There are 3 options for setting the contents of the {\tt ESMF\_Array}
 !  at creation time:
 !  \begin{description}
-!  \item[No Data]
-!    No data space is allocated.
 !  \item[Allocate Space Only]
 !    Data space is allocated but not initialized.  The caller can query
 !    for a pointer to the start of the space to address it directly.
+!    The caller must not deallocate the space; the
+!    {\tt ESMF\_Array} will release the space when it is destroyed.
 !  \item[Data Copy]
 !    An existing Fortran array is specified and the data contents are copied
 !    into new space allocated by the {\tt ESMF\_Array}.
+!    The caller must not deallocate the space; the
+!    {\tt ESMF\_Array} will release the space when it is destroyed.
 !  \item[Data Reference]
 !    An existing Fortran array is specified and the data contents reference
-!    it directly.  The caller must not deallocate the space; the
-!    {\tt ESMF\_Array} will free the space when it is destroyed.
+!    it directly.  The caller is responsible for deallocating the space;
+!    when the {\tt ESMF\_Array} is destroyed it will not release the space.
 !  \end{description}
 !
-!  If the {\tt ESMF\_Array} contains data, there are 4 options for 
-!  specifying the type/kind/rank of that data:
+!  There are 4 options for 
+!  specifying the type/kind/rank of the {\tt ESMF\_Array} data:
 !  \begin{description}
 !  \item[List]
 !    The characteristics of the {\tt ESMF\_Array} are given explicitly
@@ -231,13 +223,18 @@ ArrayInterfaceMacro(ArrayCreateByPtr)
 !    A previously created {\tt ESMF\_ArraySpec} object is given which
 !    describes the characteristics.
 !  \item[Fortran array]
-!    An existing Fortran array is used to describe the array.
+!    An existing Fortran array is used to describe the characteristics.
 !    (Only available from the Fortran interface.)
 !  \item[Fortran 90 Pointer]
-!    An existing Fortran 90 array pointer is used to describe the array.
+!    An associated or unassociated Fortran 90 array pointer is used to 
+!    describe the array.
 !    (Only available from the Fortran interface.)
 !  \end{description}
 !  
+!  The concept of an ``empty'' {\tt Array} does not exist.  To make an
+!  ESMF object which stores the Type/Kind/Rank information create an
+!  {\tt ESMF\_ArraySpec} object which can then be used repeatedly in
+!  subsequent {\tt Array} Create calls.
 !  
 !EOP 
 end interface
@@ -252,11 +249,8 @@ end interface
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      ! < this expands into declarations of interfaces for each T/K/R >
+      ! < declarations of interfaces for each T/K/R >
 ArrayInterfaceMacro(ArrayGetData)
-
-
-! ! TODO: add any additional type/kind/ranks here
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -264,30 +258,6 @@ ArrayInterfaceMacro(ArrayGetData)
 !  
 !EOP 
 end interface
-
-!------------------------------------------------------------------------------
-
-!BOP
-! !IROUTINE: ESMF_ArrayDeallocateType -- Free the data contents
-
-! !INTERFACE:
-     interface ESMF_ArrayDeallocateType
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      ! < this expands into declarations of interfaces for each T/K/R >
-ArrayInterfaceMacro(ArrayDeallocate)
-
-! ! TODO: add any additional type/kind/ranks here
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_ArrayDeallocateType} functions.   
-!  
-!EOP 
-    end interface
-
-!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 interface operator (.eq.)
@@ -327,30 +297,23 @@ end function
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayCreateNewBuffer -- Create a new Array specifying all options.
+! !IROUTINE: ESMF_ArrayCreateByList -- Create an Array specifying all options.
 
 ! !INTERFACE:
-      function ESMF_ArrayCreateNewBuffer(rank, type, kind, &
-                                   lbounds, ubounds, strides, &
-                                   bufaddr, copyflag, rc)
+      function ESMF_ArrayCreateByList(rank, type, kind, counts, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayCreateNewBuffer
+      type(ESMF_Array) :: ESMF_ArrayCreateByList
 !
 ! !ARGUMENTS:
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
-      integer, dimension(:), intent(in) :: lbounds
-      integer, dimension(:), intent(in) :: ubounds
-      integer, dimension(:), intent(in) :: strides
-      type(ESMF_Pointer), intent(in) :: bufaddr
-      type(ESMF_CopyFlag), intent(in) :: copyflag
+      integer, dimension(:), intent(in) :: counts
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Array and set the data values. 
-!
+!  Create a new Array and allocate data space, which remains uninitialized.
 !  The return value is a new Array.
 !    
 !  The arguments are:
@@ -373,30 +336,7 @@ end function
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
 !
-!  \item[lbounds]
-!    The lower bounds for valid indices in the array.  This is a 1D
-!    integer array the same length as the rank.  If not specified,
-!    the default is 1 for each dimension.
-!
-!  \item[ubounds]
-!    The upper bounds for valid indices in the array.  This is a 1D
-!    integer array the same length as the rank.  If not specified,
-!    the default is the count for each dimension.
-!
-!  \item[strides]
-!    The strides for each rank of the array. This is a 1D
-!    integer array the same length as the rank.  If not specified,
-!    the default is the standard Fortran row-major ordering.
-!
-!  \item[bufaddr]
-!    A pointer to the start of the contents of the Array.
-!
-!  \item[copyflag]
-!    Set to either copy the contents of the data array, or simply share a
-!    a pointer to the same space.  Valid values are {\tt ESMF\_DO\_COPY} or 
-!    {\tt ESMF\_DO\_REF}.  (TODO: check to see if these are the right names)
-!
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -405,55 +345,56 @@ end function
 ! !REQUIREMENTS:
 
 
-!       local vars
+        ! Local vars
         type (ESMF_Array) :: array          ! new C++ Array
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
 
-!       TODO: need a null pointer to assign to initialize ptr
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
 
-!       Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
-        call c_ESMC_ArrayCreate(array, rank, type, kind, &
-                                lbounds, ubounds, strides, status)
+        ! TODO: should this take the counts, or not?  for now i am going to
+        !  set the counts after i have created the f90 array and not here.
+        call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
+                                                   ESMF_FROM_FORTRAN, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array construction error"
           return
         endif
 
-!       set return values
-        ESMF_ArrayCreateNewBuffer = array 
-        if (rcpresent) rc = ESMF_SUCCESS
+        call ESMF_ArrayConstructF90Ptr(array, counts, rank, type, kind, status)
 
-        end function ESMF_ArrayCreateNewBuffer
+        ! Set return values
+        ESMF_ArrayCreateByList = array 
+        if (rcpresent) rc = status
+
+        end function ESMF_ArrayCreateByList
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayCreateBySpec -- Create a new Array from a spec
+! !IROUTINE: ESMF_ArrayCreateBySpec -- Create a new Array from an ArraySpec
 
 ! !INTERFACE:
-      function ESMF_ArrayCreateBySpec(spec, bufaddr, copyflag, rc)
+      function ESMF_ArrayCreateBySpec(spec, counts, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateBySpec
 !
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: spec
-      type(ESMF_Pointer), intent(in) :: bufaddr
-      type(ESMF_CopyFlag), intent(in) :: copyflag
+      integer, intent(in), dimension(:) :: counts
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Array and set the data values. 
-!
+!  Create a new Array and allocate data space, which remains uninitialized.
 !  The return value is a new Array.
 !    
 !  The arguments are:
@@ -462,16 +403,11 @@ end function
 !  \item[spec]
 !    ArraySpec object.
 !
-!  \item[bufaddr]
-!    A pointer to the start of the contents of the Array.
+!  \item[counts]
+!    The number of items in each dimension of the array.  This is a 1D
+!    integer array the same length as the rank.
 !
-!  \item[copyflag]
-!    Set to either copy the contents of the data buffer, or set a reference
-!    and assume ownership of the buffer.  It must be able to be deallocated
-!    by the ESMF.  Valid values are {\tt ESMF\_DO\_COPY} or 
-!    {\tt ESMF\_NO\_COPY}.
-!
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -479,66 +415,81 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-
-!       local vars
-        type (ESMF_Array) :: a              ! new array object
+        ! Local vars
+        type (ESMF_Array) :: array          ! new C++ Array
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
+        integer :: rank
+        type(ESMF_DataType) :: type
+        type(ESMF_DataKind) :: kind
 
-!       initialize pointer
         status = ESMF_FAILURE
         rcpresent = .FALSE.
-!        nullify(a)
+        array%this = ESMF_NULL_POINTER
 
-!       initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
-!       allocate space for Array object and call Construct method to initalize
-!        allocate(a, stat=status)
-!        if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
-!          print *, "Array allocation error"
-!          return
-!        endif
-
-
-!       set return values
-        ESMF_ArrayCreateBySpec = a
-        if (rcpresent) rc = ESMF_SUCCESS
+        call ESMF_ArraySpecGet(spec, rank, type, kind, status)
+        if (status .ne. ESMF_SUCCESS) return
+        
+        ! Call the list function to make the array
+        ESMF_ArrayCreateBySpec = ESMF_ArrayCreateByList(rank, type, kind, &
+                                                            counts, status)
+        if (rcpresent) rc = status
 
         end function ESMF_ArrayCreateBySpec
 
+
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayCreateBySpecNoData -- Create a new Array from a spec
+!BOPI
+! !IROUTINE: ESMF_ArrayConstructF90Ptr - Create and add F90 ptr to array
 
 ! !INTERFACE:
-      function ESMF_ArrayCreateBySpecNoData(as, counts, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayCreateBySpecNoData
+     subroutine ESMF_ArrayConstructF90Ptr(array, counts, rank, type, kind, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: as
-      integer, intent(in), dimension(:) :: counts
+      type(ESMF_Array), intent(inout) :: array
+      integer, dimension(:), intent(in) :: counts
+      integer, intent(in) :: rank
+      type(ESMF_DataType), intent(in) :: type
+      type(ESMF_DataKind), intent(in) :: kind
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Array and allocate space.
-!
-!  The return value is a new Array.
+!  Take a partially created {\tt Array} and T/K/R information and call the
+!   proper subroutine to create an F90 pointer, allocate space, and set the
+!   corresponding values in the {\tt Array} object.
 !    
 !  The arguments are:
 !  \begin{description}
 !
-!  \item[as]
-!    ArraySpec object.
+!  \item[array]
+!    Partially created {\tt ESMF\_Array} object.  This entry point is used
+!    during both the C++ and F90 create calls if we need to create an F90
+!    pointer to be used later.
 !
 !  \item[counts]
-!    Count of items in each dimension.  Must be the same length as the
-!    rank in the {\tt ArraySpec}.
+!    The number of items in each dimension of the array.  This is a 1D
+!    integer array the same length as the rank.
+!
+!  \item[rank]
+!    Array rank.
+!    This must match what is already in the array - it is here only as
+!    a convienience.
+!
+!  \item[type]
+!    Array type.
+!    This must match what is already in the array - it is here only as
+!    a convienience.
+!
+!  \item[kind]
+!    Array kind. 
+!    This must match what is already in the array - it is here only as
+!    a convienience.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -550,14 +501,11 @@ end function
 
 
         ! Local vars
-        type (ESMF_Array) :: a              ! new array object
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
 
-        ! Initialize pointer
         status = ESMF_FAILURE
         rcpresent = .FALSE.
-        a%this = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -565,175 +513,352 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ! Call proper create routine
-        select case (as%rank)
+
+        ! Call a T/K/R specific interface in order to create the proper
+        !  type of F90 pointer, allocate the space, set the values in the
+        !  Array object, and return.  (The routine this code is calling is
+        !  generated by macro.)
+
+        ! Call proper create F90 ptr routine
+        select case (rank)
           case (1)
-            select case (as%type%dtype)
+            select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               a = ESMF_ArrayCreateBySpecI41D(counts, rc)
+               call ESMF_ArrayConstructF90PtrI41D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               a = ESMF_ArrayCreateBySpecR41D(counts, rc)
+               call ESMF_ArrayConstructF90PtrR41D(array, counts, rc=status)
               case default
                print *, "unsupported type"
+               return
             end select
           case (2)
-            select case (as%type%dtype)
+            select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               a = ESMF_ArrayCreateBySpecI42D(counts, rc)
+               call ESMF_ArrayConstructF90PtrI42D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               a = ESMF_ArrayCreateBySpecR42D(counts, rc)
+               call ESMF_ArrayConstructF90PtrR42D(array, counts, rc=status)
               case default
                print *, "unsupported type"
+               return
             end select
           case (3)
-            select case (as%type%dtype)
+            select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               a = ESMF_ArrayCreateBySpecI43D(counts, rc)
+               call ESMF_ArrayConstructF90PtrI43D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               a = ESMF_ArrayCreateBySpecR43D(counts, rc)
+               call ESMF_ArrayConstructF90PtrR43D(array, counts, rc=status)
               case default
                print *, "unsupported type"
+               return
             end select
           case (4)
-            select case (as%type%dtype)
+            select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               a = ESMF_ArrayCreateBySpecI44D(counts, rc)
+               call ESMF_ArrayConstructF90PtrI44D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               a = ESMF_ArrayCreateBySpecR44D(counts, rc)
+               call ESMF_ArrayConstructF90PtrR44D(array, counts, rc=status)
               case default
                print *, "unsupported type"
+               return
             end select
           case (5)
-            select case (as%type%dtype)
+            select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               a = ESMF_ArrayCreateBySpecI45D(counts, rc)
+               call ESMF_ArrayConstructF90PtrI45D(array, counts, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               a = ESMF_ArrayCreateBySpecR45D(counts, rc)
+               call ESMF_ArrayConstructF90PtrR45D(array, counts, rc=status)
               case default
                print *, "unsupported type"
+               return
             end select
           case default
            print *, "unsupported rank"
+           return
         end select
 
-        ! Set return values
-        ESMF_ArrayCreateBySpecNoData = a
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! Set return code if caller specified it
+        if (rcpresent) rc = status
 
-        end function ESMF_ArrayCreateBySpecNoData
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-
-!! < start of macros which become actual function bodies after expansion >
-
-ArrayCreateMacro(integer, I2, 1, COL1, LEN1, LOC1)
-
-ArrayCreateMacro(integer, I4, 1, COL1, LEN1, LOC1)
-
-ArrayCreateMacro(integer, I8, 1, COL1, LEN1, LOC1)
-
-ArrayCreateMacro(integer, I2, 2, COL2, LEN2, LOC2)
-
-ArrayCreateMacro(integer, I4, 2, COL2, LEN2, LOC2)
-
-ArrayCreateMacro(integer, I8, 2, COL2, LEN2, LOC2)
-
-ArrayCreateMacro(integer, I2, 3, COL3, LEN3, LOC3)
-
-ArrayCreateMacro(integer, I4, 3, COL3, LEN3, LOC3)
-
-ArrayCreateMacro(integer, I8, 3, COL3, LEN3, LOC3)
-
-ArrayCreateMacro(integer, I2, 4, COL4, LEN4, LOC4)
-
-ArrayCreateMacro(integer, I4, 4, COL4, LEN4, LOC4)
-
-ArrayCreateMacro(integer, I8, 4, COL4, LEN4, LOC4)
-
-ArrayCreateMacro(integer, I2, 5, COL5, LEN5, LOC5)
-
-ArrayCreateMacro(integer, I4, 5, COL5, LEN5, LOC5)
-
-ArrayCreateMacro(integer, I8, 5, COL5, LEN5, LOC5)
-
-ArrayCreateMacro(real, R4, 1, COL1, LEN1, LOC1)
-
-ArrayCreateMacro(real, R8, 1, COL1, LEN1, LOC1)
-
-ArrayCreateMacro(real, R4, 2, COL2, LEN2, LOC2)
-
-ArrayCreateMacro(real, R8, 2, COL2, LEN2, LOC2)
-
-ArrayCreateMacro(real, R4, 3, COL3, LEN3, LOC3)
-
-ArrayCreateMacro(real, R8, 3, COL3, LEN3, LOC3)
-
-ArrayCreateMacro(real, R4, 4, COL4, LEN4, LOC4)
-
-ArrayCreateMacro(real, R8, 4, COL4, LEN4, LOC4)
-
-ArrayCreateMacro(real, R4, 5, COL5, LEN5, LOC5)
-
-ArrayCreateMacro(real, R8, 5, COL5, LEN5, LOC5)
-
-
+        end subroutine ESMF_ArrayConstructF90Ptr
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
 
-ArrayCreateSpecMacro(integer, I2, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(integer, I2, 1, COL1, LEN1, LOC1)
 
-ArrayCreateSpecMacro(integer, I4, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
-ArrayCreateSpecMacro(integer, I8, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(integer, I8, 1, COL1, LEN1, LOC1)
 
-ArrayCreateSpecMacro(integer, I2, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(integer, I2, 2, COL2, LEN2, LOC2)
 
-ArrayCreateSpecMacro(integer, I4, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
-ArrayCreateSpecMacro(integer, I8, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(integer, I8, 2, COL2, LEN2, LOC2)
 
-ArrayCreateSpecMacro(integer, I2, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(integer, I2, 3, COL3, LEN3, LOC3)
 
-ArrayCreateSpecMacro(integer, I4, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(integer, I4, 3, COL3, LEN3, LOC3)
 
-ArrayCreateSpecMacro(integer, I8, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(integer, I8, 3, COL3, LEN3, LOC3)
 
-ArrayCreateSpecMacro(integer, I2, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(integer, I2, 4, COL4, LEN4, LOC4)
 
-ArrayCreateSpecMacro(integer, I4, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(integer, I4, 4, COL4, LEN4, LOC4)
 
-ArrayCreateSpecMacro(integer, I8, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(integer, I8, 4, COL4, LEN4, LOC4)
 
-ArrayCreateSpecMacro(integer, I2, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(integer, I2, 5, COL5, LEN5, LOC5)
 
-ArrayCreateSpecMacro(integer, I4, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(integer, I4, 5, COL5, LEN5, LOC5)
 
-ArrayCreateSpecMacro(integer, I8, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(integer, I8, 5, COL5, LEN5, LOC5)
 
-ArrayCreateSpecMacro(real, R4, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(real, R4, 1, COL1, LEN1, LOC1)
 
-ArrayCreateSpecMacro(real, R8, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(real, R8, 1, COL1, LEN1, LOC1)
 
-ArrayCreateSpecMacro(real, R4, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(real, R4, 2, COL2, LEN2, LOC2)
 
-ArrayCreateSpecMacro(real, R8, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(real, R8, 2, COL2, LEN2, LOC2)
 
-ArrayCreateSpecMacro(real, R4, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(real, R4, 3, COL3, LEN3, LOC3)
 
-ArrayCreateSpecMacro(real, R8, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(real, R8, 3, COL3, LEN3, LOC3)
 
-ArrayCreateSpecMacro(real, R4, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(real, R4, 4, COL4, LEN4, LOC4)
 
-ArrayCreateSpecMacro(real, R8, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(real, R8, 4, COL4, LEN4, LOC4)
 
-ArrayCreateSpecMacro(real, R4, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(real, R4, 5, COL5, LEN5, LOC5)
 
-ArrayCreateSpecMacro(real, R8, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+
+ArrayCreateByFullArrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullArrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullArrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullArrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullArrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullArrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullArrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullArrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullArrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullArrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullArrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullArrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullArrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByFullArrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByFullArrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByFullArrMacro(real, R4, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullArrMacro(real, R8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullArrMacro(real, R4, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullArrMacro(real, R8, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullArrMacro(real, R4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullArrMacro(real, R8, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullArrMacro(real, R4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullArrMacro(real, R8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullArrMacro(real, R4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByFullArrMacro(real, R8, 5, COL5, LEN5, LOC5)
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+
+ArrayCreateByMTPtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByMTPtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByMTPtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByMTPtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByMTPtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByMTPtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByMTPtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByMTPtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByMTPtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByMTPtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByMTPtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByMTPtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByMTPtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByMTPtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByMTPtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByMTPtrMacro(real, R4, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByMTPtrMacro(real, R8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByMTPtrMacro(real, R4, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByMTPtrMacro(real, R8, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByMTPtrMacro(real, R4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByMTPtrMacro(real, R8, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByMTPtrMacro(real, R4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByMTPtrMacro(real, R8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByMTPtrMacro(real, R4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByMTPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
+
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+
+ArrayCreateByFullPtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullPtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullPtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullPtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullPtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullPtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullPtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullPtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullPtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullPtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullPtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullPtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullPtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByFullPtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByFullPtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByFullPtrMacro(real, R4, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullPtrMacro(real, R8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateByFullPtrMacro(real, R4, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullPtrMacro(real, R8, 2, COL2, LEN2, LOC2)
+
+ArrayCreateByFullPtrMacro(real, R4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullPtrMacro(real, R8, 3, COL3, LEN3, LOC3)
+
+ArrayCreateByFullPtrMacro(real, R4, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullPtrMacro(real, R8, 4, COL4, LEN4, LOC4)
+
+ArrayCreateByFullPtrMacro(real, R4, 5, COL5, LEN5, LOC5)
+
+ArrayCreateByFullPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+
+ArrayConstructF90PtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+
+ArrayConstructF90PtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+
+ArrayConstructF90PtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+
+ArrayConstructF90PtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+
+ArrayConstructF90PtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+
+ArrayConstructF90PtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+
+ArrayConstructF90PtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+
+ArrayConstructF90PtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+
+ArrayConstructF90PtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
+ArrayConstructF90PtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+
+ArrayConstructF90PtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+
+ArrayConstructF90PtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+
+ArrayConstructF90PtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+
+ArrayConstructF90PtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+
+ArrayConstructF90PtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+
+ArrayConstructF90PtrMacro(real, R4, 1, COL1, LEN1, LOC1)
+
+ArrayConstructF90PtrMacro(real, R8, 1, COL1, LEN1, LOC1)
+
+ArrayConstructF90PtrMacro(real, R4, 2, COL2, LEN2, LOC2)
+
+ArrayConstructF90PtrMacro(real, R8, 2, COL2, LEN2, LOC2)
+
+ArrayConstructF90PtrMacro(real, R4, 3, COL3, LEN3, LOC3)
+
+ArrayConstructF90PtrMacro(real, R8, 3, COL3, LEN3, LOC3)
+
+ArrayConstructF90PtrMacro(real, R4, 4, COL4, LEN4, LOC4)
+
+ArrayConstructF90PtrMacro(real, R8, 4, COL4, LEN4, LOC4)
+
+ArrayConstructF90PtrMacro(real, R4, 5, COL5, LEN5, LOC5)
+
+ArrayConstructF90PtrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -850,133 +975,6 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
-! !TODO: this may be obsolete.
-!BOP
-! !IROUTINE: ESMF_ArrayCreateMTPtr2DR8 - make an ESMF array from an F90 ptr
-
-! !INTERFACE:
-      function ESMF_ArrayCreateMTPtr2DR8(f90ptr, ni, nj, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayCreateMTPtr2DR8
-!
-! !ARGUMENTS:
-      real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr
-      integer, intent(in) :: ni
-      integer, intent(in) :: nj
-      integer, intent(out), optional :: rc  
-!
-! !DESCRIPTION:
-! Creates an {\tt Array} based on an existing Fortran 90 pointer, and
-!  the requested sizes.
-!
-! The function return is an ESMF\_Array type.
-!
-! The arguments are:
-!  \begin{description}
-!  \item[f90ptr]
-!   A Fortran 90 array pointer which can be queried for info about
-!    type/kind/rank.  This routine will allocate data space so that when
-!    it returns the pointer will be associated and the memory can be
-!    filled with values.
-!
-!  \item[ni]
-!    Number of elements in the first dimension.
-!
-!  \item[nj]
-!    Number of elements in the second dimension.
-!
-!  \item[[rc]]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!  \end{description}
-!
-
-!
-!EOP
-! !REQUIREMENTS:
-
-!       local vars
-        type (ESMF_Array) :: array          ! what C++ is going to return
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
-
-!       TODO: need a null pointer to assign to initialize ptr
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        array%this = ESMF_NULL_POINTER
-
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-!       set up callback
-        call c_ESMC_StoreAllocFunc(ESMF_Allocate2DR4, status);
-
-!       call create routine
-        !call c_ESMC_ArrayCreateMTPtr2D(array, ni, nj, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Array initial construction error"
-          return
-        endif
-
-        call ESMF_Allocate(f90ptr, ni, nj, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Array allocate construction error"
-          return
-        endif
-
-!       set base address
-        call c_ESMC_ArraySetBaseAddr(array, f90ptr(1,1), status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Array base address construction error"
-          return
-        endif
-
-
-!       return value set by c_ESMC func above
-        ESMF_ArrayCreateMTPtr2DR8 = array
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end function ESMF_ArrayCreateMTPtr2DR8  
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayDeallocateData(array, rc)
-!
-! !RETURN VALUE:
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Return an F90 pointer to the data buffer, or return an F90 pointer
-!     to a new copy of the data.
-!
-!EOP
-! !REQUIREMENTS:
-      type (ESMF_ArrWrapI41D) :: wrapI41D
-      type (ESMF_ArrWrapI81D) :: wrapI81D
-      type (ESMF_ArrWrapI42D) :: wrapI42D
-      type (ESMF_ArrWrapI82D) :: wrapI82D
-      type (ESMF_ArrWrapR41D) :: wrapR41D
-      type (ESMF_ArrWrapR81D) :: wrapR81D
-      type (ESMF_ArrWrapR42D) :: wrapR42D
-      type (ESMF_ArrWrapR82D) :: wrapR82D
-
-!    ! TODO: call the c interfaces to get the rank, type, kind, and then
-     !  call the function with the right wrapper type to get it deallocated.
-      call ESMF_ArrayDeallocateType(array, wrapI81D, rc)
-
-      end subroutine ESMF_ArrayDeallocateData
-
-
-
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1001,15 +999,25 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !
 !     \end{description}
 !
+!  To reduce the depth of crossings of the F90/C++ boundary we first
+!   query to see if we are responsible for deleting the data space.  If so,
+!   first deallocate the space and then call the C++ code to release
+!   the object space.  When it returns we are done and can return to the user.
+!   Otherwise we would need to make a nested call back into F90 from C++ to do
+!   the deallocate() during the object delete.
+!
 !EOP
 ! !REQUIREMENTS:
 
-!       local vars
+        ! Local vars
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
         logical :: needsdealloc             ! do we need to free space?
+        integer :: rank
+        type(ESMF_DataType) :: type
+        type(ESMF_DataKind) :: kind
 
-!       initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -1019,21 +1027,27 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
         needsdealloc = .FALSE.
 
-!       ! TODO: document the current rule - if we did the allocate in
-!       !   the case of ESMF_DO_COPY at create time, then we delete the
-!       !   space.  otherwise, the user needs to destroy the array first
-!       !   (we will ignore the data) and then call deallocate themselves.
+        ! TODO: document the current rule - if we do the allocate in
+        !   the case of ESMF_DATA_COPY at create time then we delete the
+        !   space.  otherwise, the user needs to destroy the array 
+        !   (we will ignore the data) and call deallocate themselves.
 
-!       call Destruct first, then free this memory
+        ! Call Destruct first, then free this memory
         call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
         if (needsdealloc) then
-          call ESMF_ArrayDeallocateData(array, status)
+          call c_ESMC_ArrayGetRank(array, rank, status)
+          call c_ESMC_ArrayGetType(array, type, status)
+          call c_ESMC_ArrayGetKind(array, kind, status)
+          call ESMF_ArrayF90Deallocate(array, rank, type, kind, status)
           if (status .ne. ESMF_SUCCESS) then
             print *, "Array contents destruction error"
             return
           endif
+          call c_ESMC_ArraySetNoDealloc(array, status)
         endif
 
+        ! Calling deallocate first means this will not return back to F90
+        !  before returning for good.
         call c_ESMC_ArrayDestroy(array, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array destruction error"
@@ -1249,8 +1263,8 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
                                      AI_exc, AI_tot, array_out, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      type(ESMF_DELayout) :: layout
+      type(ESMF_Array), intent(in) :: array
+      type(ESMF_DELayout), intent(in) :: layout
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_tot
@@ -1289,6 +1303,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
         size_decomp = size(decompids)
         call c_ESMC_ArrayAllGather(array, layout, decompids, size_decomp, &
                                    AI_exc, AI_tot, array_out, status)
+
         if (status .ne. ESMF_SUCCESS) then
           print *, "c_ESMC_ArrayAllGather returned error"
           return
@@ -1345,7 +1360,6 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !BOP
 ! !INTERFACE:
      subroutine ESMF_ArraySpecInit(as, rank, type, kind, rc)
-                                   !counts, lbounds, ubounds, strides, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1353,15 +1367,11 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
      integer, intent(in) :: rank
      type(ESMF_DataType), intent(in) :: type
      type(ESMF_DataKind), intent(in) :: kind
-     !integer, dimension(:), intent(in), optional :: counts
-     !integer, dimension(:), intent(in), optional :: lbounds
-     !integer, dimension(:), intent(in), optional :: ubounds
-     !integer, dimension(:), intent(in), optional :: strides
      integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !  Creates a description of the data -- the type, the dimensionality, etc.  
-!  This specification (basically an empty Array), can be
+!  This specification can be
 !  used in an ArrayCreate call with data to create a full Array.
 !    
 !  The arguments are:
@@ -1383,25 +1393,6 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
-!%  \item[counts]
-!%    The size of each dimension in the Array.  This is a 1D integer array
-!%    the same length as the rank.
-!%
-!%  \item[[lbounds]]
-!%    The lower bounds for valid indices in the array.  This is a 1D
-!%    integer array the same length as the rank.  If not specified
-!%    the default values are 1 for each dimension.
-!%
-!%  \item[[ubounds]]
-!%    The upper bounds for valid indices in the array.  This is a 1D
-!%    integer array the same length as the rank.  If not specified
-!%    the default values are same as the count in each dimension.
-!%
-!%  \item[[strides]]
-!%    The strides for each rank of the array. This is a 1D
-!%    integer array the same length as the rank.  If not specified
-!%    the default values are the same as the default Fortran array strides.
-!%
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1431,13 +1422,6 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
         as%type = type
         as%kind = kind
 
-       ! do i=1,rank
-       !   as%counts(i) = counts(i)
-       !   !as%rinfo(i, 1) = lbounds(i)
-       !   !as%rinfo(i, 2) = ubounds(i)
-       !   !as%rinfo(i, 3) = strides(i)
-       ! enddo
-
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArraySpecInit
@@ -1452,19 +1436,20 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayGet(array, rank, type, kind, lengths, &
-                               lbounds, ubounds, strides, base, rc)
+      subroutine ESMF_ArrayGet(array, rank, type, kind, counts, &
+                               lbounds, ubounds, strides, base, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
       integer, intent(out), optional :: rank
       type(ESMF_DataType), intent(out), optional :: type
       type(ESMF_DataKind), intent(out), optional :: kind
-      integer, dimension(:), intent(out), optional :: lengths
+      integer, dimension(:), intent(out), optional :: counts
       integer, dimension(:), intent(out), optional :: lbounds
       integer, dimension(:), intent(out), optional :: ubounds
       integer, dimension(:), intent(out), optional :: strides
       type(ESMF_Pointer), intent(out), optional :: base
+      character(len=ESMF_MAXSTR), intent(out), optional :: name
       integer, intent(out), optional :: rc             
 
 !
@@ -1503,9 +1488,9 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
          call c_ESMC_ArrayGetKind(array, kind, status)
       endif
 
-      if (present(lengths)) then
+      if (present(counts)) then
          call c_ESMC_ArrayGetRank(array, lrank, status)
-         call c_ESMC_ArrayGetLengths(array, lrank, lengths, status)
+         call c_ESMC_ArrayGetLengths(array, lrank, counts, status)
       endif
 
    
@@ -1569,17 +1554,12 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !BOP
 ! !INTERFACE:
       subroutine ESMF_ArraySpecGet(as, rank, type, kind, rc)
-                                          !counts, lbounds, ubounds, strides, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: as
       integer, intent(out), optional :: rank
       type(ESMF_DataType), intent(out), optional :: type
       type(ESMF_DataKind), intent(out), optional :: kind
-      !integer, dimension(:), intent(in), optional :: counts
-      !integer, dimension(:), intent(in), optional :: lbounds
-      !integer, dimension(:), intent(in), optional :: ubounds
-      !integer, dimension(:), intent(in), optional :: strides
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1604,25 +1584,6 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
-!%  \item[counts]
-!%    The size of each dimension in the Array.  This is a 1D integer array
-!%    the same length as the rank.
-!%
-!%  \item[[lbounds]]
-!%    The lower bounds for valid indices in the array.  This is a 1D
-!%    integer array the same length as the rank.  If not specified
-!%    the default values are 1 for each dimension.
-!%
-!%  \item[[ubounds]]
-!%    The upper bounds for valid indices in the array.  This is a 1D
-!%    integer array the same length as the rank.  If not specified
-!%    the default values are same as the count in each dimension.
-!%
-!%  \item[[strides]]
-!%    The strides for each rank of the array. This is a 1D
-!%    integer array the same length as the rank.  If not specified
-!%    the default values are the same as the default Fortran array strides.
-!%
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1630,12 +1591,12 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !
 !EOP
 
-!       local vars
+        ! Local vars
         integer :: i
         integer :: status                        ! local error status
         logical :: rcpresent                     ! did user specify rc?
 
-!       initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -1643,23 +1604,320 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           rc = ESMF_FAILURE
         endif
 
-!       get arrayspec contents
+        ! Get arrayspec contents
       
         if(present(rank)) rank = as%rank
         if(present(type)) type = as%type
         if(present(kind)) kind = as%kind
 
-       ! do i=1,rank
-       !   as%counts(i) = counts(i)
-       !   !as%rinfo(i, 1) = lbounds(i)
-       !   !as%rinfo(i, 2) = ubounds(i)
-       !   !as%rinfo(i, 3) = strides(i)
-       ! enddo
-
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArraySpecGet
 
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
+! This section is Allocate/Deallocate for Arrays
+!
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------ 
+!!! TODO:  the interface now calls ESMF_ArrayConstructF90Ptr instead of
+!!! this routine.  It maybe can go away?  and can we do something with
+!!! ESMF_ArrayF90Deallocate to get rid of it as well, so the interfaces
+!!! are more symmetric?
+!------------------------------------------------------------------------------ 
+!BOPI
+! !IROUTINE:  ESMF_ArrayF90Allocate - Allocate an F90 pointer and set Array info
+!
+! !INTERFACE: 
+     subroutine ESMF_ArrayF90Allocate(array, rank, type, kind, counts, rc)
+! 
+! !ARGUMENTS: 
+      type(ESMF_Array), intent(inout) :: array 
+      integer, intent(in) :: rank   
+      type(ESMF_DataType), intent(in) :: type
+      type(ESMF_DataKind), intent(in) :: kind
+      integer, dimension(:), intent(in) :: counts 
+      integer, intent(out), optional :: rc 
+! 
+! !DESCRIPTION: 
+!     Allocate data contents for an array created from the C++ interface. 
+!     The arguments are: 
+!     \begin{description} 
+!     \item[array]  
+!          A partially created {\tt Array} object. 
+!     \item[rank]  
+!          The {\tt Array} rank.  
+!     \item[type]  
+!          The {\tt Array} type (integer, real/float, etc).  
+!     \item[kind]  
+!          The {\tt Array} kind (short/2, long/8, etc).  
+!     \item[counts]  
+!          An integer array, size {\tt rank}, of each dimension length. 
+!     \item[{[rc]}]  
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+!   \end{description} 
+! 
+!EOPI
+! !REQUIREMENTS: 
+ 
+    integer :: status                               ! local error status 
+    integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds
+    integer, dimension(ESMF_MAXDIM) :: strides, offsets
+
+    !! local variables, expanded by macro
+ArrayAllLocalVarMacro()
+
+ 
+    status = ESMF_FAILURE  
+    if (present(rc)) rc = ESMF_FAILURE
+ 
+    !! macros which are expanded by the preprocessor
+    select case (type%dtype)
+      case (ESMF_DATA_INTEGER%dtype)
+        select case (rank)
+          case (1)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I2)
+AllocAllocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
+              case (ESMF_IKIND_I4)
+AllocAllocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
+              case (ESMF_IKIND_I8)
+AllocAllocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
+              case default
+            end select
+
+          case (2)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I2)
+AllocAllocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
+              case (ESMF_IKIND_I4)
+AllocAllocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
+              case (ESMF_IKIND_I8)
+AllocAllocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
+              case default
+            end select
+
+          case (3)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I2)
+AllocAllocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
+              case (ESMF_IKIND_I4)
+AllocAllocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
+              case (ESMF_IKIND_I8)
+AllocAllocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+              case default
+            end select
+
+          case (4)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I2)
+AllocAllocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
+              case (ESMF_IKIND_I4)
+AllocAllocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
+              case (ESMF_IKIND_I8)
+AllocAllocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
+              case default
+            end select
+
+          case default
+        end select
+
+       case (ESMF_DATA_REAL%dtype)
+        select case (rank)
+          case (1)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I4)
+AllocAllocateMacro(real, R4, 1, COL1, LEN1, LOC1)
+              case (ESMF_IKIND_I8)
+AllocAllocateMacro(real, R8, 1, COL1, LEN1, LOC1)
+              case default
+            end select
+
+          case (2)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I4)
+AllocAllocateMacro(real, R4, 2, COL2, LEN2, LOC2)
+              case (ESMF_IKIND_I8)
+AllocAllocateMacro(real, R8, 2, COL2, LEN2, LOC2)
+              case default
+            end select
+
+          case (3)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I4)
+AllocAllocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
+              case (ESMF_IKIND_I8)
+AllocAllocateMacro(real, R8, 3, COL3, LEN3, LOC3)
+              case default
+            end select
+
+          case (4)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I4)
+AllocAllocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
+              case (ESMF_IKIND_I8)
+AllocAllocateMacro(real, R8, 4, COL4, LEN4, LOC4)
+              case default
+            end select
+
+          case default
+        end select
+      case default
+     end select
+
+     if (present(rc)) rc = status 
+ 
+     end subroutine ESMF_ArrayF90Allocate
+ 
+
+!------------------------------------------------------------------------------ 
+!BOP 
+! !IROUTINE:  ESMF_ArrayF90Deallocate - Deallocate an F90 pointer 
+!
+! !INTERFACE: 
+     subroutine ESMF_ArrayF90Deallocate(array, rank, type, kind, rc)
+! 
+! !ARGUMENTS: 
+      type(ESMF_Array) :: array 
+      integer :: rank   
+      type(ESMF_DataType) :: type
+      type(ESMF_DataKind) :: kind
+      integer, intent(out), optional :: rc 
+! 
+! !DESCRIPTION: 
+!     Deallocate data contents for an array created from the C++ interface. 
+!     The arguments are: 
+!     \begin{description} 
+!     \item[array]  
+!          A partially created {\tt Array} object. 
+!     \item[rank]  
+!          The {\tt Array} rank.  
+!     \item[type]  
+!          The {\tt Array} type (integer, real/float, etc).  
+!     \item[kind]  
+!          The {\tt Array} kind (short/2, long/8, etc).  
+!     \item[{[rc]}]  
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+!   \end{description} 
+! 
+!EOP 
+! !REQUIREMENTS: 
+ 
+    integer :: status                               ! local error status 
+
+    !! local variables, expanded by macro
+ArrayAllLocalVarMacro()
+
+
+    if (present(rc)) rc = ESMF_FAILURE
+ 
+    !! macros which are expanded by the preprocessor
+    select case (type%dtype)
+      case (ESMF_DATA_INTEGER%dtype)
+        select case (rank)
+          case (1)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I2)
+AllocDeallocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
+              case (ESMF_IKIND_I4)
+AllocDeallocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
+              case (ESMF_IKIND_I8)
+AllocDeallocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
+              case default
+            end select
+
+          case (2)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I2)
+AllocDeallocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
+              case (ESMF_IKIND_I4)
+AllocDeallocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
+              case (ESMF_IKIND_I8)
+AllocDeallocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
+              case default
+            end select
+
+          case (3)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I2)
+AllocDeallocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
+              case (ESMF_IKIND_I4)
+AllocDeallocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
+              case (ESMF_IKIND_I8)
+AllocDeallocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+              case default
+            end select
+
+          case (4)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I2)
+AllocDeallocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
+              case (ESMF_IKIND_I4)
+AllocDeallocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
+              case (ESMF_IKIND_I8)
+AllocDeallocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
+              case default
+            end select
+
+          case default
+        end select
+
+       case (ESMF_DATA_REAL%dtype)
+        select case (rank)
+          case (1)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I4)
+AllocDeallocateMacro(real, R4, 1, COL1, LEN1, LOC1)
+              case (ESMF_IKIND_I8)
+AllocDeallocateMacro(real, R8, 1, COL1, LEN1, LOC1)
+              case default
+            end select
+
+          case (2)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I4)
+AllocDeallocateMacro(real, R4, 2, COL2, LEN2, LOC2)
+              case (ESMF_IKIND_I8)
+AllocDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
+              case default
+            end select
+
+          case (3)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I4)
+AllocDeallocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
+              case (ESMF_IKIND_I8)
+AllocDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
+              case default
+            end select
+
+          case (4)
+            select case (kind%dkind)
+              case (ESMF_IKIND_I4)
+AllocDeallocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
+              case (ESMF_IKIND_I8)
+AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
+              case default
+            end select
+
+          case default
+        end select
+      case default
+     end select
+
+     if (status .ne. 0) then 
+        print *, "ESMC_ArrayDelete: Deallocation error"
+        return
+      endif
+
+     if (present(rc)) rc = ESMF_SUCCESS
+ 
+     end subroutine ESMF_ArrayF90Deallocate
+ 
+!------------------------------------------------------------------------------ 
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

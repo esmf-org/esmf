@@ -1,4 +1,4 @@
-// $Id: ESMC_Alloc.h,v 1.3 2002/12/09 23:16:39 nscollins Exp $
+// $Id: ESMC_Alloc.h,v 1.4 2003/04/24 16:45:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,8 +29,8 @@ extern "C" {
  //  the alpha architcture (halem)
 //extern struct c_F90ptr;
 
-   void FTN(f_esmf_allocate2dr4)(struct c_F90ptr *f90ptr, int *ni, int *nj, int *rc);
-   void FTN(f_esmf_deallocate2dr4)(struct c_F90ptr *f90ptr, int *rc);
+//   void FTN(f_esmf_allocate2dr4)(struct c_F90ptr *f90ptr, int *ni, int *nj, int *rc);
+//   void FTN(f_esmf_deallocate2dr4)(struct c_F90ptr *f90ptr, int *rc);
 };
 
 #endif  // ESMC_Alloc_H

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.27 2003/04/17 21:40:05 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.28 2003/04/24 16:45:33 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 
 //-----------------------------------------------------------------------------
 
-#include "ESMC_Alloc.h"
+//#include "ESMC_Alloc.h"
 #include <string.h>
 //#include <stdio.h>  // include for debug only
 
@@ -67,9 +67,24 @@ struct c_F90ptr {
 
 // !PRIVATE TYPES:
 
-enum ESMC_ArrayOrigin { ESMC_FROM_FORTRAN = 1, 
-                        ESMC_FROM_CPLUSPLUS, 
-                        ESMC_UNKNOWN};
+// these must stay in sync with the F90 versions
+typedef enum { 
+    ESMC_FROM_FORTRAN = 1, 
+    ESMC_FROM_CPLUSPLUS 
+} ESMC_ArrayOrigin; 
+
+typedef enum { 
+    ESMC_DATA_COPY = 1, 
+    ESMC_DATA_REF,
+    ESMC_DATA_NONE
+} ESMC_DataCopy;
+
+// this should be public -
+typedef enum { 
+    ESMC_ARRAY_NO_ALLOCATE = 0, 
+    ESMC_ARRAY_DO_ALLOCATE,
+    ESMC_ARRAY_ALLOC_IF_BASE_NULL 
+} ESMC_ArrayDoAllocate;
 
 // class configuration type
 class ESMC_ArrayConfig {
@@ -79,8 +94,10 @@ class ESMC_ArrayConfig {
 
 // private static data - address of fortran callback funcs
 extern "C" {
- static void (*allocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = 0;
- static void (*deallocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = 0;
+ void FTN(f_esmf_arrayf90allocate)(ESMC_Array**, int *, ESMC_DataType*, 
+                                       ESMC_DataKind*, int*, int*);
+ void FTN(f_esmf_arrayf90deallocate)(ESMC_Array**, int*, ESMC_DataType*, 
+                                       ESMC_DataKind *, int*);
 }
 
 
@@ -89,19 +106,19 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
     int rank;                      // dimensionality
-    enum ESMC_DataType type;       // int, real, etc.
-    enum ESMC_DataKind kind;       // short, long
+    ESMC_DataType type;            // int, real, etc.
+    ESMC_DataKind kind;            // short, long
+    ESMC_ArrayOrigin origin;       // was the create called from F90 or C++
+    ESMC_Logical needs_dealloc;    // is array responsible for deallocation?
+    ESMC_Logical iscontig;         // optimization possible if all contig
     void *base_addr;               // real start of memory
     int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
-    int length[ESMF_MAXDIM];       // number of elements/dim
+    int counts[ESMF_MAXDIM];       // number of elements/dim
     int stride[ESMF_MAXDIM];       // byte spacing between elements/dim
-    enum ESMC_Logical iscontig;    // optimization possible if all contig
     struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
                                    // potentially these could be needed... 
-    enum ESMC_ArrayOrigin origin;  // was the create called from F90 or C++
-    int needs_dealloc;             // is array responsible for deallocation?
- // int lbounds[ESMF_MAXDIM];      // real lower indicies
- // int ubounds[ESMF_MAXDIM];      // real upper indicies
+    int lbound[ESMF_MAXDIM];       // real lower indicies
+    int ubound[ESMF_MAXDIM];       // real upper indicies
  // void *first_element;           // memory address of the first element
     struct ESMC_AxisIndex ai[ESMF_MAXDIM];   // global-local mapping help
     
@@ -114,11 +131,12 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 //  other than deleting the memory for the object/derived type itself.
 
   public:
-    void ESMC_ArrayConstruct(ESMC_Array *a, int rank,
-                          enum ESMC_DataType dt, enum ESMC_DataKind dk,
-                          void *base, int *offsets, int *lengths, int *strides, 
-                          void *f90ptr, int *rc);
-    //void ESMC_ArrayConstruct(void);
+    int ESMC_ArrayConstruct(int irank, ESMC_DataType dt, 
+            ESMC_DataKind dk, int *counts, void *base, 
+            ESMC_ArrayOrigin oflag, struct c_F90ptr *f90ptr, 
+            ESMC_ArrayDoAllocate aflag, 
+            ESMC_DataCopy docopy, ESMC_Logical dflag, 
+            int *lbounds, int *ubounds, int *strides, int *offsets);
     int ESMC_ArrayDestruct(void);
 
  // optional configuration methods
@@ -136,7 +154,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_ArrayWrite(const char *options, const char *filename) const;
     int ESMC_ArrayValidate(const char *options) const;
-    int ESMC_ArrayPrint(const char *options) const;
+    int ESMC_ArrayPrint(const char *options = NULL) const;
 
  // native C++ constructors/destructors
 	ESMC_Array(void);
@@ -146,76 +164,59 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_ArraySetRank(int rank) { this->rank = rank; return ESMF_SUCCESS;}
     int ESMC_ArrayGetRank(void) { return this->rank; }
 
-    int ESMC_ArraySetType(enum ESMC_DataType type) { this->type = type; 
+    int ESMC_ArraySetType(ESMC_DataType type) { this->type = type; 
                                                      return ESMF_SUCCESS;}
-    enum ESMC_DataType ESMC_ArrayGetType(void) { return this->type; }
+    ESMC_DataType ESMC_ArrayGetType(void) { return this->type; }
 
-    int ESMC_ArraySetKind(enum ESMC_DataKind kind) { this->kind = kind; 
+    int ESMC_ArraySetKind(ESMC_DataKind kind) { this->kind = kind; 
                                                      return ESMF_SUCCESS;}
-    enum ESMC_DataKind ESMC_ArrayGetKind(void) { return this->kind; }
+    ESMC_DataKind ESMC_ArrayGetKind(void) { return this->kind; }
 
     int ESMC_ArraySetLengths(int n, int *l) { for (int i = 0; i < n; i++)
-                                                   this->length[i] = l[i]; 
+                                                  this->counts[i] = l[i]; 
                                               return ESMF_SUCCESS;}
-    int ESMC_ArraySetLengths(int ni) { this->length[0] = ni; 
-                                       return ESMF_SUCCESS;}
-    int ESMC_ArraySetLengths(int ni, int nj) { 
-           this->length[0] = ni; this->length[1] = nj; return ESMF_SUCCESS;}
-    int ESMC_ArraySetLengths(int ni, int nj, int nk) { 
-           this->length[0] = ni; this->length[1] = nj; 
-           this->length[2] = nk; return ESMF_SUCCESS;}
-    int ESMC_ArraySetLengths(int ni, int nj, int nk, int nl) { 
-           this->length[0] = ni; this->length[1] = nj; 
-           this->length[2] = nk; this->length[3] = nl; return ESMF_SUCCESS;}
-    int ESMC_ArraySetLengths(int ni, int nj, int nk, int nl, int nm) { 
-           this->length[0] = ni; this->length[1] = nj; 
-           this->length[2] = nk; this->length[3] = nl; 
-           this->length[4] = nm; return ESMF_SUCCESS;}
+    int ESMC_ArraySetLengths(int ni, int nj=0, int nk=0, int nl=0, int nm=0) { 
+           this->counts[0] = ni; this->counts[1] = nj; 
+           this->counts[2] = nk; this->counts[3] = nl; 
+           this->counts[4] = nm; return ESMF_SUCCESS;}
     int ESMC_ArrayGetLengths(int n, int *l) { for (int i = 0; i < n; i++)
-                                                   l[i] = this->length[i]; 
+                                                   l[i] = this->counts[i]; 
                                               return ESMF_SUCCESS;}
-    int ESMC_ArrayGetLengths(int *ni) { *ni = this->length[0]; 
-                                        return ESMF_SUCCESS;}
-    int ESMC_ArrayGetLengths(int *ni, int *nj) { 
-           *ni = this->length[0]; *nj = this->length[1]; return ESMF_SUCCESS;}
-    int ESMC_ArrayGetLengths(int *ni, int *nj, int *nk) { 
-           *ni = this->length[0]; *nj = this->length[1]; 
-           *nk = this->length[2]; return ESMF_SUCCESS;}
-    int ESMC_ArrayGetLengths(int *ni, int *nj, int *nk, int *nl) { 
-           *ni = this->length[0]; *nj = this->length[1]; 
-           *nk = this->length[2]; *nl = this->length[3]; return ESMF_SUCCESS;}
-    int ESMC_ArrayGetLengths(int *ni, int *nj, int *nk, int *nl, int *nm) { 
-           *ni = this->length[0]; *nj = this->length[1]; 
-           *nk = this->length[2]; *nl = this->length[3]; 
-           *nm = this->length[4]; return ESMF_SUCCESS;}
+    int ESMC_ArrayGetLengths(int *ni, int *nj=NULL, int *nk=NULL, 
+                                int *nl=NULL, int *nm=NULL) { 
+           *ni = this->counts[0]; if (nj) *nj = this->counts[1]; 
+           if (nk) *nk = this->counts[2]; if (nl) *nl = this->counts[3]; 
+           if (nm) *nm = this->counts[4]; return ESMF_SUCCESS;}
 
     int ESMC_ArraySetBaseAddr(void *base_addr) { this->base_addr = base_addr; 
                                                  return ESMF_SUCCESS;}
     int ESMC_ArrayGetBaseAddr(void **base) { *base = this->base_addr; 
                                             return ESMF_SUCCESS;}
 
-    int ESMC_ArraySetOrigin(enum ESMC_ArrayOrigin o) { this->origin = o; 
+    int ESMC_ArraySetOrigin(ESMC_ArrayOrigin o) { this->origin = o; 
                                                        return ESMF_SUCCESS;}
-    enum ESMC_ArrayOrigin ESMC_ArrayGetOrigin(void) { return this->origin; }
+    ESMC_ArrayOrigin ESMC_ArrayGetOrigin(void) { return this->origin; }
 
     // copy the contents of an f90 ptr
     int ESMC_ArraySetF90Ptr(const struct c_F90ptr *p);
     int ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) const;
 
     // set/get the dealloc flag
-    int ESMC_ArraySetNoDealloc(void) { this->needs_dealloc = 0; 
+    int ESMC_ArraySetNoDealloc(void) { this->needs_dealloc = ESMF_TF_FALSE; 
                                        return ESMF_SUCCESS;}
-    int ESMC_ArraySetDealloc(void)   { this->needs_dealloc = 1; 
+    int ESMC_ArraySetDealloc(void)   { this->needs_dealloc = ESMF_TF_TRUE; 
                                        return ESMF_SUCCESS;}
-    int ESMC_ArrayNeedsDealloc(void)  { return this->needs_dealloc; }
+    int ESMC_ArrayNeedsDealloc(void)  { 
+                         return this->needs_dealloc == ESMF_TF_TRUE ? 1 : 0; }
 
-    //int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
-    //int stride[ESMF_MAXDIM];       // byte spacing between elements/dim
-    //enum ESMC_Logical iscontig;    // optimization possible if all contig
-    // int lbounds[ESMF_MAXDIM];      // real lower indicies
-    // int ubounds[ESMF_MAXDIM];      // real upper indicies
+    // get and set useful combinations of values that fortran cares about
+    int ESMC_ArraySetInfo(struct c_F90ptr *fptr, void *base, int *counts, 
+                          int *lbounds, int *ubounds, 
+                          int *strides, int *offsets, 
+                          ESMC_Logical contig, ESMC_Logical dealloc);
+    // TODO: add Get method
 
-    // misc methods that act on arrays
+    // misc array methods
     int ESMC_ArrayRedist(ESMC_DELayout *layout,
                          int rank_trans[], int size_rank_trans,
                          int olddecompids[], int decompids[], int size_decomp,
@@ -226,7 +227,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_ArrayAllGather(ESMC_DELayout *layout,
                             int decompids[], int size_decomp,
                             ESMC_AxisIndex *AI_exc, ESMC_AxisIndex *AI_tot,
-                            ESMC_Array *Array_out);
+                            ESMC_Array **Array_out);
     
  // < declare the rest of the public interface methods here >
   
@@ -243,20 +244,20 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 
 
 // these are functions, but not class methods.
-ESMC_Array *ESMC_ArrayCreate(int rank, enum ESMC_DataType dt,
-                             enum ESMC_DataKind dk, void *base = NULL,
-                             int *offsets = NULL, int *lengths = NULL, 
-                             int *strides = NULL, int *rc = NULL);
+ESMC_Array *ESMC_ArrayCreate(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
+                    int *counts = NULL, void *base = NULL, 
+                    ESMC_DataCopy docopy = ESMC_DATA_REF,
+                    int *rc = NULL);
 int ESMC_ArrayDestroy(ESMC_Array *array);
-ESMC_Array *ESMC_ArrayCreate_F(int rank, enum ESMC_DataType dt,
-                               enum ESMC_DataKind dk, void *base,
-                               int *offsets, int *lengths, int *strides,
-                               struct c_F90ptr *f90ptr, int *rc);
+ESMC_Array *ESMC_ArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
+                    int *icounts = NULL, struct c_F90ptr *f90ptr = NULL, 
+                    void *base = NULL, 
+                    ESMC_DataCopy docopy = ESMC_DATA_REF,
+                    int *lbounds = NULL, int *ubounds = NULL, 
+                    int *strides = NULL, int *offsets = NULL, int *rc = NULL);
+ESMC_Array *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
+                                   ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
+                                   int *rc = NULL);
 
-// internal methods for setting the call back addrs
-extern "C" {
-    int ESMC_AllocFuncStore(void (*func)(struct c_F90ptr *, int *, int *, int *));
-    int ESMC_DeallocFuncStore(void (*func)(struct c_F90ptr *, int *, int *, int *));
-}
 
  #endif  // ESMC_Array_H

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/03/31 20:03:46 cdeluca Exp $
+# $Id: makefile,v 1.11 2003/04/24 16:45:43 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -12,7 +12,7 @@ FFLAGS    =
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_Array_F.C
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_Alloc.F90 ESMF_Array.F90 
+SOURCEF	  =  ESMF_Array.F90 ESMF_Alloc_C.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 
@@ -40,7 +40,6 @@ CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
 
-
 # rule for making ESMF_Array.F90 from ESMF_Array_F90.cpp:
 # either use the F90 with cpp only, or gcc and ignore the
 # warnings about the fortran syntax, depending what is possible on each
@@ -55,7 +54,7 @@ CLOBBERDIRS =
 # actual compile. (These lines are: ^include "fred" in the
 # original source to shield them from the first preprocess pass.)
 #
-# ESMF_Array.F90: ESMF_Array_F90.cpp
+#ESMF_Array.F90: ESMF_Array_F90.cpp
 #	gcc -E -P ESMF_Array_F90.cpp | tr "@^" "\n#" > ESMF_Array.F90
-
+#
 
