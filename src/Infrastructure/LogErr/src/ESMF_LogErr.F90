@@ -79,8 +79,11 @@ type ESMF_Log
 end type ESMF_Log
 
 
-   public ESMF_Log,ESMF_LogOpen, ESMF_LogClose, ESMF_LogWrite, ESMF_LogInit, ESMF_LogFoundError, ESMF_LogSet, ESMF_LogGet
-	
+   public ESMF_Log,ESMF_LogOpen, ESMF_LogClose, ESMF_LogWrite,&
+   ESMF_LogInitialize, ESMF_LogFinalize,ESMF_LogFoundError,& 
+   ESMF_LogSet, ESMF_LogGet
+
+   type(ESMF_Log),SAVE::gLog	
 !----------------------------------------------------------------------------
 
 contains
@@ -459,14 +462,83 @@ end subroutine ESMF_LogSet
 	endif 
 end subroutine ESMF_LogGet
 
-subroutine ESMF_LogInit(aLog)
-	type(ESMF_Log) 						:: aLog
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogInitialize - Initializes Log file(s)
 
-	aLog%verbose=ESMF_TRUE
-	aLog%flush=ESMF_TRUE
-	aLog%root_only=ESMF_TRUE	
+! !INTERFACE: 
+      subroutine ESMF_LogInitialize(filename, rc)
+!
+! !ARGUMENTS:
+      character(len=*)			:: filename
+      integer, intent(out),optional	:: rc
+
+! !DESCRIPTION:
+!      This routine initializes the global log
+!
+!      The arguments are:
+!      \begin{description}
+! 
+!      \item [filename]
+!            Name of file.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP
 	
-end subroutine ESMF_LogInit
+	integer 				:: status, i	
+	if (present(rc)) rc=ESMF_FAILURE
+	gLog%FileIsOpen=ESMF_FALSE
+	if (gLog%stdOutUnitNumber .gt. ESMF_LOG_UPPER) return
+	gLog%nameLogErrFile=filename
+	gLog%unitnumber=gLog%stdOutUnitNumber
+	do i=gLog%unitnumber, ESMF_LOG_UPPER
+     		inquire(unit=i,iostat=status)
+     		if (status .eq. 0) then
+       			gLog%FileIsOpen = ESMF_TRUE
+       		exit
+     		endif
+   	enddo 
+	if (gLog%FileIsOpen .eq. ESMF_FALSE) return
+	gLog%unitNumber = i  
+	if (present(rc)) rc=ESMF_SUCCESS
+	
+end subroutine ESMF_LogInitialize
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogFinalize - Finalizes the Log file(s)
+
+! !INTERFACE: 
+	subroutine ESMF_LogFinalize(rc)
+!
+! !ARGUMENTS:
+      integer, intent(out),optional	:: rc
+
+! !DESCRIPTION:
+!      This routine finalizes the global log
+!
+!      The arguments are:
+!      \begin{description}
+! 
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP
+	if (present(rc)) then
+	  	rc=ESMF_FAILURE
+	endif
+	if (gLog%FileIsOpen .eq. ESMF_TRUE) then
+!	FLUSH	
+		gLog%FileIsOpen=ESMF_FALSE
+		if (present(rc)) then
+			rc=ESMF_SUCCESS
+		endif
+	endif	
+	
+end subroutine ESMF_LogFinalize
 
 end module ESMF_LogErrMod
 
