@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.28 2004/06/16 14:03:12 nscollins Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.29 2004/08/17 16:58:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,6 +29,7 @@
     
     ! Local variables
     integer :: x, y, rc, mycell
+    integer :: gridCount(2)
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2
@@ -64,7 +65,12 @@
                                     name="atmgrid", rc=rc)
     call ESMF_GridDistribute(grid, delayout=layout, rc=rc)
 
-    allocate(f90ptr1(10,20))
+    ! Array size has to match the Grid (plus any halo width), so query grid for
+    ! local cell counts to determine allocation
+    call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
+                                 localCellCountPerDim=gridCount, rc=rc)
+
+    allocate(f90ptr1(gridCount(1),gridCount(2)))
 
     array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -131,7 +137,9 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    allocate(f90ptr2(30,15))
+    ! the size of the data in the array still has to line up with the Grid
+    ! and its decomposition
+    allocate(f90ptr2(gridCount(1),gridCount(2)))
     array2 = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
