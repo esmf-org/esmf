@@ -1,4 +1,4 @@
-% $Id: GridComp_desc.tex,v 1.1 2004/03/23 22:50:11 cdeluca Exp $
+% $Id: GridComp_desc.tex,v 1.2 2004/04/20 06:32:23 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,18 +10,42 @@
 
 %\subsection{Description}
 
-A Gridded Component is a shell that holds the code 
-does the actual model computation.  Gridded 
-Components can run sequentially or concurrently, on all processors 
-or on a subset of processors. 
+In Earth system modeling, the simplest way to think of an 
+ESMF Gridded Component is as a piece of code representing a 
+specific physical domain; for example, an atmospheric model 
+or an ocean model.  In many large modeling systems, each 
+component is developed separately by a group of domain experts.  
+These Earth system software components tend to share a number of 
+basic features.  Most contain a variety of physical fields; 
+are associated with a (possibly noncontiguous) 
+spatial region and grid that is partitioned across a set of 
+computational resources; and require a clock, usually for stepping 
+a governing set of PDEs forward in time.  Most can also 
+be divided into distinct initialize, run, and finalize 
+computational phases.  These common characteristics are used 
+within ESMF to define a Gridded Component data structure that 
+is both tailored for Earth system modeling and yet is still 
+quite flexible.
 
-Conceptually simplest is a sequential Component which is called
-once per time step, receives 
-gridded data from the Input State, computes new values, runs
-until the requested stop time, and returns the output 
-gridded data in the Output State.  
+More broadly, an ESMF Gridded Component can be based on any 
+software with a computational function that is associated with 
+a grid.  This might be a convection or radiation scheme, a 
+dynamical core, or a data assimilation system.  ESMF allows you
+to nest Gridded Components, so that the physics and dynamics within 
+an atmospheric model can be considered Gridded Components, along
+with the atmospheric model itself.
 
-Combinations of sequential and concurrent behavior are possible,
-for example a sequential component which contains concurrent
-subcomponents.
+An ESMF Gridded Component has two parts.  The first part is the
+user code that will form the body of the Gridded Component.
+It may be a piece of legacy code, or it may be developed expressly
+for use with the ESMF system.  The second part is the ESMF Gridded 
+Component derived type itself, {\tt ESMF_GridComp}.
+
+
+
+
+
+
+
+
 
