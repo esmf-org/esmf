@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.4 2003/03/14 00:29:57 eschwab Exp $
+! $Id: ESMF_DELayout.F90,v 1.5 2003/03/14 05:38:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.4 2003/03/14 00:29:57 eschwab Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.5 2003/03/14 05:38:17 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -256,9 +256,9 @@
           call c_ESMC_DELayoutCreateLayout2D(layout, nx, ny, parentLayout, &
                                              commhint, exclusive, status)
         else
-          call c_ESMC_DELayoutCreateLayout2Dnexc(layout, nx, ny, &
-                                                 parentLayout, commhint, &
-                                                 status)
+          call c_ESMC_DELayoutCreateLayout2Dne(layout, nx, ny, &
+                                               parentLayout, commhint, &
+                                               status)
         endif
 
         if (status .ne. ESMF_SUCCESS) then

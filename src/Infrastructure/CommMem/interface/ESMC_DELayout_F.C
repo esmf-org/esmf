@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.5 2003/03/14 00:29:57 eschwab Exp $
+// $Id: ESMC_DELayout_F.C,v 1.6 2003/03/14 05:38:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,11 +51,11 @@ extern "C" {
                                     status);
        }
 
-       void FTN(c_esmc_delayoutcreatelayout2dnexc)(ESMC_DELayout **ptr, int *nx,
-                                                   int *ny,
-                                                   ESMC_DELayout **parentlayout,
-                                                   int *commhint,
-                                                   int *status) {
+       void FTN(c_esmc_delayoutcreatelayout2dne)(ESMC_DELayout **ptr, int *nx,
+                                                 int *ny,
+                                                 ESMC_DELayout **parentlayout,
+                                                 int *commhint,
+                                                 int *status) {
          *ptr = ESMC_DELayoutCreate(*nx, *ny, *parentlayout,
                                     (ESMC_CommHint_e) *commhint,
                                     status);
