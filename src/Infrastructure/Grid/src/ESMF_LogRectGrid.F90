@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.3 2004/01/21 23:29:01 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.4 2004/01/22 00:07:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
     public ESMF_LRGridCreateRead
     public ESMF_LRGridCreateCopy
     public ESMF_LRGridCreateCutout
-    public ESMF_LRGridCreateChangeResolution
+    public ESMF_LRGridCreateDiffRes
     public ESMF_LRGridCreateExchange
     public ESMF_LRGridAddPhysGrid
     public ESMF_LRGridGetCoord
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.3 2004/01/21 23:29:01 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.4 2004/01/22 00:07:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -198,9 +198,9 @@
        interface ESMF_LRGridAddPhysGrid
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_LRGridAddPhysGridSpecd
-          module procedure ESMF_LRGridAddPhysGridUniform
-          module procedure ESMF_LRGridAddVertPhysGridUniform
+          module procedure ESMF_LRGridAddPGridSpecd
+          module procedure ESMF_LRGridAddPGridUniform
+          module procedure ESMF_LRGridAddVertPGridUniform
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that
@@ -215,8 +215,8 @@
        interface ESMF_LRGridSetBoundingBoxes
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_LRGridSetBoundingBoxesUni
-          module procedure ESMF_LRGridSetBoundingBoxesSpecd
+          module procedure ESMF_LRGridSetBBoxesUni
+          module procedure ESMF_LRGridSetBBoxesSpecd
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that
@@ -731,13 +731,13 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LRGridCreateChangeResolution - Create a new Grid by coarsening or refining an existing Grid
+! !IROUTINE: ESMF_LRGridCreateDiffRes - Create a new Grid by coarsening or refining an existing Grid
 
 ! !INTERFACE:
-      function ESMF_LRGridCreateChangeResolution(gridIn, resolution, name, rc)
+      function ESMF_LRGridCreateDiffRes(gridIn, resolution, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_LRGridCreateChangeResolution
+      type(ESMF_Grid) :: ESMF_LRGridCreateDiffRes
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: gridIn
@@ -778,7 +778,7 @@
 
 !     Initialize pointers
       nullify(grid)
-      nullify(ESMF_LRGridCreateChangeResolution%ptr)
+      nullify(ESMF_LRGridCreateDiffRes%ptr)
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -792,22 +792,22 @@
 !     If error write message and return.
 !     Formal error handling will be added asap.
       if(status .NE. 0) then
-        print *, "ERROR in ESMF_LRGridCreateChangeResolution: Allocate"
+        print *, "ERROR in ESMF_LRGridCreateDiffRes: Allocate"
         return
       endif
 
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridCreateChangeResolution: Grid construct"
+        print *, "ERROR in ESMF_LRGridCreateDiffRes: Grid construct"
         return
       endif
 
 !     Set return values.
-      ESMF_LRGridCreateChangeResolution%ptr => grid
+      ESMF_LRGridCreateDiffRes%ptr => grid
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_LRGridCreateChangeResolution
+      end function ESMF_LRGridCreateDiffRes
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1144,7 +1144,7 @@
           print *, "ERROR in ESMF_LRGridConstructUniform: Add DistGrid"
           return
         endif
-        call ESMF_LRGridAddVertPhysGridUniform(grid, counts(3), physGridId, &
+        call ESMF_LRGridAddVertPGridUniform(grid, counts(3), physGridId, &
                                                distGridId, relloc, min(3), &
                                                max(3), physGridName, status)
         if(status .NE. ESMF_SUCCESS) then
@@ -1171,7 +1171,7 @@
               print *, "ERROR in ESMF_LRGridConstructUniform: Add DistGrid"
               return
             endif
-            call ESMF_LRGridAddVertPhysGridUniform(grid, counts(3), physGridId, &
+            call ESMF_LRGridAddVertPGridUniform(grid, counts(3), physGridId, &
                                                    distGridId, relloc, min(3), &
                                                    max(3), physGridName, status)
             if(status .NE. ESMF_SUCCESS) then
@@ -1707,10 +1707,10 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridAddPhysGridUniform - Add a uniform PhysGrid to a LogRectGrid
+! !IROUTINE: ESMF_LRGridAddPGridUniform - Add a uniform PhysGrid to a LogRectGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridAddPhysGridUniform(grid, numDims, globalCounts, &
+      subroutine ESMF_LRGridAddPGridUniform(grid, numDims, globalCounts, &
                                                physGridId, distGridId, relloc, &
                                                min, max, physGridName, rc)
 !
@@ -1787,7 +1787,7 @@
         if (globalCounts(i).ne.0) then
           delta(i) = (max(i) - min(i)) / real(globalCounts(i))
         else
-          print *, "ERROR in ESMF_LRGridAddPhysGridUniform: counts=0"
+          print *, "ERROR in ESMF_LRGridAddPGridUniform: counts=0"
           return
         endif
 
@@ -1881,7 +1881,7 @@
                              gridBoundWidth, relloc, delta, localMinCoord, &
                              total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridUniform: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddPGridUniform: Grid set coord"
         return
       endif
       ! set coordinates using computational cell count
@@ -1889,7 +1889,7 @@
                              0, relloc, delta, localMinCoord, &
                              total=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridUniform: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddPGridUniform: Grid set coord"
         return
       endif
 
@@ -1902,7 +1902,7 @@
                                   gridBoundWidth, relloc, cellType1(i1:i2), &
                                   cellType2(j1:j2), status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridUniform: Grid set cell mask"
+        print *, "ERROR in ESMF_LRGridAddPGridUniform: Grid set cell mask"
         return
       endif
 
@@ -1912,14 +1912,14 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridAddPhysGridUniform
+      end subroutine ESMF_LRGridAddPGridUniform
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridAddPhysGridSpecd - Add a specified PhysGrid to a LogRectGrid
+! !IROUTINE: ESMF_LRGridAddPGridSpecd - Add a specified PhysGrid to a LogRectGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridAddPhysGridSpecd(grid, physGridId, relloc, numDims, &
+      subroutine ESMF_LRGridAddPGridSpecd(grid, physGridId, relloc, numDims, &
                                              delta1, delta2, &
                                              countsPerDEDim1, countsPerDEDim2, &
                                              min, dimNames, dimUnits, &
@@ -2009,12 +2009,12 @@
       gridp%ptr => grid
       call ESMF_GridGetDELayout(gridp, layout, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: get delayout"
+        print *, "ERROR in ESMF_LRGridAddPGridSpecd: get delayout"
         return
       endif
       call ESMF_DELayoutGetDEPosition(layout, myDE(1), myDE(2), status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: delayout get position"
+        print *, "ERROR in ESMF_LRGridAddPGridSpecd: delayout get position"
         return
       endif
 
@@ -2170,7 +2170,7 @@
                              coord2(j1:j2), localMin, &
                              total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddPGridSpecd: Grid set coord"
         return
       endif
       ! set coordinates using computational cell count
@@ -2184,7 +2184,7 @@
                              coord1(i1:i2), coord2(j1:j2), localMin, &
                              total=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddPGridSpecd: Grid set coord"
         return
       endif
 
@@ -2199,7 +2199,7 @@
                                   gridBoundWidth, relloc, cellType1(i1:i2), &
                                   cellType2(j1:j2), status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: Grid set cell mask"
+        print *, "ERROR in ESMF_LRGridAddPGridSpecd: Grid set cell mask"
         return
       endif
 
@@ -2210,14 +2210,14 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridAddPhysGridSpecd
+      end subroutine ESMF_LRGridAddPGridSpecd
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridAddVertPhysGridUniform - Add a uniform vertical PhysGrid to a LogRectGrid
+! !IROUTINE: ESMF_LRGridAddVertPGridUniform - Add a uniform vertical PhysGrid to a LogRectGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridAddVertPhysGridUniform(grid, count, physGridId, &
+      subroutine ESMF_LRGridAddVertPGridUniform(grid, count, physGridId, &
                                                    distGridId, relloc, min, &
                                                    max, physGridName, rc)
 !
@@ -2293,7 +2293,7 @@
       if (count.ge.1) then
         delta(1) = (max - min) / real(count)
       else
-        print *, "ERROR in ESMF_LRGridAddVertPhysGridUniform: count < 1"
+        print *, "ERROR in ESMF_LRGridAddVertPGridUniform: count < 1"
         return
       endif
 
@@ -2338,7 +2338,7 @@
         coordCyclic      = .false.
 
       else
-        print *,'Grid type not yet supported in GridAddVertPhysGrid'
+        print *,'Grid type not yet supported in GridAddVertPGrid'
         status = ESMF_FAILURE
       endif
 
@@ -2362,7 +2362,7 @@
                              gridBoundWidth, relloc, delta, localMinCoord, &
                              total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddVertPhysGridUniform: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddVertPGridUniform: Grid set coord"
         return
       endif
       ! set coordinates using computational cell count
@@ -2370,7 +2370,7 @@
                                       0, relloc, delta, localMinCoord, &
                                       total=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddVertPhysGridUniform: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddVertPGridUniform: Grid set coord"
         return
       endif
 
@@ -2381,7 +2381,7 @@
                                   gridBoundWidth, relloc, cellType(i1:i2), &
                                   rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddVertPhysGridUniform: Grid set cell mask"
+        print *, "ERROR in ESMF_LRGridAddVertPGridUniform: Grid set cell mask"
         return
       endif
 
@@ -2390,7 +2390,7 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridAddVertPhysGridUniform
+      end subroutine ESMF_LRGridAddVertPGridUniform
 
 !------------------------------------------------------------------------------
 !BOP
@@ -4101,10 +4101,10 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridSetBoundingBoxesUni - Set the array of bounding boxes per DE
+! !IROUTINE: ESMF_LRGridSetBBoxesUni - Set the array of bounding boxes per DE
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridSetBoundingBoxesUni(grid, numDims, min, delta, &
+      subroutine ESMF_LRGridSetBBoxesUni(grid, numDims, min, delta, &
                                                 countsPerAxis, numDE1, numDE2, rc)
 !
 ! !ARGUMENTS:
@@ -4220,14 +4220,14 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridSetBoundingBoxesUni
+      end subroutine ESMF_LRGridSetBBoxesUni
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridSetBoundingBoxesSpecd - Set the array of bounding boxes per DE
+! !IROUTINE: ESMF_LRGridSetBBoxesSpecd - Set the array of bounding boxes per DE
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridSetBoundingBoxesSpecd(grid, numDims, min, delta1, &
+      subroutine ESMF_LRGridSetBBoxesSpecd(grid, numDims, min, delta1, &
                                                   delta2, countsPerDEDim1, &
                                                   countsPerDEDim2, rc)
 !
@@ -4351,7 +4351,7 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridSetBoundingBoxesSpecd
+      end subroutine ESMF_LRGridSetBBoxesSpecd
 
 !------------------------------------------------------------------------------
 !BOP

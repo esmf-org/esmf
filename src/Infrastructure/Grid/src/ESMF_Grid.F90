@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.126 2004/01/21 23:28:07 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.127 2004/01/22 00:07:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.126 2004/01/21 23:28:07 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.127 2004/01/22 00:07:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -103,7 +103,7 @@
          module procedure ESMF_GridCreateRead
          module procedure ESMF_GridCreateCopy
          module procedure ESMF_GridCreateCutout
-         module procedure ESMF_GridCreateChangeResolution
+         module procedure ESMF_GridCreateDiffRes
          module procedure ESMF_GridCreateExchange
 
 ! !DESCRIPTION:
@@ -500,13 +500,13 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCreateChangeResolution - Create a new Grid by coarsening or refining an existing Grid
+! !IROUTINE: ESMF_GridCreateDiffRes - Create a new Grid by coarsening or refining an existing Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateChangeResolution(gridIn, resolution, name, rc)
+      function ESMF_GridCreateDiffRes(gridIn, resolution, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateChangeResolution
+      type(ESMF_Grid) :: ESMF_GridCreateDiffRes
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: gridIn
@@ -545,7 +545,7 @@
       logical :: rcpresent                        ! Return code present
 
 !     Initialize pointers
-      nullify(ESMF_GridCreateChangeResolution%ptr)
+      nullify(ESMF_GridCreateDiffRes%ptr)
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -555,55 +555,55 @@
         rc = ESMF_FAILURE
       endif
 
-!     Call GridCreateChangeResolution routines based on GridStructure
+!     Call GridCreateDiffRes routines based on GridStructure
 
       select case(gridIn%ptr%gridStructure)
 
       !-------------
       case(ESMF_GridStructure_Unknown)      ! unknown structure
-        print *, "ERROR in ESMF_GridCreateChangeResolution: ", &
+        print *, "ERROR in ESMF_GridCreateDiffRes: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
       case(ESMF_GridStructure_LogRect)      ! logically rectangular
-        ESMF_GridCreateChangeResolution = &
-          ESMF_LRGridCreateChangeResolution(gridIn, resolution, name, status)
+        ESMF_GridCreateDiffRes = &
+          ESMF_LRGridCreateDiffRes(gridIn, resolution, name, status)
 
       !-------------
       case(ESMF_GridStructure_LogRectBlock) ! blocked logically rectangular
-        print *, "ERROR in ESMF_GridCreateChangeResolution: ", &
+        print *, "ERROR in ESMF_GridCreateDiffRes: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
       case(ESMF_GridStructure_Unstruct)     ! unstructured grid
-        print *, "ERROR in ESMF_GridCreateChangeResolution: ", &
+        print *, "ERROR in ESMF_GridCreateDiffRes: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
       case(ESMF_GridStructure_User)         ! user-defined grid
-        print *, "ERROR in ESMF_GridCreateChangeResolution: ", &
+        print *, "ERROR in ESMF_GridCreateDiffRes: ", &
                  "GridStructureUser not supported"
         status = ESMF_FAILURE
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridCreateChangeResolution: Invalid grid structure"
+        print *, "ERROR in ESMF_GridCreateDiffRes: Invalid grid structure"
         status = ESMF_FAILURE
       end select
 
       if (status /= ESMF_SUCCESS) then
         rc = status
-        print *, 'ERROR in ESMF_GridCreateChangeResolution: error in creation'
+        print *, 'ERROR in ESMF_GridCreateDiffRes: error in creation'
         return
       endif
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_GridCreateChangeResolution
+      end function ESMF_GridCreateDiffRes
 
 !------------------------------------------------------------------------------
 !BOP
