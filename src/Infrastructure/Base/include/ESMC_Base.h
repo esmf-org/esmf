@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.65 2005/01/12 23:23:42 theurich Exp $
+// $Id: ESMC_Base.h,v 1.66 2005/01/13 22:26:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -226,6 +226,7 @@ class ESMC_Base
     int  ESMC_BaseGetID(void) const;
 
     // accessors to object's vmID    
+    void ESMC_BaseSetVMId(ESMC_VMId *vmID);
     ESMC_VMId *ESMC_BaseGetVMId(void) const;
     
     // accessors to reference count

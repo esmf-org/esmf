@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.26 2005/01/13 21:52:19 theurich Exp $
+// $Id: ESMC_VM.C,v 1.27 2005/01/13 22:26:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.26 2005/01/13 21:52:19 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.27 2005/01/13 22:26:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -457,10 +457,19 @@ ESMC_VMId *ESMC_VMGetCurrentID(
 //-----------------------------------------------------------------------------
 
 
-int ESMC_VMIdCompare(ESMC_VMId *vmID1, ESMC_VMId *vmID2){
+ESMC_Logical ESMC_VMIdCompare(ESMC_VMId *vmID1, ESMC_VMId *vmID2){
   if (vmID1==NULL || vmID2==NULL) return ESMF_FALSE;
   if (vmID1->localID != vmID2->localID) return ESMF_FALSE;
   return ESMC_VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+}
+
+
+ESMC_Logical ESMC_VMIdCopy(ESMC_VMId *vmIDdst, ESMC_VMId *vmIDsrc){
+  if (vmIDdst==NULL || vmIDsrc==NULL) return ESMF_FALSE;
+  for (int i=0; i<vmKeyWidth; i++)
+    vmIDdst->vmKey[i] = vmIDsrc->vmKey[i];
+  vmIDdst->localID = vmIDsrc->localID;
+  return ESMF_SUCCESS;
 }
 
 
