@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.29 2004/03/09 23:51:49 jwolfe Exp $
+! $Id: ESMF_LogErr.F90,v 1.30 2004/03/12 15:53:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,6 @@
 ! !MODULE: Fortran Interface to Log class. 
 !
 ! !
-! \end{description}
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -56,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogErr.F90,v 1.29 2004/03/09 23:51:49 jwolfe Exp $'
+      '$Id: ESMF_LogErr.F90,v 1.30 2004/03/12 15:53:49 svasquez Exp $'
 
 !==============================================================================
 !
