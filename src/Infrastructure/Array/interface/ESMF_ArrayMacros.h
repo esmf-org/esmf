@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.10 2004/02/11 21:55:36 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.11 2004/02/12 22:03:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -295,7 +295,6 @@
         type (ESMF_Array) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         integer :: hwidth                   ! local copy of halo width @\
-        integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
@@ -799,6 +798,11 @@
           rc = ESMF_FAILURE @\
         endif @\
  @\
+        ! Assume defaults first, then alter if lb or ub specified, @\
+        ! or if an existing pointer is given and can be queried. @\
+        lb(:) = 1 @\
+        ub(1:size(counts)) = counts @\
+ @\
         ! Decide if we need to do: make a new allocation, copy existing data @\
         if (.not. present(f90ptr)) then @\
            nullify(newp) @\
@@ -808,6 +812,8 @@
         else @\
            if (docopy .eq. ESMF_DATA_SPACE) then @\
                newp => f90ptr    ! ptr alias, important this be =>  @\
+               lb(1:size(counts)) = lbound(f90ptr) @\
+               ub(1:size(counts)) = ubound(f90ptr) @\
                willalloc = .true. @\
                willcopy = .false. @\
                do_dealloc = ESMF_TRUE @\
@@ -818,6 +824,8 @@
                do_dealloc = ESMF_TRUE @\
            else       ! ESMF_DATA_REF @\
                newp => f90ptr    ! ptr alias, important this be =>  @\
+               lb(1:size(counts)) = lbound(f90ptr) @\
+               ub(1:size(counts)) = ubound(f90ptr) @\
                willalloc = .false. @\
                willcopy = .false. @\
                do_dealloc = ESMF_FALSE @\
@@ -825,9 +833,6 @@
         endif @\
  @\
         if (willalloc) then @\
-            ! Assume defaults first, then alter if lb or ub specified. @\
-            lb = 1 @\
-            ub(1:size(counts)) = counts @\
             if (present(lbounds)) then @\
                 lb(1:size(lbounds)) = lbounds @\
             endif @\
@@ -853,7 +858,7 @@
  @\
         wrap % ##mtypekind##mrank##Dptr => newp @\
         call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & @\
-                                 lbounds, ubounds, offsets, & @\
+                                 lb, ub, offsets, & @\
                                  ESMF_TRUE, do_dealloc, hwidth, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\
