@@ -1,4 +1,4 @@
- $Id: README,v 1.18 2003/06/30 22:55:26 jwolfe Exp $
+ $Id: README,v 1.19 2003/07/01 15:28:49 jwolfe Exp $
 ================================================================================
                                    README
 
@@ -96,7 +96,7 @@ Platform notes:
 
 Compaq alpha - Before running on the Compaq, you will need to set the
 environment variable ESMF_PROJECT to a valid project number suitable for the -P
-option on brun. If you do not know what to set this to first run with it unset
+option on bsub. If you do not know what to set this to first run with it unset
 and you should be prompted by the system for valid values for your userid. 
 
 IBM rs6000 - Before running on rs6000 machines, you will need to set an
@@ -175,7 +175,7 @@ and .mod files, and link with the ESMF library (either libesmf.a or libesmf.so).
 There is a single ESMF module, called ESMF_Mod, that should be included in
 applications with the Fortran USE statement. 
 
-To use ESMF from C/C++, link with the ESMF library (either libesmf.a ori
+To use ESMF from C/C++, link with the ESMF library (either libesmf.a or
 libesmf.so) and include the ESMC.h file. 
 
 
