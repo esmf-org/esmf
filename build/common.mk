@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.95 2005/02/23 05:13:49 theurich Exp $
+#  $Id: common.mk,v 1.96 2005/03/01 18:24:07 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -632,7 +632,7 @@ check_system_tests:
 #-------------------------------------------------------------------------------
 
 tests: chkopts chkdir_tests build_libs
-	$(MAKE) MULTI=Multiprocessor config_tests
+	$(MAKE) MULTI="Multiprocessor" config_tests
 	-$(MAKE) ACTION=tree_tests tree
 	$(MAKE) check_tests
 
@@ -642,7 +642,7 @@ tree_tests: tree_build_tests tree_run_tests
 # tests_uni
 #
 tests_uni: chkopts chkdir_tests
-	$(MAKE) MULTI=Uniprocessor config_tests
+	$(MAKE) MULTI="Uniprocessor" config_tests
 	-$(MAKE) ACTION=tree_tests_uni tree
 	$(MAKE) check_tests
 
@@ -652,7 +652,7 @@ tree_tests_uni: tree_build_tests tree_run_tests_uni
 # build_tests
 #
 build_tests: chkopts chkdir_tests
-	$(MAKE) MULTI="" config_tests
+	$(MAKE) MULTI="Multiprocessor" config_tests
 	-$(MAKE) ACTION=tree_build_tests tree
 
 tree_build_tests: $(TESTS_BUILD)
@@ -676,7 +676,10 @@ $(ESMC_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 # run_tests
 #
 run_tests:  chkopts chkdir_tests
-	-@echo "Multiprocessor" >> ${CONFIG_TESTS}
+	-@if [ -f ${CONFIG_TESTS} ] ; then \
+	   sed 's/ .*processor/ Multiprocessor/' ${CONFIG_TESTS} > ${CONFIG_TESTS}.temp; \
+           mv -f ${CONFIG_TESTS}.temp ${CONFIG_TESTS}; \
+        fi
 	-$(MAKE) ACTION=tree_run_tests tree
 	$(MAKE) check_tests
 
@@ -686,7 +689,10 @@ tree_run_tests: $(TESTS_RUN)
 # run_tests_uni
 #
 run_tests_uni:  chkopts chkdir_tests
-	-@echo "Uniprocessor" >> ${CONFIG_TESTS}
+	-@if [ -f ${CONFIG_TESTS} ] ; then \
+	   sed 's/ .*processor/ Uniprocessor/' ${CONFIG_TESTS} > ${CONFIG_TESTS}.temp; \
+           mv -f ${CONFIG_TESTS}.temp ${CONFIG_TESTS}; \
+        fi
 	-$(MAKE) ACTION=tree_run_tests_uni tree 
 	$(MAKE) check_tests
 
