@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.h,v 1.2 2003/09/23 21:44:17 jwolfe Exp $
+// $Id: ESMC_TValues.h,v 1.3 2003/09/25 16:27:30 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -62,7 +62,6 @@
         // TODO:  needs option for single large sparse matrix, etc.
 
         int numlist;
-        ESMC_DomainList *domainlist;
         ESMC_LocalArray *srcindex;
         ESMC_LocalArray *dstindex;
         ESMC_LocalArray *weights;
@@ -72,12 +71,10 @@
     int ESMC_TransformValuesDestruct(void);
 
  // accessor methods for class members
-    int ESMC_TransformValuesGet(int *numlist, ESMC_DomainList **dl,
-                                ESMC_LocalArray **si, ESMC_LocalArray **di,
-                                ESMC_LocalArray **w) const;
-    int ESMC_TransformValuesSet(int numlist, ESMC_DomainList *dl,
-                                ESMC_LocalArray *si, ESMC_LocalArray *di,
-                                ESMC_LocalArray *w);
+    int ESMC_TransformValuesGet(int *numlist, ESMC_LocalArray **si,
+                                ESMC_LocalArray **di, ESMC_LocalArray **w) const;
+    int ESMC_TransformValuesSet(int numlist, ESMC_LocalArray *si,
+                                ESMC_LocalArray *di, ESMC_LocalArray *w);
 
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_TransformValuesValidate(const char *options) const;
