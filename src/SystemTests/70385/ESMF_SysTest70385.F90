@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.12 2003/04/24 16:43:16 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.13 2003/04/25 16:07:08 nscollins Exp $
 !
 ! System test code #70385
 
@@ -117,7 +117,7 @@
 !-------------------------------------------------------------------------
 !
     subroutine setserv(comp, rc)
-      use ESMF_CompMod
+      use ESMF_Mod
 
       type(ESMF_GridComp) :: comp
       integer :: rc
@@ -139,15 +139,7 @@
 !-------------------------------------------------------------------------
 !
     subroutine myinit(comp, importstate, exportstate, clock, rc)
-      use ESMF_BaseMod
-      use ESMF_DELayoutMod
-      use ESMF_ClockMod
-      use ESMF_ArrayMod
-      use ESMF_GridMod
-      use ESMF_DataMapMod
-      use ESMF_FieldMod
-      use ESMF_StateMod
-      use ESMF_CompMod
+      use ESMF_Mod
 
       type(ESMF_GridComp) :: comp
       type(ESMF_State), optional :: importstate, exportstate
@@ -261,10 +253,7 @@
 !
 
     subroutine myrun(comp, importstate, exportstate, clock, rc)
-      use ESMF_ClockMod
-      use ESMF_FieldMod
-      use ESMF_StateMod
-      use ESMF_CompMod
+      use ESMF_Mod
 
       type(ESMF_GridComp) :: comp
       type(ESMF_State), optional :: importstate, exportstate
@@ -302,14 +291,7 @@
 
 
     subroutine myfinal(comp, importstate, exportstate, clock, rc)
-      use ESMF_BaseMod
-      use ESMF_DELayoutMod
-      use ESMF_ClockMod
-      use ESMF_ArrayMod
-      use ESMF_GridMod
-      use ESMF_FieldMod
-      use ESMF_StateMod
-      use ESMF_CompMod
+      use ESMF_Mod
 
       type(ESMF_GridComp) :: comp
       type(ESMF_State), optional :: importstate, exportstate
