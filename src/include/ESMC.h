@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.5 2002/11/07 22:19:07 nscollins Exp $
+// $Id: ESMC.h,v 1.6 2003/02/03 05:55:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,4 +14,3 @@
 #include "conf.h"
 
 #include "ESMF_Macros.inc"
-#include "ESMC_Types.h"
