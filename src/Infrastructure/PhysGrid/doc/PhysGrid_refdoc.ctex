@@ -44,28 +44,28 @@
 #ifdef STANDALONE
 \input{PhysGrid_syn}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_syn}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_syn}
 #endif
 
 %\section{Algorithmic Description}
 #ifdef STANDALONE
 %\input{PhysGrid_alg}
 #elif defined(CONSTITUENT)
-%\input{comppath/PhysGrid_alg}
+%\input{../Infrastructure/PhysGrid/doc/PhysGrid_alg}
 #endif
 
 \section{Object Model}
 #ifdef STANDALONE
 \input{PhysGrid_obj}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_obj}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_obj}
 #endif
 
 % \section{Global Parameters and Definitions}
 % #ifdef STANDALONE
 % \input{PhysGrid_param}
 % #elif defined(CONSTITUENT)
-% \input{comppath/PhysGrid_param}
+% \input{../Infrastructure/PhysGrid/doc/PhysGrid_param}
 % #endif
 
 \section{PhysGrid Design}
@@ -74,28 +74,28 @@
 #ifdef STANDALONE
 \input{PhysGrid_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_desc}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{PhysGrid_design}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_design}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{PhysGrid_def}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_def}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{PhysGrid_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_rest}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_rest}
 #endif
 
 \section{PhysGrid F90 Interface}
@@ -104,21 +104,21 @@
 #ifdef STANDALONE
 \input{PhysGrid_fex}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_fex}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 \input{PhysGrid_fparam}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_fparam}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{PhysGrid_fapi}
+\input{ESMF_PhysGrid_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_fapi}
+\input{../Infrastructure/PhysGrid/doc/ESMF_PhysGrid_fapi}
 #endif
 
 \section{PhysGrid C++ Interface}
@@ -127,21 +127,21 @@
 #ifdef STANDALONE
 \input{PhysGrid_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_ccex}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 \input{PhysGrid_ccparam}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_ccparam}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_ccparam}
 #endif
 
 % %\subsection{Class API}
 % #ifdef STANDALONE
 % \input{PhysGrid_ccapi}
 % #elif defined(CONSTITUENT)
-% \input{comppath/PhysGrid_ccapi}
+% \input{../Infrastructure/PhysGrid/doc/PhysGrid_ccapi}
 % #endif
 
 \section{<Name2> Design}

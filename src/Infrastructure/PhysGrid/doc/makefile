@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/03/25 23:21:31 flanigan Exp $ 
+# $Id: makefile,v 1.9 2003/03/31 20:44:51 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -43,10 +43,14 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 
 include $(ESMF_DIR)/makefile
 
+desdoc : $(ESMC_DOCDIR)/PhysGrid_desdoc.pdf
+refdoc : $(ESMC_DOCDIR)/PhysGrid_refdoc.pdf
+
+
 DIRS	  = 
 
 CLEANDIRS   = PhysGrid_reqdoc PhysGrid_desdoc PhySGrid_refdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi PhysGrid_desdoc.tex PhysGrid_reqdoc.tex PhysGrid_refdoc.tex
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi PhysGrid_desdoc.tex PhysGrid_reqdoc.tex PhysGrid_refdoc.tex PhysGrid_desdoc.tex PhysGrid_refdoc.tex
 CLOBBERDIRS =
 
 

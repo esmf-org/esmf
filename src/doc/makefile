@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2003/03/25 00:18:38 flanigan Exp $ 
+# $Id: makefile,v 1.19 2003/03/31 20:44:53 flanigan Exp $ 
 ALL: lib 
 
 
@@ -35,6 +35,8 @@ USRDOC_FILES = ESMF_usrdoc.tex ESMF_desc.tex ESMF_install.tex
 REQDOC_FILES  = ESMF_reqdoc.ctex ESMF_syn.tex ESMF_auth.tex ESMF_buildreq.tex
 
 include $(ESMF_DIR)/makefile
+
+refdoc : $(ESMC_DOCDIR)/ESMF_refdoc.pdf
 
 DIRS = 
 

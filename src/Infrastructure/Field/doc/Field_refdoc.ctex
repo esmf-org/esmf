@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.4 2003/03/25 23:13:39 flanigan Exp $
+% $Id: Field_refdoc.ctex,v 1.5 2003/03/31 20:44:48 flanigan Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -339,12 +339,12 @@
 
 \section{DataMap C++ Interface}
 
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{DataMap_ccex}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/DataMap_ccex}
-#endif
+%% \subsection{Use and Examples}
+%% #ifdef STANDALONE
+%% \input{DataMap_ccex}
+%% #elif defined(CONSTITUENT)
+%% \input{../Infrastructure/Field/doc/DataMap_ccex}
+%% #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE

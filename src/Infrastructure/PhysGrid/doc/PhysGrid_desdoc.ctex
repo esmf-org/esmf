@@ -1,4 +1,4 @@
-% $Id: PhysGrid_desdoc.ctex,v 1.1 2003/01/16 16:57:16 jwolfe Exp $
+% $Id: PhysGrid_desdoc.ctex,v 1.2 2003/03/31 20:44:49 flanigan Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -116,9 +116,9 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{PhysGrid_fapi}
+\input{ESMF_PhysGrid_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/PhysGrid_fapi}
+\input{comppath/ESMF_PhysGrid_fapi}
 #endif
 
 \section{PhysGrid C++ Interface}
