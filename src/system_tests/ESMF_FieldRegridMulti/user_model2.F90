@@ -1,0 +1,344 @@
+! $Id: user_model2.F90,v 1.1 2004/02/17 15:57:39 nscollins Exp $
+!
+! Example/test code which shows User Component calls.
+
+!--------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
+
+!BOP
+!
+! !DESCRIPTION:
+!  User-supplied Component
+!
+!
+!\begin{verbatim}
+
+    module user_model2
+
+    ! ESMF Framework module
+    use ESMF_Mod
+
+    implicit none
+    
+    public userm2_register
+        
+    type mylocaldata
+      integer :: dataoffset
+    end type
+
+    type wrapper
+      type(mylocaldata), pointer :: ptr
+    end type
+
+    contains
+
+!--------------------------------------------------------------------------------
+!   !  The Register routine sets the subroutines to be called
+!   !   as the init, run, and finalize routines.  Note that these are
+!   !   private to the module.
+ 
+    subroutine userm2_register(comp, rc)
+        type(ESMF_GridComp) :: comp
+        integer :: rc
+
+        ! local variables
+        type(mylocaldata), pointer :: mydatablock
+        type(wrapper) :: wrap
+
+        print *, "In user register routine"
+
+        ! Register the callback routines.
+
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+                                        user_init, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+                                        user_run, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+                                        user_final, ESMF_SINGLEPHASE, rc)
+
+        print *, "Registered Initialize, Run, and Finalize routines"
+
+        allocate(mydatablock)
+
+        mydatablock%dataoffset = 52
+
+        wrap%ptr => mydatablock
+        call ESMF_GridCompSetInternalState(comp, wrap, rc)
+
+        print *, "Registered Private Data block for Internal State"
+
+        rc = ESMF_SUCCESS
+
+    end subroutine
+
+!--------------------------------------------------------------------------------
+!   !  User Comp Component created by higher level calls, here is the
+!   !   Initialization routine.
+ 
+    subroutine user_init(comp, importstate, exportstate, clock, rc)
+      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out) :: rc
+
+!   ! Local variables
+      type(ESMF_Field) :: humidity
+      type(ESMF_DELayout) :: layout
+      type(ESMF_DataMap) :: datamap
+      integer :: i, x, y
+      type(ESMF_Grid) :: grid1
+      type(ESMF_Array) :: array1
+      type(ESMF_ArraySpec) :: arrayspec
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: idata
+      real(ESMF_KIND_R8) :: min(2)
+      real(ESMF_KIND_R8) :: delta1(40), delta2(50)
+      integer :: countsPerDE1(3), countsPerDE2(2)
+      integer :: de_id
+      type(ESMF_GridKind) :: horz_gridkind
+      type(ESMF_GridStagger) :: horz_stagger
+      type(ESMF_CoordSystem) :: horz_coord_system
+      integer :: status, myde
+
+      print *, "User Comp Init starting"
+
+      ! Initially import state contains a field with a grid but no data.
+      call ESMF_GridCompGet(comp, layout=layout, rc=status)
+
+      ! Add a "humidity" field to the import state.
+      countsPerDE1 = (/ 10, 18, 12 /)
+      countsPerDE2 = (/ 22, 28 /)
+      min(1) = 0.0
+      delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
+                  1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
+                  1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
+                  2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
+      min(2) = 0.0
+      delta2 = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
+                  0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
+                  1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
+                  1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
+                  1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
+
+      horz_gridkind = ESMF_GridKind_XY
+      horz_stagger = ESMF_GridStagger_D_NE
+      horz_coord_system = ESMF_CoordSystem_Cartesian
+
+      grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
+                              countsPerDEDim1=countsPerDE1, &
+                              countsPerDEDim2=countsPerDE2, &
+                              minGlobalCoordPerDim=min, &
+                              delta1=delta1, delta2=delta2, &
+                              layout=layout, &
+                              horzGridKind=horz_gridkind, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
+                              name="source grid", rc=status)
+
+      ! Figure out our local processor id
+      call ESMF_DELayoutGetDEID(layout, de_id, rc)
+
+      ! Set up a 3D real array
+      call ESMF_ArraySpecInit(arrayspec, rank=3, type=ESMF_DATA_REAL, &
+                              kind=ESMF_R8)
+
+      ! Create the array
+      array1 = ESMF_ArrayCreate(arrayspec, counts=(/ 4, 40, 50 /), rc=rc)
+
+      ! Create a datamap
+      datamap = ESMF_DataMapCreate(ESMF_IO_IJ, rc=rc)
+
+      ! Create the field 
+      humidity = ESMF_FieldCreate(grid1, array=array1, datamap=datamap, &
+                                  horizRelloc=ESMF_CELL_NFACE, &
+                                  haloWidth=0, name="humidity", rc=rc)
+
+      ! Get the allocated array back and get an F90 array pointer
+      call ESMF_FieldGetData(humidity, array1, rc)
+      call ESMF_ArrayGetData(array1, idata, rc=rc)
+
+      call ESMF_StateAddData(importstate, humidity, rc)
+   !   call ESMF_StatePrint(importstate, rc=rc)
+
+      print *, "User Comp Init returning"
+   
+      rc = ESMF_SUCCESS
+
+    end subroutine user_init
+
+
+!--------------------------------------------------------------------------------
+!   !  The Run routine where data is computed.
+!   !
+ 
+    subroutine user_run(comp, importstate, exportstate, clock, rc)
+      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out) :: rc
+
+!   ! Local variables
+      type(ESMF_Field) :: humidity
+      type(ESMF_Array) :: array1
+      integer :: status
+
+      print *, "User Comp Run starting"
+
+      ! Get information from the component.
+  !    call ESMF_StatePrint(importstate, rc=status)
+      call ESMF_StateGetData(importstate, "humidity", humidity, rc=status)
+  !    call ESMF_FieldPrint(humidity, "", rc=status)
+    
+      ! This is where the model specific computation goes.
+      call ESMF_FieldGetData(humidity, array1, rc=status)
+      print *, "Imported Array in user model 2:"
+  !    call ESMF_ArrayPrint(array1, "", rc)
+
+      print *, "User Comp Run returning"
+
+      rc = status
+
+    end subroutine user_run
+
+
+!--------------------------------------------------------------------------------
+!   !  The Finalization routine where things are deleted and cleaned up.
+!   !
+ 
+    subroutine user_final(comp, importstate, exportstate, clock, rc)
+      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out) :: rc
+
+      ! Local variables
+      integer :: status
+      type(ESMF_Field) :: field
+      integer :: localrc, finalrc
+      type(mylocaldata), pointer :: mydatablock
+      type(wrapper) :: wrap
+
+      print *, "User Comp Final starting"  
+
+      ! set this up to run the validate code on all fields
+      ! so we can see and compare the output.  but if any of
+      ! the verify routines return error, return error at the end.
+      finalrc = ESMF_SUCCESS
+
+      ! Get our local info
+      nullify(wrap%ptr)
+      mydatablock => wrap%ptr
+        
+      call ESMF_GridCompGetInternalState(comp, wrap, status)
+
+      mydatablock => wrap%ptr
+      print *, "before deallocate, dataoffset = ", mydatablock%dataoffset
+
+      ! check validity of results
+      ! Get Fields from import state
+      call ESMF_StateGetData(importstate, "humidity", field, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyResults(field, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      deallocate(mydatablock, stat=status)
+      print *, "deallocate returned ", status
+      nullify(wrap%ptr)
+
+30 continue
+      ! come straight here if you cannot get the data from the state.
+      ! otherwise error codes are accumulated but ignored until the
+      ! end so we can see the output from all the cases to help track
+      ! down errors.
+
+      print *, "User Comp Final returning"
+      rc = finalrc
+   
+    end subroutine user_final
+
+!--------------------------------------------------------------------------------
+!   !  The routine where results are validated.
+!   !
+ 
+    subroutine verifyResults(humidity, rc)
+      type(ESMF_Field), intent(in) :: humidity
+      integer, intent(out) :: rc
+
+      ! Local variables
+      integer :: status, i, j, myDE, counts(2)
+      type(ESMF_RelLoc) :: relloc
+      type(ESMF_Array) :: array
+      type(ESMF_Array), dimension(:), pointer :: coordArray
+      type(ESMF_Grid) :: grid
+      real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
+      real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, data, coordX, coordY
+
+      print *, "User verifyResults starting"  
+
+      pi = 3.14159
+
+      ! get the grid and coordinates
+      allocate(coordArray(2))
+      call ESMF_FieldGetRelLoc(humidity, horizRelloc=relloc, rc=status)
+      call ESMF_FieldGetGrid(humidity, grid, rc=status)
+      call ESMF_GridGetDE(grid, myDE=myDE, localCellCountPerDim=counts, &
+                          rc=status)
+      call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &
+                              rc=status)
+      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
+      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+
+      ! update field values here
+      call ESMF_FieldGetData(humidity, array, rc=rc)
+      ! Get a pointer to the start of the data
+      call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc)
+
+      ! allocate array for computed results and fill it
+      allocate(calc(counts(1), counts(2)))
+      do j   = 1,counts(2)
+        do i = 1,counts(1)
+          calc(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                           + 2.0*sin(coordY(i,j)/50.0*pi)
+        enddo
+      enddo
+
+     ! calculate data error from computed results
+      maxError    = 0.0
+      maxPerError = 0.0
+      maxCValue   = 0.0
+      minCValue   = 1000.0
+      maxDValue   = 0.0
+      minDValue   = 1000.0
+      do j   = 1,counts(2)
+        do i = 1,counts(1)
+          error       = abs(data(i,j)) - abs(calc(i,j))
+          minCValue   = min(minCValue, abs(calc(i,j)))
+          maxCValue   = max(maxCValue, abs(calc(i,j)))
+          minDValue   = min(minDValue, abs(data(i,j)))
+          maxDValue   = max(maxDValue, abs(data(i,j)))
+          maxError    = max(maxError, abs(error))
+          maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
+        enddo
+      enddo
+
+      write(*,*) "Results for DE #", myDE, ":"
+      write(*,*) "   minimum regridded value = ", minDValue
+      write(*,*) "   maximum regridded value = ", maxDValue
+      write(*,*) "   minimum computed value  = ", minCValue
+      write(*,*) "   maximum computed value  = ", maxCValue
+      write(*,*) "   maximum error           = ", maxError
+      write(*,*) "   maximum percent error   = ", maxPerError
+      print *, "User verifyResults returning"
+   
+      rc = ESMF_SUCCESS
+
+    end subroutine verifyResults
+
+
+    end module user_model2
+    
+!\end{verbatim}
+    
