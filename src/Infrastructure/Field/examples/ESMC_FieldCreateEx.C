@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldCreateEx.C,v 1.4 2004/02/19 22:57:15 nscollins Exp $
+// $Id: ESMC_FieldCreateEx.C,v 1.5 2004/02/19 23:10:58 nscollins Exp $
 //
 // Example/test code which creates a new field.
 
@@ -111,7 +111,7 @@ main(int argc, char **argv) {
      //ESMC_FieldDestroy(field1);
      //ESMC_FieldDestroy(field2);
      //ESMC_FieldDestroy(field3);
-     ESMC_FieldDestroy(field4);
+     //ESMC_FieldDestroy(field4);
      //ESMC_FieldDestroy(field5);
 
 //-------------------------------------------------------------------------

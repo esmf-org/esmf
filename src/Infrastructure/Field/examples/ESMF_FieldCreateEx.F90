@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.15 2004/02/13 20:00:49 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.16 2004/02/19 23:10:58 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -31,7 +31,7 @@
     type(ESMF_RelLoc) :: relativelocation
     character (len = ESMF_MAXSTR) :: fname
     type(ESMF_IOSpec) :: iospec
-    type(ESMF_Field) :: field1, field2, field3, field4
+    type(ESMF_Field) :: field1, field2, field3
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
     real (ESMF_KIND_R8), dimension(2) :: origin
 !EOC
@@ -150,10 +150,6 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
      call ESMF_FieldDestroy(field3,rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-     !call ESMF_FieldDestroy(field4,rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
