@@ -1,19 +1,48 @@
-% $Id: ConfigAttr_background.tex,v 1.1 2002/03/14 05:11:12 cnh Exp $
+% $Id: ConfigAttr_background.tex,v 1.2 2002/06/08 02:37:06 cnh Exp $
 
 \section{Background}
+As part of their state Earth system models need to maintain ad-hoc sets of
+parameters. These parameters can be related to physical terms (for example
+mixing coefficients, length scales or time scales) or can be related
+to computational aspects (for example directory names, output and input
+locations). Some of these parameters will be explicitly set by user
+input at runtime, others may be automatically determmined from system
+defaults or from other utilities. The parameters may be single valued
+or may be multi-dimensional. Parameters can be of various types float,
+integer, logical, string.
 
-<Desciption of this class, module or utility set.>
+The configuration attributes element of ESMF will enable
+these parameters or {\bf attributes} to be recorded and provided services
+for setting attributes from human readbale text files and for saving attributes
+to persistent storage in appropriate formats.
 
 \subsection{Location}
 
-<Describe whether this software is in the infrastructure or superstructure,
-and other software modules that it interacts with.>
+The configuration attributes element of ESMF will be part of the
+Infrastructure/Utilities area. Other upper layer tools may use the
+configuration attributes internally. User-level component code will
+also use the configuration attributes element.
 
 \subsection{Scope}
 
-<Discussion of scope and restrictions.>
+Compile time and runtime setting of parameters will initially be through
+text based specification. Extensive automatic systems for choosing parameters or GUI
+based systems for manipulating parameters are not required within the 
+initial ESMF development scope. Such systems are however highly desireable
+and it is envisaged that such systems would one-day interface with ESMF applications
+in part through the configuration attributes services.
+Another area that is outside the present scope of the inial ESMF project is automated,
+structured archival of attribute information along with other numerical
+experiment state. However, again this would be a useful concept to layer on
+top of ESMF.
 
-
-
+\subsection{Related material}
+ Property sheets used in many component based programming environments, for example
+the property sheet notion  systems in J2EE \cite[], have parallels with the concepts that need to 
+be supported here. All the ESMF applications already contain services of this nature with widely 
+varying degress of spohistication \cite[MOM_manual, MITgcm_manual, CCSM_manual]. The widely used dot 
+files and dot subdirectories used for all manner of application configuration on UNIX platforms also 
+perform similar roles \cite[pinerc,sshrc] to the functions envisaged here, as does the Windows 
+registry concept \cite[Windows_registry].
 
 
