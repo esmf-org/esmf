@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.27 2004/02/05 23:26:53 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.28 2004/02/06 21:43:23 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.27 2004/02/05 23:26:53 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.28 2004/02/06 21:43:23 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2011,54 +2011,6 @@ extern "C" {
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeGet(dt,count,value)
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AttributeGetCount - get count of items in an attribute list
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetCount(
-// 
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,           // in - name of attribute to retrieve
-      int *count) const {   // out - number of items in list
-// 
-// !DESCRIPTION:
-//
-//EOP
-
-  int rc, i;
-  ESMC_Attribute *attr;
-
-  // simple sanity checks
-  if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 4 bad attribute name\n");
-      return ESMF_FAILURE;
-  }
-  if (!count) {
-      printf("ESMF_AttributeGet: bad count argument\n");
-      return ESMF_FAILURE;
-  }
-
-  attr = ESMC_AttributeGet(name);
-  if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      *count = 0;
-      return ESMF_FAILURE;
-  }
-
-  if (attr->dt == ESMF_DATA_CHARACTER)
-      *count = attr->slen;
-  else
-      *count = attr->items;
-
-  return ESMF_SUCCESS;
-
-}  // end ESMC_AttributeGetCount
 
 
 //-----------------------------------------------------------------------------
