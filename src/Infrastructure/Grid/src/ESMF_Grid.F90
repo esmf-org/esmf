@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.121 2004/01/07 22:28:26 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.122 2004/01/08 23:38:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -90,8 +90,8 @@
                                             ! staggered and vertical grids
         type (ESMF_DistGrid) :: distgrid    ! decomposition and other
                                             ! logical space info for grid
-        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: globalMinCoord
-        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: globalMaxCoord
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: minGlobalCoordPerDim
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: maxGlobalCoordPerDim
         type (ESMF_LocalArray) :: boundingBoxes
                                             ! array of bounding boxes on each DE
                                             ! used for search routines
@@ -230,7 +230,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.121 2004/01/07 22:28:26 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.122 2004/01/08 23:38:16 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -631,7 +631,7 @@
                                            delta1, delta2, delta3, &
                                            coord1, coord2, coord3, &
                                            decompIDs, &
-                                           countsPerDE1, countsPerDE2, &
+                                           countsPerDEDim1, countsPerDEDim2, &
                                            dimNames, dimUnits, &
                                            horzGridType, vertGridType, &
                                            horzStagger, vertStagger, &
@@ -653,8 +653,8 @@
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord3
       integer, dimension(:), intent(in), optional :: decompIDs
-      integer, dimension(:), intent(in), optional :: countsPerDE1
-      integer, dimension(:), intent(in), optional :: countsPerDE2
+      integer, dimension(:), intent(in), optional :: countsPerDEDim1
+      integer, dimension(:), intent(in), optional :: countsPerDEDim2
       character (len=*), dimension(numDims), intent(in), optional :: dimNames
       character (len=*), dimension(numDims), intent(in), optional :: dimUnits
       integer, intent(in), optional :: horzGridType
@@ -696,9 +696,9 @@
 !          Array of physical coordinates in the third direction.
 !     \item[{[decompIDs]}]
 !          Identifier for which Grid axes are decomposed.
-!     \item[{[countsPerDE1]}]
+!     \item[{[countsPerDEDim1]}]
 !          Array of number of grid increments per DE in the first direction.
-!     \item[{[countsPerDE2]}]
+!     \item[{[countsPerDEDim2]}]
 !          Array of number of grid increments per DE in the second direction.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
@@ -756,7 +756,7 @@
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_GridConstruct(grid, numDims, min, layout, &
                               delta1, delta2, delta3, &
-                              decompIDs, countsPerDE1, countsPerDE2, &
+                              decompIDs, countsPerDEDim1, countsPerDEDim2, &
                               dimNames, dimUnits, &
                               horzGridType, vertGridType, &
                               horzStagger, vertStagger, &
@@ -1325,7 +1325,7 @@
       call ESMF_GridSet(grid, horzGridType, vertGridType, &
                         horzStagger, vertStagger, &
                         horzCoordSystem, vertCoordSystem, &
-                        global_min_coord=min, global_max_coord=max, &
+                        minGlobalCoordPerDim=min, maxGlobalCoordPerDim=max, &
                         periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructUniform: Grid set"
@@ -1481,7 +1481,7 @@
 ! !INTERFACE:
       subroutine ESMF_GridConstructSpecd(grid, numDims, min, layout, &
                                          delta1, delta2, delta3, &
-                                         decompIDs, countsPerDE1, countsPerDE2, &
+                                         decompIDs, countsPerDEDim1, countsPerDEDim2, &
                                          dimNames, dimUnits, &
                                          horzGridType, vertGridType, &
                                          horzStagger, vertStagger, &
@@ -1497,8 +1497,8 @@
       real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta3
       integer, dimension(:), intent(in), optional :: decompIDs
-      integer, dimension(:), intent(in), optional :: countsPerDE1
-      integer, dimension(:), intent(in), optional :: countsPerDE2
+      integer, dimension(:), intent(in), optional :: countsPerDEDim1
+      integer, dimension(:), intent(in), optional :: countsPerDEDim2
       character (len=*), dimension(numDims), intent(in), optional :: dimNames
       character (len=*), dimension(numDims), intent(in), optional :: dimUnits
       integer, intent(in), optional :: horzGridType
@@ -1537,9 +1537,9 @@
 !          Array of physical increments between nodes in the third direction.
 !     \item[{[decompIDs]}]
 !          Identifier for which Grid axes are decomposed.
-!     \item[{[countsPerDE1]}]
+!     \item[{[countsPerDEDim1]}]
 !          Array of number of grid increments per DE in the x-direction.
-!     \item[{[countsPerDE2]}]
+!     \item[{[countsPerDEDim2]}]
 !          Array of number of grid increments per DE in the y-direction.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
@@ -1632,7 +1632,8 @@
       call ESMF_GridSet(grid, horzGridType, vertGridType, &
                         horzStagger, vertStagger, &
                         horzCoordSystem, vertCoordSystem, &
-                        global_min_coord=min, global_max_coord=max, rc=status)
+                        minGlobalCoordPerDim=min, maxGlobalCoordPerDim=max, &
+                        rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructSpecd: Grid set"
         return
@@ -1640,7 +1641,7 @@
 
 !     Create the BoundingBoxes structure
       call ESMF_GridSetBoundingBoxes(grid, numDims, min, delta1, delta2, &
-                                     countsPerDE1, countsPerDE2, status)
+                                     countsPerDEDim1, countsPerDEDim2, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructSpecd: Grid set boxes"
         return
@@ -1650,8 +1651,8 @@
       grid%distgrid = ESMF_DistGridCreate(counts=counts, layout=layout, &
                                           decompIDs=decompIDsUse, &
                                           periodic=periodic, &
-                                          countsPerDE1=countsPerDE1, &
-                                          countsPerDE2=countsPerDE2, &
+                                          countsPerDEDim1=countsPerDEDim1, &
+                                          countsPerDEDim2=countsPerDEDim2, &
                                           rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructSpecd: Distgrid create"
@@ -1663,7 +1664,7 @@
       physgrid_name = 'cell_center'
       relloc = ESMF_CELL_CENTER
       call ESMF_GridAddPhysGrid(grid, physgridId, relloc, numDims, delta1, &
-                                delta2, countsPerDE1, countsPerDE2, min, &
+                                delta2, countsPerDEDim1, countsPerDEDim2, min, &
                                 dimNames, dimUnits, physgrid_name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructSpecd: Add physgrid"
@@ -1683,7 +1684,7 @@
           physgrid_name = 'cell_necorner'
           relloc = ESMF_CELL_NECORNER
           call ESMF_GridAddPhysGrid(grid, physgridId, relloc, numDims, delta1, &
-                                    delta2, countsPerDE1, countsPerDE2, min, &
+                                    delta2, countsPerDEDim1, countsPerDEDim2, min, &
                                     dimNames, dimUnits, physgrid_name, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_GridConstructSpecd: Add physgrid"
@@ -1696,7 +1697,7 @@
           physgrid_name = 'cell_eface'
           relloc = ESMF_CELL_EFACE
           call ESMF_GridAddPhysGrid(grid, physgridId, relloc, numDims, delta1, &
-                                    delta2, countsPerDE1, countsPerDE2, min, &
+                                    delta2, countsPerDEDim1, countsPerDEDim2, min, &
                                     dimNames, dimUnits, physgrid_name, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_GridConstructSpecd: Add physgrid"
@@ -1709,7 +1710,7 @@
           physgrid_name = 'cell_nface'
           relloc = ESMF_CELL_NFACE
           call ESMF_GridAddPhysGrid(grid, physgridId, relloc, numDims, delta1, &
-                                    delta2, countsPerDE1, countsPerDE2, min, &
+                                    delta2, countsPerDEDim1, countsPerDEDim2, min, &
                                     dimNames, dimUnits, physgrid_name, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_GridConstructSpecd: Add physgrid"
@@ -1720,7 +1721,7 @@
           physgrid_name = 'cell_eface'
           relloc = ESMF_CELL_EFACE
           call ESMF_GridAddPhysGrid(grid, physgridId, relloc, numDims, delta1, &
-                                    delta2, countsPerDE1, countsPerDE2, min, &
+                                    delta2, countsPerDEDim1, countsPerDEDim2, min, &
                                     dimNames, dimUnits, physgrid_name, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_GridConstructSpecd: Add physgrid"
@@ -1959,12 +1960,12 @@
           return
         endif
 
-        localStart(i) = grid%distgrid%ptr%MyDE_comp%ai_global(i)%min - 1
+        localStart(i) = grid%distgrid%ptr%myDEComp%globalAIPerDim(i)%min - 1
         localMinCoord(i) = min(i) + delta(i) * real(localStart(i))
         localMaxCoord(i) = min(i) + delta(i) &
-                         * real(grid%distgrid%ptr%MyDE_comp%ai_global(i)%max)
-        localCounts(i)   = grid%distgrid%ptr%MyDE_comp%ai_global(i)%max &
-                         - grid%distgrid%ptr%MyDE_comp%ai_global(i)%min + 1
+                         * real(grid%distgrid%ptr%myDEComp%globalAIPerDim(i)%max)
+        localCounts(i)   = grid%distgrid%ptr%myDEComp%globalAIPerDim(i)%max &
+                         - grid%distgrid%ptr%myDEComp%globalAIPerDim(i)%min + 1
       enddo
 
       ! allocate and load cell type masks
@@ -2084,7 +2085,7 @@
 ! !INTERFACE:
       subroutine ESMF_GridAddPhysGridSpecd(grid, physgridId, relloc, numDims, &
                                            delta1, delta2, &
-                                           countsPerDE1, countsPerDE2, &
+                                           countsPerDEDim1, countsPerDEDim2, &
                                            min, dimNames, dimUnits, &
                                            physgridName, rc)
 !
@@ -2095,8 +2096,8 @@
       integer, intent(in) :: numDims
       real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
       real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
-      integer, dimension(:), intent(in) :: countsPerDE1
-      integer, dimension(:), intent(in) :: countsPerDE2
+      integer, dimension(:), intent(in) :: countsPerDEDim1
+      integer, dimension(:), intent(in) :: countsPerDEDim2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: min
       character (len=*), dimension(:), intent(in), optional :: dimNames
       character (len=*), dimension(:), intent(in), optional :: dimUnits
@@ -2121,9 +2122,9 @@
 !          Array of physical increments between nodes in the first direction.
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
-!     \item[countsPerDE1]
+!     \item[countsPerDEDim1]
 !          Array of number of grid increments per DE in the x-direction.
-!     \item[countsPerDE2]
+!     \item[countsPerDEDim2]
 !          Array of number of grid increments per DE in the y-direction.
 !     \item[{[min]}]
 !          Array of minimum physical coordinates in each direction.
@@ -2197,27 +2198,27 @@
       localStart(2) = 0
       if(myDE(1).ge.2) then
         do j = 1,myDE(1)-1
-          do i = 1,countsPerDE1(j)
+          do i = 1,countsPerDEDim1(j)
             localMin(1) = localMin(1) + delta1(i+localStart(1))
           enddo
-          localStart(1) = localStart(1) + countsPerDE1(j)
+          localStart(1) = localStart(1) + countsPerDEDim1(j)
         enddo
       endif
       localMax(1) = localMin(1)
-      do i = 1,countsPerDE1(myDE(1))
+      do i = 1,countsPerDEDim1(myDE(1))
         localMax(1) = localMax(1) + delta1(i+localStart(1))
       enddo
 
       if(myDE(2).ge.2) then
         do j = 1,myDE(2)-1
-          do i = 1,countsPerDE2(j)
+          do i = 1,countsPerDEDim2(j)
             localMin(2) = localMin(2) + delta2(i+localStart(2))
           enddo
-          localStart(2) = localStart(2) + countsPerDE2(j)
+          localStart(2) = localStart(2) + countsPerDEDim2(j)
         enddo
       endif
       localMax(2) = localMin(2)
-      do i = 1,countsPerDE2(myDE(2))
+      do i = 1,countsPerDEDim2(myDE(2))
         localMax(2) = localMax(2) + delta2(i+localStart(2))
       enddo
 
@@ -2329,8 +2330,8 @@
       enddo
 
       ! set coordinates using total cell count
-      counts(1) = countsPerDE1(myDE(1)) + 2*gridBoundWidth
-      counts(2) = countsPerDE2(myDE(2)) + 2*gridBoundWidth
+      counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
+      counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
       i1 = localStart(1) + 1
       i2 = localStart(1) + counts(1) + 1
       j1 = localStart(2) + 1
@@ -2344,8 +2345,8 @@
         return
       endif
       ! set coordinates using computational cell count
-      counts(1) = countsPerDE1(myDE(1))
-      counts(2) = countsPerDE2(myDE(2))
+      counts(1) = countsPerDEDim1(myDE(1))
+      counts(2) = countsPerDEDim2(myDE(2))
       i1 = localStart(1) + 1 + gridBoundWidth
       i2 = i1 + counts(1)
       j1 = localStart(2) + 1 + gridBoundWidth
@@ -2359,8 +2360,8 @@
       endif
 
       ! set mask using total cell count
-      counts(1) = countsPerDE1(myDE(1)) + 2*gridBoundWidth
-      counts(2) = countsPerDE2(myDE(2)) + 2*gridBoundWidth
+      counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
+      counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
       i1 = localStart(1) + 1
       i2 = localStart(1) + counts(1)
       j1 = localStart(2) + 1
@@ -2472,12 +2473,12 @@
         return
       endif
 
-      localStart       = grid%distgrid%ptr%MyDE_comp%ai_global(3)%min - 1
+      localStart       = grid%distgrid%ptr%myDEComp%globalAIPerDim(3)%min - 1
       localMinCoord(1) = min + delta(1) * real(localStart)
       localMaxCoord    = min + delta(1) &
-                       * real(grid%distgrid%ptr%MyDE_comp%ai_global(3)%max)
-      localCount(1)    = grid%distgrid%ptr%MyDE_comp%ai_global(3)%max &
-                       - grid%distgrid%ptr%MyDE_comp%ai_global(3)%min + 1
+                       * real(grid%distgrid%ptr%myDEComp%globalAIPerDim(3)%max)
+      localCount(1)    = grid%distgrid%ptr%myDEComp%globalAIPerDim(3)%max &
+                       - grid%distgrid%ptr%myDEComp%globalAIPerDim(3)%min + 1
 
       ! allocate and load cell type masks
       allocate(cellType(count+2*gridBoundWidth), stat=status)
@@ -2952,17 +2953,17 @@
 ! !IROUTINE: ESMF_GridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDE(grid, MyDE, local_cell_count, local_axis_length, &
-                                globalStart, ai_global, total, rc)
+      subroutine ESMF_GridGetDE(grid, MyDE, localCellCount, localCellCountPerDim, &
+                                globalStartPerDim, globalAIPerDim, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       integer, intent(inout), optional :: MyDE
-      integer, intent(inout), optional :: local_cell_count
-      integer, dimension(:), intent(inout), optional :: local_axis_length
-      integer, dimension(:,:), intent(inout), optional :: globalStart
+      integer, intent(inout), optional :: localCellCount
+      integer, dimension(:), intent(inout), optional :: localCellCountPerDim
+      integer, dimension(:), intent(inout), optional :: globalStartPerDim
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
-                        optional :: ai_global
+                        optional :: globalAIPerDim
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -2975,13 +2976,13 @@
 !          Class to be queried.
 !     \item[{[MyDE]}]
 !          Identifier for this {\tt ESMF\_DE}.
-!     \item[{[local\_cell\_count]}]
+!     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
-!     \item[{[local\_axis\_length]}]
+!     \item[{[localCellCountPerDim]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells per axis.
-!     \item[{[global\_start]}]
+!     \item[{[globalStartPerDim]}]
 !          Global index of starting counts for each dimension.
-!     \item[{[ai\_global]}]
+!     \item[{[globalAIPerDim]}]
 !          Global axis indices for each dimension.
 !     \item[{[total]}]
 !          Logical flag to indicate getting DistGrid information for total cells.
@@ -3006,9 +3007,9 @@
 
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
-      call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, local_cell_count, &
-                              local_axis_length, globalStart, ai_global, &
-                              total=total, rc=status)
+      call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, localCellCount, &
+                              localCellCountPerDim, globalStartPerDim, &
+                              globalAIPerDim, total=total, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE: distgrid get de"
         return
@@ -4057,10 +4058,10 @@
       subroutine ESMF_GridGet(grid, horzGridType, vertGridType, &
                               horzStagger, vertStagger, &
                               horzCoordSystem, vertCoordSystem, &
-                              coordOrder, global_min_coord, &
-                              global_max_coord, global_cell_dim, &
-                              globalStart, local_cell_max_dim, &
-                              local_axis_length, periodic, name, rc)
+                              coordOrder, minGlobalCoordPerDim, &
+                              maxGlobalCoordPerDim, globalCellCountPerDim, &
+                              globalStartPerDEPerDim, maxLocalCellCountPerDim, &
+                              cellCountPerDEPerDim, periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4072,16 +4073,16 @@
       type(ESMF_CoordSystem), intent(out), optional :: vertCoordSystem
       integer, intent(out), optional :: coordOrder
       real(ESMF_KIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
-                            optional :: global_min_coord
+                            optional :: minGlobalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
-                            optional :: global_max_coord
+                            optional :: maxGlobalCoordPerDim
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), &
-                            optional :: global_cell_dim
-      integer, intent(out), dimension(:,:), optional :: globalStart
+                            optional :: globalCellCountPerDim
+      integer, intent(out), dimension(:,:), optional :: globalStartPerDEPerDim
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), &
-                            optional :: local_cell_max_dim
+                            optional :: maxLocalCellCountPerDim
       integer,              dimension(:,:), pointer, &
-                            optional :: local_axis_length
+                            optional :: cellCountPerDEPerDim
       type (ESMF_Logical), intent(out), optional :: periodic(:)
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
@@ -4112,17 +4113,17 @@
 !          the vertical grid.
 !     \item[{[coordOrder]}]
 !          Integer specifier to denote coordinate ordering.
-!     \item[{[global\_min\_coord]}]
+!     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
-!     \item[{[global\_max\_coord]}]
+!     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
-!     \item[{[global\_cell\_dim]}]
+!     \item[{[globalCellCountPerDim]}]
 !          Array of numbers of global grid increments in each direction.
-!     \item[{[global\_start]}]
+!     \item[{[globalStartPerDEPerDim]}]
 !          Array of global starting locations for each DE and in each direction.
-!     \item[{[local\_cell\_max\_dim]}]
+!     \item[{[maxLocalCellCountPerDim]}]
 !          Array of maximum grid counts on any DE in each direction.
-!     \item[{[local\_axis\_length]}]
+!     \item[{[cellCountPerDEPerDim]}]
 !          2-D array of grid counts on each DE and in each direction.
 !     \item[{[periodic]}]
 !          Returns the periodicity along the coordinate axes - logical array.
@@ -4165,22 +4166,22 @@
       if(present(coordOrder     )) coordOrder      = gridp%coordOrder
 
       ! Get distgrid info with global coordinate counts
-      if(present(global_cell_dim) .or. present(globalStart) &
-                                  .or. present(local_cell_max_dim)) then
+      if (present(globalCellCountPerDim) .or. present(globalStartPerDEPerDim) &
+                                     .or. present(maxLocalCellCountPerDim)) then
         call ESMF_DistGridGet(gridp%distgrid, &
-                              global_cell_dim=global_cell_dim, &
-                              globalStart=globalStart, &
-                              local_cell_max_dim=local_cell_max_dim, &
+                              globalCellCountPerDim=globalCellCountPerDim, &
+                              globalStartPerDEPerDim=globalStartPerDEPerDim, &
+                              maxLocalCellCountPerDim=maxLocalCellCountPerDim, &
                               rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridGet: DistGrid get"
           return
         endif
       endif
-      if(present(local_axis_length)) then
-        ! TODO: check size of local_axis_length
+      if(present(cellCountPerDEPerDim)) then
+        ! TODO: check size of cellCountPerDEPerDim
         call ESMF_DistGridGetAllCounts(gridp%distgrid%ptr, &
-                              local_axis_length, rc=status)
+                                       cellCountPerDEPerDim, rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridGet: DistGrid get all counts"
           return
@@ -4197,16 +4198,16 @@
       endif
 
       ! Get global coordinate extents
-      if(present(global_min_coord)) then
+      if(present(minGlobalCoordPerDim)) then
         do i=1,ESMF_MAXGRIDDIM
-          if (i > size(global_min_coord)) exit
-          global_min_coord(i) = gridp%globalMinCoord(i)
+          if (i > size(minGlobalCoordPerDim)) exit
+          minGlobalCoordPerDim(i) = gridp%minGlobalCoordPerDim(i)
         enddo
       endif
-      if(present(global_max_coord)) then
+      if(present(maxGlobalCoordPerDim)) then
         do i=1,ESMF_MAXGRIDDIM
-          if (i > size(global_max_coord)) exit
-          global_max_coord(i) = gridp%globalMaxCoord(i)
+          if (i > size(maxGlobalCoordPerDim)) exit
+          maxGlobalCoordPerDim(i) = gridp%maxGlobalCoordPerDim(i)
         enddo
       endif
 
@@ -4230,8 +4231,8 @@
       subroutine ESMF_GridSet(grid, horzGridType, vertGridType, &
                               horzStagger, vertStagger, &
                               horzCoordSystem, vertCoordSystem, &
-                              coordOrder, global_min_coord, global_max_coord, &
-                              periodic, rc)
+                              coordOrder, minGlobalCoordPerDim, &
+                              maxGlobalCoordPerDim, periodic, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -4242,8 +4243,8 @@
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
       type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
       integer, intent(in), optional :: coordOrder
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: global_min_coord
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: global_max_coord
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: maxGlobalCoordPerDim
       type(ESMF_Logical), intent(in), optional :: periodic(:)
       integer, intent(out), optional :: rc
 !
@@ -4273,9 +4274,9 @@
 !          the vertical grid.
 !     \item[{[coordOrder]}]
 !          Integer specifier to denote coordinate ordering.
-!     \item[{[global\_min\_coord]}]
+!     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
-!     \item[{[global\_max\_coord]}]
+!     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
@@ -4314,16 +4315,16 @@
          enddo
       endif
 
-      if (present(global_min_coord)) then
-   !      if (size(global_min_coord) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
-         do i=1,size(global_min_coord)
-            grid%globalMinCoord(i) = global_min_coord(i)
+      if (present(minGlobalCoordPerDim)) then
+   !      if (size(minGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
+         do i=1,size(minGlobalCoordPerDim)
+            grid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
          enddo
       endif
-      if (present(global_max_coord)) then
-   !      if (size(global_max_coord) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
-         do i=1,size(global_max_coord)
-            grid%globalMaxCoord(i) = global_max_coord(i)
+      if (present(maxGlobalCoordPerDim)) then
+   !      if (size(maxGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
+         do i=1,size(maxGlobalCoordPerDim)
+            grid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
          enddo
       endif
 
@@ -5283,8 +5284,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridSetBoundingBoxesSpecd(grid, numDims, min, delta1, &
-                                                delta2, countsPerDE1, &
-                                                countsPerDE2, rc)
+                                                delta2, countsPerDEDim1, &
+                                                countsPerDEDim2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType), intent(inout) :: grid
@@ -5292,8 +5293,8 @@
       real(ESMF_KIND_R8), dimension(numDims), intent(in) :: min
       real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
       real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
-      integer, dimension(:), intent(in) :: countsPerDE1
-      integer, dimension(:), intent(in) :: countsPerDE2
+      integer, dimension(:), intent(in) :: countsPerDEDim1
+      integer, dimension(:), intent(in) :: countsPerDEDim2
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5312,9 +5313,9 @@
 !          Array of physical increments between nodes in the first direction.
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
-!     \item[countsPerDE1]
+!     \item[countsPerDEDim1]
 !          Array of number of grid increments per DE in the x-direction.
-!     \item[countsPerDE2]
+!     \item[countsPerDEDim2]
 !          Array of number of grid increments per DE in the y-direction.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5338,8 +5339,8 @@
         rc = ESMF_FAILURE
       endif
 
-      numDE1 = size(countsPerDE1)
-      numDE2 = size(countsPerDE2)
+      numDE1 = size(countsPerDEDim1)
+      numDE2 = size(countsPerDEDim2)
       numDEs = numDE1*numDE2
       npts   = 2**numDims
 
@@ -5370,7 +5371,7 @@
       stop  = min(1)
       i1    = 0
       do j = 1,numDE1
-        do i = i1+1,i1+countsPerDE1(j)
+        do i = i1+1,i1+countsPerDEDim1(j)
           stop = stop + delta1(i)
         enddo
         do i = 1,numDE2
@@ -5381,14 +5382,14 @@
           boxes(DE,4,1) = start
         enddo
         start = stop
-        i1    = i1 + countsPerDE1(j)
+        i1    = i1 + countsPerDEDim1(j)
       enddo
 !     Direction 2 next
       start = min(2)
       stop  = min(2)
       i1    = 0
       do j = 1,numDE2
-        do i = i1+1,i1+countsPerDE2(j)
+        do i = i1+1,i1+countsPerDEDim2(j)
           stop = stop + delta2(i)
         enddo
         do i = 1,numDE1
@@ -5399,7 +5400,7 @@
           boxes(DE,4,2) = start
         enddo
         start = stop
-        i1    = i1 + countsPerDE2(j)
+        i1    = i1 + countsPerDEDim2(j)
       enddo
 
       grid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_REF, status)
