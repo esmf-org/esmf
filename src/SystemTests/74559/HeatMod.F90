@@ -1,6 +1,6 @@
-! $Id: HeatMod.F90,v 1.2 2003/04/24 16:43:19 nscollins Exp $
+! $Id: HeatMod.F90,v 1.3 2003/04/25 22:10:50 nscollins Exp $
 !
-! Example/test code which generates random injections of heat.
+! Example/test code which generates injections of heat.
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,15 +8,16 @@
 !BOP
 !
 ! !DESCRIPTION:
-!   Randomly perturb the temperature of another model.
+!   Inject heat and fluid flow into another model.
 !
 !
 !\begin{verbatim}
 
-    module HeatMod
+    module HeatFlowMod
 
     ! ESMF Framework module
     use ESMF_Mod
+    use ArraysGlobalMod
     
     implicit none
     
@@ -79,100 +80,107 @@
 !   !   Initialization routine.
  
     
-    subroutine heat_init(comp, importstate, exportstate, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importstate, exportstate
-        type(ESMF_Clock), intent(in) :: clock
-        integer, intent(out) :: rc
+subroutine heat_init(gcomp, importstate, exportstate, clock, rc)
+      type(ESMF_GridComp), intent(inout) :: gcomp
+      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out) :: rc
 
-!     ! Local variables
-        type(ESMF_Field) :: field_sie, field_u, field_v
-        type(ESMF_DELayout) :: layout
-        integer :: i, x, y
-        type(ESMF_Grid) :: grid1
-        type(ESMF_Array) :: array_sie, array_u, array_v
-        type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-        real, dimension(:,:), pointer :: data_sie, data_u, data_v
-        type(ESMF_Array) :: array_sie, array_u, array_v
-        integer :: nDE_i, nDE_j
-        real :: x_min, x_max, y_min, y_max
-        integer :: i_max, j_max
-        integer :: ni, nj, de_id
-        integer :: horz_gridtype, vert_gridtype
-        integer :: horz_stagger, vert_stagger
-        integer :: horz_coord_system, vert_coord_system
-        integer :: status, myde
+      !
+      ! Local variables
+      !
+      integer :: status
+      logical :: rcpresent
+      integer :: i, j
+      type(ESMF_DELayout) :: layout
+      type(ESMF_Grid) :: grid
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      real :: x_min, x_max, y_min, y_max
+      integer :: i_max, j_max
+      integer :: horz_gridtype, vert_gridtype
+      integer :: horz_stagger, vert_stagger
+      integer :: horz_coord_system, vert_coord_system
+      integer :: myde, halo_width
 
-        print *, "HeatMod Init starting"
+      !
+      ! Set initial values
+      !
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      !
+      ! Initialize return code
+      !
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+   
+      !
+      ! Calculate some other quantities
+      !
+      dx = (x_max - x_min)/i_max      ! Should be calls to PhysGrid
+      dy = (y_max - y_min)/j_max
+      !
+      ! Query component for information.
+      !
+      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
+      !
+      ! Create the Grid
+      !
+      horz_gridtype = ESMF_GridType_XY
+      vert_gridtype = ESMF_GridType_Unknown
+      horz_stagger = ESMF_GridStagger_A
+      vert_stagger = ESMF_GridStagger_Unknown
+      horz_coord_system = ESMF_CoordSystem_Cartesian
+      vert_coord_system = ESMF_CoordSystem_Unknown
+      halo_width = 1
 
-        ! query comp for layout
-        call ESMF_GridCompGet(comp, layout=layout, rc=status)
+      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             layout=layout, &
+                             horz_gridtype=horz_gridtype, &
+                             vert_gridtype=vert_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             vert_stagger=vert_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             vert_coord_system=vert_coord_system, &
+                             halo_width=halo_width, &
+                             name="source grid", rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in Heat_init:  grid create"
+        return
+      endif
 
-        ! Add an energy, u velocity and v velocity field to the state.
-        i_max = 40
-        j_max = 20
-        x_min = 0.0
-        x_max = 20.0
-        y_min = 0.0
-        y_max = 5.0
-        horz_gridtype = ESMF_GridType_XY
-        vert_gridtype = ESMF_GridType_Unknown
-        horz_stagger = ESMF_GridStagger_A
-        vert_stagger = ESMF_GridStagger_Unknown
-        horz_coord_system = ESMF_CoordSystem_Cartesian
-        vert_coord_system = ESMF_CoordSystem_Unknown
+      call ESMF_GridCompSet(gcomp, grid=grid, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in Heat_init:  grid comp set"
+        return
+      endif
 
-        grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                                x_min=x_min, x_max=x_max, &
-                                y_min=y_min, y_max=y_max, &
-                                layout=layout, &
-                                horz_gridtype=horz_gridtype, &
-                                vert_gridtype=vert_gridtype, &
-                                horz_stagger=horz_stagger, &
-                                vert_stagger=vert_stagger, &
-                                horz_coord_system=horz_coord_system, &
-                                vert_coord_system=vert_coord_system, &
-                                name="source grid", rc=status)
+      !
+      ! create space for Heat Flow arrays
+      !
+      call ArraysGlobalAlloc(grid, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in Heat_init:  arraysglobalalloc"
+        return
+      endif
 
-        ! Figure out our local processor id
-        call ESMF_DELayoutGetDEID(layout, de_id, rc)
+      ! This is adding names only to the export list, marked by default
+      !  as "not needed".  The coupler will consult with the other component
+      !  and mark the ones which are needed.
+      call ESMF_StateAddData(exportstate, "SIE", rc)
+      call ESMF_StateAddData(exportstate, "U", rc)
+      call ESMF_StateAddData(exportstate, "V", rc)
+      call ESMF_StateAddData(exportstate, "RHO", rc)
+      call ESMF_StateAddData(exportstate, "P", rc)
+      call ESMF_StateAddData(exportstate, "Q", rc)
+      call ESMF_StateAddData(exportstate, "FLAG", rc)
 
-        ! Get size of our exclusive domain
-        call ESMF_GridGetDE(grid1, lcellexc_index=index, rc=rc)
-        ni = index(1)%r - index(1)%l + 1
-        nj = index(2)%r - index(2)%l + 1
+      call ESMF_StatePrint(exportstate, rc=rc)
 
-        print *, "allocating", ni, " by ",nj," cells on DE", de_id
-        allocate(data_sie(ni,nj))
-        allocate(data_u  (ni,nj))
-        allocate(data_v  (ni,nj))
-
-        ! Set initial data values over whole array to 0
-        data_sie = 0.0
-        data_u   = 0.0
-        data_v   = 0.0
-
-        ! Create Array based on an existing, allocated F90 pointer.
-        ! Data is type Real, 1D.
-        array_sie = ESMF_ArrayCreate(data_sie, ESMF_DATA_REF, rc)
-        array_u   = ESMF_ArrayCreate(data_u, ESMF_DATA_REF, rc)
-        array_v   = ESMF_ArrayCreate(data_v, ESMF_DATA_REF, rc)
-        print *, "Array Create returned"
-
-        field_sie = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
-                                                    name="SIE", rc=rc)
-        field_u   = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
-                                                    name="U Velocity", rc=rc)
-        field_v   = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
-                                                    name="V Velocity", rc=rc)
-
-
-        call ESMF_StateAddData(exportstate, field_sie, rc)
-        call ESMF_StateAddData(exportstate, field_u  , rc)
-        call ESMF_StateAddData(exportstate, field_v  , rc)
-        call ESMF_StatePrint(exportstate, rc=rc)
-
-        print *, "HeatMod Init returning"
+      print *, "HeatMod Init returning"
    
     end subroutine heat_init
 
@@ -187,7 +195,7 @@
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
 
-!     ! Local variables
+      ! Local variables
         type(ESMF_Field) :: field_sie, field_u, field_v
         type(ESMF_Array) :: array_sie, array_u, array_v
         real, dimension(:,:), pointer :: data_sie, data_u, data_v
@@ -208,11 +216,11 @@
         call ESMF_FieldGetData(field_sie, array_sie, rc=rc) 
         call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
             
-        call ESMF_StateGetData(exportstate, "U Velocity", field_u, rc=status)
+        call ESMF_StateGetData(exportstate, "U", field_u, rc=status)
         call ESMF_FieldGetData(field_u, array_u, rc=rc) 
         call ESMF_ArrayGetData(array_u, data_u, ESMF_DATA_REF, rc)
 
-        call ESMF_StateGetData(exportstate, "V Velocity", field_v, rc=status)
+        call ESMF_StateGetData(exportstate, "V", field_v, rc=status)
         call ESMF_FieldGetData(field_v, array_v, rc=rc) 
         call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
       
@@ -274,7 +282,7 @@
     end subroutine heat_final
 
 
-    end module user_model1
+    end module HeatFlowMod
     
 !\end{verbatim}
     
