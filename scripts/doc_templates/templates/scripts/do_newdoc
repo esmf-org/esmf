@@ -1,6 +1,6 @@
 #!/bin/csh -f
 #
-# $Id: do_newdoc,v 1.5 2002/07/25 17:26:18 eschwab Exp $
+# $Id: do_newdoc,v 1.6 2002/08/29 02:15:08 eschwab Exp $
 #
 #===============================================================================
 # do_newdoc
@@ -55,8 +55,9 @@ endif
   switch ($type) 
   case req:
       if(!(-r $newdir/README_REQ)) cp $DOCT_DIR/README_REQ $newdir
-      if(!(-r $newdir/$1_reqdoc.tex)) cat $DOCT_DIR/comp_reqdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_reqdoc.tex
+      if(!(-r $newdir/$1_reqdoc.ctex)) cat $DOCT_DIR/comp_reqdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_reqdoc.ctex
+      if(!(-r $newdir/$1_auth.tex)) cp $DOCT_DIR/comp_auth.tex $newdir/$1_auth.tex
       if(!(-r $newdir/$1_background.tex)) cp $DOCT_DIR/comp_background.tex $newdir/$1_background.tex
       if(!(-r $newdir/$1_abbr.tex)) cp $DOCT_DIR/comp_abbr.tex $newdir/$1_abbr.tex
       if(!(-r $newdir/$1_terms.tex)) cp $DOCT_DIR/comp_terms.tex $newdir/$1_terms.tex
@@ -66,19 +67,20 @@ endif
       breaksw
   case arch:
       if(!(-r $newdir/README_ARCH)) cp $DOCT_DIR/README_ARCH $newdir
-      if(!(-r $newdir/$1_archdoc.tex)) cat $DOCT_DIR/comp_archdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_archdoc.tex
+      if(!(-r $newdir/$1_archdoc.ctex)) cat $DOCT_DIR/comp_archdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_archdoc.ctex
       if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex
       if(!(-r $newdir/$1_alg.tex)) cp $DOCT_DIR/comp_alg.tex $newdir/$1_alg.tex
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
       if(!(-r $newdir/$1_arch.tex)) cp $DOCT_DIR/comp_arch.tex $newdir/$1_arch.tex
+      if(!(-r $newdir/$1_archrev.tex)) cp $DOCT_DIR/comp_archrev.tex $newdir/$1_archrev.tex
       if(!(-r $newdir/$1_glos.tex)) cp $DOCT_DIR/comp_glos.tex $newdir/$1_glos.tex
       if(!(-r $newdir/$1.bib)) cp $DOCT_DIR/comp.bib $newdir/$1.bib
       breaksw
   case des:
       if(!(-r $newdir/README_DES)) cp $DOCT_DIR/README_DES $newdir
-      if(!(-r $newdir/$1_desdoc.tex)) cat $DOCT_DIR/comp_desdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_desdoc.tex
+      if(!(-r $newdir/$1_desdoc.ctex)) cat $DOCT_DIR/comp_desdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_desdoc.ctex
       if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex
       if(!(-r $newdir/$1_alg.tex)) cp $DOCT_DIR/comp_alg.tex $newdir/$1_alg.tex
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
@@ -93,13 +95,14 @@ endif
       if(!(-r $newdir/class_ccparam.tex)) cp $DOCT_DIR/class_ccparam.tex $newdir
       if(!(-r $newdir/class_ccex.tex)) cp $DOCT_DIR/class_ccex.tex $newdir      
       if(!(-r $newdir/prologue.cc)) cp $DOCT_DIR/prologue.cc $newdir      
+      if(!(-r $newdir/$1_desrev.tex)) cp $DOCT_DIR/comp_desrev.tex $newdir/$1_desrev.tex
       if(!(-r $newdir/$1_glos.tex)) cp $DOCT_DIR/comp_glos.tex $newdir/$1_glos.tex
       if(!(-r $newdir/$1.bib)) cp $DOCT_DIR/comp.bib $newdir/$1.bib
       breaksw
   case ref:
       if(!(-r $newdir/README_REF)) cp $DOCT_DIR/README_REF $newdir
-      if(!(-r $newdir/$1_refdoc.tex)) cat $DOCT_DIR/comp_refdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_refdoc.tex
+      if(!(-r $newdir/$1_refdoc.ctex)) cat $DOCT_DIR/comp_refdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_refdoc.ctex
       if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex
       if(!(-r $newdir/$1_alg.tex)) cp $DOCT_DIR/comp_alg.tex $newdir/$1_alg.tex
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
@@ -114,12 +117,12 @@ endif
       breaksw
   case usr:
       if(!(-r $newdir/README_USR)) cp $DOCT_DIR/README_USR $newdir
-      if(!(-r $newdir/$1_usrdoc.tex)) cat $DOCT_DIR/comp_usrdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_usrdoc.tex
+      if(!(-r $newdir/$1_usrdoc.ctex)) cat $DOCT_DIR/comp_usrdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_usrdoc.ctex
       breaksw
   case phys:
       if(!(-r $newdir/README_PHYS)) cp $DOCT_DIR/README_PHYS $newdir
-      if(!(-r $newdir/$1_physdoc.tex)) cp $DOCT_DIR/comp_physdoc.tex $newdir/$1_physdoc.tex
+      if(!(-r $newdir/$1_physdoc.ctex)) cp $DOCT_DIR/comp_physdoc.ctex $newdir/$1_physdoc.ctex
       if(!(-r $newdir/$1.bib)) cp $DOCT_DIR/comp.bib $newdir/$1.bib
       breaksw
   case all:
@@ -129,17 +132,18 @@ endif
       if(!(-r $newdir/README_REF)) cp $DOCT_DIR/README_REF $newdir
       if(!(-r $newdir/README_USR)) cp $DOCT_DIR/README_USR $newdir
       if(!(-r $newdir/README_PHYS)) cp $DOCT_DIR/README_PHYS $newdir
-      if(!(-r $newdir/$1_reqdoc.tex)) cat $DOCT_DIR/comp_reqdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_reqdoc.tex
-      if(!(-r $newdir/$1_archdoc.tex)) cat $DOCT_DIR/comp_archdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_archdoc.tex
-      if(!(-r $newdir/$1_desdoc.tex)) cat $DOCT_DIR/comp_desdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_desdoc.tex
-      if(!(-r $newdir/$1_refdoc.tex)) cat $DOCT_DIR/comp_refdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_refdoc.tex
-      if(!(-r $newdir/$1_usrdoc.tex)) cat $DOCT_DIR/comp_usrdoc.tex | \
-       sed s'z\\input{comp_\(.*\)z\\input{'$1_'\1z' > $newdir/$1_usrdoc.tex
-      if(!(-r $newdir/$1_physdoc.tex)) cp $DOCT_DIR/comp_physdoc.tex $newdir/$1_physdoc.tex
+      if(!(-r $newdir/$1_reqdoc.ctex)) cat $DOCT_DIR/comp_reqdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_reqdoc.ctex
+      if(!(-r $newdir/$1_archdoc.ctex)) cat $DOCT_DIR/comp_archdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_archdoc.ctex
+      if(!(-r $newdir/$1_desdoc.ctex)) cat $DOCT_DIR/comp_desdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_desdoc.ctex
+      if(!(-r $newdir/$1_refdoc.ctex)) cat $DOCT_DIR/comp_refdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_refdoc.ctex
+      if(!(-r $newdir/$1_usrdoc.ctex)) cat $DOCT_DIR/comp_usrdoc.ctex | \
+       sed s'zcomp_\(.*\)z'$1_'\1z' > $newdir/$1_usrdoc.ctex
+      if(!(-r $newdir/$1_physdoc.ctex)) cp $DOCT_DIR/comp_physdoc.ctex $newdir/$1_physdoc.ctex
+      if(!(-r $newdir/$1_auth.tex)) cp $DOCT_DIR/comp_auth.tex $newdir/$1_auth.tex
       if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex
       if(!(-r $newdir/$1_alg.tex)) cp $DOCT_DIR/comp_alg.tex $newdir/$1_alg.tex
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
@@ -149,6 +153,8 @@ endif
       if(!(-r $newdir/class_fparam.tex)) cp $DOCT_DIR/class_fparam.tex $newdir
       if(!(-r $newdir/class_fex.tex)) cp $DOCT_DIR/class_fex.tex $newdir      
       if(!(-r $newdir/prologue.F)) cp $DOCT_DIR/prologue.F $newdir      
+      if(!(-r $newdir/$1_archrev.tex)) cp $DOCT_DIR/comp_archrev.tex $newdir/$1_archrev.tex
+      if(!(-r $newdir/$1_desrev.tex)) cp $DOCT_DIR/comp_desrev.tex $newdir/$1_desrev.tex
       if(!(-r $newdir/$1_glos.tex)) cp $DOCT_DIR/comp_glos.tex $newdir/$1_glos.tex
       if(!(-r $newdir/$1.bib)) cp $DOCT_DIR/comp.bib $newdir/$1.bib
       breaksw
@@ -157,10 +163,3 @@ endif
     exit
   endsw
 endif
-
-
-
-
-
-
-

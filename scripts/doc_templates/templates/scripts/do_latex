@@ -1,6 +1,6 @@
 #!/bin/csh -f
 #
-# $Id: do_latex,v 1.3 2002/07/25 16:57:06 eschwab Exp $
+# $Id: do_latex,v 1.4 2002/08/29 02:13:05 eschwab Exp $
 #
 #===============================================================================
 # do_latex
@@ -26,22 +26,33 @@
 if ($#argv != 2) then
   echo "Usage: do_latex <component> <document type>"
   exit
-else
-  if (-r $1.bib) then
-    cp $1.bib $1_$2doc.bib
-    latex $1_$2doc.tex
-    latex $1_$2doc.tex
-    bibtex $1_$2doc
-    latex $1_$2doc.tex
-    rm -f $1_$2doc.bib
-  else 
-    latex $1_$2doc.tex
-    latex $1_$2doc.tex
-  endif
 endif
 
+# if needed, pre-process as top-level constituent or standalone document
+if (-e $1_$2doc.ctex) then
 
+  # move original out of the way
+  if (-e $1_$2doc.tex) then
+    mv $1_$2doc.tex $1_$2doc.tex.ORIG
+  endif
 
+  # perform pre-processing
+  if($1 == "ESMF") then
+    cpp -C -P -DCONSTITUENT $1_$2doc.ctex $1_$2doc.tex
+  else
+    cpp -C -P -DSTANDALONE $1_$2doc.ctex $1_$2doc.tex
+  endif
 
+endif
 
-
+if (-r $1.bib) then
+  cp $1.bib $1_$2doc.bib
+  latex $1_$2doc.tex
+  latex $1_$2doc.tex
+  bibtex $1_$2doc
+  latex $1_$2doc.tex
+  rm -f $1_$2doc.bib
+else 
+  latex $1_$2doc.tex
+  latex $1_$2doc.tex
+endif
