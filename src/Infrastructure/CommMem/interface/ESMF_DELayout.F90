@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.23 2003/07/11 01:00:00 eschwab Exp $
+! $Id: ESMF_DELayout.F90,v 1.24 2003/07/18 01:53:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
+      use ESMF_LocalArrayMod
       implicit none
 
 !  TODO: move to include file and share with C++ ?
@@ -110,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.23 2003/07/11 01:00:00 eschwab Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.24 2003/07/18 01:53:56 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -134,25 +135,6 @@
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DELayoutCreate} functions.   
-!EOP 
-      end interface
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutScatter -- Scatter data from one DE to all others in a layout
-
-! !INTERFACE:
-      interface ESMF_DELayoutScatter
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_DELayoutScatterR8
-      module procedure ESMF_DELayoutScatterR4
-      module procedure ESMF_DELayoutScatterI4
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_DELayoutScatter} functions.   
 !EOP 
       end interface
 
@@ -1362,19 +1344,19 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutScatterR8 - Scatter real*8 array among DEs
+! !IROUTINE: ESMF_DELayoutScatter - Scatter local array among DEs
 !
 ! !INTERFACE:
-      subroutine ESMF_DELayoutScatterR8(layout, sndArray, rcvArray, len, &
-                                        rootDEid, rc)
+      subroutine ESMF_DELayoutScatter(layout, sndArray, rcvArray, len, &
+                                      srcDEid, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(ESMF_IKIND_R8), intent(in) :: sndArray(:)
-      real(ESMF_IKIND_R8), intent(out) :: rcvArray(:)
+      type(ESMF_LocalArray), intent(in) :: sndArray
+      type(ESMF_LocalArray), intent(out) :: rcvArray
       integer, intent(in) :: len
-      integer, intent(in) :: rootDEid
+      integer, intent(in) :: srcDEid
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1396,107 +1378,16 @@
 
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutScatter(layout, sndArray, rcvArray, len, &
-                                  ESMF_DOUBLE, rootDEid, status)
+                                  srcDEid, status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutScatterR8 error"
+          print *, "ESMF_DELayoutScatter error"
           return
       endif
 
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
-      end subroutine ESMF_DELayoutScatterR8
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutScatterR4 - Scatter real*4 array among DEs
-!
-! !INTERFACE:
-      subroutine ESMF_DELayoutScatterR4(layout, sndArray, rcvArray, len, &
-                                        rootDEid, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_DELayout) :: layout
-      real(ESMF_IKIND_R4), intent(in) :: sndArray(:)
-      real(ESMF_IKIND_R4), intent(out) :: rcvArray(:)
-      integer, intent(in) :: len
-      integer, intent(in) :: rootDEid
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!     Perform an MPI-like scatter from one DE to all DEs in a layout
-!
-!EOP
-
-!     Local variables.
-      integer :: status                ! Error status
-      logical :: rcpresent             ! Return code present
-
-!     Initialize return code; assume failure until success is certain.
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-!     Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutScatter(layout, sndArray, rcvArray, len, &
-                                  ESMF_FLOAT, rootDEid, status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutScatterR4 error"
-          return
-      endif
-
-!     set return code if user specified it
-      if (rcpresent) rc = ESMF_SUCCESS
-      end subroutine ESMF_DELayoutScatterR4
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutScatterI4 - Scatter inteter*4 array among DEs
-!
-! !INTERFACE:
-      subroutine ESMF_DELayoutScatterI4(layout, sndArray, rcvArray, len, &
-                                        rootDEid, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_DELayout) :: layout
-      integer(ESMF_IKIND_I4), intent(in) :: sndArray(:)
-      integer(ESMF_IKIND_I4), intent(out) :: rcvArray(:)
-      integer, intent(in) :: len
-      integer, intent(in) :: rootDEid
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!     Perform an MPI-like scatter from one DE to all DEs in a layout
-!
-!EOP
-
-!     Local variables.
-      integer :: status                ! Error status
-      logical :: rcpresent             ! Return code present
-
-!     Initialize return code; assume failure until success is certain.
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-!     Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutScatter(layout, sndArray, rcvArray, len, &
-                                  ESMF_INT, rootDEid, status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutScatterI4 error"
-          return
-      endif
-
-!     set return code if user specified it
-      if (rcpresent) rc = ESMF_SUCCESS
-      end subroutine ESMF_DELayoutScatterI4
+      end subroutine ESMF_DELayoutScatter
 
 !------------------------------------------------------------------------------
 !BOP
