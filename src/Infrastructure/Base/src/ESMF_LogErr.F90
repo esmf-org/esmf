@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.20 2004/08/25 21:44:33 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.21 2004/08/28 00:15:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -451,7 +451,7 @@ end subroutine ESMF_LogGet
     if (present(rc)) rc=ESMF_FAILURE
     ESMF_LogDefault%FileIsOpen=ESMF_FALSE
     ESMF_LogDefault%nameLogErrFile=filename
-    ESMF_LogDefault%halt=ESMF_LOG_HALTERROR
+    ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
 
     ESMF_LogDefault%unitnumber=ESMF_LOG_FORT_STDOUT   
     do i=ESMF_LogDefault%unitnumber, ESMF_LOG_UPPER
