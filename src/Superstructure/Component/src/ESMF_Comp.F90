@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.63 2004/02/10 22:05:22 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.64 2004/02/23 22:49:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -181,7 +181,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.63 2004/02/10 22:05:22 svasquez Exp $'
+      '$Id: ESMF_Comp.F90,v 1.64 2004/02/23 22:49:13 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -277,7 +277,8 @@ end function
 !    Component internal structure to be filled in.
 !
 !   \item[ctype]
-!    Component type.
+!    Component type, where types include: ESMF\_APPCOMP, ESMF\_GRIDCOMP,
+!    ESMF\_CPLCOMP.
 !
 !   \item[{[name]}]
 !    Component name.
