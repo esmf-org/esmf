@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.20 2004/06/18 14:56:18 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.21 2004/06/18 22:01:37 jwolfe Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -245,10 +245,6 @@
 !   ! Test 3:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Real, 2D.
-#if 0
-    ! there is still a core dump in here somewhere on AIX;  but the
-    ! other system tests all work, so i'm afraid it might be a compiler bug.
-    ! leave this out for now.  nsc.
     print *, ">>> Test 3:"
  
  
@@ -309,7 +305,6 @@
     call ESMF_LocalArrayDestroy(array2, rc)
     print *, "array 2a destroy returned"
     deallocate(realptr)
-#endif
 
 !-------------------------------------------------------------------------------
 !   ! Test 4:
