@@ -1,4 +1,4 @@
-# $Id: do_ut_results,v 1.5 2003/04/07 14:56:45 svasquez Exp $
+# $Id: do_ut_results,v 1.6 2003/04/07 14:59:20 svasquez Exp $
 #!/bin/ksh
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
@@ -64,4 +64,5 @@ else
 fi #end of if grep " 0" stdoutfiles
 rm -f stdoutfiles
 rm -f zerofiles
+rm -f tests
 
