@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.8 2004/02/18 20:40:08 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.9 2004/03/03 18:20:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.8 2004/02/18 20:40:08 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.9 2004/03/03 18:20:35 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2178,6 +2178,35 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   return(rc);
 
  } // end ESMC_DELayoutSendRecv
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutBerrier - synchronize a set of processes
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutBarrier(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void) {                   // no args
+
+//
+// !DESCRIPTION:
+//    Synchronize all processes in an {\tt ESMC\_DELayout}.
+//
+//EOP
+
+  int rc;
+  MPI_Status status;
+
+  // TODO: make this only the local communicator
+  MPI_Barrier(MPI_COMM_WORLD);
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DELayoutBarrier
 
 //-----------------------------------------------------------------------------
 //BOP

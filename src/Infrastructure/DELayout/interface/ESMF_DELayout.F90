@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.8 2004/02/18 20:40:25 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.9 2004/03/03 18:20:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -124,6 +124,7 @@
       public ESMF_DELayoutValidate
 
       public ESMF_DELayoutSendRecv
+      public ESMF_DELayoutBarrier
       public ESMF_DELayoutBcast
       public ESMF_DELayoutScatter
       public ESMF_DELayoutAllReduce
@@ -133,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.8 2004/02/18 20:40:25 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.9 2004/03/03 18:20:34 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1883,6 +1884,45 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DELayoutSendRecv
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutBarrier
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutBarrier(layout, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!     Synchronizes a set of processes in an {\tt ESMF\_DELayout}.
+!
+!EOP
+
+      ! Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+      ! Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      ! Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutBarrier(layout, rc)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutBarrier error"
+        return
+      endif
+
+      ! Set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutBarrier
 
 !------------------------------------------------------------------------------
 !BOP

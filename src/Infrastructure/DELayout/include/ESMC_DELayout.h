@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.4 2003/12/09 22:30:55 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.5 2004/03/03 18:20:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -206,6 +206,7 @@ typedef int ESMC_CommType;
 			      int sde_index, int rde_index, ESMC_DataKind type);
     int ESMC_DELayoutBcast(void *buf, int num, int srcde_index, 
 			   ESMC_DataKind type);
+    int ESMC_DELayoutBarrier(void);
   
 // !PRIVATE MEMBER FUNCTIONS:
 //
