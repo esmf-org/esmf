@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.33 2004/03/09 22:44:12 svasquez Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.34 2004/03/09 23:51:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.33 2004/03/09 22:44:12 svasquez Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.34 2004/03/09 23:51:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2398,7 +2398,7 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: i, j, i1, i2, j1, j2, gridBoundWidth, myDE(2)
+      integer :: i, j, i1, i2, j1, j2, gridBoundWidth, myDE(2), myDEDecomp(0:2)
       integer, dimension(numDims) :: counts, compCount, localStart
       integer, dimension(:), allocatable :: cellType1, cellType2
       character(len=ESMF_MAXSTR), dimension(numDims) :: coordNames, coordUnits
@@ -2431,7 +2431,9 @@
         print *, "ERROR in ESMF_LRGridAddPhysGrid: get delayout"
         return
       endif
-      call ESMF_DELayoutGetDEPosition(layout, myDE(1), myDE(2), status)
+      myDEDecomp(0) = 1
+      call ESMF_DELayoutGetDEPosition(layout, myDEDecomp(1), myDEDecomp(2), &
+                                      status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridAddPhysGrid: delayout get position"
         return
@@ -2439,7 +2441,7 @@
      
       ! modify myDE array by decompIds
       do i = 1,numDims
-        if (decompIds(i).eq.0) myDE(i) = 1
+        myDE(i) = myDEDecomp(decompIds(i))
       enddo
 
       localMin(1) = 0.0
