@@ -1,4 +1,4 @@
-// $Id: ESMC_class.h,v 1.10 2002/10/16 22:50:08 nscollins Exp $
+// $Id: ESMC_class.h,v 1.11 2002/10/29 22:06:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
-// ESMF <Class> C++ definition include file
+// ESMF <Class> C++ declaration include file
 //
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)
@@ -58,7 +58,7 @@
  //   < insert resource items here >
  };
 
- // class definition type
+ // class declaration type
  class ESMC_<Class> : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
