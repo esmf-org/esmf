@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.11 2003/04/02 20:11:08 eschwab Exp $
+// $Id: ESMC_Base.h,v 1.12 2003/04/08 22:46:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,6 +41,8 @@
 
 // ESMF class states
 enum ESMC_Status { ESMF_STATE_UNINIT=1,
+                   ESMF_STATE_READY,
+                   ESMF_STATE_UNALLOCATED,
                    ESMF_STATE_ALLOCATED,
                    ESMF_STATE_BUSY,
                    ESMF_STATE_INVALID };
@@ -146,7 +148,6 @@ class ESMC_Base
     ESMC_Attribute *attr;     // attribute list
 
   protected:
-    static int    instCount;  // number of instances of this class
     int           ID;         // unique ID of this instance
     int           refCount;   // number of references to this instance
     ESMC_Status   baseStatus; // status of an instance of Base derived class
