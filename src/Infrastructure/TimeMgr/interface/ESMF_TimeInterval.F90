@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.70 2004/12/17 22:35:46 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.71 2005/04/02 00:20:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.70 2004/12/17 22:35:46 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.71 2005/04/02 00:20:17 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1006,12 +1006,12 @@
 !     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !     
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
-!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO}.
-!     See also method {\tt ESMF\_TimeIntervalPrint()}.
+!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
+!     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !
 !     For timeStringISOFrac, converts {\tt ESMF\_TimeInterval}'s value into
-!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO}.
-!     See also method {\tt ESMF\_TimeIntervalPrint()}.
+!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO} and
+!     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1071,12 +1071,13 @@
 !     \item[{[timeString]}]
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
-!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
-!          See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          all other units are in ISO 8601 format.  See ~\cite{ISO} and
+!          ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !     \item[{[timeStringISOFrac]}]
 !          Convert time interval value to strict ISO 8601 format string
 !          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
-!          seconds.  See ~\cite{ISO}. See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          seconds.  See ~\cite{ISO} and ~\cite{ISOnotes}.  See also method
+!          {\tt ESMF\_TimeIntervalPrint()}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1200,12 +1201,12 @@
 !     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !     
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
-!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO}.
-!     See also method {\tt ESMF\_TimeIntervalPrint()}.
+!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
+!     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !
 !     For timeStringISOFrac, converts {\tt ESMF\_TimeInterval}'s value into
-!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO}.
-!     See also method {\tt ESMF\_TimeIntervalPrint()}.
+!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO} and
+!     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1270,12 +1271,13 @@
 !     \item[{[timeString]}]
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
-!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
-!          See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          all other units are in ISO 8601 format.  See ~\cite{ISO} and
+!          ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !     \item[{[timeStringISOFrac]}]
 !          Convert time interval value to strict ISO 8601 format string
 !          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
-!          seconds.  See ~\cite{ISO}. See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          seconds.  See ~\cite{ISO} and ~\cite{ISOnotes}. See also method
+!          {\tt ESMF\_TimeIntervalPrint()}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1401,12 +1403,12 @@
 !     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !     
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
-!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO}.
-!     See also method {\tt ESMF\_TimeIntervalPrint()}.
+!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
+!     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !
 !     For timeStringISOFrac, converts {\tt ESMF\_TimeInterval}'s value into
-!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO}.
-!     See also method {\tt ESMF\_TimeIntervalPrint()}.
+!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO} and
+!     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1473,12 +1475,13 @@
 !     \item[[{timeString]}]
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
-!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
-!          See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          all other units are in ISO 8601 format.  See ~\cite{ISO} and
+!          ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !     \item[{[timeStringISOFrac]}]
 !          Convert time interval value to strict ISO 8601 format string
 !          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
-!          seconds.  See ~\cite{ISO}. See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          seconds.  See ~\cite{ISO} and ~\cite{ISOnotes}. See also method
+!          {\tt ESMF\_TimeIntervalPrint()}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1604,12 +1607,12 @@
 !     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !     
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
-!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO}.
-!     See also method {\tt ESMF\_TimeIntervalPrint()}.
+!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
+!     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !
 !     For timeStringISOFrac, converts {\tt ESMF\_TimeInterval}'s value into
-!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO}.
-!     See also method {\tt ESMF\_TimeIntervalPrint()}.
+!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO} and
+!     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1673,12 +1676,14 @@
 !     \item[[{timeString]}]
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
-!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
-!          See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          all other units are in ISO 8601 format.  See ~\cite{ISO} and
+!          ~\cite{ISOnotes}.  See also method
+!          {\tt ESMF\_TimeIntervalPrint()}.
 !     \item[{[timeStringISOFrac]}]
 !          Convert time interval value to strict ISO 8601 format string
 !          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
-!          seconds.  See ~\cite{ISO}. See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          seconds.  See ~\cite{ISO} and ~\cite{ISOnotes}. See also method
+!          {\tt ESMF\_TimeIntervalPrint()}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1792,14 +1797,14 @@
 !                     fraction form n/d.  Format is PyYmMdDThHmMs[:n/d]S,
 !                     where [:n/d] is the integer numerator and denominator
 !                     of the fractional seconds value, if present.
-!                     See ~\cite{ISO}.  See also method
+!                     See ~\cite{ISO} and ~\cite{ISOnotes}.  See also method
 !                     {\tt ESMF\_TimeIntervalGet(..., timeString= , ...)} \\
 !          "string isofrac" - prints {\tt timeinterval}'s value in strict
 !                     ISO 8601 format for all units, including any fractional
 !                     seconds part.  Format is PyYmMdDThHmMs[.f]S, where [.f]
 !                     represents fractional seconds in decimal form,
-!                     if present.  See ~\cite{ISO}.  See also method
-!                     {\tt ESMF\_TimeIntervalGet(..., timeStringISOFrac= , ...)} \\
+!                     if present.  See ~\cite{ISO} and ~\cite{ISOnotes}.
+!                     See also method {\tt ESMF\_TimeIntervalGet(..., timeStringISOFrac= , ...)} \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
