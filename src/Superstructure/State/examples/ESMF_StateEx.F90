@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.10 2004/05/26 08:53:33 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.11 2004/06/01 13:26:44 nscollins Exp $
 
 
 !-------------------------------------------------------------------------
@@ -44,15 +44,6 @@
     compname = "Atmosphere"
     state1 = ESMF_StateCreate(compname, statetype=ESMF_STATEIMPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(compname)
-
-    print *, "about to query for a nonexistent entry"
-    if (ESMF_StateIsNeeded(state1, "fred", rc)) then 
-      print *, "apparently returned true in error"
-    else
-      print *, "returned false w/o setting error"
-    endif
-    print *, "about to destroy an uninit state"
-    call ESMF_StateDestroy(state4, rc)
 
     ! Data would be added here and the State reused inside the run
     !  routine of a sequential application.
