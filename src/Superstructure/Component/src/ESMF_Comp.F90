@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.112 2004/11/01 23:39:38 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.113 2004/11/03 08:50:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -233,7 +233,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.112 2004/11/01 23:39:38 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.113 2004/11/03 08:50:51 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -488,6 +488,10 @@ end function
         call ESMF_VMPlanConstruct(compp%vmplan, compp%vm_parent, &
                                   compp%npetlist, compp%petlist)
                                   
+        ! Initialize the remaining vm members in compp
+        compp%vm_info = ESMF_NULL_POINTER
+        compp%vm_cargo = ESMF_NULL_POINTER
+                                  
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
         ! if (ESMF_LogPassFoundError(status, rc)) return
@@ -547,6 +551,17 @@ end function
                                   ESMF_CONTEXT, rc)) return
         endif
 
+        if (compp%vm_info /= ESMF_NULL_POINTER) then
+          ! Shut down this component's VM
+          call ESMF_VMShutdown(compp%vm_parent, compp%vmplan, compp%vm_info)
+        endif
+
+        ! destruct the VMPlan
+        call ESMF_VMPlanDestruct(compp%vmplan)
+
+        ! Deallocate space held for petlist
+        deallocate(compp%petlist)
+
         ! mark obj invalid
         compp%compstatus = ESMF_STATUS_INVALID
 
@@ -564,15 +579,6 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
         
-        ! Deallocate space held for petlist
-        deallocate(compp%petlist)
-
-        ! Shut down this component's VM
-        call ESMF_VMShutdown(compp%vm_parent, compp%vmplan, compp%vm_info)
-
-        ! destruct the VMPlan
-        call ESMF_VMPlanDestruct(compp%vmplan)
-
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
