@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.12 2004/03/18 22:23:56 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.13 2004/03/19 23:29:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.12 2004/03/18 22:23:56 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.13 2004/03/19 23:29:10 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -259,7 +259,7 @@
         print *, "ERROR in BundleGather: DataMapGet returned failure"
         return
       endif 
-      call ESMF_GridGet(btypep%grid, numDims=numDims, &
+      call ESMF_GridGet(btypep%grid, dimCount=numDims, &
                         globalCellCountPerDim=globalCellCountPerDim, &
                         maxLocalCellCountPerDim=maxLocalCellCountPerDim, &
                         rc=status)
