@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.18 2004/03/10 23:00:46 svasquez Exp $
+// $Id: ESMC_Comp_F.C,v 1.19 2004/03/12 16:56:28 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -282,6 +282,7 @@ extern "C" {
 //    are expected to be called.
 //   \item[{[rc]}] 
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//   \end{description}
 //EOP
 
 //BOP
