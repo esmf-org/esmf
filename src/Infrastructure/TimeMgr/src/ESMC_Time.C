@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.30 2003/04/29 23:34:32 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.31 2003/04/30 07:48:24 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.30 2003/04/29 23:34:32 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.31 2003/04/30 07:48:24 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -616,6 +616,109 @@
     if (Calendar->Type == ESMC_CAL_JULIAN ||
         Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
+    // get day of year as time interval between now and 1/1/YR
+    ESMC_TimeInterval yearDay;
+    if (ESMC_TimeGetDayOfYear(&yearDay) == ESMF_FAILURE) return(ESMF_FAILURE);
+
+    // get difference in floating point days
+    double diffDays;
+    // TODO: use native C++ Get, not F90 entry point
+    yearDay.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+
+                                 ESMC_NULL_POINTER, &diffDays,
+
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+
+    // day-of-year is one-based count; i.e. day-of-year for 1/1/YR is 1
+    *dayOfYear = diffDays + 1;
+
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGetDayOfYear
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetDayOfYear - Get a Time's day of the year value
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetDayOfYear(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *dayOfYear) const {    // out - time's day of year value
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s day of the year value as a integer value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // validate inputs
+    if (dayOfYear == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar->Type == ESMC_CAL_JULIAN ||
+        Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+    
+    // get day of year as time interval between now and 1/1/YR
+    ESMC_TimeInterval yearDay;
+    if (ESMC_TimeGetDayOfYear(&yearDay) == ESMF_FAILURE) return(ESMF_FAILURE);
+
+    // get difference in integer days
+    ESMF_IKIND_I8 diffDays;
+    // TODO: use native C++ Get, not F90 entry point
+    yearDay.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+
+                                 &diffDays,
+
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER);
+
+    // day-of-year is one-based count; i.e. day-of-year for 1/1/YR is 1
+    *dayOfYear = (int) diffDays + 1;
+
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGetDayOfYear
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetDayOfYear - Get a Time's day of the year value
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetDayOfYear(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *dayOfYear) const {   // out - time's day of year value
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s day of the year value as an {\tt ESMC_TimeInterval}
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // validate inputs
+    if (dayOfYear == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar->Type == ESMC_CAL_JULIAN ||
+        Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+
     // get year of our (this) time
     ESMF_IKIND_I8 YR;
     int MM, DD;
@@ -628,44 +731,22 @@
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER);
 
     // create time for 1/1/YR
-    ESMC_Time dayOne;
+    ESMC_Time dayOne = *this;  // initialize calendar & timezone
     MM=1, DD=1;
     // TODO: use native C++ Init, not F90 entry point
-    dayOne.ESMC_TimeInit(&YR, &MM, &DD,
-                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         this->Calendar, (int*) &this->Timezone);
+    dayOne.ESMC_TimeSet(&YR, &MM, &DD,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, ESMC_NULL_POINTER);
 
     // calculate difference between 1/1/YR and our (this) time
-    ESMC_TimeInterval dayofYear;
-    dayofYear = *this - dayOne;
-    // TODO: add C++ infrastructure to enable the following expression:
-    // ESMC_TimeInterval dayofYear = *this - dayOne;
+    *dayOfYear = *this - dayOne;
     
-    // get difference in floating point days
-    double diffDays;
-    // TODO: use native C++ Get, not F90 entry point
-    dayofYear.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-
-                                   ESMC_NULL_POINTER, &diffDays,
-
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER);
-
-    // day-of-year is one-based count; i.e. day-of-year for 1/1/YR is 1
-    *dayOfYear = diffDays + 1;
-
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeGetDayOfYear
@@ -684,7 +765,8 @@
       int *dayOfWeek) const {    // out - time's day of week value
 //
 // !DESCRIPTION:
-//      Gets a {\tt Time}'s day of the week value
+//      Gets a {\tt Time}'s day of the week value in ISO 8601 format:
+//      Monday = 1 through Sunday = 7
 //
 //EOP
 // !REQUIREMENTS:  
@@ -695,7 +777,25 @@
     if (Calendar->Type == ESMC_CAL_JULIAN ||
         Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
-    // TODO
+    // get day of the year  
+    int dayOfYear;
+    if (ESMC_TimeGetDayOfYear(&dayOfYear) == ESMF_FAILURE) return(ESMF_FAILURE);
+
+    // get year of our (this) time
+    ESMF_IKIND_I8 YR;
+    // TODO: use native C++ Get, not F90 entry point
+    ESMC_TimeGet(&YR,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+
+    int YY = (YR-1) % 100;
+    *dayOfWeek = 1 + ((dayOfYear + ((((( ((YR-1)-YY) / 100) % 4) * 5) +
+                      (YY+YY/4) ) % 7) - 1) % 7);
+
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeGetDayOfWeek
@@ -780,7 +880,7 @@
 
     // set start of this month
     DD = 1;
-    ESMC_Time startOfMonth = *this;  // copy calendar and timezone
+    ESMC_Time startOfMonth = *this;  // initialize calendar & timezone
     startOfMonth.ESMC_TimeSet(&YR, &MM, &DD, 
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -797,7 +897,7 @@
       MM = 1;
       YR++;
     }
-    ESMC_Time endOfMonth = *this;  // copy calendar and timezone
+    ESMC_Time endOfMonth = *this;  // initialize calendar & timezone
     endOfMonth.ESMC_TimeSet(&YR, &MM, &DD, 
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -811,6 +911,7 @@
     month = endOfMonth - startOfMonth;
 
     // calculate and return the middle of this month
+    *midMonth = startOfMonth;  // initialize calendar & timezone
     *midMonth = startOfMonth + month/2;
 
     // TODO: add C++ infrastructure to enable the following expression:
@@ -839,13 +940,18 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // validate for calendar type
+    if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar->Type == ESMC_CAL_JULIAN ||
+        Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+
     time_t tm;
     struct tm wallClock;
 
     // get wall clock (system) time
     if (time(&tm) < 0) return (ESMF_FAILURE);
     wallClock = *localtime(&tm);          
-    int           YR = wallClock.tm_year + 1900;
+    ESMF_IKIND_I8 YR = wallClock.tm_year + 1900;
     int           MM = wallClock.tm_mon + 1;
     int           DD = wallClock.tm_mday;
     int           H  = wallClock.tm_hour;
@@ -854,7 +960,7 @@
 
     // set this time to wall clock time
     // TODO: use native C++ version when ready
-    ESMC_TimeSet((ESMF_IKIND_I8 *)&YR, &MM, &DD, ESMC_NULL_POINTER,
+    ESMC_TimeSet(&YR, &MM, &DD, ESMC_NULL_POINTER,
                  &H, &M, &S, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
