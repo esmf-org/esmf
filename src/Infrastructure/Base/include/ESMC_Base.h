@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.44 2004/02/10 23:16:06 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.45 2004/02/24 15:36:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -343,5 +343,10 @@ void FTN(f_esmf_domainlistgetde)(ESMC_DomainList *, int *, int *, int *);
 void FTN(f_esmf_domainlistgetai)(ESMC_DomainList *, int *, int *, 
                                                     ESMC_AxisIndex *ai, int *);
 }
+
+#ifdef ESMF_ENABLE_VM
+// general reduction operator value - MUST MATCH F90
+enum ESMC_newOp { ESMF_newSUM=1, ESMF_newMIN, ESMF_newMAX};
+#endif
 
 #endif  // ESMC_BASE_H
