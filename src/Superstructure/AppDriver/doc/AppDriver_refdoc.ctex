@@ -1,4 +1,4 @@
-% $Id: AppDriver_refdoc.ctex,v 1.10 2004/03/22 19:18:03 cdeluca Exp $
+% $Id: AppDriver_refdoc.ctex,v 1.11 2004/05/13 14:24:25 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -72,9 +72,9 @@
 
 \subsection{Required ESMF Methods}
 #ifdef STANDALONE
-\input{../../Component/doc/ESMF_Comp_fapi}
+\input{../../Component/doc/Component_other}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_Comp_fapi}
+\input{../Superstructure/Component/doc/Component_other}
 #endif
 
 %%%%%%% end class sections %%%%%%%%
