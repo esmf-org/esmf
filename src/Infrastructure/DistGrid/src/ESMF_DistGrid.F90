@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.120 2004/08/19 17:22:34 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.121 2004/08/21 22:10:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2055,13 +2055,12 @@
 !     TODO: this assumes exclusive indexing for local cells - total too?
 !jw        base = dgtype%MyDE%globalStartPerDim()
 ! TODO: check this!!
-! nsc - this was in local-to-global but missing here.  does it need to be here?
         base = 0
-        !if (me%MyDE.ne.1) then
-        !  do i = 1,me%MyDE-1
-        !    base = base + dgtype%cellCountPerDE(i)
-        !  enddo
-        !endif
+        if (me%MyDE.ne.1) then
+          do i = 1,me%MyDE-1
+            base = base + glob%cellCountPerDE(i)
+          enddo
+        endif
         do i = 1, size(global1D)
           local1D(i) = global1D(i) - base
         enddo
@@ -2093,8 +2092,8 @@
         do i = 1, size(global2D,1)
           if (global2D(i,1).ge.l1 .and. global2D(i,1).le.r1 .and. &
              global2D(i,2).ge.l2 .and. global2D(i,2).le.r2 ) then
-            local2D(i,1) = global2D(i,1) - l1
-            local2D(i,2) = global2D(i,2) - l2
+            local2D(i,1) = global2D(i,1) - l1 + 1
+            local2D(i,2) = global2D(i,2) - l2 + 1
           else
             local2D(i,1) = -1 ! TODO: make an ESMF_NOTFOUND to use instead of -1
             local2D(i,2) = -1
@@ -2273,7 +2272,7 @@
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
       !integer :: localrc                          ! Error status
-      integer :: i, j,  base, localCount
+      integer :: i, j, l1, l2, base, localCount
       character(len=ESMF_MAXSTR) :: logMsg
       logical :: dummy
       type(ESMF_DistGridLocal), pointer :: me
@@ -2324,26 +2323,28 @@
         enddo
       endif
 
-!     2-D index translation here
+      ! 2-D index translation here
       if (present(local2D)) then
-!       make sure global array is present as well
+        ! make sure global array is present as well
         if (.not. present(global2D)) then
           print logMsg, "2D global array not present"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
                                       ESMF_CONTEXT, rc)
           return
         endif
-!       make sure array lengths are the same
+        ! make sure array lengths are the same
         if (size(global2D) .NE. size(local2D)) then
           print logMsg, "2D array lengths not equal"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
                                       ESMF_CONTEXT, rc)
           return
         endif
-!jw        base = me%globalStartPerDim()
+
+        l1 = me%globalAIPerDim(1)%min
+        l2 = me%globalAIPerDim(2)%min
         do i = 1, size(local2D,1)
-          global2D(i,1) = local2D(i,1) + base
-          global2D(i,2) = local2D(i,2) + base
+          global2D(i,1) = local2D(i,1) + l1 - 1
+          global2D(i,2) = local2D(i,2) + l2 - 1
         enddo
       endif
 
