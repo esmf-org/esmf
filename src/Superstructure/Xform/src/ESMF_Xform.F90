@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.4 2004/04/29 17:30:03 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.5 2004/05/05 13:11:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,13 +13,18 @@
 !     ESMF Xform module
       module ESMF_XformMod
 !
+! just in case protex must have something, give it a blank line.
+! otherwise, the rest of the file is BOPI/EOPI until xforms are implemented.
+!BOP
+
+!EOP
 !==============================================================================
 !
 ! This file contains the Transform class definition and all Transform
 ! class methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !MODULE: ESMF_XformMod - Object to encapsulate lists of transformations
 !
 ! !DESCRIPTION:
@@ -65,12 +70,12 @@
       public ESMF_XformReadRestart
  
       public ESMF_XformPrint
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.4 2004/04/29 17:30:03 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.5 2004/05/05 13:11:27 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -93,7 +98,7 @@
 ! This section includes the Transform Init method
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XformInit -- Fill in an Xform's data
 
 ! !INTERFACE:
@@ -121,7 +126,7 @@
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 
@@ -150,7 +155,7 @@
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XformSet - Set information in a Transform
 !
 ! !INTERFACE:
@@ -163,7 +168,7 @@
 ! !DESCRIPTION:
 !      Update or overwrite data inside a {\tt Transform}.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
@@ -179,7 +184,7 @@
 ! Query for information from the xform.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XformGet - Get information from a Transform
 !
 ! !INTERFACE:
@@ -197,7 +202,7 @@
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the xform input are optional to facilitate this.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
         name = xform%name
@@ -212,7 +217,7 @@
 ! This section is I/O for Xforms
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XformWriteRestart - Save Transform state
 !
 ! !INTERFACE:
@@ -229,7 +234,7 @@
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
@@ -241,7 +246,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XformReadRestart - ReadRestart Transform state
 !
 ! !INTERFACE:
@@ -260,7 +265,7 @@
 !      Used to reinitialize
 !      all data associated with a Xform from the last call to WriteRestart.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
@@ -284,7 +289,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XformPrint - Print information about a Transform object
 !
 ! !INTERFACE:
@@ -299,7 +304,7 @@
 ! !DESCRIPTION:
 !      Routine to print information about an xform.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
