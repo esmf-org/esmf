@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.h,v 1.5 2004/03/19 14:46:16 theurich Exp $
+// $Id: ESMC_newDELayout.h,v 1.6 2004/03/19 16:11:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,6 +56,7 @@ typedef struct{
 // class definition
 class ESMC_newDELayout : public ESMC_Base {    // inherits from ESMC_Base class
   private:
+    ESMC_VM *myvm;  // ptr to this PET's VM instance this layout is running on
     int ndes;       // number of DEs
     de_type *des;   // list that holds all of this layout's DE info
     int nmydes;     // number of DEs associated with instantiating PET
@@ -77,13 +78,13 @@ class ESMC_newDELayout : public ESMC_Base {    // inherits from ESMC_Base class
     // IO
     int ESMC_newDELayoutPrint(void);
     // Communication
-    int ESMC_newDELayoutCopy(ESMC_VM &vm, void **srcdata, void **destdata, 
+    int ESMC_newDELayoutCopy(void **srcdata, void **destdata, 
       int len, int srcDE, int destDE);
-    int ESMC_newDELayoutScatter(ESMC_VM &vm, void **srcdata, void **destdata, 
+    int ESMC_newDELayoutScatter(void **srcdata, void **destdata, 
       int len, int rootDE);
-    int ESMC_newDELayoutGather(ESMC_VM &vm, void **srcdata, void **destdata, 
+    int ESMC_newDELayoutGather(void **srcdata, void **destdata, 
       int len, int rootDE);
-    int ESMC_newDELayoutAllGlobalReduce(ESMC_VM &vm, void **srcdata, 
+    int ESMC_newDELayoutAllGlobalReduce(void **srcdata, 
       void *result, int len, ESMC_DataKind dtk, ESMC_newOp op);
   private:
     int ESMC_newDELayout::ESMC_newDELayoutFindDEtoPET(int npets);

@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.7 2004/03/19 14:46:16 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.8 2004/03/19 16:11:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.7 2004/03/19 14:46:16 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.8 2004/03/19 16:11:05 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -622,12 +622,11 @@ contains
 ! !IROUTINE: ESMF_newDELayoutCopy - Copy data between DEs
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutCopy(layout, vm, datain, dataout, len, src, dest, &
+  subroutine ESMF_newDELayoutCopy(layout, datain, dataout, len, src, dest, &
     rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
-    type(ESMF_VM), intent(in)               :: vm
     type(ESMF_DELayoutData), intent(in)     :: datain
     type(ESMF_DELayoutData), intent(out)    :: dataout
     integer, intent(in)                     :: len, src, dest
@@ -641,8 +640,6 @@ contains
 !     \begin{description}
 !     \item[layout] 
 !          DELayout
-!     \item[vm] 
-!          VM object
 !     \item[datain] 
 !          Source data
 !     \item[dataout] 
@@ -678,7 +675,7 @@ contains
     if (datain%dtk == ESMF_R8) blen = len * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutCopy(layout, vm, datain, dataout, blen, src, dest, &
+    call c_ESMC_newDELayoutCopy(layout, datain, dataout, blen, src, dest, &
       status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutCopy error"
@@ -696,11 +693,10 @@ contains
 ! !IROUTINE: ESMF_newDELayoutScatter - MPI-like Scatter
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutScatter(layout, vm, datain, dataout, len, root, rc)
+  subroutine ESMF_newDELayoutScatter(layout, datain, dataout, len, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
-    type(ESMF_VM), intent(in)               :: vm
     type(ESMF_DELayoutData), intent(in)     :: datain
     type(ESMF_DELayoutData), intent(out)    :: dataout
     integer, intent(in)                     :: len, root
@@ -714,8 +710,6 @@ contains
 !     \begin{description}
 !     \item[layout] 
 !          DELayout
-!     \item[vm] 
-!          VM object
 !     \item[datain] 
 !          Source data
 !     \item[dataout] 
@@ -749,7 +743,7 @@ contains
     if (datain%dtk == ESMF_R8) blen = len * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutScatter(layout, vm, datain, dataout, blen, root, &
+    call c_ESMC_newDELayoutScatter(layout, datain, dataout, blen, root, &
       status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutScatter error"
@@ -767,11 +761,10 @@ contains
 ! !IROUTINE: ESMF_newDELayoutGather - MPI-like Gather
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutGather(layout, vm, datain, dataout, len, root, rc)
+  subroutine ESMF_newDELayoutGather(layout, datain, dataout, len, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
-    type(ESMF_VM), intent(in)               :: vm
     type(ESMF_DELayoutData), intent(in)     :: datain
     type(ESMF_DELayoutData), intent(out)    :: dataout
     integer, intent(in)                     :: len, root
@@ -785,8 +778,6 @@ contains
 !     \begin{description}
 !     \item[layout] 
 !          DELayout
-!     \item[vm] 
-!          VM object
 !     \item[datain] 
 !          Source data
 !     \item[dataout] 
@@ -820,7 +811,7 @@ contains
     if (datain%dtk == ESMF_R8) blen = len * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGather(layout, vm, datain, dataout, blen, root, &
+    call c_ESMC_newDELayoutGather(layout, datain, dataout, blen, root, &
       status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutGather error"
@@ -838,12 +829,11 @@ contains
 ! !IROUTINE: ESMF_newDELayoutAllGlobalReduceI4 - Reduce to a single value
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutAllGlobalReduceI4(layout, vm, datain, dataout, &
+  subroutine ESMF_newDELayoutAllGlobalReduceI4(layout, datain, dataout, &
     len, op, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
-    type(ESMF_VM), intent(in)               :: vm
     type(ESMF_DELayoutData), intent(in)     :: datain
     integer, intent(out)                    :: dataout
     integer, intent(in)                     :: len
@@ -877,7 +867,7 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(layout, vm, datain, dataout, &
+    call c_ESMC_newDELayoutAllGlobalReduce(layout, datain, dataout, &
       len, ESMF_I4, op, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutAllGlobalReduce error"
@@ -896,12 +886,11 @@ contains
 ! !IROUTINE: ESMF_newDELayoutAllGlobalReduceR4 - Reduce to a single value
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutAllGlobalReduceR4(layout, vm, datain, dataout, &
+  subroutine ESMF_newDELayoutAllGlobalReduceR4(layout, datain, dataout, &
     len, op, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
-    type(ESMF_VM), intent(in)               :: vm
     type(ESMF_DELayoutData), intent(in)     :: datain
     real(ESMF_KIND_R4), intent(out)         :: dataout
     integer, intent(in)                     :: len
@@ -935,7 +924,7 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(layout, vm, datain, dataout, &
+    call c_ESMC_newDELayoutAllGlobalReduce(layout, datain, dataout, &
       len, ESMF_R4, op, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutAllGlobalReduce error"
@@ -954,12 +943,11 @@ contains
 ! !IROUTINE: ESMF_newDELayoutAllGlobalReduceR8 - Reduce to a single value
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutAllGlobalReduceR8(layout, vm, datain, dataout, &
+  subroutine ESMF_newDELayoutAllGlobalReduceR8(layout, datain, dataout, &
     len, op, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
-    type(ESMF_VM), intent(in)               :: vm
     type(ESMF_DELayoutData), intent(in)     :: datain
     real(ESMF_KIND_R8), intent(out)         :: dataout
     integer, intent(in)                     :: len
@@ -993,7 +981,7 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(layout, vm, datain, dataout, &
+    call c_ESMC_newDELayoutAllGlobalReduce(layout, datain, dataout, &
       len, ESMF_R8, op, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutAllGlobalReduce error"

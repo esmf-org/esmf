@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.5 2004/03/19 14:46:16 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.6 2004/03/19 16:11:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.5 2004/03/19 14:46:16 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.6 2004/03/19 16:11:05 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -153,7 +153,8 @@ int ESMC_newDELayout::ESMC_newDELayoutConstruct1D(ESMC_VM &vm, int nDEs,
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int npets =  vm.vmachine_npets();   // get number of PETs
+  myvm = &vm;                       // set the pointer onto this VM instance
+  int npets =  vm.vmachine_npets(); // get number of PETs
   if (nDEs==0){
     // this will be a 1:1 Layout
     ndes = npets;                   // number of DEs to be the same as PETs
@@ -253,7 +254,8 @@ int ESMC_newDELayout::ESMC_newDELayoutConstructND(ESMC_VM &vm, int *nDEs,
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int npets =  vm.vmachine_npets();   // get number of PETs
+  myvm = &vm;                       // set the pointer onto this VM instance
+  int npets =  vm.vmachine_npets(); // get number of PETs
   // determine how many DEs there are in this layout
   ndes = 1;
   for (int i=0; i<nndim; i++)
@@ -496,7 +498,6 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
 //
 // !ARGUMENTS:
 //
-  ESMC_VM &vm,    // reference to ESMC_VM object
   void **srcdata, // input array
   void **destdata,// output array
   int len,        // size in bytes that need to be copied from src to dest
@@ -507,6 +508,8 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
   // len must be converted into bytes:
   int mypet = vm.vmachine_mypet();
   int srcpet = des[srcDE].petid;      // PETid where srcDE lives
@@ -550,7 +553,6 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
 //
 // !ARGUMENTS:
 //
-  ESMC_VM &vm,    // reference to ESMC_VM object
   void **srcdata, // input array
   void **destdata,// output array
   int len,        // message size in bytes
@@ -560,6 +562,8 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
   // very crude implementation of a layout wide scatter
   int mypet = vm.vmachine_mypet();
   if (des[rootDE].petid==mypet){
@@ -570,14 +574,14 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
     void *rootdata = srcdata[j];    // backup the correct start of rootDE's data
     char *tempdata = (char *)srcdata[j];
     for (int i=0; i<ndes; i++){
-      ESMC_newDELayoutCopy(vm, srcdata, destdata, len, rootDE, i);
+      ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i);
       tempdata += len;
       srcdata[j] = tempdata;
     }
     srcdata[j] = rootdata;  // restore correct start of root's src data
   }else{
     for (int i=0; i<ndes; i++)
-      ESMC_newDELayoutCopy(vm, srcdata, destdata, len, rootDE, i);
+      ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i);
   }
   return ESMF_SUCCESS;
 }
@@ -596,7 +600,6 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
 //
 // !ARGUMENTS:
 //
-  ESMC_VM &vm,    // reference to ESMC_VM object
   void **srcdata, // input array
   void **destdata,// output array
   int len,        // message size in bytes
@@ -606,6 +609,8 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
   // very crude implementation of a layout wide gather
   int mypet = vm.vmachine_mypet();
   if (des[rootDE].petid==mypet){
@@ -616,14 +621,14 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
     void *rootdata = destdata[j];  // backup the correct start of rootDE's data
     char *tempdata = (char *)destdata[j];
     for (int i=0; i<ndes; i++){
-      ESMC_newDELayoutCopy(vm, srcdata, destdata, len, i, rootDE);
+      ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE);
       tempdata += len;
       destdata[j] = tempdata;
     }
     destdata[j] = rootdata;  // restore correct start of root's destdata
   }else{
     for (int i=0; i<ndes; i++)
-      ESMC_newDELayoutCopy(vm, srcdata, destdata, len, i, rootDE);
+      ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE);
   }
   return ESMF_SUCCESS;
 }
@@ -642,7 +647,6 @@ int ESMC_newDELayout::ESMC_newDELayoutAllGlobalReduce(
 //
 // !ARGUMENTS:
 //
-  ESMC_VM &vm,        // reference to ESMC_VM object
   void **srcdata,     // input array
   void *result,       // result
   int len,            // number of elements in each DE
@@ -654,6 +658,8 @@ int ESMC_newDELayout::ESMC_newDELayoutAllGlobalReduce(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
   // very crude implementation of a layout wide GlobalReduce
   int mypet = vm.vmachine_mypet();
   void *localresult;
