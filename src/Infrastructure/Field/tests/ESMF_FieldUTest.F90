@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.20 2003/06/19 19:25:05 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.21 2003/06/19 19:51:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.20 2003/06/19 19:25:05 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.21 2003/06/19 19:51:29 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -398,6 +398,12 @@
       ! major at field creation and to rearrange it (assumes local copy).
       ! Cannot be tested until Bug 705247 "Unable to query Data Map from Field" 
       ! is fixed.
+      !EX_UTest
+      call ESMF_FieldGetDataMap(f3, dm, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a DataMap from a Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_DataMapPrint(dm, "", rc=rc)
 
       ! Requirement 1.3 Index Order
       ! It shall be possible to specify the index order of field data and also to rearrange it.
