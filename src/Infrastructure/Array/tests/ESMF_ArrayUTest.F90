@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.2 2004/04/08 21:48:17 svasquez Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.3 2004/05/19 18:02:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayUTest.F90,v 1.2 2004/04/08 21:48:17 svasquez Exp $'
+      '$Id: ESMF_ArrayUTest.F90,v 1.3 2004/05/19 18:02:09 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -52,9 +52,31 @@
     
     call ESMF_Initialize()
 
+
 !-------------------------------------------------------------------------------
 !   !  Create an Array Test
-    ! THe following code core dumps it will be uncommented
+ 
+    !NEX_UTest
+    allocate(f90ptr1(10,20))
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Create Array Test"
+    array1 =  ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Destroy an Array Test
+
+    !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Destroy Array Test"
+    call ESMF_ArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_EXHAUSTIVE
+!-------------------------------------------------------------------------------
+
+!   !  Create an Array Test
+    ! The following code core dumps it will be uncommented
     ! when bug 932018 is fixed.
     !allocate(f90ptr1(10,20))
     !write(failMsg, *) "Did not return ESMF_SUCCESS" 
@@ -66,7 +88,7 @@
 !-------------------------------------------------------------------------------
 !   !  Create an Array Test
  
-    !NEX_UTest
+    !EX_UTest
     allocate(f90ptr1(10,20))
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Create Array Test"
@@ -77,7 +99,7 @@
 !-------------------------------------------------------------------------------
 !   !  Set Array Name Test
  
-    !NEX_UTest
+    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set Array Name Test"
     call ESMF_ArraySet(array1, name="SAM", rc=rc)
@@ -87,7 +109,7 @@
 !-------------------------------------------------------------------------------
 !   !  Get Array Name Test
  
-    !NEX_UTest
+    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong name" 
     write(name, *) "Get Array Name Test"
     call ESMF_ArrayGet(array1, name=array_name, rc=rc)
@@ -97,6 +119,7 @@
 !-------------------------------------------------------------------------------
 !   !  Destroy an Array Test
 
+    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Destroy Array Test"
     call ESMF_ArrayDestroy(array1, rc=rc)
@@ -104,6 +127,9 @@
     print *, "array 1 destroy returned"
 
 !-------------------------------------------------------------------------------
+
+#endif
+
 
     call ESMF_Finalize()
 
