@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.3 2003/03/10 05:40:49 cdeluca Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.4 2003/04/02 18:50:17 nscollins Exp $
 !
 ! System test code #69527
 
@@ -26,7 +26,6 @@
     use ESMF_GridMod
     use ESMF_DataMapMod
     use ESMF_FieldMod
-    use ESMF_CompMod
     
     implicit none
     
@@ -44,12 +43,12 @@
     real :: x_min, x_max, y_min, y_max
     integer(ESMF_IKIND_I4), dimension(:), pointer :: idata, idata2, &
                                                      rowdata, ldata
+    type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
     character(len=ESMF_MAXSTR) :: cname, gname, fname
     type(ESMF_DELayout) :: layout1 
     type(ESMF_Grid) :: grid1
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
-    type(ESMF_Comp) :: comp1
         
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -66,16 +65,13 @@
 !-------------------------------------------------------------------------
 !
 
-!   ! Create a DELayout for the Component
+!   ! Create a DELayout 
     delist = (/ 0, 1 /)
     layout1 = ESMF_DELayoutCreate(2, 1, delist, ESMF_XFAST, rc)
 
     cname = "System Test #69527"
-    comp1 = ESMF_CompCreate(cname, layout1, ESMF_GRIDCOMP, &
-                                       ESMF_ATM, "/usr/local", rc=rc)
 
-    print *, "Comp Create finished, name = ", trim(cname)
-
+    print *, "Create section finished"
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -83,7 +79,6 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_CompInit(comp1, rc)
 
 !   !  The user creates a simple horizontal Grid internally by passing all
 !   !  necessary information through the CreateInternal argument list.
@@ -116,7 +111,7 @@
 
 
 !   ! Allocate and set initial data values.  These are different on each DE.
-    call ESMF_GridGetDE(grid1, lsize=ni, rc=rc)
+    call ESMF_GridGetDE(grid1, lcelltot_count=ni, rc=rc)
     print *, "allocating", ni, " cells on DE", de_id
     allocate(idata(ni))
     allocate(ldata(ni))
@@ -149,7 +144,7 @@
     print *, "Field Create returned"
 
 
-    print *, "Comp Init finished"
+    print *, "Init section finished"
 
 !
 !-------------------------------------------------------------------------
@@ -158,9 +153,6 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-
-    timestep = 1
-    call ESMF_CompRun(comp1, timestep, rc)
 
 
 !   Call Reduction operator here
@@ -176,9 +168,10 @@
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size
-    call ESMF_GridGetDE(grid1, n_dir1_size=rowlen, rc=rc)
+    call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)
  
     ! Create a new Fortran array for just the part of this row on this DE
+    rowlen = index(1)%r - index(1)%l + 1
     rstart = ((row_to_reduce-1) * rowlen) + 1
     rend = (row_to_reduce) * rowlen
     
@@ -198,9 +191,8 @@
     ! Clean up local array
     deallocate(rowdata)
 
-    print *, "Comp Run returned"
 
-
+    print *, "Run section finished"
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -209,16 +201,13 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_CompFinalize(comp1, rc)
-
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
     print *, "Row Reduction operation returned ", result, " on DE ", de_id
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
-    print *, "Comp Finalize returned"
-
+    print *, "Finalize section finished"
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -227,11 +216,10 @@
 !-------------------------------------------------------------------------
 !   Clean up
 
-    call ESMF_CompDestroy(comp1, rc)
     call ESMF_FieldDestroy(field1, rc)
     call ESMF_GridDestroy(grid1, rc)
-    call ESMF_ArrayDestroy(array1, rc)
-    call ESMF_DELayoutDestroy(layout1, rc)
+    !call ESMF_ArrayDestroy(array1, rc)
+    !call ESMF_DELayoutDestroy(layout1, rc)
     print *, "All Destroy routines done"
 
 
