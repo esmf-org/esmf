@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/05/30 17:41:20 flanigan Exp $ 
+# $Id: makefile,v 1.12 2003/05/30 21:55:39 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -40,8 +40,10 @@ CLOBBERDIRS =
 warning: 
 	@echo "*******************************************************************"
 	@echo ""
-	@echo "Warning this test is valid only for previous ESMF versions"
-	@echo "and is not expected to either build or run with this ESMF release."
+	@echo "Warning: This system test is incompatible with the current ESMF"
+	@echo "version, and is not expected to build or run.  Please see the"
+	@echo "Test and Validation page on the Development link of the ESMF"
+	@echo "website for details on the status of system tests."
 	@echo ""
 	@echo "*******************************************************************"
 
