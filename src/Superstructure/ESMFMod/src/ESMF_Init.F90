@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.9 2004/04/28 23:12:12 cdeluca Exp $
+! $Id: ESMF_Init.F90,v 1.10 2004/06/02 07:51:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,6 +86,8 @@
 !
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_Initialize"
 !BOP
 ! !IROUTINE:  ESMF_Initialize - Initialize the ESMF Framework.
 !
@@ -102,20 +104,24 @@
 
 !
 ! !DESCRIPTION:
-!     Initialize the ESMF framework.
+!     Initialize the ESMF.  This routine must be called before
+!     any other ESMF routines are used, and before exiting the program
+!     must call {\tt ESMF\_Finalize()} to release resources and clean up
+!     the ESMF gracefully.
 !
-!     The argument is:
+!     The arguments are:
 !     \begin{description}
 !     \item [{[defaultConfigFilename]}]
-!           Name of the default config file for the entire application.
+!           Name of the default configuration file for the entire application.
 !     \item [{[defaultCalendar]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
-!           If not specified, defaults to "ESMF_ErrorLog".
+!           If not specified, defaults to {\tt ESMF\_ErrorLog}.
 !     \item [{[vm]}]
-!           Returns the global vm that was created during initialization.
+!           Returns the global {\tt ESMF\_VM} that was created 
+!           during initialization.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -132,6 +138,8 @@
       end subroutine ESMF_Initialize
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FrameworkInternalInit"
 !BOPI
 ! !IROUTINE:  ESMF_FrameworkInternalInit - internal routine called by both F90 and C++
 !
@@ -247,6 +255,8 @@
       end subroutine ESMF_FrameworkInternalInit
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_Finalize"
 !BOP
 ! !IROUTINE:  ESMF_Finalize - Clean up and close the ESMF Framework.
 !
@@ -258,7 +268,9 @@
 
 !
 ! !DESCRIPTION:
-!     Finalize the ESMF Framework.
+!     Finalize the ESMF.  This must be called before the program exits
+!     to allow the ESMF to flush buffers, close open connections, and 
+!     release internal resources cleanly.
 !
 !     The argument is:
 !     \begin{description}
