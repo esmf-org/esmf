@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.1 2003/05/07 06:58:54 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.2 2003/05/07 14:14:37 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -8,7 +8,7 @@
 !
 ! !DESCRIPTION:
 !  This component does a finite difference solution of the PDE's for
-!  semi-compressible fluid flow with energy.  It uses an explicit solution
+!  semi-compressible fluid flow.  It uses an explicit solution
 !  method on a staggered mesh with velocities and momentum located at cell
 !  faces and other physical quantities at cell centers.  The component
 !  assumes a logically rectangular two-dimensional cartesian mesh with
@@ -23,6 +23,46 @@
 !  heats, thermal conductivity, and specific heat capacity.  There is no
 !  system of units assumed by the component -- it is up to the user to
 !  ensure dimensional consistency.
+!
+! {\sm Semi-compressible flow equations
+!
+!mass:  \[\frac{\partial \rho}{\partial t} + \frac{\partial \rho u}{\partial x}
+!+ \frac{\partial \rho v}{\partial y} = 0\]
+!
+!momemtum:  \[\frac{\partial \rho u}{\partial t} + \frac{\partial \rho u^{2}}{\partial x} 
+!+ \frac{\partial \rho u v}{\partial y} = - \frac{\partial(p + q)}{\partial x}\]
+!
+!\[\frac{\partial \rho v}{\partial t} + \frac{\partial \rho u v}{\partial x} 
+!+ \frac{\partial \rho v^{2}}{\partial y} = - \frac{\partial(p + q)}{\partial y}\]
+!
+!energy:  \[\frac{\partial p I}{\partial t} + \frac{\partial \rho u I}{\partial x} +
+!\frac{\partial \rho v I}{\partial y} = -(p + q)\left(\frac{\partial u}
+!{\partial x} + \frac{\partial v}{\partial y}\right) + \frac{k}{b}\left(
+!\frac{\partial^{2}I}{\partial x^{2}} + \frac{\partial^{2}I}{\partial y^{2}}\right)\]
+!
+!state:  \[p = (\gamma - 1)\rho I\]
+!
+!viscosity:  \[q = -q_{o}\rho u_{in}(dx^{2} + dy^{2})^{1/2} \left(\frac{\partial u}
+!{\partial x} + \frac{\partial v}{\partial y}\right)\]
+!
+!\[if q < 0 set q = 0\]
+!
+Where
+!\begin{tabular}{ll}
+!$\rho$ & density \\
+!$t$ & time \\
+!$u$ & x-component of velocity \\
+!$v$ & y-component of velocity\\
+!$p$ & pressure\\
+!$q$ & artificial velocity\\
+!$I$ & standard internal energy\\
+!$\gamma$ & ratio of specific heats\\
+!$k$ & thermal conductivity\\
+!$b$ & specific heat capacity\\
+!$q_{o}$ & artificial viscosity coefficient, dimensionless\\
+!$u_{in}$ & inflow velocity (representative velocity)\\
+!\end{tabular}}
+!
 !
 !EOP
 

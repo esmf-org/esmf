@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.21 2003/05/02 22:13:09 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.22 2003/05/07 14:14:37 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.21 2003/05/02 22:13:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.22 2003/05/07 14:14:37 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -486,7 +486,7 @@
 //
 // !REQUIREMENTS:  
 
-    ESMC_Fraction quotient;
+    ESMC\_Fraction quotient;
 
     // TODO:
 
@@ -505,8 +505,8 @@
 //    double result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
-                                                      //        to divide by
+      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
+                                                //        to divide by
 //
 // !DESCRIPTION:
 //    Returns this time interval divided by given time interval as a double

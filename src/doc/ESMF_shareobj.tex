@@ -1,12 +1,7 @@
-% $Id: ESMF_shareobj.tex,v 1.2 2003/04/09 17:08:27 cdeluca Exp $
+% $Id: ESMF_shareobj.tex,v 1.3 2003/05/07 14:14:38 cdeluca Exp $
 
 \subsection{Shared Objects}
-
-ESMF uses shared objects as opposed to statically linked libraries.                                           
-
-In simplest terms a shared object is a type of UNIX software library. Under Linux it is also known as a shared library. There are three main types of software libraries for the UNIX operating system:
-
-Shared object libraries -- are libraries that are loaded by the first program that uses it. All programs that start afterwards automatically use the existing shared library. The library is kept in memory as long as any active program is still using it. Using shared libraries you can: 
+ Using shared libraries you can: 
 \begin{itemize}
 \item update libraries and still support programs that want to use older, non-backward-compatible versions of those libraries;
 \item override specific libraries or even specific functions in a library when executing a particular program.
@@ -29,54 +24,7 @@ In short yes. But, there are a few things to keep in mind when including them in
 
 Static vs Dynamic - If there are two copies of a library, one static and one shared, the default behavior is to prefer the shared library. Before looking for static library like \emph{'libutil.a'}, the linker will look for a file named \emph{'libutil.so'} - as a shared library. Only if it cannot find a shared library, will it look for \emph{'libutil.a'} as a static library. This behavior can be overridden using some linker flags (\emph{'-Wl,static'} with some linkers, \emph{'-Bstatic'} with other types of linkers. refer to the compiler's or the linker's manual for info about these flags). 
 
-Link order -- the order in which the libraries are presented to the linker is important. Library routines must be called before they are defined. So, if a library \emph{'A'} uses functionality provided by library \emph{'B'}, then library \emph{'A'} must appear before library \emph{'B'} during linking. 
-
 %[TODO:] Answer if this is a potential problem for users component code to end up loading duplicate copies of .so libraries.…(Suppose you are building two dynamic-load modules, B and C, which should share another block of code A. On Unix, you would not pass A.a to the linker for B.so and C.so; that would cause it to be included twice, so that B and C would each have their own copy.)
-
-\subsubsection{An example using shared object libraries.}
-%[TODO:] a brief example.
-
-Using the shared libraries provided by ESMF is handled in a manner similar to standard libraries that you have probably encountered in the past. The descriptions below show examples of how to link to the ESMF shared library \emph{'libesmf.so'} on each of the platforms currently supported by the ESMF development team. The example for each platform is using a Fortran 90 application, \emph{'myModel'}, and linking it with the ESMF shared object library, \emph{'libesmf.so'}
-
-
-\noindent{Linking using the Compaq:}
-
-\begin{verbatim}
-   f90 -I.. -o myModel myModel.f ../libesmf.so
-\end{verbatim}
-
-\noindent{Linking using the SGI:} 
-
-\begin{verbatim}
-   f90 -64 -c myModel.F I.. 
-   f90 -64 -o myModel myModel.o -L.. -lesmf
-\end{verbatim}
-
-\noindent{Linking using the IBM:}
-
-\begin{verbatim}
-   xlf90\_r -I.. -o myModel myModel.F -L. -L.. -lesmf -brtl -lC
-\end{verbatim}
-
-\noindent{Linking using Linux:} 
- 
-\begin{verbatim}
-   lf95 -I.. -o myModel myModel.F ../libesmf.so
-   pgf90 -I.. -o myModel myModel.F ../libesmf.so
-\end{verbatim}
-
-\noindent{Linking using the Sun:} 
-
-\begin{verbatim}
-   f90 -M.. -o myModel myModel.F ../libesmf.so
-\end{verbatim}
-
-\noindent{Linking using the Alpha:} 
-
-\begin{verbatim}
-   f90 myModel.F -I..  -L.. -L/usr/ccs/lib/cmplrs/cc -lcxx -lesmf  -o myModel
-\end{verbatim}
-
 
 
 

@@ -39,7 +39,7 @@
 
 % Title page
 
-\input{../../scripts/doc_templates/templates/title_alldoc}
+\input{../../scripts/doc_templates/templates/verstitle_alldoc}
 
 \newpage
 \tableofcontents
@@ -67,6 +67,7 @@
 %\section{Looking Ahead:  How to Adapt Applications for ESMF}
 \input{ESMF_adoption}
 
+\newpage
 %\section{Glossary}
 \input{ESMF_terms}
 

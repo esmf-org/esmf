@@ -1,4 +1,4 @@
-% $Id: FlowEqns.tex,v 1.1 2003/05/07 07:02:58 cdeluca Exp $
+% $Id: FlowEqns.tex,v 1.2 2003/05/07 14:14:37 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -9,44 +9,6 @@
 \usepackage[T1]{fontenc}
 
 \begin{document}
-
-Compressible flow equations
-
-\[\frac{\partial \rho}{\partial t} + \frac{\partial \rho u}{\partial x}
-+ \frac{\partial \rho}{\partial v}{\partial y} = 0\]
-
-\[\frac{\partial \rho u}{\partial t} + \frac{\partial \rho u^{2}}{\partial x} 
-+ \frac{\partial \rho u v}{\partial y} = - \frac{\partial(p + q)}{\partial x}\]
-
-\[\frac{\partial \rho v}{\partial t} + \frac{\partial \rho u v}{\partial x} 
-+ \frac{\partial \rho v^{2}}{\partial y} = - \frac{\partial(p + q)}{\partial y}\]
-
-\[\frac{\partial p I}{\partial t} + \frac{\partial \rho u I}{\partial x} +
-\frac{\partial \rho v I}{\partial y} = -(p + q)\left(\frac{\partial u}
-{\partial x} + \frac{\partial v}{\partial y}\right) + \frac{k}{b}\left(
-\frac{\partial^{2}I}{\partial x^{2}} + \frac{\partial^{2}I}{\partial y^{2}}\right)\]
-
-\[p = (\gamma - 1)\rho I\]
-
-\[q = -q_{o}\rho u_{in}(dx^{2} + dy^{2})^{1/2} \left(\frac{\partial u}
-{\partial x} + \frac{\partial v}{\partial y}\right)\]
-
-\[q = 0 if < 0\]
-
-\begin{tabular}{ll}
-$\rho$ & density \\
-$t$ & time \\
-$u$ & x-component of velocity \\
-$v$ & y-component of velocity\\
-$p$ & pressure\\
-$q$ & artificial velocity\\
-$I$ & standard internal energy\\
-$\gamma$ & ratio of specific heats\\
-$k$ & thermal conductivity\\
-$b$ & specific heat capacity\\
-$q_{o}$ & artificial viscosity coefficient, dimensionless\\
-$u_{in}$ & inflow velocity (representative velocity)\\
-\end{tabular}
 
 
 \end{document}

@@ -1,36 +1,80 @@
-% $Id: ESMF_use.tex,v 1.1 2003/04/08 16:06:08 cdeluca Exp $
+% $Id: ESMF_use.tex,v 1.2 2003/05/07 14:14:38 cdeluca Exp $
 
-\subsection{Using the ESMF library}
+\subsection{Using the ESMF}
 \label{UsingLibrary}
-To use the library from C/C++, link with the library executable and include
-the {\tt ``ESMC.h''} file.
-To use the library from Fortran, link with the library executable and
-create links to the library modules in your build directory.  These are
-in the top level {\tt mod} directory under the appropriate architecture.  Alternately, 
-most compilers have a module-include-path directive which may be used to point
-to the correct module directory.
 
-Include the library in application modules with the Fortran {\tt USE}
-construct:  {\tt USE ESMF}.  It is not necessary to include any header files.
+To use ESMF from Fortran, link with the shared object library and
+create links to the library modules in your build directory.  The
+*.mod files are
+in the top level {\tt mod} directory under the appropriate architecture.  
+Alternately, most compilers have a module-include-path directive which 
+may be used to point to the correct module directory.
 
-There is an install target which will copy the library and mod files to an
-install location.  To invoke this target use:
+There is a single ESMF module, called {\tt ESMF_Mod}, that should be 
+include in applications with the Fortran {\tt USE} statement.  It 
+is not necessary to include any header files in Fortran.
+
+To use ESMF from C/C++, link with the ESMF shared object library 
+and include the {\tt ESMC.h} file.
+
+\subsubsection{Shared Object Libraries and Linking}
+
+In simplest terms a shared object is a type of UNIX software library. 
+Under Linux it is also known as a shared library. 
+
+Shared object libraries are libraries that are loaded by the first program that uses them. All programs that start afterwards automatically use the existing shared library. The library is kept in memory as long as any active program is still using it. 
+
+Since shared object libraries are pre-linked to system libraries, using them
+simplifies life for the user when a variety of system libraries are
+required or when system libraries vary a great deal on a 
+platform-to-platform basis.  ESMF requires linking to both Fortran90 and
+C++ libraries on a set of very non-standardized platforms, and using
+shared objects helps to hide some of this complexity.
+
+Using the shared libraries provided by ESMF is handled in a manner similar to standard libraries that you have probably encountered in the past. The descriptions below show examples of how to link to the ESMF shared library \emph{'libesmf.so'} on each of the platforms currently supported by the ESMF development team. The example for each platform is using a Fortran 90 application, \emph{'myModel'}, and linking it with the ESMF shared object library, \emph{'libesmf.so'}
+
+\noindent{Linking using the Compaq:}
+
 \begin{verbatim}
-  gmake BOPT=[O,g] ESMF_LIB_INSTALL=dir_for_lib ESMF_MOD_INSTALL=dir_for_mod_files install 
+   f90 -I.. -o myModel myModel.f ../libesmf.so
 \end{verbatim}
 
-Some users may wish for the library to be built in a directory different from 
-where the source code resides.  To do this, build using:
+\noindent{Linking using the SGI:} 
+
 \begin{verbatim}
-   gmake ESMF_BUILD=build_directory_here BOPT=[O,g]
+   f90 -64 -c myModel.F I.. 
+   f90 -64 -o myModel myModel.o -L.. -lesmf
 \end{verbatim}
 
-The {\tt ESMF\_BUILD} variable gives an alternate path in which to place the libraries,
-mod files and object files.  This variable defaults to {\tt ESMF\_DIR}.  If it is 
-assigned another value, the {\tt ESMF\_BUILD} variable will need to be passed as
-an additional argument to the the above make commands.  (Alternatively the variable
-{\tt ESMF\_BUILD} can be set in the environment (using setenv or export) and then it 
-need not be passed to any make calls).
+\noindent{Linking using the IBM:}
+
+\begin{verbatim}
+   xlf90\_r -I.. -o myModel myModel.F -L. -L.. -lesmf -brtl -lC
+\end{verbatim}
+
+These following are the linking commands for platforms for which 
+we offer limited support.
+
+\noindent{Linking using Linux:} 
+ 
+\begin{verbatim}
+   lf95 -I.. -o myModel myModel.F ../libesmf.so
+   pgf90 -I.. -o myModel myModel.F ../libesmf.so
+\end{verbatim}
+
+\noindent{Linking using the Sun:} 
+
+\begin{verbatim}
+   f90 -M.. -o myModel myModel.F ../libesmf.so
+\end{verbatim}
+
+\noindent{Linking using the Alpha:} 
+
+\begin{verbatim}
+   f90 myModel.F -I..  -L.. -L/usr/ccs/lib/cmplrs/cc -lcxx -lesmf  -o myModel
+\end{verbatim}
+
+The order in which the libraries are presented to the linker is important. Library routines must be called before they are defined. So, if a library \emph{'A'} uses functionality provided by library \emph{'B'}, then library \emph{'A'} must appear before library \emph{'B'} during linking. 
 
 
 

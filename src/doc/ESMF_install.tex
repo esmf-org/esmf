@@ -1,22 +1,31 @@
-% $Id: ESMF_install.tex,v 1.21 2003/04/28 22:47:54 cdeluca Exp $
+% $Id: ESMF_install.tex,v 1.22 2003/05/07 14:14:38 cdeluca Exp $
 
-A user has two options for working with the ESMF.  The first option 
-is to download the full ESMF source code, and compile and link
+\subsection{ESMF Download Options}
+
+Major releases of the ESMF software can be downloaded by following
+the instructions on the 
+the {\bf Downloads \& Documentation} page on the ESMF 
+website, \htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.  There are two options for using the ESMF:
+
+\begin{itemize}
+\item Download a pre-built ESMF shared object library and
+test applications for a particular platform.  If you choose
+this approach, you can skip ahead to Section~\ref{UsingLibrary},
+Using the ESMF.  
+\item Download the full ESMF source code, and compile and link
 the framework to any necessary system libraries.  This will
 result in a shared object file (with a *.so extension)
 that can be linked in with the user's code, or with the demo
-{ESMF\_COUPLED\_FLOW} executable.  In this case the user will need
-to follow all the instructions in this section.
+{ESMF\_COUPLED\_FLOW} executable.  In this case you will need
+to follow all the instructions in subsequent sections of the 
+{\it Quick Start} guide, beginning with Section~\ref{InstallProcedures},
+Installation.
+\end{itemize}
 
-The second option is to download a pre-built ESMF shared object 
-file for a particular platform.  The user who chooses this
-approach can then skip ahead to Section~\ref{UsingLibrary}.
-
-\subsection{Downloading the ESMF Software}
-
-Major releases of the ESMF software can be downloaded from 
-the {\bf User Links and Downloads} page on the ESMF 
-website, \htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.  
+You may find it necessary to build the ESMF yourself
+if we do not offer a shared object library for the current
+version of your compiler.  The compiler versions that we offer
+shared objects for are noted on the download web page.
 
 \subsection{Installation}
 \label{InstallProcedures}
@@ -53,25 +62,8 @@ Build the library with the command:
 \end{verbatim}
   for an optimized version.
 
-There is an install target which will copy the library and mod files to an
-install location.  To invoke this target use:
-\begin{verbatim}
-  gmake BOPT=[O,g] ESMF_LIB_INSTALL=dir_for_lib ESMF_MOD_INSTALL=dir_for_mod_files install 
-\end{verbatim}
-
-Some users may wish for the library to be built in a directory different from 
-where the source code resides.  To do this, build using:
-\begin{verbatim}
-   gmake ESMF_BUILD=build_directory_here BOPT=[O,g]
-\end{verbatim}
-
-The {\tt ESMF\_BUILD} variable gives an alternate path in which to place the libraries,
-mod files and object files.  This variable defaults to {\tt ESMF\_DIR}.  If it is 
-assigned another value, the {\tt ESMF\_BUILD} variable will need to be passed as
-an additional argument to the the above make commands.  (Alternatively the variable
-{\tt ESMF\_BUILD} can be set in the environment (using setenv or export) and then it 
-need not be passed to any make calls).
-
+Build options that enable you to copy the library and *.mod files to
+specified directories are explained in Section~\ref{BuildOptions}. 
 
 \subsubsection{Building the ESMF Test Suites}
 \label{BuildTestSuite}
