@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.h,v 1.3 2003/09/25 16:27:30 jwolfe Exp $
+// $Id: ESMC_TValues.h,v 1.4 2003/11/06 23:08:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,14 +67,16 @@
         ESMC_LocalArray *weights;
 
    public:
-    int ESMC_TransformValuesConstruct(void);
+    int ESMC_TransformValuesConstruct(int count);
     int ESMC_TransformValuesDestruct(void);
 
  // accessor methods for class members
     int ESMC_TransformValuesGet(int *numlist, ESMC_LocalArray **si,
-                                ESMC_LocalArray **di, ESMC_LocalArray **w) const;
+                              ESMC_LocalArray **di, ESMC_LocalArray **w) const;
+    int ESMC_TransformValuesGet(int *numlist, struct c_F90ptr *si,
+                              struct c_F90ptr *di, struct c_F90ptr *w) const;
     int ESMC_TransformValuesSet(int numlist, ESMC_LocalArray *si,
-                                ESMC_LocalArray *di, ESMC_LocalArray *w);
+                               ESMC_LocalArray *di, ESMC_LocalArray *w);
 
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_TransformValuesValidate(const char *options) const;
@@ -88,6 +90,7 @@
 
 
  ESMC_TransformValues *ESMC_TransformValuesCreate(int *rc);
+ ESMC_TransformValues *ESMC_TransformValuesCreate(int count, int *rc);
  int ESMC_TransformValuesDestroy(ESMC_TransformValues *tv);
 
  #endif  // ESMC_TValues_H

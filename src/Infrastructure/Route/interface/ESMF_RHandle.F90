@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.12 2003/09/25 16:25:42 jwolfe Exp $
+! $Id: ESMF_RHandle.F90,v 1.13 2003/11/06 23:08:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,6 +56,22 @@
       end type
 
 !------------------------------------------------------------------------------
+!     !  ESMF_TVWrapper
+!
+!     !  Simple derived types which allows us to pass the entire F90 dope 
+!     !  vector across the language boundary uninterpreted.
+
+      type ESMF_TVWrapperR8
+      sequence
+        real(ESMF_KIND_R8), dimension(:), pointer :: r8ptr
+      end type
+
+      type ESMF_TVWrapperI4
+      sequence
+        real(ESMF_KIND_I4), dimension(:), pointer :: i4ptr
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_RouteHandleType
 !
       integer, parameter :: ESMF_HALOHANDLE=1, ESMF_REDISTHANDLE=2, &
@@ -84,11 +100,11 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 
-! the following routines apply to deep classes only
       public ESMF_TransformValuesCreate             ! interface only, deep class
       public ESMF_TransformValuesDestroy            ! interface only, deep class
 
       public ESMF_TransformValuesGet                ! get and set values
+      public ESMF_TransformValuesGetF90Ptrs
       public ESMF_TransformValuesSet
  
       public ESMF_TransformValuesValidate
@@ -108,7 +124,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.12 2003/09/25 16:25:42 jwolfe Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.13 2003/11/06 23:08:14 nscollins Exp $'
 
 !==============================================================================
 
@@ -123,12 +139,13 @@
 ! !IROUTINE: ESMF_TransformValuesCreate - Create a new TransformValues obj
 
 ! !INTERFACE:
-      function ESMF_TransformValuesCreate(rc)
+      function ESMF_TransformValuesCreate(count, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_TransformValues) :: ESMF_TransformValuesCreate
 !
 ! !ARGUMENTS:
+      integer, intent(out), optional :: count               
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -137,6 +154,10 @@
 !
 !     The arguments are:
 !     \begin{description}
+!     \item[{[count]}] 
+!          Optional item count.  If set and greater than 0, the 
+!          TransformValues object will return with space already allocated
+!          to contain lists of this length.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -146,8 +167,9 @@
 
         ! local variables
         type (ESMF_TransformValues) :: tv     ! new C++ TransformValues
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
+        integer :: status                     ! local error status
+        logical :: rcpresent                  ! did user specify rc?
+        integer :: nitems
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -160,8 +182,12 @@
           rc = ESMF_FAILURE
         endif
 
+        ! Make sure you supply a default value
+        if (present(count)) nitems = count
+        if (.not.present(count)) nitems = 0
+
         ! Call C++ create code
-        call c_ESMC_TransformValuesCreate(tv, status)
+        call c_ESMC_TransformValuesCreate(tv, nitems, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "TransformValues create error"
           return  
@@ -313,6 +339,91 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_TransformValuesGet
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_TransformValuesGetF90Ptrs - Get f90 ptrs from TransformValues
+
+! !INTERFACE:
+      subroutine ESMF_TransformValuesGetF90Ptrs(tv, numlist, srcindex, &
+                                                dstindex, weights, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_TransformValues), intent(in) :: tv
+      integer, intent(out), optional :: numlist
+      real(ESMF_KIND_I4), dimension(:), pointer, optional :: srcindex
+      real(ESMF_KIND_I4), dimension(:), pointer, optional :: dstindex
+      real(ESMF_KIND_R8), dimension(:), pointer, optional :: weights
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!     Returns the requested parts of a {\tt TransformValues} type.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tv] 
+!          Class to be queried.
+!     \item[{[numlist]}]
+!          Value to be retrieved.         
+!     \item[{[srcindex]}]
+!          Value to be retrieved.         
+!     \item[{[dstindex]}]
+!          Value to be retrieved.         
+!     \item[{[weights]}]
+!          Value to be retrieved.         
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+        integer :: curnumlist
+        type(ESMF_TVWrapperI4) :: srcwrap
+        type(ESMF_TVWrapperI4) :: dstwrap
+        type(ESMF_TVWrapperR8) :: wwrap
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code to get all current values
+        call c_ESMC_TransformValuesGetF90Ptr(tv, curnumlist, srcwrap, &
+                                             dstwrap, wwrap, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "TransformValues Get error"
+          return  
+        endif
+
+        if (present(numlist)) then
+            numlist = curnumlist    
+        endif
+
+        if (present(srcindex)) then
+            srcindex => srcwrap%i4ptr
+        endif
+
+        if (present(dstindex)) then
+            dstindex => dstwrap%i4ptr
+        endif
+
+        if (present(weights)) then
+            weights => wwrap%r8ptr
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_TransformValuesGetF90Ptrs
 
 !------------------------------------------------------------------------------
 !BOP

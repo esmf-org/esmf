@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.2 2003/09/25 16:28:06 jwolfe Exp $
+// $Id: ESMC_TValues.C,v 1.3 2003/11/06 23:08:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,6 +25,7 @@
  #include "ESMC.h"
  #include <stdio.h>
  #include <stdlib.h>
+ #include "ESMC_LocalArray.h"
 
  // associated class definition file
  #include "ESMC_TValues.h"
@@ -32,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.2 2003/09/25 16:28:06 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.3 2003/11/06 23:08:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -71,7 +72,42 @@
 
     ESMC_TransformValues *newrt = new ESMC_TransformValues();
 
-    *rc = newrt->ESMC_TransformValuesConstruct();
+    *rc = newrt->ESMC_TransformValuesConstruct(0);
+
+    return newrt;
+
+ } // end ESMC_TransformValuesCreate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TransformValuesCreate - Create a new TransformValues
+//
+// !INTERFACE:
+      ESMC_TransformValues *ESMC_TransformValuesCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_TransformValues
+//
+// !ARGUMENTS:
+      int count,           // in - number of items in each array
+      int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Allocates memory for a new TransformValues
+//      object and uses the internal routine ESMC_TransformValuesConstruct to
+//      initialize it.  Define for deep classes only, for shallow classes only
+//      define and use ESMC_TransformValuesInit.
+//      There can be multiple overloaded methods with the same name, but
+//      different argument lists.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC_TransformValues.h)
+//
+//EOP
+
+    ESMC_TransformValues *newrt = new ESMC_TransformValues();
+
+    *rc = newrt->ESMC_TransformValuesConstruct(count);
 
     return newrt;
 
@@ -115,7 +151,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      void) { 
+      int count) {        // in - number of items to preallocate space for
 // 
 // !DESCRIPTION: 
 //      ESMF routine which fills in the contents of an already
@@ -126,11 +162,24 @@
 //      ESMC_TransformValuesConstruct.  Define for deep classes only.
 //
 //EOP
+    int rc;
+    int count2 = count * 2;
 
     numlist = 0;
-    srcindex = NULL;
-    dstindex = NULL;
-    weights = NULL;
+    if (count > 0) {
+        srcindex = ESMC_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, 
+                                         &count, NULL, ESMC_DATA_COPY, &rc);
+
+        dstindex = ESMC_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, 
+                                         &count2, NULL, ESMC_DATA_COPY, &rc);
+
+        weights = ESMC_LocalArrayCreate(1, ESMF_DATA_REAL, ESMF_R8, 
+                                        &count, NULL, ESMC_DATA_COPY, &rc);
+    } else {
+        srcindex = NULL;
+        dstindex = NULL;
+        weights = NULL;
+    }
 
     return ESMF_SUCCESS;
 
@@ -193,6 +242,38 @@
     if (si) *si = srcindex;
     if (di) *di = dstindex;
     if (w) *w = weights;
+
+    return ESMF_SUCCESS;
+
+} // end ESMC_TransformValuesGet
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TransformValuesGet - Get multiple values in one call.
+//
+// !INTERFACE:
+    int ESMC_TransformValues::ESMC_TransformValuesGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *numlist,                 // out - number of domains in list
+      struct c_F90ptr *si,          // out - data for source index list
+      struct c_F90ptr *di,          // out - data for destination index list
+      struct c_F90ptr *w) const {   // out - data for weights
+
+//
+// !DESCRIPTION:
+//    Query for multiple values in a single call.  (Inline calls should exist
+//    to return individual items.)
+//
+//EOP
+
+    if (numlist) *numlist = this->numlist;
+    if (si) srcindex->ESMC_LocalArrayGetF90Ptr(si);
+    if (di) dstindex->ESMC_LocalArrayGetF90Ptr(di);
+    if (w) weights->ESMC_LocalArrayGetF90Ptr(w);
 
     return ESMF_SUCCESS;
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.8 2003/09/25 16:24:55 jwolfe Exp $
+// $Id: ESMC_RHandle_F.C,v 1.9 2003/11/06 23:08:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include "ESMC.h"
 #include "ESMC_Base.h"
 #include "ESMC_RHandle.h"
+#include "ESMC_LocalArray.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -38,8 +39,9 @@ extern "C" {
 //------------------------------------------------------------------------------
 //  TransformValues interfaces
 
-       void FTN(c_esmc_transformvaluescreate)(ESMC_TransformValues **ptr, int *status) {
-           *ptr = ESMC_TransformValuesCreate(status);
+       void FTN(c_esmc_transformvaluescreate)(ESMC_TransformValues **ptr, 
+                         int *count, int *status) {
+           *ptr = ESMC_TransformValuesCreate(*count, status);
        }
 
        void FTN(c_esmc_transformvaluesdestroy)(ESMC_TransformValues **ptr, int *status) {
@@ -52,6 +54,20 @@ extern "C" {
                                        ESMC_LocalArray **src, 
                                        ESMC_LocalArray **dst, 
                                        ESMC_LocalArray **w, 
+                                       int *status) {
+           if ((ptr == NULL) || (ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_TransformValuesGet(numlist, src, dst, w);
+       }
+
+       // the int needs to be an enum, the label needs to be added and handled
+       void FTN(c_esmc_transformvaluesgetf90ptrs)(ESMC_TransformValues **ptr, 
+                                       int *numlist, 
+                                       struct c_F90ptr *src, 
+                                       struct c_F90ptr *dst, 
+                                       struct c_F90ptr *w, 
                                        int *status) {
            if ((ptr == NULL) || (ptr == NULL)) {
               *status = ESMF_FAILURE;
