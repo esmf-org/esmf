@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.ctex,v 1.5 2002/09/10 18:11:35 cdeluca Exp $
+% $Id: ESMF_archdoc.ctex,v 1.6 2002/09/10 20:38:37 cdeluca Exp $
 
 %
 \documentclass[]{article}
@@ -17,7 +17,7 @@
 \newcommand{\longname}{ESMF }
 \newcommand{\funcname}{ESMF }
 \newcommand{\shortname}{ARCH}
-\newcommand{\myauthors}{ESMF Joint Specification Team:  Cecelia DeLuca, V. Balaji, Chris Hill, Max Suarez, Nancy Collins, Bob Hallberg, Arlindo da Silva, Mark Iredell, Mike Young, Brian Kauffman, Byron Boville, Tony Craig, Phil Jones, Brian Kauffman, Jay Larson, Rob Jacob, John Michalakes, David Neckels, Erik Kluzek, Will Sawyer, Jeff Anderson, Earl Schwab, Shepard Smithline, Leonid Zaslavsky, Weiyu Yang, Carlos Cruz}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Carlos Cruz, Nancy Collins, Tony Craig, Arlindo da Silva, Cecelia DeLuca, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Erik Kluzek, Jay Larson, John Michalakes, David Neckels, Will Sawyer, Earl Schwab, Max Suarez, Shepard Smithline, Weiyu Yang, Mike Young, Leonid Zaslavsky}
 %===============================================================================
 
 \textwidth 6.5in
