@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.48 2004/03/19 21:11:47 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.49 2004/03/24 00:43:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.48 2004/03/19 21:11:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.49 2004/03/24 00:43:43 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -243,11 +243,6 @@
 
     // TODO: fractional, sub-seconds
 
-    // relative calendar interval
-    //  TODO:  When calendar, startTime, endTime specified, can convert 
-    //         between relative and absolute units.  Relative and absolute
-    //         parts are additive (e.g. d=1, h=48 equals 3 days).
-
     // TODO: put calendar logic under test for any non-zero yy, mm, d ?
 
     // TODO: reduce size of this method by creating seperate methods on
@@ -308,7 +303,7 @@
     //        can.  Failure is determined in the conversion section below
     //        which tries to satisfy the user's request for specific units.
 
-    // Inititialize time-to-convert values.  These are used to reduce this time
+    // Initialize time-to-convert values.  These are used to reduce this time
     // interval's units from which to convert to user-requested units.  
     // Represents remaining unconverted time; any years, months or days
     //   requested will be removed from these values.  In this way, a requested
@@ -522,7 +517,7 @@
         };
       } // else { // no calendar specified
         // will just return yy as specified by the user in Set(); other units
-        // cannont be converted to years.  TODO:  return rc = ESMF_WARNING ?
+        // cannot be converted to years.  TODO:  return rc = ESMF_WARNING ?
    // }
 
       // return requested years value
