@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.132 2005/03/04 00:28:15 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.133 2005/03/04 00:29:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.132 2005/03/04 00:28:15 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.133 2005/03/04 00:29:49 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -431,7 +431,7 @@
     int sendBufferSize, recvBufferSize;
     char msgbuf[ESMF_MAXSTR];
     int VMType;
-    int nbytes, xpCount, sendXPCount, recvXPCount, maxXPCount;
+    int nbytes, maxReqCount, sendXPCount, recvXPCount, maxXPCount;
 #define STACKLIMIT 64
     vmk_commhandle *stackHandle[STACKLIMIT];
     char *stackSendBuffer[STACKLIMIT];
@@ -450,7 +450,7 @@
 // -----------------------------------------------------------
 
     if (useOptions & ESMC_ROUTE_OPTION_SYNC) {
-      xpCount = 1;
+      maxReqCount = 1;
 
       myPET = vm->vmk_mypet();
       rc = ct->ESMC_CommTableGetCount(&commCount);
@@ -776,7 +776,7 @@
             }      // end of k loop
 #else
             // experimental version: the inner loop is pulled out so the
-            // compiler has an opportunity to optomize it.
+            // compiler has an opportunity to optimize it.
             sendReps = 1; 
             for (k=1; k<sendRank-1; k++) {
                 sendReps *= sendRepCount[k];
@@ -858,7 +858,7 @@
           }        // XP loop
         }          // packing branch
 
-        // reset the useOptions to the default ones in case it has been overwritten
+        // reset the useOptions to the default in case it has been overwritten
         useOptions = options;
 
       }            // communication (PET) loop, variable i
@@ -877,6 +877,7 @@
       recvXPCount = 0;
       if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
         ct->ESMC_CommTableGetCount(&sendXPCount);
+        maxReqCount = sendXPCount;
       }
       if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
         maxXPCount = 0;
@@ -892,7 +893,12 @@
           // loop over the XPs
           maxXPCount += MAX(recvXPCount, sendXPCount);
         }            // loop over PETs
-        sendXPCount = recvXPCount = maxXPCount;
+        maxReqCount = maxXPCount;
+      }
+      if (useOptions & ESMC_ROUTE_OPTION_PACK_VECTOR) {
+          // TODO: use same code as PACK_XP case for number of possible
+          // outstanding requests possible?
+          maxReqCount = 0;
       }
       if (useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) {
         maxReps = 0;
@@ -940,12 +946,14 @@
             maxReps += MAX(sendReps, recvReps);
           }          // maxXPCount loop
         }            // loop over PETs
-        sendXPCount = recvXPCount = maxReps;
+        maxReqCount = maxReps;
       }
 
-      xpCount = MAX(sendXPCount, recvXPCount);             // assumes single sendRecv call
-      if ((xpCount < 0) || (xpCount > (1<<24))) {
-        sprintf(msgbuf, "computed bad xp counts: %d\n", xpCount);
+      // assumes single sendRecv call will handle one send and one receive
+      // per outstanding request handle.  if these are broken up into separate
+      // sends and receives, each with their own handle, this number doubles.
+      if ((maxReqCount < 0) || (maxReqCount > (1<<24))) {
+        sprintf(msgbuf, "computed #reqs too small or large: %d\n", maxReqCount);
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
         return (rc);
       }
@@ -953,20 +961,20 @@
       // if the total number of possible outstanding communications requests
       // is less than the limit, use local stack buffers.  if it is larger,
       // allocate off the heap to avoid stack size problems.
-      if (xpCount <= STACKLIMIT) {
+      if (maxReqCount <= STACKLIMIT) {
         handle = stackHandle;
         sendBufferList = stackSendBuffer;
         recvBufferList = stackRecvBuffer;
       } else {
-        handle = new vmk_commhandle*[xpCount];
-        sendBufferList = new char*[xpCount];
-        recvBufferList = new char*[xpCount];
+        handle = new vmk_commhandle*[maxReqCount];
+        sendBufferList = new char*[maxReqCount];
+        recvBufferList = new char*[maxReqCount];
       }
 
       // allocate any necessary arrays for specific options
       if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
-        madeSendBufList = new bool[xpCount];
-        madeRecvBufList = new bool[xpCount];
+        madeSendBufList = new bool[maxReqCount];
+        madeRecvBufList = new bool[maxReqCount];
       }
 
 // -----------------------------------------------------------------------
@@ -985,9 +993,9 @@
         if (!needed) continue;
 
         // some sanity checking to be sure we have enough async buffers
-        if (req > xpCount) {
+        if (req > maxReqCount) {
           sprintf(msgbuf, "not enough async bufs; have %d and index now %d (must be < %d)\n",
-                           xpCount, req, xpCount);
+                           maxReqCount, req, maxReqCount);
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
           return (rc);
         }
@@ -1490,7 +1498,7 @@
       }            // communication (PET) loop, variable i
 
       // if we are not using the local stack buffers, free these. 
-      if (xpCount > STACKLIMIT) {
+      if (maxReqCount > STACKLIMIT) {
           delete [] handle; 
           delete [] sendBufferList;
           delete [] recvBufferList;
