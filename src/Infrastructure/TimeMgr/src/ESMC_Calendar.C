@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.75 2004/10/27 18:50:28 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.76 2004/12/01 00:06:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.75 2004/10/27 18:50:28 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.76 2004/12/01 00:06:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -1033,7 +1033,8 @@ int ESMC_Calendar::count=0;
                                    daysPerMonth[month] * secondsPerDay);
             }
             t->ESMC_FractionSetw(t->ESMC_FractionGetw() +
-                                 (dd-1) * secondsPerDay + 148600915200LL);
+                                 (dd-1) * secondsPerDay);
+                      // TODO: ? (dd-1) * secondsPerDay + 148600915200LL);
                                           // ^ adjust to match Julian time zero
                                           // = (1/1/0000) - (11/24/-4713)
             break;
@@ -1054,7 +1055,8 @@ int ESMC_Calendar::count=0;
 
             t->ESMC_FractionSetw(yy * secondsPerYear
                   + (mm-1) * 30 * secondsPerDay   // each month has 30 days
-                  + (dd-1) * secondsPerDay + 146565244800LL);
+                  + (dd-1) * secondsPerDay);
+       // TODO: ? + (dd-1) * secondsPerDay + 146565244800LL);
                                           // ^ adjust to match Julian time zero
                                           // = (1/1/0000) - (11/24/-4713)
             break;
@@ -1231,7 +1233,8 @@ int ESMC_Calendar::count=0;
         // convert Time => No Leap Date
         case ESMC_CAL_NOLEAP:
         {
-            ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw() - 148600915200LL;
+            ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw();
+ // TODO: ? ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw() - 148600915200LL;
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
@@ -1301,7 +1304,8 @@ int ESMC_Calendar::count=0;
         // convert Time => 360 Day Date
         case ESMC_CAL_360DAY:
         {
-            ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw() - 146565244800LL;
+            ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw();
+ // TODO: ? ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw() - 146565244800LL;
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
