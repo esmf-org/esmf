@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.29 2003/07/31 22:59:17 jwolfe Exp $
+! $Id: ESMF_DELayout.F90,v 1.30 2003/08/01 16:35:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 
       integer, parameter :: ESMF_COMMTYPE_MP=0, ESMF_COMMTYPE_SHR=2
 
-      integer, parameter :: ESMF_SUM=0, ESMF_MIN=1, ESMF_MAX=2
+      integer, parameter :: ESMF_SUM=1, ESMF_MIN=2, ESMF_MAX=3
 
 ! exclusivity type used for allocating DEs within a layout to sub-layouts
 ! TODO:  move to ESMF_DE.F90 when created, to be symmetrical with C++ ?
@@ -131,7 +131,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.29 2003/07/31 22:59:17 jwolfe Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.30 2003/08/01 16:35:48 nscollins Exp $'
 
 !==============================================================================
 ! 
