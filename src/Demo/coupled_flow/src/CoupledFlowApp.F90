@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.4 2003/06/19 17:07:37 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.5 2003/06/24 00:17:57 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -32,6 +32,7 @@
     ! States and Layouts
     type(ESMF_DELayout) :: layoutApp
     type(ESMF_State) :: flowstate
+    integer :: de_id
 
     ! A common grid
     type(ESMF_Grid) :: grid
@@ -126,8 +127,9 @@
     ! ESMF Framework as well.
     compApp = ESMF_AppCompCreate("Coupled Flow Application", rc=rc)
 
-    ! Query application for default layout.
+    ! Query application for default layout and save our DE id number.
     call ESMF_AppCompGet(compApp, layout=layoutApp, rc=rc)
+    call ESMF_DELayoutGetDEId(layoutApp, de_id, rc)
 
    
     ! Create the Gridded component, passing in the default layout.
@@ -262,10 +264,22 @@
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+      ! This output goes into the log file (standard output, unit 6)
       print *, "**********************************************************"
-      print *, "CONGRATULATIONS!  Your ESMF Coupled Flow Application Demo ", &
-               "successfully completed!"
+      print *, "SUCCESS!  Your ESMF Coupled Flow Application Demo ", &
+               "ran to completion!"
+      print *, "See the output files in the Demo source directory for ", &
+               "the generated data."
       print *, "**********************************************************"
+
+      ! This output goes to the console/screen (standard error) where
+      ! hopefully the user will see it without needing to inspect the log file.
+      if (de_id .eq. 0) then
+        write(0, *) ""
+        write(0, *) "SUCCESS!  Your ESMF Coupled Flow Application Demo ", &
+                 "ran to completion!"
+        write(0, *) ""
+      endif
 
       end program ESMF_ApplicationWrapper
     
