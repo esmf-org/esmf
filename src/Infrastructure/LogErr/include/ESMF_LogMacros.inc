@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.14 2004/05/18 22:36:53 cpboulder Exp $
+ $Id: ESMF_LogMacros.inc,v 1.15 2004/05/18 23:07:15 eschwab Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -50,5 +50,5 @@ ESMC_LogMsgFoundError(status,msg,__LINE__,__FILE__,ESMC_METHOD,rc)
 #define ESMC_LogAllocError(rc) \
 ESMC_LogAllocError(__LINE__,__FILE__,ESMC_METHOD,rc)
 
-#define ESMC_LogMsgAllocError(msg) \
+#define ESMC_LogMsgAllocError(msg,rc) \
 ESMC_LogMsgAllocError(msg,__LINE__,__FILE__,ESMC_METHOD,rc)
