@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.41 2003/08/29 05:31:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.42 2003/08/29 23:09:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -91,9 +91,28 @@
     // TODO: ensure initialization if called via F90 interface;
     //       cannot call constructor, because destructor is subsequently
     //       called automatically, returning initialized values to garbage.
-    this->s  = 0;
-    this->sN = 0;
-    this->sD = 1;
+
+    // if any time value is specified, initialize core values first;
+    // user is specifying a complete time and not relying on any past settings.
+    // (if only calendar or timezone is specified, don't initialize)
+    // (this logic avoids the need for a separate ESMC_TimeSetup() method)
+    if (yr    != ESMC_NULL_POINTER || yr_i8 != ESMC_NULL_POINTER ||
+        mm    != ESMC_NULL_POINTER || dd    != ESMC_NULL_POINTER ||
+        d     != ESMC_NULL_POINTER || d_i8  != ESMC_NULL_POINTER ||
+        h     != ESMC_NULL_POINTER || m     != ESMC_NULL_POINTER ||
+        s     != ESMC_NULL_POINTER || s_i8  != ESMC_NULL_POINTER ||
+        ms    != ESMC_NULL_POINTER || us    != ESMC_NULL_POINTER ||
+        ns    != ESMC_NULL_POINTER || d_r8  != ESMC_NULL_POINTER ||
+        h_r8  != ESMC_NULL_POINTER || m_r8  != ESMC_NULL_POINTER ||
+        s_r8  != ESMC_NULL_POINTER || ms_r8 != ESMC_NULL_POINTER ||
+        us_r8 != ESMC_NULL_POINTER || ns_r8 != ESMC_NULL_POINTER ||
+        sN    != ESMC_NULL_POINTER || sD    != ESMC_NULL_POINTER) {
+      this->s  = 0;
+      this->sN = 0;
+      this->sD = 1;                       // prevents divide-by-zero errors
+      this->calendar = ESMC_NULL_POINTER; // to trap no calendar case below
+      this->timeZone = 0;                 // default is UTC
+    }
     
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
@@ -106,7 +125,9 @@
     }
 
     // set timezone
-    this->timeZone = (timeZone != ESMC_NULL_POINTER) ? *timeZone : 0;
+    if (timeZone != ESMC_NULL_POINTER) {
+      this->timeZone = *timeZone;
+    }
 
     // TODO: Timezone adjust
 
