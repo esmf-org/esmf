@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.88 2004/04/19 20:27:59 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.89 2004/04/20 22:36:32 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.88 2004/04/19 20:27:59 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.89 2004/04/20 22:36:32 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -715,9 +715,10 @@ static int maxroutes = 10;
             if (xscount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xscount);
             if (ixs < xscount) {
                 rc = sendRT->ESMC_RTableGetEntry(theirdeid, ixs, &sendxp);
-                rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length, sstride, srep_count);
-                printf("RouteRun: sendxp\n");
-                sendxp->ESMC_XPacketPrint();
+                rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length,
+                                             sstride, srep_count);
+  //              printf("RouteRun: sendxp\n");
+  //              sendxp->ESMC_XPacketPrint();
             } else {
                 sendxp = NULL;
                 srank = 0;
@@ -726,16 +727,17 @@ static int maxroutes = 10;
                     srep_count[j]=0;
 		    sstride[j]=0;
                 }
-                printf("nothing to send\n");
+  //              printf("nothing to send\n");
             }
-            printf("soffset: %d\n", soffset);
+  //          printf("soffset: %d\n", soffset);
 
             if (xrcount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xrcount);
             if (ixr < xrcount) {
                 rc = recvRT->ESMC_RTableGetEntry(theirdeid, ixr, &recvxp);
-                rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length, rstride, rrep_count);
-                 printf("RouteRun: recvxp\n");
-                 recvxp->ESMC_XPacketPrint();
+                rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length,
+                                             rstride, rrep_count);
+  //               printf("RouteRun: recvxp\n");
+  //               recvxp->ESMC_XPacketPrint();
             } else {
                 recvxp = NULL;
                 rrank = 0;
@@ -744,9 +746,9 @@ static int maxroutes = 10;
                     rrep_count[j]=0;
                     rstride[j]=0;
                 }
-                printf("nothing to recv\n");
+  //              printf("nothing to recv\n");
             }
-            printf("roffset: %d\n", roffset);
+  //          printf("roffset: %d\n", roffset);
         
        
             // ready to call the comm routines - multiple times, one for
@@ -786,7 +788,7 @@ static int maxroutes = 10;
 	   srcbuf = srcbufstart;
 	   rcvbuf = rcvbufstart;
            
-           printf("srcbufstart=%p, rcvbufstart%p\n", srcbufstart, rcvbufstart);
+  //         printf("srcbufstart=%p, rcvbufstart%p\n", srcbufstart, rcvbufstart);
 
            // copy in to the send buffer
 	   if(srctcount > 0) {
@@ -1166,7 +1168,7 @@ static int maxroutes = 10;
           // get the parent DE identifier for this DE in the rcv layout
           dstdeLayout->ESMC_newDELayoutGetDEMatch(theirDE, *delayout, NULL,
                                                   &theirDEParent, 1);
-          printf("Match1: %d, %d\n", theirDE, theirDEParent);
+  //        printf("Match1: %d, %d\n", theirDE, theirDEParent);
           //theirDEParent = theirDE;     // temporarily
           if (theirDEParent != theirDE) 
 	     cout << "theirDE = " << theirDE << ", parentDE = " 
@@ -1231,7 +1233,7 @@ static int maxroutes = 10;
           // get the parent DE identifier for this DE in the src layout
           dstdeLayout->ESMC_newDELayoutGetDEMatch(theirDE, *delayout, NULL,
                                                   &theirDEParent, 1);
-          printf("Match2: %d, %d\n", theirDE, theirDEParent);
+  //        printf("Match2: %d, %d\n", theirDE, theirDEParent);
           //theirDEParent = theirDE;     // temporarily
           if (theirDEParent != theirDE) 
 	     cout << "theirDE = " << theirDE << ", parentDE = " 
@@ -1387,7 +1389,7 @@ static int maxroutes = 10;
           // get the parent DE identifier for this DE in the rcv layout
           delayout_rcv->ESMC_newDELayoutGetDEMatch(their_de, *delayout, NULL,
                                                    &their_de_parent, 1);
-          printf("Match1: %d, %d\n", their_de, their_de_parent);
+ //         printf("Match1: %d, %d\n", their_de, their_de_parent);
           //their_de_parent = their_de;     // temporarily
           if (their_de_parent != their_de) 
 	     cout << "their_de = " << their_de << ", parent_de = " 
@@ -1453,7 +1455,7 @@ static int maxroutes = 10;
           // get the parent DE identifier for this DE in the snd layout
           delayout_snd->ESMC_newDELayoutGetDEMatch(their_de, *delayout, NULL,
                                                    &their_de_parent, 1);
-          printf("Match2: %d, %d\n", their_de, their_de_parent);
+  //        printf("Match2: %d, %d\n", their_de, their_de_parent);
           //their_de_parent = their_de;     // temporarily
           if (their_de_parent != their_de) 
 	     cout << "their_de = " << their_de << ", parent_de = " 
