@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/08/03 19:33:45 nscollins Exp $
+# $Id: makefile,v 1.6 2004/12/15 22:43:20 nscollins Exp $
 
 ALL:  build_tests
 
@@ -57,10 +57,6 @@ ESMF_BundleDataMapUTest.rm:
 #
 # C++ Unit tests
 #
-$(ESMC_TESTDIR)/ESMC_BundleDataMapUTest: chkopts ESMC_BundleDataMapUTest.o
-	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest ESMC_BundleDataMapUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	${RM} ESMC_BundleDataMapUTest.o
-
 RUN_ESMC_BundleDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_BundleDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest > $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest.stdout

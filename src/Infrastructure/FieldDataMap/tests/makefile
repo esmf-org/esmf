@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/08/03 19:33:49 nscollins Exp $
+# $Id: makefile,v 1.6 2004/12/15 22:43:42 nscollins Exp $
 
 ALL:  build_tests
 
@@ -53,10 +53,6 @@ ESMF_FieldDataMapUTest.rm:
 #
 # C++ Unit tests
 #
-$(ESMC_TESTDIR)/ESMC_FieldDataMapUTest: chkopts ESMC_FieldDataMapUTest.o
-	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest ESMC_FieldDataMapUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	-${RM} ESMC_FieldDataMapUTest.o
-
 RUN_ESMC_FieldDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_FieldDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest > $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest.stdout
