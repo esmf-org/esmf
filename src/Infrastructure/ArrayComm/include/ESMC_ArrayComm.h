@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm.h,v 1.1 2003/10/07 22:29:46 nscollins Exp $
+// $Id: ESMC_ArrayComm.h,v 1.2 2003/12/08 18:29:09 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,8 +58,9 @@
     int ESMC_ArrayHalo(ESMC_DELayout *layout,
                        ESMC_AxisIndex *ai_global, int global_dimlengths[],
                        int decompids[], int size_decomp, ESMC_Logical periodic[]);
-    int ESMC_ArrayAllGather(ESMC_DELayout *layout, int decompids[], 
-                            int size_decomp, int global_dimlengths[],
+    int ESMC_ArrayAllGather(ESMC_DELayout *layout, int decompids[],
+                            int size_decomp, int localAxisLengths[],
+                            int size_axislengths, int global_dimlengths[],
                             ESMC_Array **Array_out);
     int ESMC_ArrayGather(ESMC_DELayout *layout, int decompids[], 
                             int size_decomp, int global_dimlengths[],
