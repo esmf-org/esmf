@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.13 2002/05/10 22:33:55 lzaslavsky Exp $
+% $Id: IO_background.tex,v 1.14 2002/05/20 20:24:28 dasilva Exp $
 
 
 Earth system modeling applications require efficient and robust tools
@@ -54,17 +54,29 @@ for phyical grids, {\em DistGrid} element for distributed grids, and
 {\em Fields} class for fields (\cite{ESMF-PhysGrid-Req},
 \cite{ESMF-DistGrid-Req}, \cite{ESMF-Field-Req}). 
 
-ESMF I/O will support the following three models of data: 
+ESMF I/O will support input/output of data defined on all ESMF
+supported grids and location streams (\cite{ESMF-PhysGrid-Req},
+\cite{ESMF-DistGrid-Req}). For
+the purpose of this document, we will consider data beloging to three
+broad categories:
+
 \begin{description}
-\item[\bf Regular Gridded Data] are defined on a logically rectangular grid. 
-Multi-dimensional arrays can be used for storing the data and operating. The 
-neighbor relationships are defined naturally by geometry.
 
-\item[\bf Data on Unstructured Grid] are defined on an irregular grid such as 
-in Finite-Element Methods. A list of neighbors should be explicitly provided 
-for each grid node. 
+\item[\bf Structured Gridded Data.] A {\em structured grid} is one on 
+on which the relationship between gridpoints can be derived from their
+indices, without he need for an explicit map.  A simple example fields
+defined on a rectangular lat/lon grid.
 
-\item[\bf Observational Data] describe the measurements. Each observation is 
+\item[\bf Unstructured Gridded Data.] For the more general 
+{\em unstructured grid} the relationship between gridpoints cannot be
+derived from their indices, and the specification of an explicit map
+is necessary.  An example is a {\em catchment grid} used by soime
+land-surface models.
+
+\item[\bf Observational Data on location streams.] As defined in the {\em Phisycal Grid Requirements}, a location stream contains a list of locations
+
+
+describe the measurements. Each observation is 
 associated with a a spatial point or region.A neighbor relationship is not 
 defined for observations. 
 \end{description}
@@ -127,22 +139,21 @@ units for these dimensions and other quantities.
 %%% participants of the ESMF project.
 %%% Leonid %%%
 
-We expect ESMF metadata conventions to be defined as extensions to
-CF-conventions covering fields defined on both structured and
-unstructured grids, as well as observational data. Unlike the CF
-conventions which are tightly associated with NetCDF, the ESMF
-conventions are supposed to be format neutral, and cover all of the
-ESMF data formats.  These extensions will become the ESMF standard,
-and will be enforced by the ESMF I/O subsystem.
+We expect ESMF metadata conventions to be based on the CF-conventions,
+and to cover fields defined on both structured and unstructured grids,
+as well as observational data. Unlike the CF conventions which are
+tightly associated with NetCDF, the ESMF conventions are supposed to
+be format neutral, and cover all of the ESMF data formats.  These
+extensions will become the ESMF standard, and will be enforced by the
+ESMF I/O subsystem. However, the specification of ESMF metadata is
+optional, and users desiring not to specify any metadata should be
+able to do so.
 
-ESMF I\/O interfaces and software will cover only I/O of data covered by
-the ESMF convention.
-
-
+%%% ESMF I\/O interfaces and software will cover only I/O of data covered by
+%%% the ESMF convention.
 
 
 \subsection{Data Formats}
-
 
 
 Several standard formats are currently used in Earth Science modeling
@@ -228,18 +239,28 @@ The GRIB format used in ESMF shall be configurable, and shall allow the
 creation of files which conform to the NCEP standard usage.  
 
 \item[\bf IEEE Binary Streams]
-A natural way for a machine to represent data is to use a native binary data 
-representation. There are  two choices of ordering of 
-bytes (so-called {\it Big Endian} and {\it Little Endian}), and a lot of
+A natural way for a machine to represent data is to use a native
+binary data representation. There are two choices of ordering of bytes
+(so-called {\it Big Endian} and {\it Little Endian}), and a lot of
 ambiguity in representing floating point data. The latter, however, is
-specified, if IEEE Floating Point Standard 754 is satisfied 
-(\cite{IEEE-Floating-Point}, \cite{Kahan-IEEE-754}). It is
-desirable to be able to use efficient native representation,
-accompanied by a metadata file that could be created using XML \cite{XML-W3C}. 
+specified, if IEEE Floating Point Standard 754 is satisfied
+(\cite{IEEE-Floating-Point}, \cite{Kahan-IEEE-754}). It is desirable
+to be able to use efficient native representation, and optionally
+provide ESMF metadata on a companion file using for example XML
+\cite{XML-W3C}.
+
+\item[\bf GrADS] The Grid Analysis and Display System (GrADS) is popular 
+visualization software widely used by the earth science modeling
+communinity (http://grads.iges.org/grads/). GrADS can read COARDS
+compliant NetCDF and HDF files, as well as IEEE binary and GRIB files
+provided an appropriate companion metadadata file is provided (in
+GrADS parlance these are refered to as {\em control files}). Files
+produced by the ESMF are intended to be GrADS redable, and the ESMF
+shall produce GrADS control files upon request.
 
 \item[\bf BUFR] Binary Universal Form of Represantation of the meteorological 
-data (BUFR) is a self-descriptive format for observational data 
-transmission introduced by the World Meteorological Organization 
+data (BUFR) is a self-descriptive format for observational data
+transmission introduced by the World Meteorological Organization
 \cite{WMO-BUFR-CREX}. The form and content of data contained in a BUFR 
 message are described within BUFR message itself. In addition, BUFR provides 
 condensation, or packing of data. 
@@ -310,6 +331,12 @@ Balaji_Parallel_IO_1999, Balaji_Parallel_IO_2000}. Parallel IO implemented in
 GFDL (\cite{mpp_io}) supports parallel writing to single or multiple files. 
 It supports NetCDF and binary data formats.
 
+\subsection{Synchronous and Asynchronous IO}
+
+ESMF shall provide an asynchronous option for all ESMF IO models.  It
+shall provide async read and write operations, the capability to wait
+on individual or groups of I/O operations, and query functions for the
+state of an operation.
 
 
 \subsection{Location}
