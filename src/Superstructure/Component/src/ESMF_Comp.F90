@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.41 2003/04/17 18:02:17 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.42 2003/04/23 14:38:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.41 2003/04/17 18:02:17 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.42 2003/04/23 14:38:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1869,7 +1869,7 @@
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
-        print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
@@ -1984,7 +1984,7 @@
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
-        print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
@@ -2100,7 +2100,7 @@
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
-        print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
