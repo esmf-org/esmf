@@ -80,6 +80,20 @@ PCONF		= ${ESMC_HAVE_MPE}  ${ESMC_HAVE_BLOCKSOLVE} ${ESMC_HAVE_PVODE} ${ESMC_HAV
 EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}        ${PVODE_LIB}        ${PARMETIS_LIB} \
                   ${AMS_LIB}        ${SPAI_LIB}                                                  \
                   ${ADIC_LIB} 
+
+
+#
+# ESMF_EXHAUSTIVE is passed (by CPP) into test
+# programs to control the number of tests that 
+# a test program will do.
+#
+ifeq ($(ESMF_EXHAUSTIVE),ON) 
+FCPPFLAGS += -DESMF_EXHAUSTIVE 
+CCPPFLAGS += -DESMF_EXHAUSTIVE 
+endif
+
+
+
 #
 # ----------------------------------------------------------------------------------------
 #
