@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.57 2004/03/16 23:03:04 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.58 2004/03/16 23:28:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.57 2004/03/16 23:03:04 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.58 2004/03/16 23:28:43 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -324,7 +324,7 @@
 
 !==============================================================================
 !BOP    
-! !IROUTINE: ESMF_CalendarCreate - Create a copy of a Calendar
+! !IROUTINE: ESMF_CalendarCreateCopy - Create a copy of a Calendar
 
 ! !INTERFACE:
       function ESMF_CalendarCreateCopy(calendar, rc)
@@ -360,7 +360,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarCreate - Create a custom Calendar
+! !IROUTINE: ESMF_CalendarCreateCustom - Create a custom Calendar
 
 ! !INTERFACE:
       function ESMF_CalendarCreateCustom(name, daysPerMonth, secondsPerDay, &
@@ -461,7 +461,7 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarCreate - Create a new Calendar
+! !IROUTINE: ESMF_CalendarCreateNew - Create a new Calendar
 
 ! !INTERFACE:
       function ESMF_CalendarCreateNew(name, calendarType, rc)
@@ -746,7 +746,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSet - Set a custom Calendar
+! !IROUTINE: ESMF_CalendarSetCustom - Set a custom Calendar
 
 ! !INTERFACE:
       subroutine ESMF_CalendarSetCustom(calendar, name, daysPerMonth, &
@@ -846,7 +846,7 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSet - Set the Calendar type
+! !IROUTINE: ESMF_CalendarSetNew - Set the Calendar type
 
 ! !INTERFACE:
       subroutine ESMF_CalendarSetNew(calendar, name, calendarType, rc)
