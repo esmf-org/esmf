@@ -1,4 +1,4 @@
-% $Id: LogErr_refdoc.ctex,v 1.8 2003/10/21 03:56:51 cdeluca Exp $
+% $Id: LogErr_refdoc.ctex,v 1.10 2004/03/16 20:08:08 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,8 +51,10 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
+\input{LogErr_usage}
 \input{LogErr_fex}
 #elif defined(CONSTITUENT)
+\input{../Infrastructure/LogErr/doc/LogErr_usage}
 \input{../Infrastructure/LogErr/doc/LogErr_fex}
 #endif
 
@@ -68,6 +70,13 @@
 \input{LogErr_implnotes}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/LogErr/doc/LogErr_implnotes}
+#endif
+
+%\subsection{Object Model}
+#ifdef STANDALONE
+\input{Log_obj.tex}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/LogErr/doc/Log_obj.tex}
 #endif
 
 \subsection{Global Parameters and Definitions}
