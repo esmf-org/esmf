@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/28 17:45:32 svasquez Exp $ 
+# $Id: makefile,v 1.5 2003/05/23 15:44:33 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -26,10 +26,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-$(ESMC_TESTDIR)/ESMF_SysTestNNNNN: ESMF_SysTestNNNNN.o  chkopts
-	${F90CXXLD} -o ESMF_SysTestNNNNN ESMF_SysTestNNNNN.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	mv -f ESMF_SysTestNNNNN $(ESMC_TESTDIR)
-	${RM} *.o *.mod
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt core $(SYSTEM_TESTS_BUILD)
+CLOBBERDIRS =
 
 RUN_ESMF_SysTestNNNNN:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTestNNNNN.tmps
