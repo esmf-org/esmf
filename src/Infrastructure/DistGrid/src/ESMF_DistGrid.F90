@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.60 2003/07/25 23:14:50 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.61 2003/07/29 18:51:23 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.60 2003/07/25 23:14:50 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.61 2003/07/29 18:51:23 dneckels Exp $'
 
 !==============================================================================
 !
@@ -1639,10 +1639,30 @@
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
+ 
+      integer :: i, j
+      type(ESMF_DistGridType) , pointer :: dg
 
-!
-!  code goes here
-!
+      print *, 'DistGrid Print:'
+
+      dg => distgrid%ptr
+
+
+      !Print the global axis indicies per DE
+      if (associated(dg%ai_global)) then
+      do i = 1, size(dg%ai_global, 1)
+         print *, '   DE:', i
+         do j = 1, size(dg%ai_global, 2)
+            print *, 'min:', dg%ai_global(i,j)%min, 'max:', &
+            dg%ai_global(i,j)%max
+         enddo
+      end do
+      else
+      print *, 'ai_global array not associated'
+      endif
+
+
+
       end subroutine ESMF_DistGridPrint
 
 !------------------------------------------------------------------------------
