@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.23 2004/05/24 16:44:49 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.24 2004/05/25 04:48:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.23 2004/05/24 16:44:49 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.24 2004/05/25 04:48:32 nscollins Exp $'
 
 !==============================================================================
 !
@@ -630,7 +630,7 @@
 !           associated with the precomputed 
 !           information for a halo operation on this {\tt ESMF\_Bundle}.
 !           This handle must be supplied at run time to execute the halo.
-!     \item [{halodirection]}]
+!     \item [{[halodirection]}]
 !           Optional argument to restrict halo direction to a subset of the
 !           possible halo directions.  If not specified, the halo is executed
 !           along all boundaries.
