@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.5 2003/02/11 16:25:21 jwolfe Exp $
+// $Id: ESMC_Base.h,v 1.6 2003/02/26 20:10:36 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,6 +113,7 @@ struct ESMC_AxisIndex {
     int       r;
     int     max;
     int  decomp;
+    int  gstart;
 };
 
 // elemental index for chunks of memory
