@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.27 2004/05/24 22:59:02 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.28 2004/05/25 20:07:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -354,7 +354,7 @@
       ESMF_GRID_TYPE_LATLON_MERC       = ESMF_GridType( 4), &
       ESMF_GRID_TYPE_REDUCED           = ESMF_GridType( 5), &
       ESMF_GRID_TYPE_DIPOLE            = ESMF_GridType( 6), &
-      ESMF_GRID_TYPE_TRIPLOE           = ESMF_GridType( 7), &
+      ESMF_GRID_TYPE_TRIPOLE           = ESMF_GridType( 7), &
       ESMF_GRID_TYPE_XY                = ESMF_GridType( 8), &
       ESMF_GRID_TYPE_XY_UNI            = ESMF_GridType( 9), &
       ESMF_GRID_TYPE_DATASTREAM        = ESMF_GridType(10), &
@@ -492,7 +492,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.27 2004/05/24 22:59:02 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.28 2004/05/25 20:07:05 jwolfe Exp $'
 
 !==============================================================================
 !
