@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldTest.F90,v 1.5 2003/03/12 23:59:11 svasquez Exp $
+! $Id: ESMF_FieldTest.F90,v 1.6 2003/03/13 16:45:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldTest.F90,v 1.5 2003/03/12 23:59:11 svasquez Exp $'
+      '$Id: ESMF_FieldTest.F90,v 1.6 2003/03/13 16:45:17 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -56,8 +56,8 @@
 
 !     !LOCAL VARIABLES:
       integer :: x, y
-      type(ESMF_Grid) :: grid
-      type(ESMF_Array) :: arr
+      type(ESMF_Grid) :: grid, grid2
+      type(ESMF_Array) :: arr, arr2
       real, dimension(:,:), pointer :: f90ptr1
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
@@ -68,19 +68,13 @@
       print *, "******************FIELDS UNIT TESTS****************************"
       print *
 
-     ! Verifing that printing an uninitialized Field is handled properly.
-      call ESMF_FieldPrint(f1, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Printing an uninitialized Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
       ! Verifing that a Field can be created with no data
       f1 = ESMF_FieldCreateNoData()
       write(failMsg, *) ""
       write(name, *) "Creating a Field with no data Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      ! Verifing that an initialized  Field can be printed
+      ! Verifing that an initialized Field can be printed
       call ESMF_FieldPrint(f1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing an initialized Field with no data Test"
@@ -96,6 +90,12 @@
       call ESMF_FieldDestroy(f1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Destroying initialized Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     ! Verifing that printing an uninitialized Field is handled properly.
+      call ESMF_FieldPrint(f2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing an uninitialized Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
        ! verify that querying the name of a destroyed Field is handled properly.
@@ -142,6 +142,12 @@
       write(name, *) "Recreate a destroyed Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f2)
+
+      ! Verifing that an uninitialized Grid can be printed
+      call ESMF_GridPrint(grid, "", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing an uninitialized Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that a Grid can be created
       grid =  ESMF_GridCreate("atmgrid", rc=rc)
@@ -193,6 +199,14 @@
       call ESMF_FieldDestroy(f3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Destroying a Field with a Grid and Array Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldPrint(f3)
+
+      ! Verifing that a Field can be created with an uninitialized Grid and Array
+      f3 = ESMF_FieldCreate(grid2, arr2, ESMF_NO_COPY, ESMF_CELL_CENTER, &
+                                   dm, "Field 0", ios, rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f3)
 
