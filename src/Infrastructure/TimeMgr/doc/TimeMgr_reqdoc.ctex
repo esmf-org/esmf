@@ -1,4 +1,4 @@
-% $Header: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/Infrastructure/TimeMgr/doc/Attic/TimeMgr_reqdoc.ctex,v 1.3 2003/02/11 18:55:53 eschwab Exp $
+% $Header: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/Infrastructure/TimeMgr/doc/Attic/TimeMgr_reqdoc.ctex,v 1.4 2003/07/25 10:40:13 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -145,82 +145,20 @@
 %\addcontentsline{toc}{section}{Glossary}
 #endif
 
-\def\refname{Reference Material}
-\def\bibname{Reference Material}
-\begin{thebibliography}{99}
-
-\bibitem{1}
-\textsl{International Earth Rotation Service (IERS)}
-\begin{rawhtml}<A href=http://hpiers.obspm.fr>\end{rawhtml}
-http://hpiers.obspm.fr \newline
-\begin{rawhtml}</A>\end{rawhtml}
-\begin{rawhtml}<A href=http://hpiers.obspm.fr/eop-pc/products/bulletins.html>\end{rawhtml}
-IERS Bulletins \newline
-\begin{rawhtml}</A>\end{rawhtml}
-\begin{rawhtml}<A href=http://hpiers.obspm.fr/eop-pc/models/constants.html>\end{rawhtml}
-IERS Constants \newline
-\begin{rawhtml}</A>\end{rawhtml}
-
-\bibitem{2}
-\begin{rawhtml}<A href=//www.cgd.ucar.edu/cms/eaton/netcdf/NCAR-CSM.html>\end{rawhtml}
-\textsl{CSM Time Conventions} 
-\begin{rawhtml}</A>\end{rawhtml}
-
-\bibitem{3}
-\begin{rawhtml}<A href=http://www.omg.org>\end{rawhtml}
-\textsl{OMG\newline} 
-\begin{rawhtml}</A>\end{rawhtml}
-CORBA Time Service Specification Version 1.0
-\begin{rawhtml}<A href=ftp://ftp.omg.org/pub/docs/formal/00-06-26.pdf>\end{rawhtml}
-ftp://ftp.omg.org/pub/docs/formal/00-06-26.pdf
-\begin{rawhtml}</A>\end{rawhtml}
-
-\bibitem{4}
-\begin{rawhtml}<A href=http://www.usno.navy.mil>\end{rawhtml}
-US Naval Observatory\newline
-\begin{rawhtml}</A>\end{rawhtml}
-\begin{rawhtml}<A href=http://tycho.usno.navy.mil>\end{rawhtml}
-US Naval Observatory Time Pages\newline
-\begin{rawhtml}</A>\end{rawhtml}
-
-\bibitem{5}
-\begin{rawhtml}<A href=http://www.w3.org/TR/NOTE-datetime>\end{rawhtml}
-W3C Date and Time Note
-\begin{rawhtml}</A>\end{rawhtml}
-
-\bibitem{6}
-\begin{rawhtml}<A href=http://www.boulder.nist.gov/timefreq/general/faq.htm>\end{rawhtml}
-NIST Time and Date Material
-\begin{rawhtml}</A>\end{rawhtml}
-
-\bibitem{7}
-\begin{rawhtml}<A href=http://www.tondering.dk/claus/calendar.html>\end{rawhtml}
-A Calendar FAQ.
-\begin{rawhtml}</A>\end{rawhtml}
-
-\bibitem{8}
-\begin{rawhtml}<A href=http://www.mcs.vuw.ac.nz/technical/software/SGML/doc/iso8601/ISO8601.html>\end{rawhtml}
-Some notes on the ISO8601 time and date specification standard.
-\begin{rawhtml}</A>\end{rawhtml}
-
-\bibitem{Fli68}
-Fliegel, H.F. and Van Flandern, T.C., Comm.ACM V11 N10, Oct 1968, p657
-Press, W.H., et.al. (1986) 'Numerical Recipes', Cambridge, pp 10-13
-
-\bibitem{javaCalendar}
-\begin{rawhtml}<A href=http://java.sun.com/j2se/1.4/docs/api/java/util/Calendar.html>
-\end{rawhtml}
-The JAVA Calendar Class
-\begin{rawhtml}</A>\end{rawhtml}
-
-\bibitem{wiegers}
-Software Requirements. Karl Eugene Wiegers. Microsoft Press, 1999. ISBN 0-7356-0631-5.
-
-\bibitem{ESMFGenReq}
-ESMF General Requirements.  ESMF Joint Specification Team, 2002.
-
-\end{thebibliography}
-
 #ifdef STANDALONE
 \end{document}
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
