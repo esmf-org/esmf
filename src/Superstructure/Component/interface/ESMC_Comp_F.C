@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.31 2004/12/23 04:41:00 theurich Exp $
+// $Id: ESMC_Comp_F.C,v 1.32 2004/12/23 18:07:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,33 +113,6 @@ static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     if (status) *status = localrc;
 }
 
-
-extern "C" {
-
-static int current_vm_id = 0;
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_ESMC_CompSetVMID"
-void FTN(c_esmc_compsetvmid)(int *id, int *status) 
-{
-     current_vm_id = *id;
-     if (status) 
-         *status = ESMF_SUCCESS;
-     return;
-}
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_ESMC_CompGetVMID"
-void FTN(c_esmc_compgetvmid)(int *id, int *status) 
-{
-     if (id)
-         *id = current_vm_id;
-     if (status) 
-         *status = ESMF_SUCCESS;
-     return;
-}
-
-}
 
 extern "C" {
 static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo);
