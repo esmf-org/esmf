@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.2 2004/03/03 19:44:59 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.3 2004/03/04 21:21:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.2 2004/03/03 19:44:59 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.3 2004/03/04 21:21:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -710,10 +710,10 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_newDELayoutAllReduce
+// !IROUTINE:  ESMC_newDELayoutAllGlobalReduce
 //
 // !INTERFACE:
-int ESMC_newDELayout::ESMC_newDELayoutAllReduce(
+int ESMC_newDELayout::ESMC_newDELayoutAllGlobalReduce(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -721,18 +721,31 @@ int ESMC_newDELayout::ESMC_newDELayoutAllReduce(
 // !ARGUMENTS:
 //
   ESMC_VM &vm,    // reference to ESMC_VM object
-  int *array,     // input array
-  int *result,    // output array
-  int len,        // number of elements in input and output arrays
+  void **srcdata, // input array
+  int *result,    // result
+  int len,        // number of elements in each DE
   ESMC_newOp op){ // reduction operation
 //
 // !DESCRIPTION:
-//    Print details of DELayout object 
+//    Reduce data into a single value
 //
 //EOP
 //-----------------------------------------------------------------------------
-  // simple 1:1 implementation  -> will be more complicated for general case
-  vm.vmachine_allreduce(array, result, len, (vmOp)op);
+  // very crude implementation of a layout wide GlobalReduce
+  int mypet = vm.vmachine_mypet();
+  // first reduce across all of this PET's DEs
+  int localresult=0;
+  for (int i=0; i<nmydes; i++){
+    // looping over all of my DEs
+    int *tempdata = (int *)srcdata[i];  // hardcoded for 32bit integer data
+    for (int j=0; j<len; j++){
+      // looping over all the elements in this DE
+      localresult += tempdata[j];
+    }
+  }
+  // now each PET holds the reduced result for all its DEs
+  // next is to allreduce this result across the entire VM
+  vm.vmachine_allreduce((void *)&localresult, result, 1, vmI4, (vmOp)op);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
