@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.15 2003/04/15 16:47:41 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.16 2003/04/16 21:11:15 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.15 2003/04/15 16:47:41 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.16 2003/04/16 21:11:15 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1216,6 +1216,35 @@
     return(*this);
 
 }  // end ESMC_BaseTime::operator-=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTime(=) - assignment operator
+//
+// !INTERFACE:
+      ESMC_BaseTime& ESMC_BaseTime::operator=(
+//
+// !RETURN VALUE:
+//    ESMC_BaseTime& result
+//
+// !ARGUMENTS:
+      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime
+//
+// !DESCRIPTION:
+//      Assign current object's (this) {\tt BaseTime} with given
+//      {\tt BaseTime}.  Supports ESMC_Time & ESMC_TimeInterval
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO: should be implicit, but then won't support
+    //   ESMC_Time & ESMC_TimeInterval ?
+    S  = baseTime.S;
+    Sn = baseTime.Sn;
+    Sd = baseTime.Sd;
+
+    return(*this);
+
+}  // end ESMC_BaseTime::operator=
 
 //-------------------------------------------------------------------------
 //BOP
