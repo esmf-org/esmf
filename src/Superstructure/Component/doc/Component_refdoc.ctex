@@ -1,0 +1,383 @@
+% $Id: Component_refdoc.ctex,v 1.1 2003/03/11 04:39:46 cdeluca Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{Component Reference Manual}
+\newcommand{\myauthors}{Nancy Collins}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+\section{Synopsis}
+#ifdef STANDALONE
+\input{Component_syn}
+#elif defined(CONSTITUENT)
+\input{comppath/Component_syn}
+#endif
+
+\section{Object Model}
+#ifdef STANDALONE
+\input{Component_obj}
+#elif defined(CONSTITUENT)
+\input{comppath/Component_obj}
+#endif
+
+
+%%%%%%%%%%%%% Component Superclass %%%%%%%%%
+\section{Component Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{comp_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/comp_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{comp_design}
+#elif defined(CONSTITUENT)
+\input{comppath/comp_design}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{comp_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/comp_rest}
+#endif
+
+\section{Component F90 Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{compex_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/compex_fapi}
+#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{comp_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/comp_fapi}
+#endif
+
+\section{Component C++ Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{compex_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/compex_ccapi}
+#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{comp_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/comp_ccapi}
+#endif
+
+
+%%%%%%%%%%%%% Application Class %%%%%%%%%
+\section{Application Component Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{app_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/app_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{app_design}
+#elif defined(CONSTITUENT)
+\input{comppath/app_design}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{app_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/app_rest}
+#endif
+
+\subsection{Application F90 Use and Examples}
+#ifdef STANDALONE
+\input{appmainex_fapi}
+\input{appcompex_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/appmainex_fapi}
+\input{comppath/appcompex_fapi}
+#endif
+
+\subsection{Application C++ Use and Examples}
+#ifdef STANDALONE
+\input{appmainex_ccapi}
+\input{appcompex_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/appmainex_ccapi}
+\input{comppath/appcompex_ccapi}
+#endif
+
+
+
+
+%%%%%%%%%%%%% Gridded Component Class %%%%%%%%%
+\section{Gridded Component Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{gcomp_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/gcomp_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{gcomp_design}
+#elif defined(CONSTITUENT)
+\input{comppath/gcomp_design}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{gcomp_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/gcomp_rest}
+#endif
+
+\subsection{Gridded Component F90 Use and Examples}
+#ifdef STANDALONE
+\input{gcompex_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/gcompex_fapi}
+#endif
+
+\subsection{Gridded Component C++ Use and Examples}
+#ifdef STANDALONE
+\input{gcompex_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/gcompex_ccapi}
+#endif
+
+
+
+%%%%%%%%%%%%% Coupler Class %%%%%%%%%
+\section{Coupler Component Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{cpl_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/cpl_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{cpl_design}
+#elif defined(CONSTITUENT)
+\input{comppath/cpl_design}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{cpl_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/cpl_rest}
+#endif
+
+\subsection{Coupler F90 Use and Examples}
+#ifdef STANDALONE
+\input{cplex_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/cplex_fapi}
+#endif
+
+\subsection{Coupler C++ Use and Examples}
+#ifdef STANDALONE
+\input{cplex_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/cplex_ccapi}
+#endif
+
+
+
+
+
+%%%%%%%%%%%%% State Class %%%%%%%%%
+\section{State Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{state_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/state_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{state_design}
+#elif defined(CONSTITUENT)
+\input{comppath/state_design}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{state_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/state_rest}
+#endif
+
+\section{State F90 Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{stateex_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/stateex_fapi}
+#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{state_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/state_fapi}
+#endif
+
+\section{State C++ Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{stateex_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/stateex_ccapi}
+#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{state_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/state_ccapi}
+#endif
+
+
+
+%%%%%%%%%%%%% Transform Class %%%%%%%%%
+\section{Transform Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{xform_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/xform_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{xform_design}
+#elif defined(CONSTITUENT)
+\input{comppath/xform_design}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{xform_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/xform_rest}
+#endif
+
+\section{Transform F90 Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{xformex_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/xformex_fapi}
+#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{xform_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/xform_fapi}
+#endif
+
+\section{Transform C++ Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{xformex_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/xformex_ccapi}
+#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{xform_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/xform_ccapi}
+#endif
+
+
+%%%%%%% end class sections %%%%%%%%
+
+#ifdef STANDALONE
+\section{Review Status}
+\input{Component_desrev}
+#endif
+
+#ifdef STANDALONE
+%\section{Glossary}
+\input{Component_glos}
+#endif
+
+#ifdef STANDALONE
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif

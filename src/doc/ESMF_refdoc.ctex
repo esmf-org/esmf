@@ -103,90 +103,90 @@
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Superstructure/Coupler/doc/Coupler_desdoc.ctex"
+#include "../Superstructure/Coupler/doc/Coupler_refdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Fields}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Fields}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Fields}
+%\end{htmlonly}
+%\part{Infrastructure Fields and Grids: Fields}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/Field/doc/Field_desdoc.ctex"
+#include "../Infrastructure/Field/doc/Field_refdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Physical Grids}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Physical Grids}
-\label{part:Infrastructure_Fields_and_Grids:_Physical_Grids}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Physical Grids}
+%\end{htmlonly}
+%\part{Infrastructure Fields and Grids: Physical Grids}
+%\label{part:Infrastructure_Fields_and_Grids:_Physical_Grids}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/PhysGrid/doc/PhysGrid_desdoc.ctex"
+%#include "../Infrastructure/PhysGrid/doc/PhysGrid_desdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Distributed Grids}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Distributed Grids}
-\label{part:Infrastructure_Fields_and_Grids:_Distributed_Grids}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Distributed Grids}
+%\end{htmlonly}
+%\part{Infrastructure Fields and Grids: Distributed Grids}
+%\label{part:Infrastructure_Fields_and_Grids:_Distributed_Grids}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/DistGrid/doc/DistGrid_desdoc.ctex"
+%#include "../Infrastructure/DistGrid/doc/DistGrid_desdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Regridding}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Regridding}
-\label{part:Infrastructure_Fields_and_Grids:_Regridding}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Regridding}
+%\end{htmlonly}
+%\part{Infrastructure Fields and Grids: Regridding}
+%\label{part:Infrastructure_Fields_and_Grids:_Regridding}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/Regrid/doc/Regrid_desdoc.ctex"
+%#include "../Infrastructure/Regrid/doc/Regrid_desdoc.ctex"
 %====================================================================================================
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
-\end{htmlonly}
-\part{Infrastructure Utilities: Time Management}
-\label{part:Infrastructure_Utilities:_Time_Management}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Time Management}
+%\label{part:Infrastructure_Utilities:_Time_Management}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/TimeMgr/doc/TimeMgr_desdoc.ctex"
+%#include "../Infrastructure/TimeMgr/doc/TimeMgr_desdoc.ctex"
 %====================================================================================================
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
-\end{htmlonly}
-\part{Infrastructure Utilities: Communication and Memory Kernels}
-\label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Communication and Memory Kernels}
+%\label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/CommMem/doc/CommMem_desdoc.ctex"
+%#include "../Infrastructure/CommMem/doc/CommMem_desdoc.ctex"
 %====================================================================================================
 
 %\newpage
@@ -204,73 +204,73 @@
 % replace % with # below to uncomment
 %include "../Infrastructure/ConfigAttr/doc/ConfigAttr_reqdoc.ctex"
 %====================================================================================================
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Performance Profiling}
-\end{htmlonly}
-\part{Infrastructure Utilities: Performance Profiling}
-\label{part:Infrastructure_Utilities:_Performance_Profiling}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Performance Profiling}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Performance Profiling}
+%\label{part:Infrastructure_Utilities:_Performance_Profiling}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/PerfProf/doc/PerfProf_desdoc.ctex"
+%#include "../Infrastructure/PerfProf/doc/PerfProf_desdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
-\end{htmlonly}
-\part{Infrastructure Utilities: Log}
-\label{part:Infrastructure_Utilities:_Log}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Log}
+%\label{part:Infrastructure_Utilities:_Log}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/LogErr/doc/Log_desdoc.ctex"
+%#include "../Infrastructure/LogErr/doc/Log_desdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: I/O}
-\end{htmlonly}
-\part{Infrastructure Utilities: I/O}
-\label{part:Infrastructure Utilities:_I/O}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: I/O}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: I/O}
+%\label{part:Infrastructure Utilities:_I/O}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/IO/doc/IO_desdoc.ctex"
+%#include "../Infrastructure/IO/doc/IO_desdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
-\end{htmlonly}
-\part{Infrastructure Utilities: Configuration Attributes}
-\label{part:Infrastructure_Utilities:_CA}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Configuration Attributes}
+%\label{part:Infrastructure_Utilities:_CA}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/ConfigAttr/doc/ConfigAttr_desdoc.ctex"
+%#include "../Infrastructure/ConfigAttr/doc/ConfigAttr_desdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Glossary}
-\end{htmlonly}
-\part{Glossary}
-\label{part:Glossary}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Glossary}
+%\end{htmlonly}
+%\part{Glossary}
+%\label{part:Glossary}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 %\section{Glossary}
 \input{ESMF_terms}
