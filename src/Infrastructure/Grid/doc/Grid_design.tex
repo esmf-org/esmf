@@ -1,10 +1,11 @@
-% $Id: Grid_design.tex,v 1.3 2003/10/08 21:06:09 jwolfe Exp $
+% $Id: Grid_design.tex,v 1.4 2004/08/16 22:52:50 jwolfe Exp $
 
 %\subsection{Design}
 
 % <Describe strategy for overall class design.>
 
-Each Grid contains at least one Distributed Grid and one Physical Grid.
+Each Grid contains at least one Distributed Grid and one Physical Grid, both
+of which are private classes.
 The separation into two internal classes allows the code to differentiate
 between functions which define the local decomposition of data and
 the local representation of the grid.  The Grid class itself maintains
