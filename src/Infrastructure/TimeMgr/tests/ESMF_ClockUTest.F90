@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.16 2003/04/22 16:16:10 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.17 2003/04/22 21:34:27 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.16 2003/04/22 16:16:10 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.17 2003/04/22 21:34:27 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -72,84 +72,13 @@
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
-#ifdef ESMF_EXHAUSTIVE
-      ! initialize clock time intervals and instants
-      call ESMF_TimeIntervalInit(timeStep, S=1, rc=rc)
-      YR=2003
-      call ESMF_TimeInit(startTime, YR=YR, MM=3, DD=13, &
-                         cal=gregorianCalendar, rc=rc)
-      call ESMF_TimeInit(stopTime, YR=YR, MM=3, DD=14, &
-                         cal=gregorianCalendar, rc=rc)
+!--------------------------------------------------------------------------------
+!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!     to OFF, then only the sanity unit tests.
+!--------------------------------------------------------------------------------
 
-      ! initialize the clock
-      call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
-
-      ! print out initialized variables
-      call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
-      call ESMF_TimeIntervalPrint(timeStep, rc=rc)
-      call ESMF_TimePrint(startTime, rc=rc)
-      call ESMF_TimePrint(stopTime, rc=rc)
-      call ESMF_ClockPrint(clock, rc=rc)
-
-      ! time step from start time to stop time
-      do while (.not.ESMF_ClockIsStopTime(clock, rc))
-        call ESMF_ClockAdvance(clock, rc=rc)
-        call ESMF_ClockPrint(clock, rc=rc)
-      end do
-
-      ! print out ending clock state
-      call ESMF_ClockPrint(clock, rc=rc)
-
-
-#if 0
-      ! test initialization of members of statically allocated ESMF_Clock
-      !   may want to read back values via Get methods for comparison
-      call ESMF_ClockInit(clock, args, rc)
-      write(name, *) "ESMF_ClockInit"
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test setting of ESMF_Clock members values
-      <value type> :: value_set
-      call ESMF_ClockSet<Value>(clock, value_set, rc)
-      write(name, *) "ESMF_ClockSet<Value>"
-      write(failMsg, *) "rc =", rc, ", value_set =", value_set
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test getting of ESMF_Clock members values,
-      !   compare to values set previously
-      <value type> :: value_get
-      call ESMF_ClockGet<Value>(clock, value_get, rc)
-      write(name, *) "ESMF_ClockGet<Value>"
-      write(failMsg, *) "rc =", rc, ", value_get =", value_get
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
-                      name, failMsg, result, ESMF_SRCLINE)
-    
-      ! test validate method via option string
-      character(ESMF_MAXSTR) :: validate_options
-      call ESMF_ClockValidate(clock, validate_options, rc)
-      write(name, *) "ESMF_ClockValidate"
-      write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test print method via option string
-      character(ESMF_MAXSTR) :: print_options
-      call ESMF_ClockPrint(clock, print_options, rc)
-      write(name, *) "ESMF_ClockPrint"
-      write(failMsg, *) "rc =", rc, ", print_options =", print_options
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-#else
-
-      ! perform non-exhaustive tests here;
-      !   use same templates as above
-      print *, "****************** NON-EXHAUSTIVE FIELDS UNIT TESTS****************************"
-      print *
 
 
       ! initialize clock time intervals and instants
@@ -219,6 +148,8 @@
        !                name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
+#ifdef ESMF_EXHAUSTIVE
 
       ! Attempt to get un-initialized year from stop time
        write(name, *) "Get Uninitialized StopTime Year Test"
@@ -305,6 +236,8 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+#endif
+
       ! ----------------------------------------------------------------------------
       write(name, *) "Stop Time Initialization Test"
       YR=2003
@@ -332,11 +265,15 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
+#ifdef ESMF_EXHAUSTIVE
+
       write(name, *) "Clock Initialization Test with uninitialized startTime"
       write(failMsg, *) " Returned ESMF_SUCCESS"
       call ESMF_ClockInit(clock, timeStep, startTime2, stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
+#endif
 
       ! ----------------------------------------------------------------------------
       write(name, *) "Clock Initialization Test"
@@ -400,6 +337,7 @@
       ! print out ending clock state
       call ESMF_ClockPrint(clock, rc=rc)
 
+#ifdef ESMF_EXHAUSTIVE
 
       ! ----------------------------------------------------------------------------
       write(name, *) "Clock Initialization with stop time set before start time Test"
@@ -410,6 +348,9 @@
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+#endif
+
 
 #if 0
       ! test initialization of members of statically allocated ESMF_Clock
@@ -452,8 +393,6 @@
       write(failMsg, *) "rc =", rc, ", print_options =", print_options
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-#endif
-
 #endif
 
       ! return number of failures to environment; 0 = success (all pass)
