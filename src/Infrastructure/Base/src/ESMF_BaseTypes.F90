@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.14 2005/02/11 22:49:08 theurich Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.15 2005/03/29 19:12:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -342,6 +342,20 @@
 
 !------------------------------------------------------------------------------
 !
+!     ! Typed context flag
+
+      type ESMF_ContextFlag
+      sequence
+      private
+          integer :: value
+      end type
+
+      type(ESMF_ContextFlag), parameter:: &
+        ESMF_CHILD_IN_NEW_VM     = ESMF_ContextFlag(1), &
+        ESMF_CHILD_IN_PARENT_VM  = ESMF_ContextFlag(2)
+
+!------------------------------------------------------------------------------
+!
 !     ! Typed termination type
 
       type ESMF_TerminationType
@@ -392,6 +406,7 @@
 
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_NONBLOCKING
+      public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
       public ESMF_TerminationType, ESMF_FINAL, ESMF_ABORT
 
       public ESMF_FAILURE, ESMF_SUCCESS
@@ -441,6 +456,7 @@ interface operator (.eq.)
  module procedure ESMF_tfeq
  module procedure ESMF_aieq
  module procedure ESMF_bfeq
+ module procedure ESMF_cfeq
  module procedure ESMF_tteq
 end interface
 
@@ -452,6 +468,7 @@ interface operator (.ne.)
  module procedure ESMF_tfne
  module procedure ESMF_aine
  module procedure ESMF_bfne
+ module procedure ESMF_cfne
  module procedure ESMF_ttne
 end interface
 
@@ -553,6 +570,23 @@ function ESMF_bfne(bf1, bf2)
  type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
 
  ESMF_bfne = (bf1%value .ne. bf2%value)
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_ContextFlags
+
+function ESMF_cfeq(cf1, cf2)
+ logical ESMF_cfeq
+ type(ESMF_ContextFlag), intent(in) :: cf1, cf2
+
+ ESMF_cfeq = (cf1%value .eq. cf2%value)
+end function
+
+function ESMF_cfne(cf1, cf2)
+ logical ESMF_cfne
+ type(ESMF_ContextFlag), intent(in) :: cf1, cf2
+
+ ESMF_cfne = (cf1%value .ne. cf2%value)
 end function
 
 !------------------------------------------------------------------------------

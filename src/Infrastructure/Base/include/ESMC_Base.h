@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.66 2005/01/13 22:26:43 theurich Exp $
+// $Id: ESMC_Base.h,v 1.67 2005/03/29 19:12:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,6 +62,10 @@ enum ESMC_Status { ESMF_STATUS_UNINIT=1,
 // comm types
 enum ESMC_BlockingFlag { ESMF_BLOCKING=1,
                          ESMF_NONBLOCKING};
+
+// context flag
+enum ESMC_ContextFlag { ESMF_CHILD_IN_NEW_VM=1,
+                        ESMF_CHILD_IN_PARENT_VM};
 
 // ESMF data types and kinds.
 // this is demented, frankly.  There should be a "TypeKind" single
