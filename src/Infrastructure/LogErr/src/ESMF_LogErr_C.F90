@@ -1,4 +1,4 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.3 2003/04/25 20:08:37 shep_smith Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.4 2003/07/24 20:01:40 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,12 +23,12 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.3 2003/04/25 20:08:37 shep_smith Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.4 2003/07/24 20:01:40 dneckels Exp $'
 !==============================================================================
    subroutine f_esmf_logopenfortran(isOpen, unitNumber, nameLogFile)
          use ESMF_BaseMod    ! ESMF base class
          use ESMF_LogErrMod
-      integer, intent(inout) ::  isOpen     !if file successfully opened
+      type(ESMF_Logical), intent(inout) :: isOpen !if file successfully opened
                                             !isOpen set to ESMF_LOG_TRUE
                                             !otherwise set to ESMF_LOG_FALSE
       integer, intent(inout) ::  unitNumber ! Fortran unit number for I/O
@@ -53,7 +53,7 @@
        use ESMF_LogErrMod
        integer, intent(in) :: unitNumber   
        character(len=*), intent(in) :: stringData  
-       integer, intent(in) :: flushSet   
+       type(ESMF_Logical), intent(in) :: flushSet   
 
        call ESMF_LogPrintString(unitNumber, stringData,flushSet)
 
@@ -64,7 +64,7 @@
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_LogErrMod
        integer, intent(in) :: unitNumber   
-       integer, intent(in) :: flushSet   
+       type(ESMF_Logical), intent(in) :: flushSet   
 
        call ESMF_LogPrintNewline(unitNumber, flushSet)
 
