@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.5 2003/07/23 17:01:17 jwolfe Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.6 2003/07/24 22:35:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.5 2003/07/23 17:01:17 jwolfe Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.6 2003/07/24 22:35:23 nscollins Exp $'
 !
 !==============================================================================
 
@@ -133,6 +133,8 @@
                                       ESMF_DOMAIN_EXCLUSIVE, exclindex, status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
+        status = ESMF_SUCCESS
+
  10   continue
         if (present(rc)) rc = status
         end subroutine ESMF_ArraySetAxisIndex
@@ -165,8 +167,8 @@
           call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_TOTAL, totalindex,&
                                         status)
           do i=1,size(totalindex)
-            totalindex(i).min = totalindex(i).min + 1
-            totalindex(i).max = totalindex(i).max + 1
+            totalindex(i)%min = totalindex(i)%min + 1
+            totalindex(i)%max = totalindex(i)%max + 1
           enddo
         endif
         if (status .ne. ESMF_SUCCESS) goto 10
@@ -175,8 +177,8 @@
           call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
                                         compindex, status)
           do i=1,size(compindex)
-            compindex(i).min = compindex(i).min + 1
-            compindex(i).max = compindex(i).max + 1
+            compindex(i)%min = compindex(i)%min + 1
+            compindex(i)%max = compindex(i)%max + 1
           enddo
         endif
         if (status .ne. ESMF_SUCCESS) goto 10
@@ -185,11 +187,13 @@
           call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
                                         exclindex, status)
           do i=1,size(exclindex)
-            exclindex(i).min = exclindex(i).min + 1
-            exclindex(i).max = exclindex(i).max + 1
+            exclindex(i)%min = exclindex(i)%min + 1
+            exclindex(i)%max = exclindex(i)%max + 1
           enddo
         endif
         if (status .ne. ESMF_SUCCESS) goto 10
+
+        status = ESMF_SUCCESS
 
  10   continue
         if (present(rc)) rc = status
@@ -265,6 +269,8 @@
         enddo
       endif
           
+      status = ESMF_SUCCESS
+
       if (present(rc)) rc = status
 
       end subroutine ESMF_ArrayGetAllAxisIndices
