@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.23 2004/03/09 12:48:31 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.24 2004/03/09 13:05:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.23 2004/03/09 12:48:31 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.24 2004/03/09 13:05:22 theurich Exp $'
 
 !==============================================================================
 !
@@ -1003,7 +1003,7 @@
 !     \item[component] 
 !      gridded component object
 !     \item[{[max]}] 
-!      Maximum threading level
+!      Maximum number of PEs per PET
 !     \item[{[pref\_intra\_process]}] 
 !      Intra process communication preference
 !     \item[{[pref\_intra\_ssi]}] 
@@ -1066,7 +1066,7 @@
 !     \item[component] 
 !      gridded component object
 !     \item[{[max]}] 
-!      Maximum threading level
+!      Maximum number of PEs per PET
 !     \item[{[pref\_intra\_process]}] 
 !      Intra process communication preference
 !     \item[{[pref\_intra\_ssi]}] 

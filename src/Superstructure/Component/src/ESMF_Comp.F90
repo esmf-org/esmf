@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.71 2004/03/08 22:50:24 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.72 2004/03/09 13:05:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -125,10 +125,10 @@
          type(ESMF_Grid) :: grid                  ! default grid, gcomp only
          type(ESMF_ModelType) :: mtype            ! model type, gcomp only
 #ifdef ESMF_ENABLE_VM
-         type(ESMF_VM) :: vm_parent               ! reference to the parent VM
-         integer(ESMF_KIND_I4):: npetlist         ! number of PETs in petlist
-         integer(ESMF_KIND_I4),pointer::petlist(:)! list of usble parent PETs 
-         type(ESMF_VMPlan) :: vmplan              ! reference to VMPlam
+         type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
+         integer            :: npetlist           ! number of PETs in petlist
+         integer, pointer   :: petlist(:)         ! list of usble parent PETs 
+         type(ESMF_VMPlan)  :: vmplan             ! reference to VMPlam
          type(ESMF_Pointer) :: vm_info            ! holding pointer to info
          type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
 #endif         
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.71 2004/03/08 22:50:24 svasquez Exp $'
+      '$Id: ESMF_Comp.F90,v 1.72 2004/03/09 13:05:22 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -290,7 +290,7 @@ end function
       type(ESMF_Clock), intent(in), optional :: clock
 #ifdef ESMF_ENABLE_VM      
       type(ESMF_VM), intent(in), optional :: vm
-      integer(ESMF_KIND_I4), intent(in), optional :: petlist(:)
+      integer,       intent(in), optional :: petlist(:)
 #endif      
       integer, intent(out), optional :: rc 
 !
@@ -1592,12 +1592,12 @@ end function
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_CompClass), pointer ::             compp
-    integer(ESMF_KIND_I4), intent(in), optional:: max
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
-    integer, intent(out), optional ::             rc           
+    type(ESMF_CompClass), pointer, intent(in)            :: compp
+    integer,                       intent(in),  optional :: max
+    integer,                       intent(in),  optional :: pref_intra_process
+    integer,                       intent(in),  optional :: pref_intra_ssi
+    integer,                       intent(in),  optional :: pref_inter_ssi
+    integer,                       intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !     Print VM internals
@@ -1608,6 +1608,12 @@ end function
 !          component object
 !     \item[{[max]}] 
 !          Maximum threading level
+!     \item[{[pref\_intra\_process]}] 
+!          Intra process communication preference
+!     \item[{[pref\_intra\_ssi]}] 
+!          Intra SSI communication preference
+!     \item[{[pref\_inter\_ssi]}] 
+!          Inter process communication preference
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1650,12 +1656,12 @@ end function
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_CompClass), pointer ::             compp
-    integer(ESMF_KIND_I4), intent(in), optional:: max
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
-    integer, intent(out), optional ::             rc           
+    type(ESMF_CompClass), pointer, intent(in)            :: compp
+    integer,                       intent(in),  optional :: max
+    integer,                       intent(in),  optional :: pref_intra_process
+    integer,                       intent(in),  optional :: pref_intra_ssi
+    integer,                       intent(in),  optional :: pref_inter_ssi
+    integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Print VM internals
@@ -1665,7 +1671,13 @@ end function
 !     \item[compp] 
 !          component object
 !     \item[{[max]}] 
-!          Maximum threading level
+!          Maximum number of PEs per PET
+!     \item[{[pref\_intra\_process]}] 
+!          Intra process communication preference
+!     \item[{[pref\_intra\_ssi]}] 
+!          Intra SSI communication preference
+!     \item[{[pref\_inter\_ssi]}] 
+!          Inter process communication preference
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1708,12 +1720,12 @@ end function
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_CompClass), pointer ::             compp
-    integer(ESMF_KIND_I4), intent(in), optional:: max
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
-    integer, intent(out), optional ::             rc           
+    type(ESMF_CompClass), pointer, intent(in)            :: compp
+    integer,                       intent(in),  optional :: max
+    integer,                       intent(in),  optional :: pref_intra_process
+    integer,                       intent(in),  optional :: pref_intra_ssi
+    integer,                       intent(in),  optional :: pref_inter_ssi
+    integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Print VM internals
@@ -1723,7 +1735,13 @@ end function
 !     \item[compp] 
 !          component object
 !     \item[{[max]}] 
-!          Maximum threading level
+!          Maximum number of PEs per PET
+!     \item[{[pref\_intra\_process]}] 
+!          Intra process communication preference
+!     \item[{[pref\_intra\_ssi]}] 
+!          Intra SSI communication preference
+!     \item[{[pref\_inter\_ssi]}] 
+!          Inter process communication preference
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
