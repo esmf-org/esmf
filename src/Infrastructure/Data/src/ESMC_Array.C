@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.26 2003/02/17 22:27:10 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.27 2003/02/18 22:38:31 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.26 2003/02/17 22:27:10 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.27 2003/02/18 22:38:31 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -610,6 +610,7 @@
               int rankx, ranky;
               int rmax[3];
               int rsize[3];
+              int rskip[3];
               int rbreak[2];
               int rbcount = 0;
               for (i=0; i<size_decomp; i++) {
@@ -628,6 +629,10 @@
                   rbcount++;
                 }
               }
+              rskip[0] = 1;
+              for (int i=1; i<size_decomp; i++) {
+                rskip[i] = rskip[i-1]*rmax[i-1];
+              }
               // loop over ranks, skipping the first decomposed one, loading
               // up chunks of data to gather
               int k;
@@ -645,7 +650,7 @@
                     for (int ky=0; ky<ny; ky++) {
                       k = ky*nx + kx;
                       recvcounts[k] = rsize[rankx]; // TODO: fix so variable
-                      displs[k] = kx*rsize[rankx] + ky*rmax[rankx]*rsize[ranky];
+                      displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
                     }
                   }
                 // call layout gather routine
