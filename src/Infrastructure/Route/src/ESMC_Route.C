@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.12 2003/03/13 21:16:47 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.13 2003/03/13 22:04:21 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.12 2003/03/13 21:16:47 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.13 2003/03/13 22:04:21 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -222,6 +222,36 @@
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_RouteGetCached - Retrieve a precomputed Route
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteGetCached(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_DELayout *parentlayout, 
+      int *hascachedroute, 
+      ESMC_Route **route) {
+
+//
+// !DESCRIPTION:
+//     Returns the value of Route member <Value>.
+//     Can be multiple routines, one per value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    *hascachedroute = 0;
+    *route = NULL;
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_RouteGet
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_RouteSetSend - set send work request in route table
 //
 // !INTERFACE:
@@ -232,7 +262,6 @@
 //
 // !ARGUMENTS:
       int dest_de,         // in - destination de id
-      void *base_addr,     // in - local source address
       ESMC_XPacket *xp) {  // in - exchange packet
 //
 // !DESCRIPTION:
@@ -244,7 +273,7 @@
     
     int rc;
 
-    rc = sendRT->ESMC_RTableSetEntry(dest_de, base_addr, xp);
+    rc = sendRT->ESMC_RTableSetEntry(dest_de, xp);
 
     return rc;
 
@@ -262,7 +291,6 @@
 //
 // !ARGUMENTS:
       int source_de,       // in - sending de id
-      void *base_addr,     // in - local source address
       ESMC_XPacket *xp) {  // in - exchange packet
 //
 // !DESCRIPTION:
@@ -274,7 +302,7 @@
     
     int rc;
 
-    rc = recvRT->ESMC_RTableSetEntry(source_de, base_addr, xp);
+    rc = recvRT->ESMC_RTableSetEntry(source_de, xp);
 
     return rc;
 
@@ -285,13 +313,14 @@
 // !IROUTINE:  ESMC_RouteRun - Execute the comm routine described by this obj
 //
 // !INTERFACE:
-      int ESMC_Route::ESMC_RouteRun(void) {
+      int ESMC_Route::ESMC_RouteRun(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//     none
+      void *srcaddr,       // in, local send buffer base address
+      void *dstaddr) {     // in, local receive buffer base address
 //
 // !DESCRIPTION:
 //     Calls the communications routines to send/recv the information
