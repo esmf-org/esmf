@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.13 2004/05/26 22:14:21 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.14 2004/06/15 13:34:44 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -921,7 +921,7 @@
 ! Print out some results before finalizing
 !
       ! TODO: need to get the fields from the state object, not a global, i.e.:
-      ! call ESMF_StateGetData(import_state, "U", field_u, rc)
+      ! call ESMF_StateGetField(import_state, "U", field_u, rc)
 
       ! Collect results on DE 0 and output to a file
       call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
@@ -931,7 +931,7 @@
       ! Frame number from computation
       call ESMF_ClockGet(clock, advanceCount=frame, rc=rc)
 
-      ! call ESMF_StateGetData(import_state, "U", field_u, rc)
+      ! call ESMF_StateGetField(import_state, "U", field_u, rc)
       call ESMF_FieldGather(field_u, 0, array2, rc=rc)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", frame
@@ -939,7 +939,7 @@
         call ESMF_ArrayDestroy(array2, rc)
       endif
 
-      ! call ESMF_StateGetData(import_state, "V", field_v, rc)
+      ! call ESMF_StateGetField(import_state, "V", field_v, rc)
       call ESMF_FieldGather(field_v, 0, array2, rc=rc)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", frame
@@ -947,7 +947,7 @@
         call ESMF_ArrayDestroy(array2, rc)
       endif
 
-      ! call ESMF_StateGetData(import_state, "SIE", field_sie, rc)
+      ! call ESMF_StateGetField(import_state, "SIE", field_sie, rc)
       call ESMF_FieldGather(field_sie, 0, array2, rc=rc)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", frame

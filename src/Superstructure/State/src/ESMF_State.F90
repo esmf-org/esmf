@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.63 2004/06/15 07:08:21 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.64 2004/06/15 13:34:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -250,7 +250,6 @@
       public ESMF_StateCreate, ESMF_StateDestroy
 
       public ESMF_StateAddNameOnly
-      public ESMF_StateAddData, ESMF_StateGetData
       public ESMF_StateAddBundle, ESMF_StateAddField, ESMF_StateAddArray
       public ESMF_StateAddState
       public ESMF_StateGetBundle, ESMF_StateGetField, ESMF_StateGetArray
@@ -290,7 +289,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.63 2004/06/15 07:08:21 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.64 2004/06/15 13:34:24 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -303,27 +302,27 @@
 ! !IROUTINE: ESMF_StateAddData -- Add Data to a State
 
 ! !INTERFACE:
-     interface ESMF_StateAddData
+!!     interface ESMF_StateAddData
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_StateAddOneArray
-        module procedure ESMF_StateAddArrayList
-        module procedure ESMF_StateAddOneField
-        module procedure ESMF_StateAddFieldList
-        module procedure ESMF_StateAddOneBundle
-        module procedure ESMF_StateAddBundleList
-        module procedure ESMF_StateAddOneState
-        module procedure ESMF_StateAddStateList
-        module procedure ESMF_StateAddOneName
-        module procedure ESMF_StateAddNameList
+!!        module procedure ESMF_StateAddOneArray
+!!        module procedure ESMF_StateAddArrayList
+!!        module procedure ESMF_StateAddOneField
+!!        module procedure ESMF_StateAddFieldList
+!!        module procedure ESMF_StateAddOneBundle
+!!        module procedure ESMF_StateAddBundleList
+!!        module procedure ESMF_StateAddOneState
+!!        module procedure ESMF_StateAddStateList
+!!        module procedure ESMF_StateAddOneName
+!!        module procedure ESMF_StateAddNameList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_StateAddData} functions.   
 !  
 !EOPI 
-end interface
+!!end interface
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -430,21 +429,21 @@ end interface
 ! !IROUTINE: ESMF_StateGetData -- Retrieve Bundles, Fields, or Arrays from a State
 
 ! !INTERFACE:
-     interface ESMF_StateGetData
+!!     interface ESMF_StateGetData
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_StateGetBundle
-        module procedure ESMF_StateGetField
-        module procedure ESMF_StateGetArray
-        module procedure ESMF_StateGetState
+!!      module procedure ESMF_StateGetBundle
+!!      module procedure ESMF_StateGetField
+!!      module procedure ESMF_StateGetArray
+!!      module procedure ESMF_StateGetState
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_StateGetData} functions.   
 !  
 !EOPI 
-end interface
+!!end interface
 
 !------------------------------------------------------------------------------
 !BOPI

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.13 2004/06/11 02:12:59 cdeluca Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.14 2004/06/15 13:34:41 nscollins Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -185,7 +185,7 @@
     ! No deallocate() is needed for array data, it will be freed when the
     !  Array is destroyed. 
 
-    call ESMF_StateAddData(state1, array1, rc=rc)
+    call ESMF_StateAddArray(state1, array1, rc=rc)
     call ESMF_ArrayGet(array1, name=aname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "Source Array added to state"
@@ -201,7 +201,7 @@
 !-------------------------------------------------------------------------
 !
 
-    call ESMF_StateGetData(state1, aname, array1a, rc=rc)
+    call ESMF_StateGetArray(state1, aname, array1a, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "Source Array retrieved from state"
     

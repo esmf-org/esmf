@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.9 2004/04/28 23:12:15 cdeluca Exp $
+! $Id: user_model2.F90,v 1.10 2004/06/15 13:34:44 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -149,7 +149,7 @@
         ! Set initial data values over exclusive domain to the de identifier
         idata = de_id
 
-        call ESMF_StateAddData(exportState, humidity, rc)
+        call ESMF_StateAddField(exportState, humidity, rc)
         call ESMF_StatePrint(exportState, rc=rc)
 
         print *, "User Comp Init returning"
@@ -186,7 +186,7 @@
         print *, "run, scale_factor = ", mydatablock%scale_factor
 
         ! Get the Field and Bundle data from the State
-        call ESMF_StateGetData(exportState, "humidity", humidity, rc=status)
+        call ESMF_StateGetField(exportState, "humidity", humidity, rc=status)
       
         ! update field values here
         call ESMF_FieldGetArray(humidity, array1, rc=rc) 

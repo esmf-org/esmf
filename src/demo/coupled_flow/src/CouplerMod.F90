@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.14 2004/06/12 17:17:57 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.15 2004/06/15 13:34:41 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -243,8 +243,8 @@
 !   an Export State and the other is an Import State.
 !
 !\begin{verbatim}
-           call ESMF_StateGetData(importState, datanames(i), srcfield, rc=rc)
-           call ESMF_StateGetData(exportState, datanames(i), dstfield, rc=rc)
+           call ESMF_StateGetField(importState, datanames(i), srcfield, rc=rc)
+           call ESMF_StateGetField(exportState, datanames(i), dstfield, rc=rc)
 !\end{verbatim}
 !
 !   The Route routine uses information contained in the Fields and the

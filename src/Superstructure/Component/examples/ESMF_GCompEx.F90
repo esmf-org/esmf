@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.18 2004/06/11 02:12:58 cdeluca Exp $
+! $Id: ESMF_GCompEx.F90,v 1.19 2004/06/15 13:34:24 nscollins Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -56,8 +56,8 @@
         ! This is where the model specific setup code goes.  
  
         ! If the initial Export state needs to be filled, do it here.
-        !call ESMF_StateAddData(exportState, field, rc)
-        !call ESMF_StateAddData(exportState, bundle, rc)
+        !call ESMF_StateAddField(exportState, field, rc)
+        !call ESMF_StateAddBundle(exportState, bundle, rc)
         print *, "Gridded Comp Init returning"
    
     end subroutine GComp_Init
@@ -73,12 +73,12 @@
         integer :: rc
 
         print *, "Gridded Comp Run starting"
-        ! call ESMF_StateGetData() to get fields, bundles, arrays
+        ! call ESMF_StateGetField(), etc to get fields, bundles, arrays
         !  from import state.
 
         ! This is where the model specific computation goes.
 
-        ! Fill export state here using ESMF_StateAddData()
+        ! Fill export state here using ESMF_StateAddField(), etc
 
         print *, "Gridded Comp Run returning"
 

@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.16 2004/05/26 22:15:39 jwolfe Exp $
+! $Id: FlowSolverMod.F90,v 1.17 2004/06/15 13:34:44 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -194,28 +194,28 @@
 ! For initialization, add all fields to the import state.  Only the ones
 ! needed will be copied over to the export state for coupling.
 !
-      call ESMF_StateAddData(import_state, field_sie, rc)
-      call ESMF_StateAddData(import_state, field_u, rc)
-      call ESMF_StateAddData(import_state, field_v, rc)
-      call ESMF_StateAddData(import_state, field_rho, rc)
-      call ESMF_StateAddData(import_state, field_p, rc)
-      call ESMF_StateAddData(import_state, field_q, rc)
-      call ESMF_StateAddData(import_state, field_flag, rc)
+      call ESMF_StateAddField(import_state, field_sie, rc)
+      call ESMF_StateAddField(import_state, field_u, rc)
+      call ESMF_StateAddField(import_state, field_v, rc)
+      call ESMF_StateAddField(import_state, field_rho, rc)
+      call ESMF_StateAddField(import_state, field_p, rc)
+      call ESMF_StateAddField(import_state, field_q, rc)
+      call ESMF_StateAddField(import_state, field_flag, rc)
 !
 ! This is adding names only to the export list, marked by default
 ! as "not needed".  The coupler will mark the ones needed based
 ! on the requirements of the component(s) this is coupled to.
 !
-      call ESMF_StateAddData(export_state, "SIE", rc)
-      call ESMF_StateAddData(export_state, "U", rc)
-      call ESMF_StateAddData(export_state, "V", rc)
-      call ESMF_StateAddData(export_state, "RHO", rc)
-      call ESMF_StateAddData(export_state, "P", rc)
-      call ESMF_StateAddData(export_state, "Q", rc)
-      call ESMF_StateAddData(export_state, "FLAG", rc)
+      call ESMF_StateAddNameOnly(export_state, "SIE", rc)
+      call ESMF_StateAddNameOnly(export_state, "U", rc)
+      call ESMF_StateAddNameOnly(export_state, "V", rc)
+      call ESMF_StateAddNameOnly(export_state, "RHO", rc)
+      call ESMF_StateAddNameOnly(export_state, "P", rc)
+      call ESMF_StateAddNameOnly(export_state, "Q", rc)
+      call ESMF_StateAddNameOnly(export_state, "FLAG", rc)
 
 ! temporary fix
-      call ESMF_StateAddData(export_state, field_sie, rc)
+      call ESMF_StateAddField(export_state, field_sie, rc)
       rc = ESMF_SUCCESS
 
       end subroutine Flow_Init
@@ -650,11 +650,11 @@
         return
       endif
       ! Debug
-      call ESMF_StateAddData(export_state, field_sie, rc=status)
-      call ESMF_StateAddData(export_state, field_u, rc=status)
-      call ESMF_StateAddData(export_state, field_v, rc=status)
-      call ESMF_StateAddData(export_state, field_rho, rc=status)
-      call ESMF_StateAddData(export_state, field_flag, rc=status)
+      call ESMF_StateAddField(export_state, field_sie, rc=status)
+      call ESMF_StateAddField(export_state, field_u, rc=status)
+      call ESMF_StateAddField(export_state, field_v, rc=status)
+      call ESMF_StateAddField(export_state, field_rho, rc=status)
+      call ESMF_StateAddField(export_state, field_flag, rc=status)
       !
       ! Update export state with needed fields
       !
@@ -666,8 +666,8 @@
           endif
 
           ! Set export data in export state
-          call ESMF_StateGetData(import_state, datanames(i), thisfield, rc=status)
-          call ESMF_StateAddData(export_state, thisfield, rc=status)
+          call ESMF_StateGetField(import_state, datanames(i), thisfield, rc=status)
+          call ESMF_StateAddField(export_state, thisfield, rc=status)
 
         enddo
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.12 2004/06/15 08:23:49 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.13 2004/06/15 13:34:41 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -102,9 +102,9 @@
     call ESMF_StatePrint(state2, rc=rc)
     P_OUT("ESMF_StatePrint")
 
-    P_IN("ESMF_StateGetData")
-    call ESMF_StateGetData(state2, "Surface pressure", qbundle, rc=rc)
-    P_OUT("ESMF_StateGetData")
+    P_IN("ESMF_StateGetBundle")
+    call ESMF_StateGetBundle(state2, "Surface pressure", qbundle, rc=rc)
+    P_OUT("ESMF_StateGetBundle")
 
     P_IN("ESMF_BundlePrint")
     call ESMF_BundlePrint(qbundle, "", rc=rc)

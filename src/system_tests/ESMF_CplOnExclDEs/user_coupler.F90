@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2004/03/24 14:54:49 nscollins Exp $
+! $Id: user_coupler.F90,v 1.5 2004/06/15 13:34:42 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -111,7 +111,7 @@
         call ESMF_FieldPrint(humidity1, rc=status)
 
         ! Get location of output data
-        call ESMF_StateGetData(exportState, "humidity", humidity2, rc=rc)
+        call ESMF_StateGetField(exportState, "humidity", humidity2, rc=rc)
         call ESMF_FieldPrint(humidity2, rc=status)
 
         ! Get layout from coupler component

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: user_model2.F90,v 1.5 2004/06/15 13:34:43 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -151,7 +151,7 @@
         idata = de_id
 
 
-        call ESMF_StateAddData(importState, humidity, rc)
+        call ESMF_StateAddField(importState, humidity, rc)
         call ESMF_StatePrint(importState, rc=rc)
 
         print *, "User Comp Init returning"
@@ -180,7 +180,7 @@
 
         ! Get information from the component.
         call ESMF_StatePrint(importState, rc=status)
-        call ESMF_StateGetData(importState, "humidity", humidity, rc=status)
+        call ESMF_StateGetField(importState, "humidity", humidity, rc=status)
         call ESMF_FieldPrint(humidity, "", rc=status)
     
 

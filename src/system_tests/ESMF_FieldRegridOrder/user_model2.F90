@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.16 2004/06/14 22:28:27 jwolfe Exp $
+! $Id: user_model2.F90,v 1.17 2004/06/15 13:34:44 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -162,7 +162,7 @@
       call ESMF_ArrayGetData(array1, idata, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_StateAddData(importState, humidity, rc=status)
+      call ESMF_StateAddField(importState, humidity, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       print *, de_id, "User Comp 2 Init returning"
@@ -191,7 +191,7 @@
       print *, "User Comp Run starting"
 
       ! Get information from the component.
-      call ESMF_StateGetData(importState, "humidity", humidity, rc=status)
+      call ESMF_StateGetField(importState, "humidity", humidity, rc=status)
     
       ! This is where the model specific computation goes.
       call ESMF_FieldGetArray(humidity, array1, rc=status)
@@ -239,7 +239,7 @@
 
       ! check validity of results
       ! Get Fields from import state
-      call ESMF_StateGetData(importState, "humidity", field, rc=rc)
+      call ESMF_StateGetField(importState, "humidity", field, rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30

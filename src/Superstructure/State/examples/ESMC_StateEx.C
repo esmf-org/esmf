@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.6 2004/06/12 17:17:56 cdeluca Exp $
+// $Id: ESMC_StateEx.C,v 1.7 2004/06/15 13:34:24 nscollins Exp $
 //
 // Example/test code which creates a new State.
 
@@ -70,8 +70,8 @@ main(int argc, char **argv) {
     bundle1 = ESMF_BundleCreate(bundlename, rc=rc);
     printf("Bundle Create returned, rc = %d", rc);
 
-    rc = ESMF_StateAddData(state2, bundle1);
-    printf("StateAddData returned, rc = %d", rc);
+    rc = ESMF_StateAddBundle(state2, bundle1);
+    printf("StateAddBundle returned, rc = %d", rc);
 
     // Loop here, updating Bundle contents each time step
 
@@ -102,12 +102,12 @@ main(int argc, char **argv) {
     printf("State Create returned", rc, " name = ", trim(compname)
 
     dataname = "Downward wind";
-    rc = ESMF_StateAddData(state3, dataname);
-    printf("StateAddData returned, rc = %d, name = %s\n", rc, dataname);
+    rc = ESMF_StateAddNameOnly(state3, dataname);
+    printf("StateAddNameOnly returned, rc = %d, name = %s\n", rc, dataname);
 
     dataname = "Humidity";
-    rc = ESMF_StateAddData(state3, dataname)
-    printf("StateAddData returned, rc = %d, name = %s\n", rc, dataname);
+    rc = ESMF_StateAddNameOnly(state3, dataname)
+    printf("StateAddNameOnly returned, rc = %d, name = %s\n", rc, dataname);
 
     // See next example for how this is used.
 
@@ -148,8 +148,8 @@ main(int argc, char **argv) {
         bundle2 = ESMF_BundleCreate(bundlename, rc=rc);
         printf("Bundle Create returned, rc = %d, name = %s\n", rc, bundlename);
 
-        rc = ESMF_StateAddData(state3, bundle2);
-        printf("StateAddData returned, rc = %d\n", rc);
+        rc = ESMF_StateAddBundle(state3, bundle2);
+        printf("StateAddBundle returned, rc = %d\n", rc);
     } else 
         printf("Data marked as not needed, name = %s\n", statename);
 

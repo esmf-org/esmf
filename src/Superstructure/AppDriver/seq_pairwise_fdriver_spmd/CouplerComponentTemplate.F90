@@ -1,4 +1,4 @@
-! $Id: CouplerComponentTemplate.F90,v 1.4 2004/06/08 17:52:49 nscollins Exp $
+! $Id: CouplerComponentTemplate.F90,v 1.5 2004/06/15 13:34:24 nscollins Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -49,8 +49,8 @@
 
       if (ESMF_LogWrite("Coupler Initialize routine called", ESMF_LOG_INFO)) continue
 
-      call ESMF_StateGetData(statelist,  "statename1", state1, rc)
-      call ESMF_StateGetData(statelist,  "statename2", state2, rc)
+      call ESMF_StateGetState(statelist,  "statename1", state1, rc)
+      call ESMF_StateGetState(statelist,  "statename2", state2, rc)
 
       if (ESMF_LogWrite("Coupler Initialize routine returning", ESMF_LOG_INFO)) continue
 

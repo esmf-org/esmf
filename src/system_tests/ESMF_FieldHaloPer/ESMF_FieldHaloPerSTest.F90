@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.28 2004/06/11 02:12:59 cdeluca Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.29 2004/06/15 13:34:43 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -421,13 +421,13 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Add the fields to the import state.
-      call ESMF_StateAddData(importState, field(1), rc)
+      call ESMF_StateAddField(importState, field(1), rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddData(importState, field(2), rc)
+      call ESMF_StateAddField(importState, field(2), rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddData(importState, field(3), rc)
+      call ESMF_StateAddField(importState, field(3), rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddData(importState, field(4), rc)
+      call ESMF_StateAddField(importState, field(4), rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       if (verbose) call ESMF_StatePrint(importState, "", rc)
@@ -493,7 +493,7 @@
 
       ! Get the field from the import state
       if (verbose) print *, "About to get field from import state"
-      call ESMF_StateGetData(importState, "Periodic in X", field1, rc=rc);
+      call ESMF_StateGetField(importState, "Periodic in X", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Call Field method to halo data.  This updates the data in place.
@@ -505,7 +505,7 @@
 
       ! Get the field from the import state
       if (verbose) print *, "About to get field from import state"
-      call ESMF_StateGetData(importState, "Periodic in Y", field1, rc=rc);
+      call ESMF_StateGetField(importState, "Periodic in Y", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Call Field method to halo data.  This updates the data in place.
@@ -517,7 +517,7 @@
 
       ! Get the field from the import state
       if (verbose) print *, "About to get field from import state"
-      call ESMF_StateGetData(importState, "Periodic in both X and Y", field1, rc=rc);
+      call ESMF_StateGetField(importState, "Periodic in both X and Y", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Call Field method to halo data.  This updates the data in place.
@@ -529,7 +529,7 @@
 
       ! Get the field from the import state
       if (verbose) print *, "About to get field from import state"
-      call ESMF_StateGetData(importState, "Not Periodic", field1, rc=rc);
+      call ESMF_StateGetField(importState, "Not Periodic", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Call Field method to halo data.  This updates the data in place.
@@ -578,7 +578,7 @@
 
 
       ! Get Fields from import state
-      call ESMF_StateGetData(importState, "Periodic in X", field1, rc=rc);
+      call ESMF_StateGetField(importState, "Periodic in X", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) then 
         finalrc = ESMF_FAILURE
         goto 30
@@ -587,7 +587,7 @@
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 
-      call ESMF_StateGetData(importState, "Periodic in Y", field1, rc=rc);
+      call ESMF_StateGetField(importState, "Periodic in Y", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) then 
         finalrc = ESMF_FAILURE
         goto 30
@@ -596,7 +596,7 @@
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 
-      call ESMF_StateGetData(importState, "Periodic in both X and Y", field1, rc=rc);
+      call ESMF_StateGetField(importState, "Periodic in both X and Y", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) then 
         finalrc = ESMF_FAILURE
         goto 30
@@ -605,7 +605,7 @@
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 
-      call ESMF_StateGetData(importState, "Not Periodic", field1, rc=rc);
+      call ESMF_StateGetField(importState, "Not Periodic", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) then 
         finalrc = ESMF_FAILURE
         goto 30

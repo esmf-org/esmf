@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.25 2004/06/14 22:26:32 jwolfe Exp $
+! $Id: user_model1.F90,v 1.26 2004/06/15 13:34:43 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -154,7 +154,7 @@
         ! Set initial data values over whole array to our de id
         idata = real(de_id)
 
-        call ESMF_StateAddData(exportState, humidity, rc=status)
+        call ESMF_StateAddField(exportState, humidity, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
      !   call ESMF_StatePrint(exportState, rc=rc)
 
@@ -212,7 +212,7 @@
         print *, "run, scale_factor = ", mydatablock%scale_factor
 
         ! Get the Field and Bundle data from the State
-        call ESMF_StateGetData(exportState, "humidity", humidity, rc=status)
+        call ESMF_StateGetField(exportState, "humidity", humidity, rc=status)
       
         ! get the grid and coordinates
         allocate(coordArray(2))
