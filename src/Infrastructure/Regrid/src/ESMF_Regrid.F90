@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.30 2003/08/28 17:23:28 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.31 2003/08/28 18:47:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,49 +98,8 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.30 2003/08/28 17:23:28 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.31 2003/08/28 18:47:02 nscollins Exp $'
 
-!==============================================================================
-!
-! INTERFACE BLOCKS
-!
-!==============================================================================
-!BOP
-! !INTERFACE:
-      interface ESMF_RegridCreate
-
-! !PRIVATE MEMBER FUNCTIONS:
-         ! TODO: this used to have an entry point for fields, bundles, etc.
-         !  now there should only be an array entry point and the need for
-         !  this interface has really gone away.
-         module procedure ESMF_RegridCreateFromArray
-         
-!
-! !DESCRIPTION:
-!     This interface provides a single entry point for various Regrid create
-!     methods, including a regrid
-!     created from a field pair, a regrid created from input field bundles
-!     and a regrid created by shifting addresses of an existing regrid.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      interface ESMF_RegridRun
-
-! !PRIVATE MEMBER FUNCTIONS:
-         ! TODO: ditto for the comment above about create.
-         module procedure ESMF_RegridRunArray
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for performing the
-!     actual regridding operation.
-!
-!EOP
-      end interface
-!
 !==============================================================================
 
       contains
@@ -151,10 +110,10 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridCreateFromArray - Precomputes Regrid data
+! !IROUTINE: ESMF_RegridCreate - Precomputes Regrid data
 
 ! !INTERFACE:
-      subroutine ESMF_RegridCreateFromArray(srcarray, srcgrid, srcdatamap, &
+      subroutine ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &
                                             dstarray, dstgrid, dstdatamap, &
                                             routehandle, regridmethod, &
                                             srcmask, dstmask, &
@@ -279,13 +238,13 @@
       !-------------
       case(ESMF_RegridMethod_FieldCopy) ! copy field
          !*** no regrid type required
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "Field copy not yet supported"
          status = ESMF_FAILURE
 
       !-------------
       case(ESMF_RegridMethod_Redist)   ! redistribution of field
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "Redistribution not yet supported"
          status = ESMF_FAILURE
 
@@ -298,7 +257,7 @@
 
       !-------------
       case(ESMF_RegridMethod_Bicubic)  ! bicubic
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "Bicubic not yet supported"
          status = ESMF_FAILURE
 
@@ -312,7 +271,7 @@
       !                                        regrid_name, order=2, rc=status)
       !-------------
       case(ESMF_RegridMethod_Raster) ! regrid by rasterizing domain
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "Raster method not yet supported"
          status = ESMF_FAILURE
       !-------------
@@ -321,55 +280,55 @@
       !                                        regrid_name, rc=status)
       !-------------
       case(ESMF_RegridMethod_Fourier) ! Fourier transform
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "Fourier transforms not yet supported"
          status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_Legendre) ! Legendre transform
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "Legendre transforms not yet supported"
          status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_Index) ! index-space regridding (shift, stencil)
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "Index-space methods not yet supported"
          status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_Linear) ! linear for 1-d regridding
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "1-d linear methods not yet supported"
          status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_Spline) ! cubic spline for 1-d regridding
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "1-d cubic splines not yet supported"
          status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_User) ! cubic spline for 1-d regridding
-         print *, "ERROR in ESMF_RegridCreateFromArray: ", &
+         print *, "ERROR in ESMF_RegridCreate: ", &
                   "User-defined regridding not yet supported"
          status = ESMF_FAILURE
       !-------------
       case default
-         print *, "ERROR in ESMF_RegridCreateFromArray: Invalid method"
+         print *, "ERROR in ESMF_RegridCreate: Invalid method"
          status = ESMF_FAILURE
       end select
 
       if (status /= ESMF_SUCCESS) then
          ! Use error function eventually...
-         print *, 'ERROR in ESMF_RegridCreateFromArray: error in creation'
+         print *, 'ERROR in ESMF_RegridCreate: error in creation'
       endif
 
       if (rcpresent) rc = status
 
-      end subroutine ESMF_RegridCreateFromArray
+      end subroutine ESMF_RegridCreate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridRunArray - Performs a regridding between two arrays
+! !IROUTINE: ESMF_RegridRun - Performs a regridding between two arrays
 
 ! !INTERFACE:
-      subroutine ESMF_RegridRunArray(srcarray, dstarray, routehandle, rc)
+      subroutine ESMF_RegridRun(srcarray, dstarray, routehandle, rc)
 !
 ! !ARGUMENTS:
 
@@ -451,7 +410,7 @@
    ! set return codes
    ! nuke temp array
 
-   end subroutine ESMF_RegridRunArray
+   end subroutine ESMF_RegridRun
 
 !------------------------------------------------------------------------------
 !BOP
