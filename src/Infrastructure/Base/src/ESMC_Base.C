@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.1 2002/10/25 21:04:22 eschwab Exp $
+// $Id: ESMC_Base.C,v 1.2 2003/03/24 21:09:24 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.1 2002/10/25 21:04:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.2 2003/03/24 21:09:24 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -90,13 +90,13 @@ int ESMC_Base::instCount = 0;
 // !IROUTINE:  ESMC_Validate - virtual internal consistency check for a Base
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_Validate(void) const {
+      int ESMC_Base::ESMC_Validate(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    const char *options) const {    // in - validate options
+      const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
 //      base provides stub for required Validate method in derived classes
@@ -115,13 +115,13 @@ int ESMC_Base::instCount = 0;
 // !IROUTINE:  ESMC_Print - virutal print contents of a Base
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_Print(void) const {
+      int ESMC_Base::ESMC_Print(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    const char *options) const {     //  in - print options
+      const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
 //      base provides stub for required Validate method in derived classes
