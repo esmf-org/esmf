@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.40 2003/04/15 16:12:17 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.41 2003/04/17 18:02:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.40 2003/04/15 16:12:17 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.41 2003/04/17 18:02:17 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2605,8 +2605,8 @@
         rc = ESMF_FAILURE
       endif
 
-      ! currently nothing to do, but here is where MPI could be shut down,
-      !  files closed, etc.
+      ! where MPI could be shut down, files closed, etc.
+      call ESMF_MachineFinalize()
 
       if (rcpresent) rc = ESMF_SUCCESS
 
