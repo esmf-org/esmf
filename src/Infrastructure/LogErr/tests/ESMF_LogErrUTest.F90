@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.3 2004/08/17 21:39:49 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.4 2004/08/20 15:48:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,21 +37,21 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.3 2004/08/17 21:39:49 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.4 2004/08/20 15:48:28 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc = 1
+      integer :: rc
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: rc1, rc2
+      integer :: rc2
       type(ESMF_Log) :: log1
 
 !-------------------------------------------------------------------------------
@@ -92,7 +92,9 @@
       !EX_UTest
       ! Test Log Write
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      rc=ESMF_LogWrite(msg="Log Write 2",msgtype=ESMF_LOG_INFO)
+      call ESMF_LogWrite(msg="Log Write 2",msgtype=ESMF_LOG_INFO)
+      ! TODO:  this should be the format, with an rc argument
+      !call ESMF_LogWrite(msg="Log Write 2",msgtype=ESMF_LOG_INFO,rc=rc)
       write(name, *) "Use of default log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
