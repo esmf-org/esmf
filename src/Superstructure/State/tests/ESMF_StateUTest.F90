@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.34 2005/02/24 22:21:46 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.35 2005/02/25 03:03:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.34 2005/02/24 22:21:46 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.35 2005/02/25 03:03:40 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -112,6 +112,14 @@
       state1 = ESMF_StateCreate(statename, ESMF_STATE_IMPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty import State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Destruction of State
+      call  ESMF_StateDestroy(state1, rc)
+      write(failMsg, *) ""
+      write(name, *) "Destruction of a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -583,12 +591,26 @@
 
       !EX_UTest
       ! Test getting a State from a State 
-      call ESMF_StateGetState(state2, "Atmosphere Out", state1, rc=rc)
+      call ESMF_StateGetState(state2, "Atmosphere Out", state3, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a State from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call  ESMF_StatePrint(state2, rc=rc)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test adding the same State to a State -- should fail
+      ! Note that you cannot pass the same object in for multiple arguments;
+      ! this is illegal in fortran but not all compilers catch it - they just
+      ! do bizarre things with them.  So use an alias to the same State.
+      state3 = state2
+      call ESMF_StateAddState(state2, state3, rc=rc)
+      write(failMsg, *) "Did return ESMF_SUCCESS"
+      write(name, *) "Adding the same State to a State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
@@ -599,6 +621,7 @@
       write(name, *) "Validating a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
 
       !------------------------------------------------------------------------
 
