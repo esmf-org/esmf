@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.2 2002/10/08 23:29:01 nscollins Exp $
+! $Id: ESMF_class.F90,v 1.3 2002/10/09 20:31:19 nscollins Exp $
 !
 ! ESMF <Class> Module
 !
@@ -64,10 +64,11 @@
 !       < insert other class members here >
       end type
 
-! !PUBLIC MEMBER FUNCTIONS:
+      public ESMF_<Class>Config
+      public ESMF_<Class>
 
-    public ESMF_<Class>Config
-    public ESMF_<Class>
+
+! !PUBLIC MEMBER FUNCTIONS:
 !
 ! pick one or the other of the init/create sections depending on
 !  whether this is a deep class (the class/derived type has pointers to
@@ -101,7 +102,7 @@
 !-------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.2 2002/10/08 23:29:01 nscollins Exp $'
+      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.3 2002/10/09 20:31:19 nscollins Exp $'
 !-------------------------------------------------------------------------
 
 ! interface blocks for functions which are going to have a single
@@ -166,8 +167,8 @@
 !      initialize it.  Define for deep classes only, for shallow classes only
 !      define and use ESMF_<Class>Init
 !
-! !REQUIREMENTS:  AAAn.n.n
 !EOP
+! !REQUIREMENTS:  AAAn.n.n
 
 !
 !  code goes here
@@ -190,8 +191,8 @@
 !      ESMF routine which destroys a <Class> object previously allocated
 !      via an ESMF_<Class>Create routine.  Define for deep classes only.
 !
-! !REQUIREMENTS: developer's guide for classes
 !EOP
+! !REQUIREMENTS: developer's guide for classes
 
 !
 !  code goes here
@@ -220,8 +221,8 @@
 !      ESMF use only; end-users use ESMF_<Class>Create, which calls
 !      ESMF_<Class>Construct.  Define for deep classes only.
 !
-! !REQUIREMENTS: developer's guide for classes
 !EOP
+! !REQUIREMENTS: developer's guide for classes
 
 !
 !  code goes here
@@ -247,8 +248,8 @@
 !      use only; end-users use ESMF_<Class>Destroy, which calls
 !      ESMF_<Class>Destruct.  Define for deep classes only.
 !
-! !REQUIREMENTS: developer's guide for classes
 !EOP
+! !REQUIREMENTS: developer's guide for classes
 
 !
 !  code goes here
@@ -277,8 +278,8 @@
 !      Construct/Destruct.  Can be overloaded like ESMF_<Class>Create
 !      via interface blocks.
 !
-! !REQUIREMENTS: developer's guide for classes
 !EOP
+! !REQUIREMENTS: developer's guide for classes
 
 !
 !  code goes here
@@ -301,8 +302,8 @@
 ! !DESCRIPTION:
 !     Configures the <Class> object with set of resources given.
 !
-! !REQUIREMENTS: developer's guide for classes
 !EOP
+! !REQUIREMENTS: developer's guide for classes
 
 !
 !  code goes here
@@ -325,8 +326,8 @@
 ! !DESCRIPTION:
 !     Returns the set of resources the <Class> object was configured with.
 !
-! !REQUIREMENTS: developer's guide for classes
 !EOP
+! !REQUIREMENTS: developer's guide for classes
 
 !
 !  code goes here
@@ -350,8 +351,8 @@
 !     Sets the <Class> member <Value> with the given value.
 !     Can be multiple routines, one per value
 !
-! !REQUIREMENTS: developer's guide for classes
 !EOP
+! !REQUIREMENTS: developer's guide for classes
 
 !
 !  code goes here
@@ -375,8 +376,8 @@
 !     Returns the value of <Class> member <Value>.
 !     Can be multiple routines, one per value
 !
-! !REQUIREMENTS: developer's guide for classes
 !EOP
+! !REQUIREMENTS: developer's guide for classes
 
 !
 !  code goes here
@@ -400,8 +401,8 @@
 !      Returns error code if problems are found.  ESMF_Base class
 !      method.
 !
-! !REQUIREMENTS:  XXXn.n, YYYn.n
 !EOP
+! !REQUIREMENTS:  XXXn.n, YYYn.n
 
 !
 !  code goes here
@@ -426,8 +427,8 @@
 !      type of information and level of detail.  ESMF_Base class
 !      method.
 !
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !
 !  code goes here
