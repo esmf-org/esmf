@@ -1,4 +1,4 @@
-! $Id: ESMF_Overloads.F90,v 1.2 2004/01/28 00:29:55 nscollins Exp $
+! $Id: ESMF_Overloads.F90,v 1.3 2004/05/05 12:59:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 #include "ESMF.h"
 ! #include "ESMF_Base.h"
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_Base2Mod - Functions overloaded by object type.
 !
 ! !DESCRIPTION:
@@ -65,19 +65,19 @@
  
 !
 !
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Overloads.F90,v 1.2 2004/01/28 00:29:55 nscollins Exp $'
+      '$Id: ESMF_Overloads.F90,v 1.3 2004/05/05 12:59:09 nscollins Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_AttributeSetCharacter
 
@@ -92,11 +92,11 @@
 !     This interface provides a single entry point for Attribute Set/Get
 !     methods for each object type in the system.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_AttributeGetCharacter
 
@@ -111,11 +111,11 @@
 !     This interface provides a single entry point for Attribute Set/Get
 !     methods for each object type in the system.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_AttributeSetInteger
 
@@ -130,11 +130,11 @@
 !     This interface provides a single entry point for Attribute Set/Get
 !     methods for each object type in the system.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_AttributeGetInteger
 
@@ -149,7 +149,7 @@
 !     This interface provides a single entry point for Attribute Set/Get
 !     methods for each object type in the system.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
@@ -380,7 +380,7 @@
       end subroutine ESMF_FieldAttrGetInt
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_Validate - Check internal consistency of any object.
 
 ! !INTERFACE:
@@ -404,7 +404,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
       integer :: status                       ! local error status
@@ -436,7 +436,7 @@
       end subroutine ESMF_Base2Validate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_Base2Print - Print the contents of a Base2
 
 ! !INTERFACE:
@@ -461,7 +461,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       integer :: status                       ! local error status
