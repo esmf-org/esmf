@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.9 2004/04/28 23:11:48 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.10 2004/05/13 12:08:40 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -182,6 +182,7 @@
 !       1may2003 Leonid Zaslavsky Corrected version 
 ! !USES:
 
+      use ESMF_BaseMod
       use ESMF_DELayoutMod
       !use ESMF_LogErrMod    ! seems unneeded, at least for now.
 
@@ -220,10 +221,14 @@
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ConfigGetString
-        module procedure ESMF_ConfigGetFloat
-        module procedure ESMF_ConfigGetFloats
-        module procedure ESMF_ConfigGetInt
-        module procedure ESMF_ConfigGetInts
+        module procedure ESMF_ConfigGetFloatR4
+        module procedure ESMF_ConfigGetFloatR8
+        module procedure ESMF_ConfigGetFloatsR4
+        module procedure ESMF_ConfigGetFloatsR8
+        module procedure ESMF_ConfigGetIntI4
+        module procedure ESMF_ConfigGetIntI8
+        module procedure ESMF_ConfigGetIntsI4
+        module procedure ESMF_ConfigGetIntsI8
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for getting
@@ -539,11 +544,11 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetFloat( cf, r, label, default, rc )
+      subroutine ESMF_ConfigGetFloatR4( cf, r, label, default, rc )
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: cf    
-      real, intent(out)                      :: r    
+      real(ESMF_KIND_R4), intent(out)        :: r    
       character(len=*), intent(in), optional :: label
       real, intent(in), optional             :: default 
       integer, intent(out), optional         :: rc     
@@ -569,7 +574,7 @@
 !
       integer:: iret
       character*256 :: string
-      real ::     x
+      real(ESMF_KIND_R4) ::     x
       
       iret = 0
 
@@ -599,7 +604,80 @@
       if( present( rc )) rc = iret 
       return
 
-    end subroutine ESMF_ConfigGetFloat
+    end subroutine ESMF_ConfigGetFloatR4
+
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a real number
+
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetFloatR8( cf, r, label, default, rc )
+
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf    
+      real(ESMF_KIND_R8), intent(out)        :: r    
+      character(len=*), intent(in), optional :: label
+      real, intent(in), optional             :: default 
+      integer, intent(out), optional         :: rc     
+!
+! !DESCRIPTION: 
+!   Gets a floating point number from the configuration object.
+!
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [r]
+!     Returned value. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+
+!EOP -------------------------------------------------------------------
+!
+      integer:: iret
+      character*256 :: string
+      real(ESMF_KIND_R8) ::     x
+      
+      iret = 0
+
+! Default setting
+      if( present( default ) ) then 
+         r = default
+      else
+         r = 0.0
+      endif
+
+! Processing
+      if (present (label ) ) then
+         call ESMF_ConfigGetString( cf, string, label, rc = iret )
+      else
+         call ESMF_ConfigGetString( cf, string, rc = iret )
+      endif
+
+      if ( iret .eq. 0 ) then
+           read(string,*,iostat=iret) x
+           if ( iret .ne. 0 ) iret = -2
+      end if
+
+      if ( iret .eq. 0 ) then
+         r = x
+      endif
+
+      if( present( rc )) rc = iret 
+      return
+
+    end subroutine ESMF_ConfigGetFloatR8
 
 
 
@@ -612,12 +690,12 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetFloats( cf, array, nsize, label,  &
-                                       default, rc )
+      subroutine ESMF_ConfigGetFloatsR4( cf, array, nsize, label,  &
+                                         default, rc )
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: cf    
-      real, intent(inout)                 :: array(*) 
+      real(ESMF_KIND_R4), intent(inout)      :: array(*) 
       character(len=*), intent(in), optional :: label 
       integer, intent(in)                    :: nsize 
       real, intent(in), optional             :: default
@@ -646,8 +724,6 @@
       iret = 0
 
 
-
-      
       if (nsize.le.0) then
          print *,myname_,' invalid SIZE =', nsize
          iret = -1
@@ -667,22 +743,101 @@
          
          if (present( label )) then
             if(present( default )) then
-               call ESMF_ConfigGetFloat( cf, array(i), label, default, iret)
+               call ESMF_ConfigGetFloatR4( cf, array(i), label, default, iret)
             else
-               call ESMF_ConfigGetFloat( cf, array(i), label, rc = iret)
+               call ESMF_ConfigGetFloatR4( cf, array(i), label, rc = iret)
             endif
          else
             if(present( default )) then
-               call ESMF_ConfigGetFloat( cf, array(i), default=default, rc=iret )
+               call ESMF_ConfigGetFloatR4( cf, array(i), default=default, rc=iret )
             else
-               call ESMF_ConfigGetFloat( cf, array(i), rc = iret)
+               call ESMF_ConfigGetFloatR4( cf, array(i), rc = iret)
             endif
          endif
       enddo
 
       if(present( rc )) rc = iret
       return
-    end subroutine ESMF_ConfigGetFloats
+    end subroutine ESMF_ConfigGetFloatsR4
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of real numbers
+
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetFloatsR8( cf, array, nsize, label,  &
+                                         default, rc )
+
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf    
+      real(ESMF_KIND_R8), intent(inout)      :: array(*) 
+      character(len=*), intent(in), optional :: label 
+      integer, intent(in)                    :: nsize 
+      real, intent(in), optional             :: default
+      integer, intent(out), optional         :: rc    
+!
+! !DESCRIPTION: Gets a floating point array of a given size.
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [array]
+!     Returned values. 
+!   \item [nsize]
+!     Number of returned values expected. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetFloat_array'
+      integer iret, i 
+      
+      iret = 0
+
+
+      if (nsize.le.0) then
+         print *,myname_,' invalid SIZE =', nsize
+         iret = -1
+         if(present( rc )) rc = iret
+         return
+      endif
+       
+! Default setting
+      if( present( default ) ) then 
+         array(1:nsize) = default
+      else
+         array(1:nsize) = 0.0
+      endif
+
+! Processing
+      do i = 1, nsize
+         
+         if (present( label )) then
+            if(present( default )) then
+               call ESMF_ConfigGetFloatR8( cf, array(i), label, default, iret)
+            else
+               call ESMF_ConfigGetFloatR8( cf, array(i), label, rc = iret)
+            endif
+         else
+            if(present( default )) then
+               call ESMF_ConfigGetFloatR8( cf, array(i), default=default, rc=iret )
+            else
+               call ESMF_ConfigGetFloatR8( cf, array(i), rc = iret)
+            endif
+         endif
+      enddo
+
+      if(present( rc )) rc = iret
+      return
+    end subroutine ESMF_ConfigGetFloatsR8
 
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
@@ -693,11 +848,11 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetInt( cf, i, label, default, rc )
+      subroutine ESMF_ConfigGetIntI4( cf, i, label, default, rc )
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: cf     
-      integer, intent(out)                   :: i
+      integer(ESMF_KIND_I4), intent(out)     :: i
       character(len=*), intent(in), optional :: label 
       integer, intent(in), optional          :: default
       integer, intent(out), optional         :: rc   
@@ -720,7 +875,8 @@
 !EOP -------------------------------------------------------------------
       character*256 string
       real*8        x
-      integer       n, iret
+      integer(ESMF_KIND_I4)  n
+      integer       iret
 
       iret = 0
 
@@ -759,7 +915,85 @@
       if( present( rc )) rc = iret
       
       return
-    end subroutine ESMF_ConfigGetInt
+    end subroutine ESMF_ConfigGetIntI4
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetAttribute - Get an integer number
+
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetIntI8( cf, i, label, default, rc )
+
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf     
+      integer(ESMF_KIND_I8), intent(out)     :: i
+      character(len=*), intent(in), optional :: label 
+      integer, intent(in), optional          :: default
+      integer, intent(out), optional         :: rc   
+
+!
+! !DESCRIPTION: Gets an integer number
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [i]
+!     Returned integer value. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+      character*256 string
+      real*8        x
+      integer(ESMF_KIND_I8)  n
+      integer       iret
+
+      iret = 0
+
+! Default setting
+      if( present( default ) ) then 
+         i = default
+      else
+         i = 0
+      endif
+
+! Processing
+      if (present (label ) ) then
+         call ESMF_ConfigGetString( cf, string, label, rc = iret )
+      else
+         call ESMF_ConfigGetString( cf, string, rc = iret )
+      endif
+
+      if ( iret .eq. 0 ) then
+           read(string,*,iostat=iret) x
+           if ( iret .ne. 0 ) iret = -2
+      end if
+      if ( iret .eq. 0 ) then
+         n = nint(x)
+      else
+         if( present( default )) then
+            n = default
+         else
+            n = 0
+         endif
+      endif
+
+      if ( iret .eq. 0 ) then
+         i = n
+      endif
+
+      if( present( rc )) rc = iret
+      
+      return
+    end subroutine ESMF_ConfigGetIntI8
 
 
 !-----------------------------------------------------------------------
@@ -770,12 +1004,12 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetInts( cf, array, nsize, label,  &
-                                   default, rc )
+      subroutine ESMF_ConfigGetIntsI4( cf, array, nsize, label,  &
+                                       default, rc )
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: cf      
-      integer, intent(inout)              :: array(*)  
+      integer(ESMF_KIND_I4), intent(inout)   :: array(*)  
       character(len=*), intent(in), optional :: label 
       integer, intent(in)                    :: nsize  
       integer, intent(in), optional          :: default
@@ -822,22 +1056,101 @@
          
          if (present( label )) then
             if(present( default )) then
-               call ESMF_ConfigGetInt( cf, array(i), label, default, iret)
+               call ESMF_ConfigGetIntI4( cf, array(i), label, default, iret)
             else
-               call ESMF_ConfigGetInt( cf, array(i), label, rc = iret)
+               call ESMF_ConfigGetIntI4( cf, array(i), label, rc = iret)
             endif
          else
             if(present( default )) then
-               call ESMF_ConfigGetInt( cf, array(i), default = default, rc = iret)
+               call ESMF_ConfigGetIntI4( cf, array(i), default = default, rc = iret)
             else
-               call ESMF_ConfigGetInt( cf, array(i), rc = iret)
+               call ESMF_ConfigGetIntI4( cf, array(i), rc = iret)
             endif
          endif
       enddo
 
       if(present( rc )) rc = iret
       return
-    end subroutine ESMF_ConfigGetInts
+    end subroutine ESMF_ConfigGetIntsI4
+
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of integers
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetIntsI8( cf, array, nsize, label,  &
+                                       default, rc )
+
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf      
+      integer(ESMF_KIND_I8), intent(inout)   :: array(*)  
+      character(len=*), intent(in), optional :: label 
+      integer, intent(in)                    :: nsize  
+      integer, intent(in), optional          :: default
+      integer, intent(out), optional         :: rc    
+!
+! !DESCRIPTION: Gets an integer array of given size.
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [array]
+!     Returned values. 
+!   \item [nsize]
+!     Number of returned values expected. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetInt_array'
+      integer iret, i 
+      
+      iret = 0
+
+      if (nsize.le.0) then
+         print *,myname_,' invalid SIZE =', nsize
+         iret = -1
+         if(present( rc )) rc = iret
+         return
+      endif
+       
+ ! Default setting
+      if( present( default ) ) then 
+         array(1:nsize) = default
+      else
+         array(1:nsize) = 0
+      endif
+
+! Processing 
+      do i = 1, nsize
+         
+         if (present( label )) then
+            if(present( default )) then
+               call ESMF_ConfigGetIntI8( cf, array(i), label, default, iret)
+            else
+               call ESMF_ConfigGetIntI8( cf, array(i), label, rc = iret)
+            endif
+         else
+            if(present( default )) then
+               call ESMF_ConfigGetIntI8( cf, array(i), default = default, rc = iret)
+            else
+               call ESMF_ConfigGetIntI8( cf, array(i), rc = iret)
+            endif
+         endif
+      enddo
+
+      if(present( rc )) rc = iret
+      return
+    end subroutine ESMF_ConfigGetIntsI8
 
 
 
