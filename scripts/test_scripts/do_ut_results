@@ -1,6 +1,6 @@
-# $Id: do_ut_results,v 1.3 2003/04/04 23:08:10 svasquez Exp $
+# $Id: do_ut_results,v 1.4 2003/04/04 23:28:52 svasquez Exp $
 #!/bin/ksh
-# This script runs at the enf of the "run_tests" and "run_tests_uni" targets.
+# This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 echo ""
 echo "The following is the analysis of the Unit Tests results:"
@@ -18,7 +18,7 @@ else
 	find . -name "*UTest" -print
 	cd $ESMF_DIR
 	echo "" 
-	echo "All of these executable unit tests should have a corresponding stdout file." 
+	echo "All of the executable unit tests should have a corresponding stdout file." 
 	echo "If not, it's an indication that the unit test was not executed, or that it failed to execute." 
 	echo "" 
 
