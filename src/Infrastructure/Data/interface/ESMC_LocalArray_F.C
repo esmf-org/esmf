@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.2 2003/07/10 23:03:16 jwolfe Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.3 2003/07/18 15:24:10 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,6 @@
 #include "ESMC.h"
 #include "ESMC_Base.h"
 #include "ESMC_LocalArray.h"
-#include "ESMC_DELayout.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
