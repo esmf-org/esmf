@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.53 2004/02/19 21:30:08 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.54 2004/02/20 21:30:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.53 2004/02/19 21:30:08 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.54 2004/02/20 21:30:46 jwolfe Exp $'
 
 !==============================================================================
 
@@ -374,8 +374,8 @@
 !EOP
       integer :: status
       logical :: rcpresent
-      integer :: i, i2, n, d1, d2, s1, s2, asize, rank
-      integer :: dstUndecomp, srcUndecomp
+      integer :: i, i2, n, d1, d2, s1, s2, asize, rank, counts(ESMF_MAXDIM)
+      integer :: dstUndecomp, srcUndecomp, srcUndecompSize, srcStride
       integer :: di1, di2, dj1, dj2, dk1, dk2
       integer :: si1, si2, sj1, sj2, sk1, sk2
       integer, dimension(:), allocatable :: dstDimOrder, srcDimOrder
@@ -431,8 +431,8 @@
 
      call ESMF_RouteGetRecvItems(rh, asize, status)
 
-     call ESMF_ArrayGet(srcarray, rank=rank, type=type, kind=kind, rc=status)
-   !  gatheredArray = ESMF_LocalArrayCreate(rank-1, type, kind, asize, rc=status)
+     call ESMF_ArrayGet(srcarray, rank=rank, type=type, kind=kind, &
+                        counts=counts, rc=status)
      gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=status)
      srcLocalArray = srcarray
      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, status)
@@ -487,11 +487,20 @@
        dstData3D = zero
 
        !*** for cases where datarank>gridrank, figure out the undecomposed
-       dstUndecomp = 0
-       srcUndecomp = 0
+       dstUndecomp     = 0   !TODO: should be arrays to be general
+       srcUndecomp     = 0
+       srcUndecompSize = 0
+       srcStride       = 1
        do i = 1,rank
-         if (dstDimOrder(i).eq.0) dstUndecomp = i
-         if (srcDimOrder(i).eq.0) srcUndecomp = i
+         if (dstDimOrder(i).eq.0) then
+           dstUndecomp = i
+         endif
+         if (srcDimOrder(i).eq.0) then
+           srcUndecomp = i
+           srcUndecompSize = counts(i)
+         else
+           srcStride = srcStride * counts(i)
+         endif
        enddo
 
        !*** special code if Undecomp = 1 or rank
@@ -502,7 +511,7 @@
          do n = 1,numlinks
            d1 = dstIndex((n-1)*2 + 1)
            d2 = dstIndex((n-1)*2 + 2)
-           s1 = (srcIndex(n)-1)*4
+           s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
            do i = 1,i2
              dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
                                 + (gatheredData(s1+i) * weights(n))
@@ -512,13 +521,41 @@
        elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.rank) then
 
          !*** do the regrid
-         i2 = size(dstData3D,1)
+         i2 = size(dstData3D,rank)
          do i = 1,i2
            do n = 1,numlinks
              d1 = dstIndex((n-1)*2 + 1)
              d2 = dstIndex((n-1)*2 + 2)
-             s1 = srcIndex(n)
+             s1 = (i-1)*srcStride + srcIndex(n)
              dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
+                                + (gatheredData(s1) * weights(n))
+           enddo
+         enddo
+
+       elseif (srcUndecomp.eq.1 .and. dstUndecomp.eq.rank) then
+
+         !*** do the regrid
+         i2 = size(dstData3D,rank)
+         do i = 1,i2
+           do n = 1,numlinks
+             d1 = dstIndex((n-1)*2 + 1)
+             d2 = dstIndex((n-1)*2 + 2)
+             s1 = (srcIndex(n)-1)*i2 + i    ! assumes i2 = srcUndecompSize
+             dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
+                                + (gatheredData(s1) * weights(n))
+           enddo
+         enddo
+
+       elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.1) then
+
+         !*** do the regrid
+         i2 = size(dstData3D,1)
+         do n = 1,numlinks
+           d1 = dstIndex((n-1)*2 + 1)
+           d2 = dstIndex((n-1)*2 + 2)
+           do i = 1,i2
+             s1 = (i-1)*srcStride + srcIndex(n)
+             dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
                                 + (gatheredData(s1) * weights(n))
            enddo
          enddo
