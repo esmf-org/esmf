@@ -14,7 +14,7 @@ program test_log_2
     int_num=8
     ch='s'
 
-    call ESMF_LogSet(aLog1,flush=ESMF_TF_FALSE, verbose=ESMF_TF_TRUE)
+    call ESMF_LogSet(aLog1,flush=ESMF_FALSE, verbose=ESMF_TRUE)
     call ESMF_LogOpenFile(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"aLog.txt")
 !jw no such    write(ESMF_LogGetUnit(ESMF_Log_World),*)"This is a test."
     call ESMF_LogInfo(aLog1,"Hi there %c %d %f ",ch,int_num,real_num)

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.42 2003/09/04 18:57:55 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.43 2003/09/04 22:24:20 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.42 2003/09/04 18:57:55 cdeluca Exp $";
+           "$Id: ESMC_DELayout.C,v 1.43 2003/09/04 22:24:20 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1640,9 +1640,9 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   rc = this->ESMC_DELayoutGetSameDEID(deid, other, &dummy);
   if (rc == ESMF_FAILURE) 
-      *exists = ESMF_TF_FALSE;
+      *exists = ESMF_FALSE;
   else
-      *exists = ESMF_TF_TRUE;
+      *exists = ESMF_TRUE;
 
   return ESMF_SUCCESS;
 

@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.14 2003/08/14 21:52:51 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.15 2003/09/04 22:24:20 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -102,7 +102,7 @@
      status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
                                      ESMC_FROM_CPLUSPLUS,
                                      NULL, ESMC_ARRAY_DO_ALLOCATE, 
-                                     docopy, ESMF_TF_TRUE, 
+                                     docopy, ESMF_TRUE, 
                                      NULL, NULL, NULL, NULL, 0); 
      
      if (rc != NULL)
@@ -145,7 +145,7 @@
      status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
                                      ESMC_FROM_CPLUSPLUS,
                                      NULL, ESMC_ARRAY_DO_ALLOCATE, 
-                                     docopy, ESMF_TF_TRUE, 
+                                     docopy, ESMF_TRUE, 
                                      NULL, NULL, NULL, NULL, halo_width); 
      
      if (rc != NULL)
@@ -215,7 +215,7 @@
 
      status = a->ESMC_ArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
-                            ESMC_DATA_NONE, ESMF_TF_FALSE, 
+                            ESMC_DATA_NONE, ESMF_FALSE, 
                             NULL, NULL, NULL, NULL, 0);
 
      if (rc != NULL)
@@ -291,14 +291,14 @@
          status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
                                      ESMC_FROM_FORTRAN, f90ptr, 
                                      ESMC_ARRAY_DO_ALLOCATE,
-                                     ESMC_DATA_NONE, ESMF_TF_TRUE, 
+                                     ESMC_DATA_NONE, ESMF_TRUE, 
                                      lbounds, ubounds, strides, 
                                      offsets, halo_widths); 
      else
          status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
                                      ESMC_FROM_FORTRAN, f90ptr, 
                                      ESMC_ARRAY_NO_ALLOCATE, 
-                                     docopy, ESMF_TF_FALSE, 
+                                     docopy, ESMF_FALSE, 
                                      lbounds, ubounds, strides, 
                                      offsets, halo_widths); 
 
@@ -441,7 +441,7 @@
     ESMC_Array *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
-    if (needs_dealloc != ESMF_TF_TRUE)
+    if (needs_dealloc != ESMF_TRUE)
         return ESMF_SUCCESS;
 
     // if there is an F90 dope vector, we have to call back into fortran
@@ -957,13 +957,13 @@
               for (j=0; j<lmax[1]; j++) {
                 j_exc = j + lstart[1] - ai_comp[1].min;
 		if (periodic != NULL) {
-		  if (periodic[1] == ESMF_TF_TRUE) j_exc = j_exc%global_dimlengths[1];
+		  if (periodic[1] == ESMF_TRUE) j_exc = j_exc%global_dimlengths[1];
 		}
                 if (j_exc>=0 && j_exc<global_dimlengths[1]) {
                   for (i=0; i<lmax[0]; i++) {
                     i_exc = i + lstart[0] - ai_comp[0].min;
 		    if (periodic != NULL) {
-		      if (periodic[0] == ESMF_TF_TRUE) i_exc = i_exc%global_dimlengths[0];
+		      if (periodic[0] == ESMF_TRUE) i_exc = i_exc%global_dimlengths[0];
 		    }
                     if (i_exc>=0 && i_exc<global_dimlengths[0]) {
                       local  = lmax[0]*j + i;
@@ -1082,13 +1082,13 @@
               for (j=0; j<lmax[1]; j++) {
                 j_exc = j + lstart[1] - ai_comp[1].min;
 		if (periodic != NULL) {
-		  if (periodic[1] == ESMF_TF_TRUE) j_exc = j_exc%global_dimlengths[1];
+		  if (periodic[1] == ESMF_TRUE) j_exc = j_exc%global_dimlengths[1];
 		}
                 if (j_exc>=0 && j_exc<global_dimlengths[1]) {
                   for (i=0; i<lmax[0]; i++) {
                     i_exc = i + lstart[0] - ai_comp[0].min;
 		    if (periodic != NULL) {
-		      if (periodic[0] != ESMF_TF_TRUE) i_exc = i_exc%global_dimlengths[0];
+		      if (periodic[0] != ESMF_TRUE) i_exc = i_exc%global_dimlengths[0];
 		    }
                     if (i_exc>=0 && i_exc<global_dimlengths[0]) {
                       local  = lmax[0]*j + i;

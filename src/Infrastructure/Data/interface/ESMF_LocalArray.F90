@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.15 2003/09/04 18:57:55 cdeluca Exp $
+! $Id: ESMF_LocalArray.F90,v 1.16 2003/09/04 22:24:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -379,7 +379,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.15 2003/09/04 18:57:55 cdeluca Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.16 2003/09/04 22:24:20 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -10465,23 +10465,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -10511,7 +10511,7 @@ end function
  wrap%I21Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -10604,23 +10604,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -10650,7 +10650,7 @@ end function
  wrap%I41Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -10743,23 +10743,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -10789,7 +10789,7 @@ end function
  wrap%I81Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -10882,23 +10882,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -10928,7 +10928,7 @@ end function
  wrap%I22Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -11021,23 +11021,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -11067,7 +11067,7 @@ end function
  wrap%I42Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -11160,23 +11160,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -11206,7 +11206,7 @@ end function
  wrap%I82Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -11299,23 +11299,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -11345,7 +11345,7 @@ end function
  wrap%I23Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -11438,23 +11438,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -11484,7 +11484,7 @@ end function
  wrap%I43Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -11577,23 +11577,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -11623,7 +11623,7 @@ end function
  wrap%I83Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -11716,23 +11716,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -11762,7 +11762,7 @@ end function
  wrap%I24Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -11855,23 +11855,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -11901,7 +11901,7 @@ end function
  wrap%I44Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -11994,23 +11994,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -12040,7 +12040,7 @@ end function
  wrap%I84Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -12133,23 +12133,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -12179,7 +12179,7 @@ end function
  wrap%I25Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -12272,23 +12272,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -12318,7 +12318,7 @@ end function
  wrap%I45Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -12411,23 +12411,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -12457,7 +12457,7 @@ end function
  wrap%I85Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -12550,23 +12550,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -12596,7 +12596,7 @@ end function
  wrap%R41Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -12689,23 +12689,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -12735,7 +12735,7 @@ end function
  wrap%R81Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -12828,23 +12828,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -12874,7 +12874,7 @@ end function
  wrap%R42Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -12967,23 +12967,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -13013,7 +13013,7 @@ end function
  wrap%R82Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -13106,23 +13106,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -13152,7 +13152,7 @@ end function
  wrap%R43Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -13245,23 +13245,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -13291,7 +13291,7 @@ end function
  wrap%R83Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -13384,23 +13384,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -13430,7 +13430,7 @@ end function
  wrap%R44Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -13523,23 +13523,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -13569,7 +13569,7 @@ end function
  wrap%R84Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -13662,23 +13662,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -13708,7 +13708,7 @@ end function
  wrap%R45Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -13801,23 +13801,23 @@ end function
  nullify(newp) 
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .true. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else if (docopy .eq. ESMF_DATA_COPY) then 
  nullify(newp) 
  willalloc = .true. 
  willcopy = .true. 
- do_dealloc = ESMF_TF_TRUE 
+ do_dealloc = ESMF_TRUE 
  else       ! ESMF_DATA_REF 
  newp => f90ptr    ! ptr alias, important this be =>  
  willalloc = .false. 
  willcopy = .false. 
- do_dealloc = ESMF_TF_FALSE 
+ do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
@@ -13847,7 +13847,7 @@ end function
  wrap%R85Dptr => newp 
  call c_ESMC_LocalArraySetInfo(array, wrap, newp (   1,1,1,1,1   ), counts, & 
  lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, do_dealloc, status) 
+ ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17136,7 +17136,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI21D, & 
  localI21D%  I21Dptr(   1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17166,7 +17166,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI41D, & 
  localI41D%  I41Dptr(   1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17196,7 +17196,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI81D, & 
  localI81D%  I81Dptr(   1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17231,7 +17231,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI22D, & 
  localI22D%  I22Dptr(   1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17261,7 +17261,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI42D, & 
  localI42D%  I42Dptr(   1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17291,7 +17291,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI82D, & 
  localI82D%  I82Dptr(   1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17326,7 +17326,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI23D, & 
  localI23D%  I23Dptr(   1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17356,7 +17356,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI43D, & 
  localI43D%  I43Dptr(   1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17386,7 +17386,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI83D, & 
  localI83D%  I83Dptr(   1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17421,7 +17421,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI24D, & 
  localI24D%  I24Dptr(   1,1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17451,7 +17451,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI44D, & 
  localI44D%  I44Dptr(   1,1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17481,7 +17481,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localI84D, & 
  localI84D%  I84Dptr(   1,1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17521,7 +17521,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localR41D, & 
  localR41D%  R41Dptr(   1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17551,7 +17551,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localR81D, & 
  localR81D%  R81Dptr(   1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17586,7 +17586,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localR42D, & 
  localR42D%  R42Dptr(   1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17616,7 +17616,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localR82D, & 
  localR82D%  R82Dptr(   1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17651,7 +17651,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localR43D, & 
  localR43D%  R43Dptr(   1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17681,7 +17681,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localR83D, & 
  localR83D%  R83Dptr(   1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17716,7 +17716,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localR44D, & 
  localR44D%  R44Dptr(   1,1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 
@@ -17746,7 +17746,7 @@ end function
  call c_ESMC_LocalArraySetInfo(array, localR84D, & 
  localR84D%  R84Dptr(   1,1,1,1   ), & 
  counts, lbounds, ubounds, strides, offsets, & 
- ESMF_TF_TRUE, ESMF_TF_TRUE) 
+ ESMF_TRUE, ESMF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray internal set info error" 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.73 2003/09/04 19:39:40 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.74 2003/09/04 22:24:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -222,7 +222,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.73 2003/09/04 19:39:40 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.74 2003/09/04 22:24:21 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3010,7 +3010,7 @@
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
       call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hassrcdata = (hasdata .eq. ESMF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
@@ -3020,7 +3020,7 @@
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
       call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hasdstdata = (hasdata .eq. ESMF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
@@ -3124,7 +3124,7 @@
           
       ! periodic only matters for halo operations
       do i=1, ESMF_MAXGRIDDIM
-        periodic(i) = ESMF_TF_FALSE
+        periodic(i) = ESMF_FALSE
       enddo
 
       ! Does this same route already exist?  If so, then we can drop
@@ -3299,7 +3299,7 @@
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
       call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hassrcdata = (hasdata .eq. ESMF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
@@ -3309,7 +3309,7 @@
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
       call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hasdstdata = (hasdata .eq. ESMF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
@@ -3413,7 +3413,7 @@
           
       ! periodic only matters for halo operations
       do i=1, ESMF_MAXGRIDDIM
-        periodic(i) = ESMF_TF_FALSE
+        periodic(i) = ESMF_FALSE
       enddo
 
       ! Does this same route already exist?  If so, then we can drop
@@ -4009,7 +4009,7 @@
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
       call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TF_TRUE)
+      hassrcdata = (hasdata .eq. ESMF_TRUE)
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
         ! don't ask for our de number if this de isn't part of the layout
@@ -4019,7 +4019,7 @@
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
       call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TF_TRUE)
+      hasdstdata = (hasdata .eq. ESMF_TRUE)
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
         ! don't ask for our de number if this de isn't part of the layout

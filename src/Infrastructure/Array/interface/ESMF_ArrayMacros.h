@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.4 2003/09/04 18:57:55 cdeluca Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.5 2003/09/04 22:24:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -756,23 +756,23 @@
            nullify(newp) @\
            willalloc = .true. @\
            willcopy = .false. @\
-           do_dealloc = ESMF_TF_TRUE @\
+           do_dealloc = ESMF_TRUE @\
         else @\
            if (docopy .eq. ESMF_DATA_SPACE) then @\
                newp => f90ptr    ! ptr alias, important this be =>  @\
                willalloc = .true. @\
                willcopy = .false. @\
-               do_dealloc = ESMF_TF_TRUE @\
+               do_dealloc = ESMF_TRUE @\
            else if (docopy .eq. ESMF_DATA_COPY) then @\
                nullify(newp) @\
                willalloc = .true. @\
                willcopy = .true. @\
-               do_dealloc = ESMF_TF_TRUE @\
+               do_dealloc = ESMF_TRUE @\
            else       ! ESMF_DATA_REF @\
                newp => f90ptr    ! ptr alias, important this be =>  @\
                willalloc = .false. @\
                willcopy = .false. @\
-               do_dealloc = ESMF_TF_FALSE @\
+               do_dealloc = ESMF_FALSE @\
            endif @\
         endif @\
  @\
@@ -802,7 +802,7 @@
         wrap%##mtypekind##mrank##Dptr => newp @\
         call c_ESMC_ArraySetInfo(array, wrap, newp ( mloc ), counts, & @\
                                  lbounds, ubounds, strides, offsets, & @\
-                                 ESMF_TF_TRUE, do_dealloc, hwidth, status) @\
+                                 ESMF_TRUE, do_dealloc, hwidth, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array internal set info error" @\

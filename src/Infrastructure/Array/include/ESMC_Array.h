@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.13 2003/08/01 16:25:54 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.14 2003/09/04 22:24:20 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -157,12 +157,12 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     int ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) const;
 
     // set/get the dealloc flag
-    int ESMC_ArraySetNoDealloc(void) { this->needs_dealloc = ESMF_TF_FALSE; 
+    int ESMC_ArraySetNoDealloc(void) { this->needs_dealloc = ESMF_FALSE; 
                                        return ESMF_SUCCESS;}
-    int ESMC_ArraySetDealloc(void)   { this->needs_dealloc = ESMF_TF_TRUE; 
+    int ESMC_ArraySetDealloc(void)   { this->needs_dealloc = ESMF_TRUE; 
                                        return ESMF_SUCCESS;}
     int ESMC_ArrayNeedsDealloc(void)  { 
-                         return this->needs_dealloc == ESMF_TF_TRUE ? 1 : 0; }
+                         return this->needs_dealloc == ESMF_TRUE ? 1 : 0; }
 
     // get and set useful combinations of values that fortran cares about
     int ESMC_ArraySetInfo(struct c_F90ptr *fptr, void *base, int *counts, 

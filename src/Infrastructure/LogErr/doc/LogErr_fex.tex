@@ -1,4 +1,4 @@
-% $Id: LogErr_fex.tex,v 1.2 2003/08/07 17:54:18 shep_smith Exp $
+% $Id: LogErr_fex.tex,v 1.3 2003/09/04 22:24:21 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,8 +49,8 @@ to ESMF\_SET().
 #include "ESMC_LogErr.inc" 
 type(ESMF_Log) :: anErr
 integer returnCode 
-call ESMF_LogSet(anErr, verbose=ESMF_TF_TRUE, flush=ESMF_TF_FALSE,   &
-                 haltOnErr=ESMF_TF_TRUE, haltOnWarn=ESMF_TF_FALSE)
+call ESMF_LogSet(anErr, verbose=ESMF_TRUE, flush=ESMF_FALSE,   &
+                 haltOnErr=ESMF_TRUE, haltOnWarn=ESMF_FALSE)
 call ESMF_LogOpenFile(anErr,ESMF_SINGLE_LOG_FILE,"anErr.txt")
 returnCode=foo()
 if (returnCode == ESMF_FATAL) call ESMF_LogErr(anErr, returnCode) 
@@ -75,14 +75,14 @@ type(ESMF_Log) :: anErr
 type(ESMF_Logical) :: myVerbosity
 character(len=32) :: myMsg
 integer returnCode 
-call ESMF_LogSet(anErr, verbose=ESMF_TF_TRUE, flush=ESMF_TF_FALSE,   &
-                 haltOnErr=ESMF_TF_TRUE, haltOnWarn=ESMF_TF_FALSE)
+call ESMF_LogSet(anErr, verbose=ESMF_TRUE, flush=ESMF_FALSE,   &
+                 haltOnErr=ESMF_TRUE, haltOnWarn=ESMF_FALSE)
 call ESMF_LogOpenFile(anErr,ESMF_SINGLE_LOG_FILE,"anErr.txt")
 returnCode=foo()
 myMsg="This will be written out."
 if (returnCode == ESMF_FATAL) call ESMF_LogErrMsg(anErr, returnCode,myMsg) 
 ESMF_LogGet(anErr,verbose=myVerbosity)
-if (myVerbosity==ESMF_TF_TRUE) call ESMF_LogSet(verbose=ESMF_TF_FALSE)
+if (myVerbosity==ESMF_TRUE) call ESMF_LogSet(verbose=ESMF_FALSE)
 myMsg="This will not be written out."
 returnCode=foo()
 if (returnCode == ESMF_FATAL) call ESMF_LogErrMsg(anErr, returnCode,myMsg)

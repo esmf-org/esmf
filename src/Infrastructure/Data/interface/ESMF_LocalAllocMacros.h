@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalAllocMacros.h,v 1.1 2003/07/15 21:08:15 jwolfe Exp $
+! $Id: ESMF_LocalAllocMacros.h,v 1.2 2003/09/04 22:24:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
         call c_ESMC_LocalArraySetInfo(array, local##mtypekind##mrank##D, & @\
                         local##mtypekind##mrank##D%mtypekind##mrank##Dptr( mloc ), & @\
                         counts, lbounds, ubounds, strides, offsets, & @\
-                        ESMF_TF_TRUE, ESMF_TF_TRUE) @\
+                        ESMF_TRUE, ESMF_TRUE) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "LocalArray internal set info error" @\

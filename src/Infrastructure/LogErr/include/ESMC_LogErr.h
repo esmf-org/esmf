@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.14 2003/08/14 14:31:13 theurich Exp $
+// $Id: ESMC_LogErr.h,v 1.15 2003/09/04 22:24:21 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ inline void ESMC_Log::ESMC_LogSetFlush(
 // 
 //EOP
 {
-      flush=ESMF_TF_TRUE;
+      flush=ESMF_TRUE;
 }
 
 
@@ -206,7 +206,7 @@ inline void ESMC_Log::ESMC_LogSetNotFlush(
 // Causes output not to be flushed.
 //EOP
 {                    
-   flush=ESMF_TF_FALSE;
+   flush=ESMF_FALSE;
 }               
 									
 
@@ -229,7 +229,7 @@ inline void ESMC_Log::ESMC_LogSetVerbose(
 // 
 //EOP
 {
-     verbose=ESMF_TF_TRUE;
+     verbose=ESMF_TRUE;
 }
 
 //----------------------------------------------------------------------------
@@ -272,7 +272,7 @@ inline void ESMC_Log::ESMC_LogSetNotVerbose(
 // 
 //EOP
 {
-     verbose=ESMF_TF_FALSE;
+     verbose=ESMF_FALSE;
 }
 
 
@@ -296,7 +296,7 @@ inline void ESMC_Log::ESMC_LogSetHaltOnErr(
 // 
 //EOP
 {
-     haltOnErr=ESMF_TF_TRUE;
+     haltOnErr=ESMF_TRUE;
 }
 
 //----------------------------------------------------------------------------
@@ -340,7 +340,7 @@ inline void ESMC_Log::ESMC_LogSetNotHaltOnErr(
 // 
 //EOP
 {
-     haltOnErr=ESMF_TF_FALSE;
+     haltOnErr=ESMF_FALSE;
 }
 
 //----------------------------------------------------------------------------
@@ -363,7 +363,7 @@ inline void ESMC_Log::ESMC_LogSetHaltOnWarn(
 // 
 //EOP
 {
-     haltOnWarn=ESMF_TF_TRUE;
+     haltOnWarn=ESMF_TRUE;
 }
 
 //----------------------------------------------------------------------------
@@ -409,7 +409,7 @@ inline void ESMC_Log::ESMC_LogSetNotHaltOnWarn(
 // 
 //EOP
 {
-     haltOnWarn=ESMF_TF_FALSE;
+     haltOnWarn=ESMF_FALSE;
 }
 
 

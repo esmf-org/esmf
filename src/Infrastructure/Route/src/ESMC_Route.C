@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.65 2003/09/04 20:05:33 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.66 2003/09/04 22:24:21 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.65 2003/09/04 20:05:33 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.66 2003/09/04 22:24:21 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -339,7 +339,7 @@ static int maxroutes = 10;
             memcpy(ep->rcv_AI_tot, AI_rcv_tot, bytes);
         }
         for (i=0; i<rank; i++) 
-            ep->periodic[i] = periodic ? periodic[i] : ESMF_TF_FALSE;
+            ep->periodic[i] = periodic ? periodic[i] : ESMF_FALSE;
 
         //DEBUG:
         //printf("Info: this route added to Cache, entry %d\n", 
@@ -437,7 +437,7 @@ static int maxroutes = 10;
                                    //       number of DE's in the snd layout)
       ESMC_DELayout *layout_snd,   // in  - pointer to the snd DELayout 
       ESMC_Logical *periodic,      // in - if halo'ing, per/axis flag
-      ESMC_Logical *hascachedroute,  // out - ESMF_TF_TRUE, ESMF_TF_FALSE
+      ESMC_Logical *hascachedroute,  // out - ESMF_TRUE, ESMF_FALSE
       ESMC_Route **route) {        // out - if true, cached route
 
 //
@@ -473,22 +473,22 @@ static int maxroutes = 10;
             entries = ep->snd_AI_count * ep->rank;            
             for (j=0; j<entries; j++) {
                 tf = ESMC_AxisIndexEqual(AI_snd_exc+j, ep->snd_AI_exc+j); 
-                if (tf == ESMF_TF_FALSE) goto next;
+                if (tf == ESMF_FALSE) goto next;
                 tf = ESMC_AxisIndexEqual(AI_snd_tot+j, ep->snd_AI_tot+j); 
-                if (tf == ESMF_TF_FALSE) goto next;
+                if (tf == ESMF_FALSE) goto next;
             }
         }
         if (ep->rcv_AI_count > 0) {
             entries = ep->rcv_AI_count * ep->rank;            
             for (j=0; j<entries; j++) {
                 tf = ESMC_AxisIndexEqual(AI_rcv_exc+j, ep->rcv_AI_exc+j); 
-                if (tf == ESMF_TF_FALSE) goto next;
+                if (tf == ESMF_FALSE) goto next;
                 tf = ESMC_AxisIndexEqual(AI_rcv_tot+j, ep->rcv_AI_tot+j); 
-                if (tf == ESMF_TF_FALSE) goto next;
+                if (tf == ESMF_FALSE) goto next;
             }
         }
 
-        *hascachedroute = ESMF_TF_TRUE;
+        *hascachedroute = ESMF_TRUE;
         *route = routetable.rcep[i]->theroute;
 
         //DEBUG: 
@@ -501,7 +501,7 @@ static int maxroutes = 10;
           // between a label and the closing brace.)
     }
  
-    *hascachedroute = ESMF_TF_FALSE;
+    *hascachedroute = ESMF_FALSE;
     *route = NULL;
 
     //DEBUG: 
@@ -837,13 +837,13 @@ static int maxroutes = 10;
  
       // calculate "their" XPacket in the sense of the global data
       for (j=0; j<rank; j++) {
-        boundary[j][0] = ESMF_TF_FALSE;
-        boundary[j][1] = ESMF_TF_FALSE;
-        if (periodic[j]==ESMF_TF_TRUE) {
+        boundary[j][0] = ESMF_FALSE;
+        boundary[j][1] = ESMF_FALSE;
+        if (periodic[j]==ESMF_TRUE) {
           if (their_DE_pos[j] == 0) 
-            boundary[j][0] = ESMF_TF_TRUE;
+            boundary[j][0] = ESMF_TRUE;
           if (their_DE_pos[j] == nde[j]-1) 
-            boundary[j][1] = ESMF_TF_TRUE;
+            boundary[j][1] = ESMF_TRUE;
         }
       }
       rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, boundary,
@@ -898,13 +898,13 @@ static int maxroutes = 10;
  
       // calculate "their" XPacket in the sense of the global data
       for (j=0; j<rank; j++) {
-        boundary[j][0] = ESMF_TF_FALSE;
-        boundary[j][1] = ESMF_TF_FALSE;
-        if (periodic[j] == ESMF_TF_TRUE) {
+        boundary[j][0] = ESMF_FALSE;
+        boundary[j][1] = ESMF_FALSE;
+        if (periodic[j] == ESMF_TRUE) {
           if (their_DE_pos[j] == 0) 
-            boundary[j][0] = ESMF_TF_TRUE;
+            boundary[j][0] = ESMF_TRUE;
           if (their_DE_pos[j] == nde[j]-1) 
-            boundary[j][1] = ESMF_TF_TRUE;
+            boundary[j][1] = ESMF_TRUE;
         }
       }
       rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, boundary, 

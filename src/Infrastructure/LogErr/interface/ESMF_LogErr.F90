@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.19 2003/07/25 23:17:23 jwolfe Exp $
+! $Id: ESMF_LogErr.F90,v 1.20 2003/09/04 22:24:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,18 +44,18 @@ type ESMF_Log
 					          !one file if
 			                          !oneLogErrFile
 					          !is set to
-					          !ESMF_TF_TRUE
+					          !ESMF_TRUE
 
     type(ESMF_Logical) :: standardOut             !If standardOut
                                                   !set 
-                                                  !to ESMF_TF_TRUE
+                                                  !to ESMF_TRUE
 					          !output
                                                   !goes to standard
 					          !out.
 
     type(ESMF_Logical) :: fortIsOpen              !If fortIsOpen
                                                   !is set to
-                                                  !ESMF_TF_TRUE an 
+                                                  !ESMF_TRUE an 
 			                          !ESMF_Log object
 					          !has a Fortran file
 					          !open.
@@ -72,26 +72,26 @@ type ESMF_Log
                                                   !Fortran unit numbers
 
 
-    type(ESMF_Logical) :: verboseSet=ESMF_TF_TRUE !An ESMF_Log object will write
+    type(ESMF_Logical) :: verboseSet=ESMF_TRUE !An ESMF_Log object will write
                                                   !output only if verbose
 						  !is set to
-					          !ESMF_TF_TRUE
+					          !ESMF_TRUE
     
-    type(ESMF_Logical) :: flushSet=ESMF_TF_FALSE  !An ESMF_Log object
+    type(ESMF_Logical) :: flushSet=ESMF_FALSE  !An ESMF_Log object
                                                   !will have its
                                                   !output flushed if
 						  !flushSet is set
-					          !to ESMF_TF_TRUE 
+					          !to ESMF_TRUE 
 
-    type(ESMF_Logical) :: haltOnWarn=ESMF_TF_FALSE !An ESMF_Log object will halt
+    type(ESMF_Logical) :: haltOnWarn=ESMF_FALSE !An ESMF_Log object will halt
                                                    !on encountering a warning if
 					           !haltOnWarn is set to
-						   !ESMF_TF_TRUE 
+						   !ESMF_TRUE 
 
-    type (ESMF_Logical) :: haltOnErr=ESMF_TF_TRUE  !An ESMF_Log object will halt
+    type (ESMF_Logical) :: haltOnErr=ESMF_TRUE  !An ESMF_Log object will halt
                                                    !on encountering an error if
 					           !haltOnErr is set to
-						   !ESMF_TF_TRUE. 
+						   !ESMF_TRUE. 
 
     character(len=32) nameLogErrFile      !Name of an ESMF_Log objects's
                                           !output file 
@@ -216,20 +216,20 @@ subroutine ESMF_LogSet(aLog, verbose, flush, haltOnErr, haltOnWarn)
 !   \begin{description}
 !
 !   \item[verbose]
-!   If set to ESMF_TF_TRUE, output written to Log file.                   
+!   If set to ESMF_TRUE, output written to Log file.                   
 !  \item[flush]                                                       
-!   If set to ESMF_TF_TRUE, output is flushed.                                  
+!   If set to ESMF_TRUE, output is flushed.                                  
 !  \item[haltOnWarn]                                              
-!   If set to ESMF_TF_TRUE, code stops on warnings.                             
+!   If set to ESMF_TRUE, code stops on warnings.                             
 !  \item[haltOnErr]                                                   
-!   If set to ESMF_TF_TRUE, code stops on errors.                               
+!   If set to ESMF_TRUE, code stops on errors.                               
 !  \end{description}
 !
 !EOP
 
 
  if (present(verbose)) then
-    if (verbose .eq. ESMF_TF_TRUE) then
+    if (verbose .eq. ESMF_TRUE) then
       call c_esmf_logsetverbose(aLog)
     else
       call c_esmf_logsetnotverbose(aLog)
@@ -237,7 +237,7 @@ subroutine ESMF_LogSet(aLog, verbose, flush, haltOnErr, haltOnWarn)
   end if
 
  if (present(flush)) then
-    if (flush .eq. ESMF_TF_TRUE) then
+    if (flush .eq. ESMF_TRUE) then
       call c_esmf_logsetflush(aLog)
     else
       call c_esmf_logsetnotflush(aLog)
@@ -245,7 +245,7 @@ subroutine ESMF_LogSet(aLog, verbose, flush, haltOnErr, haltOnWarn)
  end if
 
  if (present(haltOnErr)) then
-    if (haltOnErr .eq. ESMF_TF_TRUE) then
+    if (haltOnErr .eq. ESMF_TRUE) then
       call c_esmf_logsethaltonerr(aLog)
     else
       call c_esmf_logsetnothaltonerr(aLog)
@@ -253,7 +253,7 @@ subroutine ESMF_LogSet(aLog, verbose, flush, haltOnErr, haltOnWarn)
  end if
 
  if (present(haltOnWarn)) then
-    if (haltOnWarn .eq. ESMF_TF_TRUE) then
+    if (haltOnWarn .eq. ESMF_TRUE) then
       call c_esmf_logsethaltonwarn(aLog)
     else
       call c_esmf_logsetnothaltonwarn(aLog)
@@ -582,8 +582,8 @@ subroutine ESMF_LogOpenFortran(isOpen, unitNumber, nameLogFile)
 ! The arguments are:
 ! \begin{description}
 ! \item[isOpen]
-! If file successfully opene isOpen set to ESMF_TF_TRUE otherwise set
-! to ESMF_TF_FALSE
+! If file successfully opene isOpen set to ESMF_TRUE otherwise set
+! to ESMF_FALSE
 !
 ! \item[unitNumber]
 ! standard Fortran unit number for I/O
@@ -598,28 +598,28 @@ subroutine ESMF_LogOpenFortran(isOpen, unitNumber, nameLogFile)
    integer :: status, i
 
    ! Assume failure until we know we have an open unit number
-   isOpen=ESMF_TF_FALSE
+   isOpen=ESMF_FALSE
 
    if (unitNumber .gt. ESMF_LOG_UPPER) return
 
    do i=unitNumber, ESMF_LOG_UPPER
      inquire(unit=i,iostat=status)
      if (status .eq. 0) then
-       isOpen = ESMF_TF_TRUE
+       isOpen = ESMF_TRUE
        exit
      endif
    enddo 
 
-   if (isOpen .eq. ESMF_TF_FALSE) return
+   if (isOpen .eq. ESMF_FALSE) return
 
    unitNumber = i
    open(unit=unitNumber,file=nameLogFile, status='unknown', &
         action='write',position='append',iostat=status)
 
    if (status .eq. 0) then
-    isOpen=ESMF_TF_TRUE
+    isOpen=ESMF_TRUE
    else
-    isOpen=ESMF_TF_FALSE
+    isOpen=ESMF_FALSE
    end if    
 
  end subroutine  ESMF_LogOpenFortran
@@ -672,7 +672,7 @@ end subroutine ESMF_LogCloseFortran
 ! \begin{description}
 
 ! \item[flushSet]
-! If set to ESMF_TF_TRUE, out flushed.
+! If set to ESMF_TRUE, out flushed.
 !
 ! \item[unitNumber]
 ! standard Fortran unit number for I/O
@@ -683,7 +683,7 @@ end subroutine ESMF_LogCloseFortran
   integer :: istat
 
   write(unitNumber,*)
-  if (flushSet .eq. ESMF_TF_TRUE) call ESMF_IOFlush(unitNumber, istat)
+  if (flushSet .eq. ESMF_TRUE) call ESMF_IOFlush(unitNumber, istat)
 
  end subroutine ESMF_LogPrintNewLine
 
@@ -721,7 +721,7 @@ end subroutine ESMF_LogCloseFortran
 ! String to be printed.
 !
 ! \item[flushSet]
-! If set to ESMF_TF_TRUE, out flushed.
+! If set to ESMF_TRUE, out flushed.
 !
 ! \end{description}
 !
@@ -730,7 +730,7 @@ end subroutine ESMF_LogCloseFortran
   integer :: i,istat
 
   write(unitNumber,10) stringToPrint
-  if (flushSet .eq. ESMF_TF_TRUE) call ESMF_IOFlush(unitNumber, istat)
+  if (flushSet .eq. ESMF_TRUE) call ESMF_IOFlush(unitNumber, istat)
   10 format(A)
  end subroutine ESMF_LogPrintString
 

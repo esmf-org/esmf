@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.32 2003/09/04 19:41:46 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.33 2003/09/04 22:24:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.32 2003/09/04 19:41:46 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.33 2003/09/04 22:24:21 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -551,7 +551,7 @@
 
 
         ! Set return values
-        if (lcache .eq. ESMF_TF_TRUE) then
+        if (lcache .eq. ESMF_TRUE) then
             hascachedroute = .true.
             route = lroute
         endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.72 2003/09/04 20:13:27 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.73 2003/09/04 22:24:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -144,7 +144,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.72 2003/09/04 20:13:27 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.73 2003/09/04 22:24:21 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1260,7 +1260,7 @@
 
       global_start = 1
       global_end = 0
-!     if (periodic(1).eq.ESMF_TF_TRUE) then
+!     if (periodic(1).eq.ESMF_TRUE) then
 !       global_start = countsPerDE1(nDE(1)) + 1
 !       global_end   = countsPerDE1(nDE(1))
 !     endif
@@ -1280,7 +1280,7 @@
           de = (i-1)*nDE(1) + j
           distgrid%ai_global(de,1)%stride = global_end
           if (present(periodic)) then
-            if (periodic(1).eq.ESMF_TF_TRUE) &
+            if (periodic(1).eq.ESMF_TRUE) &
             distgrid%ai_global(de,1)%stride = global_end + countsPerDE1(1) &
                                             + countsPerDE1(nDE(1))
           endif
@@ -1291,7 +1291,7 @@
       global_start = 1
       global_end = 0
       if (present(periodic)) then
-        if (periodic(2).eq.ESMF_TF_TRUE) then
+        if (periodic(2).eq.ESMF_TRUE) then
           global_start = countsPerDE2(nDE(2)) + 1
           global_end   = countsPerDE2(nDE(2))
         endif
@@ -1312,7 +1312,7 @@
           de = (j-1)*nDE(1) + i
           distgrid%ai_global(de,2)%stride = global_end
           if (present(periodic)) then
-            if (periodic(2).eq.ESMF_TF_TRUE) &
+            if (periodic(2).eq.ESMF_TRUE) &
             distgrid%ai_global(de,2)%stride = global_end + countsPerDE2(1) &
                                             + countsPerDE2(nDE(2))
           endif

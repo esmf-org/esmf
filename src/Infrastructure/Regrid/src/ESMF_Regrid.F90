@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.35 2003/09/02 18:56:00 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.36 2003/09/04 22:24:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.35 2003/09/02 18:56:00 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.36 2003/09/04 22:24:21 cdeluca Exp $'
 
 !==============================================================================
 
@@ -991,7 +991,7 @@
       call ESMF_FieldGetGrid(srcfield, src_grid, rc=status)
       call ESMF_GridGetDELayout(src_grid, srclayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hassrcdata = (hasdata .eq. ESMF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
@@ -1004,7 +1004,7 @@
       call ESMF_FieldGetGrid(dstfield, dst_grid, rc=status)
       call ESMF_GridGetDELayout(dst_grid, dstlayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hasdstdata = (hasdata .eq. ESMF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
@@ -1127,7 +1127,7 @@
       call ESMF_FieldGetGrid(srcfield, src_grid, rc=status)
       call ESMF_GridGetDELayout(src_grid, srclayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hassrcdata = (hasdata .eq. ESMF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
@@ -1140,7 +1140,7 @@
       call ESMF_FieldGetGrid(dstfield, dst_grid, rc=status)
       call ESMF_GridGetDELayout(dst_grid, dstlayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hasdstdata = (hasdata .eq. ESMF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout

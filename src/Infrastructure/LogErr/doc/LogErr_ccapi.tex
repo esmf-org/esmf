@@ -119,7 +119,7 @@
    EOP
  {
    int i;
-   if (FortIO == ESMF_TF_FALSE) {
+   if (FortIO == ESMF_FALSE) {
      for(i=0; i< numCFiles; i++)
       if (strcmp(name,listOfCFileNames[i])  == 0) 
  	return false;
@@ -218,7 +218,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}    void ESMC_Log::ESMC_LogPrintHeader(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      none \end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}      int fortIO       //if set to ESMF_TF_TRUE, use fortran io libraries
+\begin{verbatim}      int fortIO       //if set to ESMF_TRUE, use fortran io libraries
  
     )
    !Description:
@@ -580,7 +580,7 @@
  void ESMC_Log:: ESMC_LogPrint(
  \end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim} 
-    int fortIO,          //if set to ESMF_TF_TRUE use Fortran IO libraries
+    int fortIO,          //if set to ESMF_TRUE use Fortran IO libraries
     int errCode,
     int line,            // see LogErr for a definition
     char file[],         // of these variables

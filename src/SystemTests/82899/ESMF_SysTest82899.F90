@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.17 2003/09/04 19:55:55 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.18 2003/09/04 22:24:22 cdeluca Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -300,8 +300,8 @@
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
       print *, "Grid 1 is Periodic along the 1st dimension"
-      periodic(1) = ESMF_TF_TRUE
-      periodic(2) = ESMF_TF_FALSE
+      periodic(1) = ESMF_TRUE
+      periodic(2) = ESMF_FALSE
 
       gname = "test grid 1"
 
@@ -317,8 +317,8 @@
       if (verbose) print *, "Grid Create returned"
 
       print *, "Grid 2 is Periodic along the 2st dimension"
-      periodic(1) = ESMF_TF_FALSE
-      periodic(2) = ESMF_TF_TRUE
+      periodic(1) = ESMF_FALSE
+      periodic(2) = ESMF_TRUE
 
       gname = "test grid 2"
 
@@ -334,8 +334,8 @@
       if (verbose) print *, "Grid Create returned"
 
       print *, "Grid 3 is Periodic along both dimensions"
-      periodic(1) = ESMF_TF_TRUE
-      periodic(2) = ESMF_TF_TRUE
+      periodic(1) = ESMF_TRUE
+      periodic(2) = ESMF_TRUE
 
       gname = "test grid 3"
 
@@ -351,8 +351,8 @@
       if (verbose) print *, "Grid Create returned"
 
       print *, "Grid 4 is not Periodic along either dimension"
-      periodic(1) = ESMF_TF_FALSE
-      periodic(2) = ESMF_TF_FALSE
+      periodic(1) = ESMF_FALSE
+      periodic(2) = ESMF_FALSE
 
       gname = "test grid 4"
 
@@ -694,7 +694,7 @@
 
       ! bottom middle
       if (ypos .eq. 0) then
-        if (pflags(2) .eq. ESMF_TF_TRUE) then
+        if (pflags(2) .eq. ESMF_TRUE) then
           target = (ny-1)*nx + xpos 
         else
           target = -1
@@ -704,7 +704,7 @@
 
       ! top middle
       if (ypos .eq. ny-1) then
-        if (pflags(2) .eq. ESMF_TF_TRUE) then
+        if (pflags(2) .eq. ESMF_TRUE) then
           target = xpos 
         else
           target = -1
@@ -714,7 +714,7 @@
       
       ! left side middle
       if (xpos .eq. 0) then
-        if (pflags(1) .eq. ESMF_TF_TRUE) then
+        if (pflags(1) .eq. ESMF_TRUE) then
           target = de_id + (nx-1)
         else
           target = -1
@@ -724,7 +724,7 @@
       
       ! right side middle
       if (xpos .eq. nx-1) then
-        if (pflags(1) .eq. ESMF_TF_TRUE) then
+        if (pflags(1) .eq. ESMF_TRUE) then
           target = de_id - (nx-1)
         else
           target = -1
@@ -736,8 +736,8 @@
 
       ! lower left
       if ((xpos .eq. 0) .and. (ypos .eq. 0)) then
-        if ((pflags(1) .eq. ESMF_TF_TRUE) .and. &
-            (pflags(2) .eq. ESMF_TF_TRUE)) then
+        if ((pflags(1) .eq. ESMF_TRUE) .and. &
+            (pflags(2) .eq. ESMF_TRUE)) then
           target = -1 ! ambiguous
           !target = de_id + nx - 1  ! ambiguous
           !target = de_id + (ny-1)*nx - 1 ! ambiguous
@@ -746,14 +746,14 @@
         endif
         pattern(1, 1) = target
       else if (xpos .eq. 0) then
-        if (pflags(1) .eq. ESMF_TF_TRUE) then
+        if (pflags(1) .eq. ESMF_TRUE) then
           target = de_id - 1
         else
           target = -1
         endif
         pattern(1, 1) = target
       else if (ypos .eq. 0) then
-        if (pflags(2) .eq. ESMF_TF_TRUE) then
+        if (pflags(2) .eq. ESMF_TRUE) then
           target = de_id + (ny-1)*nx - 1
         else
           target = -1
@@ -763,8 +763,8 @@
       
       ! lower right
       if ((xpos .eq. nx-1) .and. (ypos .eq. 0)) then
-        if ((pflags(1) .eq. ESMF_TF_TRUE) .and. &
-            (pflags(2) .eq. ESMF_TF_TRUE)) then
+        if ((pflags(1) .eq. ESMF_TRUE) .and. &
+            (pflags(2) .eq. ESMF_TRUE)) then
           target = -1  ! ambiguous
           !target = de_id - nx + 1  ! ambiguous
           !target = de_id + (ny-1)*nx + 1  ! ambiguous
@@ -773,14 +773,14 @@
         endif
         pattern(3, 1) = target
       else if (xpos .eq. nx-1) then
-        if (pflags(1) .eq. ESMF_TF_TRUE) then
+        if (pflags(1) .eq. ESMF_TRUE) then
           target = de_id - 2*nx + 1
         else
           target = -1
         endif
         pattern(3, 1) = target
       else if (ypos .eq. 0) then
-        if (pflags(2) .eq. ESMF_TF_TRUE) then
+        if (pflags(2) .eq. ESMF_TRUE) then
           target = de_id + (ny-1)*nx + 1
         else
           target = -1
@@ -790,8 +790,8 @@
       
       ! upper left
       if ((xpos .eq. 0) .and. (ypos .eq. ny-1)) then
-        if ((pflags(1) .eq. ESMF_TF_TRUE) .and. &
-            (pflags(2) .eq. ESMF_TF_TRUE)) then
+        if ((pflags(1) .eq. ESMF_TRUE) .and. &
+            (pflags(2) .eq. ESMF_TRUE)) then
           target = -1 ! ambiguous
           !target = de_id + nx - 1  ! ambiguous
           !target = xpos + nx - 1 ! ambiguous
@@ -800,14 +800,14 @@
         endif
         pattern(1, 3) = target
       else if (xpos .eq. 0) then
-        if (pflags(1) .eq. ESMF_TF_TRUE) then
+        if (pflags(1) .eq. ESMF_TRUE) then
           target = de_id + 2*nx - 1
         else
           target = -1
         endif
         pattern(1, 3) = target
       else if (ypos .eq. ny-1) then
-        if (pflags(2) .eq. ESMF_TF_TRUE) then
+        if (pflags(2) .eq. ESMF_TRUE) then
           target = xpos - 1
         else
           target = -1
@@ -817,8 +817,8 @@
       
       ! upper right
       if ((xpos .eq. nx-1) .and. (ypos .eq. ny-1)) then
-        if ((pflags(1) .eq. ESMF_TF_TRUE) .and. &
-            (pflags(2) .eq. ESMF_TF_TRUE)) then
+        if ((pflags(1) .eq. ESMF_TRUE) .and. &
+            (pflags(2) .eq. ESMF_TRUE)) then
           target = -1  ! ambiguous
           !target = de_id - nx + 1  ! ambiguous
           !target = de_id + 1  ! ambiguous
@@ -827,14 +827,14 @@
         endif
         pattern(3, 3) = target
       else if (xpos .eq. nx-1) then
-        if (pflags(1) .eq. ESMF_TF_TRUE) then
+        if (pflags(1) .eq. ESMF_TRUE) then
           target = de_id + 1
         else
           target = -1
         endif
         pattern(3, 3) = target
       else if (ypos .eq. ny-1) then
-        if (pflags(2) .eq. ESMF_TF_TRUE) then
+        if (pflags(2) .eq. ESMF_TRUE) then
           target = xpos + 1
         else
           target = -1

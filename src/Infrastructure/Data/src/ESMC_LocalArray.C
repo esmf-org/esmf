@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.5 2003/08/28 15:51:10 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.6 2003/09/04 22:24:21 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -96,7 +96,7 @@
      status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
                                           ESMC_FROM_CPLUSPLUS,
                                           NULL, ESMC_ARRAY_DO_ALLOCATE, 
-                                          docopy, ESMF_TF_TRUE, 
+                                          docopy, ESMF_TRUE, 
                                           NULL, NULL, NULL, NULL); 
      
      if (rc != NULL)
@@ -168,7 +168,7 @@
 
      status = a->ESMC_LocalArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
-                            ESMC_DATA_NONE, ESMF_TF_FALSE, 
+                            ESMC_DATA_NONE, ESMF_FALSE, 
                             NULL, NULL, NULL, NULL);
 
      if (rc != NULL)
@@ -243,13 +243,13 @@
          status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
                                               ESMC_FROM_FORTRAN, f90ptr, 
                                               ESMC_ARRAY_DO_ALLOCATE,
-                                              ESMC_DATA_NONE, ESMF_TF_TRUE, 
+                                              ESMC_DATA_NONE, ESMF_TRUE, 
                                               lbounds, ubounds, strides, offsets); 
      else
          status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
                                               ESMC_FROM_FORTRAN, f90ptr, 
                                               ESMC_ARRAY_NO_ALLOCATE, 
-                                              docopy, ESMF_TF_FALSE, 
+                                              docopy, ESMF_FALSE, 
                                               lbounds, ubounds, strides, offsets); 
 
      if (rc != NULL)
@@ -367,7 +367,7 @@
     ESMC_LocalArray *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
-    if (needs_dealloc != ESMF_TF_TRUE)
+    if (needs_dealloc != ESMF_TRUE)
         return ESMF_SUCCESS;
 
     // if there is an F90 dope vector, we have to call back into fortran

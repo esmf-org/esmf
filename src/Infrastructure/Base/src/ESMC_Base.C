@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.9 2003/09/04 19:38:34 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.10 2003/09/04 22:24:20 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.9 2003/09/04 19:38:34 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.10 2003/09/04 22:24:20 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -406,18 +406,18 @@ static int globalCount = 0;
 
      // if both null, say ok.
      if ((ai1 == NULL) && (ai2 == NULL))
-        return ESMF_TF_TRUE;   // in some sense...
+        return ESMF_TRUE;   // in some sense...
 
      // if only 1 null, can't be equal.
      if ((ai1 == NULL) || (ai2 == NULL))
-        return ESMF_TF_FALSE;
+        return ESMF_FALSE;
 
      if ((ai1->min != ai2->min) ||
          (ai1->max != ai2->max) ||
          (ai1->stride != ai2->stride))
-         return ESMF_TF_FALSE;
+         return ESMF_FALSE;
 
-     return ESMF_TF_TRUE;
+     return ESMF_TRUE;
 };
 
 //-----------------------------------------------------------------------------

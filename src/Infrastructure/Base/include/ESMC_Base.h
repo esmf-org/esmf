@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.25 2003/09/04 19:37:58 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.26 2003/09/04 22:24:20 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -85,8 +85,8 @@ enum ESMC_DataKind { ESMF_I1=1,
 
 // general logical value - MUST MATCH F90
 enum ESMC_Logical { ESMF_TF_UNKNOWN=1,
-                    ESMF_TF_TRUE,
-                    ESMF_TF_FALSE };
+                    ESMF_TRUE,
+                    ESMF_FALSE };
 
 // max/min macros if they don't already exist
 #ifndef MAX

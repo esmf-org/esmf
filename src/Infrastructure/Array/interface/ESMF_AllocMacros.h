@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_AllocMacros.h,v 1.2 2003/07/22 19:36:49 nscollins Exp $
+! $Id: ESMF_AllocMacros.h,v 1.3 2003/09/04 22:24:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
         call c_ESMC_ArraySetInfo(array, local##mtypekind##mrank##D, & @\
                         local##mtypekind##mrank##D%mtypekind##mrank##Dptr( mloc ), & @\
                         counts, lbounds, ubounds, strides, offsets, & @\
-                        ESMF_TF_TRUE, ESMF_TF_TRUE, hwidth, status) @\
+                        ESMF_TRUE, ESMF_TRUE, hwidth, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array internal set info error" @\
