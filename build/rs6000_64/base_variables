@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.11 2003/04/30 18:19:43 flanigan Exp $ 
+# $Id: base_variables,v 1.12 2003/05/02 20:30:43 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -69,15 +69,15 @@ C_CXXF90LIBS		= -L.  \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc -lC \
-			  /usr/lpp/ppe.poe/lib/libc.a
+			  -lpthreads -lm_r -lm -lc_r -lc -lC 
+
 C_F90CXXLIBS		= -L. \
 			  -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc -lC \
-			  /usr/lpp/ppe.poe/lib/libc.a
+			  -lpthreads -lm_r -lm -lc_r -lc -lC 
+
 C_CXXSO			= cc_r -G
 C_CXXSOLIBS		= -L. \
                           -L/usr/lpp/ppe.poe/lib/threads \
@@ -85,6 +85,7 @@ C_CXXSOLIBS		= -L. \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
 			  -lpthreads -lm_r -lm -lc_r -lc -lC
+
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS		= -g  -qfullpath
 GCXX_FOPTFLAGS		= -g  -qfullpath 

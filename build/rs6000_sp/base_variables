@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.26 2003/05/01 16:42:12 flanigan Exp $ 
+# $Id: base_variables,v 1.27 2003/05/02 20:30:44 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -86,8 +86,7 @@ C_F90CXXLIBS		= -L. \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -L/usr/lib -L/usr/vac/lib \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc -lC \
-			  /usr/lpp/ppe.poe/lib/libc.a 
+			  -lpthreads -lm_r -lm -lc_r -lc -lC 
 
 C_CXXSO			= cc_r -G
 
