@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.180 2004/06/22 22:55:42 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.181 2004/07/12 22:29:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.180 2004/06/22 22:55:42 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.181 2004/07/12 22:29:49 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1806,8 +1806,8 @@
       subroutine ESMF_GridPrint(grid, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: options
+      type(ESMF_Grid),   intent(in) :: grid
+      character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1817,7 +1817,7 @@
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to print.
-!     \item[options]
+!     \item[{[options]}]
 !          Print options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
