@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.4 2004/03/05 17:23:46 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.5 2004/03/10 20:43:07 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -209,6 +209,8 @@
       call ESMF_StateAddData(export_state, "Q", rc)
       call ESMF_StateAddData(export_state, "FLAG", rc)
 
+! temporary fix
+      call ESMF_StateAddData(export_state, field_sie, rc)
       rc = ESMF_SUCCESS
 
       end subroutine Flow_Init
