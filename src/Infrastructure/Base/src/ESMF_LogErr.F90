@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.69 2005/01/13 06:25:56 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.70 2005/02/03 21:42:36 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -271,8 +271,8 @@ end subroutine ESMF_LogClose
     integer, intent(out),optional	                        :: rc
 
 ! !DESCRIPTION:
-!      This routine finalizes the global log.  The default log will be flushed
-!      and the default log will be closed.
+!      This routine finalizes the global Log.  The default Log will be flushed
+!      and the default Log will be closed.
 !
 !      The arguments are:
 !      \begin{description}
@@ -301,86 +301,93 @@ end subroutine ESMF_LogFinalize
 !
 !
 ! !ARGUMENTS:
-	type(ESMF_LOG)				                :: log
+        type(ESMF_LOG), target,optional				:: log
 	integer, intent(out),optional		                :: rc
 
 ! !DESCRIPTION:
-!      This subroutine flushes th {\tt log}.
+!      This subroutine flushes the {\tt ESMF\_Log}.
 !
 !      The arguments are:
 !      \begin{description}
-! 
-!      \item [log]
+!
+!      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default log.
+!            of the default Log.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
 !EOP
     integer 			    :: i,j,ok,status
+    type(ESMF_LOG),pointer          :: alog
+
+    if (present(log)) then
+      alog => log
+    else
+      alog => ESMF_LogDefault
+    endif
     
     if (present(rc)) rc=ESMF_FAILURE 
-    if ((log%FileIsOpen .eq. ESMF_TRUE) .AND. &
-        (log%flushed .eq. ESMF_FALSE) .AND. &
-	(log%dirty .eq. ESMF_TRUE))  then	
+    if ((alog%FileIsOpen .eq. ESMF_TRUE) .AND. &
+        (alog%flushed .eq. ESMF_FALSE) .AND. &
+	(alog%dirty .eq. ESMF_TRUE))  then	
     	ok=0
     	do i=1, ESMF_LOG_MAXTRYOPEN
-    	    OPEN(UNIT=log%unitnumber,File=log%nameLogErrFile,& 
+    	    OPEN(UNIT=alog%unitnumber,File=alog%nameLogErrFile,& 
 	    POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
             if (status.eq.0) then
-	        do j=1, log%findex-1
-    		    if (log%LOG_ENTRY(j)%lineflag) then								
-    		        if (log%LOG_ENTRY(j)%methodflag) then
-    			    WRITE(log%unitnumber,122) &
-                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h   , &
-                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s   , ".", &
-                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt  , "  PET", &
-				  log%petnum, " ", &
-                                  log%LOG_ENTRY(j)%file  , " ", log%LOG_ENTRY(j)%line, " ", &
-                                  log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
+	        do j=1, alog%findex-1
+    		    if (alog%LOG_ENTRY(j)%lineflag) then								
+    		        if (alog%LOG_ENTRY(j)%methodflag) then
+    			    WRITE(alog%unitnumber,122) &
+                                  alog%LOG_ENTRY(j)%d     , " ", alog%LOG_ENTRY(j)%h   , &
+                                  alog%LOG_ENTRY(j)%m     ,      alog%LOG_ENTRY(j)%s   , ".", &
+                                  alog%LOG_ENTRY(j)%ms    , " ", alog%LOG_ENTRY(j)%lt  , "  PET", &
+				  alog%petnum, " ", &
+                                  alog%LOG_ENTRY(j)%file  , " ", alog%LOG_ENTRY(j)%line, " ", &
+                                  alog%LOG_ENTRY(j)%method, " ", alog%LOG_ENTRY(j)%msg
     		        else
-    			    WRITE(log%unitnumber,123) &
-                                  log%LOG_ENTRY(j)%d   , " ", log%LOG_ENTRY(j)%h   , &
-                                  log%LOG_ENTRY(j)%m   ,      log%LOG_ENTRY(j)%s   , ".", &
-                                  log%LOG_ENTRY(j)%ms  , " ", log%LOG_ENTRY(j)%lt  , "  PET", &
-				  log%petnum, " ", &
-                                  log%LOG_ENTRY(j)%file, " ", log%LOG_ENTRY(j)%line, " ", &
-                                  log%LOG_ENTRY(j)%msg
+    			    WRITE(alog%unitnumber,123) &
+                                  alog%LOG_ENTRY(j)%d   , " ", alog%LOG_ENTRY(j)%h   , &
+                                  alog%LOG_ENTRY(j)%m   ,      alog%LOG_ENTRY(j)%s   , ".", &
+                                  alog%LOG_ENTRY(j)%ms  , " ", alog%LOG_ENTRY(j)%lt  , "  PET", &
+				  alog%petnum, " ", &
+                                  alog%LOG_ENTRY(j)%file, " ", alog%LOG_ENTRY(j)%line, " ", &
+                                  alog%LOG_ENTRY(j)%msg
     		        endif	
                     else
-    		        if (log%LOG_ENTRY(j)%methodflag) then
-    		            WRITE(log%unitnumber,132) &
-                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h  , &
-                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s  , ".", &
-                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt , "  PET", &
-				  log%petnum, " ", &
-    			          log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
+    		        if (alog%LOG_ENTRY(j)%methodflag) then
+    		            WRITE(alog%unitnumber,132) &
+                                  alog%LOG_ENTRY(j)%d     , " ", alog%LOG_ENTRY(j)%h  , &
+                                  alog%LOG_ENTRY(j)%m     ,      alog%LOG_ENTRY(j)%s  , ".", &
+                                  alog%LOG_ENTRY(j)%ms    , " ", alog%LOG_ENTRY(j)%lt , "  PET", &
+				  alog%petnum, " ", &
+    			          alog%LOG_ENTRY(j)%method, " ", alog%LOG_ENTRY(j)%msg
     		        else
-    		            WRITE(log%unitnumber,133) &
-                                  log%LOG_ENTRY(j)%d  , " ", log%LOG_ENTRY(j)%h , &
-                                  log%LOG_ENTRY(j)%m  ,      log%LOG_ENTRY(j)%s , ".", &
-                                  log%LOG_ENTRY(j)%ms , " ", log%LOG_ENTRY(j)%lt, "  PET", &
-				  log%petnum, " ", &
-                                  log%LOG_ENTRY(j)%msg
+    		            WRITE(alog%unitnumber,133) &
+                                  alog%LOG_ENTRY(j)%d  , " ", alog%LOG_ENTRY(j)%h , &
+                                  alog%LOG_ENTRY(j)%m  ,      alog%LOG_ENTRY(j)%s , ".", &
+                                  alog%LOG_ENTRY(j)%ms , " ", alog%LOG_ENTRY(j)%lt, "  PET", &
+				  alog%petnum, " ", &
+                                  alog%LOG_ENTRY(j)%msg
     		        endif	
     	            endif
 		enddo    
-    	        CLOSE(UNIT=log%unitnumber)
+    	        CLOSE(UNIT=alog%unitnumber)
     	        ok=1
     	    endif	
     	    if (ok.eq.1) exit    
        enddo
    endif
    
-   log%findex = 1 
+   alog%findex = 1 
    122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,i0,a,a,a,a)
    123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,i0,a,a)
    132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,a)
    133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a)
    
-   log%flushed = ESMF_TRUE
-   log%dirty = ESMF_FALSE
+   alog%flushed = ESMF_TRUE
+   alog%dirty = ESMF_FALSE
    rc=ESMF_SUCCESS	
       
 end subroutine ESMF_LogFlush
@@ -429,7 +436,7 @@ end subroutine ESMF_LogFlush
 !            allocation eror.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	         of the default log.
+!	     of the default Log.
 !      
 !      \end{description}
 ! 
@@ -495,7 +502,7 @@ end function ESMF_LogFoundAllocError
 !            at the same time it is testing the value.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default log.
+!	     of the default Log.
 !      
 !      \end{description}
 ! 
@@ -521,7 +528,7 @@ end function ESMF_LogFoundError
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log), intent(in) 		                :: log
+        type(ESMF_LOG), target,optional			        :: log
 	type(ESMF_Logical), intent(out),optional		:: verbose
 	type(ESMF_Logical), intent(out),optional		:: flush
 	type(ESMF_Logical), intent(out),optional		:: rootOnly
@@ -533,41 +540,61 @@ end function ESMF_LogFoundError
 	
 
 ! !DESCRIPTION:
-!      This subroutine returns properties about a log object.
+!      This subroutine returns properties about a Log object.
 !
 !      The arguments are:
 !      \begin{description}
 !
-!      \item [log]
-!            Log object.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!            of the default Log.
 !      \item [{[verbose]}]
 !            Verbose flag.
 !      \item [{[flush]}]
 !            Flush flag.
 !      \item [{[rootOnly]}]
-!	     Root only flag
+!	     Root only flag.
 !      \item [{[halt]}]
-!	     Halt definitions 
+!            Halt definition, with the following valid values:
+!            \begin{description}
+!              \item {\tt ESMF\_LOG\_HALTWARNING};
+!              \item {\tt ESMF\_LOG\_HALTERROR};
+!              \item {\tt ESMF\_LOG\_HALTNEVER}.
+!            \end{description}
 !      \item [{[logtype]}]
-!            Defines either single or multilog
+!            Defines either single or multilog.
 !      \item [{[stream]}]
-!            The type of stream (free(0), preordered(1))
+!            The type of stream, with the following valid values and meanings:
+!            \begin{description}
+!              \item 0 \  free;
+!              \item 1 \  preordered.
+!            \end{description}
 !      \item [{[maxElements]}]
-!            Maximum number of elements in the log.
+!            Maximum number of elements in the Log.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
 !EOPI
+
+        type(ESMF_LOG),pointer          :: alog
+
+        if (present(log)) then
+          alog => log
+        else
+          alog => ESMF_LogDefault
+        endif
+
 	if (present(rc)) rc=ESMF_FAILURE
-	if (present(verbose)) verbose=log%verbose
-	if (present(flush)) flush=log%flushImmediately
-	if (present(rootOnly)) rootOnly=log%rootOnly
-	if (present(halt)) halt=log%halt
-	if (present(logtype)) logtype=log%logtype
-	if (present(stream)) stream=log%stream
-	if (present(maxElements)) maxElements=log%maxElements	
-	if (present(rc)) rc=ESMF_SUCCESS 
+	if (present(verbose)) verbose=alog%verbose
+	if (present(flush)) flush=alog%flushImmediately
+	if (present(rootOnly)) rootOnly=alog%rootOnly
+	if (present(halt)) halt=alog%halt
+	if (present(logtype)) logtype=alog%logtype
+	if (present(stream)) stream=alog%stream
+	if (present(maxElements)) maxElements=alog%maxElements	
+	if (present(rc)) rc=ESMF_SUCCESS
+
 end subroutine ESMF_LogGet
 
 !--------------------------------------------------------------------------
@@ -596,9 +623,9 @@ end subroutine ESMF_LogGet
 !            the PET number to be added and keep the total file name
 !            length under 32 characters.
 !      \item [{[lognone]}]
-!            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}
+!            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}.
 !      \item [{[logtype]}]
-!            Specifies ESMF\_LOG\_SINGLE or ESMF\_LOG\_MULTI
+!            Specifies {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -734,7 +761,7 @@ end subroutine ESMF_LogInitialize
 !            allocation eror.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	         of the default log.
+!	     of the default Log.
 !      
 !      \end{description}
 ! 
@@ -805,7 +832,7 @@ end function ESMF_LogMsgFoundAllocError
 !            at the same time it is testing the value.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	         of the default log.
+!            of the default Log.
 !      
 !      \end{description}
 ! 
@@ -867,7 +894,7 @@ end function ESMF_LogMsgFoundError
 !            at the same time it is testing the value.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	         of the default log.
+!	     of the default Log.
 !      
 !      \end{description}
 ! 
@@ -896,8 +923,8 @@ end subroutine ESMF_LogMsgSetError
 
 ! !DESCRIPTION:
 !      This routine opens a file with {\tt filename} and associates
-!      it with the {\tt log}.  This is only
-!      used when the user does not want to use the default {\tt ESMF\_Log}.
+!      it with the {\tt ESMF\_Log}.  This is only
+!      used when the user does not want to use the default Log.
 !
 !      The arguments are:
 !      \begin{description}
@@ -907,9 +934,9 @@ end subroutine ESMF_LogMsgSetError
 !      \item [filename]
 !            Name of file.
 !      \item [{[lognone]}]
-!            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}
+!            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}.
 !      \item [{[logtype]}]
-!            Specifies ESMF\_LOG\_SINGLE or ESMF\_LOG\_MULTI
+!            Specifies {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1005,7 +1032,7 @@ end subroutine ESMF_LogOpen
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log) 				   		:: log
+	type(ESMF_LOG), target,optional                         :: log
 	type(ESMF_Logical), intent(in),optional			:: verbose
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
@@ -1015,44 +1042,62 @@ end subroutine ESMF_LogOpen
 	integer, intent(out),optional			        :: rc
 	
 ! !DESCRIPTION:
-!      This subroutine sets the properties for the log object.
+!      This subroutine sets the properties for the Log object.
 !
 !      The arguments are:
 !      \begin{description}
 !
-!      \item [log]
-!            Log object.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!            of the default Log.
 !      \item [{[verbose]}]
 !            Verbose flag.
 !      \item [{[rootOnly]}]
-!	         Root only flag
+!	     Root only flag.
 !      \item [{[halt]}]
-!	         Halt definitions {\tt ESMF\_HALTWARNING}, {\tt ESMF\_HALTERROR},{\tt ESMF\_HALTNEVER}
+!	     Halt definition, with the following valid values:
+!            \begin{description}
+!              \item {\tt ESMF\_LOG\_HALTWARNING};
+!              \item {\tt ESMF\_LOG\_HALTERROR};
+!              \item {\tt ESMF\_LOG\_HALTNEVER}.
+!            \end{description}
 !      \item [{[stream]}]
-!            The type of stream (free(0), preordered(1))
+!            The type of stream, with the following valid values and meanings:
+!            \begin{description}
+!              \item 0 \  free;
+!              \item 1 \  preordered. 
+!            \end{description}
 !      \item [{[maxElements]}]
-!            Maximum number of elements in the log.
+!            Maximum number of elements in the Log.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
 !EOP
     integer :: status
+    type(ESMF_LOG),pointer          :: alog
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
+
+    if (present(log)) then
+      alog => log
+    else
+      alog => ESMF_LogDefault
+    endif
+
 	if (present(rc)) rc=ESMF_FAILURE
-	if (present(verbose)) log%verbose=verbose
-	if (present(flush)) log%flushImmediately=flush
-	if (present(rootOnly)) log%rootOnly=rootOnly
-	if (present(halt)) log%halt=halt
-	if (present(stream)) log%stream=stream
+	if (present(verbose)) alog%verbose=verbose
+	if (present(flush)) alog%flushImmediately=flush
+	if (present(rootOnly)) alog%rootOnly=rootOnly
+	if (present(halt)) alog%halt=halt
+	if (present(stream)) alog%stream=stream
 	if (present(maxElements) .and. maxElements .gt. 0) then
-	    if (log%maxElements .ne. maxElements) then
+	    if (alog%maxElements .ne. maxElements) then
 	        allocate(localbuf(maxElements), &
                      stat=status)
                 ! TODO: copy old contents over, or flush first!!
-	        deallocate(log%LOG_ENTRY,stat=status)
-                log%LOG_ENTRY => localbuf
-		log%maxElements=maxElements
+	        deallocate(alog%LOG_ENTRY,stat=status)
+                alog%LOG_ENTRY => localbuf
+		alog%maxElements=maxElements
 	    endif
 	endif    
 	if (present(rc)) rc=ESMF_SUCCESS 
@@ -1100,7 +1145,7 @@ end subroutine ESMF_LogSet
 !            User-provided method string.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default log.
+!	     of the default Log.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
