@@ -1,15 +1,16 @@
-% $Id: ESMF_testing.tex,v 1.8 2003/05/30 20:24:08 svasquez Exp $
+% $Id: ESMF_testing.tex,v 1.9 2003/08/27 23:09:55 flanigan Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
 
-Robustness and portability are primary goals of the ESMF development effort. 
-To ensure that these goals are met, the ESMF includes a comprehesive suite of tests. 
-They allow testing and validation of everything from individual functions to complete 
-system tests.  These test suites are used by the ESMF development team as part of their 
-regular development process.  ESMF users can run the testing suites to verify that 
-the framework software was built and installed properly, and is running correctly on
-a particular platform. 
+Robustness and portability are primary goals of the ESMF development
+effort.  To ensure that these goals are met, the ESMF includes a
+comprehesive suite of tests.  They allow testing and validation of
+everything from individual functions to complete system tests.  These
+test suites are used by the ESMF development team as part of their
+regular development process.  ESMF users can run the testing suites to
+verify that the framework software was built and installed properly,
+and is running correctly on a particular platform.
 
 Test targets will compile the ESMF if it has not already been built.
 
@@ -34,8 +35,8 @@ a wide range of valid and non-valid arguments are evaluated for correct behavior
 The following commands are used to build and run the unit tests provided with 
 the ESMF:
 \begin{verbatim}
-        gmake BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] tests
-        gmake BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] tests_uni
+        gmake ESMF_BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] tests
+        gmake ESMF_BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] tests_uni
 \end{verbatim}
 
 The {\tt tests\_uni} target runs the tests on a single processor. 
@@ -47,7 +48,7 @@ unit tests are being tracked and corrected by the ESMF development team.
 
 The results of running the unit tests can be found in the following location:
 \begin{verbatim}
-       ${ESMF_DIR/test/test${BOPT}/${ESMF_ARCH}
+       ${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
 \end{verbatim}
 
 For example, if your esmf source files have been placed in: 
@@ -55,20 +56,30 @@ For example, if your esmf source files have been placed in:
        /usr/local/esmf
 \end{verbatim}
 
-and your platform and compiler configuration is:
+Your platform is a Linux uni-processor. The build system has been
+configured to use a lahey lf95 compiler with this site file:
+
 \begin{verbatim}
-       Linux uni-processor using the LF95 compiler
+      build_config/Linux.lahey.mk
 \end{verbatim}
 
-and you want to run a debug version of non-exhaustive unit tests,
-then you use the command:
+If you want to run a debug version of non-exhaustive unit tests,
+then you use these commands from /usr/local/esmf:
+
 \begin{verbatim}
-       gmake BOPT=g ESMF_EXHAUSTIVE=OFF tests_uni
+       setenv ESMF_DIR /usr/local/esmf
+       gmake ESMF_BOPT=g ESMF_SITE=lahey ESMF_EXHAUSTIVE=OFF tests_uni
 \end{verbatim}
 
-and will find the results in:
+
+If you are using ksh, then replace the setenv command with:
 \begin{verbatim}
-       /usr/local/esmf/test/testg/linux_lf95/
+       export ESMF_DIR=/usr/local/esmf
+\end{verbatim}
+
+The results of the unit tests will be in:
+\begin{verbatim}
+       /usr/local/esmf/test/testg/Linux.32.lehay/
 \end{verbatim}
 
 At the end of unit test execution a script runs to analyze the results.
@@ -113,20 +124,21 @@ The system tests provided with the ESMF library evaluate:
 \item behavior of the system as a whole
 \end{itemize}
 
-The current system test suite includes tests that perform layout reduction operations, 
-redistribution-transpose, halo operations, component creation and intra-grid communication. 
-Some of the system tests are no longer compatible with the current API, but are included in
-the release for completeness.
-A complete description of each available system test and its current compatibility status
-can be found at the ESMF website,
+The current system test suite includes tests that perform layout
+reduction operations, redistribution-transpose, halo operations,
+component creation and intra-grid communication.  Some of the system
+tests are no longer compatible with the current API, but are included
+in the release for completeness.  A complete description of each
+available system test and its current compatibility status can be
+found at the ESMF website,
 \htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.  The testing
 and validation page is accessible from the {\bf Development} link on the navigation bar.
 
 The following commands are used to build and run the system tests:
 
 \begin{verbatim}
-        gmake BOPT=<g,O> [SYSTEM_TEST=NNNNN] system_tests
-        gmake BOPT=<g,O> [SYSTEM_TEST=NNNNN] system_tests_uni
+        gmake ESMF_BOPT=<g,O> [SYSTEM_TEST=NNNNN] system_tests
+        gmake ESMF_BOPT=<g,O> [SYSTEM_TEST=NNNNN] system_tests_uni
 \end{verbatim}
 
 The {\tt system\_tests\_uni} target runs the tests on a single processor. 
@@ -137,7 +149,7 @@ are built and run.
 
 The results of the test can be found in the following location:
 \begin{verbatim}
-       ${ESMF_DIR/test/test${BOPT}/${ESMF_ARCH}
+       ${ESMF_DIR/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
 \end{verbatim}
 
 For example, if your ESMF source files have been placed in your home directory:
@@ -151,22 +163,31 @@ and your platform and compiler configuration is:
 \end{verbatim}
 
 and you want to run an optimized version of system test number 62502,
-then you use the command:
+then you use these commands from ~/esmf:
 \begin{verbatim}
-       gmake BOPT=O SYSTEM_TEST=62502 system_tests
+       setenv ESMF_PROJECT <project_name>
+       gmake ESMF_DIR=`pwd` ESMF_BOPT=O SYSTEM_TEST=62502 system_tests
 \end{verbatim}
 
-and will find the results in:
+If you are using ksh then replace the setenv command with
+this:
+
 \begin{verbatim}
-       ~/esmf/test/testO/alpha/62502 
+       export ESMF_PROJECT=<project_name>
+\end{verbatim}
+
+The results will be in:
+\begin{verbatim}
+       ~/esmf/test/testO/OSF1.64.default/ESMF_SysTest62502.stdout
 \end{verbatim}
 
 \subsubsection{Running the ESMF VAlidation (EVA) Suite}
 \label{EVATestDescription}
 
-The ESMF VAlidation(EVA) Suite is a collection of seven codes representative of those used 
-in climate, weather, and data assimulation. These codes are currently used for ESMF 
-prototyping.  They will eventually provide the basis for ESMF tutorial examples.
+The ESMF VAlidation(EVA) Suite is a collection of seven codes
+representative of those used in climate, weather, and data
+assimulation. These codes are currently used for ESMF prototyping.
+They will eventually provide the basis for ESMF tutorial examples.
 
 The {\it EVA Suite User's Guide} and source code can be downloaded from the {\bf
 User Links and Downloads} link on the ESMF website, 

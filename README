@@ -1,4 +1,4 @@
- $Id: README,v 1.27 2003/08/21 21:13:41 flanigan Exp $
+ $Id: README,v 1.28 2003/08/27 23:09:54 flanigan Exp $
 ================================================================================
                                    README
 
@@ -44,26 +44,26 @@ QuickStart information for the impatient.
 Directories
 -----------
 
-CVS:               Contains the CVSROOT information.
+CVS:             Contains the CVSROOT information.
 
-esmf_build &
-esmf_build_config: Contains the build system.
+build &
+build_config:    Contains the build system.
 
-scripts:           Contains scripts for testing and uniprocessor runs, and some
-                   templates.
+scripts:         Contains scripts for testing and uniprocessor runs, and some
+                 templates.
 
-src:               Contains the source code.
+src:             Contains the source code.
 
 In addition, the following directories are created during the building
 and testing stages:
 
-doc:               Contains documentation (if built).
+doc:             Contains documentation (if built).
 
-lib:               Contains the ESMF libraries.
+lib:             Contains the ESMF libraries.
 
-mod:               Contains the Fortran module files.
+mod:             Contains the Fortran module files.
 
-test:              Contains unit and system test executables and output.
+test:            Contains unit and system test executables and output.
 
 
 System Information
@@ -95,7 +95,7 @@ ESMF_PREC      Precision value of 32 or 64.  When possible the default
 ESMF_BOPT      Build option value of g (for debug) or O (for Optimize). 
                Default value will be O.
 
-The README file in the directory esmf_build_config documents these
+The README file in the directory build_config documents these
 variables in more detail.
 
 Environment variables must be set in the user's shell and not inside

@@ -1,9 +1,10 @@
-%  $Id: ESMF_builddetail.tex,v 1.1 2003/08/26 17:40:16 flanigan Exp $
+%  $Id: ESMF_builddetail.tex,v 1.2 2003/08/27 23:09:54 flanigan Exp $
 
 
 \subsection{Make System}
-For most users the description of the build system in the Quick Start
-section should be sufficient.  Some users, however, may wish to have a
+\label{sec:make}
+For most users the description of the build system in previous
+sections should be sufficient.  Some users, however, may wish to have a
 more detailed knowledge of the make system that is used by the library
 either for configuring different build options or other reasons.
 \subsubsection{General Structure}
@@ -17,64 +18,77 @@ complete build system.
 
 The main components of the make system are:
 \begin{itemize}
-\item{Build directories}
+\item{{\bf Build directories}}
 
 There are two directories containing makefile fragment files used by
-the make system.  Makefile fragment files are files that contain
-makefile syntax defining build rules and variables, but do not
-constitute a complete build system.
+the make system.  
 
-The {\tt esmf\_build} directory contains a generic makefile fragment
-file common.mk that is included by the top level Makefile in the
-source tree.  common.mk contains generic build system settings and
-build rules used across all platforms.
+The {\tt build} directory contains a generic makefile fragment file
+common.mk that is included by the top level Makefile in the source
+tree.  common.mk contains generic build system settings and build
+rules used across all platforms.  A user should have no reason to edit
+common.mk.
 
-The {\tt esmf\_build\_config} directory contains makefile fragments
-for each supported platform defining compilers, compiler flags, and
-the various other definitions that are necessary to build on each
-platform.  Files can also be added to this directory for specific
-machines where the build settings are different from the standards of
-the architecture.  One of the files in this directory will be included
-by the esmf\_build/common.mk file depending the values of the environment
-variable EMSF\_ARCH and ESMF\_SITE.  See below for more details on this
-topic.
+The {\tt build\_config} directory contains makefile fragments for each
+supported platform defining compilers, compiler flags, and the various
+other definitions that are necessary to build on each platform.  Files
+can also be added to this directory for specific machines where the
+build settings are different from the standards of the architecture.
+One of the files in this directory will be included by the
+build/common.mk file depending the values of the environment variable
+EMSF\_ARCH and ESMF\_SITE.  See below for more details on environment
+variables.
 
-\item{Environment Variables}
+\item{{\bf Environment Variables}}
 
 The three sets of source code that the build system support all need
 environment variables set to point to their top level source code
 directories. 
 
-\begin{itemize}
+\begin{description}
 
-\item{ESMF Library} The ESMF library needs ESMF\_DIR set .
+\item{ESMF Library} 
 
-\item{Implementation Report} The Implementation Report needs ESMF\_IMPL\_DIR set.  
+To build the ESMF library, ESMF\_DIR set to the top level ESMF
+library source code directory.
 
+\item{Implementation Report} 
 
-\item{EVA Applications} An EVA source code tree does not contain a copy of the ESMF build
-system.  Instead it uses a copy found in an ESMF source code tree.
-ESMF\_EVA\_DIR has to be set to the top most directory of the EVA source
-code.  ESMF\_DIR has to be set to the top most directory of an ESMF
-source code tree.
+The build system needs ESMF\_IMPL\_DIR set to the top level source
+code directory of the Implementation Report source tree to build the
+report and to build and run the examples.
 
+\item{EVA Applications} 
 
-\end{itemize}
+An EVA source code tree does not contain a copy of the ESMF build
+system.  Instead it uses a copy found in an ESMF library source code
+tree.  Building the EVA applications requires that ESMF\_EVA\_DIR and
+ESMF\_DIR be set.  ESMF\_EVA\_DIR has to be set to the top directory
+of the EVA source code.  ESMF\_DIR has to be set to the top directory
+of an ESMF source code tree.
+
+\end{description}
+
+There are four other variables that the build system uses.  If they
+are not set, then the build system will assign default values to
+them.  In most cases the default values will be fine.
 
 \begin{description}
 
 \item{ESMF\_ARCH} 
+
 Defines current architecture. Default value is value returned by the
 command uname -s.  There should be almost no reason for ESMF\_ARCH to
 be set by a user.
-
 
 \item{ESMF\_SITE}
 
 If ESMF\_SITE is not set or has the value of default, default build
 settings for the current machine architecture will be used.  Values
-are created from a machine's name and if needed, the compiler used.
-Example ESMF\_SITE values could be blackforest or jazz\_lahey.
+are created either from a machine's name or the compiler's name that
+is used. In some cases both a machine's name and the compiler's name
+will be used.  Example ESMF\_SITE values could be blackforest or
+jazz\_lahey.
 
 \item{ESMF\_PREC}
 
@@ -92,43 +106,74 @@ is O.
 \end{description}
 
 
-\item{Top level Makefile}
+\item{{\bf Makefiles}}
 
-The top level makefile includes the common.mk file from the {\tt
-esmf\_build} directory.  Many of the commands in this Makefile spawn a recursive make
-through the directory structure.
+Every source tree contains a Makefile in its top level directory.  This
+makefile includes the common.mk file from the {\tt build} directory.
+The top level makefile contains makefile settings specific for the
+source code that it is found in.
 
-\item{Source tree Makefiles}
-
-Each directory contains a Makefile which includes the {\tt build} common
-makefiles.  These local Makefiles include defintions that allow the local files
-and documents to be built.
+Each directory in the source tree contains a Makefile which includes
+the top level makefile.  These local Makefiles include defintions that
+allow the local files and documents to be built.
 \end{itemize}
 
-\subsubsection{Configuration}
+\subsubsection{Build Configuration}
 
+A single makefile or makefile fragment from the build system never
+constitutes a complete set of build rules and settings.  Starting from
+the local makefile, successive include commands are used to string
+together makefiles and makefile fragments to create a complete system
+of build rules and settings.  Configuration of the build system is
+done by including a configuration makefile fragment.  The build
+system can be configured for a machine's architecture or, if needed,
+for a particular machine and its compiler. A configuration for a
+specific machine or compiler is referred to as a site configuration.
 
+The string of files included is fairly short.  Makefiles below the top
+level makefile include the top level makefile. The top level makefile
+includes build/common.mk and then build/common.mk includes a
+configuration file from the build\_config directory.  The configuration
+files in the build\_config directory contain the architecture and site
+specific build settings.  The architecture and site that a file
+configures is determined by its name.  The configuration makefile
+fragments follow this naming convention:
 
-\subsection{Build Options}
-\label{BuildOptions}
-
-There is an install target which will copy the library and *.mod files to
-specified directories.  To invoke this target use:
 \begin{verbatim}
-  gmake BOPT=[O,g] ESMF_LIB_INSTALL=<path for library>
-                   ESMF_MOD_INSTALL=<path for *.mod files> install 
+    ESMF_ARCH.ESMF_SITE.mk
 \end{verbatim}
 
-Some users may wish for the library to be built in a directory different from 
-where the source code resides.  To do this, build using:
+Where ESMF\_ARCH and ESMF\_SITE are environment variables either set by
+the user or given defalut values by the build system. ESMF\_ARCH is the
+current architecture and will have the value returned by the command
+uname -s.  ESMF\_SITE is the current machine or compiler name. If there
+are no site specific files for a particular architecture, then
+ESMF\_SITE will be set to default.  Examples:
+
 \begin{verbatim}
-   gmake ESMF_BUILD=<path> BOPT=[O,g]
+    AIX.default.mk      ! Default configuation for RS6000.
+    Linux.lahey.mk      ! Linux configuation using lahey compilers.
 \end{verbatim}
 
-The {\tt ESMF\_BUILD} variable gives an alternate path in which to
-place the libraries, *.mod files and object files.  This variable
-defaults to {\tt ESMF\_DIR}.  If it is assigned another value, the
-{\tt ESMF\_BUILD} variable will need to be passed as an additional
-argument to the the above make commands.  (Alternatively the variable
-{\tt ESMF\_BUILD} can be set in the environment (using setenv or
-export) and then it need not be passed to any make calls).
+\subsubsection{Source Code Configuration}
+
+C++ and C source code written to build on a range of platforms many
+times require preprocessor directives to configure the source code for
+specific platforms.  The directives are included in the source code
+and are processed by the C preprocessor (cpp) before the source code
+is compiled.  The directives are used to determine among other things,
+the memory requirements of variable types and the system resources
+that are available.
+
+The ESMF build system provides preprossor directives in conf.h files
+that are included in the source code.  The path to the conf.h files is
+
+\begin{verbatim}
+    build_config/conf/ESMF_ARCH.ESMF_PREC.ESMF_SITE/conf.h
+\end{verbatim}
+
+Where ESMF\_ARCH, ESMF\_PREC arnd ESMF\_SITE are environment variables 
+set by the user or given default values be the build system.  Based on 
+the settings of these environment variables, the build system provides
+a path to the correct conf.h file during source code compiles.
+
