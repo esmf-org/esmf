@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.34 2004/05/19 22:05:05 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.35 2004/07/02 20:19:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,7 +101,8 @@ extern "C" {
                                  ESMC_Time *startTimeIn, ESMC_Time *endTimeIn,
                                  ESMC_Calendar **calendarIn, 
                                  ESMC_CalendarType *calendarTypeIn, 
-                                 char *timeString, int *status) {
+                                 int *timeStringLen, int *tempTimeStringLen,
+                                 char *tempTimeString, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalGet(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -133,7 +134,10 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(endTimeIn),
                        ESMC_NOT_PRESENT_FILTER(calendarIn),
                        ESMC_NOT_PRESENT_FILTER(calendarTypeIn),
-                       ESMC_NOT_PRESENT_FILTER(timeString) );
+                                          // always present internal arguments
+                                              *timeStringLen,
+	                                       tempTimeStringLen,
+                                               tempTimeString);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 

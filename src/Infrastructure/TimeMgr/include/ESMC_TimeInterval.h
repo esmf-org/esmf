@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.36 2004/04/27 22:58:43 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.37 2004/07/02 20:17:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -139,7 +139,8 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                              ESMC_Time *startTimeIn=0, ESMC_Time *endTimeIn=0,
                              ESMC_Calendar **calendarIn=0,
                              ESMC_CalendarType *calendarTypeIn=0,
-                             char *timeString=0) const;
+                             int timeStringLen=0, int *tempTimeStringLen=0,
+                             char *tempTimeString=0) const;
 
     // native C++ interface -- via variable argument lists
     //   corresponds to F90 named-optional-arguments interface
