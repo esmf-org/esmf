@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.83 2005/02/02 00:25:18 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.82.2.1 2005/03/08 20:01:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.83 2005/02/02 00:25:18 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.82.2.1 2005/03/08 20:01:05 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -3839,6 +3839,18 @@ end interface
         ! the user's responsibility to delete them when finished.
         stypep%st = ESMF_STATE_INVALID
         stypep%statestatus = ESMF_STATUS_INVALID
+        if (stypep%datacount .gt. 0) then
+          do i = 1, stypep%datacount
+            ! free anything allocated here
+            nextitem => stypep%datalist(i)
+            if (associated(nextitem%datap)) then
+              deallocate(nextitem%datap, stat=localrc)
+              if (ESMF_LogMsgFoundAllocError(localrc, "data item", &
+                                             ESMF_CONTEXT, rc)) return
+              nullify(nextitem%datap)
+            endif
+          enddo
+        endif
         stypep%datacount = 0
 
         ! Now release the entire list
@@ -3978,9 +3990,13 @@ end interface
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
-            if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
-                ! optionally warn here that an existing object is being
-                ! replaced...
+            if (dataitem%otype .eq. ESMF_STATEITEM_NAME) then
+                allocate(dataitem%datap, stat=localrc)
+                if (ESMF_LogMsgFoundAllocError(localrc, "adding array over name", &
+                                     ESMF_CONTEXT, rc)) then
+                    deallocate(atodo, stat=localrc)
+                    return
+                endif
             endif
 
             dataitem%otype = ESMF_STATEITEM_ARRAY
@@ -4021,6 +4037,9 @@ end interface
             if (ESMF_LogMsgFoundError(localrc, "getting name from array", &
                                       ESMF_CONTEXT, rc)) return
 
+            allocate(nextitem%datap, stat=localrc)
+            if (ESMF_LogMsgFoundAllocError(localrc, "adding array to state", &
+                                           ESMF_CONTEXT, rc)) return
             nextitem%datap%ap = arrays(i)
  
             nextitem%needed = stypep%needed_default
@@ -4168,9 +4187,14 @@ end interface
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
-            if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
-                ! optionally warn we are replacing a real object
-                ! and not just a name...
+            if (dataitem%otype .eq. ESMF_STATEITEM_NAME) then
+                allocate(dataitem%datap, stat=localrc)
+                if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "adding fields to a state", &
+                                  ESMF_CONTEXT, rc)) then
+                  deallocate(ftodo, stat=localrc)
+                  return
+                endif
             endif
 
             dataitem%otype = ESMF_STATEITEM_FIELD
@@ -4213,6 +4237,10 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+            allocate(nextitem%datap, stat=localrc)
+            if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "adding fields to a state", &
+                                  ESMF_CONTEXT, rc)) return
             nextitem%datap%fp = fields(i)
  
             nextitem%needed = stypep%needed_default
@@ -4360,9 +4388,11 @@ end interface
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
-            if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
-                ! optionally warn we are replacing a real object
-                ! and not just a placeholder...
+            if (dataitem%otype .eq. ESMF_STATEITEM_NAME) then
+                allocate(dataitem%datap, stat=localrc)
+                if (ESMF_LogMsgFoundAllocError(localrc, &
+                               "adding bundles to a state", &
+                               ESMF_CONTEXT, rc)) goto 10
             endif
 
             dataitem%otype = ESMF_STATEITEM_BUNDLE
@@ -4414,6 +4444,15 @@ end interface
                 ! or bundle which had the same name.
                 if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
                   ! print *, "Warning: overwriting old entry"
+                endif
+   
+                ! If there was previously associated data, deallocate it.
+	        if (associated(dataitem%datap)) then
+                    deallocate(dataitem%datap, stat=localrc)
+                    if (ESMF_LogMsgFoundAllocError(localrc, &
+                                                 "deallocating old object", &
+                                                 ESMF_CONTEXT, rc)) goto 10
+                    nullify(dataitem%datap)
                 endif
 
                 ! Set up the new entry.
@@ -4470,6 +4509,10 @@ end interface
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
 
+            allocate(nextitem%datap, stat=localrc)
+            if (ESMF_LogMsgFoundAllocError(localrc, &
+                                          "adding bundles to a state",  &
+                                           ESMF_CONTEXT, rc)) goto 10
            nextitem%datap%bp = bundles(i)
 
            nextitem%needed = stypep%needed_default
@@ -4513,6 +4556,8 @@ end interface
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
+    
+            nullify(nextitem%datap)
     
             ! If we found the corresponding bundle entry during pass 1,
             ! it was stored in the todo list.  Otherwise, we just added it
@@ -4679,9 +4724,11 @@ end interface
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
-            if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
-                ! optionally warn we are replacing a real object
-                ! and not just a placeholder
+            if (dataitem%otype .eq. ESMF_STATEITEM_NAME) then
+                allocate(dataitem%datap, stat=status)
+                if (ESMF_LogMsgFoundAllocError(status, &
+                                       "Adding States to a State", &
+                                       ESMF_CONTEXT, rc)) return
             endif
 
             dataitem%otype = ESMF_STATEITEM_STATE
@@ -4723,6 +4770,10 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+            allocate(nextitem%datap, stat=status)
+            if (ESMF_LogMsgFoundAllocError(status, &
+                                       "Adding States to a State", &
+                                       ESMF_CONTEXT, rc)) return
             nextitem%datap%spp => states(i)%statep
  
             nextitem%needed = stypep%needed_default
@@ -4891,6 +4942,7 @@ end interface
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       integer, allocatable, dimension(:) :: ntodo
+      type(ESMF_DataHolder), pointer :: ldatap
       integer :: i
       integer :: newcount, nindex
       logical :: exists
@@ -4945,12 +4997,19 @@ end interface
             !  it that way.  But we should revisit this and see if it is
             !  how people want this to behave.
             if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
-              ! optionally warn here
+              if (associated(dataitem%datap)) then
+                deallocate(dataitem%datap, stat=localrc)
+                if (ESMF_LogMsgFoundAllocError(localrc, &
+                                            "removing an entry from a state", &
+                                             ESMF_CONTEXT, rc)) return
+                nullify(dataitem%datap)
+              endif
             endif
 
             dataitem%otype = ESMF_STATEITEM_NAME
             ! don't have to add name, we already matched it.
 
+            nullify(dataitem%datap)
             dataitem%indirect_index = -1
 
             dataitem%needed = stypep%needed_default
@@ -4990,6 +5049,27 @@ end interface
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
             nextitem%reqrestart = stypep%reqrestart_default
+ 
+            ldatap => nextitem%datap
+            nullify(ldatap)
+            ! this *should* work, but causes errors on the intel optimized
+            ! build (compiler 8.1).  i moved the previous 4 lines up from
+            ! where they used to be (below this line) and now it seems to
+            ! work either way, but i'll leave the intermediate pointer just
+            ! to be on the safe side.   nsc 11jan05
+            !nullify(nextitem%datap)
+
+            ! DEBUG
+            !if (.not. associated(nextitem)) then
+            !    print *, "nextitem not associated"
+            !else
+            !    print *, "nextitem still associated"
+            !    if (associated(nextitem%datap)) then
+            !        print *, "datap still associated"
+            !    else
+            !        print *, "datap cleared"
+            !    endif
+            !endif
  
         endif
 
@@ -5041,6 +5121,7 @@ end interface
 !EOPI
 
       type(ESMF_StateItem), dimension(:), pointer :: temp_list
+      type(ESMF_StateItem), pointer :: nextitem
       integer :: i
       integer :: allocsize 
       integer :: newsize
@@ -5066,6 +5147,15 @@ end interface
                                          ESMF_CONTEXT, rc)) return
           stypep%alloccount = allocsize
 
+          ! Nullify all internal pointers to prevent problems at delete
+          ! time for those platforms which do not allow us to initialize
+          ! pointer values to NULL by default.
+
+          do i = 1, stypep%alloccount
+            nextitem => stypep%datalist(i)
+            nullify(nextitem%datap)
+          enddo
+
       ! Extend an existing list to the right length, including copy
       else if (stypep%alloccount .lt. stypep%datacount + itemcount) then
 
@@ -5089,6 +5179,15 @@ end interface
           stypep%datalist => temp_list
 
           stypep%alloccount = allocsize
+
+          ! Nullify all new internal pointers to prevent problems at delete
+          ! time for those platforms which do not allow us to initialize
+          ! pointer values to NULL by default.
+
+          do i = stypep%datacount+1, stypep%alloccount
+            nextitem => stypep%datalist(i)
+            nullify(nextitem%datap)
+          enddo
 
       endif
    
