@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.12 2003/10/23 14:43:53 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.13 2003/12/17 20:24:44 svasquez Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -61,7 +61,7 @@
 \input{../Infrastructure/Field/doc/Field_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Field_usage}
 #elif defined(CONSTITUENT)
