@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.18 2004/05/20 18:55:44 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.19 2004/05/21 02:55:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -116,21 +116,21 @@ module ESMF_VMMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
   ! - ESMF_VM:
-  ! For ESMF internal use only
-  public ESMF_VMInitialize
-  public ESMF_VMFinalize
   ! For ESMF application use
   public ESMF_VMGetGlobal
   public ESMF_VMGet
   public ESMF_VMGetPET
   public ESMF_VMPrint
   ! For ESMF application use (communications)
-  public ESMF_VMBarrier
-  public ESMF_VMThreadBarrier
   public ESMF_VMSend
   public ESMF_VMRecv
   public ESMF_VMScatter
   public ESMF_VMGather
+  public ESMF_VMBarrier
+  public ESMF_VMThreadBarrier
+  ! For ESMF internal use only
+  public ESMF_VMInitialize
+  public ESMF_VMFinalize
   
   ! - ESMF_VMPlan:
   ! For ESMF internal use only
@@ -146,7 +146,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.18 2004/05/20 18:55:44 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.19 2004/05/21 02:55:39 theurich Exp $'
 
 !==============================================================================
 
