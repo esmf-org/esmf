@@ -1,4 +1,4 @@
- $Id: README,v 1.21 2003/08/19 22:19:26 flanigan Exp $
+ $Id: README,v 1.22 2003/08/20 17:37:25 flanigan Exp $
 ================================================================================
                                    README
 
@@ -44,25 +44,26 @@ QuickStart information for the impatient.
 Directories
 -----------
 
-CVS:            Contains the CVSROOT information.
+CVS:               Contains the CVSROOT information.
 
-build:          Contains the build system.
+esmf_build &
+esmf_build_config: Contains the build system.
 
-scripts:        Contains scripts for testing and uniprocessor runs, and some
-                templates.
+scripts:           Contains scripts for testing and uniprocessor runs, and some
+                   templates.
 
-src:            Contains the source code.
+src:               Contains the source code.
 
 In addition, the following directories are created during the building
 and testing stages:
 
-doc:            Contains documentation (if built).
+doc:               Contains documentation (if built).
 
-lib:            Contains the ESMF libraries.
+lib:               Contains the ESMF libraries.
 
-mod:            Contains the Fortran module files.
+mod:               Contains the Fortran module files.
 
-test:           Contains unit and system test executables and output.
+test:              Contains unit and system test executables and output.
 
 
 System Information
@@ -84,7 +85,7 @@ default values are not acceptable.
 
 ESMF_ARCH      Value of uname -s.  This will by AIX for IBM RS6000's.
 
-ESMF_SITE      Build configure file site name or the value default.
+ESMF_SITE      Build configure site name or the value default.
                If not set, then the value of default is assumed.
 
 ESMF_PREC      Precision value of 32 or 64.  When possible the default
