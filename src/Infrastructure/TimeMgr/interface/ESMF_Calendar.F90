@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.23 2003/07/25 05:17:06 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.24 2003/07/25 23:31:26 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -119,7 +119,9 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_CalendarSet
+      public ESMF_CalendarGet
       public ESMF_CalendarSetGeneric
+      public ESMF_CalendarGetGeneric
 
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -132,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.23 2003/07/25 05:17:06 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.24 2003/07/25 23:31:26 eschwab Exp $'
 
 !==============================================================================
 
