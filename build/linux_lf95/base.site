@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.4 2003/07/01 15:25:09 nscollins Exp $ 
+# $Id: base.site,v 1.5 2003/07/02 22:36:23 nscollins Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -20,4 +20,4 @@ MPIRUN         =  ${MPI_HOME}/mpirun
 #MP_LIB          = 
 #MP_INCLUDE      = 
 # For pthreads (or omp)
-THREAD_LIB      = 
+THREAD_LIB      = -lpthread
