@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.11 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_XPacket.F90,v 1.12 2004/06/08 16:01:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 #include "ESMF.h"
 !#include "ESMF_Route.h"
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_XPacketMod - Multi-dimensional description of a rectangular block of memory
 !
 ! !DESCRIPTION:
@@ -73,12 +73,12 @@
       public ESMF_XPacketPrint
  
 !
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.11 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.12 2004/06/08 16:01:40 cdeluca Exp $'
 
 !==============================================================================
 
@@ -88,7 +88,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XPacketGet"
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XPacketGet - Get values from a XPacket
 
 ! !INTERFACE:
@@ -116,7 +116,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
         ! local variables
         integer :: status                  ! local error status
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XPacketPrint"
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_XPacketPrint - Print the contents of a XPacket
 
 ! !INTERFACE:
@@ -179,7 +179,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
         if (present(rc)) rc = ESMF_FAILURE
 
@@ -195,7 +195,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XPacketSet"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XPacketSet - Set values in a XPacket
 
 ! !INTERFACE:
@@ -224,7 +224,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -263,7 +263,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XPacketSetDefault"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XPacketSetDefault - Initialize an XPacket 
 
 ! !INTERFACE:
@@ -301,7 +301,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
         ! local variables
         integer :: status                  ! local error status
