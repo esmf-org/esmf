@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.17 2005/01/12 22:04:15 eschwab Exp $
+! $Id: InjectorMod.F90,v 1.18 2005/01/12 22:49:46 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -271,9 +271,9 @@
       call ESMF_StateAddNameOnly(exportState, "Q", rc)
       call ESMF_StateAddNameOnly(exportState, "FLAG", rc)
 
-      !! DEBUG: these are here so we can run w/o the coupler to debug
-      !!  code.  remove these lines later.
+! Give the export state an initial set of values for the SIE Field.
       call ESMF_StateAddField(exportState, field_sie, rc)
+
       rc = ESMF_SUCCESS
 
       end subroutine injector_init1

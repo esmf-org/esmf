@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.23 2005/01/12 20:37:30 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.24 2005/01/12 22:49:46 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -306,6 +306,7 @@
 
 ! Give the export state an initial set of values for the SIE Field.
       call ESMF_StateAddField(export_state, field_sie, rc)
+
       rc = ESMF_SUCCESS
 
       end subroutine Flow_Init1

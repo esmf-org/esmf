@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.8 2005/01/12 20:37:29 nscollins Exp $
+! $Id: FlowArraysMod.F90,v 1.9 2005/01/12 22:49:46 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -83,8 +83,7 @@
       integer :: haloWidth
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: array_temp
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: indexe
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: indext
+      integer, dimension(2) :: lb, ub
 !
 ! Set initial values
 !
@@ -178,16 +177,19 @@
 ! set some of the scalars from array information
 !
       call ESMF_FieldGetArray(field_de, array_temp, rc=status)
-      call ESMF_ArrayGetAxisIndex(array_temp, totalindex=indext, &
-                                  compindex=indexe, rc=status)
-      imin = indexe(1)%min
-      imax = indexe(1)%max
-      jmin = indexe(2)%min
-      jmax = indexe(2)%max
-      imin_t = indext(1)%min
-      imax_t = indext(1)%max
-      jmin_t = indext(2)%min
-      jmax_t = indext(2)%max
+      call ESMF_ArrayGet(array_temp, lbounds=lb, ubounds=ub, &
+                         haloWidth=haloWidth, rc=rc)
+
+      ! Computational region: data unique to this DE
+      imin = lb(1) + haloWidth
+      imax = ub(1) - haloWidth
+      jmin = lb(2) + haloWidth
+      jmax = ub(2) - haloWidth
+      ! Total region: data plus the halo widths
+      imin_t = lb(1) 
+      imax_t = ub(1)
+      jmin_t = lb(2)
+      jmax_t = ub(2)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
