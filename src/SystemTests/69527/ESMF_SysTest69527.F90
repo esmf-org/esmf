@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.18 2003/07/31 23:02:46 jwolfe Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.19 2003/08/01 21:49:07 nscollins Exp $
 !
 ! System test code #69527
 
@@ -278,6 +278,7 @@
       write(0, *) trim(finalMsg)
       write(0, *) ""
 
+      call ESMF_FrameworkFinalize(rc)
     endif
     
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.3 2003/08/01 21:10:12 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.4 2003/08/01 21:49:07 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -146,10 +146,10 @@
 
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
-        write(finalMsg, *) "SUCCESS!! Halo values are as expected"
+        write(finalMsg, *) "SUCCESS!! Periodic Halo values are as expected"
       else
         write(finalMsg, *) "System Test did not succeed. ", &
-        "Halo values do not match expected, or error code set ", rc
+        "Periodic Halo values do not match expected, or error code set ", rc
       endif
       write(0, *) ""
       write(0, *) trim(testname)

@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.12 2003/08/01 14:55:37 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.13 2003/08/01 21:49:07 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -76,6 +76,9 @@
         call ESMF_GridCompSetInternalState(comp, wrap, rc)
 
         print *, "Registered Private Data block for Internal State"
+
+        rc = ESMF_SUCCESS
+
     end subroutine
 
 !-------------------------------------------------------------------------
@@ -222,6 +225,8 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       call ESMF_StateAddData(exportstate, field_rho, rc)
       call ESMF_StateAddData(exportstate, field_flag, rc)
 
+      rc = ESMF_SUCCESS
+
     end subroutine injector_init
 
 
@@ -356,6 +361,8 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
 
         enddo
 
+        rc = ESMF_SUCCESS
+
     end subroutine injector_run
 
 
@@ -389,6 +396,8 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         nullify(wrap%ptr)
 
         print *, "Injector Finalize returning"
+
+        rc = ESMF_SUCCESS
    
     end subroutine injector_final
 

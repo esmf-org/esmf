@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.3 2003/08/01 15:45:26 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.4 2003/08/01 21:49:07 nscollins Exp $
 !
 ! System test code #79497
 
@@ -267,6 +267,7 @@
         write(0, *) trim(finalMsg)
         write(0, *) ""
   
+        call ESMF_FrameworkFinalize(rc)
       endif
     
       end program ESMF_SysTest79497

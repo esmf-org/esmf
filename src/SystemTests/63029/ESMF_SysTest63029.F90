@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.15 2003/06/20 17:45:54 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.16 2003/08/01 21:49:07 nscollins Exp $
 !
 ! System test code #63029
 
@@ -200,6 +200,7 @@
         write(0, *) trim(finalMsg)
         write(0, *) ""
 
+        call ESMF_FrameworkFinalize(rc)
       endif
 
 

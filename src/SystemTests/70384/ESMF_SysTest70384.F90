@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.21 2003/08/01 17:26:36 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.22 2003/08/01 21:49:07 nscollins Exp $
 !
 ! System test code #70384
 
@@ -355,6 +355,7 @@
       write(0, *) trim(finalMsg)
       write(0, *) ""
 
+      call ESMF_FrameworkFinalize(rc)
     endif
     
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.16 2003/07/28 15:17:00 jwolfe Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.17 2003/08/01 21:49:07 nscollins Exp $
 !
 ! System test code #62502
 
@@ -306,6 +306,7 @@
         write(0, *) trim(finalMsg)
         write(0, *) ""
   
+        call ESMF_FrameworkFinalize(rc)
       endif
     
       end program ESMF_SysTest62502

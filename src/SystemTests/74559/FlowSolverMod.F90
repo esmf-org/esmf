@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.14 2003/08/01 14:55:37 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.15 2003/08/01 21:49:07 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -82,7 +82,7 @@
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, optional, intent(out) :: rc
+      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !     This subroutine is the registered init routine.  It reads input,
@@ -97,7 +97,7 @@
 !           Pointer to a {\tt State} object containing the export list.
 !     \item [clock]
 !           Pointer to a {\tt Clock} object.
-!     \item [{[rc]}]
+!     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
@@ -107,7 +107,6 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: i, j
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
@@ -127,14 +126,7 @@
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-!
-! Initialize return code
-!
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      rc = ESMF_FAILURE
 !
 ! Read in input file
 !
@@ -209,7 +201,7 @@
       call ESMF_StateAddData(export_state, "Q", rc)
       call ESMF_StateAddData(export_state, "FLAG", rc)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine Flow_Init
 
@@ -520,7 +512,7 @@
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, optional, intent(out) :: rc
+      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !     The FlowSolve subroutine is the registered "run" routine for the
@@ -529,7 +521,7 @@
 !     \begin{description}
 !     \item [ccomp]
 !           Pointer to a {\tt Gridded Component} object.
-!     \item [{[rc]}]
+!     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
@@ -539,7 +531,6 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: i, j
       integer :: counter = 0
       integer :: print_count = 0
@@ -560,14 +551,7 @@
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-!
-! Initialize return code
-!
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      rc = ESMF_FAILURE
 !
 ! Increment counter
 !
@@ -675,7 +659,7 @@
         call FlowPrint(gcomp, clock, print_count, status)
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine FlowSolve
 
@@ -1420,7 +1404,7 @@
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !     The Flow_Final routine is the registered finalize routine for the
@@ -1435,7 +1419,7 @@
 !           Pointer to a {\tt State} object containing the export list.
 !     \item [clock]
 !           Pointer to a {\tt Clock} object.
-!     \item [{[rc]}]
+!     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
@@ -1445,19 +1429,11 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
 !
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-!
-! Initialize return code
-!
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      rc = ESMF_FAILURE
 !
 ! Deallocate arrays
 !
@@ -1467,7 +1443,7 @@
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine Flow_Final
 

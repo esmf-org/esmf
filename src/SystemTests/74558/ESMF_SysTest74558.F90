@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.15 2003/07/28 15:19:49 jwolfe Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.16 2003/08/01 21:49:07 nscollins Exp $
 !
 ! System test code #74558
 
@@ -230,6 +230,7 @@
         write(0, *) trim(finalMsg)
         write(0, *) ""
 
+        call ESMF_FrameworkFinalize(rc)
       endif
     
       end program ESMF_SysTest74558

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.7 2003/08/01 14:55:37 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.8 2003/08/01 21:49:07 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -30,8 +30,8 @@
 !   !   private to the module.
  
     subroutine Coupler_register(comp, rc)
-        type(ESMF_CplComp) :: comp
-        integer :: rc
+        type(ESMF_CplComp), intent(inout) :: comp
+        integer, intent(out) :: rc
 
         print *, "in user setservices routine"
 
@@ -45,6 +45,8 @@
                                                   ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
+
+        rc = ESMF_SUCCESS
 
     end subroutine
 
@@ -86,6 +88,8 @@
 
         print *, "Coupler Init returning"
    
+        rc = ESMF_SUCCESS
+
     end subroutine coupler_init
 
 
@@ -179,7 +183,7 @@
         type(ESMF_CplComp) :: comp
         type(ESMF_State) :: statelist
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
         ! Local variables
         type(ESMF_State) :: state1, state2
@@ -189,6 +193,8 @@
         ! Nothing to do here.
     
         print *, "Coupler Final returning"
+
+        rc = ESMF_SUCCESS
    
     end subroutine coupler_final
 
