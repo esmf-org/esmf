@@ -1,6 +1,6 @@
-! $Id: FieldRegrid.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: FieldRegrid.F90,v 1.2 2003/09/18 22:38:21 cdeluca Exp $
 !
-! System test code #79497
+! System test code FieldRegrid
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,14 +8,14 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 79497.  
+! System test FieldRegrid.  
 !   Regrid test.  2 components and 1 coupler, one-way coupling.
 !   
 !
 !
 !\begin{verbatim}
 
-    program ESMF_SysTest79497
+    program FieldRegrid
 
 #include <ESMF_Macros.inc>
 
@@ -59,9 +59,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "--------------------------- "
-    print *, "Start of System Test #79497:"
-    print *, "--------------------------- "
+    print *, "-------------------------------- "
+    print *, "Start of System Test FieldRegrid:"
+    print *, "-------------------------------- "
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -71,7 +71,7 @@
 !
 
     ! Create the top level application component.
-    aname = "System Test #79497"
+    aname = "System Test FieldRegrid"
     app = ESMF_AppCompCreate(aname, rc=rc)
     print *, "Created component ", trim(aname), ",  rc =", rc
     call ESMF_AppCompPrint(app, "", rc)
@@ -243,14 +243,14 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test #79497 complete!"
+10    print *, "System Test FieldRegrid complete!"
 
       ! Only on de 0 or any DE with an error. 
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
 
         ! Normal ESMF Test output
         write(failMsg, *) "System Test failure"
-        write(testname, *) "System Test 79497: Field Regrid"
+        write(testname, *) "System Test FieldRegrid: Field Regrid"
   
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
@@ -271,7 +271,7 @@
       call ESMF_AppCompDestroy(app, rc)
       ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
 
-      end program ESMF_SysTest79497
+      end program FieldRegrid
     
 !\end{verbatim}
     
