@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.198 2004/11/30 21:01:28 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.199 2004/12/03 20:47:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.198 2004/11/30 21:01:28 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.199 2004/12/03 20:47:46 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5536,6 +5536,7 @@
 
       integer :: localrc                     ! Error status
       type(ESMF_GridClass), pointer :: gp    ! grid class
+      type(ESMF_DELayout) :: delayout
 
       ! shortcut to internals
       gp => grid%ptr
@@ -5554,6 +5555,16 @@
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
+      call ESMF_GridGet(grid, delayout=delayout, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call ESMF_DELayoutSerialize(delayout, buffer, length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+       
       !call ESMF_PhysGridSerialize(gp%physgrid, buffer, length, offset, localrc)
       !if (ESMF_LogMsgFoundError(localrc, &
       !                           ESMF_ERR_PASSTHRU, &
@@ -5577,12 +5588,13 @@
 ! !IROUTINE: ESMF_GridDeserialize - Deserialize a byte stream into a Grid
 !
 ! !INTERFACE:
-      function ESMF_GridDeserialize(buffer, offset, rc) 
+      function ESMF_GridDeserialize(vm, buffer, offset, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridDeserialize   
 !
 ! !ARGUMENTS:
+      type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
@@ -5596,6 +5608,8 @@
 !
 !     The arguments are:
 !     \begin{description}
+!     \item [vm]
+!           Current VM into which this object should be deserialized.
 !     \item [buffer]
 !           Data buffer which holds the serialized information.
 !     \item [offset]
@@ -5610,6 +5624,7 @@
 
       integer :: localrc, status             ! Error status, allocation status
       type(ESMF_GridClass), pointer :: gp    ! grid class
+      type(ESMF_DELayout) :: remotedelayout
 
       ! in case of error, make sure this is invalid.
       nullify(ESMF_GridDeserialize%ptr)
@@ -5653,6 +5668,17 @@
       !                           ESMF_ERR_PASSTHRU, &
       !                           ESMF_CONTEXT, rc)) return
 
+      remotedelayout = ESMF_DELayoutDeserialize(buffer, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+      
+      call ESMF_DELayoutPrint(remotedelayout, "", localrc)
+
+      ! get number PETs here - from where?
+     
+      ! get geometry from delayout and pad to include all PETs here.
+   
       ESMF_GridDeserialize%ptr => gp
       if  (present(rc)) rc = ESMF_SUCCESS
 

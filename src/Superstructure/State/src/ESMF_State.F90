@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.76 2004/11/30 23:48:56 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.77 2004/12/03 20:47:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,9 @@
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_LogErrMod
-      use ESMF_VMMod
+      use ESMF_VMTypesMod
+      use ESMF_VMBaseMod
+      use ESMF_VMCommMod
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
       use ESMF_FieldMod
@@ -93,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.76 2004/11/30 23:48:56 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.77 2004/12/03 20:47:50 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -5260,12 +5262,13 @@ end interface
 ! !IROUTINE: ESMF_StateDeserialize - Deserialize a byte stream into a State
 !
 ! !INTERFACE:
-      function ESMF_StateDeserialize(buffer, offset, rc) 
+      function ESMF_StateDeserialize(vm, buffer, offset, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateDeserialize   
 !
 ! !ARGUMENTS:
+      type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
@@ -5279,6 +5282,8 @@ end interface
 !
 !     The arguments are:
 !     \begin{description}
+!     \item [vm]
+!           Current VM in which this object should be created.
 !     \item [buffer]
 !           Data buffer which holds the serialized information.
 !     \item [offset]

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.41 2004/11/05 08:14:49 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.42 2004/12/03 20:47:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,8 @@ module ESMF_DELayoutMod
   use ESMF_BaseTypesMod    ! ESMF base class
   use ESMF_BaseMod                          ! ESMF base class
   use ESMF_LogErrMod
-  use ESMF_VMMod                            ! ESMF VM
+  use ESMF_VMTypesMod                            ! ESMF VM
+  use ESMF_VMBaseMod                            ! ESMF VM
   
   implicit none
 
@@ -126,7 +127,9 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutGetDELocalInfo
   public ESMF_DELayoutGetDEMatchDE
   
+  public ESMF_DELayoutDeserialize
   public ESMF_DELayoutPrint
+  public ESMF_DELayoutSerialize
   public ESMF_DELayoutValidate
       
 ! - ESMF-private methods:
@@ -147,7 +150,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.41 2004/11/05 08:14:49 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.42 2004/12/03 20:47:45 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -887,6 +890,112 @@ contains
   end subroutine ESMF_DELayoutValidate
 !------------------------------------------------------------------------------
 
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_DELayoutSerialize - Serialize delayout info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutSerialize(delayout, buffer, length, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout), intent(in) :: delayout 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_DELayout} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_DELayoutWrite()} and {\tt ESMF\_DELayoutRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [delayout]
+!           {\tt ESMF\_DELayout} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    integer :: localrc                     ! Error status
+
+    call c_ESMC_DELayoutSerialize(delayout, buffer(1), length, offset, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    end subroutine ESMF_DELayoutSerialize
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_DELayoutDeserialize - Deserialize a byte stream into a DELayout
+!
+! !INTERFACE:
+      function ESMF_DELayoutDeserialize(buffer, offset, rc) 
+!
+! !RETURN VALUE:
+      type(ESMF_DELayout) :: ESMF_DELayoutDeserialize   
+!
+! !ARGUMENTS:
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a DELayout object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_DELayoutWrite()} and {\tt ESMF\_DELayoutRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    integer :: localrc
+
+    call c_ESMC_DELayoutSerialize(ESMF_DELayoutDeserialize%this, &
+                                  buffer(1), offset, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    end function ESMF_DELayoutDeserialize
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.43 2004/12/03 09:42:55 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.44 2004/12/03 20:47:45 nscollins Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,8 @@
 ! !USES:
     ! inherit from ESMF base class
     use ESMF_BaseTypesMod
-    use ESMF_VMMod
+    use ESMF_VMTypesMod
+    use ESMF_VMBaseMod
 
 implicit none
 !
@@ -597,7 +598,7 @@ end subroutine ESMF_LogGet
 ! 
 !EOPI
 	
-    integer 				          :: status, i, rc2,rc3	
+    integer 				          :: status, i, rc2,rc3,rc4
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 	
     if (present(rc)) rc=ESMF_FAILURE
@@ -605,8 +606,10 @@ end subroutine ESMF_LogGet
     if (present(lognone)) then
       if (lognone .eq. ESMF_LOG_NONE) ESMF_LogDefault%logNone = ESMF_TRUE 
     endif
+    ! these two calls are made before the actual interfaces for the VM
+    ! functions have been defined, so they cannot use optional args.
     call ESMF_VMGetGlobal(ESMF_LogDefault%vm,rc3)
-    call ESMF_VMGet(ESMF_LogDefault%vm,petCount=ESMF_LogDefault%petCount)
+    call ESMF_VMGet(ESMF_LogDefault%vm,petcount=ESMF_LogDefault%petCount,rc=rc4)
     ESMF_LogDefault%FileIsOpen=ESMF_FALSE
     ESMF_LogDefault%nameLogErrFile=filename
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER

@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.67 2004/12/02 17:23:57 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.68 2004/12/03 20:47:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -4121,12 +4121,13 @@ end function
 ! !IROUTINE: ESMF_BundleDeserialize - Deserialize a byte stream into a Bundle
 !
 ! !INTERFACE:
-      function ESMF_BundleDeserialize(buffer, offset, rc) 
+      function ESMF_BundleDeserialize(vm, buffer, offset, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_Bundle) :: ESMF_BundleDeserialize   
 !
 ! !ARGUMENTS:
+      type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
@@ -4140,6 +4141,8 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
+!     \item [vm]
+!           Current VM in which this object should be created.
 !     \item [buffer]
 !           Data buffer which holds the serialized information.
 !     \item [offset]
@@ -4186,7 +4189,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          bp%grid = ESMF_GridDeserialize(buffer, offset, localrc)
+          bp%grid = ESMF_GridDeserialize(vm, buffer, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -4199,7 +4202,7 @@ end function
                                      ESMF_CONTEXT, rc)) return
 
       do i = 1, bp%field_count
-          bp%flist(i) = ESMF_FieldDeserialize(buffer, offset, localrc)
+          bp%flist(i) = ESMF_FieldDeserialize(vm, buffer, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return

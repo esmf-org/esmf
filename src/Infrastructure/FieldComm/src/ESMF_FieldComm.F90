@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.62 2004/11/18 17:00:56 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.63 2004/12/03 20:47:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,9 @@
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
-      use ESMF_VMMod
+      use ESMF_VMTypesMod
+      use ESMF_VMBaseMod
+      use ESMF_VMCommMod
       use ESMF_DELayoutMod    ! ESMF layout class
       use ESMF_LocalArrayMod
       use ESMF_ArrayMod
@@ -99,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.62 2004/11/18 17:00:56 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.63 2004/12/03 20:47:46 nscollins Exp $'
 
 !==============================================================================
 !

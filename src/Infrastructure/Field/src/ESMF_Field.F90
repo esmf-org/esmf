@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.194 2004/12/02 17:26:43 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.195 2004/12/03 20:47:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,9 @@
 ! !USES:
       use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod
-      use ESMF_VMMod
+      use ESMF_VMTypesMod
+      use ESMF_VMBaseMod
+      use ESMF_VMCommMod
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
@@ -283,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.194 2004/12/02 17:26:43 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.195 2004/12/03 20:47:45 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5174,12 +5176,13 @@
 ! !IROUTINE: ESMF_FieldDeserialize - Deserialize a byte stream into a Field
 !
 ! !INTERFACE:
-      function ESMF_FieldDeserialize(buffer, offset, rc) 
+      function ESMF_FieldDeserialize(vm, buffer, offset, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldDeserialize   
 !
 ! !ARGUMENTS:
+      type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
@@ -5193,6 +5196,8 @@
 !
 !     The arguments are:
 !     \begin{description}
+!     \item [vm]
+!           Current VM in which this object should be created.
 !     \item [buffer]
 !           Data buffer which holds the serialized information.
 !     \item [offset]
@@ -5245,7 +5250,7 @@
                                  ESMF_CONTEXT, rc)) return
 
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-          fp%grid = ESMF_GridDeserialize(buffer, offset, localrc)
+          fp%grid = ESMF_GridDeserialize(vm, buffer, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.8 2004/12/02 17:36:20 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.9 2004/12/03 20:47:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,9 @@
       use ESMF_BaseTypesMod
       use ESMF_BaseMod
       use ESMF_LogErrMod
-      use ESMF_VMMod
+      use ESMF_VMTypesMod
+      use ESMF_VMBaseMod
+      use ESMF_VMCommMod
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
       use ESMF_ArrayCreateMod
@@ -96,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.8 2004/12/02 17:36:20 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.9 2004/12/03 20:47:51 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -578,13 +580,13 @@
                    case (ESMF_ID_BUNDLE%objectID)
                     print *, "need to create proxy bundle, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    bundle = ESMF_BundleDeserialize(bptr, offset, localrc)
+                    bundle = ESMF_BundleDeserialize(vm, bptr, offset, localrc)
                     call ESMF_StateAddBundle(state, bundle, rc=localrc)
 
                    case (ESMF_ID_FIELD%objectID)
                     print *, "need to create proxy field, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    field = ESMF_FieldDeserialize(bptr, offset, localrc)
+                    field = ESMF_FieldDeserialize(vm, bptr, offset, localrc)
                     call ESMF_StateAddField(state, field, rc=localrc)
 
                    case (ESMF_ID_ARRAY%objectID)
@@ -596,7 +598,7 @@
                    case (ESMF_ID_STATE%objectID)
                     print *, "need to create proxy state, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    substate = ESMF_StateDeserialize(bptr, offset, localrc)
+                    substate = ESMF_StateDeserialize(vm, bptr, offset, localrc)
                     call ESMF_StateAddState(state, substate, rc=localrc)
 
                    case (ESMF_STATEITEM_NAME%ot)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.57 2004/11/05 08:14:50 theurich Exp $
+! $Id: ESMF_Route.F90,v 1.58 2004/12/03 20:47:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,9 @@
       use ESMF_BaseTypesMod
       use ESMF_BaseMod       
       use ESMF_LogErrMod
-      use ESMF_VMMod
+      use ESMF_VMTypesMod
+      use ESMF_VMBaseMod
+      use ESMF_VMCommMod
       use ESMF_DELayoutMod  
       use ESMF_LocalArrayMod
       use ESMF_XPacketMod  
@@ -96,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.57 2004/11/05 08:14:50 theurich Exp $'
+      '$Id: ESMF_Route.F90,v 1.58 2004/12/03 20:47:48 nscollins Exp $'
 
 !==============================================================================
 !
