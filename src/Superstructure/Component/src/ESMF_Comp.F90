@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.78 2004/03/19 13:50:49 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.79 2004/03/19 20:32:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -200,7 +200,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.78 2004/03/19 13:50:49 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.79 2004/03/19 20:32:39 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -558,7 +558,7 @@ end function
 
 ! !INTERFACE:
       recursive subroutine ESMF_CompInitialize(compp, importState, &
-                                                exportState, clock, phase, rc)
+        exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -567,6 +567,7 @@ end function
       type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -604,6 +605,7 @@ end function
         type(ESMF_CWrap) :: compw
         type(ESMF_State) :: is, es
         logical :: isdel, esdel
+        type(ESMF_BlockingFlag):: blocking
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -611,6 +613,13 @@ end function
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        endif
+        
+        ! set the default mode to ESMF_BLOCKING
+        if (present(blockingFlag)) then
+          blocking = blockingFlag
+        else
+          blocking = ESMF_BLOCKING
         endif
 
         ! See if this is currently running on a DE which is part of the
@@ -664,6 +673,10 @@ end function
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETINIT, phase, &
           status)
+        if (blocking == ESMF_BLOCKING) then
+          call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
+            compp%vm_cargo, status)
+        endif
 #else
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, phase, &
           status)
@@ -873,8 +886,8 @@ end function
 ! !IROUTINE: ESMF_CompFinalize -- Call the Component's finalize routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CompFinalize(compp, importState, exportState, &
-                                      clock, phase, rc)
+      recursive subroutine ESMF_CompFinalize(compp, importState, &
+        exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -883,6 +896,7 @@ end function
       type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -918,6 +932,7 @@ end function
         integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
+        type(ESMF_BlockingFlag):: blocking
 
         ! Finalize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -925,6 +940,13 @@ end function
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        endif
+
+        ! set the default mode to ESMF_BLOCKING
+        if (present(blockingFlag)) then
+          blocking = blockingFlag
+        else
+          blocking = ESMF_BLOCKING
         endif
 
         ! See if this is currently finalizening on a DE which is part of the
@@ -954,6 +976,10 @@ end function
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETFINAL, phase, &
           status)
+        if (blocking == ESMF_BLOCKING) then
+          call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
+            compp%vm_cargo, status)
+        endif
 #else
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, phase, &
           status)
@@ -975,8 +1001,8 @@ end function
 ! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CompRun(compp, importState, exportState, &
-                                                            clock, phase, rc)
+      recursive subroutine ESMF_CompRun(compp, importState, &
+        exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -985,6 +1011,7 @@ end function
       type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1021,6 +1048,7 @@ end function
         integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
+        type(ESMF_BlockingFlag):: blocking
 
         ! Run return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -1028,6 +1056,13 @@ end function
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        endif
+
+        ! set the default mode to ESMF_BLOCKING
+        if (present(blockingFlag)) then
+          blocking = blockingFlag
+        else
+          blocking = ESMF_BLOCKING
         endif
 
         ! See if this is currently running on a DE which is part of the
@@ -1056,6 +1091,10 @@ end function
 #ifdef ESMF_ENABLE_VM
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETRUN, phase, status)
+        if (blocking == ESMF_BLOCKING) then
+          call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
+            compp%vm_cargo, status)
+        endif
 #else
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, phase, &
           status)
@@ -1813,10 +1852,10 @@ end function
     endif
 
     ! call into C++ 
-    call c_ESMC_CompReturn(compp%vm_parent, compp%vmplan, compp%vm_info, &
+    call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
       compp%vm_cargo, status)
     if (status .ne. ESMF_SUCCESS) then
-      print *, "c_ESMC_CompReturn error"
+      print *, "c_ESMC_CompWait error"
       return
     endif
 
