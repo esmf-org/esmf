@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.25 2004/01/27 18:01:27 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.26 2004/01/28 22:49:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.25 2004/01/27 18:01:27 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.26 2004/01/28 22:49:11 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -53,6 +53,7 @@
       type(ESMF_Grid) :: grid1, grid2, grid3, grid4
       type(ESMF_Array) :: arr1, arr2
       type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: g1_ai, g2_ai
+      integer, dimension(ESMF_MAXDIM) :: g1_cells, g2_cells
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
@@ -65,8 +66,8 @@
       integer :: half, quart
       real (ESMF_KIND_R8):: min(2), max(2)
       integer :: counts(ESMF_MAXGRIDDIM)
-      integer :: horz_gridtype, vert_gridtype
-      integer :: horz_stagger, vert_stagger
+      type(ESMF_GridKind) :: horz_gridtype, vert_gridtype
+      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: status, myde
 
@@ -117,23 +118,19 @@
       max(1) = 20.0
       min(2) = 0.0
       max(2) = 5.0
-      horz_gridtype = ESMF_GridType_XY
-      vert_gridtype = ESMF_GridType_Unknown
+      horz_gridtype = ESMF_GridKind_XY
       horz_stagger = ESMF_GridStagger_A
-      vert_stagger = ESMF_GridStagger_Unknown
       horz_coord_system = ESMF_CoordSystem_Cartesian
-      vert_coord_system = ESMF_CoordSystem_Unknown
       gname = "test grid 1"
 
       !NEX_UTest
-      grid1 = ESMF_GridCreate(2, counts=counts, min=min, max=max, &
+      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                              minGlobalCoordPerDim=min, &
+                              maxGlobalCoordPerDim=max, &
+                              horzGridKind=horz_gridtype, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
                               layout=layout1, &
-                              horz_gridtype=horz_gridtype, &
-                              vert_gridtype=vert_gridtype, &
-                              horz_stagger=horz_stagger, &
-                              vert_stagger=vert_stagger, &
-                              horz_coord_system=horz_coord_system, &
-                              vert_coord_system=vert_coord_system, &
                               name=gname, rc=status)
 
       write(failMsg, *) ""
@@ -149,16 +146,14 @@
 !     call 
       ! Second grid
       gname = "test grid 2"
-      grid2 = ESMF_GridCreate(2, counts=counts, min=min, max=max, &
-                             layout=layout2, &
-                             horz_gridtype=horz_gridtype, &
-                             vert_gridtype=vert_gridtype, &
-                             horz_stagger=horz_stagger, &
-                             vert_stagger=vert_stagger, &
-                             horz_coord_system=horz_coord_system, &
-                             vert_coord_system=vert_coord_system, &
-                             name=gname, rc=status)
-
+      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                              minGlobalCoordPerDim=min, &
+                              maxGlobalCoordPerDim=max, &
+                              horzGridKind=horz_gridtype, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
+                              layout=layout1, &
+                              name=gname, rc=status)
       write(failMsg, *) ""
       write(name, *) "Creating a destination Test Grid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -166,8 +161,8 @@
 
       !NEX_UTest
       ! Verifing that an Array can be created
-      call ESMF_GridGetDE(grid1, ai_global=g1_ai)
-      allocate(f90ptr1(g1_ai(1)%max, g1_ai(2)%max))
+      call ESMF_GridGetDE(grid1, localCellCountPerDim=g1_cells)
+      allocate(f90ptr1(g1_cells(1), g1_cells(2)))
       f90ptr1 = 10+myde
       arr1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
@@ -178,8 +173,8 @@
 
       !NEX_UTest
       ! second array
-      call ESMF_GridGetDE(grid2, ai_global=g2_ai)
-      allocate(f90ptr2(g2_ai(1)%max, g2_ai(2)%max))
+      call ESMF_GridGetDE(grid2, localCellCountPerDim=g2_cells)
+      allocate(f90ptr2(g2_cells(1), g2_cells(2)))
       f90ptr2 = -1
       arr2 = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""

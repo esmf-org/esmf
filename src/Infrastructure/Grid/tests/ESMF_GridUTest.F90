@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.19 2003/10/20 20:13:56 cdeluca Exp $
+! $Id: ESMF_GridUTest.F90,v 1.20 2004/01/28 22:49:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,22 +30,14 @@
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod     ! test methods
-      use ESMF_GridMod  ! the class to test
       use ESMF_Mod
-      use ESMF_BaseMod
-      use ESMF_DELayoutMod
-      use ESMF_DataMapMod
-      use ESMF_CompMod
-      use ESMF_IOMod
-      use ESMF_FieldMod
-      use ESMF_StateMod
-!      use ArraysGlobalMod
+    
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.19 2003/10/20 20:13:56 cdeluca Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.20 2004/01/28 22:49:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -74,8 +66,8 @@
 
       integer :: counts(ESMF_MAXGRIDDIM)
       integer :: nDE_i, nDE_j
-      integer :: horz_gridtype, vert_gridtype
-      integer :: horz_stagger, vert_stagger
+      type(ESMF_GridKind) :: horz_gridtype, vert_gridtype
+      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: status
       integer :: phy_grid_id
@@ -101,12 +93,9 @@
       counts(2) = 12
       nDE_i = 2
       nDE_j = 2
-      horz_gridtype = ESMF_GridType_XY
-      vert_gridtype = ESMF_GridType_Unknown
+      horz_gridtype = ESMF_GridKind_XY
       horz_stagger = ESMF_GridStagger_A
-      vert_stagger = ESMF_GridStagger_Unknown
       horz_coord_system = ESMF_CoordSystem_Cartesian
-      vert_coord_system = ESMF_CoordSystem_Unknown
       grid_min(1) = 0.0
       grid_max(1) = 10.0
       grid_min(2) = 0.0
@@ -122,16 +111,15 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-     grid = ESMF_GridCreate(2, counts=counts, &
-                            min=grid_min, max=grid_max, &
-                            layout=layout, &
-                            horz_gridtype=horz_gridtype, &
-                            vert_gridtype=vert_gridtype, &
-                            horz_stagger=horz_stagger, &
-                            vert_stagger=vert_stagger, &
-                            horz_coord_system=horz_coord_system, &
-                            vert_coord_system=vert_coord_system, &
-                            name=name, rc=status)
+      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                              minGlobalCoordPerDim=grid_min, &
+                              maxGlobalCoordPerDim=grid_max, &
+                              horzGridKind=horz_gridtype, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
+                              layout=layout, &
+                              name=name, rc=status)
+
 
       !NEX_UTest
 
@@ -153,16 +141,14 @@
       ! The following code is commented out because it crashes. 
       ! (Because the layout being passed in is uninitialized.)
       ! Bug report 796975 has been filed
-      !grid = ESMF_GridCreate(2, counts=counts, &
-      !                      min=grid_min, max=grid_max, &
-      !                      layout=layout2, &
-      !                      horz_gridtype=horz_gridtype, &
-      !                      vert_gridtype=vert_gridtype, &
-      !                      horz_stagger=horz_stagger, &
-      !                      vert_stagger=vert_stagger, &
-      !                      horz_coord_system=horz_coord_system, &
-      !                      vert_coord_system=vert_coord_system, &
-      !                      name=name, rc=status)
+      !grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      !                        minGlobalCoordPerDim=grid_min, &
+      !                        maxGlobalCoordPerDim=grid_max, &
+      !                        horzGridKind=horz_gridtype, &
+      !                        horzStagger=horz_stagger, &
+      !                        horzCoordSystem=horz_coord_system, &
+      !                        layout=layout2, &
+      !                        name=name, rc=status)
 
 
 
@@ -177,16 +163,14 @@
       grid_min(2) = 5.0
       grid_max(2) = 1.0
 
-      grid = ESMF_GridCreate(2, counts=counts, &
-                            min=grid_min, max=grid_max, &
-                            layout=layout, &
-                            horz_gridtype=horz_gridtype, &
-                            vert_gridtype=vert_gridtype, &
-                            horz_stagger=horz_stagger, &
-                            vert_stagger=vert_stagger, &
-                            horz_coord_system=horz_coord_system, &
-                            vert_coord_system=vert_coord_system, &
-                            name=name, rc=status)
+      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                              minGlobalCoordPerDim=grid_min, &
+                              maxGlobalCoordPerDim=grid_max, &
+                              horzGridKind=horz_gridtype, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
+                              layout=layout, &
+                              name=name, rc=status)
 
       !NEX_UTest
 
@@ -207,18 +191,16 @@
 #ifdef ESMF_EXHAUSTIVE
 
       ! Test creating an internal Grid
-      grid2 = ESMF_GridCreate(2, counts=counts, &
-                              min=grid_min, max=grid_max, &
-       		              layout=layout, &
-                              horz_gridtype=horz_gridtype, &
-                              vert_gridtype=vert_gridtype, &
-                              horz_stagger=horz_stagger, &
-                              vert_stagger=vert_stagger, &
-                              horz_coord_system=horz_coord_system, &
-                              vert_coord_system=vert_coord_system, &
+      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                              minGlobalCoordPerDim=grid_min, &
+                              maxGlobalCoordPerDim=grid_max, &
+                              horzGridKind=horz_gridtype, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
+                              layout=layout, &
                               name=name, rc=status)
 
-         write(failMsg, *) ""
+        write(failMsg, *) ""
         write(name, *) "Creating an Internal Grid Test"
         call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -253,8 +235,8 @@
       !NEX_UTest
 
 
-      ! Test creation ofempty 
-      grid1 =  ESMF_GridCreate( rc=rc)
+      ! Test creation of empty grid
+      grid1 =  ESMF_GridCreate(rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.28 2004/01/28 00:35:50 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.29 2004/01/28 22:49:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.28 2004/01/28 00:35:50 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.29 2004/01/28 22:49:11 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -208,7 +208,7 @@
 
       !NEX_UTest
       ! Verifing that a Grid can be created
-      grid =  ESMF_GridCreateEmpty(name="atmgrid", rc=rc)
+      grid =  ESMF_GridCreate(name="atmgrid", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -253,7 +253,7 @@
 
       !NEX_UTest
       ! Verifing that recreating a created Grid is allowed.
-      grid =  ESMF_GridCreateEmpty(name="landgrid", rc=rc)
+      grid =  ESMF_GridCreate(name="landgrid", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreating a created Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -383,7 +383,7 @@
       ! It will be uncommented when the query function is written.
       ! Bug 705196 "Unable to query Grid name"
       gname="oceangrid"
-      grid =  ESMF_GridCreateEmpty(name=gname, rc=rc)
+      grid =  ESMF_GridCreate(name=gname, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    1, dm, "Field 0", ios, rc)
@@ -402,7 +402,7 @@
 
       !NEX_UTest
       ! Req. xxx  - setting and getting Attributes from a Field
-      grid =  ESMF_GridCreateEmpty(name=gname, rc=rc)
+      grid =  ESMF_GridCreate(name=gname, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    1, dm, "Field 0", ios, rc)
