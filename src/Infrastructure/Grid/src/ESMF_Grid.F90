@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.86 2003/08/29 21:07:05 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.87 2003/08/29 22:55:51 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.86 2003/08/29 21:07:05 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.87 2003/08/29 22:55:51 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1213,7 +1213,7 @@
 !EOPI
 
       character(len=4) :: physgrid_name       !
-      integer :: physgrid_id                  ! integer identifier for physgrid
+      integer :: physgridId                   ! integer identifier for physgrid
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       type(ESMF_RelLoc) :: relloc
@@ -1251,28 +1251,88 @@
         return
       endif
 
-!     Create main physgrid
-      physgrid_name = 'base'
-      ! TODO: based on horiz and vert grid types, set the proper relloc
+!     Create physgrid at cell center
+      physgridId = 1
+      physgrid_name = 'cell_center'
       relloc = ESMF_CELL_CENTER
-      call ESMF_GridAddPhysGrid(grid, counts, physgrid_id, relloc, &
+      call ESMF_GridAddPhysGrid(grid, counts, physgridId, relloc, &
                                 x_min, x_max, y_min, y_max, &
                                 physgrid_name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Add physgrid"
         return
       endif
-
-!     Call SetCoord to create physical coordinates of subgrid
-      call ESMF_GridSetCoord(grid, physgrid_id, status)
+      call ESMF_GridSetCoord(grid, physgridId, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
         return
       endif
+      physgridId = physgridId + 1 
 
-!     Create any necessary physgrids to support staggering  TODO
+!     Create any other physgrids necessary for horizontal grid stagger
+!     TODO: finish filling out, look up D
+      select case (horz_stagger)
 
-!     Create vertical physgrid if requested
+        ! Arakawa A (centered velocity)
+        case (1)
+
+        ! Arakawa B (velocities at grid corner)
+        case (2)
+          physgrid_name = 'cell_necorner'
+          relloc = ESMF_CELL_NECORNER
+          call ESMF_GridAddPhysGrid(grid, counts, physgridId, relloc, &
+                                    x_min, x_max, y_min, y_max, &
+                                    physgrid_name, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructInternal: Add physgrid"
+            return
+          endif
+          call ESMF_GridSetCoord(grid, physgridId, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
+            return
+          endif
+          physgridId = physgridId + 1 
+
+        ! Arakawa C (velocities at cell faces)
+        case (3)
+          physgrid_name = 'cell_eface'
+          relloc = ESMF_CELL_EFACE
+          call ESMF_GridAddPhysGrid(grid, counts, physgridId, relloc, &
+                                    x_min, x_max, y_min, y_max, &
+                                    physgrid_name, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructInternal: Add physgrid"
+            return
+          endif
+          call ESMF_GridSetCoord(grid, physgridId, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
+            return
+          endif
+          physgridId = physgridId + 1 
+
+        ! Arakawa D
+        case (4)
+          physgrid_name = 'cell_nface'
+          relloc = ESMF_CELL_NFACE
+          call ESMF_GridAddPhysGrid(grid, counts, physgridId, relloc, &
+                                    x_min, x_max, y_min, y_max, &
+                                    physgrid_name, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructInternal: Add physgrid"
+            return
+          endif
+          call ESMF_GridSetCoord(grid, physgridId, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
+            return
+          endif
+          physgridId = physgridId + 1 
+
+      end select
+
+!     Create vertical physgrid if requested  TODO
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Grid construct"
@@ -1368,7 +1428,7 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       character(len=4) :: physgrid_name       !
-      integer :: physgrid_id                  ! integer identifier for physgrid
+      integer :: physgridId                   ! integer identifier for physgrid
       type(ESMF_RelLoc) :: relloc
 
 !     Initialize return code
@@ -1413,19 +1473,86 @@
         return
       endif
 
-!     Create main physgrid
-      physgrid_name = 'base'
-      ! TODO: based on horiz and vert grid type set the proper relloc
+!     Create physgrid at cell center
+      physgridId = 1
+      physgrid_name = 'cell_center'
       relloc = ESMF_CELL_CENTER
-      call ESMF_GridAddPhysGrid(grid, physgrid_id, relloc, delta1, delta2, &
+      call ESMF_GridAddPhysGrid(grid, physgridId, relloc, delta1, delta2, &
                                 countsPerDE1, countsPerDE2, min, dim_names, &
                                 dim_units, physgrid_name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
         return
       endif
+  !    call ESMF_GridSetCoord(grid, physgridId, status)
+  !    if(status .NE. ESMF_SUCCESS) then
+  !      print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
+  !      return
+  !    endif
+      physgridId = physgridId + 1 
 
-!     Create any necessary physgrids to support staggering  TODO
+!     Create any other physgrids necessary for horizontal grid stagger
+!     TODO: finish filling out, look up D
+      select case (horz_stagger)
+
+        ! Arakawa A (centered velocity)
+        case (1)
+
+        ! Arakawa B (velocities at grid corner)
+        case (2)
+          physgrid_name = 'cell_necorner'
+          relloc = ESMF_CELL_NECORNER
+          call ESMF_GridAddPhysGrid(grid, physgridId, relloc, delta1, delta2, &
+                                    countsPerDE1, countsPerDE2, min, dim_names, &
+                                    dim_units, physgrid_name, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
+            return
+          endif
+  !        call ESMF_GridSetCoord(grid, physgridId, status)
+  !        if(status .NE. ESMF_SUCCESS) then
+  !          print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
+  !          return
+  !        endif
+          physgridId = physgridId + 1 
+
+        ! Arakawa C (velocities at cell faces)
+        case (3)
+          physgrid_name = 'cell_eface'
+          relloc = ESMF_CELL_EFACE
+          call ESMF_GridAddPhysGrid(grid, physgridId, relloc, delta1, delta2, &
+                                    countsPerDE1, countsPerDE2, min, dim_names, &
+                                    dim_units, physgrid_name, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
+            return
+          endif
+  !        call ESMF_GridSetCoord(grid, physgridId, status)
+  !        if(status .NE. ESMF_SUCCESS) then
+  !          print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
+  !          return
+  !        endif
+          physgridId = physgridId + 1 
+
+        ! Arakawa D
+        case (4)
+          physgrid_name = 'cell_nface'
+          relloc = ESMF_CELL_NFACE
+          call ESMF_GridAddPhysGrid(grid, physgridId, relloc, delta1, delta2, &
+                                    countsPerDE1, countsPerDE2, min, dim_names, &
+                                    dim_units, physgrid_name, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
+            return
+          endif
+  !        call ESMF_GridSetCoord(grid, physgridId, status)
+  !        if(status .NE. ESMF_SUCCESS) then
+  !          print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
+  !          return
+  !        endif
+          physgridId = physgridId + 1 
+
+      end select
 
 !     Create vertical physgrid if requested
 
