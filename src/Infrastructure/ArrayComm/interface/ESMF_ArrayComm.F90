@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.2 2003/10/13 23:07:42 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.3 2003/10/22 17:53:28 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMF.h"
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !MODULE: ESMF_ArrayMod - Manage data arrays uniformly between F90 and C++     
 !
 ! !DESCRIPTION:
@@ -71,12 +71,12 @@
       !!public ESMF_ArrayReduce, ESMF_ArrayAllReduce
       !!public ESMF_ArrayBroadcast, ESMF_ArrayAlltoAll
 
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.2 2003/10/13 23:07:42 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.3 2003/10/22 17:53:28 cdeluca Exp $'
 !
 !==============================================================================
 !
