@@ -1,4 +1,4 @@
-# $Id: common,v 1.49 2003/06/06 21:01:46 jwolfe Exp $ 
+# $Id: common,v 1.50 2003/08/01 16:01:23 svasquez Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -517,6 +517,7 @@ alldoc: chkdir_doc
 	-@echo "Building All Documentation"
 	-@echo "========================================="
 	-@${OMAKE} tex dvi pdf html
+	-@echo "Build alldoc completed."
 
 ##########  Tex ##########
 tex:
