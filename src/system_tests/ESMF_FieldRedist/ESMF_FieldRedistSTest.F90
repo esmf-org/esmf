@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.18 2004/04/16 15:50:25 nscollins Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.19 2004/04/16 23:06:10 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -33,7 +33,7 @@
     implicit none
     
     ! Local variables
-    integer :: i, j, rc
+    integer :: i, j, ifld, jfld, rc
     integer :: ndes, deId
     integer :: miscount, hWidth
     integer :: status
@@ -179,10 +179,10 @@
 
     ! set data array to a function of coordinates (in the computational part
     ! of the array only, not the halo region)
-    do j    = hWidth+1,localCounts(2)-hWidth
-       do i = hWidth+1,localCounts(1)-hWidth
-           srcdata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                               + 2.0*sin(coordY(i,j)/50.0*pi) 
+    do j    = 1,localCounts(2)
+       do i = 1,localCounts(1)
+           srcdata(i+hWidth,j+hWidth) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                                             + 2.0*sin(coordY(i,j)/50.0*pi) 
       enddo
     enddo
 
@@ -242,15 +242,17 @@
 
     match    = .true.
     miscount = 0
-    do j   = hWidth+1,size(resdata,2)-hWidth
-      do i = hWidth+1,size(resdata,1)-hWidth
+    do j   = 1,localCounts(2)
+      jfld = j+hWidth
+      do i = 1,localCounts(1)
+        ifld = i+hWidth
         compval = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
                        + 2.0*sin(coordY(i,j)/50.0*pi)
-        if (resdata(i,j) .ne. compval) then
-        !if (srcdata(i,j) .ne. resdata(i,j)) then
+        if (resdata(ifld,jfld) .ne. compval) then
+        !if (srcdata(ifld,jfld) .ne. resdata(ifld,jfld)) then
           print *, "array contents do not match at: (", i,j, ") on DE ", &
-                   deId, ".  src=", srcdata(i,j), "dst=", resdata(i,j), &
-                   "realval=", compval
+                   deId, ".  src=", srcdata(ifld,jfld), "dst=", &
+                   resdata(ifld,jfld), "realval=", compval
           match = .false.
           miscount = miscount + 1
           if (miscount .gt. 40) then
