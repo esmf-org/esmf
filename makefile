@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.39 2003/11/13 20:06:11 svasquez Exp $
+# $Id: makefile,v 1.40 2003/12/03 20:31:17 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -144,7 +144,7 @@ build_fortran:
 	-@echo "========================================="
 	-@cd interface/F90; \
 	  ${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} libf clean 
-	-@mv ${ESMF_TOP_DIR}/interface/F90/*.mod ${ESMC_MODDIR}
+	-@mv ${ESMF_TOP_DIR}/interface/F90/*.mod ${ESMF_MODDIR}
 	${RANLIB} $(ESMF_LIBDIR)/*.a
 	-@echo "Completed compiling Fortran source"
 	-@echo "========================================="
@@ -224,11 +224,15 @@ SCRIPTS    =
 
 install:
 	-@if [ "${ESMF_LIB_INSTALL}" != "" ] ; then \
-	cp $(ESMF_LIBDIR)/libesmf.a ${ESMF_LIB_INSTALL} ; \
-	cp $(ESMF_LIBDIR)/libmpiuni.a ${ESMF_LIB_INSTALL} ; \
+	cp -fp $(ESMF_LIBDIR)/libesmf.a ${ESMF_LIB_INSTALL} ; \
+	cp -fp $(ESMF_LIBDIR)/libesmf.so ${ESMF_LIB_INSTALL} ; \
+	cp -fp $(ESMF_LIBDIR)/libmpiuni.a ${ESMF_LIB_INSTALL} ; \
 	fi
 	-if [ "${ESMF_MOD_INSTALL}" != "" ] ; then \
-	cp ${ESMC_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \
+	cp -fp ${ESMF_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \
+	fi
+	-if [ "${ESMF_H_INSTALL}" != "" ] ; then \
+	cp -fp $(ESMF_BUILD)/src/include/*.h ${ESMF_H_INSTALL} ; \
 	fi
 
 
@@ -239,7 +243,7 @@ install:
 # deleted.   Remove the .mod files here manually since the case
 # of mods is not really predictable.
 # clean: 
-# 	@rm -f ${ESMC_MODDIR}/*.mod
+# 	@rm -f ${ESMF_MODDIR}/*.mod
 # 	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 # 	   ACTION=clean_recursive  tree 
 
