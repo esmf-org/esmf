@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.4 2003/12/02 18:12:04 svasquez Exp $
+! $Id: ESMF_RouteEx.F90,v 1.5 2003/12/02 18:20:17 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -186,9 +186,9 @@
     end if
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-       print *, "PASS: ESMF_RouteUseEx.F90"
+       print *, "PASS: ESMF_RouteEx.F90"
     else
-       print *, "FAIL: ESMF_RouteUseEx.F90"
+       print *, "FAIL: ESMF_RouteEx.F90"
     end if
 
 
