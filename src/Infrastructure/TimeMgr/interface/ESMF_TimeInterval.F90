@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.37 2003/09/12 17:14:39 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.38 2003/10/22 01:15:10 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -103,9 +103,12 @@
       private ESMF_TimeIntervalQuotR
 
       public operator(*)
-      private ESMF_TimeIntervalProdI
-      private ESMF_TimeIntervalProdF
-      private ESMF_TimeIntervalProdR
+      private ESMF_TimeIntervalProdTI
+      private ESMF_TimeIntervalProdIT
+      private ESMF_TimeIntervalProdTF
+      private ESMF_TimeIntervalProdFT
+      private ESMF_TimeIntervalProdTR
+      private ESMF_TimeIntervalProdRT
 
 ! Inherited and overloaded from ESMF_BaseTime
 
@@ -137,7 +140,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.37 2003/09/12 17:14:39 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.38 2003/10/22 01:15:10 eschwab Exp $'
 
 !==============================================================================
 !
@@ -196,9 +199,12 @@
       interface operator(*)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalProdI
-      module procedure ESMF_TimeIntervalProdF
-      module procedure ESMF_TimeIntervalProdR
+      module procedure ESMF_TimeIntervalProdTI
+      module procedure ESMF_TimeIntervalProdIT
+      module procedure ESMF_TimeIntervalProdTF
+      module procedure ESMF_TimeIntervalProdFT
+      module procedure ESMF_TimeIntervalProdTR
+      module procedure ESMF_TimeIntervalProdRT
 
 ! !DESCRIPTION:
 !     This interface overloads the * operator for the {\tt ESMF\_TimeInterval}
@@ -829,13 +835,13 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_TimeIntervalProdI - Multiply a TimeInterval by an integer
+! !IROUTINE:   ESMF_TimeIntervalProdTI - Multiply a TimeInterval by an integer
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalProdI(timeInterval, multiplier)
+      function ESMF_TimeIntervalProdTI(timeInterval, multiplier)
 
 ! !RETURN VALUE:
-      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdI
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdTI
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeInterval
@@ -844,6 +850,7 @@
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by an integer {\tt multiplier}, 
 !     and returns the product as an {\tt ESMF\_TimeInterval}.
+!     Commutative complement to ESMF_TimeIntervalProdIT.
 !
 !     The arguments are:
 !     \begin{description}
@@ -857,20 +864,56 @@
 ! !REQUIREMENTS:
 !     TMG1.5.7, TMG7.2
 
-      call c_ESMC_TimeIntervalProdI(timeInterval, multiplier, &
-                                    ESMF_TimeIntervalProdI)
+      call c_ESMC_TimeIntervalProdTI(timeInterval, multiplier, &
+                                     ESMF_TimeIntervalProdTI)
 
-      end function ESMF_TimeIntervalProdI
+      end function ESMF_TimeIntervalProdTI
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalProdF - Multiply a TimeInterval by a fraction
+! !IROUTINE:   ESMF_TimeIntervalProdIT - Multiply a TimeInterval by an integer
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalProdF(timeInterval, multiplier)
+      function ESMF_TimeIntervalProdIT(multiplier, timeInterval)
 
 ! !RETURN VALUE:
-      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdF
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdIT
+
+! !ARGUMENTS:
+      integer(ESMF_KIND_I4),   intent(in) :: multiplier
+      type(ESMF_TimeInterval), intent(in) :: timeInterval
+
+! !DESCRIPTION:
+!     Multiplies {\tt timeInterval} by an integer {\tt multiplier}, 
+!     and returns the product as an {\tt ESMF\_TimeInterval}.
+!     Commutative complement to ESMF_TimeIntervalProdTI.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[mutliplier]
+!          Integer multiplier.
+!     \item[timeInterval]
+!          The multiplicand.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+
+      call c_ESMC_TimeIntervalProdIT(multiplier, timeInterval, &
+                                     ESMF_TimeIntervalProdIT)
+
+      end function ESMF_TimeIntervalProdIT
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalProdTF - Multiply a TimeInterval by a fraction
+
+! !INTERFACE:
+      function ESMF_TimeIntervalProdTF(timeInterval, multiplier)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdTF
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeInterval
@@ -879,6 +922,7 @@
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by a fraction {\tt multiplier},
 !     and returns the product as an {\tt ESMF\_TimeInterval}.
+!     Commutative complement to ESMF_TimeIntervalProdFT.
 !
 !     The arguments are:
 !     \begin{description}
@@ -892,19 +936,56 @@
 ! !REQUIREMENTS:
 !     TMG1.5.7, TMG7.2
 
-      call c_ESMC_TimeIntervalProdF(timeInterval, multiplier, &
-                                    ESMF_TimeIntervalProdF)
+      call c_ESMC_TimeIntervalProdTF(timeInterval, multiplier, &
+                                     ESMF_TimeIntervalProdTF)
 
-      end function ESMF_TimeIntervalProdF
+      end function ESMF_TimeIntervalProdTF
+
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_TimeIntervalProdR - Multiply a TimeInterval by a double precision
+! !IROUTINE:  ESMF_TimeIntervalProdFT - Multiply a TimeInterval by a fraction
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalProdR(timeInterval, multiplier)
+      function ESMF_TimeIntervalProdFT(multiplier, timeInterval)
 
 ! !RETURN VALUE:
-      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdR
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdFT
+
+! !ARGUMENTS:
+      type(ESMF_Fraction),     intent(in) :: multiplier
+      type(ESMF_TimeInterval), intent(in) :: timeInterval
+
+! !DESCRIPTION:
+!     Multiplies {\tt timeInterval} by a fraction {\tt multiplier},
+!     and returns the product as an {\tt ESMF\_TimeInterval}.
+!     Commutative complement to ESMF_TimeIntervalProdTF.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[mutliplier]
+!          Fraction multiplier.
+!     \item[timeInterval]
+!          The multiplicand.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+
+      call c_ESMC_TimeIntervalProdFT(multiplier, timeInterval, &
+                                     ESMF_TimeIntervalProdFT)
+
+      end function ESMF_TimeIntervalProdFT
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:   ESMF_TimeIntervalProdTR - Multiply a TimeInterval by a double precision
+
+! !INTERFACE:
+      function ESMF_TimeIntervalProdTR(timeInterval, multiplier)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdTR
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeInterval
@@ -913,6 +994,7 @@
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by a double precision 
 !     {\tt multiplier}, and returns the product as an {\tt ESMF\_TimeInterval}.
+!     Commutative complement to ESMF_TimeIntervalProdRT.
 !
 !     The arguments are:
 !     \begin{description}
@@ -926,10 +1008,46 @@
 ! !REQUIREMENTS:
 !     TMG1.5.7, TMG7.2
 
-      call c_ESMC_TimeIntervalProdR(timeInterval, multiplier, &
-                                    ESMF_TimeIntervalProdR)
+      call c_ESMC_TimeIntervalProdTR(timeInterval, multiplier, &
+                                     ESMF_TimeIntervalProdTR)
 
-      end function ESMF_TimeIntervalProdR
+      end function ESMF_TimeIntervalProdTR
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:   ESMF_TimeIntervalProdRT - Multiply a TimeInterval by a double precision
+
+! !INTERFACE:
+      function ESMF_TimeIntervalProdRT(multiplier, timeInterval)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdRT
+
+! !ARGUMENTS:
+      real(ESMF_KIND_R8),      intent(in) :: multiplier
+      type(ESMF_TimeInterval), intent(in) :: timeInterval
+
+! !DESCRIPTION:
+!     Multiplies {\tt timeInterval} by a double precision 
+!     {\tt multiplier}, and returns the product as an {\tt ESMF\_TimeInterval}.
+!     Commutative complement to ESMF_TimeIntervalProdTR.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[mutliplier]
+!          Double precision multiplier.
+!     \item[timeInterval]
+!          The multiplicand.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+
+      call c_ESMC_TimeIntervalProdRT(multiplier, timeInterval, &
+                                     ESMF_TimeIntervalProdRT)
+
+      end function ESMF_TimeIntervalProdRT
 
 !------------------------------------------------------------------------------
 !

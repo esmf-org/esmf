@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.37 2003/09/11 00:05:07 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.38 2003/10/22 01:15:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.37 2003/09/11 00:05:07 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.38 2003/10/22 01:15:10 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -734,6 +734,37 @@
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by an integer
+//
+// !INTERFACE:
+      ESMC_TimeInterval operator*(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const ESMF_KIND_I4 &multiplier,  // in - integer multiplier
+      const ESMC_TimeInterval &ti) {   // in - TimeInterval multiplicand
+//
+// !DESCRIPTION:
+//     Multiply a {\tt ESMC\_TimeInterval} by an integer, return product as a
+//    {\tt ESMC\_TimeInterval}
+//
+//EOP
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval product;
+
+    // TODO: fractional & calendar interval parts
+
+    product.s = multiplier * ti.s;
+
+    return(product);
+
+}  // end operator*
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_TimeInterval(*=) - Multiply a time interval by an integer
 //
 // !INTERFACE:
@@ -786,6 +817,35 @@
     return(product);
 
 }  // end ESMC_TimeInterval::operator*
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by an fraction
+//
+// !INTERFACE:
+      ESMC_TimeInterval operator*(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &multiplier, // in - fraction multiplier
+      const ESMC_TimeInterval &ti) {   // in - TimeInterval multiplicand
+//
+// !DESCRIPTION:
+//     Multiply a {\tt ESMC\_TimeInterval} by an fraction, return product as a
+//    {\tt ESMC\_TimeInterval}
+//
+//EOP
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval product;
+
+    // TODO: whole, fractional & calendar interval parts
+
+    return(product);
+
+}  // end operator*
 
 //-------------------------------------------------------------------------
 //BOP
@@ -842,6 +902,38 @@
     return(product);
 
 }  // end ESMC_TimeInterval::operator*
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by a double precision
+//
+// !INTERFACE:
+      ESMC_TimeInterval operator*(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const ESMF_KIND_R8 &multiplier,  // in - double precision
+      const ESMC_TimeInterval &ti) {   // in - TimeInterval multiplicand
+                                                 //   multiplier
+//
+// !DESCRIPTION:
+//     Multiply a {\tt ESMC\_TimeInterval} by an double precision,
+//     return product as a {\tt ESMC\_TimeInterval}
+//
+//EOP
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval product;
+
+    // TODO: fractional & calendar interval parts
+
+    product.s = (ESMF_KIND_I8) (multiplier * (ESMF_KIND_R8) ti.s);
+
+    return(product);
+
+}  // end operator*
 
 //-------------------------------------------------------------------------
 //BOP

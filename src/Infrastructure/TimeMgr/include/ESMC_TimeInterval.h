@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.24 2003/09/04 18:57:56 cdeluca Exp $
+// $Id: ESMC_TimeInterval.h,v 1.25 2003/10/22 01:15:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,6 +27,7 @@
  // include files.
 #include <ESMF_TimeMgr.inc>
 #include <ESMC_Fraction.h>
+class ESMC_TimeInterval;
 
 //-------------------------------------------------------------------------
 //BOP
@@ -188,6 +189,15 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     ~ESMC_TimeInterval(void);
 
  // < declare the rest of the public interface methods here >
+
+    // commutative complements to ESMC_TimeInterval class member overloaded
+    //   "*" operators
+    friend ESMC_TimeInterval
+                   operator* (const ESMF_KIND_I4 &, const ESMC_TimeInterval &);
+    friend ESMC_TimeInterval
+                   operator* (const ESMC_Fraction &, const ESMC_TimeInterval &);
+    friend ESMC_TimeInterval
+                   operator* (const ESMF_KIND_R8 &, const ESMC_TimeInterval &);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //

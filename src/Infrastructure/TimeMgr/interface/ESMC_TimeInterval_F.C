@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.21 2003/09/12 01:58:03 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.22 2003/10/22 01:15:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,22 +209,40 @@ extern "C" {
            *timeIntervalQuotR = (*timeInterval / *divisor);
        }
 
-       void FTN(c_esmc_timeintervalprodi)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalprodti)(ESMC_TimeInterval *timeInterval,
                                         ESMF_KIND_I4 *multiplier,
-                                        ESMC_TimeInterval *timeIntervalProdI) {
-           *timeIntervalProdI = (*timeInterval * *multiplier);
+                                        ESMC_TimeInterval *timeIntervalProdTI) {
+           *timeIntervalProdTI = (*timeInterval * *multiplier);
        }
 
-       void FTN(c_esmc_timeintervalprodf)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalprodit)(ESMF_KIND_I4 *multiplier,
+                                        ESMC_TimeInterval *timeInterval,
+                                        ESMC_TimeInterval *timeIntervalProdIT) {
+           *timeIntervalProdIT = (*multiplier * *timeInterval);
+       }
+
+       void FTN(c_esmc_timeintervalprodtf)(ESMC_TimeInterval *timeInterval,
                                         ESMC_Fraction *multiplier,
-                                        ESMC_TimeInterval *timeIntervalProdF) {
-           *timeIntervalProdF = (*timeInterval * *multiplier);
+                                        ESMC_TimeInterval *timeIntervalProdTF) {
+           *timeIntervalProdTF = (*timeInterval * *multiplier);
        }
 
-       void FTN(c_esmc_timeintervalprodr)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalprodft)(ESMC_Fraction *multiplier,
+                                        ESMC_TimeInterval *timeInterval,
+                                        ESMC_TimeInterval *timeIntervalProdFT) {
+           *timeIntervalProdFT = (*multiplier * *timeInterval);
+       }
+
+       void FTN(c_esmc_timeintervalprodtr)(ESMC_TimeInterval *timeInterval,
                                         ESMF_KIND_R8 *multiplier,
-                                        ESMC_TimeInterval *timeIntervalProdR) {
-           *timeIntervalProdR = (*timeInterval * *multiplier);
+                                        ESMC_TimeInterval *timeIntervalProdTR) {
+           *timeIntervalProdTR = (*timeInterval * *multiplier);
+       }
+
+       void FTN(c_esmc_timeintervalprodrt)(ESMF_KIND_R8 *multiplier,
+                                        ESMC_TimeInterval *timeInterval,
+                                        ESMC_TimeInterval *timeIntervalProdRT) {
+           *timeIntervalProdRT = (*multiplier * *timeInterval);
        }
 
        void FTN(c_esmc_timeintervalreadrestart)(ESMC_TimeInterval *ptr,
