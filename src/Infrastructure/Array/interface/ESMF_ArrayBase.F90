@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.9 2003/07/29 16:31:49 jwolfe Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.10 2003/07/31 23:22:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -71,12 +71,17 @@
       public ESMF_ArraySpecInit
       public ESMF_ArraySpecGet
 
-      public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex
-      public ESMF_ArrayGetAllAxisIndices
-      public ESMF_ArrayRedist, ESMF_ArrayHalo
-      public ESMF_ArrayAllGather, ESMF_ArrayGather, ESMF_ArrayScatter
       public ESMF_ArrayGet, ESMF_ArrayGetName
- 
+
+      public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
+      public ESMF_ArrayGetAllAxisIndices
+
+      public ESMF_ArrayRedist, ESMF_ArrayRegrid, ESMF_ArrayHalo
+
+      public ESMF_ArrayAllGather, ESMF_ArrayGather, ESMF_ArrayScatter
+      !public ESMF_ArrayReduce, ESMF_ArrayAllReduce
+      !public ESMF_ArrayBroadcast, ESMF_ArrayAlltoAll
+
       public ESMF_ArrayCheckpoint
       public ESMF_ArrayRestore
       public ESMF_ArrayWrite
@@ -86,11 +91,54 @@
       public ESMF_ArrayPrint
 !EOP
 
+
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.9 2003/07/29 16:31:49 jwolfe Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.10 2003/07/31 23:22:28 nscollins Exp $'
 !
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+!BOP
+! !IROUTINE: ESMF_ArrayHalo - halo a distributed array
+!
+! !INTERFACE:
+      interface ESMF_ArrayHalo
+
+! !PRIVATE MEMBER FUNCTIONS:
+          module procedure ESMF_ArrayHaloNew
+          module procedure ESMF_ArrayHaloDeprecated
+
+! !DESCRIPTION:
+!     This interface provides both the revised entry point for
+!      calling Halo on an {\tt ESMF\_Array} object, and temporarily
+!      for backwards compatibility an older interface into the same code.
+
+!EOP
+      end interface
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayRedist - redistribute a distributed array
+!
+! !INTERFACE:
+      interface ESMF_ArrayRedist
+
+! !PRIVATE MEMBER FUNCTIONS:
+          module procedure ESMF_ArrayRedistNew
+          module procedure ESMF_ArrayRedistDeprecated
+
+! !DESCRIPTION:
+!     This interface provides both the revised entry point for
+!      calling Redistribute on an {\tt ESMF\_Array} object, and temporarily
+!      for backwards compatibility an older interface into the same code.
+
+!EOP
+      end interface
+
 !==============================================================================
 
       contains
@@ -283,10 +331,185 @@
 
       end subroutine ESMF_ArrayGetAllAxisIndices
 
+
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayRedist(array, layout, global_start, &
+      subroutine ESMF_ArrayRegrid(srcarray, dstarray, srcgrid, srcdatamap, &
+                                  dstgrid, dstdatamap, parentlayout, async, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: srcarray
+      type(ESMF_Array), intent(inout) :: dstarray
+      type(ESMF_Grid), intent(in) :: srcgrid
+      type(ESMF_DataMap), intent(in) :: srcdatamap
+      type(ESMF_Grid), intent(in) :: dstgrid
+      type(ESMF_DataMap), intent(in) :: dstdatamap
+      type(ESMF_DELayout) :: parentlayout
+      type(ESMF_Async), intent(inout), optional :: async
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Used to Regrid data in an Array.
+!
+!     \begin{description}
+!     \item [srcarray]
+!           {\tt ESMF\_Array} containing source data.
+!     \item [dstarray]
+!           {\tt ESMF\_Array} containing results.
+!     \item [srcgrid]
+!           {\tt ESMF\_Grid} which corresponds to how the data in the
+!           source array has been decomposed.  
+!     \item [srcdatamap]
+!           {\tt ESMF\_DataMap} which describes how the array maps to
+!           the specified source grid.
+!     \item [dstgrid]
+!           {\tt ESMF\_Grid} which corresponds to how the data in the
+!           destination array should be decomposed.  
+!     \item [dstdatamap]
+!           {\tt ESMF\_DataMap} which describes how the array should map to
+!           the specified destination grid.
+!     \item [parentlayout]
+!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s,
+!           most commonly the layout
+!           of the Coupler if the regridding is inter-component, but could
+!           also be the individual layout for a component if the
+!           regridding is intra-component.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+
+!
+!
+!EOP
+! !REQUIREMENTS:
+        integer :: status         ! local error status
+        logical :: rcpresent      ! did user specify rc?
+        integer :: size_rank_trans
+        integer :: size_decomp
+
+! TODO: add code here
+! TODO: query grids and datamaps to get what is needed for redist
+
+        ! assume failure until success certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! query things implemented in F90 and pass them to the C++ side,
+        !  assume we can directly reference members in the class.
+        !call c_ESMC_ArrayRegrid()
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "c_ESMC_ArrayRegrid returned error"
+          return
+        endif
+
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayRegrid
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayRedistNew(srcarray, dstarray, srcgrid, srcdatamap, &
+                                  dstgrid, dstdatamap, parentlayout, async, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: srcarray
+      type(ESMF_Array), intent(inout) :: dstarray
+      type(ESMF_Grid), intent(in) :: srcgrid
+      type(ESMF_DataMap), intent(in) :: srcdatamap
+      type(ESMF_Grid), intent(in) :: dstgrid
+      type(ESMF_DataMap), intent(in) :: dstdatamap
+      type(ESMF_DELayout) :: parentlayout
+      type(ESMF_Async), intent(inout), optional :: async
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Used to redistribute an Array.
+!
+!     \begin{description}
+!     \item [srcarray]
+!           {\tt ESMF\_Array} containing source data.
+!     \item [dstarray]
+!           {\tt ESMF\_Array} containing results.
+!     \item [srcgrid]
+!           {\tt ESMF\_Grid} which corresponds to how the data in the
+!           source array has been decomposed.  
+!     \item [srcdatamap]
+!           {\tt ESMF\_DataMap} which describes how the array maps to
+!           the specified source grid.
+!     \item [dstgrid]
+!           {\tt ESMF\_Grid} which corresponds to how the data in the
+!           destination array should be decomposed.  
+!     \item [dstdatamap]
+!           {\tt ESMF\_DataMap} which describes how the array should map to
+!           the specified destination grid.
+!     \item [parentlayout]
+!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s,
+!           most commonly the layout
+!           of the Coupler if the regridding is inter-component, but could
+!           also be the individual layout for a component if the
+!           regridding is intra-component.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+
+!
+!
+!EOP
+! !REQUIREMENTS:
+        integer :: status         ! local error status
+        logical :: rcpresent      ! did user specify rc?
+        integer :: size_rank_trans
+        integer :: size_decomp
+
+! TODO: add code here
+! TODO: query grids and datamaps to get what is needed for redist
+
+        ! assume failure until success certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! query things implemented in F90 and pass them to the C++ side,
+        !  assume we can directly reference members in the class.
+        !call c_ESMC_ArrayRedist()
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "c_ESMC_ArrayRedist returned error"
+          return
+        endif
+
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayRedistNew
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayRedistDeprecated(array, layout, global_start, &
                                   global_dimlengths, rank_trans, olddecompids, &
                                   decompids, redistarray, rc)
 !
@@ -335,12 +558,87 @@
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayRedist
+        end subroutine ESMF_ArrayRedistDeprecated
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayHalo(array, layout, decompids, AI_exc, AI_tot, rc)
+      subroutine ESMF_ArrayHaloNew(array, grid, datamap, async, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_DataMap), intent(in), optional :: datamap
+      type(ESMF_Async), intent(inout), optional :: async
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform a {\tt Halo} operation over the data
+!     in an {\tt ESMF\_Array}.  This routine updates the data
+!     inside the {\tt ESMF\_Array} in place.  It uses the {\tt ESMF\_Grid}
+!     and {\tt ESMF\_DataMap} as a template to understand how this
+!     {\tt ESMF\_Array} relates to {\tt ESMF\_Array}s on other {\tt DE}s.
+!
+!     \begin{description}
+!     \item [array]
+!           {\tt ESMF\_Array} containing data to be halo'd.
+!     \item [grid]
+!           {\tt ESMF\_Grid} which matches how this array was decomposed.
+!     \item [datamap]
+!           {\tt ESMF\_DataMap} which matches how this array relates to the
+!           given grid.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!
+!EOP
+! !REQUIREMENTS:
+        integer :: status         ! local error status
+        logical :: rcpresent      ! did user specify rc?
+        integer :: size_decomp, size_AI
+        integer, dimension(ESMF_MAXGRIDDIM) :: decompids
+        integer :: gridrank
+        type(ESMF_DELayout) :: layout
+        integer :: i
+
+! initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+ 
+! get layout, decompids from grid
+        call ESMF_GridGetDELayout(grid, layout, status)
+        !call ESMF_GridGet(grid, decompids=decompids, rc=status)
+        !call ESMF_GridGet(grid, dimnum=size_decomp, rc=status)
+        call ESMF_DataMapGet(datamap, gridrank=size_decomp, rc=status)
+
+! call c routine to halo
+        call c_ESMC_ArrayHalo(array, layout, decompids, size_decomp, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "c_ESMC_ArrayHalo returned error"
+          return
+        endif
+
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayHaloNew
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayHaloDeprecated(array, layout, decompids, AI_exc, AI_tot, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
@@ -399,7 +697,7 @@
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayHalo
+        end subroutine ESMF_ArrayHaloDeprecated
 
 !------------------------------------------------------------------------------
 !BOP

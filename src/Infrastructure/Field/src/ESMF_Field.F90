@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.49 2003/07/31 22:58:36 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.50 2003/07/31 23:27:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.49 2003/07/31 22:58:36 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.50 2003/07/31 23:27:19 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2000,18 +2000,18 @@
 ! !IROUTINE: ESMF_FieldReduce - Reduction operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldReduce(field, rtype, result, rc)
+      subroutine ESMF_FieldReduce(field, rtype, result, async, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field) :: field                 
       integer :: rtype
       integer :: result
+      type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt ESMF\_Grid} routines to perform a Reduction operation over the data
-!       in a {\tt ESMF\_Field}.
+!     Perform a Reduction operation over the data in a {\tt ESMF\_Field}.
 !
 !     \begin{description}
 !     \item [field] 
@@ -2020,6 +2020,11 @@
 !           Type of reduction operation to perform.  Options include: ...
 !     \item [result] 
 !           Numeric result (may be single number, may be array)
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2059,16 +2064,17 @@
 ! !IROUTINE: ESMF_FieldAllGather - Data AllGather operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldAllGather(field, array, rc)
+      subroutine ESMF_FieldAllGather(field, array, async, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field                 
       type(ESMF_Array), intent(out) :: array
+      type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_AllGather} operation
+!     Perform a {\tt ESMF\_AllGather} operation
 !     over the data in a {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is
 !     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
 !     entire collected data {\tt ESMF\_Array} on each of the N {\tt ESMF\_DE}s.
@@ -2079,6 +2085,11 @@
 !     \item [array] 
 !           Newly created array containing the collected data.
 !           It is the size of the entire undecomposed grid.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2182,13 +2193,14 @@
 ! !IROUTINE: ESMF_FieldGather - Data Gather operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldGather(field, destination_de, array, rc)
+      subroutine ESMF_FieldGather(field, destination_de, array, async, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field                 
       integer, intent(in) :: destination_de
       type(ESMF_Array), intent(out) :: array
+      type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -2208,6 +2220,11 @@
 !           Newly created array containing the collected data on the
 !           specified {\tt ESMF\_DE}.  It is the size of the entire undecomposed grid.
 !           On all other {\tt ESMF\_DE}s this return is an invalid object.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2311,17 +2328,18 @@
 ! !IROUTINE: ESMF_FieldScatter - Data Scatter operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldScatter(array, source_de, field, rc)
+      subroutine ESMF_FieldScatter(array, source_de, field, async, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
       integer, intent(in) :: source_de
       type(ESMF_Field), intent(inout) :: field                 
+      type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt ESMF\_Grid} routines to perform a Scatter operation over the data
+!     Perform a Scatter operation over the data
 !     in an {\tt ESMF\_Array}, returning it as the data array in a {\tt ESMF\_Field}.  
 !     If the Field is decomposed over N {\tt ESMF\_DE}s, this routine
 !     takes a single array on the specified {\tt ESMF\_DE} and returns a decomposed copy
@@ -2339,6 +2357,11 @@
 !           in the array which will be scattered.  When this routine returns
 !           each {\tt ESMF\_Field} will contain a valid data array containing the 
 !           subset of the decomposed data.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
