@@ -1,26 +1,32 @@
-! $Id: ESMF_AppMainEx.F90,v 1.23 2004/06/11 02:12:58 cdeluca Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.24 2004/06/15 15:33:20 nscollins Exp $
 !
 ! Example code for a main Application program. 
 
 !-------------------------------------------------------------------------
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP
 !
 ! !DESCRIPTION:
-! Example of a main Application program.
+! Example of what a main program which uses ESMF might look like, along
+!  with 2 Gridded Components and a Coupler Component.  
+!  (In a real application each Component would probably be in separate files.)
 !
-!
-!\begin{verbatim}
+!EOP
 
-!   ! Example main program showing calls to the top level
-!   ! Gridded Component routines.
+!BOC
+!-------------------------------------------------------------------------
+!   ! Example Gridded Component that the main program will call.
 
     module PHYS_mod
+
     use ESMF_Mod
     public PHYS_SetServices
     contains
 
+!   ! Public subroutine which the main program will call to register the
+!   ! various user-supplied subroutines which make up this Component.
     subroutine PHYS_SetServices(gcomp, rc)
       type(ESMF_GridComp) :: gcomp
       integer :: rc
@@ -34,6 +40,7 @@
       
     end subroutine PHYS_SetServices
       
+!   ! User-written Initialization routine
     subroutine my_init(gcomp, importState, exportState, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importState
@@ -46,6 +53,7 @@
 
     end subroutine my_init
 
+!   ! User-written Run routine
     subroutine my_run(gcomp, importState, exportState, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importState
@@ -58,6 +66,7 @@
 
     end subroutine my_run
 
+!   ! User-written Finalization routine
     subroutine my_final(gcomp, importState, exportState, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importState
@@ -71,13 +80,19 @@
     end subroutine my_final
 
     end module
+!   ! End of Gridded Component module
+!-------------------------------------------------------------------------
 
+!-------------------------------------------------------------------------
+!   ! Start of a Second Gridded Component module
     module DYNM_mod
 
     use ESMF_Mod
     public DYNM_SetServices
     contains
 
+!   ! Public subroutine which the main program will call to register the
+!   ! various user-supplied subroutines which make up this Component.
     subroutine DYNM_SetServices(gcomp, rc)
       type(ESMF_GridComp) :: gcomp
       integer :: rc
@@ -91,6 +106,7 @@
       
     end subroutine DYNM_SetServices
       
+!   ! User-written Initialization routine
     subroutine my_init(gcomp, importState, exportState, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importState
@@ -103,6 +119,7 @@
 
     end subroutine my_init
 
+!   ! User-written Run routine
     subroutine my_run(gcomp, importState, exportState, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importState
@@ -115,6 +132,7 @@
 
     end subroutine my_run
 
+!   ! User-written Finalization routine
     subroutine my_final(gcomp, importState, exportState, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importState
@@ -128,7 +146,11 @@
     end subroutine my_final
 
     end module
+!   ! End of Second Gridded Component module
+!-------------------------------------------------------------------------
 
+!-------------------------------------------------------------------------
+!   ! Start of a Coupler Component module
     module CPLR_mod
 
     use ESMF_Mod
@@ -136,6 +158,8 @@
     public CPLR_SetServices
     contains
 
+!   ! Public subroutine which the main program will call to register the
+!   ! various user-supplied subroutines which make up this Component.
     subroutine CPLR_SetServices(cpl, rc)
       type(ESMF_CplComp) :: cpl
       integer :: rc
@@ -149,6 +173,7 @@
       
     end subroutine CPLR_SetServices
       
+!   ! User-written Initialization routine
     subroutine my_init(cpl, importStatelist, exportStatelist, externalclock, rc)
       type(ESMF_CplComp) :: cpl
       type(ESMF_State) :: importStatelist
@@ -161,6 +186,7 @@
 
     end subroutine my_init
 
+!   ! User-written Run routine
     subroutine my_run(cpl, importStatelist, exportStatelist, externalclock, rc)
       type(ESMF_CplComp) :: cpl
       type(ESMF_State) :: importStatelist
@@ -173,6 +199,7 @@
 
     end subroutine my_run
 
+!   ! User-written Finalization routine
     subroutine my_final(cpl, importStatelist, exportStatelist, externalclock, rc)
       type(ESMF_CplComp) :: cpl
       type(ESMF_State) :: importStatelist
@@ -186,13 +213,17 @@
     end subroutine my_final
 
     end module
+!   ! End of Gridded Component module
+!-------------------------------------------------------------------------
 
+!-------------------------------------------------------------------------
+!   ! Start of the main program.
     program ESMF_AppMainEx
     
 !   ! The ESMF Framework module
     use ESMF_Mod
     
-    ! User supplied modules
+!   ! User supplied modules, using only the public registration routine.
     use PHYS_Mod, only: PHYS_SetServices
     use DYNM_Mod, only: DYNM_SetServices
     use CPLR_Mod, only: CPLR_SetServices
@@ -325,6 +356,8 @@
     call ESMF_Finalize(rc=rc)
 
     end program ESMF_AppMainEx
+!   ! End of main program
+!-------------------------------------------------------------------------
 
     ! Each Component must supply a SetServices routine which makes the
     !  following types of calls:
@@ -340,5 +373,5 @@
     !  of the same type for codes which need to compute part of the process
     !  and then allow another component to run before completing the function.
 
-!\end{verbatim}
+!EOC
     

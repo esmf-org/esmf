@@ -1,8 +1,9 @@
-! $Id: ESMF_GCompEx.F90,v 1.19 2004/06/15 13:34:24 nscollins Exp $
+! $Id: ESMF_GCompEx.F90,v 1.20 2004/06/15 15:33:21 nscollins Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
 !-------------------------------------------------------------------------
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP
@@ -12,7 +13,8 @@
 !  Also see the Programming Model section of this document.
 !
 !
-!\begin{verbatim}
+!EOP
+!BOC
 !   ! Example module showing Gridded Comp calls to the Component routines.
     module ESMF_GriddedCompEx
     
@@ -199,5 +201,5 @@
 
     end program ESMF_AppMainEx
     
-!\end{verbatim}
+!EOC
     

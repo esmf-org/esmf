@@ -1,8 +1,9 @@
-! $Id: ESMF_CplEx.F90,v 1.19 2004/06/11 02:12:58 cdeluca Exp $
+! $Id: ESMF_CplEx.F90,v 1.20 2004/06/15 15:33:21 nscollins Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
 !-------------------------------------------------------------------------
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP
@@ -12,7 +13,8 @@
 !  Also see the Programming Model section of this document.
 !
 !
-!\begin{verbatim}
+!EOP
+!BOC
 
 !   ! Example module showing Coupler calls to the Component routines.
     module ESMF_CouplerEx
@@ -60,13 +62,6 @@
         ! Precompute any needed values, fill in any inital values
         !  needed in Import States
 
-        call ESMF_StateGetState(importState, "substate 1", nestedstate, rc)
-        call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importState, "substate 2", nestedstate, rc)
-        call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importState, "substate 3", nestedstate, rc)
-        call ESMF_StatePrint(nestedstate, rc=rc)
-
         print *, "Coupler Init returning"
    
     end subroutine CPL_Init
@@ -89,12 +84,6 @@
         ! Add whatever code needed here to transform Export state data
         !  into Import states for the next timestep.  
 
-        call ESMF_StateGetState(importState, "substate 1", nestedstate, rc)
-        call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importState, "substate 2", nestedstate, rc)
-        call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importState, "substate 3", nestedstate, rc)
-        call ESMF_StatePrint(nestedstate, rc=rc)
 
         print *, "Coupler Run returning"
 
@@ -118,12 +107,6 @@
         ! Add whatever code needed here to compute final values and
         !  finish the computation.
 
-        call ESMF_StateGetState(importState, "substate 1", nestedstate, rc)
-        call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importState, "substate 2", nestedstate, rc)
-        call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importState, "substate 3", nestedstate, rc)
-        call ESMF_StatePrint(nestedstate, rc=rc)
 
         print *, "Coupler Final returning"
    
@@ -233,5 +216,5 @@
 
     end program ESMF_AppMainEx
     
-!\end{verbatim}
+!EOC
     
