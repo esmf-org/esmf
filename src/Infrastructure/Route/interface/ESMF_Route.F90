@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.66 2005/03/14 17:33:44 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.67 2005/03/15 16:06:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.66 2005/03/14 17:33:44 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.67 2005/03/15 16:06:26 nscollins Exp $'
 
 !==============================================================================
 !
@@ -146,7 +146,7 @@ function radd(first, second)
   type(ESMF_RouteOptions) :: radd
   type(ESMF_RouteOptions), intent(in) :: first, second
 
-  radd.option = first.option + second.option
+  radd%option = first%option + second%option
 
 end function radd
 
