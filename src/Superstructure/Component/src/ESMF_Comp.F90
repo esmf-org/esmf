@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.62 2004/02/05 21:52:23 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.63 2004/02/10 22:05:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,6 +14,10 @@
       module ESMF_CompMod
 !
 !==============================================================================
+! A blank line to keep protex happy.
+!BOP
+
+!EOP
 !
 ! This file contains the Component class definition and all Component
 ! class methods.
@@ -177,7 +181,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.62 2004/02/05 21:52:23 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.63 2004/02/10 22:05:22 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
