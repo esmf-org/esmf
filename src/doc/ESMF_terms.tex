@@ -122,11 +122,15 @@ object model but simply to achieve a common language.
 \item[DE] \label{glos:DE} 
   Short for \htmlref{decomposition element}{glos:Decomp_Element}.
 
+\item[DELayout] \label{glos:DELayout} A DELayout defines a topology on top of
+  the decomposition elements and specifies DE-to-PET against an ESMF  
+  \htmlref{VM}{glos:VM}. 
+
 \item[Decomposition element (DE)] \label{glos:Decomp_Element}
-  A decomposition element is a virtual portion of a computer 
-  associated with a processing element and an address space.  
-  DELayouts assign a topology to decomposition elements. 
-  See also \htmlref{DELayout}{glos:DELayout}, \htmlref{PE}{glos:Process_Element}.
+  A decomposition element is a virtual portion of a computational
+  task into which the application writer divides the problem.
+  DELayouts assign a topology to decomposition elements.
+  See also \htmlref{DELayout}{glos:DELayout}
 
 \item[Deep objects] \label{glos:DeepObjects} In an environment
   in which the calling and implementation language of a library are
@@ -281,11 +285,6 @@ object model but simply to achieve a common language.
   data assimilation applications that will be used as ESMF testbeds 
   during the initial NASA-funded phase of framework development.
 
-\item[DELayout] \label{glos:DELayout} A DELayout specifies a PE list, 
-  decomposition strategy (thread and process), and the dimensionality 
-  and connectivity of the decomposition.  Multiple distributed 
-  grids may be defined per DELayout.
-
 \item[Local domain] \label{glos:LocalDomain} This includes the exclusive 
   domain, as well as the points with whom the exclusive points have data 
   dependencies. See also \htmlref{exclusive domain}{glos:ExcDomain}.
@@ -342,8 +341,14 @@ object model but simply to achieve a common language.
 
 \item[PE] \label{glos:PE} Short for \htmlref{processing element}{glos:Process_Element}.
 
-\item[PE list] \label{glos:PEList} A list of processor IDs associated 
-  with a component.  See also \htmlref{layout}{glos:DELayout}, \htmlref{DE}{glos:Decomp_Element}.
+\item[PET] \label{glos:PET} Short for 
+  \htmlref{permanent execution thread}{glos:PermET}.
+
+\item[Permanent execution thread (PET)] \label{glos:PermET} Provides a
+  path for executing an instruction sequence. A PET has a lifetime at least 
+  as long as the associated data objects. The PET is the central concept of
+  abstraction provided by the ESMF virtual machine. See also  
+  \htmlref{VM}{glos:VM}
 
 \item[Physical grid] \label{term:PhysGrid} 
   A physical grid contains a variety of information on the location 
@@ -359,14 +364,11 @@ object model but simply to achieve a common language.
 
 \item[Process] \label{glos:Process}
   A process is a computational workspace that is associated with a single,
-  private address space. Data defined within a process must be communicated
-  via message passing to another process.
+  private address space.
 
 \item[Processing element (PE)] \label{glos:Processing_Element}
-  A processing element is associated with a single hardware processor.  It 
-  has a framework-assigned PE ID that may be different than its 
-  vendor-assigned ID.
-  See also \htmlref{DE}{glos:Decomp_Element}.  
+  A processing element (PE) is the smallest physical processing unit available
+  on a particular hardware platform.
 
 \item[Processing node] \label{glos:Pnode} A set of processors to which an
   operating system scheduler is capable of assigning to a single job.
@@ -430,16 +432,25 @@ object model but simply to achieve a common language.
   Mathematical operations such as addition, multiplication and subdivision 
   can be applied to time intervals. See also \htmlref{time instant}{glos:TimeInstant}
 
-\item [User component] \label{UserComp} A component that is customized or
+\item[User component] \label{UserComp} A component that is customized or
   written by the user.  See also \htmlref{generic component}{glos:GenericComp}.
 
-\item [User time] \label{UserTime} Processor time actually spent executing 
+\item[User time] \label{UserTime} Processor time actually spent executing 
   a process's code. See also \htmlref{system time}{glos:SysTime}, 
   \htmlref{wall clock time}{glos:WallClockTime}.
 
 \item[User transform] \label{glos:UserTrans} A user-supplied 
   method that is used to extend framework capabilities beyond generic 
   transforms. See also \htmlref{generic transform}{glos:GenericTrans}. 
+
+\item[VM] \label{glos:VM} Short for 
+  \htmlref{virutal machine}{glos:VMachine}.
+
+\item[Virtual machine (VM)] \label{glos:VMachine} Abstracts hardware and 
+  operation system details. The VM's responsibilities are resource management
+  and topological description of the underlying compute resources in terms of 
+  \htmlref{PETs}{glos:PET}. In addition the VM provides a transparent, low level
+  communication API. 
 
 \item [Wall clock time] \label{WallClockTime} Elapsed real-world time 
   (i.e. difference between start time minus stop time).
