@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.12 2003/07/25 15:39:52 shep_smith Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.13 2003/07/25 23:16:46 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -567,7 +567,7 @@ void FTN(c_esmf_logclosefile)(
 // !IROUTINE: C_ESMF_LogSetHaltOnErr - program halts on encountering an error
 //
 // !INTERFACE
-    void FTN(esmf_logsethaltonerr)(
+    void FTN(c_esmf_logsethaltonerr)(
 // !RETURN VALUE
 //  none
 // !ARGUMENTS
