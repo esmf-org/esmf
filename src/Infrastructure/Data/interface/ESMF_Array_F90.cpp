@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.30 2003/04/29 18:04:45 cdeluca Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.31 2003/04/30 21:09:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -159,7 +159,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.30 2003/04/29 18:04:45 cdeluca Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.31 2003/04/30 21:09:53 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1809,6 +1809,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
     integer :: status                               ! local error status 
     integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds
     integer, dimension(ESMF_MAXDIM) :: strides, offsets
+    integer :: localkind, localtype
 
     !! local variables, expanded by macro
 ArrayAllLocalVarMacro()
@@ -1817,50 +1818,53 @@ ArrayAllLocalVarMacro()
     status = ESMF_FAILURE  
     if (present(rc)) rc = ESMF_FAILURE
  
+    localtype = type%dtype
+    localkind = kind%dkind
+
     !! macros which are expanded by the preprocessor
-    select case (type%dtype)
+    select case (localtype)
       case (ESMF_DATA_INTEGER%dtype)
         select case (rank)
           case (1)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 AllocAllocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 AllocAllocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 AllocAllocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
               case default
             end select
 
           case (2)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 AllocAllocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 AllocAllocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 AllocAllocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
               case default
             end select
 
           case (3)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 AllocAllocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 AllocAllocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 AllocAllocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
               case default
             end select
 
           case (4)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 AllocAllocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 AllocAllocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 AllocAllocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
               case default
             end select
@@ -1871,37 +1875,37 @@ AllocAllocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
        case (ESMF_DATA_REAL%dtype)
         select case (rank)
           case (1)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 AllocAllocateMacro(real, R4, 1, COL1, LEN1, LOC1)
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 AllocAllocateMacro(real, R8, 1, COL1, LEN1, LOC1)
               case default
             end select
 
           case (2)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 AllocAllocateMacro(real, R4, 2, COL2, LEN2, LOC2)
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 AllocAllocateMacro(real, R8, 2, COL2, LEN2, LOC2)
               case default
             end select
 
           case (3)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 AllocAllocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 AllocAllocateMacro(real, R8, 3, COL3, LEN3, LOC3)
               case default
             end select
 
           case (4)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 AllocAllocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 AllocAllocateMacro(real, R8, 4, COL4, LEN4, LOC4)
               case default
             end select
@@ -1950,6 +1954,7 @@ AllocAllocateMacro(real, R8, 4, COL4, LEN4, LOC4)
 ! !REQUIREMENTS: 
  
     integer :: status                               ! local error status 
+    integer :: localkind, localtype
 
     !! local variables, expanded by macro
 ArrayAllLocalVarMacro()
@@ -1957,50 +1962,53 @@ ArrayAllLocalVarMacro()
 
     if (present(rc)) rc = ESMF_FAILURE
  
+    localtype = type
+    localkind = kind
+
     !! macros which are expanded by the preprocessor
-    select case (type%dtype)
+    select case (localtype)
       case (ESMF_DATA_INTEGER%dtype)
         select case (rank)
           case (1)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 AllocDeallocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 AllocDeallocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 AllocDeallocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
               case default
             end select
 
           case (2)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 AllocDeallocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 AllocDeallocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 AllocDeallocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
               case default
             end select
 
           case (3)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 AllocDeallocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 AllocDeallocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 AllocDeallocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
               case default
             end select
 
           case (4)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I2)
+            select case (localkind)
+              case (ESMF_KIND_I2%dkind)
 AllocDeallocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
-              case (ESMF_IKIND_I4)
+              case (ESMF_KIND_I4%dkind)
 AllocDeallocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_I8%dkind)
 AllocDeallocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
               case default
             end select
@@ -2011,37 +2019,37 @@ AllocDeallocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
        case (ESMF_DATA_REAL%dtype)
         select case (rank)
           case (1)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 AllocDeallocateMacro(real, R4, 1, COL1, LEN1, LOC1)
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 AllocDeallocateMacro(real, R8, 1, COL1, LEN1, LOC1)
               case default
             end select
 
           case (2)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 AllocDeallocateMacro(real, R4, 2, COL2, LEN2, LOC2)
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 AllocDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
               case default
             end select
 
           case (3)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 AllocDeallocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 AllocDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
               case default
             end select
 
           case (4)
-            select case (kind%dkind)
-              case (ESMF_IKIND_I4)
+            select case (localkind)
+              case (ESMF_KIND_R4%dkind)
 AllocDeallocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
-              case (ESMF_IKIND_I8)
+              case (ESMF_KIND_R8%dkind)
 AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
               case default
             end select
