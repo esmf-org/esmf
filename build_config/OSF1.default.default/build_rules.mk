@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.11 2004/06/07 17:07:05 slswift Exp $
+#  $Id: build_rules.mk,v 1.12 2004/07/29 20:22:48 nscollins Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -100,7 +100,7 @@ C_CLINKER		= cc
 C_FLINKER		= f90
 C_CCV			= $(C_CC) -V
 C_FCV			= $(C_FC) -version
-C_SYS_LIB		= -lfor -lutil -lFutil -lots
+C_SYS_LIB		= -lutil -lFutil -lots
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS		= -g -assume gfullpath -pthread
 G_FOPTFLAGS		= -g -assume gfullpath 
@@ -117,11 +117,11 @@ CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = cxx
 CXX_FLINKER	   = f90
 CXX_CCV		   = $(CXX_CC) -V
-CXX_SYS_LIB	   = -lcomplex -lfor -lutil -lFutil -lots
+CXX_SYS_LIB	   = -lcomplex -lutil -lFutil -lots
 C_F90CXXLIBS       = -L/usr/ccs/lib/cmplrs/cxx -lcxx 
 C_F90CXXLD         = f90
 C_CXXF90LD         = cxx
-C_CXXF90LIBS       = -lfor
+C_CXXF90LIBS       = 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS		= -g  -qfullpath
 GCXX_FOPTFLAGS		= -g  -qfullpath 
