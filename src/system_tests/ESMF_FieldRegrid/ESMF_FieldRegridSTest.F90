@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.6 2003/10/22 05:01:28 eschwab Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.7 2003/11/07 18:38:57 jwolfe Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -169,7 +169,7 @@
  
       c2imp = ESMF_StateCreate("comp2 import", ESMF_STATEIMPORT, cname2)
       call ESMF_GridCompInitialize(comp2, importstate=c2imp, clock=clock, rc=rc)
-      print *, "Comp 1a Initialize finished, rc =", rc
+      print *, "Comp 2 Initialize finished, rc =", rc
  
       cplstate = ESMF_StateCreate("coupler list", ESMF_STATELIST, cplname)
       call ESMF_StateAddData(cplstate, c1exp, rc=rc)
