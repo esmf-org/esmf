@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.1 2003/10/22 20:09:41 cdeluca Exp $
+// $Id: ESMC_State.h,v 1.2 2003/10/25 12:37:37 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,6 @@
 
 
 // !PUBLIC TYPES:
- class ESMC_StateConfig;
  class ESMC_State;
 
 // !PRIVATE TYPES:
@@ -60,9 +59,6 @@ typedef enum ESMC_StateType {
 typedef enum ESMC_Objtype { Bundle=1, Field=2, Array=3 };
 typedef enum ESMC_Needed { Needed=1, NotNeeded=2 };
 typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 };
-
- class ESMC_StateConfig {
- };
 
  // class declaration type
  class ESMC_State : public ESMC_Base {    // inherits from ESMC_Base class
@@ -95,12 +91,6 @@ typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 };
  // native C++ constructors/destructors
 	ESMC_State(void);
 	~ESMC_State(void);
-  
- // methods which are going away
-    int ESMC_StateInit(void);
-    int ESMC_StateSetConfig(const ESMC_StateConfig *config);
-    int ESMC_StateGetConfig(ESMC_StateConfig *config) const;
- // < declare the rest of the public interface methods here >
   
 // !PRIVATE MEMBER FUNCTIONS:
 //

@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.1 2003/10/22 20:09:41 cdeluca Exp $
+// $Id: ESMC_State.C,v 1.2 2003/10/25 12:37:37 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.1 2003/10/22 20:09:41 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.2 2003/10/25 12:37:37 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -170,87 +170,6 @@
     return ESMF_FAILURE;
 
  } // end ESMC_StateDestruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_StateInit - initializes a State object
-//
-// !INTERFACE:
-      int ESMC_State::ESMC_StateInit(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) {
-//
-// !DESCRIPTION:
-//      ESMF routine which only initializes State values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC\_StateCreate.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-    return ESMF_FAILURE;
-
- } // end ESMC_StateInit
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_StateGetConfig - get configuration info from a State
-//
-// !INTERFACE:
-      int ESMC_State::ESMC_StateGetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_StateConfig *config) const {  // out - resources
-//
-// !DESCRIPTION:
-//    Returns the set of resources the State object was configured with.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-    return ESMF_FAILURE;
-
- } // end ESMC_StateGetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_StateSetConfig - set configuration info for a State
-//
-// !INTERFACE:
-      int ESMC_State::ESMC_StateSetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const ESMC_StateConfig *config) {     // in - resources
-//
-// !DESCRIPTION:
-//    Configures the State object with set of resources given.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-    return ESMF_FAILURE;
-
- } // end ESMC_StateSetConfig
 
 //-----------------------------------------------------------------------------
 //BOP

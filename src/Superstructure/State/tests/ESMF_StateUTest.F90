@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $
+! $Id: ESMF_StateUTest.F90,v 1.2 2003/10/25 12:37:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.2 2003/10/25 12:37:37 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -58,12 +58,6 @@
       ! local variables needed to pass into function/subroutine calls
       character(ESMF_MAXSTR) :: validate_options
       character(ESMF_MAXSTR) :: print_options
-      !type(ESMF_StateConfig) :: config_set
-      !type(ESMF_StateConfig) :: config_get
-      ! when get/set value routines enabled, comment these in and set
-      ! the appropriate values.  then remove the temporary integers.
-      !<value type> :: value_set, value_get
-      ! integer :: value_set, value_get 
 
       ! instantiate a State 
       type(ESMF_State) :: state
