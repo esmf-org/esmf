@@ -1,10 +1,11 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.14 2004/06/11 02:12:59 cdeluca Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.15 2005/02/01 23:05:10 svasquez Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !
