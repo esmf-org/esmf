@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.6 2003/09/23 21:45:33 jwolfe Exp $
+// $Id: ESMC_RHandle_F.C,v 1.7 2003/09/23 22:00:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,7 +49,7 @@ extern "C" {
        // the int needs to be an enum, the label needs to be added and handled
        void FTN(c_esmc_transformvaluesget)(ESMC_TransformValues **ptr, 
                                        int *numlist, 
-                                       ESMC_DomainList **dl, 
+                                       ESMC_DomainList *dl, 
                                        ESMC_LocalArray **src, 
                                        ESMC_LocalArray **dst, 
                                        ESMC_LocalArray **w, 
@@ -58,12 +58,12 @@ extern "C" {
               *status = ESMF_FAILURE;
               return;
            }
-           *status = (*ptr)->ESMC_TransformValuesGet(numlist, dl, src, dst, w);
+           *status = (*ptr)->ESMC_TransformValuesGet(numlist, &dl, src, dst, w);
        }
 
        void FTN(c_esmc_transformvaluesset)(ESMC_TransformValues **ptr, 
                                        int *numlist, 
-                                       ESMC_DomainList **dl, 
+                                       ESMC_DomainList *dl, 
                                        ESMC_LocalArray **src, 
                                        ESMC_LocalArray **dst, 
                                        ESMC_LocalArray **w, 
@@ -72,7 +72,7 @@ extern "C" {
               *status = ESMF_FAILURE;
               return;
            }
-           *status = (*ptr)->ESMC_TransformValuesSet(*numlist, *dl, *src, *dst, *w);
+           *status = (*ptr)->ESMC_TransformValuesSet(*numlist, dl, *src, *dst, *w);
        }
 
        void FTN(c_esmc_transformvaluesvalidate)(ESMC_TransformValues **ptr, 
