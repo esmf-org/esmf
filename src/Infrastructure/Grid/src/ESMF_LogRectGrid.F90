@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.15 2004/02/10 23:47:08 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.16 2004/02/11 23:40:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.15 2004/02/10 23:47:08 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.16 2004/02/11 23:40:38 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -243,9 +243,9 @@
       integer, intent(in) :: numDims
       integer, dimension(numDims), intent(in) :: counts
       real(ESMF_KIND_R8), dimension(numDims), intent(in) :: minGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+      real(ESMF_KIND_R8), dimension(numDims), intent(in), optional :: &
                                                             maxGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: deltaPerDim
+      real(ESMF_KIND_R8), dimension(numDims), intent(in), optional :: deltaPerDim
       type(ESMF_GridKind), intent(in), optional :: horzGridKind
       type(ESMF_GridKind), intent(in), optional :: vertGridKind
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
