@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.6 2003/11/13 22:36:29 nscollins Exp $
+% $Id: AppDriver_desc.tex,v 1.7 2004/02/05 19:15:41 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -11,17 +11,17 @@
 %\subsection{Description}
 
 The AppDriver directory contains examples of how to structure 
-Applications using the ESMF Superstructure in a variety of styles.
-Overall options when deciding how to structure an Application include
-choices about:
+applications using the ESMF superstructure in a number of different
+modes.  Options when deciding how to structure an application 
+include choices about:
 
 \begin{description}
 
 \item[Serial vs. Concurrent Execution]
 
-In a Serial Execution model each processor 
-executes the same Component until it has produced data needed
-by another Component, and then all processors change to
+In a serial execution model every DE executes the same Component 
+until it has produced data needed by another Component, and then 
+all DEs change to
 running the next Component.  This has the appeal of simplicity
 of data consumption and production: when a Component starts
 all required data is available for use, and when a Component finishes
@@ -31,7 +31,7 @@ the possibility of less data movement if the gridding and
 data decomposition is done such that each processor's memory contains
 the data needed by the next Component.
 
-In a Concurrent Execution model subgroups of processors run
+In a concurrent execution model subgroups of DEs run
 a Component and all Components are active at the same time.  
 Data exchange must be coordinated between Components so that
 data deadlock does not occur.  This strategy has the advantage
@@ -43,7 +43,8 @@ other components.
 \item[Coupling Strategy]
 
 Coupling components are responsible for taking data from one
-Component and putting it into the form expected by another Component.
+Gridded Component and putting it into the form expected by another 
+Gridded Component.
 This might include regridding, change of units, averaging or binning.
 
 Couplers can be written for {\it pairwise} data exchange: the Coupler takes
@@ -78,7 +79,6 @@ machine in getting the different executables started, and getting
 inter-process communcations established.
 
 \end{description}
-
 
 Examples of these combinations are found in the ESMF source code tree, in
 subdirectories under {\tt src/Superstructure/AppDriver}.

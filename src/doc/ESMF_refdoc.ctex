@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.37 2004/02/05 00:11:15 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.38 2004/02/05 19:13:34 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -40,6 +40,9 @@
 % Title page
 
 \input{../../scripts/doc_templates/templates/verstitle_alldoc}
+
+\newpage
+\input{ESMF_acknowledge.tex}
 
 \newpage
 \tableofcontents
@@ -128,6 +131,7 @@
 %\section{Overview of Infrastructure Utility Classes}
 \input{ESMF_infrautiloverview}
 
+\newpage
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
 #include "../Infrastructure/DELayout/doc/CommMem_refdoc.ctex"

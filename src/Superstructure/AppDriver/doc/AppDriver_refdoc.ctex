@@ -1,4 +1,4 @@
-% $Id: AppDriver_refdoc.ctex,v 1.2 2003/11/12 23:54:31 nscollins Exp $
+% $Id: AppDriver_refdoc.ctex,v 1.3 2004/02/05 19:15:41 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,41 +54,21 @@
 \input{../Superstructure/AppDriver/doc/AppDriver_desc}
 #endif
 
-%\subsection{Design}
-%#ifdef STANDALONE
-%\input{AppDriver_design}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/AppDriver/doc/AppDriver_design}
-%#endif
-
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{AppDriver_usage}
+\input{AppDriver_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/AppDriver/doc/AppDriver_usage}
+\input{../Superstructure/AppDriver/doc/AppDriverSeqPrF_fapi}
 #endif
 
-\subsubsection{Restrictions}
+\subsection{Restrictions}
 #ifdef STANDALONE
 \input{AppDriver_rest}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/AppDriver/doc/AppDriver_rest}
 #endif
-
-\subsection{AppDriver F90 Use and Examples}
-#ifdef STANDALONE
-\input{AppDriver_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/AppDriver/doc/AppDriver_fapi}
-#endif
-
-%\subsection{AppDriver C++ Use and Examples}
-%#ifdef STANDALONE
-%\input{AppDriver_ccex}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/AppDriver/doc/AppDriver_ccex}
-%#endif
-
 
 %%%%%%% end class sections %%%%%%%%
 
