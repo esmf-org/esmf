@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.5 2004/03/10 20:43:07 jwolfe Exp $
+! $Id: FlowSolverMod.F90,v 1.6 2004/03/18 23:29:11 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -149,7 +149,7 @@
 !
 ! Query component for information.
 !
-      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
+      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
 !
 ! Create the Grid
 !
@@ -301,7 +301,7 @@
 ! First, get size of layout and position of my DE to determine if
 ! this DE is on the domain boundary
 !
-      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
+      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  grid comp get"
         return
@@ -1355,7 +1355,7 @@
 !
 ! Collect results on DE 0 and output to a file
 !
-      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
+      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
       call ESMF_DELayoutGetDEID(layout, de_id, status)
 !
 ! Frame number from computation

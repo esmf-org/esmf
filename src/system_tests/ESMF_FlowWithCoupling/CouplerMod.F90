@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.6 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.7 2004/03/18 23:29:11 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -79,7 +79,7 @@
       call ESMF_StateGetField(exportState, "SIE", dstfield, rc=rc)
      
       ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
+      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
 
       ! Now see which way we're going so we set the correct fields needed
       ! and compute the right routehandle
@@ -169,7 +169,7 @@
       endif
 
       ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
+      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=status)
 
       do i=1, datacount
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.8 2004/02/01 13:59:46 nscollins Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.9 2004/03/18 23:29:11 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -114,17 +114,17 @@
     cnameIN = "Injector model"
     layoutIN = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    INcomp = ESMF_GridCompCreate(cnameIN, layout=layoutIN, rc=rc)
+    INcomp = ESMF_GridCompCreate(cnameIN, delayout=layoutIN, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cnameFS = "Flow Solver model"
     layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    FScomp = ESMF_GridCompCreate(cnameFS, layout=layoutFS, rc=rc)
+    FScomp = ESMF_GridCompCreate(cnameFS, delayout=layoutFS, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cplname = "Two-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, layout=layoutDef, rc=rc)
+    cpl = ESMF_CplCompCreate(cplname, delayout=layoutDef, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
 

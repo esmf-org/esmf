@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.8 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.9 2004/03/18 23:29:11 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -158,7 +158,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       ! Query component for information.
       !
-      call ESMF_GridCompGet(gcomp, layout=layout, rc=rc)
+      call ESMF_GridCompGet(gcomp, delayout=layout, rc=rc)
 
       !
       ! Create the Grid
@@ -437,7 +437,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       ! 
       ! Get our layout from the component, and our de number
       !
-      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
+      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
       call ESMF_DELayoutGetDEID(layout, de_id, rc=status)
       !
       ! Collect results on DE 0 and output to a file
