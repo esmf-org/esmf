@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.17 2002/12/30 21:23:22 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.18 2003/01/07 22:23:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.17 2002/12/30 21:23:22 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.18 2003/01/07 22:23:14 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -479,8 +479,8 @@ end function
 !    type/kind/rank and sizes.
 !
 !  \item[[docopy]]
-!   Default to ESMF_NO_COPY, makes the {\tt ESMF\_Array} reference
-!   the existing data array.  If set to ESMF_DO_COPY, this routine
+!   Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference
+!   the existing data array.  If set to {\tt ESMF\_DO\_COPY} this routine
 !   allocates new space and copies the data from the pointer into the
 !   new array.
 !
@@ -569,8 +569,8 @@ end function
 !    type/kind/rank and sizes.
 !
 !  \item[[docopy]]
-!   Default to ESMF_NO_COPY, makes the {\tt ESMF\_Array} reference
-!   the existing data array.  If set to ESMF_DO_COPY, this routine
+!   Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference
+!   the existing data array.  If set to {\tt ESMF\_DO\_COPY} this routine
 !   allocates new space and copies the data from the pointer into the
 !   new array.
 !
@@ -760,6 +760,10 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+!       ! TODO: handle deallocate() if needed - is it always right
+!       !   to delete the data if the user still has a handle to it?
+!       !   maybe we need another arg to say deallocate or not?
 
 !       call Destruct first, then free this memory
         call c_ESMC_ArrayDestroy(array%this, status)
