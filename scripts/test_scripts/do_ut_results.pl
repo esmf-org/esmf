@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.1 2004/07/22 22:35:09 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.2 2004/07/28 16:11:01 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -109,6 +109,7 @@ getopts("d:b:a:c:p:s:", \%options);
                 # do an "ls -l" on each file
 		# and count the number of PASS and FAIL
 		$count=0;
+		$pass_count=0;
                 foreach $file ( @stdout_files) {
                         open($file, "| ls  -l $file");
 			open(F,$file);
@@ -116,10 +117,13 @@ getopts("d:b:a:c:p:s:", \%options);
 				push(file_lines, $line);
 			}
 			close ($file);
+			$count=grep ( /PASS/i, @file_lines);
+			$pass_count=$pass_count + $count;
+			$count=grep ( /FAIL/i, @file_lines);
+			$fail_count=$fail_count +$count;
+			@file_lines=();
                 }
                 print "\n\n";
-		$pass_count=grep ( /PASS/i, @file_lines);
-		$fail_count=grep ( /FAIL/i, @file_lines);
 
 		print "Unit test stdout files of zero length indicate that the unit test\n";
 		print "did not run because it failed to compile or it failed to execute. \n\n";
