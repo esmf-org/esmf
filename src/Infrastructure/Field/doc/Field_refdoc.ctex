@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.5 2003/03/31 20:44:48 flanigan Exp $
+% $Id: Field_refdoc.ctex,v 1.6 2003/04/15 16:57:56 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -120,9 +120,9 @@
 \input{../Infrastructure/Field/doc/ESMF_Field_fapi}
 #endif
 
-\section{Field C++ Interface}
+%\section{Field C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 % #ifdef STANDALONE
 % \input{Field_ccex}
 % #elif defined(CONSTITUENT)
@@ -137,11 +137,11 @@
 % #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMC_Field_chapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMC_Field_chapi}
-#endif
+%#ifdef STANDALONE
+%\input{ESMC_Field_chapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Field/doc/ESMC_Field_chapi}
+%#endif
 
 \section{Bundle Design}
 
@@ -196,7 +196,7 @@
 \input{../Infrastructure/Field/doc/ESMF_Bundle_fapi}
 #endif
 
-\section{Bundle C++ Interface}
+%\section{Bundle C++ Interface}
 
 %% \subsection{Use and Examples}
 %% #ifdef STANDALONE
@@ -213,11 +213,11 @@
 % #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMC_Bundle_chapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMC_Bundle_chapi}
-#endif
+%#ifdef STANDALONE
+%\input{ESMC_Bundle_chapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Field/doc/ESMC_Bundle_chapi}
+%#endif
 
 
 \section{Array Design}
@@ -337,7 +337,7 @@
 \input{../Infrastructure/Field/doc/ESMF_DataMap_fapi}
 #endif
 
-\section{DataMap C++ Interface}
+%\section{DataMap C++ Interface}
 
 %% \subsection{Use and Examples}
 %% #ifdef STANDALONE
@@ -347,11 +347,11 @@
 %% #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMC_DataMap_chapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMC_DataMap_chapi}
-#endif
+%#ifdef STANDALONE
+%\input{ESMC_DataMap_chapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Field/doc/ESMC_DataMap_chapi}
+%#endif
 
 
 

@@ -11,63 +11,59 @@
 \contentsline {subsubsection}{\numberline {5.1.1}Example 1. Simple Example.}{5}
 \contentsline {subsubsection}{\numberline {5.1.2}Example 2. Simple Error Handling.}{6}
 \contentsline {subsubsection}{\numberline {5.1.3}Example 3. More error handling.}{6}
-\contentsline {subsection}{\numberline {5.2}Fortran: Module Interface Fortran Interface to Log class. (Source File: ESMF\_LogErr.F90)}{6}
-\contentsline {subsubsection}{\numberline {5.2.1}ESMF\_LogInit}{7}
-\contentsline {subsubsection}{\numberline {5.2.2}ESMF\_LogCloseFortran}{8}
-\contentsline {subsubsection}{\numberline {5.2.3}ESMF\_LogOpenFortran}{8}
-\contentsline {subsubsection}{\numberline {5.2.4}ESMF\_LogPrintChar}{8}
-\contentsline {subsubsection}{\numberline {5.2.5}ESMF\_LogPrintNewLine}{9}
-\contentsline {subsubsection}{\numberline {5.2.6}ESMF\_LogPrintString}{9}
-\contentsline {subsubsection}{\numberline {5.2.7}ESMF\_LogPrintInt}{10}
-\contentsline {subsubsection}{\numberline {5.2.8}ESMF\_LogCloseFile}{10}
-\contentsline {subsubsection}{\numberline {5.2.9}ESMF\_LogOpenFile}{10}
-\contentsline {subsubsection}{\numberline {5.2.10}ESMF\_LogInfo}{11}
-\contentsline {subsubsection}{\numberline {5.2.11}ESMF\_LogWarnMsg}{11}
-\contentsline {subsubsection}{\numberline {5.2.12}ESMF\_LogWarn}{11}
-\contentsline {subsubsection}{\numberline {5.2.13}ESMF\_LogFlush}{12}
-\contentsline {subsubsection}{\numberline {5.2.14}ESMF\_LogNotFlush}{12}
-\contentsline {subsubsection}{\numberline {5.2.15}ESMF\_LogVerbose}{12}
-\contentsline {subsubsection}{\numberline {5.2.16}ESMF\_LogNotVerbose}{13}
-\contentsline {subsubsection}{\numberline {5.2.17}LogWrite}{13}
-\contentsline {subsubsection}{\numberline {5.2.18}ESMF\_LogErrMsg}{13}
-\contentsline {subsubsection}{\numberline {5.2.19}ESMF\_LogErr}{14}
-\contentsline {subsubsection}{\numberline {5.2.20}ESMF\_LogHaltOnErr}{14}
-\contentsline {subsubsection}{\numberline {5.2.21}ESMF\_LogNotHaltOnErr}{14}
-\contentsline {subsubsection}{\numberline {5.2.22}ESMF\_LogHaltOnWarn}{14}
-\contentsline {subsubsection}{\numberline {5.2.23}ESMF\_LogNotHaltOnWarn}{15}
-\contentsline {section}{\numberline {6}LogErr C++ Interface}{15}
-\contentsline {subsection}{\numberline {6.1}Use and Examples}{15}
-\contentsline {subsubsection}{\numberline {6.1.1}Example 1. Simple Example.}{15}
-\contentsline {subsubsection}{\numberline {6.1.2}Example 2. Simple Error Handling.}{15}
+\contentsline {subsubsection}{\numberline {5.1.4}ESMC\_LogOpenCFile}{6}
+\contentsline {subsubsection}{\numberline {5.1.5}ESMC\_LogOpenFortFile}{7}
+\contentsline {subsubsection}{\numberline {5.1.6}ESMC\_LogNameValid}{8}
+\contentsline {subsubsection}{\numberline {5.1.7}ESMC\_LogInfo}{9}
+\contentsline {subsubsection}{\numberline {5.1.8}ESMC\_LogInfoFortran}{9}
+\contentsline {subsubsection}{\numberline {5.1.9}ESMC\_LogPrintHeader}{10}
+\contentsline {subsubsection}{\numberline {5.1.10}ESMC\_LogWrite}{10}
+\contentsline {subsubsection}{\numberline {5.1.11}ESMC\_LogFormName}{11}
+\contentsline {subsubsection}{\numberline {5.1.12}ESMC\_LogCloseFortFile}{11}
+\contentsline {subsubsection}{\numberline {5.1.13}ESMC\_LogCloseCFile}{11}
+\contentsline {subsubsection}{\numberline {5.1.14}ESMC\_Log}{12}
+\contentsline {subsubsection}{\numberline {5.1.15}ESMC\_LogErr}{12}
+\contentsline {subsubsection}{\numberline {5.1.16}ESMC\_LogErrMsg}{13}
+\contentsline {subsubsection}{\numberline {5.1.17}ESMC\_LogWarn}{13}
+\contentsline {subsubsection}{\numberline {5.1.18}ESMC\_LogWarnMsg}{13}
+\contentsline {subsubsection}{\numberline {5.1.19}ESMC\_LogExit()}{14}
+\contentsline {subsubsection}{\numberline {5.1.20}ESMC\_LogErrFortran}{14}
+\contentsline {subsubsection}{\numberline {5.1.21}ESMC\_LogWarnFortran}{14}
+\contentsline {subsubsection}{\numberline {5.1.22}ESMC\_LogPrint}{15}
+\contentsline {subsubsection}{\numberline {5.1.23}ESMC\_LogGetErrMsg}{15}
+\contentsline {section}{\numberline {6}LogErr C++ Interface}{16}
+\contentsline {subsection}{\numberline {6.1}Use and Examples}{16}
+\contentsline {subsubsection}{\numberline {6.1.1}Example 1. Simple Example.}{16}
+\contentsline {subsubsection}{\numberline {6.1.2}Example 2. Simple Error Handling.}{16}
 \contentsline {subsubsection}{\numberline {6.1.3}Example 3. More error handling. }{16}
-\contentsline {subsection}{\numberline {6.2}Parameters, Definitions, and Some APIs}{16}
+\contentsline {subsection}{\numberline {6.2}Parameters, Definitions, and Some APIs}{17}
 \contentsline {subsubsection}{\numberline {6.2.1}ESMC\_LogNotFlush()}{19}
 \contentsline {subsubsection}{\numberline {6.2.2}ESMC\_LogVerbose}{19}
-\contentsline {subsubsection}{\numberline {6.2.3}ESMC\_LogNotVerbose}{19}
+\contentsline {subsubsection}{\numberline {6.2.3}ESMC\_LogNotVerbose}{20}
 \contentsline {subsubsection}{\numberline {6.2.4}ESMC\_LogHaltOnErr}{20}
 \contentsline {subsubsection}{\numberline {6.2.5}ESMC\_LogNotHaltOnErr}{20}
-\contentsline {subsubsection}{\numberline {6.2.6}ESMC\_LogHaltOnWarn}{20}
+\contentsline {subsubsection}{\numberline {6.2.6}ESMC\_LogHaltOnWarn}{21}
 \contentsline {subsubsection}{\numberline {6.2.7}ESMC\_LogNotHaltOnWarn}{21}
-\contentsline {subsubsection}{\numberline {6.2.8}ESMC\_LogOpenFile}{21}
-\contentsline {subsubsection}{\numberline {6.2.9}ESMC\_LogOpenFile}{21}
+\contentsline {subsubsection}{\numberline {6.2.8}ESMC\_LogOpenCFile}{21}
+\contentsline {subsubsection}{\numberline {6.2.9}ESMC\_LogOpenFortFile}{22}
 \contentsline {subsubsection}{\numberline {6.2.10}ESMC\_LogNameValid}{22}
-\contentsline {subsubsection}{\numberline {6.2.11}ESMC\_LogInfo}{23}
-\contentsline {subsubsection}{\numberline {6.2.12}ESMC\_LogInfoFortran}{23}
-\contentsline {subsubsection}{\numberline {6.2.13}ESMC\_LogPrintHeader}{24}
-\contentsline {subsubsection}{\numberline {6.2.14}ESMC\_LogWrite}{24}
-\contentsline {subsubsection}{\numberline {6.2.15}ESMC\_LogFormName}{25}
-\contentsline {subsubsection}{\numberline {6.2.16}ESMC\_LogCloseFileForWrite}{25}
-\contentsline {subsubsection}{\numberline {6.2.17}ESMC\_LogCloseFile}{26}
-\contentsline {subsubsection}{\numberline {6.2.18}ESMC\_Log}{26}
-\contentsline {subsubsection}{\numberline {6.2.19}ESMC\_LogErr}{26}
-\contentsline {subsubsection}{\numberline {6.2.20}ESMC\_LogErrMsg}{27}
-\contentsline {subsubsection}{\numberline {6.2.21}ESMC\_LogWarning}{27}
-\contentsline {subsubsection}{\numberline {6.2.22}ESMC\_LogWarningMsg}{28}
-\contentsline {subsubsection}{\numberline {6.2.23}ESMC\_LogExit()}{28}
-\contentsline {subsubsection}{\numberline {6.2.24}ESMC\_LogErrFortran}{28}
-\contentsline {subsubsection}{\numberline {6.2.25}ESMC\_LogWarningFortran}{29}
-\contentsline {subsubsection}{\numberline {6.2.26}ESMC\_LogPrint}{29}
-\contentsline {subsubsection}{\numberline {6.2.27}ESMC\_LogGetErrMsg}{29}
-\contentsline {section}{\numberline {7}LogErr Design}{30}
-\contentsline {section}{\numberline {8}Review Status}{30}
-\contentsline {section}{Bibliography}{30}
+\contentsline {subsubsection}{\numberline {6.2.11}ESMC\_LogInfo}{24}
+\contentsline {subsubsection}{\numberline {6.2.12}ESMC\_LogInfoFortran}{24}
+\contentsline {subsubsection}{\numberline {6.2.13}ESMC\_LogPrintHeader}{25}
+\contentsline {subsubsection}{\numberline {6.2.14}ESMC\_LogWrite}{25}
+\contentsline {subsubsection}{\numberline {6.2.15}ESMC\_LogFormName}{26}
+\contentsline {subsubsection}{\numberline {6.2.16}ESMC\_LogCloseFortFile}{26}
+\contentsline {subsubsection}{\numberline {6.2.17}ESMC\_LogCloseCFile}{26}
+\contentsline {subsubsection}{\numberline {6.2.18}ESMC\_Log}{27}
+\contentsline {subsubsection}{\numberline {6.2.19}ESMC\_LogErr}{27}
+\contentsline {subsubsection}{\numberline {6.2.20}ESMC\_LogErrMsg}{28}
+\contentsline {subsubsection}{\numberline {6.2.21}ESMC\_LogWarn}{28}
+\contentsline {subsubsection}{\numberline {6.2.22}ESMC\_LogWarnMsg}{28}
+\contentsline {subsubsection}{\numberline {6.2.23}ESMC\_LogExit()}{29}
+\contentsline {subsubsection}{\numberline {6.2.24}ESMC\_LogErrFortran}{29}
+\contentsline {subsubsection}{\numberline {6.2.25}ESMC\_LogWarnFortran}{29}
+\contentsline {subsubsection}{\numberline {6.2.26}ESMC\_LogPrint}{30}
+\contentsline {subsubsection}{\numberline {6.2.27}ESMC\_LogGetErrMsg}{30}
+\contentsline {section}{\numberline {7}LogErr Design}{31}
+\contentsline {section}{\numberline {8}Review Status}{31}
+\contentsline {section}{Bibliography}{31}

@@ -1,13 +1,13 @@
-This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2001.9.7)  28 MAR 2003 16:32
+This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2001.8.20)  15 APR 2003 10:20
 **LogErr_desdoc.tex
 (LogErr_desdoc.tex
-LaTeX2e <2000/06/01>
-Babel <v3.7h> and hyphenation patterns for american, french, german, ngerman, i
+LaTeX2e <1998/12/01> patch level 1
+Babel <v3.6x> and hyphenation patterns for american, french, german, ngerman, i
 talian, nohyphenation, loaded.
 (/usr/share/texmf/tex/latex/base/article.cls
-Document Class: article 2000/05/19 v1.4b Standard LaTeX document class
+Document Class: article 1999/01/07 v1.4a Standard LaTeX document class
 (/usr/share/texmf/tex/latex/base/size10.clo
-File: size10.clo 2000/05/19 v1.4b Standard LaTeX file (size option)
+File: size10.clo 1999/01/07 v1.4a Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@section=\count80
@@ -33,8 +33,8 @@ This is `epsf.tex' v2.7k <10 July 1997>
 \epsfysize=\dimen109
 \pspoints=\dimen110
 \epsfnoopenhelp=\toks14
-) (/usr/share/texmf/tex/latex/html/html.sty
-Package: html 1999/07/19 v1.38 hypertext commands for latex2html (nd, hws, rrm)
+) (/usr/share/texmf/tex/latex/latex2html/html.sty
+Package: html 1999/03/12 v1.37 hypertext commands for latex2html (nd, hws, rrm)
 
 \c@lpart=\count87
 \c@lchapter=\count88
@@ -48,14 +48,14 @@ Package: html 1999/07/19 v1.38 hypertext commands for latex2html (nd, hws, rrm)
 \ptrfile=\write3
 )
 (/usr/share/texmf/tex/latex/psnfss/times.sty
-Package: times 2000/01/12 PSNFSS-v8.1 Times font as default roman (SPQR) 
+Package: times 1999/03/29 PSNFSS v.7.2 Times font as default roman : S Rahtz
 )
 (/usr/share/texmf/tex/latex/base/fontenc.sty
-Package: fontenc 2000/08/30 v1.91 Standard LaTeX package
+Package: fontenc 1999/02/24 v1.9t Standard LaTeX package
 
 (/usr/share/texmf/tex/latex/base/t1enc.def
-File: t1enc.def 2000/08/30 v1.91 Standard LaTeX file
-LaTeX Font Info:    Redeclaring font encoding T1 on input line 38.
+File: t1enc.def 1999/02/24 v1.9t Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 25.
 ))
 (/usr/share/texmf/tex/latex/graphics/graphics.sty
 Package: graphics 1999/02/16 v1.0l Standard LaTeX Graphics (DPC,SPQR)
@@ -80,22 +80,22 @@ File: dvipsnam.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
 )) (LogErr_desdoc.aux)
 \openout1 = `LogErr_desdoc.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Try loading font information for T1+ptm on input line 21.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Try loading font information for T1+ptm on input line 28.
 
 (/usr/share/texmf/tex/latex/psnfss/t1ptm.fd
-File: t1ptm.fd 2000/01/12 PSNFSS-v8.1 font definitions for T1/ptm.
+File: t1ptm.fd 1998/07/06 Fontinst v1.800 font definitions for T1/ptm.
 )
 (../../../../scripts/doc_templates/templates/title_alldoc.tex
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <14.4> not available
@@ -116,484 +116,240 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <10> not available
  [2] (LogErr_syn.tex) (LogErr_obj.tex) (Log_param.tex)
 (Err_param.tex [3])
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `T1/ptm/b/n' tried instead on input line 38.
+(Font)              Font shape `T1/ptm/b/n' tried instead on input line 66.
  (LogErr_desc.tex) (LogErr_design.tex [4]) (LogErr_def.tex)
 (LogErr_rest.tex) (LogErr_fex.tex
 LaTeX Font Info:    Try loading font information for T1+pcr on input line 21.
  (/usr/share/texmf/tex/latex/psnfss/t1pcr.fd
-File: t1pcr.fd 2000/01/12 PSNFSS-v8.1 font definitions for T1/pcr.
+File: t1pcr.fd 1998/07/06 Fontinst v1.800 font definitions for T1/pcr.
 )
 Overfull \hbox (28.24501pt too wide) in paragraph at lines 35--37
-\T1/pcr/m/n/10 Here we illustrate simple error handling. Error output goes to t
-he file anErr.txt. 
+\T1/pcr/m/n/10 Here we il-lus-trate sim-ple er-ror han-dling. Er-ror out-put go
+es to the file an-Err.txt. 
  []
 
 [5]
-Overfull \hbox (58.24501pt too wide) in paragraph at lines 55--62
-\T1/pcr/m/n/10 This example combines writing to a log file and error handling. 
-All output to anErr.txt
+Overfull \hbox (22.24501pt too wide) in paragraph at lines 55--62
+\T1/pcr/m/n/10 This ex-am-ple com-bines writ-ing to a log file and er-ror han-d
+ling. All out-put to an-
  []
 
 
-Overfull \hbox (34.24501pt too wide) in paragraph at lines 55--62
-\T1/pcr/m/n/10 is flushed. Initially, we halt execution on warnings, continue e
-xecution on errors.
+Overfull \hbox (16.24501pt too wide) in paragraph at lines 55--62
+\T1/pcr/m/n/10 Err.txt is flushed. Ini-tially, we halt ex-e-cu-tion on warn-ing
+s, con-tinue ex-e-cu-tion
  []
 
-) (LogErr_fapi.tex
-Overfull \hbox (23.29698pt too wide) in paragraph at lines 41--41
-[]\T1/ptm/b/n/12 Fortran: Mod-ule In-ter-face For-tran In-ter-face to Log class
-. (Source File: ESMF_LogErr.F90) 
- []
-
-
-Overfull \hbox (22.24501pt too wide) in paragraph at lines 46--49
-\T1/pcr/m/n/10 The Fortran interface to the Log class is written in both Fortra
-n and C/C++. This
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 46--49
-\T1/pcr/m/n/10 file contains the interface code written in Fortran. It also con
-tains some utility
- []
-
-LaTeX Font Info:    Try loading font information for T1+phv on input line 52.
-(/usr/share/texmf/tex/latex/psnfss/t1phv.fd
-File: t1phv.fd 2000/01/12 PSNFSS-v8.1 scalable font definitions for T1/phv.
-) [6]
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 83--83
-[]     \T1/pcr/m/n/10 integer numFilePtr        !Index into global array of For
-tran unit numbers[] 
- []
-
-
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 83--83
-[]     \T1/pcr/m/n/10 integer flushSet          !An ESMF_Log object will have i
-ts output flushed[] 
- []
-
-
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 83--83
-[]     \T1/pcr/m/n/10 character(len=32) nameLogErrFile !Name of an ESMF_Log obj
-ects's output file[] 
- []
-
+) (ESMC_LogErr_ccapi.tex
+LaTeX Font Info:    Try loading font information for T1+phv on input line 44.
+ (/usr/share/texmf/tex/latex/psnfss/t1phv.fd
+File: t1phv.fd 1998/07/06 Fontinst v1.800 font definitions for T1/phv.
+)
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <10> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 95.
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 97--97
-[]  \T1/pcr/m/n/10 integer, intent(inout),optional::verbose, flush, standardOut
-,haltOnErr,haltOnWarn[] 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 98--99
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 46.
+ [6]
+[7] [8]
+Underfull \hbox (badness 10000) in paragraph at lines 178--179
 
  []
 
 
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 101--104
-[]\T1/pcr/m/n/10 Most of the Fortran wrapper routines for the C/C++ ESMC_Log cl
-ass are written in
+Overfull \hbox (28.24501pt too wide) in paragraph at lines 181--189
+[]\T1/pcr/m/n/10 ESMC_Log_Info works sim-i-lar to C's printf state-ment. The fi
+rst ar-gu-ment is a char-
  []
 
 
-Overfull \hbox (46.24501pt too wide) in paragraph at lines 101--104
-\T1/pcr/m/n/10 C. This is the only routine that isn't. See the class design sec
-tion for the rational
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 181--189
+\T1/pcr/m/n/10 ac-ter string that can in-clude text to be writ-ten as well as a
+ de-scrip-tion of the
  []
 
 
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 105--108
-[]\T1/pcr/m/n/10 With the exception of the ESMF_Log object, all the arguments a
-re optional. See
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 181--189
+\T1/pcr/m/n/10 num-ber and kind of char-ac-ters to be printed out. The for-mat 
+of this string fol-
  []
 
 
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 105--108
-\T1/pcr/m/n/10 the Examples section of the document for a discussion of how to 
-use the routine. 
- []
-
-[7]
-Underfull \hbox (badness 10000) in paragraph at lines 120--121
-
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 181--189
+\T1/pcr/m/n/10 lows the C for-mat de-scrip-tion con-ven-tion, though not ev-ery
+ fea-ture is sup-ported.
  []
 
 
-Overfull \hbox (58.24501pt too wide) in paragraph at lines 123--130
-[]\T1/pcr/m/n/10 This routine closes any log files that have been written to us
-ing the Fortran interface.
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 181--189
+\T1/pcr/m/n/10 The cur-rent con-ver-sion spec-i-fiers are sup-ported: d (signed
+ dec-i-mal in-te-ger), f
  []
 
 
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 123--130
-\T1/pcr/m/n/10 It is called by by the C/C++ Log method ESMC_LogFinalize(). Note
-: This routine
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 192--195
+[]\T1/pcr/m/n/10 The items are printed on a sin-gle line. Widths, pre-ci-sion, 
+and es-cape se-quences
  []
 
 
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 123--130
-\T1/pcr/m/n/10 is not a module procedure because it needs to be called from Log
-'s C++ method and
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 221--221
+[]      \T1/pcr/m/n/10 int int-Data[],        // ar-ray stor-ing in-te-ger data
+ to be printed (input)[] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 150--151
-
- []
-
-
-Overfull \hbox (46.24501pt too wide) in paragraph at lines 153--159
-[]\T1/pcr/m/n/10 This routine opens the log file and is called by ESMC_LogWrite
-. See the ESMC_LogErr.C
- []
-
-
-Overfull \hbox (22.24501pt too wide) in paragraph at lines 153--159
-\T1/pcr/m/n/10 file for more details. This routine is not a module procedure be
-cause F90 mangles
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 153--159
-\T1/pcr/m/n/10 the names of functions inside modules and this routine is called
- by ESMC_LogWrite()
- []
-
-[8]
-Underfull \hbox (badness 10000) in paragraph at lines 185--186
-
- []
-
-
-Overfull \hbox (106.24501pt too wide) in paragraph at lines 188--198
-[]\T1/pcr/m/n/10 This routine, and the routines that follow it, are used by ESM
-C_LogPrint() ESMC_LogPrintHeader()
- []
-
-
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 188--198
-\T1/pcr/m/n/10 in the Log class. Ordinarily, these Log routines would have just
- used fprintf.
- []
-
-
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 188--198
-\T1/pcr/m/n/10 However, because we needed to use the Fortran I/O libraries when
- calling Log from
- []
-
-
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 188--198
-\T1/pcr/m/n/10 a Fortran code (see the discussion about the class design), we h
-ad to make calls
- []
-
-
-Overfull \hbox (22.24501pt too wide) in paragraph at lines 188--198
-\T1/pcr/m/n/10 to ESMF_LogPrintChar() and the subroutines below, in addition to
- C's fprintf() (We
- []
-
-
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 188--198
-\T1/pcr/m/n/10 still have to support C/C++, so we still need fprintf() ). ESMF_
-LogPrintChar()
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 216--217
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 241--242
+Underfull \hbox (badness 10000) in paragraph at lines 222--223
 
  []
 
 [9]
-Underfull \hbox (badness 10000) in paragraph at lines 276--277
-
- []
-
-) (LogErr_cfapi.tex
-Underfull \hbox (badness 10000) in paragraph at lines 50--51
-
+Overfull \hbox (22.24501pt too wide) in paragraph at lines 225--232
+[]\T1/pcr/m/n/10 ESMC_LogInfoFortran is the ver-sion of LogInfo used for the Fo
+r-tran in-ter-face. In-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 70--71
-
+Overfull \hbox (28.24501pt too wide) in paragraph at lines 225--232
+\T1/pcr/m/n/10 stead of print-ing the data from the stack as ESMC_LogInfo does,
+ ESMC_LogInfoFortran
  []
 
 
-Overfull \hbox (34.24501pt too wide) in paragraph at lines 73--76
-[]\T1/pcr/m/n/10 This routine finds the first space in the array name and inser
-ts a a null character.
+Overfull \hbox (46.24501pt too wide) in paragraph at lines 225--232
+\T1/pcr/m/n/10 prints the data stored in the "Data" ar-rays. The rou-tine is ca
+lled from esmf_logprint
+ []
+
+
+Overfull \hbox (22.24501pt too wide) in paragraph at lines 225--232
+\T1/pcr/m/n/10 which is de-fined in ESMF_LogInterface.C. esmf_logprint is calla
+ble from the user's
+ []
+
+
+Overfull \hbox (34.24501pt too wide) in paragraph at lines 225--232
+\T1/pcr/m/n/10 from For-tran code. It is this rou-tine that takes the data from
+ the stack and stores
  []
 
 [10]
-Underfull \hbox (badness 10000) in paragraph at lines 91--92
-
- []
-
-
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 94--101
-[]\T1/pcr/m/n/10 This routine allows the user to write miscellaneous informatio
-n the Log file. It
- []
-
-
-Overfull \hbox (58.24501pt too wide) in paragraph at lines 94--101
-\T1/pcr/m/n/10 uses a printf style character descriptor, e.g. ESMF_LogInfo(aLog
-,"Hi there, a character
- []
-
-
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 94--101
-\T1/pcr/m/n/10 string. The routine takes a variable number of arguments, so tha
-t any number of
- []
-
-
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 94--101
-\T1/pcr/m/n/10 data items can be written to the Log file. Currently, only chara
-cter, strings,
- []
-
-
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 94--101
-\T1/pcr/m/n/10 integers, and reals are supported. However, field widths, precis
-ions, and flags
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 122--123
-
- []
-
-
-Overfull \hbox (40.24501pt too wide) in paragraph at lines 125--137
-[]\T1/pcr/m/n/10 This routine writes a warning message to the log file. This wa
-rning message consists
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 125--137
-\T1/pcr/m/n/10 of the erroCode, a description of the warning, the line number, 
-file, and directory
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 125--137
-\T1/pcr/m/n/10 of the error, and a message. A preprocessor macro adds the prede
-fined preprocessor
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 125--137
-\T1/pcr/m/n/10 symbolic constants __LINE__, __FILE__, and __DIR__. The macro op
-erates on the file
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 125--137
-\T1/pcr/m/n/10 from which these routines are called. Note, the value of __DIR__
- must be suppliled
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 125--137
-\T1/pcr/m/n/10 by the user (usually done in the makefile.). By default, executi
-on continues after
- []
-
-
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 125--137
-\T1/pcr/m/n/10 encountering a warning, but by calling the routine ESMF_LogWarnH
-alt(), the user
+Overfull \hbox (34.24501pt too wide) in paragraph at lines 285--287
+\T1/pcr/m/n/10 the name of the LogErr file to be writ-ten when mul-ti-ple LogEr
+r files are to be writ-
  []
 
 [11]
-Underfull \hbox (badness 10000) in paragraph at lines 150--151
+Underfull \hbox (badness 10000) in paragraph at lines 358--359
 
  []
 
 
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 153--155
-[]\T1/pcr/m/n/10 This routine is identical to ESMF_LogWarnMsg, except a msg is 
-not written to the
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 167--168
+Underfull \hbox (badness 10000) in paragraph at lines 381--382
 
  []
 
 
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 170--172
-[]\T1/pcr/m/n/10 This routine calls the Log method ESMC_LogFlush() which sets a
- flag that causes
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 184--185
-
- []
-
-
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 187--189
-[]\T1/pcr/m/n/10 This routine calls the Log method ESMC_LogNotFlush() which set
-s a flag that turns
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 201--202
-
- []
-
-
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 204--207
-[]\T1/pcr/m/n/10 This routine sets a flag that causes all output associated wit
-h the aLog ESMC_Log
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 384--387
+[]\T1/pcr/m/n/10 Prints er-ror code, cor-re-spond-ing mes-sage, line num-ber, f
+ile, di-rec-tory that er-
  []
 
 [12]
-Underfull \hbox (badness 10000) in paragraph at lines 217--218
+Underfull \hbox (badness 10000) in paragraph at lines 406--407
 
  []
 
 
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 220--223
-[]\T1/pcr/m/n/10 This routine sets a flag that forces all output associated wit
-h the aLog ESMC_Log
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 409--412
+[]\T1/pcr/m/n/10 Prints er-ror code, cor-re-spond-ing mes-sage, line num-ber, f
+ile, di-rec-tory that er-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 234--235
-
- []
-
-
-Overfull \hbox (82.24501pt too wide) in paragraph at lines 237--242
-[]\T1/pcr/m/n/10 This function called from with a Fortran write statement, e.g.
- write(LogWrite(aLog),*)"Hi".
- []
-
-
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 237--242
-\T1/pcr/m/n/10 The LogWrite function appends some header information (time,date
- etc.) to what
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 261--262
+Underfull \hbox (badness 10000) in paragraph at lines 426--427
 
  []
 
 
-Overfull \hbox (40.24501pt too wide) in paragraph at lines 264--276
-[]\T1/pcr/m/n/10 This routine writes a warning message to the log file. This wa
-rning message consists
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 429--431
+[]\T1/pcr/m/n/10 Same as ESMC_LogErr, ex-cept ex-e-cu-tion is not stopped af-te
+r print-ing mes-sage, ex-
  []
 
 
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 264--276
-\T1/pcr/m/n/10 of the erroCode, a description of the warning, the line number, 
-file, and directory
+Underfull \hbox (badness 10000) in paragraph at lines 448--449
+
  []
 
 
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 264--276
-\T1/pcr/m/n/10 of the error, and a message. A preprocessor macro adds the prede
-fined preprocessor
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 264--276
-\T1/pcr/m/n/10 symbolic constants __LINE__, __FILE__, and __DIR__. The macro op
-erates on the file
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 264--276
-\T1/pcr/m/n/10 from which these routines are called. Note, the value of __DIR__
- must be suppliled
- []
-
-
-Overfull \hbox (22.24501pt too wide) in paragraph at lines 264--276
-\T1/pcr/m/n/10 by the user (usually done in the makefile). By default, executio
-n continues after
- []
-
-
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 264--276
-\T1/pcr/m/n/10 encountering a warning, but by calling the routine ESMF_LogWarnH
-alt(), the user
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 451--453
+[]\T1/pcr/m/n/10 Same as ESMC_LogErr, ex-cept ex-e-cu-tion is not stopped af-te
+r print-ing mes-sage, ex-
  []
 
 [13]
-Underfull \hbox (badness 10000) in paragraph at lines 289--290
+Underfull \hbox (badness 10000) in paragraph at lines 471--472
 
  []
 
 
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 292--294
-[]\T1/pcr/m/n/10 This routine is identical to ESMF_LogErrMsg, except a msg is n
-ot written to the
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 308--309
+Underfull \hbox (badness 10000) in paragraph at lines 496--497
 
  []
 
 
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 311--314
-[]\T1/pcr/m/n/10 This routine calls a Log method that sets a flag to stop execu
-tion on reaching an
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 499--505
+[]\T1/pcr/m/n/10 Similar to LogErr, ex-cept called by the for-tran wrap-per esm
+f_logerr which is de-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 326--327
-
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 499--505
+\T1/pcr/m/n/10 fined in ESMC_Interface.C. The ma-jor dif-fer-ence be-tween this
+ rou-tine and LogErr
  []
 
 
-Overfull \hbox (40.24501pt too wide) in paragraph at lines 329--332
-[]\T1/pcr/m/n/10 This routine calls a Log method that sets a flag to prevent th
-e program from stopping
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 343--344
-
- []
-
-
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 346--349
-[]\T1/pcr/m/n/10 This routine calls a Log method that sets a flag to stop execu
-tion on reaching a
+Overfull \hbox (40.24501pt too wide) in paragraph at lines 499--505
+\T1/pcr/m/n/10 is that this rou-tine prints the printf style data from the Data
+ ar-rays not the stack. 
  []
 
 [14]
-Underfull \hbox (badness 10000) in paragraph at lines 363--364
+Underfull \hbox (badness 10000) in paragraph at lines 525--526
 
  []
 
-)
-Overfull \hbox (40.24501pt too wide) in paragraph at lines 366--52
-[]\T1/pcr/m/n/10 This routine calls a Log method that sets a flag to prevent th
-e program from stopping
+
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 528--532
+[]\T1/pcr/m/n/10 Similar to ESMC_LogWarn, ex-cept called by the for-tran wrap-p
+er esmf_logerr which
  []
 
-(LogErr_cex.tex
+
+Underfull \hbox (badness 10000) in paragraph at lines 554--555
+
+ []
+
+
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 556--560
+[]\T1/pcr/m/n/10 This is a pri-vate rou-tine, used by many meth-ods of ESMC_Log
+ to print data to the
+ []
+
+
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 556--560
+\T1/pcr/m/n/10 log file. If used from For-tran, then For-tran I/O li-braries ar
+e used. Oth-er-wise
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 573--574
+
+ []
+
+) (LogErr_cex.tex [15]
 Overfull \hbox (4.24501pt too wide) in paragraph at lines 16--18
-\T1/pcr/m/n/10 In this example we initialize a Log object (aLog) and write a si
-mple message to
+\T1/pcr/m/n/10 In this ex-am-ple we ini-tial-ize a Log ob-ject (aLog) and write
+ a sim-ple mes-sage to
  []
 
 
@@ -616,8 +372,8 @@ e/ESMF_ErrConstants.inc"[]
 
 
 Overfull \hbox (22.24501pt too wide) in paragraph at lines 34--36
-\T1/pcr/m/n/10 Here we illustrate simple error handling. Error output goes to t
-he file anErr.txt 
+\T1/pcr/m/n/10 Here we il-lus-trate sim-ple er-ror han-dling. Er-ror out-put go
+es to the file an-Err.txt 
  []
 
 
@@ -639,18 +395,18 @@ e/ESMF_ErrConstants.inc"[]
  []
 
 
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 54--57
-\T1/pcr/m/n/10 Here's an example combining writing to the log file and error ha
-ndling. All output
+Overfull \hbox (16.24501pt too wide) in paragraph at lines 54--57
+\T1/pcr/m/n/10 Here's an ex-am-ple com-bin-ing writ-ing to the log file and er-
+ror han-dling. All out-
  []
 
 
-Overfull \hbox (46.24501pt too wide) in paragraph at lines 54--57
-\T1/pcr/m/n/10 to anErr.txt is flushed. Initially, we halt execution on warning
-s, continue execution
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 54--57
+\T1/pcr/m/n/10 put to an-Err.txt is flushed. Ini-tially, we halt ex-e-cu-tion o
+n warn-ings, con-tinue
  []
 
-[15]
+
 Overfull \hbox (28.24501pt too wide) in paragraph at lines 85--85
 []\T1/pcr/m/n/10 #include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/includ
 e/ESMF_LogMacros.inc"[] 
@@ -668,46 +424,46 @@ Overfull \hbox (46.24501pt too wide) in paragraph at lines 85--85
 e/ESMF_ErrConstants.inc"[] 
  []
 
-
+[16]
 Overfull \hbox (46.24501pt too wide) in paragraph at lines 85--85
-[]  \T1/pcr/m/n/10 anErr.ESMC_LogWarnMsg(ESMC_WARNING,"Encountered a warning, b
-ut we stop execution!");[] 
+[]  \T1/pcr/m/n/10 an-Err.ESMC_LogWarnMsg(ESMC_WARNING,"Encountered a warn-ing,
+ but we stop execution!");[] 
  []
 
-) (LogErr_chapi.tex
+) (ESMC_LogErr_chapi.tex
 Overfull \hbox (16.24501pt too wide) in paragraph at lines 44--47
-[]\T1/pcr/m/n/10 The code in this file defines the C++ Log members and declares
- all class data and
+[]\T1/pcr/m/n/10 The code in this file de-fines the C++ Log mem-bers and de-cla
+res all class data and
  []
 
 
 Overfull \hbox (4.24501pt too wide) in paragraph at lines 44--47
-\T1/pcr/m/n/10 methods. All methods, except for the SetVerbosity method, which 
-is inlined are
- []
-
-[16]
-Overfull \hbox (22.24501pt too wide) in paragraph at lines 167--167
-[]     \T1/pcr/m/n/10 int standardOut;        // if log data written to standar
-d out, this variable[] 
+\T1/pcr/m/n/10 meth-ods. All meth-ods, ex-cept for the SetVer-bosity method, wh
+ich is in-lined are
  []
 
 
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 167--167
-[]   \T1/pcr/m/n/10 !PUBLIC MEMBER FUNCTIONS (see ESMC\_LogErr.C for a descript
-ion of these methods)[] 
+Overfull \hbox (16.24501pt too wide) in paragraph at lines 167--167
+[]     \T1/pcr/m/n/10 int stan-dard-Out;        //if log data writ-ten to stan-
+dard out, this variable[] 
  []
 
 [17]
+Overfull \hbox (28.24501pt too wide) in paragraph at lines 167--167
+[]   \T1/pcr/m/n/10 !PUB-LIC MEM-BER FUNC-TIONS (see ESMC\_LogErr.C for a de-sc
+rip-tion of these methods)[] 
+ []
+
+[18]
 Overfull \hbox (40.24501pt too wide) in paragraph at lines 167--167
-[]     \T1/pcr/m/n/10 void ESMC_LogErrFortran(int errCode,int line,char file[],
-char dir[],char msg[]);[] 
+[]     \T1/pcr/m/n/10 void ESMC_LogErrFortran(int er-rCode,int line,char file[]
+,char dir[],char msg[]);[] 
  []
 
 
 Overfull \hbox (28.24501pt too wide) in paragraph at lines 167--167
-[]  \T1/pcr/m/n/10 \subsubsection [ESMC\_LogFlush()] {ESMC\_LogFlush() - set th
-e flushSet variable.}[] 
+[]  \T1/pcr/m/n/10 \sub-sub-sec-tion [ESMC\_LogFlush()] {ESMC\_LogFlush() - set
+ the flush-Set variable.}[] 
  []
 
 
@@ -715,254 +471,260 @@ Underfull \hbox (badness 10000) in paragraph at lines 168--169
 
  []
 
-[18]
-Underfull \hbox (badness 10000) in paragraph at lines 189--190
 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 209--210
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 230--231
+Underfull \hbox (badness 10000) in paragraph at lines 190--191
 
  []
 
 [19]
-Underfull \hbox (badness 10000) in paragraph at lines 252--253
+Underfull \hbox (badness 10000) in paragraph at lines 211--212
 
  []
 
 
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 255--257
-[]\T1/pcr/m/n/10 If haltOnErr is set to ESMC_LOG_TRUE, code will stop executing
- when encountering
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 275--276
+Underfull \hbox (badness 10000) in paragraph at lines 233--234
 
  []
 
 
-Overfull \hbox (40.24501pt too wide) in paragraph at lines 278--280
-[]\T1/pcr/m/n/10 If haltOnErr is set to ESMC_LOG_FALSE, code will not stop exec
-uting when encountering
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 299--300
+Underfull \hbox (badness 10000) in paragraph at lines 255--256
 
  []
 
 
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 302--304
-[]\T1/pcr/m/n/10 If haltOnWarn is set to ESMC_LOG_TRUE, code will stop executin
-g when encountering
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 258--260
+[]\T1/pcr/m/n/10 If hal-tOn-Err is set to ESMC_LOG_TRUE, code will stop ex-e-cu
+t-ing when en-coun-ter-ing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 279--280
+
  []
 
 [20]
-Underfull \hbox (badness 10000) in paragraph at lines 323--324
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 282--284
+[]\T1/pcr/m/n/10 If hal-tOn-Err is set to ESMC_LOG_FALSE, code will not stop ex
+-e-cut-ing when en-coun-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 303--304
 
  []
 
 
-Overfull \hbox (46.24501pt too wide) in paragraph at lines 326--328
-[]\T1/pcr/m/n/10 If haltOnWarn is set to ESMC_LOG_FALSE, code will not stop exe
-cuting when encountering
- []
-
-) (LogErr_ccapi.tex [21] [22]
-Underfull \hbox (badness 10000) in paragraph at lines 168--169
-
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 306--308
+[]\T1/pcr/m/n/10 If hal-tOn-Warn is set to ESMC_LOG_TRUE, code will stop ex-e-c
+ut-ing when en-coun-ter-
  []
 
 
-Overfull \hbox (52.24501pt too wide) in paragraph at lines 171--179
-[]\T1/pcr/m/n/10 ESMC_Log_Info works similar to C's printf statement. The first
- argument is a character
- []
-
-
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 171--179
-\T1/pcr/m/n/10 string that can include text to be written as well as a descript
-ion of the number
- []
-
-
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 171--179
-\T1/pcr/m/n/10 and kind of characters to be printed out. The format of this str
-ing follows the
- []
-
-
-Overfull \hbox (34.24501pt too wide) in paragraph at lines 171--179
-\T1/pcr/m/n/10 C format description convention, though not every feature is sup
-ported. The current
- []
-
-
-Overfull \hbox (34.24501pt too wide) in paragraph at lines 171--179
-\T1/pcr/m/n/10 conversion specifiers are supported: d (signed decimal integer),
- f (double values),
- []
-
-
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 182--185
-[]\T1/pcr/m/n/10 The items are printed on a single line. Widths, precision, and
- escape sequences
- []
-
-[23]
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 211--211
-[]      \T1/pcr/m/n/10 int intData[],        // array storing integer data to b
-e printed (input)[] 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 212--213
+Underfull \hbox (badness 10000) in paragraph at lines 327--328
 
  []
 
 
-Overfull \hbox (46.24501pt too wide) in paragraph at lines 215--222
-[]\T1/pcr/m/n/10 ESMC_LogInfoFortran is the version of LogInfo used for the For
-tran interface. Instead
+Overfull \hbox (16.24501pt too wide) in paragraph at lines 330--332
+[]\T1/pcr/m/n/10 If hal-tOn-Warn is set to ESMC_LOG_FALSE, code will not stop e
+x-e-cut-ing when en-coun-
+ []
+
+) (ESMC_LogErr_ccapi.tex [21] [22] [23]
+Underfull \hbox (badness 10000) in paragraph at lines 178--179
+
  []
 
 
-Overfull \hbox (34.24501pt too wide) in paragraph at lines 215--222
-\T1/pcr/m/n/10 of printing the data from the stack as ESMC_LogInfo does, ESMC_L
-ogInfoFortran prints
+Overfull \hbox (28.24501pt too wide) in paragraph at lines 181--189
+[]\T1/pcr/m/n/10 ESMC_Log_Info works sim-i-lar to C's printf state-ment. The fi
+rst ar-gu-ment is a char-
  []
 
 
-Overfull \hbox (4.24501pt too wide) in paragraph at lines 215--222
-\T1/pcr/m/n/10 the data stored in the "Data" arrays. The routine is called from
- esmf_logprint
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 181--189
+\T1/pcr/m/n/10 ac-ter string that can in-clude text to be writ-ten as well as a
+ de-scrip-tion of the
  []
 
 
-Overfull \hbox (22.24501pt too wide) in paragraph at lines 215--222
-\T1/pcr/m/n/10 which is defined in ESMF_LogInterface.C. esmf_logprint is callab
-le from the user's
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 181--189
+\T1/pcr/m/n/10 num-ber and kind of char-ac-ters to be printed out. The for-mat 
+of this string fol-
  []
 
 
-Overfull \hbox (34.24501pt too wide) in paragraph at lines 215--222
-\T1/pcr/m/n/10 from Fortran code. It is this routine that takes the data from t
-he stack and stores
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 181--189
+\T1/pcr/m/n/10 lows the C for-mat de-scrip-tion con-ven-tion, though not ev-ery
+ fea-ture is sup-ported.
+ []
+
+
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 181--189
+\T1/pcr/m/n/10 The cur-rent con-ver-sion spec-i-fiers are sup-ported: d (signed
+ dec-i-mal in-te-ger), f
+ []
+
+
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 192--195
+[]\T1/pcr/m/n/10 The items are printed on a sin-gle line. Widths, pre-ci-sion, 
+and es-cape se-quences
+ []
+
+
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 221--221
+[]      \T1/pcr/m/n/10 int int-Data[],        // ar-ray stor-ing in-te-ger data
+ to be printed (input)[] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 222--223
+
+ []
+
+
+Overfull \hbox (22.24501pt too wide) in paragraph at lines 225--232
+[]\T1/pcr/m/n/10 ESMC_LogInfoFortran is the ver-sion of LogInfo used for the Fo
+r-tran in-ter-face. In-
+ []
+
+
+Overfull \hbox (28.24501pt too wide) in paragraph at lines 225--232
+\T1/pcr/m/n/10 stead of print-ing the data from the stack as ESMC_LogInfo does,
+ ESMC_LogInfoFortran
+ []
+
+
+Overfull \hbox (46.24501pt too wide) in paragraph at lines 225--232
+\T1/pcr/m/n/10 prints the data stored in the "Data" ar-rays. The rou-tine is ca
+lled from esmf_logprint
+ []
+
+
+Overfull \hbox (22.24501pt too wide) in paragraph at lines 225--232
+\T1/pcr/m/n/10 which is de-fined in ESMF_LogInterface.C. esmf_logprint is calla
+ble from the user's
+ []
+
+
+Overfull \hbox (34.24501pt too wide) in paragraph at lines 225--232
+\T1/pcr/m/n/10 from For-tran code. It is this rou-tine that takes the data from
+ the stack and stores
  []
 
 [24]
-Overfull \hbox (52.24501pt too wide) in paragraph at lines 275--277
-\T1/pcr/m/n/10 the name of the LogErr file to be written when multiple LogErr f
-iles are to be written. 
+Overfull \hbox (34.24501pt too wide) in paragraph at lines 285--287
+\T1/pcr/m/n/10 the name of the LogErr file to be writ-ten when mul-ti-ple LogEr
+r files are to be writ-
  []
 
-[25]
-Underfull \hbox (badness 10000) in paragraph at lines 348--349
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 371--372
+[25] [26]
+Underfull \hbox (badness 10000) in paragraph at lines 358--359
 
  []
 
 
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 374--377
-[]\T1/pcr/m/n/10 Prints error code, corresponding message, line number, file, d
-irectory that error
- []
-
-[26]
-Underfull \hbox (badness 10000) in paragraph at lines 396--397
+Underfull \hbox (badness 10000) in paragraph at lines 381--382
 
  []
 
 
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 399--402
-[]\T1/pcr/m/n/10 Prints error code, corresponding message, line number, file, d
-irectory that error
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 416--417
-
- []
-
-
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 419--421
-[]\T1/pcr/m/n/10 Same as ESMC_LogErr, except execution is not stopped after pri
-nting message, except
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 384--387
+[]\T1/pcr/m/n/10 Prints er-ror code, cor-re-spond-ing mes-sage, line num-ber, f
+ile, di-rec-tory that er-
  []
 
 [27]
-Underfull \hbox (badness 10000) in paragraph at lines 438--439
+Underfull \hbox (badness 10000) in paragraph at lines 406--407
 
  []
 
 
-Overfull \hbox (28.24501pt too wide) in paragraph at lines 441--443
-[]\T1/pcr/m/n/10 Same as ESMC_LogErr, except execution is not stopped after pri
-nting message, except
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 409--412
+[]\T1/pcr/m/n/10 Prints er-ror code, cor-re-spond-ing mes-sage, line num-ber, f
+ile, di-rec-tory that er-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 461--462
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 486--487
+Underfull \hbox (badness 10000) in paragraph at lines 426--427
 
  []
 
 
-Overfull \hbox (34.24501pt too wide) in paragraph at lines 489--495
-[]\T1/pcr/m/n/10 Similar to LogErr, except called by the fortran wrapper esmf_l
-ogerr which is defined
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 429--431
+[]\T1/pcr/m/n/10 Same as ESMC_LogErr, ex-cept ex-e-cu-tion is not stopped af-te
+r print-ing mes-sage, ex-
  []
 
 
-Overfull \hbox (16.24501pt too wide) in paragraph at lines 489--495
-\T1/pcr/m/n/10 in ESMC_Interface.C. The major difference between this routine a
-nd LogErr is that
+Underfull \hbox (badness 10000) in paragraph at lines 448--449
+
+ []
+
+
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 451--453
+[]\T1/pcr/m/n/10 Same as ESMC_LogErr, ex-cept ex-e-cu-tion is not stopped af-te
+r print-ing mes-sage, ex-
  []
 
 [28]
-Underfull \hbox (badness 10000) in paragraph at lines 515--516
+Underfull \hbox (badness 10000) in paragraph at lines 471--472
 
  []
 
 
-Overfull \hbox (22.24501pt too wide) in paragraph at lines 518--522
-[]\T1/pcr/m/n/10 Similar to ESMC_LogWarning, except called by the fortran wrapp
+Underfull \hbox (badness 10000) in paragraph at lines 496--497
+
+ []
+
+
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 499--505
+[]\T1/pcr/m/n/10 Similar to LogErr, ex-cept called by the for-tran wrap-per esm
+f_logerr which is de-
+ []
+
+
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 499--505
+\T1/pcr/m/n/10 fined in ESMC_Interface.C. The ma-jor dif-fer-ence be-tween this
+ rou-tine and LogErr
+ []
+
+
+Overfull \hbox (40.24501pt too wide) in paragraph at lines 499--505
+\T1/pcr/m/n/10 is that this rou-tine prints the printf style data from the Data
+ ar-rays not the stack. 
+ []
+
+[29]
+Underfull \hbox (badness 10000) in paragraph at lines 525--526
+
+ []
+
+
+Overfull \hbox (4.24501pt too wide) in paragraph at lines 528--532
+[]\T1/pcr/m/n/10 Similar to ESMC_LogWarn, ex-cept called by the for-tran wrap-p
 er esmf_logerr which
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 544--545
+Underfull \hbox (badness 10000) in paragraph at lines 554--555
 
  []
 
 
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 546--550
-[]\T1/pcr/m/n/10 This is a private routine, used by many methods of ESMC_Log to
- print data to the
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 556--560
+[]\T1/pcr/m/n/10 This is a pri-vate rou-tine, used by many meth-ods of ESMC_Log
+ to print data to the
  []
 
 
-Overfull \hbox (10.24501pt too wide) in paragraph at lines 546--550
-\T1/pcr/m/n/10 log file. If used from Fortran, then Fortran I/O libraries are u
-sed. Otherwise
+Overfull \hbox (10.24501pt too wide) in paragraph at lines 556--560
+\T1/pcr/m/n/10 log file. If used from For-tran, then For-tran I/O li-braries ar
+e used. Oth-er-wise
  []
 
-[29]
-Underfull \hbox (badness 10000) in paragraph at lines 563--564
+
+Underfull \hbox (badness 10000) in paragraph at lines 573--574
 
  []
 
@@ -971,18 +733,18 @@ Underfull \hbox (badness 10000) in paragraph at lines 11--12
 
  []
 
-) (LogErr_glos.tex) (LogErr_desdoc.bbl
+[30]) (LogErr_glos.tex) (LogErr_desdoc.bbl
 
 LaTeX Warning: Empty `thebibliography' environment on input line 3.
 
-) [30] (LogErr_desdoc.aux) ) 
+) [31] (LogErr_desdoc.aux) ) 
 Here is how much of TeX's memory you used:
- 1309 strings out of 20887
- 14791 string characters out of 196275
- 61493 words of memory out of 350001
- 4248 multiletter control sequences out of 10000+15000
+ 1301 strings out of 10898
+ 14727 string characters out of 96881
+ 61377 words of memory out of 263001
+ 4233 multiletter control sequences out of 10000+0
  18568 words of font info for 25 fonts, out of 400000 for 1000
- 14 hyphenation exceptions out of 10000
- 23i,8n,19p,241b,309s stack positions out of 3000i,100n,1500p,50000b,4000s
+ 14 hyphenation exceptions out of 1000
+ 23i,8n,19p,205b,330s stack positions out of 300i,100n,500p,50000b,4000s
 
-Output written on LogErr_desdoc.dvi (31 pages, 92416 bytes).
+Output written on LogErr_desdoc.dvi (32 pages, 90008 bytes).
