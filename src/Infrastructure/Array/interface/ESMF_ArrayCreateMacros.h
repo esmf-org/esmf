@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayCreateMacros.h,v 1.7 2004/10/05 22:44:19 jwolfe Exp $
+! $Id: ESMF_ArrayCreateMacros.h,v 1.8 2004/10/19 21:26:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -392,11 +392,8 @@
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
-        rcpresent = .FALSE. @\
-        if (present(rc)) then @\
-          rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
-        endif @\
+        if (present(rc)) rc = ESMF_FAILURE @\
+        zerosize = .FALSE. @\
  @\
         ! Assume defaults first, then alter if lb or ub specified, @\
         ! or if an existing pointer is given and can be queried. @\
@@ -494,7 +491,7 @@
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-        if (rcpresent) rc = status @\
+        if (present(rc)) rc = status @\
  @\
         end subroutine ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind  @\
  @\
