@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.33 2004/03/18 16:37:37 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.34 2004/03/18 16:47:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -288,7 +288,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.33 2004/03/18 16:37:37 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.34 2004/03/18 16:47:33 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1026,7 +1026,7 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeAddChar(state%statep%base, name, value, status)
+      call c_ESMC_AttributeSetChar(state%statep%base, name, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_StateAddAttribute"
         return
