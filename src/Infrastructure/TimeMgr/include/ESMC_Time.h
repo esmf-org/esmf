@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.8 2003/03/26 01:04:57 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.9 2003/03/27 01:40:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -83,11 +83,11 @@
     int ESMC_TimeInit(ESMC_Calendar *cal, int tz, const char *timeList, ...);
 
     // Init method to support the F90 optional arguments interface
-    int ESMC_TimeInit(int YY, int MM, int DD, int D, int H, int M,
-                      ESMF_IKIND_I8 S, int MS, int US, int NS,
-                      double d_, double h_, double m_, double s_,
-                      double ms_, double us_, double ns_,
-                      int Sn, int Sd, ESMC_Calendar *cal, int tz);
+    int ESMC_TimeInit(int *YY, int *MM, int *DD, int *D, int *H, int *M,
+                      ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                      double *d_, double *h_, double *m_, double *s_,
+                      double *ms_, double *us_, double *ns_,
+                      int *Sn, int *Sd, ESMC_Calendar *cal, int *tz);
 
     // Time doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
