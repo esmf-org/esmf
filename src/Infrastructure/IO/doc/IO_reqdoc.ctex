@@ -1,4 +1,4 @@
-% $Id: IO_reqdoc.ctex,v 1.4 2003/07/24 18:52:07 cdeluca Exp $
+% $Id: IO_reqdoc.ctex,v 1.5 2003/07/24 18:54:31 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -124,7 +124,7 @@ Mark Iredell}
 %\section{References}
 \bibliography{IO}
 #elif defined(CONSTITUENT)
-\bibiography{../Infrastructure/IO/doc/IO}
+\bibliography{../Infrastructure/IO/doc/IO}
 #endif
 \bibliographystyle{plain} 
 \addcontentsline{toc}{section}{References}
