@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.7 2004/02/23 20:53:45 nscollins Exp $
+// $Id: ESMC_Machine.C,v 1.8 2004/03/04 18:09:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-                 "$Id: ESMC_Machine.C,v 1.7 2004/02/23 20:53:45 nscollins Exp $";
+                 "$Id: ESMC_Machine.C,v 1.8 2004/03/04 18:09:26 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -112,8 +112,10 @@ ESMC_Machine Machine;
     int finalized;
 
     MPI_Finalized(&finalized);
-    if (!finalized) 
+    if (!finalized) {
+      MPI_Barrier(MPI_COMM_WORLD);    // is this safe?
       MPI_Finalize();
+    }
 
 
     return ESMF_SUCCESS;
