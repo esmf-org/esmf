@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.3 2003/04/17 17:31:22 nscollins Exp $
+! $Id: FlowMod.F90,v 1.4 2003/04/17 20:06:56 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
     module FlowMod
     
 !   ESMF modules
-    use ESMF_ESMFMod
+    use ESMF_Mod
 
     use ArraysGlobalMod
     
