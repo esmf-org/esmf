@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.68 2004/12/03 20:47:45 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.69 2004/12/10 18:19:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -907,7 +907,7 @@ end function
                                         ESMF_CONTEXT, rc)) return
           endif
 
-          fieldList(1:fieldCount) = btype%flist(1:fieldCount)
+          fieldList(1:btype%field_count) = btype%flist(1:btype%field_count)
       endif
 
       ! Return Field count
@@ -2463,6 +2463,8 @@ end function
 !
       type(ESMF_Bundle) :: b
 
+      allocate(b%btypep)
+
       b%btypep%bundlestatus = ESMF_STATUS_UNINIT
 
       ESMF_BundleRead = b
@@ -2508,6 +2510,8 @@ end function
 !  TODO: code goes here
 !
       type(ESMF_Bundle) :: b
+
+      allocate(b%btypep)
 
       b%btypep%bundlestatus = ESMF_STATUS_UNINIT
 
