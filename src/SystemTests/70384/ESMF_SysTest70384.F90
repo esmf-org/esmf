@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.5 2003/02/20 23:34:56 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.6 2003/02/21 15:47:24 nscollins Exp $
 !
 ! System test code #70384
 
@@ -217,24 +217,20 @@
     do i=1, ni
       do j=1, nj
         do k=1, nk
-           ! write(*,*) i,j,k,de_id,srcdata(i,j,k),resdata(i,j,k)
-           !if (srcptr(i,j,k) .ne. resptr(i,j,k)) then
-           !  print *, "array contents do not match: ", &
-           !          srcptr(i,j,k), ".ne.", resptr(i,j,k), "at", i,j,k,de_id
-          if (srcdata(i,j,k) .ne. resdata(i,j,k)) then
+          if (srcptr(i,j,k) .ne. resptr(i,j,k)) then
             print *, "array contents do not match at: (", i,j,k, ") on DE ", &
-                     de_id, ".  src=", srcdata(i,j,k), "dst=", resdata(i,j,k)
+                     de_id, ".  src=", srcptr(i,j,k), "dst=", resptr(i,j,k)
             match = .false.
             miscount = miscount + 1
-            if (miscount .gt. 20) then
-              print *, "more than 20 matches, skipping rest of loop"
+            if (miscount .gt. 40) then
+              print *, "more than 40 mismatches, skipping rest of loop"
               goto 10
             endif
           endif
         enddo
       enddo
     enddo
-    if (match) print *, "Array contents matched correctly!! DE_id = ",de_id
+    if (match) print *, "Array contents matched correctly!! DE_id = ", de_id
 10  continue
 
     print *, "Finalize section finished"
