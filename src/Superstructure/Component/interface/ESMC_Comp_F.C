@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.32 2004/12/23 18:07:51 theurich Exp $
+// $Id: ESMC_Comp_F.C,v 1.33 2005/01/28 22:12:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,6 +126,7 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      ESMC_Comp *f90comp = (ESMC_Comp *)ptr;
      ESMC_FTable *tabptr;
      
+     if (status) *status = ESMF_SUCCESS;  // assume success 'till problems found
 
      //printf("ptr = 0x%08x\n", (unsigned long)ptr);
      //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
@@ -163,23 +164,26 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
          if (status) *status = funcrc;
          return;
      }
-     if (status) *status = ESMF_SUCCESS;
 
      // time to startup the VM for this component...     
-     int rcc;
      ESMC_VM *vm_parent;
-     FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &rcc);
-//fprintf(stderr, "gjt debug: ESMC_SetServ, vm_parent=%p\n", vm_parent);
+     FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &localrc); //get vm_parent
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       status)) return;
      ESMC_VMPlan *vmplan_p;
-     FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &rcc);   // obtain vmplan_p
-//fprintf(stderr, "gjt debug: ESMC_SetServ, vm_plan=%p\n", vmplan_p);
+     FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &localrc);    //get vmplan_p
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       status)) return;
+     // parent VM and plan for child can now be used to startup the child VM
      void *vm_info = vm_parent->ESMC_VMStartup(vmplan_p,
-       ESMC_FTableCallEntryPointVMHop, NULL);
-//gjt     void *vm_info = vm_parent->vmk_startup(
-//gjt     static_cast<ESMC_VMKPlan *>(vmplan_p), ESMC_FTableCallEntryPointVMHop,
-//gjt      NULL);
-//fprintf(stderr, "gjt debug: ESMC_SetServ, vm_info=%p\n", vm_info);
-     FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &rcc);
+       ESMC_FTableCallEntryPointVMHop, NULL, &localrc);
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       status)) return;
+     // keep vm_info in a safe place (in parent component) 'till it's used again
+     FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &localrc);
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       status)) return;
+     // ...now the component's VM is started up and placed on hold.
      
      return;
   
