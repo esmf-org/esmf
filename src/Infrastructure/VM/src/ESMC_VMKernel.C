@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.1 2004/10/26 21:31:19 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.2 2004/10/28 15:36:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -83,8 +83,10 @@ typedef struct{
   pthread_cond_t cond0;
   pthread_mutex_t mut1;
   pthread_cond_t cond1;
-  pthread_mutex_t mut_extra;
-  pthread_cond_t cond_extra;
+  pthread_mutex_t mut_extra1;
+  pthread_cond_t cond_extra1;
+  pthread_mutex_t mut_extra2;
+  pthread_cond_t cond_extra2;
   void *arg;
 }vmkt_t;
 
@@ -94,12 +96,16 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
   pthread_mutex_lock(&(vmkt->mut0));
   pthread_cond_init(&(vmkt->cond0), NULL);
   pthread_mutex_init(&(vmkt->mut1), NULL);
-  pthread_mutex_lock(&(vmkt->mut1));
+  //pthread_mutex_lock(&(vmkt->mut1));
   pthread_cond_init(&(vmkt->cond1), NULL);
-  pthread_mutex_init(&(vmkt->mut_extra), NULL);
-  pthread_mutex_lock(&(vmkt->mut_extra));
-  pthread_cond_init(&(vmkt->cond_extra), NULL);
+  pthread_mutex_init(&(vmkt->mut_extra1), NULL);
+  //pthread_mutex_lock(&(vmkt->mut_extra1));
+  pthread_cond_init(&(vmkt->cond_extra1), NULL);
+  pthread_mutex_init(&(vmkt->mut_extra2), NULL);
+  pthread_mutex_lock(&(vmkt->mut_extra2));
+  pthread_cond_init(&(vmkt->cond_extra2), NULL);
   int error = pthread_create(&(vmkt->tid), NULL, vmkt_spawn, arg);
+  pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0));
   return error;
 }
 
@@ -517,6 +523,14 @@ static void *vmk_spawn(void *arg){
 #endif
   // fill in the tid for this thread
   sarg->pthid = sarg->vmkt.tid;
+  // use vmkt features to prepare for catch/release loop
+  vmkt_t *vmkt = &(sarg->vmkt);
+  pthread_mutex_lock(&(vmkt->mut0));
+  pthread_mutex_lock(&(vmkt->mut1));
+  pthread_mutex_lock(&(vmkt->mut_extra1));
+  pthread_cond_signal(&(vmkt->cond0));
+  pthread_mutex_unlock(&(vmkt->mut0));  
+  volatile int *f = &(vmkt->flag);
   // obtain reference to the vm instance on heap
   ESMC_VMK &vm = *(sarg->myvm);
   // setup the pet section in this vm instance
@@ -524,9 +538,6 @@ static void *vmk_spawn(void *arg){
     sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
     sarg->pth_mutex2, sarg->pth_mutex, sarg->pth_finish_count,
     sarg->commarray, sarg->pref_intra_ssi);  
-  // use vmkt features to prepare for catch/release loop
-  vmkt_t *vmkt = &(sarg->vmkt);
-  volatile int *f = &(vmkt->flag);
   // now enter the catch/release loop
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
@@ -590,6 +601,11 @@ static void *vmk_sigcatcher(void *arg){
   vmkt_t *blocker_vmkt;
   // use vmkt features to prepare for catch/release loop
   vmkt_t *vmkt = &(sarg->vmkt_extra);
+  pthread_mutex_lock(&(vmkt->mut0));
+  pthread_mutex_lock(&(vmkt->mut1));
+  pthread_mutex_lock(&(vmkt->mut_extra1));
+  pthread_cond_signal(&(vmkt->cond0));
+  pthread_mutex_unlock(&(vmkt->mut0));  
   volatile int *f = &(vmkt->flag);
   // since LinuxThreads (pre NPTL) have the problem that each thread reports
   // its own PID instead the same for each thread, which would be the posix
@@ -598,9 +614,9 @@ static void *vmk_sigcatcher(void *arg){
   pid_t pid = getpid();
   vmkt->arg = (void *)&pid;
   // next is to signal the parent thread that sigcatcher is done with getpid
-  pthread_mutex_lock(&(vmkt->mut_extra));
-  pthread_cond_signal(&(vmkt->cond_extra));
-  pthread_mutex_unlock(&(vmkt->mut_extra));
+  pthread_mutex_lock(&(vmkt->mut_extra2));
+  pthread_cond_signal(&(vmkt->cond_extra2));
+  pthread_mutex_unlock(&(vmkt->mut_extra2));
   // now enter the catch/release loop
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
@@ -655,9 +671,9 @@ static void *vmk_sigcatcher(void *arg){
 #endif
 //  pthread_kill(thread_wake, VM_SIG2);
   
-  pthread_mutex_lock(&(blocker_vmkt->mut_extra));
-  pthread_cond_signal(&(blocker_vmkt->cond_extra));
-  pthread_mutex_unlock(&(blocker_vmkt->mut_extra));
+  pthread_mutex_lock(&(blocker_vmkt->mut_extra1));
+  pthread_cond_signal(&(blocker_vmkt->cond_extra1));
+  pthread_mutex_unlock(&(blocker_vmkt->mut_extra1));
   
   // this sigcatcher has done its job and is allowed to recycle to be caught...
   
@@ -681,6 +697,11 @@ static void *vmk_block(void *arg){
   sarg->pthid = sarg->vmkt.tid;
   // use vmkt features to prepare for catch/release loop
   vmkt_t *vmkt = &(sarg->vmkt);
+  pthread_mutex_lock(&(vmkt->mut0));
+  pthread_mutex_lock(&(vmkt->mut1));
+  pthread_mutex_lock(&(vmkt->mut_extra1));
+  pthread_cond_signal(&(vmkt->cond0));
+  pthread_mutex_unlock(&(vmkt->mut0));  
   volatile int *f = &(vmkt->flag);
   // now enter the catch/release loop
   for(;;){
@@ -721,7 +742,7 @@ static void *vmk_block(void *arg){
 
 //  sigwait(&sigs_to_catch, &caught);
   
-  pthread_cond_wait(&(vmkt->cond_extra), &(vmkt->mut_extra));
+  pthread_cond_wait(&(vmkt->cond_extra1), &(vmkt->mut_extra1));
 
 #if (VERBOSITY > 9)
 //  fprintf(stderr, "I am a blocker for pid %d, my tid is %d and\n"
@@ -914,8 +935,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
               // obtained with getpid() above, and thus won't break posix!
               // So we wait here until the sigcatcher thead is done getting its
               // PID and then overwrite the .pid member:
-              pthread_cond_wait(&(sarg[0].vmkt_extra.cond_extra), 
-                &(sarg[0].vmkt_extra.mut_extra));
+              pthread_cond_wait(&(sarg[0].vmkt_extra.cond_extra2), 
+                &(sarg[0].vmkt_extra.mut_extra2));
               new_contributors[new_petid][ncontrib_counter].pid = 
                 *(pid_t *)sarg[0].vmkt_extra.arg;
               // send contributor info over to this pet (i) that receives cores
