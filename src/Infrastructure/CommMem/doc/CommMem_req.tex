@@ -1,4 +1,4 @@
-% $Id: CommMem_req.tex,v 1.5 2002/07/23 18:27:41 vbalaji Exp $
+% $Id: CommMem_req.tex,v 1.6 2002/07/23 20:42:12 vbalaji Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -33,7 +33,8 @@ an optimal memory strategy and communication pattern.
 
 Given a \textbf{Remapping} between \textbf{Distgrid}s, the ESMF setup
 phase will compute and store an optimal memory strategy and
-communication pattern.
+communication pattern. Domains may be reassigned for the individual
+\textbf{DistGrid}s at this stage to optimize the layout for remapping.
 
 \begin{reqlist}
 {\bf Priority:} Priority 1 \\
@@ -63,12 +64,11 @@ performance-critical grid collectives.
 {\bf Verification:} Unit tests, EVA tests \\
 \end{reqlist}
 
-\ssreq{Setup performance profiling}
+\ssreq{Setup bit-reproducible collectives}
 
-The \textbf{CMK} operations are all instrumented for memory and
-communication profiling. The setup phase will include mechanisms for
-turning on and off the available options for profiling, and assigning
-a reporting mechanism (e.g write to stdout).
+Given a \textbf{Distgrid}, the ESMF setup
+phase will compute and store a communication map for
+bit-reproducible grid collectives.
 
 \begin{reqlist}
 {\bf Priority:} Priority 1 \\
@@ -77,11 +77,12 @@ a reporting mechanism (e.g write to stdout).
 {\bf Verification:} Unit tests, EVA tests \\
 \end{reqlist}
 
-\ssreq{Setup bit-reproducible collectives}
+\sreq{Setup performance profiling}
 
-Given a \textbf{Distgrid}, the ESMF setup
-phase will compute and store a communication map for
-bit-reproducible grid collectives.
+The \textbf{CMK} operations are all instrumented for memory and
+communication profiling. The setup phase will include mechanisms for
+turning on and off the available options for profiling, and assigning
+a reporting mechanism (e.g write to stdout).
 
 \begin{reqlist}
 {\bf Priority:} Priority 1 \\
@@ -109,12 +110,17 @@ These include
 {\bf Verification:} Unit tests, EVA tests \\
 \end{reqlist}
 
+\ssreq{Heterogeneous platform}
+
+Platform attributes for multiple platforms must be available for
+heterogeneous applications.
+
 \sreq{Determine PE attributes}
 
 Primitives for determining key PE attributes are required.
 These include
 \begin{itemize}
-\item Identifier of the PE associated with a data domain.
+\item Identifier of the PE.
 \item Identifiers of the memory and communication groupings a PE
 belongs to e.g. m-node.1, a-node.1, p-node.3 etc...
 \item Identifiers of the physical resources (CPU, memory, storage) associated with a PE.
@@ -136,19 +142,44 @@ bindings were made.
 
 \req{Communication primitives}
 
-\sreq{Point-to-point primitives}
+% \sreq{Point-to-point primitives}
 
-\ssreq{Non-blocking send}
-A performance-critical non-blocking send operation to a specified
-target is required.
+% \ssreq{Non-blocking send}
+% A performance-critical non-blocking send operation to a specified
+% target is required.
 
-\ssreq{Non-blocking receive}
-A performance-critical non-blocking receive operation from a specified
-source is required.
+% \ssreq{Non-blocking receive}
+% A performance-critical non-blocking receive operation from a specified
+% source is required.
 
-\ssreq{Non-blocking receive from unspecific source}
-A performance-critical non-blocking receive operation from an unspecified
-source is required.
+% \ssreq{Non-blocking receive from unspecific source}
+% A performance-critical non-blocking receive operation from an unspecified
+% source is required.
+
+% \ssreq{Multiple outstanding messages}
+
+% Both send and receive phases must be capable of tolerating multiple
+% outstanding messages between source-target pairs, up to some specified
+% queue limit.
+
+% \ssreq{Wait}
+
+% A performance-critical wait operation for a specified message must be present.
+
+% \ssreq{Waitall}
+
+% A performance-critical wait operation for all outstanding messages must be present.
+
+% \ssreq{Barrier}
+
+% A point-to-point barrier operation is required.
+
+\sreq{Collective primitives}
+
+\ssreq{All-to-all}
+
+A general, non-blocking all-to-all collective communication operation
+shall be the basic ESMF message-passing pathway.
 
 \ssreq{Multiple outstanding messages}
 
@@ -156,19 +187,11 @@ Both send and receive phases must be capable of tolerating multiple
 outstanding messages between source-target pairs, up to some specified
 queue limit.
 
-\ssreq{Wait}
+\ssreq{Collective wait}
 
-A performance-critical wait operation for a specified message must be present.
-
-\ssreq{Waitall}
-
-A performance-critical wait operation for all outstanding messages must be present.
-
-\ssreq{Barrier}
-
-A point-to-point barrier operation is required.
-
-\sreq{Collective primitives}
+There shall be a wait operation for the basic ESMF collective
+communication pathway to ensure all outstanding \emph{local} messages
+are completed.
 
 \ssreq{Broadcast}
 
@@ -216,11 +239,11 @@ internal storage required for this may be prohibitive).
 It shall be possible during the setup phase to set caliper points
 around a code section, i.e:
 
-\begin{verbatim}
-ESMF_tick('radiation')
-...radiation code
-ESMF_tock('radiation')
-\end{verbatim}
+% \begin{verbatim}
+% ESMF_tick('radiation')
+% ...radiation code
+% ESMF_tock('radiation')
+% \end{verbatim}
 
 to have the reports above narrowed to this code section. The number of
 caliper pairs is limited to a pre-specifed value.

@@ -1,4 +1,4 @@
-% $Id: CommMem_background.tex,v 1.5 2002/07/23 18:27:41 vbalaji Exp $
+% $Id: CommMem_background.tex,v 1.6 2002/07/23 20:42:12 vbalaji Exp $
 
 \section{Background}
 
@@ -57,6 +57,9 @@ not concerned with ESMF {\it partition} based parallelism as this does
 not involve any communication between components or among data
 domains.
 
+User code containing its own message-passing primitives or shared
+memory directives may co-exist with ESMF, but use of this layer
+is recommended for fully realizing the benefits of ESMF.
 
 \subsection{Related Material}
 
