@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.13 2004/02/27 04:35:34 cdeluca Exp $
+! $Id: ESMF_DataMap.F90,v 1.14 2004/03/05 18:20:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -224,7 +224,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.13 2004/02/27 04:35:34 cdeluca Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.14 2004/03/05 18:20:22 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -751,7 +751,7 @@ end function
         if (present(vertRelloc)) then
           datamap%vertRelloc = vertRelloc
         else
-          datamap%vertRelloc = ESMF_CELL_CELL
+          datamap%vertRelloc = ESMF_CELL_UNDEFINED
         endif
 
         datamap%interleave%il_type = ESMF_IL_ITEM
@@ -869,7 +869,7 @@ end function
         if (present(vertRelloc)) then
           datamap%vertRelloc = vertRelloc
         else
-          datamap%vertRelloc = ESMF_CELL_CELL
+          datamap%vertRelloc = ESMF_CELL_UNDEFINED
         endif
 
         datamap%interleave%il_type = ESMF_IL_ITEM
