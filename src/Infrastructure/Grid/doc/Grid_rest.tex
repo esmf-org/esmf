@@ -1,4 +1,4 @@
-% $Id: Grid_rest.tex,v 1.6 2004/06/22 20:54:17 jwolfe Exp $
+% $Id: Grid_rest.tex,v 1.7 2004/06/23 16:16:58 jwolfe Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
@@ -31,46 +31,46 @@ create methods will be added:
 be supported, although only some will have internal generation 
 methods:
  \begin{description}
+    \item [ESMF\_GRID\_TYPE\_CART\_SPECT]
+          Spectral space for cartesian coordinates
+    \item [ESMF\_GRID\_TYPE\_CUBEDSPHERE]
+          Cubed sphere grid
+    \item [ESMF\_GRID\_TYPE\_DATASTREAM]
+          Data stream - set of locations
+    \item [ESMF\_GRID\_TYPE\_DIPOLE]
+          Displaced-pole dipole grid
+    \item [ESMF\_GRID\_TYPE\_EXCHANGE]
+          Intersection of two grids, which is itself a grid
+    \item [ESMF\_GRID\_TYPE\_GEODESIC]
+          Spherical geodesic grid
     \item [ESMF\_GRID\_TYPE\_LATLON\_GAUSS]
           Latitude/Longitude grid with gaussian-spaced latitudes
     \item [ESMF\_GRID\_TYPE\_LATLON\_MERC]
           Latitude/Longitude grid with Mercator-spaced latitudes
+    \item [ESMF\_GRID\_TYPE\_PHYSFOURIER]
+          Mixed Fourier Space/Physcal Space grid
     \item [ESMF\_GRID\_TYPE\_REDUCED]
           Latitude/Longitude grid where the number of longitudinal points is a
           function of the latitude
-    \item [ESMF\_GRID\_TYPE\_DIPOLE]
-          Displaced-pole dipole grid
-    \item [ESMF\_GRID\_TYPE\_TRIPOLE]
-          Tripolar grids
-    \item [ESMF\_GRID\_TYPE\_DATASTREAM]
-          Data stream - set of locations
-    \item [ESMF\_GRID\_TYPE\_PHYSFOURIER]
-          Mixed Fourier Space/Physcal Space grid
     \item [ESMF\_GRID\_TYPE\_SPHER\_SPECT]
           Spectral space for spherical harmonics
-    \item [ESMF\_GRID\_TYPE\_CART\_SPECT]
-          Spectral space for cartesian coordinates
-    \item [ESMF\_GRID\_TYPE\_GEODESIC]
-          Spherical geodesic grid
-    \item [ESMF\_GRID\_TYPE\_CUBEDSPHERE]
-          Cubed sphere grid
-    \item [ESMF\_GRID\_TYPE\_EXCHANGE]
-          Intersection of two grids, which is itself a grid
+    \item [ESMF\_GRID\_TYPE\_TRIPOLE]
+          Tripolar grids
  \end{description}
 
 \item {\bf Future coordinate system support.}  Support for the following
 coordinate systems will be added:
  \begin{description}
-    \item [ESMF\_COORD\_SYSTEM\_USER]
-          User-defined coordinate system
     \item [ESMF\_COORD\_SYSTEM\_CYLINDRICAL]
           Cylindrical coordinates
+    \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN]
+          Lagrangian coordinates
     \item [ESMF\_COORD\_SYSTEM\_LATFOURIER]
           Mixed latitude/Fourier spectral space
     \item [ESMF\_COORD\_SYSTEM\_SPECTRAL]
           Wavenumber space
-    \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN]
-          Lagrangian coordinates
+    \item [ESMF\_COORD\_SYSTEM\_USER]
+          User-defined coordinate system
  \end{description}
 
 \item {\bf Future horizontal Grid staggerings.}  Support for the following
@@ -87,20 +87,20 @@ vertical grids will be added:
  \begin{description}
     \item [ESMF\_COORD\_SYSTEM\_DEPTH]
           Vertical z coordinate depth (0 at top surface)
+    \item [ESMF\_COORD\_SYSTEM\_ETA]
+          Vertical eta coordinate
+    \item [ESMF\_COORD\_SYSTEM\_HYBRID]
+          Hybrid vertical coordinates
+    \item [ESMF\_COORD\_SYSTEM\_ISOPYCNAL]
+          Vertical density coordinate
+    \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN]
+          Lagrangian coordinates
     \item [ESMF\_COORD\_SYSTEM\_PRESSURE]
           Vertical pressure coordinate
     \item [ESMF\_COORD\_SYSTEM\_SIGMA]
           Vertical sigma coordinate
     \item [ESMF\_COORD\_SYSTEM\_THETA]
           Vertical theta coordinate
-    \item [ESMF\_COORD\_SYSTEM\_ETA]
-          Vertical eta coordinate
-    \item [ESMF\_COORD\_SYSTEM\_ISOPYCNAL]
-          Vertical density coordinate
-    \item [ESMF\_COORD\_SYSTEM\_HYBRID]
-          Hybrid vertical coordinates
-    \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN]
-          Lagrangian coordinates
  \end{description}
 
 \item {\bf Future Grid masks.}  Grid masks will be implemented, including
