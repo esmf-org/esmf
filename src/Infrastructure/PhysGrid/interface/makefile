@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2002/11/01 19:54:38 jwolfe Exp $
+# $Id: makefile,v 1.1 2002/11/01 19:53:45 jwolfe Exp $
 
 # leave alone.
 ALL: lib 
@@ -10,9 +10,9 @@ CFLAGS    =
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = 
+SOURCEC	  = ESMC_PhysGrid.C
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_PhysGrid.F90
+SOURCEF	  = 
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 
@@ -30,7 +30,7 @@ DIRS	  =
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/PhysGrid/src
+LOCDIR	  = src/Infrastructure/PhysGrid/interface
 
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
