@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.4 2003/07/17 22:37:53 nscollins Exp $
+// $Id: ESMC_Grid.h,v 1.5 2004/11/30 21:01:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,5 +61,20 @@ class ESMC_Grid : public ESMC_Base {
 //
 //
 
+extern "C" {
+
+void c_esmc_gridserialize(int *gridStatus, int *dimCount, 
+                          int *hasLocalData, int *gridStructure, 
+                          int *horzGridType, int *vertGridType,      
+                          int *horzStagger, int *vertStagger,
+                          void *buffer, int *length, int *offset, int *localrc);
+
+void c_esmc_griddeserialize(int *gridStatus, int *dimCount, 
+                            int *hasLocalData, int *gridStructure, 
+                            int *horzGridType, int *vertGridType,      
+                            int *horzStagger, int *vertStagger,
+                            void *buffer, int *offset, int *localrc);
+
+}
 
 #endif  // ESMC_Grid_H

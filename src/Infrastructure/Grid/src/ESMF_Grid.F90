@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.197 2004/11/29 20:33:44 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.198 2004/11/30 21:01:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,6 +94,8 @@
     public ESMF_GridGlobalToDELocalAI
     public ESMF_GridDELocalToGlobalAI
     !public ESMF_GridSearch
+    public ESMF_GridSerialize
+    public ESMF_GridDeserialize
 
 !------------------------------------------------------------------------------
 !
@@ -104,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.197 2004/11/29 20:33:44 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.198 2004/11/30 21:01:28 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5489,6 +5491,174 @@
 !      end subroutine ESMF_GridSearchPoint
 !
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_GridSerialize - Serialize grid info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_GridSerialize(grid, buffer, length, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Grid} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_GridWrite()} and {\tt ESMF\_GridRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           {\tt ESMF\_Grid} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                     ! Error status
+      type(ESMF_GridClass), pointer :: gp    ! grid class
+
+      ! shortcut to internals
+      gp => grid%ptr
+
+      call c_ESMC_BaseSerialize(gp%base, buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_GridSerialize(gp%gridStatus, gp%dimCount, gp%hasLocalData, &
+                                gp%gridStructure, gp%horzGridType, &
+                                gp%vertGridType, gp%horzStagger, &
+                                gp%vertStagger, &
+                                buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      !call ESMF_PhysGridSerialize(gp%physgrid, buffer, length, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      !call ESMF_DistGridSerialize(gp%distgrid, buffer, length, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_GridDeserialize - Deserialize a byte stream into a Grid
+!
+! !INTERFACE:
+      function ESMF_GridDeserialize(buffer, offset, rc) 
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridDeserialize   
+!
+! !ARGUMENTS:
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a Grid object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_GridWrite()} and {\tt ESMF\_GridRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc, status             ! Error status, allocation status
+      type(ESMF_GridClass), pointer :: gp    ! grid class
+
+      ! in case of error, make sure this is invalid.
+      nullify(ESMF_GridDeserialize%ptr)
+
+      ! shortcut to internals
+      allocate(gp, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                     "space for new Grid object", &
+                                     ESMF_CONTEXT, rc)) return
+
+
+      call ESMF_BaseCreate(gp%base, "Grid", "dummy", 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! this overwrites the name and adds attributes to the base obj.
+      call c_ESMC_BaseDeserialize(gp%base, buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_GridDeserialize(gp%gridStatus, gp%dimCount, gp%hasLocalData, &
+                                  gp%gridStructure, gp%horzGridType, &
+                                  gp%vertGridType, gp%horzStagger, &
+                                  gp%vertStagger, &
+                                  buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      gp%numPhysGrids = 0
+      !call ESMF_PhysGridDeserialize(gp%physgrid, buffer, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      gp%numDistGrids = 0
+      !call ESMF_DistGridDeserialize(gp%distgrid, buffer, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      ESMF_GridDeserialize%ptr => gp
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_GridDeserialize
+!------------------------------------------------------------------------------
+
 
       end module ESMF_GridMod
 

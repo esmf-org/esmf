@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/08/03 19:33:48 nscollins Exp $
+# $Id: makefile,v 1.3 2004/11/30 21:01:13 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -10,7 +10,7 @@ CFLAGS    =
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_FieldDataMap.C
+SOURCEC	  = ESMC_FieldDataMap.C ESMC_FieldDataMap_F.C
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
 # if you have .h include files in this dir, list them all on the line below.

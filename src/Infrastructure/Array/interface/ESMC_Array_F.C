@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.29 2004/06/17 16:04:53 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.30 2004/11/30 20:59:01 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include <iostream.h>
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
+#include "ESMC_LogErr.h"
 #include "ESMC_Array.h"
 #include "ESMC_DELayout.h"
 
@@ -385,6 +386,76 @@ extern "C" {
              delete[] filetemp;
      }
 
-};
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_ArraySerialize - Serialize Array object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_arrayserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Array **array,       // in/out - array object
+      char *buf,                // in/out - really a byte stream
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a array object.
+//
+//EOP
+
+  int i, status;
+
+  if (!array) {
+    //printf("uninitialized Array object\n");
+    ESMC_LogDefault.ESMC_LogWrite("Array object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*array)->ESMC_ArraySerialize(buf, length, offset);
+
+  return;
+
+}  // end c_ESMC_ArraySerialize
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_ArrayDeserialize - Deserialize Array object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_arraydeserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Array **array,       // in/out - array object
+      char *buf,                // in/out - really a byte stream
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a array object.
+//
+//EOP
+
+  int i, status;
+
+  (*array) = ESMC_ArrayDeserialize(buf, offset);
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_ArrayDeserialize
+
+
+}
 
 

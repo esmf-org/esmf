@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.191 2004/11/23 00:38:23 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.192 2004/11/30 21:00:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -147,13 +147,11 @@
         type (ESMF_Status) :: gridstatus = ESMF_STATUS_UNINIT
         type (ESMF_Status) :: datastatus = ESMF_STATUS_UNINIT
         type (ESMF_Status) :: datamapstatus = ESMF_STATUS_UNINIT
-        type (ESMF_GridClass), pointer :: gridp => NULL()  ! for faster access
 #else
         type (ESMF_Status) :: fieldstatus
         type (ESMF_Status) :: gridstatus
         type (ESMF_Status) :: datastatus
         type (ESMF_Status) :: datamapstatus
-        type (ESMF_GridClass), pointer :: gridp
 #endif
         type (ESMF_Grid) :: grid             ! save to satisfy query routines
         type (ESMF_LocalField) :: localfield ! this differs per DE
@@ -224,6 +222,8 @@
    public ESMF_FieldWrite              ! Write data and grid from a Field
 
    public ESMF_FieldConstruct          ! Only public for internal use
+   public ESMF_FieldSerialize
+   public ESMF_FieldDeserialize
 
 !  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !  !function ESMF_FieldReadRestart(name, iospec, rc)
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.191 2004/11/23 00:38:23 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.192 2004/11/30 21:00:48 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5059,5 +5059,219 @@
       end subroutine ESMF_FieldBoxIntersect
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_FieldSerialize - Serialize field info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_FieldSerialize(field, buffer, length, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Field} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_FieldWrite()} and {\tt ESMF\_FieldRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           {\tt ESMF\_Field} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                     ! Error status
+      type(ESMF_FieldType), pointer :: fp    ! field type
+
+      ! shortcut to internals
+      fp => field%ftypep
+
+#if 0
+      ! TODO: these are currently unused and are not serialized or deserialized.
+      type (ESMF_LocalField) :: localfield ! this differs per DE
+        type (ESMF_Mask) :: mask                 ! may belong in Grid
+        integer :: rwaccess                      ! reserved for future use
+        integer :: accesscount                   ! reserved for future use
+#endif
+
+      call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_FieldSerialize(fp%fieldstatus, fp%gridstatus, fp%datastatus, &
+                                 fp%datamapstatus, fp%iostatus, &
+                                 buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call ESMF_GridSerialize(fp%grid, buffer, length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldDataMapSerialize(fp%mapping, buffer, length, &
+                                      offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_IOSpecSerialize(fp%iospec, buffer, length, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_ArraySerialize(fp%localfield%localdata, buffer(1), length, &
+                                 offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      !call c_ESMC_ArraySpecSerialize(fp%localfield%arrayspec, buffer, length, &
+      !                               offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_FieldDeserialize - Deserialize a byte stream into a Field
+!
+! !INTERFACE:
+      function ESMF_FieldDeserialize(buffer, offset, rc) 
+!
+! !RETURN VALUE:
+      type(ESMF_Field) :: ESMF_FieldDeserialize   
+!
+! !ARGUMENTS:
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a Field object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_FieldWrite()} and {\tt ESMF\_FieldRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc, status             ! Error status, allocation status
+      type(ESMF_FieldType), pointer :: fp    ! field type
+
+      ! in case of error, make sure this is invalid.
+      nullify(ESMF_FieldDeserialize%ftypep)
+
+      ! shortcut to internals
+      allocate(fp, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                     "space for new Field object", &
+                                     ESMF_CONTEXT, rc)) return
+
+
+#if 0
+      ! TODO: these are currently unused and not serialized.
+      type (ESMF_LocalField) :: localfield ! this differs per DE
+        type (ESMF_Mask) :: mask                 ! may belong in Grid
+        integer :: rwaccess                      ! reserved for future use
+        integer :: accesscount                   ! reserved for future use
+#endif
+
+      call ESMF_BaseCreate(fp%base, "Field", "dummy", 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! this overwrites the name and adds attributes to the base obj.
+      call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_FieldDeserialize(fp%fieldstatus, fp%gridstatus, &
+                                   fp%datastatus, fp%datamapstatus, &
+                                   fp%iostatus, buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      fp%grid = ESMF_GridDeserialize(buffer, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldDataMapDeserialize(fp%mapping, buffer, &
+                                      offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_IOSpecDeserialize(fp%iospec, buffer, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_ArrayDeserialize(fp%localfield%localdata, &
+                                   buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_ArraySpecDeserialize(fp%arrayspec, buffer, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      ESMF_FieldDeserialize%ftypep => fp
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_FieldDeserialize
+!------------------------------------------------------------------------------
 
       end module ESMF_FieldMod
+

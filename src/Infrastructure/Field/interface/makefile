@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.7 2004/02/13 15:35:56 nscollins Exp $ 
+# $Id: makefile,v 1.8 2004/11/30 21:00:48 nscollins Exp $ 
 
 ALL: build_here 
 
 CFLAGS    =
 FFLAGS    =
-SOURCEC	  = ESMC_Field.C 
+SOURCEC	  = ESMC_Field.C  ESMC_Field_F.C
 SOURCEF	  = ESMF_Field_C.F90 
 STOREH	  = ESMC_Field.h 
 

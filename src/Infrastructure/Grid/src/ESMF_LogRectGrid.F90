@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.112 2004/11/24 19:19:10 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.113 2004/11/30 21:01:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -117,7 +117,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.112 2004/11/24 19:19:10 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.113 2004/11/30 21:01:31 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2320,8 +2320,8 @@
       enddo
       myCount = countsPerDE1(myDE(1))*countsPerDE2(myDE(2))
       if (dimCount.eq.3) myCount = myCount*countsPerDE3(myDE(3))
-      grid%hasLocalData = .true.
-      if (myCount.le.0) grid%hasLocalData = .false.
+      grid%hasLocalData = ESMF_TRUE
+      if (myCount.le.0) grid%hasLocalData = ESMF_FALSE
 
       ! Create DistGrid and PhysGrid at cell center
       dimCountGrid = dimCount
@@ -3777,7 +3777,7 @@
       localMin(2) = 0.0
       localStart(1) = 0
       localStart(2) = 0
-      if (grid%hasLocalData) then
+      if (grid%hasLocalData .eq. ESMF_TRUE) then
 
         ! set local starts for this DE
         if (myDE(1).ge.2) then
@@ -3908,7 +3908,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      if (grid%hasLocalData) then
+      if (grid%hasLocalData .eq. ESMF_TRUE) then
         ! set coordinate min/max using total cell count -- but don't include the halo
         ! region around the global grid
         counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
@@ -3949,7 +3949,7 @@
                                 ESMF_CONTEXT, rc)) return
       physGridId = grid%numPhysGrids
 
-      if (grid%hasLocalData) then
+      if (grid%hasLocalData .eq. ESMF_TRUE) then
         ! set coordinates using total cell count
         counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
         counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth

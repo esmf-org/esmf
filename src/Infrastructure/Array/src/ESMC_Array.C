@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.36 2004/10/20 17:06:05 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.37 2004/11/30 20:59:02 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.36 2004/10/20 17:06:05 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.37 2004/11/30 20:59:02 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1906,6 +1906,85 @@
  } // end ESMC_ArrayWrite
 
 
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArraySerialize"
+//BOPI
+// !IROUTINE:  ESMC_ArraySerialize - Turn array information into a byte stream
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArraySerialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in array class into a stream of bytes.
+//
+//EOPI
+    int fixedpart, nbytes;
+    char *cp;
+
+    fixedpart = sizeof(ESMC_Array);
+    if ((*length - *offset) < fixedpart) {
+        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        *length += 2 * fixedpart;
+    }
+
+    // what about base object and attributes?  
+
+    cp = (char *)(buffer + *offset);
+    memcpy(cp, (void *)this, sizeof(ESMC_Array));
+    cp += sizeof(ESMC_Array);
+
+    *offset = (cp - buffer);
+   
+    return ESMF_SUCCESS;
+
+ } // end ESMC_Serialize
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Deserialize"
+//BOPI
+// !IROUTINE:  ESMC_ArrayDeserialize - Turn a byte stream into an object
+//
+// !INTERFACE:
+      ESMC_Array *ESMC_ArrayDeserialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+    ESMC_Array *a = new ESMC_Array;
+    char *cp;
+
+    // what about base object and attributes?  
+
+    cp = (char *)(buffer + *offset);
+    memcpy((void *)a, cp, sizeof(ESMC_Array));
+    cp += sizeof(ESMC_Array);
+
+    *offset = (cp - buffer);
+   
+    return a;
+
+ } // end ESMC_ArrayDeserialize
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

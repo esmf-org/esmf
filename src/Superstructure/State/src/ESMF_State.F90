@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.74 2004/11/05 18:18:12 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.75 2004/11/30 21:01:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.74 2004/11/05 18:18:12 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.75 2004/11/30 21:01:54 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -5155,12 +5155,208 @@ end interface
 
       end subroutine ESMF_StateClassExtendList
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_StateSerialize - Serialize state info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_StateSerialize(state, buffer, length, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_State} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_StateWrite()} and {\tt ESMF\_StateRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!           {\tt ESMF\_State} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc, status                     ! Error status
+      integer :: i
+      type(ESMF_StateClass), pointer :: sp           ! state type
+      type(ESMF_StateItem), pointer :: sip           ! state item
+
+      ! shortcut to internals
+      sp => state%statep
+
+      call c_ESMC_BaseSerialize(sp%base, buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_StateSerialize(sp%statestatus, sp%st, sp%needed_default, &
+                                 sp%ready_default, sp%reqrestart_default, &
+                                 sp%alloccount, sp%datacount, &
+                                 buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      do i = 1, sp%datacount
+          sip => sp%datalist(i)
+
+          call c_ESMC_StateTypeSerialize(sip%otype, sip%namep, &
+                                         sip%indirect_index, sip%needed, &
+                                         sip%ready, sip%valid, sip%reqrestart, &
+                                         buffer(1), length, offset, localrc)
+
+          select case (sip%otype%ot)
+            case (ESMF_STATEITEM_BUNDLE%ot)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_FIELD%ot)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_ARRAY%ot)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_STATE%ot)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_NAME%ot)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_INDIRECT%ot)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_UNKNOWN%ot)
+              continue ! TODO: serialize
+          end select
+
+      enddo
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_StateDeserialize - Deserialize a byte stream into a State
+!
+! !INTERFACE:
+      function ESMF_StateDeserialize(buffer, offset, rc) 
+!
+! !RETURN VALUE:
+      type(ESMF_State) :: ESMF_StateDeserialize   
+!
+! !ARGUMENTS:
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a State object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_StateWrite()} and {\tt ESMF\_StateRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc, status                     ! Error status
+      integer :: i
+      type(ESMF_StateClass), pointer :: sp           ! state type
+      type(ESMF_StateItem), pointer :: sip           ! state item
+
+
+      ! in case of error, make sure this is invalid.
+      nullify(ESMF_StateDeserialize%statep)
+
+      allocate(sp, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                     "space for new State object", &
+                                     ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseDeserialize(sp%base, buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_StateDeserialize(sp%statestatus, sp%st, sp%needed_default, &
+                                 sp%ready_default, sp%reqrestart_default, &
+                                 sp%alloccount, sp%datacount, &
+                                 buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      allocate(sp%datalist(sp%alloccount), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "State type", &
+                                       ESMF_CONTEXT, rc)) return
+
+      do i = 1, sp%datacount
+          sip => sp%datalist(i)
+
+          call c_ESMC_StateTypeDeserialize(sip%otype, sip%namep, &
+                                         sip%indirect_index, sip%needed, &
+                                         sip%ready, sip%valid, sip%reqrestart, &
+                                         buffer(1), offset, localrc)
+
+          select case (sip%otype%ot)
+            case (ESMF_STATEITEM_BUNDLE%ot)
+              continue ! TODO: deserialize
+            case (ESMF_STATEITEM_FIELD%ot)
+              continue ! TODO: deserialize
+            case (ESMF_STATEITEM_ARRAY%ot)
+              continue ! TODO: deserialize
+            case (ESMF_STATEITEM_STATE%ot)
+              continue ! TODO: deserialize
+            case (ESMF_STATEITEM_NAME%ot)
+              continue ! TODO: deserialize
+            case (ESMF_STATEITEM_INDIRECT%ot)
+              continue ! TODO: deserialize
+            case (ESMF_STATEITEM_UNKNOWN%ot)
+              continue ! TODO: deserialize
+          end select
+
+      enddo
+
+
+      ESMF_StateDeserialize%statep => sp
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_StateDeserialize
+!------------------------------------------------------------------------------
+
 
 
       end module ESMF_StateMod
-
-
-
 
 
 

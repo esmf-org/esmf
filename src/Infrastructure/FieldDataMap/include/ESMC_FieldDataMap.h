@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldDataMap.h,v 1.1 2004/05/10 15:38:14 nscollins Exp $
+// $Id: ESMC_FieldDataMap.h,v 1.2 2004/11/30 21:01:13 nscollins Exp $
 //
 //-------------------------------------------------------------------------
 //BOP
@@ -25,3 +25,29 @@
 //EOP
 //
 
+extern "C" {
+
+// non-method functions
+void c_esmc_arraydatamapserialize(int *status, int *dataRank,
+                                  int *dataDimOrder,      /* ESMF_MAXDIM ints */
+                                  int *dataNonGridCounts, /* ESMF_MAXDIM ints */
+                         void *buffer, int *length, int *offset, int *localrc);
+
+void c_esmc_arraydatamapdeserialize(int *status, int *dataRank,
+                                  int *dataDimOrder,      /* ESMF_MAXDIM ints */
+                                  int *dataNonGridCounts, /* ESMF_MAXDIM ints */
+                                  void *buffer, int *offset, int *localrc); 
+
+void c_esmc_fielddatamapserialize(int *status, int *isScalar,
+                                  int *rankLength,  /* ESMF_MAXDIM ints */
+                                  int *interleave,  /* 4 ints */
+                                  int *horzRelloc, int *vertRelloc,
+                         void *buffer, int *length, int *offset, int *localrc); 
+
+void c_esmc_fielddatamapdeserialize(int *status, int *isScalar,
+                                    int *rankLength,  /* ESMF_MAXDIM ints */
+                                    int *interleave,  /* 4 ints */
+                                    int *horzRelloc, int *vertRelloc,
+                                    void *buffer, int *offset, int *localrc); 
+
+} // extern "C"

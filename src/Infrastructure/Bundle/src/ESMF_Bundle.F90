@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.65 2004/11/02 23:49:43 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.66 2004/11/30 20:59:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -203,10 +203,12 @@
    !public ESMF_BundleAllReduce  ! Global reduction operation, return on each DE
 
 
-       public ESMF_BundleValidate     ! Check internal consistency
-       public ESMF_BundlePrint        ! Print contents of a Bundle
+    public ESMF_BundleSerialize    ! Convert to byte stream...
+    public ESMF_BundleDeserialize  ! ... and back into an object again
+    public ESMF_BundleValidate     ! Check internal consistency
+    public ESMF_BundlePrint        ! Print contents of a Bundle
 
-       public operator(.eq.), operator(.ne.)
+    public operator(.eq.), operator(.ne.)
 
 !  !subroutine ESMF_BundleGetDataMap
 !
@@ -3993,6 +3995,235 @@ end function
 
       end subroutine ESMF_BundleDestruct
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_BundleSerialize - Serialize bundle info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_BundleSerialize(bundle, buffer, length, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Bundle} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_BundleWrite()} and {\tt ESMF\_BundleRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           {\tt ESMF\_Bundle} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                     ! Error status
+      integer :: i
+      type(ESMF_BundleType), pointer :: bp   ! bundle type
+
+      ! shortcut to internals
+      bp => bundle%btypep
+
+#if 0
+        type(ESMF_Base) :: base                   ! base class object
+        type(ESMF_Field), dimension(:), pointer :: flist
+        type(ESMF_Status) :: bundlestatus
+        type(ESMF_Status) :: gridstatus
+        integer :: field_count
+        type(ESMF_Grid) :: grid                  ! associated global grid
+        type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
+        type(ESMF_Packflag) :: pack_flag         ! is packed data present?
+        type(ESMF_BundleFieldInterleave) :: fil  ! ordering in buffer
+        type(ESMF_BundleDataMap) :: mapping      ! map info
+        type(ESMF_IOSpec) :: iospec              ! iospec values
+        type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
+#endif
+
+      call c_ESMC_BaseSerialize(bp%base, buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BundleSerialize(bp%bundlestatus, bp%gridstatus, &
+                                 bp%field_count, bp%pack_flag, &
+                                 bp%mapping, bp%iostatus, &
+                                 buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      if (bp%gridstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_GridSerialize(bp%grid, buffer, length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+      endif
+
+      ! TODO: decide if these need to be sent before or after
+      do i = 1, bp%field_count
+          call ESMF_FieldSerialize(bp%flist(i), buffer, length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      enddo
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_BundleDataMapSerialize(bp%mapping, buffer, length, &
+      !                                offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_IOSpecSerialize(bp%iospec, buffer, length, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+     ! TODO: call C directly here?
+      !call ESMF_ArraySerialize(bp%localbundle%localdata, buffer, length, &
+      !                          offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_BundleDeserialize - Deserialize a byte stream into a Bundle
+!
+! !INTERFACE:
+      function ESMF_BundleDeserialize(buffer, offset, rc) 
+!
+! !RETURN VALUE:
+      type(ESMF_Bundle) :: ESMF_BundleDeserialize   
+!
+! !ARGUMENTS:
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a Bundle object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_BundleWrite()} and {\tt ESMF\_BundleRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc, status             ! Error status, allocation status
+      integer :: i
+      type(ESMF_BundleType), pointer :: bp   ! bundle type
+
+      ! in case of error, make sure this is invalid.
+      nullify(ESMF_BundleDeserialize%btypep)
+
+      ! shortcut to internals
+      allocate(bp, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                     "space for new Bundle object", &
+                                     ESMF_CONTEXT, rc)) return
+
+
+      call ESMF_BaseCreate(bp%base, "Bundle", "dummy", 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! this overwrites the name and adds attributes to the base obj.
+      call c_ESMC_BaseDeserialize(bp%base, buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BundleDeserialize(bp%bundlestatus, bp%gridstatus, &
+                                 bp%field_count, bp%pack_flag, &
+                                 bp%mapping, bp%iostatus, &
+                                 buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      if (bp%gridstatus .eq. ESMF_STATUS_READY) then
+          bp%grid = ESMF_GridDeserialize(buffer, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      ! TODO: decide if these need to be sent before or after
+      do i = 1, bp%field_count
+          bp%flist(i) = ESMF_FieldDeserialize(buffer, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      enddo
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_BundleDataMapDeserialize(bp%mapping, buffer, &
+      !                                offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_IOSpecDeserialize(bp%iospec, buffer, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+     ! TODO: call C directly here?
+      !call ESMF_ArrayDeserialize(bp%localbundle%localdata, buffer, &
+      !                          offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      ESMF_BundleDeserialize%btypep => bp
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_BundleDeserialize
 !------------------------------------------------------------------------------
 
 

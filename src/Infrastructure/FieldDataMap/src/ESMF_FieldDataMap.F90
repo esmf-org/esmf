@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.25 2004/10/26 19:25:03 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.26 2004/11/30 21:01:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,6 +105,7 @@
       public ESMF_FieldDataMapWriteRestart, ESMF_FieldDataMapReadRestart
       public ESMF_FieldDataMapWrite, ESMF_FieldDataMapRead 
       public ESMF_FieldDataMapValidate, ESMF_FieldDataMapPrint
+      public ESMF_FieldDataMapSerialize, ESMF_FieldDataMapDeserialize
 
 !EOPI
  
@@ -113,7 +114,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.25 2004/10/26 19:25:03 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.26 2004/11/30 21:01:13 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -846,6 +847,143 @@
         end function ESMF_FieldDataMapRead
 
 
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDataMapSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_FieldDataMapSerialize - Serialize fielddatamap info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_FieldDataMapSerialize(fielddatamap, buffer, length, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_FieldDataMap), intent(in) :: fielddatamap 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_FieldDataMap} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_FieldDataMapWrite()} and {\tt ESMF\_FieldDataMapRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [fielddatamap]
+!           {\tt ESMF\_FieldDataMap} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                     ! Error status
+
+
+      call c_ESMC_FieldDataMapSerialize(fielddatamap%status, &
+                                 fielddatamap%isScalar, &
+                                 fielddatamap%rankLength(1), &
+                                 fielddatamap%interleave, &
+                                 fielddatamap%horzRelloc, &
+                                 fielddatamap%vertRelloc, &
+                                 buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_ArrayDataMapSerialize(fielddatamap%adm%status, &
+                                 fielddatamap%adm%dataRank, &
+                                 fielddatamap%adm%dataDimOrder, &
+                                 fielddatamap%adm%dataNonGridCounts, &
+                                 buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldDataMapSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDataMapDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_FieldDataMapDeserialize - Deserialize a byte stream into a FieldDataMap
+!
+! !INTERFACE:
+      subroutine ESMF_FieldDataMapDeserialize(fielddatamap, buffer, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_FieldDataMap), intent(in) :: fielddatamap 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a FieldDataMap object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_FieldDataMapWrite()} and {\tt ESMF\_FieldDataMapRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [fielddatamap]
+!           {\tt ESMF\_FieldDataMap} object to be deserialized.
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                ! Error status
+
+      call c_ESMC_FieldDataMapDeserialize(fielddatamap%status, &
+                                 fielddatamap%isScalar, &
+                                 fielddatamap%rankLength(1), &
+                                 fielddatamap%interleave, &
+                                 fielddatamap%horzRelloc, &
+                                 fielddatamap%vertRelloc, &
+                                 buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_ArrayDataMapDeserialize(fielddatamap%adm%status, &
+                                 fielddatamap%adm%dataRank, &
+                                 fielddatamap%adm%dataDimOrder, &
+                                 fielddatamap%adm%dataNonGridCounts, &
+                                 buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldDataMapDeserialize
 !------------------------------------------------------------------------------
 
 
