@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.29 2004/03/05 17:15:43 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.30 2004/03/05 18:20:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.29 2004/03/05 17:15:43 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.30 2004/03/05 18:20:49 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3167,6 +3167,7 @@
       endif
 
       if (present(vertRelLoc)) then
+       if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
         call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridGetDE: get PhysGrid id"
@@ -3174,6 +3175,7 @@
         endif
         vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
         vertIsValid   = .true.
+       endif
       endif
       if (present(vertPhysGridId)) then
         if ((vertPhysGridId.ge.1) .and. &
@@ -3363,12 +3365,14 @@
       horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
 
       if (present(vertRelLoc)) then
+       if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
         call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridGetDE: get PhysGrid id"
           return
         endif
         vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+       endif
       endif
 
       ! call DistGrid method to retrieve information otherwise not available
@@ -3531,12 +3535,14 @@
       horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
 
       if (present(vertRelLoc)) then
+       if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
         call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: get PhysGrid id"
           return
         endif
         vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+       endif
       endif
 
       hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
@@ -3764,12 +3770,14 @@
       horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
 
       if (present(vertRelLoc)) then
+       if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
         call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: get PhysGrid id"
           return
         endif
         vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+       endif
       endif
 
       hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
