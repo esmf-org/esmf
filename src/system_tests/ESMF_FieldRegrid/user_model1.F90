@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.19 2004/03/24 14:54:50 nscollins Exp $
+! $Id: user_model1.F90,v 1.20 2004/04/14 22:27:41 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -90,7 +90,7 @@
 
        ! Local variables
         type(ESMF_Field) :: humidity
-        type(ESMF_DELayout) :: layout
+        type(ESMF_newDELayout) :: delayout
         integer :: i, x, y
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
@@ -107,8 +107,8 @@
         integer :: status, myde
 
         ! query comp for layout
-        call ESMF_GridCompGet(comp, delayout=layout, rc=status)
-        call ESMF_DELayoutGetDEID(layout, de_id)
+        call ESMF_GridCompGet(comp, delayout=delayout, rc=status)
+        call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=status)
 
         print *, de_id, "User Comp 1 Init starting"
 
@@ -126,14 +126,14 @@
         grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
-                                layout=layout, &
+                                delayout=delayout, &
                                 horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
                                 name="source grid", rc=status)
 
         ! Figure out our local processor id
-        call ESMF_DELayoutGetDEID(layout, de_id, rc)
+        call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=rc)
 
         ! Set up a 2D real array
         call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &

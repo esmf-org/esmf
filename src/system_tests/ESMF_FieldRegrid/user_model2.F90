@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.18 2004/03/24 14:54:50 nscollins Exp $
+! $Id: user_model2.F90,v 1.19 2004/04/14 22:27:54 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,15 +83,15 @@
 
 !   ! Local variables
       type(ESMF_Field) :: humidity
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: delayout
       integer :: i, x, y
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
       type(ESMF_ArraySpec) :: arrayspec
       real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
-      real(ESMF_KIND_R8) :: min(2)
+      real(ESMF_KIND_R8) :: min(2), max(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
-      integer :: countsPerDE1(3), countsPerDE2(2)
+      integer :: countsPerDE1(3), countsPerDE2(2), counts(2)
       integer :: de_id
       type(ESMF_GridType) :: horz_gridtype
       type(ESMF_GridStagger) :: horz_stagger
@@ -100,8 +100,8 @@
 
 
       ! Initially import state contains a field with a grid but no data.
-      call ESMF_GridCompGet(comp, delayout=layout, rc=status)
-      call ESMF_DELayoutGetDEID(layout, de_id)
+      call ESMF_GridCompGet(comp, delayout=delayout, rc=status)
+      call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=status)
 
       print *, de_id, "User Comp 2 Init starting"
 
@@ -119,24 +119,27 @@
                   1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
                   1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
                   1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
+        counts(1) = 200
+        counts(2) = 100
+        min(1) = 0.0
+        max(1) = 60.0
+        min(2) = 0.0
+        max(2) = 50.0
+        horz_gridtype = ESMF_GridType_XY
+        horz_stagger = ESMF_GridStagger_D_NE
+        horz_coord_system = ESMF_CoordSystem_Cartesian
 
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_D_NE
-      horz_coord_system = ESMF_CoordSystem_Cartesian
-
-      grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
-                              countsPerDEDecomp1=countsPerDE1, &
-                              countsPerDEDecomp2=countsPerDE2, &
-                              minGlobalCoordPerDim=min, &
-                              delta1=delta1, delta2=delta2, &
-                              layout=layout, &
-                              horzGridType=horz_gridtype, &
-                              horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              name="source grid", rc=status)
+        grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                                minGlobalCoordPerDim=min, &
+                                maxGlobalCoordPerDim=max, &
+                                delayout=delayout, &
+                                horzGridType=horz_gridtype, &
+                                horzStagger=horz_stagger, &
+                                horzCoordSystem=horz_coord_system, &
+                                name="source grid", rc=status)
 
       ! Figure out our local processor id
-      call ESMF_DELayoutGetDEID(layout, de_id, rc)
+      call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=rc)
 
       ! Set up a 2D real array
       call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &

@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.6 2004/03/24 14:54:50 nscollins Exp $
+! $Id: user_coupler.F90,v 1.7 2004/04/14 22:27:26 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -66,8 +66,7 @@
       ! Local variables
       integer :: itemcount
       type(ESMF_Field) :: humidity1, humidity2
-      type(ESMF_DELayout) :: cpllayout
-
+      type(ESMF_newDELayout) :: cplDElayout
 
       print *, "User Coupler Init starting"
 
@@ -83,13 +82,12 @@
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
-
+      call ESMF_CplCompGet(comp, delayout=cplDElayout, rc=rc)
 
       ! These are fields on different Grids - call RegridStore to set
       ! up the Regrid structure
 
-      call ESMF_FieldRegridStore(humidity1, humidity2, cpllayout, &
+      call ESMF_FieldRegridStore(humidity1, humidity2, cplDElayout, &
                                  routehandle, &
                                  regridtype=ESMF_RegridMethod_Bilinear, &
                                  rc=rc)
@@ -114,7 +112,7 @@
 
       ! Local variables
       type(ESMF_Field) :: humidity1, humidity2
-      type(ESMF_DELayout) :: cpllayout
+      type(ESMF_newDELayout) :: cplDElayout
       integer :: status
 
       print *, "User Coupler Run starting"
@@ -128,7 +126,7 @@
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=status)
+      call ESMF_CplCompGet(comp, delayout=cplDElayout, rc=status)
 
       ! These are fields on different Grids - call Regrid to rearrange
       !  the data.   The communication pattern was computed at init,

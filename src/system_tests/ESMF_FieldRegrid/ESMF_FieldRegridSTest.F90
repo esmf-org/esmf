@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.17 2004/04/14 21:52:19 nscollins Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.18 2004/04/14 22:27:12 jwolfe Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -41,8 +41,8 @@
     ! Local variables
     integer :: i, de_id, ndes, mid, rc, delist(64), pid, cid
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
-    type(ESMF_newDELayout) :: layout1, layout2, layout3
-    type(ESMF_VM) :: vm
+    type(ESMF_VM):: vm
+    type(ESMF_newDELayout) :: delayout1, delayout2, delayout3
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
@@ -84,12 +84,15 @@
     ! get default vm
     call ESMF_VMGetGlobal(vm, rc=rc)
 
-    ! Query for default layout.
-    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
-
-    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc=rc)
+    ! Create a default 1-dim DELayout with N DE's, where N is number of PETs
+    ! in VM
+    delayout1 = ESMF_newDELayoutCreate(vm, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) stop
+    call ESMF_newDELayoutGet(delayout1, ndes, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) stop
     if (ndes .lt. 6) then
-      print *, "This system test needs to run at least 6-way, current np = ", ndes
+      print *, "This system test needs to run at least 6-way, current np = ", &
+               ndes
       goto 10
     endif
 
@@ -97,27 +100,21 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    !delist = (/ (i, i=0, ndes-1) /)
-    !layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, mid /), (/ 0, 0 /), &
-    !                              de_indices=delist, rc=rc)
-    layout2 = ESMF_newDELayoutCreate(layout1, (/ 2, mid /), rc=rc)
-    comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
+    delayout2 = ESMF_newDELayoutCreate(vm, (/ 2, mid /), rc=rc)
+    comp1 = ESMF_GridCompCreate(cname1, delayout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
   !  call ESMF_GridCompPrint(comp1, "", rc)
 
 
     cname2 = "user model 2"
-    !delist = (/ (i, i=0, ndes-1) /)
-    !layout3 = ESMF_newDELayoutCreate(layout1, 2, (/ mid, 2 /), (/ 0, 0 /), &
-    !                              de_indices=delist, rc=rc)
-    layout3 = ESMF_newDELayoutCreate(layout1, (/ mid, 2 /), rc=rc)
+    delayout3 = ESMF_newDELayoutCreate(vm, (/ mid, 2 /), rc=rc)
 
-    comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)
+    comp2 = ESMF_GridCompCreate(cname2, delayout3, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
   !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, delayout=layout1, rc=rc)
+    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
     print *, "Created component ", trim(cplname), ", rc =", rc
   !  call ESMF_CplCompPrint(cpl, "", rc)
 
@@ -218,7 +215,7 @@
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_newDELayoutGetDEID(layout1, de_id, rc)
+      call ESMF_newDELayoutGet(delayout1, localDE=de_id, rc=rc)
 
 
       print *, "------------------------------------------------------------"
@@ -247,8 +244,8 @@
       call ESMF_GridCompDestroy(comp2, rc)
       call ESMF_CplCompDestroy(cpl, rc)
 
-      call ESMF_newDELayoutDestroy(layout2, rc)
-      call ESMF_newDELayoutDestroy(layout3, rc)
+      call ESMF_newDELayoutDestroy(delayout2, rc)
+      call ESMF_newDELayoutDestroy(delayout3, rc)
 
       print *, "All Destroy routines done"
 
