@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.33 2005/02/03 22:00:21 theurich Exp $
+// $Id: ESMC_VM.C,v 1.34 2005/02/11 16:19:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.33 2005/02/03 22:00:21 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.34 2005/02/11 16:19:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -64,9 +64,13 @@ static ESMC_VM *GlobalVM = NULL;
 static pthread_t matchArray_tid[ESMC_VM_MAXTIDS];
 static ESMC_VM *matchArray_vm[ESMC_VM_MAXTIDS];
 static ESMC_VMId matchArray_vmID[ESMC_VM_MAXTIDS];
+//gjtNotYet static pthread_t *matchArray_tid;
+//gjtNotYet static ESMC_VM **matchArray_vm;
+//gjtNotYet static ESMC_VMId *matchArray_vmID;
 static int vmKeyWidth = 0;        // in units of 8-bit chars
 static int vmKeyOff = 0;          // extra bits in last char
 static int matchArray_count = 0;  // number of valid entries in association list
+static int matchIndex = 0;        // process wide index for non-thread based VMs
 //-----------------------------------------------------------------------------
 
 
@@ -369,6 +373,52 @@ void *ESMC_VM::ESMC_VMStartup(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMEnter()"
+//BOP
+// !IROUTINE:  ESMC_VMEnter
+//
+// !INTERFACE:
+void ESMC_VM::ESMC_VMEnter(
+//
+// !RETURN VALUE:
+//    
+//
+// !ARGUMENTS:
+//
+  class ESMC_VMPlan *vmp,         // plan for this child VM
+  void *info,                     // info structure
+  void *cargo                     // pointer to cargo structure for in/out data
+  ){
+//
+// !DESCRIPTION:
+//    Enter a child VM.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int oldMatchIndex;
+  if(vmp->nothreadflag){
+    // take care of book keeping for ESMF...
+    oldMatchIndex = matchIndex;
+    int i;
+    for (i=0; i<matchArray_count; i++)
+      if (matchArray_vm[i]==vmp->myvms[0]) break;
+    if(i<matchArray_count)
+      matchIndex=i;
+  }
+
+  // startup the VM
+  vmk_enter(static_cast<ESMC_VMKPlan *>(vmp), info, cargo);
+
+  if(vmp->nothreadflag){
+    // restore book keeping for ESMF...
+    matchIndex = oldMatchIndex;
+  }
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMGet()"
 //BOP
 // !IROUTINE:  ESMC_VMGet
@@ -486,7 +536,6 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
 //-----------------------------------------------------------------------------
   int npets = vmMatch.vmk_npets();  // maximum number of PETs in vmMatch
   int *tempMatchList = new int[npets];
-  int tempMatchCount = 0;
   int comparePID = pid[pet];        // this is pet's virtual address space id
   int j=0;
   for (int i=0; i<npets; i++)
@@ -720,13 +769,15 @@ ESMC_VMId *ESMC_VMGetCurrentID(
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE; // assume failure
   pthread_t mytid = pthread_self();
-  int i;
-  for (i=0; i<matchArray_count; i++)
-    if (matchArray_tid[i] == mytid) break;
-  if (i == matchArray_count){
-    ESMC_LogDefault.ESMC_LogWrite("could not determine current VMId",
-      ESMC_LOG_ERROR);
-    return NULL;  // bail out
+  int i = matchIndex;
+  if (matchArray_tid[i] != mytid){
+    for (i=0; i<matchArray_count; i++)
+      if (matchArray_tid[i] == mytid) break;
+    if (i == matchArray_count){
+      ESMC_LogDefault.ESMC_LogWrite("could not determine current VMId",
+        ESMC_LOG_ERROR);
+      return NULL;  // bail out
+    }
   }
   // found a match
   *rc = ESMF_SUCCESS;
@@ -766,6 +817,11 @@ ESMC_VM *ESMC_VMInitialize(
     return NULL; // bail out
   }
   
+  // allocate the VM association table
+//gjtNotYet  matchArray_tid = new pthread_t[ESMC_VM_MAXTIDS];
+//gjtNotYet  matchArray_vm = new ESMC_VM*[ESMC_VM_MAXTIDS];
+//gjtNotYet  matchArray_vmID = new ESMC_VMId[ESMC_VM_MAXTIDS];
+
   matchArray_count = 0;       // reset
   matchArray_tid[matchArray_count]  = pthread_self();
   matchArray_vm[matchArray_count]   = GlobalVM;
@@ -801,7 +857,7 @@ ESMC_VM *ESMC_VMInitialize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_VMInitialize()"
+#define ESMC_METHOD "ESMC_VMFinalize()"
 //BOP
 // !IROUTINE:  ESMC_VMFinalize
 //
@@ -827,6 +883,10 @@ void ESMC_VMFinalize(
   }
   GlobalVM->vmk_finalize();
   matchArray_count = 0;
+  // delete the VM association table
+//gjtNotYet  delete [] matchArray_tid;
+//gjtNotYet  delete [] matchArray_vm;
+//gjtNotYet  delete [] matchArray_vmID;
   *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

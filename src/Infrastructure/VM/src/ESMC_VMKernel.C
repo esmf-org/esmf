@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.25 2005/02/04 08:29:48 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.26 2005/02/11 16:19:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -808,6 +808,9 @@ static void *vmk_block(void *arg){
 
 void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp, 
   void *(fctp)(void *, void *), void *cargo, int *rc){
+#if (VERBOSITY > 9)
+  vmp->vmkplan_print();
+#endif
   // enter a vm derived from current vm according to the ESMC_VMKPlan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
@@ -1116,7 +1119,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
       }
     }else if (lpid[mypet]==first_lpid){
       // mypet is not the first one for lpid, but has the same lpid association
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 4)
       printf("mypet %d is not first thread to run under this pid\n", mypet);
 #endif
       // check and see whether pets with this lpid will spawn threads
@@ -1130,7 +1133,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
         for(int k=0; k<lpid_list[1][j]; k++){
           if (pet_list[j][k]==mypet){
             // receive the MPI_comm from the pet which created it
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 4)
             printf("mypet %d recvs new_mpi_c frm %d\n", mypet, i);
 #endif
             vmk_recv(&new_mpi_c, sizeof(MPI_Comm), i);
@@ -1138,7 +1141,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
             int rank, size;
             MPI_Comm_rank(new_mpi_c, &rank);
             MPI_Comm_size(new_mpi_c, &size);
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 4)
             printf("mypet = %d, new_mpi_c: rank: %d, size: %d\n", mypet, 
                 rank, size);
 #endif
@@ -1276,9 +1279,24 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
     sarg[i].pref_intra_ssi = vmp->pref_intra_ssi;
     // cargo
     sarg[i].cargo = cargo;
-    // finally spawn threads from this pet...
-    *rc = vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i]);
-    if (*rc) return NULL;  // could not create pthread -> bail out
+    if (vmp->nothreadflag){
+      // for a VM that is not thread-based the VM can already be constructed
+      // obtain reference to the vm instance on heap
+      ESMC_VMK &vm = *(sarg[0].myvm);
+      // setup the pet section in this vm instance
+      sarg[0].pthid = pthread_self();
+      vm.vmk_construct(sarg[0].mypet, sarg[0].pthid, sarg[0].npets,
+        sarg[0].lpid, sarg[0].pid, sarg[0].tid, sarg[0].ncpet, sarg[0].cid,
+        sarg[0].mpi_g, sarg[0].mpi_c, sarg[0].pth_mutex2, sarg[0].pth_mutex,
+        sarg[0].pth_finish_count, sarg[0].commarray, sarg[0].pref_intra_ssi);
+    }else{
+      // if this is a thread-based VM then...
+      // ...finally spawn threads from this pet...
+      // in the thread-based case the VM cannot be constructured until the
+      // pthreadID is known!
+      *rc = vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i]);
+      if (*rc) return NULL;  // could not create pthread -> bail out
+    }
   }
   // free all the temporary arrays.... (not sarg array!!!)
   delete [] new_lpid;
@@ -1322,6 +1340,15 @@ void ESMC_VMK::vmk_enter(class ESMC_VMKPlan *vmp, void *arg, void *argvmkt){
       sarg[0].fctp((void *)sarg[0].myvm, argvmkt);
     return;
   }
+  // the non-thread based VMs simply do a blocking callback for all the 
+  // spawning PETs.
+  if (vmp->nothreadflag && vmp->spawnflag[mypet]==1){
+    if (argvmkt==NULL)
+      sarg[0].fctp((void *)sarg[0].myvm, sarg[0].cargo);
+    else
+      sarg[0].fctp((void *)sarg[0].myvm, argvmkt);
+    return;
+  }
   // pets that do not spawn but contribute need to release their blocker and
   // sigcatcher _before_ the actual spawner threads get released 
   // (this is so that no signals get missed!)
@@ -1350,14 +1377,17 @@ void ESMC_VMK::vmk_exit(class ESMC_VMKPlan *vmp, void *arg){
   // simple case is that where the child runs in the parent VM, then there is
   // nothing to catch on exit.
   if (vmp->parentVMflag) return;
-  // pets that spawn need to catch their vmkts
-  for (int i=0; i<vmp->spawnflag[mypet]; i++)
-    vmkt_catch(&(sarg[i].vmkt));
-  // pets that did not spawn but contributed need to catch their blocker and
-  // sigcatcher
-  if (vmp->spawnflag[mypet]==0 && vmp->contribute[mypet]>-1){
-    vmkt_catch(&(sarg[0].vmkt));
-    vmkt_catch(&(sarg[0].vmkt_extra));
+  // check if this is a thread-based VM
+  if (!vmp->nothreadflag){
+    // pets that spawn in a thread-based VM need to catch their vmkts
+    for (int i=0; i<vmp->spawnflag[mypet]; i++)
+      vmkt_catch(&(sarg[i].vmkt));
+    // pets that did not spawn but contributed need to catch their blocker and
+    // sigcatcher
+    if (vmp->spawnflag[mypet]==0 && vmp->contribute[mypet]>-1){
+      vmkt_catch(&(sarg[0].vmkt));
+      vmkt_catch(&(sarg[0].vmkt_extra));
+    }
   }
   // The following barrier ensures that all parent PETs block until all threads
   // of this VM have been caught. Even parent PETs that don't participate in
@@ -1386,10 +1416,16 @@ void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan *vmp, void *arg){
     delete [] sarg;
     return;
   }
-  // pets that spawned will be blocked by pthread_join() call...
   for (int i=0; i<vmp->spawnflag[mypet]; i++){
-    //pthread_join(sarg[i].pthid, NULL);
-    vmkt_join(&(sarg[i].vmkt));
+    if (vmp->nothreadflag){
+      // obtain reference to the vm instance on heap
+      ESMC_VMK &vm = *(sarg[0].myvm);
+      // destroy this vm instance
+      vm.vmk_destruct();
+    }else{
+      // thread-based VM pets must be joined
+      vmkt_join(&(sarg[i].vmkt));
+    }
     // free arrays in sarg[i[ 
     delete [] sarg[i].lpid;
     delete [] sarg[i].pid;
@@ -1407,10 +1443,9 @@ void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan *vmp, void *arg){
   if (vmp->spawnflag[mypet]==0 && vmp->contribute[mypet]>-1){
     // wait for the blocker thread to return, maybe already is done...
 #if (VERBOSITY > 9)
-    printf("I am pet, pid %d, tid %d. I'll block on a pthread_join until "
+    printf("I am pet, pid %d, tid %d. I'll block on a vmkt_join until "
       "blocker returns.\n", getpid(), pthread_self());
 #endif
-    //pthread_join(sarg[0].pthid, NULL);
     vmkt_join(&(sarg[0].vmkt));         // vmk_block
     vmkt_join(&(sarg[0].vmkt_extra));   // vmk_sigcatcher
 #if (VERBOSITY > 9)
@@ -1503,12 +1538,13 @@ int ESMC_VMK::vmk_pid(int i){
 
 ESMC_VMKPlan::ESMC_VMKPlan(void){
   // native constructor
-  // invalidate the arrays
+  nothreadflag = 1; // by default use non-threaded VMs
 #ifdef NO_LIBPTHREAD
   parentVMflag = 1; // pthread library not available
 #else
   parentVMflag = 0; // default is to create a new VM for every child
 #endif
+  // invalidate the arrays
   spawnflag = NULL;
   contribute = NULL;
   cspawnid = NULL;
@@ -1866,6 +1902,8 @@ void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
 void ESMC_VMKPlan::vmkplan_print(void){
   // print info about the ESMC_VMKPlan object
   printf("--- vmkplan_print start ---\n");
+  printf("nothreadflag = %d\n", nothreadflag);
+  printf("parentVMflag = %d\n", parentVMflag);
   printf("npets = %d\n", npets);
   for (int i=0; i<npets; i++)
     printf("  spawnflag[%d]=%d, contribute[%d]=%d, cspawnid[%d]=%d\n", 

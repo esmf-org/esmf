@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.33 2005/01/28 22:12:31 theurich Exp $
+// $Id: ESMC_Comp_F.C,v 1.34 2005/02/11 16:19:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -375,8 +375,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
          
 //fprintf(stderr, "gjt cargo after new: %p\n", cargo);
   
-  vm_parent->vmk_enter(static_cast<ESMC_VMKPlan *>(vmplan), *vm_info,
-    (void*)cargo);
+  vm_parent->ESMC_VMEnter(vmplan, *vm_info, (void*)cargo);
   
   delete[] name;
   *status = ESMF_SUCCESS;

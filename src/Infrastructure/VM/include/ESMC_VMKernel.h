@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.13 2005/02/01 18:06:08 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.14 2005/02/11 16:19:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -221,8 +221,9 @@ class ESMC_VMK{
 
 
 class ESMC_VMKPlan{
-  private:
+  public:
     int npets;
+    int nothreadflag; // 0-default threaded VM, 1-non-threaded VM
     int parentVMflag; // 0-create child VM, 1-run on parent VM
     int *spawnflag;   // for each pet: 0-don't spawn, >=1-spawn threads
     int *contribute;  // pet id to which non-spawning pet contributes its cores
