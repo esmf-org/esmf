@@ -6,47 +6,55 @@ program test_log_options
     
     integer rc
     type(ESMF_Log) :: anErr1,anErr2
+    type(ESMF_Logical) :: myLocalFlush,myLocalVerbose
+    character(len=32) :: verySilly, notSilly
 
-    call ESMF_LogInit(anErr1,haltOnErr=ESMF_LOG_FALSE,flushFlag=ESMF_LOG_TRUE)
-    call ESMF_LogInit(anErr2,haltOnErr=ESMF_LOG_FALSE,haltOnWarn=ESMF_LOG_FALSE, &
-                      verbose=ESMF_LOG_FALSE)
+    notSilly='This is not silly'
+    verySilly='This is very silly'
+    call ESMF_LogSet(anErr1,haltOnErr=ESMF_TF_FALSE,flush=ESMF_TF_TRUE)
+    call ESMF_LogSet(anErr2,haltOnErr=ESMF_TF_FALSE,haltOnWarn=ESMF_TF_FALSE, &
+                      verbose=ESMF_TF_FALSE)
     call ESMF_LogOpenFile(anErr1,ESMF_SINGLE_LOG_FILE,"anErr.txt")
     call foo(rc)
     if (rc /= ESMF_SUCCESS) then
        call ESMF_LogErr(anErr1,rc)
-       call ESMF_LogErrMsg(anErr1,rc,"This is not silly.")
+       call ESMF_LogErrMsg(anErr1,rc,notSilly)
     end if
 
     call foo2(rc)
     if (rc /= ESMF_SUCCESS)  then
-       call ESMF_LogWarnMsg(anErr2,rc,"This is silly")
+       call ESMF_LogWarnMsg(anErr2,rc,verySilly)
        call ESMF_LogWarn(anErr2,rc)
     end if
 
-    call ESMF_LogVerbose(anErr2)
+    call ESMF_LogSet(anErr2,verbose=ESMF_TF_TRUE)
+    call ESMF_LogGet(anErr2,verbose=myLocalVerbose)
     call foo2(rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_LogWarnMsg(anErr2,rc,"This is not silly")
+    if (rc /= ESMF_SUCCESS) call ESMF_LogWarnMsg(anErr2,rc,notSilly)
 
-    call ESMF_LogNotVerbose(anErr1)
+    call ESMF_LogSet(anErr1,verbose=ESMF_TF_FALSE)
     call foo(rc)
     if (rc /= ESMF_SUCCESS) call ESMF_LogErr(anErr1,rc)
 
-    call ESMF_HaltOnErr(anErr1)
-    call ESMF_NotHaltOnWarn(anErr1)
+    call ESMF_LogSet(anErr1,haltOnErr=ESMF_TF_TRUE)
+    call ESMF_LogSet(anErr1,haltOnWarn=ESMF_TF_FALSE)
     call foo2(rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_LogWarnMsg(anErr2,rc,"This is silly")
+    if (rc /= ESMF_SUCCESS) call ESMF_LogWarnMsg(anErr2,rc,verySilly)
 
-    call ESMF_HaltOnWarn(anErr2)
-    call ESMF_NotHaltOnErr(anErr2)
+    call ESMF_LogSet(anErr2,haltOnWarn=ESMF_TF_TRUE)
+    call ESMF_LogSet(anErr2,haltOnErr=ESMF_TRUE)
     call foo(rc)
     if (rc /= ESMF_SUCCESS) call ESMF_LogErr(anErr2,rc)
 
-    call ESMF_LogNotFlush(anErr1)
+    call ESMF_LogSet(anErr1,flush=ESMF_TF_FALSE)
+    call ESMF_LogGet(anErr1,flush=myLocalFlush)
+    write(6,*)"My local value of flush is',myLocalFlush
     call foo2(rc)
     if (rc /= ESMF_SUCCESS) call ESMF_LogWarn(anErr1,rc)
 
-    call ESMF_LogFlush(anErr2)
+    call ESMF_LogSet(anErr2,flush=ESMF_TF_TRUE)
     call foo2(rc)
+
     if (rc /= ESMF_SUCCESS) call ESMF_LogWarn(anErr1,rc)
 
 
