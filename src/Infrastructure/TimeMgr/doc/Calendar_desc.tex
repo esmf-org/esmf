@@ -1,4 +1,4 @@
-% $Id: Calendar_desc.tex,v 1.12 2003/12/23 00:33:52 eschwab Exp $
+% $Id: Calendar_desc.tex,v 1.13 2004/03/23 00:36:39 cdeluca Exp $
 
 \label{sec:Calendar}
 The Calendar class represents the standard calendars used in 
@@ -6,63 +6,6 @@ geophysical modeling:  Gregorian, Julian, no-leap, 360-day, and
 no-calendar.  It also supports a user-customized calendar.  Brief 
 descriptions are provided for each calendar below.  For more information 
 on standard calendars, see ~\cite{seidelman}.
-
-\begin{description}            
-\item[Gregorian calendar]  
-{\tt ESMF\_CalendarType}: {\tt ESMF\_CAL\_GREGORIAN} \newline
-{\it Valid range: 3/1/4800 BC to 10/29/292,277,019,914 } \newline
-The Gregorian calendar is the calendar currently in use throughout Western
-countries.  Named after Pope Gregory, it is a minor 
-correction to the older Julian calendar. In the Gregorian calendar every
-fourth year is a leap year in which February has 29 and not 28 days;
-however, years divisible by 100 are not leap years unless they are also 
-divisible  by 400.  As in the Julian calendar, days begin at midnight.
-
-\item[Julian calendar]
-{\tt ESMF\_CalendarType}:  {\it not yet implemented}. \newline
-{\it Valid range: 4713 BC onward} \newline
-The Julian calendar was introduced by Julius Caesar in 46 B.C., and 
-reached its final form in 8 B.C.  The Julian calendar differs from the 
-Gregorian only in the determination of leap years, lacking the correction 
-for years divisible
-by 100 and 400 in the Gregorian calendar. In the Julian calendar, any positive 
-year is a leap year if divisible by 4. (Negative years are leap years if, when 
-divided by 4, a remainder of 3 results.) Days are considered to begin at 
-midnight.
-
-\item[Julian days]
-{\tt ESMF\_CalendarType}:  {\tt ESMF\_CAL\_JULIANDAY} \newline
-{\it Valid range: -32045 to 1x10$^{14}$} \newline
-Julian days simply enumerate the days and fraction of a day which have elapsed 
-since the start of the Julian era, defined as beginning at noon on Monday, 
-1st January of year 4713 B.C. in the Julian calendar.  Julian days, 
-unlike the dates in the Julian and Gregorian calendars, begin at noon.
-
-\item[No-leap calendar]
-{\tt ESMF\_CalendarType}:  {\tt ESMF\_CAL\_NOLEAP} \newline
-{\it Valid range: machine limits} \newline
-The no-leap calendar is the Gregorian calendar with no leap years - 
-February is always assumed to have 28 days.  Modelers sometimes use this 
-calendar as a simple, close approximation to the Gregorian calendar.
-
-\item[360-day calendar]
-{\tt ESMF\_CalendarType}:  {\tt ESMF\_CAL\_360DAY} \newline
-{\it Valid range: machine limits} \newline
-In the 360-day calendar, there are 12 months, each of which has 30 days.  
-Like the no-leap calendar, this is a simple approximation to the Gregorian
-calendar sometimes used by modelers.
-
-\item[Generic calendar] 
-{\tt ESMF\_CalendarType}:  {\tt ESMF\_CAL\_GENERIC} \newline
-{\it Valid range: machine limits} \newline 
-The user can set calendar parameters in the generic calendar.
-
-\item[No-calendar]
-{\tt ESMF\_CalendarType}:  {\tt ESMF\_CAL\_NOCALENDAR} \newline
-{\it Valid range: machine limits} \newline 
-The no-calendar option simply tracks the elapsed model time in seconds.
-
-\end{description}
 
 
 

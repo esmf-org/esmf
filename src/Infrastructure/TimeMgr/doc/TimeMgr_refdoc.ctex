@@ -51,13 +51,6 @@
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_specs}
 #endif
 
-%\section{Global Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{TimeMgr_param}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/TimeMgr_param}
-%#endif
-
 %\subsection{Design and Implementation Notes}
 #ifdef STANDALONE
 \input{TimeMgr_implnotes}
@@ -65,13 +58,11 @@
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_implnotes}
 #endif
 
-#ifdef INCLUDE_UML
 %\subsection{Object Model}
 #ifdef STANDALONE
 \input{TimeMgr_obj.tex}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_obj.tex}
-#endif
 #endif
 
 % --------------
@@ -85,6 +76,13 @@
 \input{Calendar_desc}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Calendar_desc}
+#endif
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Calendar_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/Calendar_options}
 #endif
 
 \subsection{Use and Examples}

@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.6 2004/03/22 21:07:56 cdeluca Exp $
+! $Id: ESMF_IOSpec.F90,v 1.7 2004/03/23 00:36:39 cdeluca Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -182,8 +182,53 @@
 
       end subroutine ESMF_IOFlush
 
-
 !-------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_IOSpecGet - Get values in an IOSpec
+!
+! !INTERFACE:
+      subroutine ESMF_IOSpecGet(iospec, filename, iofileformat, &
+                                iorwtype, async_io, rc)
+!
+!
+! !PARAMETERS:
+      type (ESMF_IOSpec), intent(in) :: iospec
+      character(len=*), intent(out), optional :: filename
+      type (ESMF_IOFileFormat), intent(out), optional :: iofileformat
+      type (ESMF_IORWType), intent(out), optional :: iorwtype
+      logical, intent(out), optional :: async_io
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   (insert documentation here.)
+
+!
+! !REQUIREMENTS: 
+
+!EOP
+
+      if (present(filename)) then
+          filename = iospec%filename
+      endif
+
+      if (present(iorwtype)) then
+          iorwtype = iospec%iorwtype
+      endif
+
+      if (present(iofileformat)) then
+          iofileformat = iospec%iofileformat
+      endif
+
+      if (present(async_io)) then
+          async_io = iospec%async_io
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_IOSpecGet
+
+
 !-------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_IOSpecSet - Set values in an IOSpec
@@ -242,54 +287,7 @@
 
 
 !-------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_IOSpecGet - Get values in an IOSpec
-!
-! !INTERFACE:
-      subroutine ESMF_IOSpecGet(iospec, filename, iofileformat, &
-                                iorwtype, async_io, rc)
-!
-!
-! !PARAMETERS:
-      type (ESMF_IOSpec), intent(in) :: iospec
-      character(len=*), intent(out), optional :: filename
-      type (ESMF_IOFileFormat), intent(out), optional :: iofileformat
-      type (ESMF_IORWType), intent(out), optional :: iorwtype
-      logical, intent(out), optional :: async_io
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!   (insert documentation here.)
-
-!
-! !REQUIREMENTS: 
-
-!EOP
-
-      if (present(filename)) then
-          filename = iospec%filename
-      endif
-
-      if (present(iorwtype)) then
-          iorwtype = iospec%iorwtype
-      endif
-
-      if (present(iofileformat)) then
-          iofileformat = iospec%iofileformat
-      endif
-
-      if (present(async_io)) then
-          async_io = iospec%async_io
-      endif
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_IOSpecGet
-
-
-!-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 !
 ! !INTERFACE:
@@ -308,7 +306,7 @@
 !
 ! !REQUIREMENTS: 
 
-!EOP
+!EOPI
       ESMF_IOSpecCreateCopy = iospec
 
       end function ESMF_IOSpecCreateCopy
