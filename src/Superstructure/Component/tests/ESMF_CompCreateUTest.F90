@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateUTest.F90,v 1.3 2004/03/18 23:01:49 nscollins Exp $
+! $Id: ESMF_CompCreateUTest.F90,v 1.4 2004/04/09 19:54:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 !   added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
         
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
 
 
 !-------------------------------------------------------------------------

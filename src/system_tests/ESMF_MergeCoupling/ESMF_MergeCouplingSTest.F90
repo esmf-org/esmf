@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.4 2004/03/24 14:55:04 nscollins Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.5 2004/04/09 19:54:18 eschwab Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -69,7 +69,7 @@
 !
 
     ! Initialize framework
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Query for the default layout

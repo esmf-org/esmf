@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.9 2004/03/24 14:54:50 nscollins Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.10 2004/04/09 19:54:17 eschwab Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -66,7 +66,7 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize framework
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Query for the default layout

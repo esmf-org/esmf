@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.12 2004/04/05 21:53:49 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.13 2004/04/09 19:54:16 eschwab Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -75,7 +75,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Create a default 1xN DELayout

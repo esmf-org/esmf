@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.10 2004/03/24 14:55:05 nscollins Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.11 2004/04/09 19:54:18 eschwab Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -68,7 +68,7 @@
 !
 
     ! Initialize framework
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Query for the default layout

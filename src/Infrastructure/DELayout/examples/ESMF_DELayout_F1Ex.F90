@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F1Ex.F90,v 1.8 2004/02/12 22:31:02 svasquez Exp $
+! $Id: ESMF_DELayout_F1Ex.F90,v 1.9 2004/04/09 19:53:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ program ESMF_DELayout_F1Ex
 
 !BOC
   ! initialize framework
-  call ESMF_Initialize(rc)
+  call ESMF_Initialize(rc=rc)
 
   ! 2 DEs: DE 0 and DE 1
   delist = (/ 0, 1 /)

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.20 2004/03/24 14:54:35 nscollins Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.21 2004/04/09 19:53:59 eschwab Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -40,7 +40,7 @@
     finalrc = ESMF_SUCCESS
 !BOC
 !-------------------------------------------------------------------------
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !

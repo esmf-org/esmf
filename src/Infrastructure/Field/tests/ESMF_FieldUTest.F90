@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.45 2004/03/24 14:54:37 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.46 2004/04/09 19:53:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.45 2004/03/24 14:54:37 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.46 2004/04/09 19:53:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------- 
       print *, "Starting job"
 
-      call ESMF_Initialize(rc)
+      call ESMF_Initialize(rc=rc)
 
       !------------------------------------------------------------------------
       ! several calls to field need a valid grid.  these will be used in

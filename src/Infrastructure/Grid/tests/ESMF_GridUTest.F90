@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.26 2004/04/02 23:47:18 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.27 2004/04/09 19:54:02 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.26 2004/04/02 23:47:18 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.27 2004/04/09 19:54:02 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -87,7 +87,7 @@
 !     added to allow a script to count the number and types of unit tests.
 !--------------------------------------------------------------------------------
 
-      call ESMF_Initialize(status)
+      call ESMF_Initialize(rc=status)
 
       !------------------------------------------------------------------------
       counts(1) = 10

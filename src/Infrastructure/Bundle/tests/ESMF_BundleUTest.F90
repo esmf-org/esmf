@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.9 2004/03/24 14:54:35 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.10 2004/04/09 19:53:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.9 2004/03/24 14:54:35 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.10 2004/04/09 19:53:56 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -81,7 +81,7 @@
 ! added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
 
-      call ESMF_Initialize(rc)
+      call ESMF_Initialize(rc=rc)
 
       !------------------------------------------------------------------------
 

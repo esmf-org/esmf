@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.2 2004/03/23 23:40:40 nscollins Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.3 2004/04/09 19:54:17 eschwab Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -79,7 +79,7 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize framework
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
 
     ! Query for default layout.
     layout1 = ESMF_DELayoutCreate(rc)

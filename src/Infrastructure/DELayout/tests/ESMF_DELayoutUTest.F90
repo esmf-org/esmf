@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.3 2004/02/06 23:29:26 nscollins Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.4 2004/04/09 19:53:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.3 2004/02/06 23:29:26 nscollins Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.4 2004/04/09 19:53:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -66,7 +66,7 @@
 ! added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
 
-      call ESMF_Initialize(rc)
+      call ESMF_Initialize(rc=rc)
 
       !NEX_UTest
       ! test dynamic allocation of default 1D ESMF_DELayout

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.14 2004/03/24 14:54:34 nscollins Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.15 2004/04/09 19:53:55 eschwab Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -43,7 +43,7 @@
         
 !-------------------------------------------------------------------------
     ! Initialize framework
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
 
 !   !  Create several Fields and add them to a new Bundle.
  

@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.16 2004/03/23 17:59:06 jwolfe Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.17 2004/04/09 19:54:18 eschwab Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -66,7 +66,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Create a default 1 x N DELayout 

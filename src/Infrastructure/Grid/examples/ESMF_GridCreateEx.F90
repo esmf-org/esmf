@@ -40,7 +40,7 @@
       finalrc = ESMF_SUCCESS
 
 !BOC
-      call ESMF_Initialize(rc)
+      call ESMF_Initialize(rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then

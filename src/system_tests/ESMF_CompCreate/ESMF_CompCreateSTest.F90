@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.3 2004/03/18 23:02:50 nscollins Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.4 2004/04/09 19:54:15 eschwab Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -55,7 +55,7 @@
 !-------------------------------------------------------------------------
 !
 
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Create a default 1xN DELayout

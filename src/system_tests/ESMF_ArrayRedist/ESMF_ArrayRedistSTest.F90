@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.4 2004/03/24 14:54:48 nscollins Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.5 2004/04/09 19:54:15 eschwab Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -63,7 +63,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Create a default 1xN DELayout

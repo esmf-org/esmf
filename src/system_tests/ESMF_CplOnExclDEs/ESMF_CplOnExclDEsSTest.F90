@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.8 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.9 2004/04/09 19:54:15 eschwab Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -70,7 +70,7 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize the ESMF Framework
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
 
     ! Query default layout
     layout1 = ESMF_DELayoutCreate(rc=rc)

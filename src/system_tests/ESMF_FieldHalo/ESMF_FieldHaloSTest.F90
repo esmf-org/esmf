@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.17 2004/03/24 14:54:49 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.18 2004/04/09 19:54:15 eschwab Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -65,7 +65,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     deflayout = ESMF_DELayoutCreate(rc)

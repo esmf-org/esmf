@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F3Ex.F90,v 1.4 2004/01/07 21:13:19 svasquez Exp $
+! $Id: ESMF_DELayout_F3Ex.F90,v 1.5 2004/04/09 19:53:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -73,7 +73,7 @@ program ESMF_DELayout_FEx3
     rArrayI4(i) = 0
   end do
 
-  call ESMF_Initialize(rc)
+  call ESMF_Initialize(rc=rc)
 
   if (rc.NE.ESMF_SUCCESS) then
       finalrc = ESMF_FAILURE

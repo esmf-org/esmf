@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreate.F90,v 1.14 2004/03/18 23:01:48 nscollins Exp $
+! $Id: ESMF_CompCreate.F90,v 1.15 2004/04/09 19:54:13 eschwab Exp $
 !
 ! Test code which creates a new Component.
 
@@ -30,7 +30,7 @@
 !   !
 !   !  Quick Test - Create, Init, Run, Finalize, Destroy a Component.
 
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
  
     print *, "Component Test 1:"
 
