@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMemEx.C,v 1.2 2002/12/17 02:23:44 eschwab Exp $
+// $Id: ESMC_CommMemEx.C,v 1.3 2003/02/21 05:28:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -7,9 +7,11 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
-
-// ESMC CommMem application example program
-
+//
+// ESMC CommMem prototype application example program
+//
+// NOTE: this is prototype test code; don't write user-level code based on this!
+//
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -36,6 +38,9 @@
 #include <math.h>    // pow()
 #include <unistd.h>  // sleep()
 
+#define ESMC_COMM_NTHREADSPERPROC 4
+#define ESMC_COMM_NPROCS 2
+
 // pthread start function requires C-linkage
 extern "C" {
 void *do_DE(void *);
@@ -48,17 +53,11 @@ struct arg_s {
   ESMC_DEType_e detype;
 };
 
-// shared memory thread id array
-pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
-
-// shared memory local buffer for intra-node pthreads communications
-int *lbuf = 0;
+// shared memory thread id array, shared with ESMC_Comm.C
+extern pthread_t *ESMC_Comm_tid;
 
 // shared memory global receive buffer for inter-node MPI communications
-int *gbuf = 0;
-
-// shared memory MPI rank of this node used by threads to calculate unique DE id
-int nodeRank=-1;
+int gbuf[ESMC_COMM_NPROCS * ESMC_COMM_NTHREADSPERPROC * 3];
 
 ///////////////////////////////
 //    main process/thread    //
@@ -66,9 +65,8 @@ int nodeRank=-1;
 
 int main(int argc, char **argv)
 {
-  // allocate local and receive buffers 
-  if (lbuf == 0) lbuf = new int[ESMC_COMM_NTHREADS * 3];
-  if (gbuf == 0) gbuf = new int[ESMC_COMM_NNODES * ESMC_COMM_NTHREADS * 3];
+  // allocate ESMC_Comm_tid array to share with ESMC_Comm
+  ESMC_Comm_tid = new pthread_t[ESMC_COMM_NTHREADSPERPROC];
 
   // pack args for separate DE threads
   arg_s t_arg = { argc, argv, ESMC_THREAD };
@@ -77,12 +75,17 @@ int main(int argc, char **argv)
   ESMC_Comm_tid[0] = pthread_self();
 
   // start other DE (worker) threads
-  for (int i=1; i<ESMC_COMM_NTHREADS; i++) {
+  //   note: loop starts at 1 since 0 is main thread
+  for (int i=1; i<ESMC_COMM_NTHREADSPERPROC; i++) {
     pthread_create(&ESMC_Comm_tid[i], NULL, do_DE, (void *)&t_arg);
     //cout << "thread " << i << " started, tid=" << ESMC_Comm_tid[i] << endl;
   }
 
+  // allow other threads to start before main thread continues
   sleep(1);  // TODO:  ?? avoids MPI_Init() vs. thread creation race condition
+             //           condition variable initCV in CommInit not enough ? 
+             //           - no, doesn't prevent main from racing thru first
+             //           need "all threads created" condition variable ?
 
   // main() participates as DE worker process/thread itself; calls
   //  do_DE() directly (not as new thread via pthread_create() )
@@ -90,7 +93,8 @@ int main(int argc, char **argv)
   do_DE((void *)&t_arg);
 
   // wait for other (DE) threads to exit
-  for (int i=1; i<ESMC_COMM_NTHREADS; i++) {
+  //   note: loop starts at 1 since 0 is main thread
+  for (int i=1; i<ESMC_COMM_NTHREADSPERPROC; i++) {
     pthread_join(ESMC_Comm_tid[i], NULL);
   }
 
@@ -102,7 +106,7 @@ int main(int argc, char **argv)
 ///////////////////////
 
 // DE work function, called direct from main() process/thread, or as
-//  separate thread start function
+//  separate pthread_create thread start function
 void *do_DE(void *t_arg)
 {
   // unpack args
@@ -113,30 +117,34 @@ void *do_DE(void *t_arg)
   argv   = ((arg_s *) t_arg)->argv;
   detype = ((arg_s *) t_arg)->detype;
 
-//cout << "I am tid, detype " << pthread_self() <<
-             //", " << detype << endl;
+cout << "I am tid, detype " << pthread_self() << ", " << detype << endl;
 
-  // initialize this DE's type
+  // initialize this DE's type with passed-in value (THREAD or PROCESS)
   ESMC_DE de(detype);
 
   // instantiate and initialize an ESMC comm object
   int nDEs=0, myDEid=0;
   ESMC_Comm comm;
-  comm.ESMC_CommInit(&argc, &argv, &de);
+  comm.ESMC_CommInit(&argc, &argv, &de, ESMC_COMM_NTHREADSPERPROC, 
+                     ESMC_COMM_NPROCS, ESMC_COMM_NTHREADSPERPROC*3, ESMC_INT);
   comm.ESMC_CommGetNumDEs(&nDEs);
-//cout << "comm group size = " << nDEs << "\n";
+cout << "comm group size = " << nDEs << "\n";
   de.ESMC_DEGetESMFID(&myDEid);
-//cout << "myDEid = " << myDEid << "\n";
+cout << "myDEid = " << myDEid << "\n";
+
+  // instantiate and initialize an ESMC machine object
+  ESMC_Machine mach;
+  mach.ESMC_MachineInit(64, 256, 4, true, true, true, 1, 100, 2, 200);
 
   // get my pe, cpu and node ids
   int mypeid=0, mycpuid=0, mynodeid=0;
   ESMC_PE pe;
-  pe.ESMC_PEInit();
+  pe.ESMC_PEInit(&mach);
   pe.ESMC_PESetEsmfID(myDEid);  // assume 1-to-1 DE-to-PE for now:
   pe.ESMC_PEGetEsmfID(&mypeid); //   (mypeid = myDEid)
   pe.ESMC_PEGetCpuID(&mycpuid);
   pe.ESMC_PEGetNodeID(&mynodeid);
-//cout << "mycpuid, mynodeid = " << mycpuid << ", " << mynodeid << "\n";
+cout << "mycpuid, mynodeid = " << mycpuid << ", " << mynodeid << "\n";
 
   // prepare send buffer
   //  TODO: ?? use MPI derived type to send whole PE object rather
@@ -148,7 +156,8 @@ void *do_DE(void *t_arg)
   sendbuf[2] = mynodeid;
 
   // gather all PE IDs from all DEs
-  comm.ESMC_CommAllGather(sendbuf, lbuf, 3, ESMC_INT);
+  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMC_INT);
+//cout << "main: exited ESMC_CommAllGather" << endl;
 
   // create PE List from gathered IDs
 
@@ -166,7 +175,8 @@ void *do_DE(void *t_arg)
     // populate PE list with retrieved ids
     peList->ESMC_PEListInit(i, mypeid, mycpuid, mynodeid);
 
-    if (myDEid == 0) {
+    // show what main thread DE got
+    if (detype == ESMC_PROCESS) {
       cout << "(peid,cpuid,nodeid) = "  << mypeid   << " "
                                              << mycpuid  << " "
                                              << mynodeid << " \n";
@@ -178,21 +188,31 @@ void *do_DE(void *t_arg)
   peList->ESMC_PEListSort();
 
   // now let's create a layout, using our sorted PE list
-  ESMC_Layout *layout = ESMC_LayoutCreate(2,4,1, peList, ESMC_YFAST, &rc);
+  // TODO:  can't currently do, since Layout now contains a Comm, which can't
+  //        be initialized with NPROC/NTHREAD info yet (eventually from
+  //        a config file, or expose at LayoutCreate, which doesn't seem right)
+//cout << "main: deid " << myDEid << " calling ESMC_LayoutCreate()" << endl;
+  //ESMC_Layout *layout = ESMC_LayoutCreate(2,4,1, peList, ESMC_YFAST, &rc);
   //ESMC_Layout layout;
   //layout.ESMC_LayoutConstruct(2,3,1, peList, ESMC_YFAST);
 
-  // let's see what we have (show one DE's copy only)
-  if (myDEid == 0) {
+  // let's see what we have (show main thread DE's copy only)
+  if (detype == ESMC_PROCESS) {
     peList->ESMC_PEListPrint();
-    layout->ESMC_LayoutPrint();
+    //layout->ESMC_LayoutPrint();
   }
 
   // now get rid of 'em
   rc = ESMC_PEListDestroy(peList);    // deallocates entire object
-  rc = ESMC_LayoutDestroy(layout);
+  //rc = ESMC_LayoutDestroy(layout);
   //layout.ESMC_LayoutDestruct();
 
+//cout << "DE " << myDEid << " doing CommFinal" << endl;
+  if (detype == ESMC_PROCESS) sleep(1);
+                       // TODO: avoids MPI-thead shutdown race condition ??
+                       //   allows other threads to exit gracefully before
+                       //   MPI_Finalize()
+                       //   need "all threads pthread_exit()ed" condition var ?
   comm.ESMC_CommFinal();
 
 #if 0
@@ -203,14 +223,14 @@ void *do_DE(void *t_arg)
     a = 3.14159 * pow((double)r, 2.0);
     if(r%1000000 == 0) {
       // let's see what PE (cpu & node) we're currently running on
-      pe.ESMC_PEInit();
+      pe.ESMC_PEInit(&mach);
       pe.ESMC_PEGetCpuID(&mycpuid);
       pe.ESMC_PEGetNodeID(&mynodeid);
      //cout << "tid, mycpuid, mynodeid = " << pthread_self() << ", " << mycpuid << ", " << mynodeid << "\n";
      }
   }
 #endif
-
+//cout << "DE " << myDEid << " outa here!" << endl;
   if (detype == ESMC_THREAD) pthread_exit(NULL); // don't exit main thread !
   return(NULL);
 }
