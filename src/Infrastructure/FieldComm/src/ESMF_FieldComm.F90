@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.59 2004/10/18 16:53:40 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.60 2004/11/05 00:08:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.59 2004/10/18 16:53:40 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.60 2004/11/05 00:08:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -379,7 +379,6 @@
       logical :: rcpresent                        ! Return code present
       integer :: htype
       logical :: allInOne
-      logical :: dummy
       type(ESMF_FieldType) :: ftypep              ! field type info
    
       ! Initialize return code   
@@ -404,9 +403,9 @@
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
         elseif (htype .ne. ESMF_HALOHANDLE) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                        "routehandle not defined for halo", &
-                                        ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                   "routehandle not defined for halo", &
+                                   ESMF_CONTEXT, rc)
           return
         endif
       ! if not valid, try calling HaloStore to initialize
@@ -423,10 +422,10 @@
       endif
 
       call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, &
-                             blockingflag, commhandle, rc=status)
+                          blockingflag, commhandle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -629,7 +628,6 @@
       logical :: rcpresent                        ! Return code present
       integer :: htype
       logical :: allInOne
-      logical :: dummy
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code   
@@ -655,9 +653,9 @@
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
         elseif (htype .ne. ESMF_REDISTHANDLE) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                        "routehandle not defined for redist", &
-                                        ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                   "routehandle not defined for redist", &
+                                   ESMF_CONTEXT, rc)
           return
         endif
       ! if not valid, try calling RedistStore to initialize
@@ -671,13 +669,17 @@
                               ESMF_LOG_WARNING, &
                               ESMF_CONTEXT)
         if (.not. present(parentDelayout)) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                        "parentDelayout needed to precompute redist", &
-                                        ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+          "if parentDELayout not specified, routehandle must be precomputed", &
+                                   ESMF_CONTEXT, rc)
           return
         endif
         call ESMF_FieldRedistStore(srcField, dstField, parentDelayout, &
                                    routehandle, status)
+        if (ESMF_LogMsgFoundError(status, &
+              "routehandle invalid, and unable to precompute one on the fly", &
+                                  ESMF_CONTEXT, rc)) return
+        
       endif
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
@@ -781,40 +783,48 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
+      integer :: srcHalo, dstHalo
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      localrc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
 
-      ! Sanity checks for good fields, and that each has an associated grid
-      ! and data before going down to the next level.
-      if (.not.associated(dstField%ftypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-      if (.not.associated(srcField%ftypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
+      ! Validate the fields before proceeding.
+      call ESMF_FieldValidate(srcField, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_FieldValidate(dstField, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! The current version of the code only works correctly for the
+      ! redistribution function if both the src and destination fields
+      ! have identical halo widths.  Add a check here for that, which 
+      ! can be removed if we augment the code to support halo mismatches.
+      call ESMF_FieldGet(srcField, haloWidth=srcHalo, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_FieldGet(dstField, haloWidth=dstHalo, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+
+      if (srcHalo .ne. dstHalo) then
+          call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+             "Source and Destination Fields must have identical Halo Widths", &
+                                   ESMF_CONTEXT, rc)
+          return
       endif
 
       dstFtypep => dstField%ftypep
       srcFtypep => srcField%ftypep
 
-      if (dstFtypep%fieldstatus.ne.ESMF_STATUS_READY .or. &
-          srcFtypep%fieldstatus.ne.ESMF_STATUS_READY) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
 
       call ESMF_ArrayRedistStore(srcFtypep%localfield%localdata, &
                                  srcFtypep%grid, &
@@ -823,13 +833,13 @@
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
                                  parentDelayout, &
-                                 routehandle, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                 routehandle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldRedistStore
 
@@ -1104,7 +1114,6 @@
       integer :: localrc                          ! Error status
       integer :: htype, srcCount, dstCount
       logical :: allInOne
-      logical :: dummy
       logical :: hasSrcData        ! does this DE contain localdata from src?
       logical :: hasDstData        ! does this DE contain localdata from dst?
       type(ESMF_DELayout) :: srcDelayout, dstDelayout
@@ -1130,9 +1139,9 @@
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
         elseif (htype .ne. ESMF_REGRIDHANDLE) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                      "routehandle not defined for regrid", &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                   "routehandle not defined for regrid", &
+                                   ESMF_CONTEXT, rc)
           return
         endif
       ! if not valid, try calling RegridStore to initialize
@@ -1209,7 +1218,7 @@
       if (allInOne) call ESMF_FieldRegridRelease(routehandle, localrc)
 
       ! Set return values.
-      if(present(rc)) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldRegrid
 
