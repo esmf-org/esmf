@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.63 2005/01/10 21:50:24 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.64 2005/01/10 22:08:04 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@ end function
     subroutine ESMF_LogClose(log, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log)	            :: log
+    type(ESMF_Log)	                :: log
     integer, intent(out),optional   :: rc
 
 ! !DESCRIPTION:
@@ -310,7 +310,7 @@ end subroutine ESMF_LogFinalize
 !      The arguments are:
 !      \begin{description}
 ! 
-!      \item [{[log]}]
+!      \item [log]
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !	     of the default log.
 !      \item [{[rc]}]
@@ -401,7 +401,7 @@ end subroutine ESMF_LogFlush
 	character(len=*), intent(in), optional  :: file
 	character(len=*), intent(in), optional  :: method
 	integer, intent(out),optional           :: rcToReturn
-	type(ESMF_LOG),intent(in),optional	:: log
+	type(ESMF_LOG),intent(in),optional	    :: log
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
@@ -468,7 +468,7 @@ end function ESMF_LogFoundAllocError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out), optional                  :: rcToReturn
-	type(ESMF_LOG),intent(in),optional		:: log
+	type(ESMF_LOG),intent(in),optional		        :: log
 	
 ! !DESCRIPTION:
 !      This function returns a logical true for ESMF return codes that indicate 
@@ -525,8 +525,8 @@ end function ESMF_LogFoundError
 	type(ESMF_Logical), intent(out),optional		:: verbose
 	type(ESMF_Logical), intent(out),optional		:: flush
 	type(ESMF_Logical), intent(out),optional		:: rootOnly
-	type(ESMF_HaltType), intent(out),optional               :: halt
-	type(ESMF_LogType), intent(out),optional	        :: logtype
+	type(ESMF_HaltType), intent(out),optional       :: halt
+	type(ESMF_LogType), intent(out),optional	    :: logtype
 	integer, intent(out),optional			        :: stream  
 	integer, intent(out),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -538,7 +538,7 @@ end function ESMF_LogFoundError
 !      The arguments are:
 !      \begin{description}
 !
-!      \item [{[log]}]
+!      \item [log]
 !            Log object.
 !      \item [{[verbose]}]
 !            Verbose flag.
@@ -579,9 +579,9 @@ end subroutine ESMF_LogGet
 !
 ! !ARGUMENTS:
       character(len=*)                          :: filename
-      integer, intent(in),optional		:: lognone  
+      integer, intent(in),optional		        :: lognone  
       type(ESMF_LogType), intent(in),optional   :: logtype  
-      integer, intent(out),optional	        :: rc
+      integer, intent(out),optional	            :: rc
 
 ! !DESCRIPTION:
 !      This routine initializes the global default {\tt ESMF\_Log}.  
@@ -591,7 +591,7 @@ end subroutine ESMF_LogGet
 !      The arguments are:
 !      \begin{description}
 ! 
-!      \item [{[filename]}]
+!      \item [filename]
 !            Name of file.  Maximum length 26 characters to allow for
 !            the PET number to be added and keep the total file name
 !            length under 32 characters.
@@ -693,16 +693,16 @@ end subroutine ESMF_LogInitialize
                                             method,rcToReturn,log)
 !
 ! !RETURN VALUE:
-	logical                                 ::ESMF_LogMsgFoundAllocError
+	logical                                     ::ESMF_LogMsgFoundAllocError
 ! !ARGUMENTS:
 !	
-	integer, intent(in)                     :: statusToCheck
-	character(len=*), intent(in)            :: msg
-	integer, intent(in), optional           :: line
-	character(len=*), intent(in), optional  :: file
-	character(len=*), intent(in), optional	:: method
-        integer, intent(out),optional           :: rcToReturn	
-        type(ESMF_LOG), intent(in), optional	:: log
+	integer, intent(in)                         :: statusToCheck
+	character(len=*), intent(in)                :: msg
+	integer, intent(in), optional               :: line
+	character(len=*), intent(in), optional      :: file
+	character(len=*), intent(in), optional	    :: method
+    integer, intent(out),optional               :: rcToReturn	
+    type(ESMF_LOG), intent(in), optional	    :: log
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
@@ -716,9 +716,9 @@ end subroutine ESMF_LogInitialize
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [{[statusToCheck]}]
+!      \item [statusToCheck]
 !            Fortran allocation status to check.
-!      \item [{[msg}]]
+!      \item [msg]
 !            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
@@ -773,7 +773,7 @@ end function ESMF_LogMsgFoundAllocError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out),optional                   :: rcToReturn
-	type(ESMF_LOG), intent(in), optional		:: log
+	type(ESMF_LOG), intent(in), optional		    :: log
 	
 
 ! !DESCRIPTION:
@@ -835,7 +835,7 @@ end function ESMF_LogMsgFoundError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out),optional                   :: rcToReturn
-	type(ESMF_LOG), intent(in), optional		:: log
+	type(ESMF_LOG), intent(in), optional		    :: log
 	
 
 ! !DESCRIPTION:
@@ -887,11 +887,11 @@ end subroutine ESMF_LogMsgSetError
     subroutine ESMF_LogOpen(log, filename, lognone, logtype, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log)			    :: log
-    character(len=*)			    :: filename
+    type(ESMF_Log)			                :: log
+    character(len=*)			            :: filename
     integer, intent(in),optional            :: lognone  
     type(ESMF_LogType), intent(in),optional :: logtype  
-    integer, intent(out),optional	    :: rc
+    integer, intent(out),optional	        :: rc
 
 ! !DESCRIPTION:
 !      This routine opens a file with {\tt filename} and associates
@@ -901,9 +901,9 @@ end subroutine ESMF_LogMsgSetError
 !      The arguments are:
 !      \begin{description}
 ! 
-!      \item [{[log]}]
+!      \item [log]
 !            An {\tt ESMF\_Log} object.
-!      \item [{[filename]}]
+!      \item [filename]
 !            Name of file.
 !      \item [{[lognone]}]
 !            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}
@@ -914,7 +914,7 @@ end subroutine ESMF_LogMsgSetError
 !      \end{description}
 ! 
 !EOP
-    integer 				       :: status, j, rc2	
+    integer 				                   :: status, j, rc2	
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
     character(len=32)                          :: fname
     character(len=4)                           :: fnum
@@ -1004,11 +1004,11 @@ end subroutine ESMF_LogOpen
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log) 				   		:: log
+	type(ESMF_Log) 				   		            :: log
 	type(ESMF_Logical), intent(in),optional			:: verbose
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
-	type(ESMF_HaltType), intent(in),optional                :: halt
+	type(ESMF_HaltType), intent(in),optional        :: halt
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -1019,7 +1019,7 @@ end subroutine ESMF_LogOpen
 !      The arguments are:
 !      \begin{description}
 !
-!      \item [{[log]}]
+!      \item [log]
 !            Log object.
 !      \item [{[verbose]}]
 !            Verbose flag.
@@ -1071,8 +1071,8 @@ end subroutine ESMF_LogSet
 	integer, intent(in), optional           :: line
 	character(len=*), intent(in), optional  :: file
 	character(len=*), intent(in), optional	:: method
-	type(ESMF_LOG),target,optional   	:: log
-	integer, intent(out),optional		:: rc
+	type(ESMF_LOG),target,optional   	    :: log
+	integer, intent(out),optional		    :: rc
 
 ! !DESCRIPTION:
 !      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
