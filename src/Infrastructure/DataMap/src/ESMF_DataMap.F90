@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.24 2004/04/23 21:29:26 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.25 2004/04/23 23:18:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -207,6 +207,8 @@
       public ESMF_DataMapWrite, ESMF_DataMapRead 
       public ESMF_DataMapValidate, ESMF_DataMapPrint
 
+      public ESMF_RelLocString, ESMF_InterleaveString, ESMF_IndexOrderString
+
       public operator(.eq.), operator(.ne.)
 
 !EOPI
@@ -216,7 +218,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.24 2004/04/23 21:29:26 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.25 2004/04/23 23:18:18 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -1104,6 +1106,135 @@ end function
 
 
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_RelLocString - Return a relloc as a string
+!
+! !INTERFACE:
+      subroutine ESMF_RelLocString(relloc, string, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_RelLoc), intent(in) :: relloc
+      character (len = *), intent(out) :: string
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Routine to turn a relloc into a string.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [relloc]
+!           The {\tt ESMF\_RelLoc} object to be turned into a string.
+!     \item [string]
+!          Return string.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+        if (relloc .eq. ESMF_CELL_UNDEFINED) string = "Undefined"
+        if (relloc .eq. ESMF_CELL_CENTER)    string = "Cell Center"
+        if (relloc .eq. ESMF_CELL_NFACE)     string = "Cell North Face"
+        if (relloc .eq. ESMF_CELL_SFACE)     string = "Cell South Face"
+        if (relloc .eq. ESMF_CELL_EFACE)     string = "Cell East Face"
+        if (relloc .eq. ESMF_CELL_WFACE)     string = "Cell West Face"
+        if (relloc .eq. ESMF_CELL_NECORNER)  string = "Cell NorthEast Corner"
+        if (relloc .eq. ESMF_CELL_NWCORNER)  string = "Cell NorthWest Corner"
+        if (relloc .eq. ESMF_CELL_SECORNER)  string = "Cell SouthEast Corner"
+        if (relloc .eq. ESMF_CELL_SWCORNER)  string = "Cell SouthWest Corner"
+        if (relloc .eq. ESMF_CELL_CELL)      string = "Full Cell"
+        if (relloc .eq. ESMF_CELL_VERTEX)    string = "Cell Vertex"
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RelLocString
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_InterleaveString - Return a interleave as a string
+!
+! !INTERFACE:
+      subroutine ESMF_InterleaveString(interleave, string, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_InterleaveType), intent(in) :: interleave
+      character (len = *), intent(out) :: string
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Routine to turn an interleave into a string.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [interleave]
+!           The {\tt ESMF\_InterleaveType} object to be turned into a string.
+!     \item [string]
+!          Return string.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+        if (interleave .eq. ESMF_IL_BLOCK) string = "Block Interleave"
+        if (interleave .eq. ESMF_IL_ITEM) string = "Item Interleave"
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_InterleaveString
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_IndexOrderString - Return a indexorder as a string
+!
+! !INTERFACE:
+      subroutine ESMF_IndexOrderString(indexorder, string, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_IndexOrder), intent(in) :: indexorder   ! turn into string
+      character (len = *), intent(out) :: string        ! where to return it
+      integer, intent(out), optional :: rc              ! return code
+!
+! !DESCRIPTION:
+!      Routine to turn an indexorder into a string.
+!
+!      The arguments are:
+!     \begin{description}
+!     \item [indexorder]
+!           The {\tt ESMF\_IndexOrder} object to be turned into a string.
+!     \item [string]
+!           The corresponding string value.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        if (indexorder.eq.ESMF_INDEX_I  ) string = "I"
+        if (indexorder.eq.ESMF_INDEX_IJ ) string = "IJ"
+        if (indexorder.eq.ESMF_INDEX_JI ) string = "JI"
+        if (indexorder.eq.ESMF_INDEX_IJK) string = "IJK"
+        if (indexorder.eq.ESMF_INDEX_JIK) string = "JIK"
+        if (indexorder.eq.ESMF_INDEX_KJI) string = "KJI"
+        if (indexorder.eq.ESMF_INDEX_IKJ) string = "IKJ"
+        if (indexorder.eq.ESMF_INDEX_JKI) string = "JKI"
+        if (indexorder.eq.ESMF_INDEX_KIJ) string = "KIJ"
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_IndexOrderString
+
+!------------------------------------------------------------------------------
+
 
         end module ESMF_DataMapMod
 
