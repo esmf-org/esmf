@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.28 2003/05/27 22:42:03 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.29 2003/06/06 14:17:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -148,8 +148,8 @@
 
    public ESMF_PhysGridPointInCell
 
-   public ESMF_PhysGridComputeDistSpherical
-   public ESMF_PhysGridComputeDistCartesian
+   public ESMF_PhysGridCompDistSpherical
+   public ESMF_PhysGridCompDistCartesian
  
 !------------------------------------------------------------------------------
 !
@@ -178,7 +178,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.28 2003/05/27 22:42:03 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.29 2003/06/06 14:17:30 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2722,14 +2722,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridComputeDistSpherical - Distance in spherical coords
+! !IROUTINE: ESMF_PhysGridCompDistSpherical - Distance in spherical coords
 !
 ! !INTERFACE:
-      function ESMF_PhysGridComputeDistSpherical(x1, y1, x2, y2, rc)
+      function ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, rc)
 
 !
 ! !RETURN VALUE:
-      real(kind=ESMF_IKIND_R8) :: ESMF_PhysGridComputeDistSpherical
+      real(kind=ESMF_IKIND_R8) :: ESMF_PhysGridCompDistSpherical
 !
 ! !ARGUMENTS:
       real(kind=ESMF_IKIND_R8), intent(in) :: &
@@ -2784,7 +2784,7 @@
 !     compute angular distance
 !
 
-      ESMF_PhysGridComputeDistSpherical = &
+      ESMF_PhysGridCompDistSpherical = &
          acos( cos(lat1)*cos(lat2)*cos(lon1)*cos(lon2) + &
                cos(lat1)*cos(lat2)*sin(lon1)*sin(lon2) + &
                sin(lat1)*sin(lat2) )
@@ -2795,18 +2795,18 @@
 
       rc = ESMF_SUCCESS
 
-      end function ESMF_PhysGridComputeDistSpherical
+      end function ESMF_PhysGridCompDistSpherical
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridComputeDistCartesian - Distance in Cartesian coords
+! !IROUTINE: ESMF_PhysGridCompDistCartesian - Distance in Cartesian coords
 !
 ! !INTERFACE:
-      function ESMF_PhysGridComputeDistCartesian(x1, y1, x2, y2, rc)
+      function ESMF_PhysGridCompDistCartesian(x1, y1, x2, y2, rc)
 
 !
 ! !RETURN VALUE:
-      real(kind=ESMF_IKIND_R8) :: ESMF_PhysGridComputeDistCartesian
+      real(kind=ESMF_IKIND_R8) :: ESMF_PhysGridCompDistCartesian
 !
 ! !ARGUMENTS:
       real(kind=ESMF_IKIND_R8), intent(in) :: &
@@ -2841,7 +2841,7 @@
 !     compute distance using the usual Cartesian formula
 !
 
-      ESMF_PhysGridComputeDistCartesian = sqrt( (x2-x1)**2 + (y2-y1)**2 )
+      ESMF_PhysGridCompDistCartesian = sqrt( (x2-x1)**2 + (y2-y1)**2 )
 
 !
 !     set return code
@@ -2849,7 +2849,7 @@
 
       rc = ESMF_SUCCESS
 
-      end function ESMF_PhysGridComputeDistCartesian
+      end function ESMF_PhysGridCompDistCartesian
 
 !------------------------------------------------------------------------------
 

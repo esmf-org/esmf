@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.53 2003/05/27 22:41:41 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.54 2003/06/06 14:17:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.53 2003/05/27 22:41:41 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.54 2003/06/06 14:17:43 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3144,10 +3144,10 @@
       select case (coord_system)
       case (ESMF_CoordSystem_Spherical)
          ESMF_GridComputeDistance = &
-         ESMF_PhysGridComputeDistSpherical(x1, y1, x2, y2, status)
+         ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, status)
       case (ESMF_CoordSystem_Cartesian)
          ESMF_GridComputeDistance = &
-         ESMF_PhysGridComputeDistCartesian(x1, y1, x2, y2, status)
+         ESMF_PhysGridCompDistCartesian(x1, y1, x2, y2, status)
       case default
          print *,'Distance in coordinate system not yet supported'
          status = ESMF_FAILURE
