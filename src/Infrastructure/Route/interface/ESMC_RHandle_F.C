@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.9 2003/11/06 23:08:14 nscollins Exp $
+// $Id: ESMC_RHandle_F.C,v 1.10 2003/11/06 23:56:13 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ extern "C" {
        }
 
        // the int needs to be an enum, the label needs to be added and handled
-       void FTN(c_esmc_transformvaluesgetf90ptrs)(ESMC_TransformValues **ptr, 
+       void FTN(c_esmc_transformvaluesgetf90ptr)(ESMC_TransformValues **ptr, 
                                        int *numlist, 
                                        struct c_F90ptr *src, 
                                        struct c_F90ptr *dst, 
