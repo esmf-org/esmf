@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.4 2004/06/15 07:07:58 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.5 2004/06/15 07:35:23 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -68,13 +68,13 @@
     ! Open a log named "Testlog.txt" associated with alog.
     call ESMF_LogOpen(alog, "TestLog.txt",rc=rc1)
     ! LogWrite
-    call ESMF_LogWrite("Log Write 2", ESMF_CONTEXT, ESMF_LOG_INFO,alog)
+    call ESMF_LogWrite("Log Write 2", ESMF_LOG_INFO, ESMF_CONTEXT,log=alog)
     ! LogMsgFoundError
     ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello", ESMF_CONTEXT, &
-          rcToReturn=rc2,alog)
+          rcToReturn=rc2,log=alog)
     ! LogMsgFoundAllocError
     ret = ESMF_LogFoundAllocError(ESMF_FAILURE, ESMF_CONTEXT, rc2,alog)
     ! Close the log.
-    call ESMF_Close(alog,rc=rc2)
+    call ESMF_LogClose(alog)
 end program
 !EOC
