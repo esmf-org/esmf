@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.58 2004/05/18 21:57:30 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.59 2004/05/18 23:08:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.58 2004/05/18 21:57:30 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.59 2004/05/18 23:08:37 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -88,7 +88,7 @@ int ESMC_Clock::count=0;
       clock = new ESMC_Clock;
     }
     catch (...) {
-      //TODO: ESMC_LogDefault.ESMC_LogAllocErr(rc);
+      ESMC_LogDefault.ESMC_LogAllocError(rc);
       return(ESMC_NULL_POINTER);
     }
 
@@ -181,7 +181,7 @@ int ESMC_Clock::count=0;
       clockCopy = new ESMC_Clock(*clock);
     }
     catch (...) {
-      //TODO: ESMC_LogDefault.ESMC_LogAllocErr(rc);
+      ESMC_LogDefault.ESMC_LogAllocError(rc);
       return(ESMC_NULL_POINTER);
     }
 
