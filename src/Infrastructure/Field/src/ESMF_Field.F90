@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.51 2003/08/04 20:20:59 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.52 2003/08/04 23:14:47 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.51 2003/08/04 20:20:59 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.52 2003/08/04 23:14:47 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2557,8 +2557,7 @@
           ! Create the route object.
           route = ESMF_RouteCreate(layout, rc) 
 
-          call ESMF_RoutePrecomputeHalo(route, datarank, &
-                                        my_DE, src_AI, dst_AI, &
+          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, src_AI, dst_AI, &
                                         AI_count, global_start, global_stride, &
                                         layout, periodic, status)
 
