@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.38 2004/05/20 22:19:38 svasquez Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.39 2004/05/25 11:03:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.38 2004/05/20 22:19:38 svasquez Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.39 2004/05/25 11:03:08 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,9 +68,7 @@
       integer :: half, quart
       real (ESMF_KIND_R8):: min(2), max(2)
       integer :: counts(ESMF_MAXGRIDDIM)
-      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
+      type(ESMF_GridHorzStagger) :: horz_stagger
       integer :: status, myde
 
 !------------------------------------------------------------------------------
@@ -120,21 +118,16 @@
       max(1) = 20.0
       min(2) = 0.0
       max(2) = 5.0
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_A
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       gname = "test grid 1"
 
       !NEX_UTest
-      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
-                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              delayout=layout1, &
                               name=gname, rc=status)
-
+      call ESMF_GridDistribute(grid1, delayout=layout1, rc=status)
       write(failMsg, *) ""
       write(name, *) "Creating a source Test Grid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -151,15 +144,12 @@
 #ifdef ESMF_EXHAUSTIVE
      
       !EX_UTest
-      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
-                              horzGridType=horz_gridtype, &
-                              horzStagger=horz_stagger, & 
-                              horzCoordSystem=horz_coord_system, &
-                              delayout=layout1, &
+                              horzStagger=horz_stagger, &
                               name=gname, rc=status)
-                              
+      call ESMF_GridDistribute(grid1, delayout=layout1, rc=status)
       write(failMsg, *) ""
       write(name, *) "Creating a source Test Grid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -173,15 +163,13 @@
 !     call 
       ! Second grid
       gname = "test grid 2"
-      horz_stagger = ESMF_GridStagger_D_NE
-      grid2 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
+      grid2 = ESMF_GridCreateHorz_XYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
-                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              delayout=layout2, &
                               name=gname, rc=status)
+      call ESMF_GridDistribute(grid2, delayout=layout1, rc=status)
       write(failMsg, *) ""
       write(name, *) "Creating a destination Test Grid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
