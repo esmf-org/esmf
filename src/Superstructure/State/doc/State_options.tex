@@ -1,28 +1,4 @@
-% $Id: State_options.tex,v 1.8 2004/06/12 04:18:05 cdeluca Exp $
-
-\subsubsection{ESMF\_StateItem}
-\label{opt:stateitem}
-
-{\sf DESCRIPTION:\\}
-Specifies the type of object being added to or retrieved from an
-{ESMF\_State.}
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_STATEITEM\_BUNDLE] 
-         Refers to an {\tt ESMF\_Bundle} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEITEM\_FIELD]
-         Refers to an {\tt ESMF\_Field} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEITEM\_ARRAY]
-         Refers to an {\tt ESMF\_Array} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEITEM\_STATE]
-         Refers to an {\tt ESMF\_State} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEITEM\_NAME]
-         Refers to a data name used as a placeholder within 
-         an {\tt ESMF\_State}.
-   \item [ESMF\_STATEITEM\_UNKNOWN]
-         Object type within an {\tt ESMF\_State} is unknown.
-\end{description}
+% $Id: State_options.tex,v 1.9 2004/06/12 13:49:29 cdeluca Exp $
 
 \subsubsection{ESMF\_StateItemNeeded}
 \label{opt:stateitemneeded}
@@ -66,6 +42,30 @@ Valid values are:
          Data is required for restart.
    \item [ESMF\_NOTREQUIRED\_FOR\_RESTART]
          Data is not required for restart.
+\end{description}
+
+\subsubsection{ESMF\_StateItemType}
+\label{opt:stateitem}
+
+{\sf DESCRIPTION:\\}
+Specifies the type of object being added to or retrieved from an
+{ESMF\_State.}
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_STATEITEM\_BUNDLE] 
+         Refers to an {\tt ESMF\_Bundle} within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEITEM\_FIELD]
+         Refers to an {\tt ESMF\_Field} within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEITEM\_ARRAY]
+         Refers to an {\tt ESMF\_Array} within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEITEM\_STATE]
+         Refers to an {\tt ESMF\_State} within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEITEM\_NAME]
+         Refers to a data name used as a placeholder within 
+         an {\tt ESMF\_State}.
+   \item [ESMF\_STATEITEM\_UNKNOWN]
+         Object type within an {\tt ESMF\_State} is unknown.
 \end{description}
 
 \subsubsection{ESMF\_StateItemValid}

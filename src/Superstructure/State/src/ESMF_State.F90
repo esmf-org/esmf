@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.58 2004/06/12 04:18:05 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.59 2004/06/12 13:49:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,24 +66,24 @@
                 ESMF_STATE_INVALID  = ESMF_StateType(4)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateItem
+!     ! ESMF_StateItemType
 !     !   Each entry in the list of states is either simply a name placeholder
 !     !   or an actual data item - Bundle, Field, Array, or State. 
 !
-      type ESMF_StateItem
+      type ESMF_StateItemType
       sequence
       private
          integer :: ot
       end type
 
-      type(ESMF_StateItem), parameter :: &
-                ESMF_STATEITEM_BUNDLE = ESMF_StateItem(1), &
-                ESMF_STATEITEM_FIELD = ESMF_StateItem(2), &
-                ESMF_STATEITEM_ARRAY = ESMF_StateItem(3), &
-                ESMF_STATEITEM_STATE = ESMF_StateItem(4), &
-                ESMF_STATEITEM_NAME = ESMF_StateItem(5), &
-                ESMF_STATEITEM_INDIRECT = ESMF_StateItem(6), &
-                ESMF_STATEITEM_UNKNOWN = ESMF_StateItem(7)
+      type(ESMF_StateItemType), parameter :: &
+                ESMF_STATEITEM_BUNDLE = ESMF_StateItemType(1), &
+                ESMF_STATEITEM_FIELD = ESMF_StateItemType(2), &
+                ESMF_STATEITEM_ARRAY = ESMF_StateItemType(3), &
+                ESMF_STATEITEM_STATE = ESMF_StateItemType(4), &
+                ESMF_STATEITEM_NAME = ESMF_StateItemType(5), &
+                ESMF_STATEITEM_INDIRECT = ESMF_StateItemType(6), &
+                ESMF_STATEITEM_UNKNOWN = ESMF_StateItemType(7)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateItemNeeded
@@ -176,7 +176,7 @@
       sequence
 #endif
       private
-        type(ESMF_StateItem) :: otype
+        type(ESMF_StateItemType) :: otype
         character(len=ESMF_MAXSTR) :: namep
         type(ESMF_DataHolder), pointer :: datap
         integer :: indirect_index
@@ -228,7 +228,7 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_State
-      public ESMF_StateItem, ESMF_STATEITEM_BUNDLE, ESMF_STATEITEM_FIELD, &
+      public ESMF_StateItemType, ESMF_STATEITEM_BUNDLE, ESMF_STATEITEM_FIELD, &
                                    ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_STATE, &
                                    ESMF_STATEITEM_NAME
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.58 2004/06/12 04:18:05 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.59 2004/06/12 13:49:29 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -339,7 +339,7 @@ end interface
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddArray} functions.   
+! types of {\tt ESMF\_StateAddArray} functions.   
 !  
 !EOPI 
 end interface
@@ -540,14 +540,14 @@ end interface
 
 function ESMF_oteq(s1, s2)
  logical ESMF_oteq
- type(ESMF_StateItem), intent(in) :: s1, s2
+ type(ESMF_StateItemType), intent(in) :: s1, s2
 
  ESMF_oteq = (s1%ot .eq. s2%ot)
 end function
 
 function ESMF_otne(s1, s2)
  logical ESMF_otne
- type(ESMF_StateItem), intent(in) :: s1, s2
+ type(ESMF_StateItemType), intent(in) :: s1, s2
 
  ESMF_otne = (s1%ot .ne. s2%ot)
 end function
@@ -630,9 +630,9 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a single {\tt ESMF\_Array} reference to an existing 
-!      {\tt ESMF\_State}.
-!      The {\tt ESMF\_Array} name must be unique within the {\tt ESMF\_State}
+!      Add a single {\tt array} reference to an existing 
+!      {\tt state}.  The {\tt array} name must be unique 
+!      within the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -668,12 +668,12 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddArray()   
-      subroutine ESMF_StateAddArrayList(state, acount, arrays, rc)
+      subroutine ESMF_StateAddArrayList(state, arrayCount, arrayList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
-      integer, intent(in) :: acount
-      type(ESMF_Array), dimension(:), intent(in) :: arrays
+      integer, intent(in) :: arrayCount
+      type(ESMF_Array), dimension(:), intent(in) :: arrayList
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -683,10 +683,10 @@ end function
 !     \begin{description}
 !     \item[state]
 !      An {\tt ESMF\_State} object.
-!     \item[acount]
+!     \item[arrayCount]
 !      The number of {\tt ESMF\_Array}s to be added.
-!     \item[arrays]
-!      The list (fortran array) of {\tt ESMF\_Array}s to be added.
+!     \item[arrayList]
+!      The list (Fortran array) of {\tt ESMF\_Array}s to be added.
 !      This is a reference only; when
 !      the {\tt ESMF\_State} is destroyed the objects contained in it will
 !      not be destroyed.   Also, the {\tt ESMF\_Array}s cannot be safely 
@@ -700,7 +700,7 @@ end function
 !
 !EOP
 
-        call ESMF_StateClassAddArrayList(state%statep, acount, arrays, rc)
+        call ESMF_StateClassAddArrayList(state%statep, arrayCount, arrayList, rc)
 
         end subroutine ESMF_StateAddArrayList
 
@@ -708,7 +708,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddIntAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set an integer attribute
+! !IROUTINE: ESMF_StateAddAttribute - Add an integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -722,16 +722,17 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer attribute to an {\tt ESMF\_State}.
+!      Attaches an integer attribute to the {\tt state}.
+!      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the attribute to set.
+!       The name of the attribute to add.
 !     \item [value]
-!       The integer value of the attribute.
+!       The integer value of the attribute to add.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -758,7 +759,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddIntListAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set an integer list attribute
+! !IROUTINE: ESMF_StateAddAttribute - Add an integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -773,18 +774,21 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer list attribute to an {\tt ESMF\_State}.
+!     Attaches an integer list attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!     The number of integer items in the {\tt value} list is
+!     given by {\tt count}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the attribute to set.
+!       The name of the attribute to add.
 !     \item [count]
-!       The number of values to be set.
+!       The number of integers in the {\tt value} list.
 !     \item [value]
-!       The integer values of the attribute.
+!       The integer values of the attribute to add.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -821,7 +825,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddRealAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a real attribute
+! !IROUTINE: ESMF_StateAddAttribute - Add a real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -835,16 +839,18 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a real attribute to an {\tt ESMF\_State}.
+!      Attaches a real attribute to the {\tt state}.
+!      The attribute has a {\tt name} and a {\tt value}.
+!      
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the attribute to set.
+!       The name of the attribute to add.
 !     \item [value]
-!       The real value of the attribute.
+!       The real value of the attribute to add.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -871,7 +877,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddRealListAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a real list attribute
+! !IROUTINE: ESMF_StateAddAttribute - Add a real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -886,18 +892,21 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Attaches a real list attribute to an {\tt ESMF\_State}.
+!     Attaches a real list attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!     The number of real items in the {\tt value} list is
+!     given by {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the attribute to set.
+!       The name of the attribute to add.
 !     \item [count]
-!       The number of values to be set.
+!       The number of reals in the {\tt value} list.
 !     \item [value]
-!       The real values of the attribute.
+!       The real values of the attribute to add.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -934,7 +943,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddLogicalAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a logical attribute 
+! !IROUTINE: ESMF_StateAddAttribute - Add a logical attribute 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -948,16 +957,17 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Attaches an logical attribute to an {\tt ESMF\_State}.
+!     Attaches an logical attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the attribute to set.
+!      The name of the attribute to add.
 !     \item [value]
-!       The logical true/false value of the attribute.
+!       The logical true/false value of the attribute to add.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -984,7 +994,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddLogicalListAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a logical list attribute
+! !IROUTINE: ESMF_StateAddAttribute - Add a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -999,16 +1009,19 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Attaches an logical list attribute to an {\tt ESMF\_State}.
+!     Attaches a logical list attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!     The number of logical items in the {\tt value} list is
+!     given by {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the attribute to set.
+!       The name of the attribute to add.
 !     \item [count]
-!       The number of values to be set.
+!       The number of logicals in the {\tt value} list.
 !     \item [value]
 !       The logical true/false values of the attribute.
 !     \item [{[rc]}] 
@@ -1047,7 +1060,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddCharAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a character attribute
+! !IROUTINE: ESMF_StateAddAttribute - Add a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -1061,16 +1074,17 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Attaches a character attribute to an {\tt ESMF\_State}.
+!     Attaches a character attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the attribute to set.
+!      The name of the attribute to add.
 !     \item [value]
-!      The character value of the attribute.
+!      The character value of the attribute to add.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1108,9 +1122,9 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a single {\tt ESMF\_Bundle} reference to an existing 
-!      {\tt ESMF\_State}.
-!      The {\tt ESMF\_Bundle} name must be unique within the {\tt ESMF\_State}
+!      Add a single {\tt bundle} reference to an existing 
+!      {\tt state}.
+!      The {\tt bundle} name must be unique within the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1147,12 +1161,12 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddBundle()   
-      subroutine ESMF_StateAddBundleList(state, bcount, bundles, rc)
+      subroutine ESMF_StateAddBundleList(state, bundleCount, bundleList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
-      integer, intent(in) :: bcount
-      type(ESMF_Bundle), dimension(:), intent(in) :: bundles
+      integer, intent(in) :: bundleCount
+      type(ESMF_Bundle), dimension(:), intent(in) :: bundleList
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -1162,10 +1176,10 @@ end function
 !     \begin{description}
 !     \item[state]
 !      An {\tt ESMF\_State} object.
-!     \item[bcount]
+!     \item[bundleCount]
 !      The number of {\tt ESMF\_Bundle}s to be added.
-!     \item[bundles]
-!      The list (fortran array) of {\tt ESMF\_Bundle}s to be added.
+!     \item[bundleList]
+!      The list (Fortran array) of {\tt ESMF\_Bundle}s to be added.
 !      This is a reference only; when
 !      the {\tt ESMF\_State} is destroyed the objects contained in it will
 !      not be destroyed.   Also, the {\tt ESMF\_Bundle}s cannot be safely 
@@ -1179,7 +1193,8 @@ end function
 !
 !EOP
 
-        call ESMF_StateClassAddBundleList(state%statep, bcount, bundles, rc)
+        call ESMF_StateClassAddBundleList(state%statep, bundleCount, &
+                                          bundleList, rc)
 
         end subroutine ESMF_StateAddBundleList
 
@@ -1190,7 +1205,7 @@ end function
 ! !IROUTINE: ESMF_StateAddField - Add a Field to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddFields()   
+      ! Private name; call using ESMF_StateAddField()   
       subroutine ESMF_StateAddOneField(state, field, rc)
 !
 ! !ARGUMENTS:
@@ -1199,9 +1214,9 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a single {\tt ESMF\_Field} reference to an existing 
-!      {\tt ESMF\_State}.
-!      The {\tt ESMF\_Field} name must be unique within the {\tt ESMF\_State}
+!      Add a single {\tt field} reference to an existing 
+!      {\tt state}.
+!      The {\tt field} name must be unique within the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1238,12 +1253,12 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddFields()   
-      subroutine ESMF_StateAddFieldList(state, fcount, fields, rc)
+      subroutine ESMF_StateAddFieldList(state, fieldCount, fieldList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
-      integer, intent(in) :: fcount
-      type(ESMF_Field), dimension(:), intent(in) :: fields
+      integer, intent(in) :: fieldCount
+      type(ESMF_Field), dimension(:), intent(in) :: fieldList
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -1253,10 +1268,10 @@ end function
 !     \begin{description}
 !     \item[state]
 !      An {\tt ESMF\_State} object.
-!     \item[fcount]
+!     \item[fieldCount]
 !      The number of {\tt ESMF\_Field}s to be added.
-!     \item[fields]
-!      The list (fortran array) of {\tt ESMF\_Field}s to be added.
+!     \item[fieldList]
+!      The list (Fortran array) of {\tt ESMF\_Field}s to be added.
 !      This is a reference only; when
 !      the {\tt ESMF\_State} is destroyed the objects contained in it will
 !      not be destroyed.   Also, the {\tt ESMF\_Field}s cannot be safely 
@@ -1270,7 +1285,7 @@ end function
 !
 !EOP
 
-      call ESMF_StateClassAddFieldList(state%statep, fcount, fields, rc)
+      call ESMF_StateClassAddFieldList(state%statep, fieldCount, fieldList, rc)
 
       end subroutine ESMF_StateAddFieldList
 
@@ -1290,11 +1305,11 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add the character string {\tt name} to an existing {\tt ESMF\_State}.
+!      Add the character string {\tt name} to an existing {\tt state}.
 !      It can subsequently be replaced by an actual object with the
 !      same name.
-!      The {\tt name} must be unique within the {\tt ESMF\_State}
-!      It is available to be marked {\tt needed} by the
+!      The {\tt name} must be unique within the {\tt state}.
+!      It is available to be marked needed by the
 !      consumer of the export {\tt ESMF\_State}. Then the data 
 !      provider can replace the name with the actual {\tt ESMF\_Bundle},
 !      {\tt ESMF\_Field}, or {\tt ESMF\_Array} which carries the needed data.
@@ -1327,21 +1342,21 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddNameOnly()   
-      subroutine ESMF_StateAddNameList(state, namecount, namelist, rc)
+      subroutine ESMF_StateAddNameList(state, nameCount, nameList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
-      integer, intent(in) :: namecount
-      character (len=*), intent(in) :: namelist(:)
+      integer, intent(in) :: nameCount
+      character (len=*), intent(in) :: nameList(:)
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a list of names to an existing {\tt ESMF\_State}.
+!      Add a list of names to an existing {\tt state}.
 !      They can subsequently be replaced by actual objects with 
 !      the same name.
-!      Each name in the {\tt namelist} must be unique within 
-!      the {\tt ESMF\_State}
-!      It is available to be marked {\tt needed} by the
+!      Each name in the {\tt nameList} must be unique within 
+!      the {\tt state}
+!      It is available to be marked needed by the
 !      consumer of the export {\tt ESMF\_State}. Then the data 
 !      provider can replace the name with the actual {\tt ESMF\_Bundle},
 !      {\tt ESMF\_Field}, or {\tt ESMF\_Array} which carries the needed data.
@@ -1351,10 +1366,10 @@ end function
 !     \begin{description}
 !     \item[state]
 !      An {\tt ESMF\_State} object.
-!     \item[namecount]
-!      The count of names in the {\tt namelist}.
-!     \item[namelist]
-!      A list (fortran array) of character strings to be added
+!     \item[nameCount]
+!      The count of names in the {\tt nameList}.
+!     \item[nameList]
+!      A list (Fortran array) of character strings to be added
 !      as placeholders for data objects.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1374,24 +1389,24 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddState()   
-      subroutine ESMF_StateAddOneState(state, nestedstate, rc)
+      subroutine ESMF_StateAddOneState(state, nestedState, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
-      type(ESMF_State), intent(in) :: nestedstate
+      type(ESMF_State), intent(in) :: nestedState
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add an {\tt ESMF\_State} reference to an existing 
-!      {\tt ESMF\_State}.
-!      The nested {\tt ESMF\_State} name must be unique within the 
-!      container {\tt ESMF\_State}.
+!      Add a {\tt nestedState} reference to an existing 
+!      {\tt state}.
+!      The {\tt nestedState} name must be unique within the 
+!      container {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
 !      An {\tt ESMF\_State} object.  This is the container object.
-!     \item[nestedstate]
+!     \item[nestedState]
 !      The {\tt ESMF\_State} to be added.  This is the nested object.
 !      This is a reference only; when
 !      the {\tt ESMF\_State} is destroyed the objects contained in it will
@@ -1408,7 +1423,7 @@ end function
 
       type(ESMF_State) :: temp_list(1)
 
-      temp_list(1) = nestedstate
+      temp_list(1) = nestedState
 
       call ESMF_StateClassAddStateList(state%statep, 1, temp_list, rc)      
 
@@ -1422,12 +1437,12 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddState()   
-      subroutine ESMF_StateAddStateList(state, scount, nestedstates, rc)
+      subroutine ESMF_StateAddStateList(state, stateCount, nestedStateList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
-      integer, intent(in) :: scount
-      type(ESMF_State), dimension(:), intent(in) :: nestedstates
+      integer, intent(in) :: stateCount
+      type(ESMF_State), dimension(:), intent(in) :: nestedStateList
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -1439,14 +1454,14 @@ end function
 !     \begin{description}
 !     \item[state]
 !      An {\tt ESMF\_State} object.  This is the container object.
-!     \item[scount]
+!     \item[stateCount]
 !      The number of {\tt ESMF\_State}s to be added.
-!     \item[nestedstate]
-!      The list (fortran array) of {\tt ESMF\_State}s to be added.
-!      This is a reference only; when the container {\tt ESMF\_State} is 
+!     \item[nestedStateList]
+!      The list (Fortran array) of {\tt ESMF\_State}s to be added.
+!      This is a reference only; when the container {\tt state} is 
 !      destroyed the objects contained in it will
-!      not be destroyed.   Also, the nested {\tt ESMF\_State}s cannot be safely 
-!      destroyed before the container {\tt ESMF\_State} is destroyed.
+!      not be destroyed.   Also, the {\tt nestedStateList} cannot be safely 
+!      destroyed before the container {\tt state} is destroyed.
 !      Since objects can be added to multiple containers, it remains
 !      the user's responsibility to manage the
 !      destruction of objects when they are no longer in use.
@@ -1456,7 +1471,7 @@ end function
 !
 !EOP
 
-        call ESMF_StateClassAddStateList(state%statep, scount, nestedstates, rc)
+        call ESMF_StateClassAddStateList(state%statep, stateCount, nestedStateList, rc)
 
         end subroutine ESMF_StateAddStateList
 
@@ -1467,22 +1482,23 @@ end function
 ! !IROUTINE: ESMF_StateCreate - Create a new State
 
 ! !INTERFACE:
-      function ESMF_StateCreate(statename, statetype, &
-                   bundles, fields, arrays, nestedstates, names, itemcount, &
+      function ESMF_StateCreate(stateName, statetype, &
+                   bundleList, fieldList, arrayList, nestedStateList, &
+                   nameList, itemCount, &
                    dataneeded, dataready, datavalid, datareqrestart, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreate
 !
 ! !ARGUMENTS:
-      character(len=*), intent(in), optional :: statename 
+      character(len=*), intent(in), optional :: stateName 
       type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_Bundle), dimension(:), intent(in), optional :: bundles
-      type(ESMF_Field), dimension(:), intent(in), optional :: fields
-      type(ESMF_Array), dimension(:), intent(in), optional :: arrays
-      type(ESMF_State), dimension(:), intent(in), optional :: nestedstates
-      character(len=*), dimension(:), intent(in), optional :: names
-      integer, intent(in), optional :: itemcount
+      type(ESMF_Bundle), dimension(:), intent(in), optional :: bundleList
+      type(ESMF_Field), dimension(:), intent(in), optional :: fieldList
+      type(ESMF_Array), dimension(:), intent(in), optional :: arrayList
+      type(ESMF_State), dimension(:), intent(in), optional :: nestedStateList
+      character(len=*), dimension(:), intent(in), optional :: nameList
+      integer, intent(in), optional :: itemCount
       type(ESMF_StateItemNeeded), optional :: dataneeded
       type(ESMF_StateItemReady), optional :: dataready
       type(ESMF_StateItemValid), optional :: datavalid
@@ -1495,30 +1511,30 @@ end function
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[{[statename]}]
+!   \item[{[stateName]}]
 !    Name of this {\tt ESMF\_State} object.   A default name will be generated
 !    if none is specified.
 !   \item[{[statetype]}]
 !    Import or Export {\tt ESMF\_State}.  Valid values are 
 !    {\tt ESMF\_STATE\_IMPORT}, {\tt ESMF\_STATE\_EXPORT}, 
 !    or {\tt ESMF\_STATE\_LIST} The default is {\tt ESMF\_STATE\_LIST}.
-!   \item[{[bundles]}]
-!    A list (fortran array) of {\tt ESMF\_Bundle}s.
-!   \item[{[fields]}]
-!    A list (fortran array) of {\tt ESMF\_Field}s.
-!   \item[{[arrays]}]
-!    A list (fortran array) of {\tt ESMF\_Array}s.
-!   \item[{[nestedstates]}]
-!    A list (fortran array) of {\tt ESMF\_State}s to be nested 
+!   \item[{[bundleList]}]
+!    A list (Fortran array) of {\tt ESMF\_Bundle}s.
+!   \item[{[fieldList]}]
+!    A list (Fortran array) of {\tt ESMF\_Field}s.
+!   \item[{[arrayList]}]
+!    A list (Fortran array) of {\tt ESMF\_Array}s.
+!   \item[{[nestedStateList]}]
+!    A list (Fortran array) of {\tt ESMF\_State}s to be nested 
 !    inside the outer {\tt ESMF\_State}.
-!   \item[{[names]}]
-!    A list (fortran array) of character string name placeholders.
-!   \item[{[itemcount]}]
+!   \item[{[nameList]}]
+!    A list (Fortran array) of character string name placeholders.
+!   \item[{[itemCount]}]
 !    The total number of things -- Bundles, Fields, 
 !    Arrays, States, and Names -- to be added.
-!    If {\tt itemcount} is not specified, it will be computed internally based
+!    If {\tt itemCount} is not specified, it will be computed internally based
 !    on the length of each object list.
-!    If {\tt itemcount} is specified this routine
+!    If {\tt itemCount} is specified this routine
 !    will do an error check to verify the total number of items found
 !    in the argument lists matches this count of the expected number of items.
 !   \item[{[dataneeded]}]
@@ -1564,8 +1580,9 @@ end function
         if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
                                        ESMF_CONTEXT, rc)) return
       
-        call ESMF_StateConstruct(stypep, statename, statetype, &
-                   bundles, fields, arrays, nestedstates, names, itemcount, &
+        call ESMF_StateConstruct(stypep, stateName, statetype, &
+                   bundleList, fieldList, arrayList, nestedStateList, &
+                   nameList, itemCount, &
                    dataneeded, dataready, datavalid, datareqrestart, rc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1657,15 +1674,15 @@ end function
 !
 ! !INTERFACE:
       subroutine ESMF_StateGet(state, name, statetype, &
-                                     itemCount, itemNames, objTypes, rc)
+                                     itemCount, itemNameList, stateitemList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
       character (len=*), intent(out), optional :: name
       type(ESMF_StateType), intent(out), optional :: statetype
       integer, intent(out), optional :: itemCount
-      character (len=*), intent(out), optional :: itemNames(:)
-      type(ESMF_StateItem), intent(out), optional :: objTypes(:)
+      character (len=*), intent(out), optional :: itemNameList(:)
+      type(ESMF_StateItemType), intent(out), optional :: stateitemList(:)
       integer, intent(out), optional :: rc             
 
 !
@@ -1685,11 +1702,11 @@ end function
 !      \item[{[itemCount]}]
 !        Count of items in {\tt state}, including all objects
 !        as well as placeholder names.
-!      \item[{[itemNames]}]
+!      \item[{[itemNameList]}]
 !        Array of item names in {\tt state}, 
 !        including placeholder names.  {\tt itemNames} must be at least
 !        {\tt itemCount} long.
-!      \item[{[objtypes]}]
+!      \item[{[stateitemList]}]
 !        Array of possible item object types in {\tt state}, including placeholder 
 !        names. Must be at least {\tt itemCount} long.  Options are
 !        shown in Section~\ref{opt:stateitem}.
@@ -1723,19 +1740,19 @@ end function
       !  total objects.  perhaps the state derived type needs to bookkeep
       !  both numbers.  For now, return entire raw count.
 
-      if (present(itemcount)) itemcount = stypep%datacount 
+      if (present(itemCount)) itemCount = stypep%datacount 
 
-      if (present(itemnames)) then
+      if (present(itemnameList)) then
           do i=1, stypep%datacount
               nextitem => stypep%datalist(i)
-              itemnames(i) = nextitem%namep
+              itemnameList(i) = nextitem%namep
           enddo
       endif
 
-      if (present(objtypes)) then
+      if (present(stateitemList)) then
           do i=1, stypep%datacount
               nextitem => stypep%datalist(i)
-              objtypes(i) = nextitem%otype
+              stateitemList(i) = nextitem%otype
           enddo
       endif
 
@@ -1750,42 +1767,42 @@ end function
 ! !IROUTINE: ESMF_StateGetArray - Retrieve a data Array from a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetArray(state, arrayname, array, statename, rc)
+      subroutine ESMF_StateGetArray(state, arrayName, array, nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: arrayname
+      character (len=*), intent(in) :: arrayName
       type(ESMF_Array), intent(out) :: array
-      character (len=*), intent(in), optional :: statename
+      character (len=*), intent(in), optional :: nestedStateName
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_Array} from an {\tt ESMF\_State} by name.  
 !      If the {\tt ESMF\_State} contains the object directly, only
-!      {\tt arrayname} is required.
+!      {\tt arrayName} is required.
 !      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
 !      and the object is one level down, this routine can return the object
-!      in a single call by specifing the proper {\tt statename}.
+!      in a single call by specifing the proper {\tt nestedStateName}.
 !      {\tt ESMF\_State}s can be nested to any depth, but this routine 
 !      only searches in immediate descendents.  
-!      It is an error to specify a {\tt statename} if the
+!      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
 !
 !     The arguments are:
 !  \begin{description}     
 !  \item[state]
-!   State to query for an {\tt ESMF\_Array} named {\tt arrayname}.
-!  \item[arrayname]
+!   State to query for an {\tt ESMF\_Array} named {\tt arrayName}.
+!  \item[arrayName]
 !    Name of {\tt ESMF\_Array} to be returned.
 !  \item[array]
 !    Returned reference to the {\tt ESMF\_Array}.
-!  \item[{[statename]}]
+!  \item[{[nestedStateName]}]
 !    Optional.  An error if specified when the {\tt state} argument contains
 !    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
-!    {\tt ESMF\_State} must be selected by this {\tt statename}.
+!    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -1805,21 +1822,21 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty (or invalid) array to mark failure?
 
-      if (present(statename)) then
-          exists = ESMF_StateClassFindData(state%statep, statename, .true., &
+      if (present(nestedStateName)) then
+          exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           if (.not. exists) then
-              print errmsg, "no nested state named", trim(statename), "found"
+              print errmsg, "no nested state named", trim(nestedStateName), "found"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
               return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
-              print errmsg, trim(statename), "found but not type State"
+              print errmsg, trim(nestedStateName), "found but not type State"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
               return
@@ -1831,20 +1848,20 @@ end function
       endif
 
 
-      exists = ESMF_StateClassFindData(top%statep, arrayname, .true., &
+      exists = ESMF_StateClassFindData(top%statep, arrayName, .true., &
                                                           dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       if (.not. exists) then
-          print errmsg, "no Array found named", trim(arrayname)
+          print errmsg, "no Array found named", trim(arrayName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_ARRAY) then
-          print errmsg, trim(arrayname), "found but not type Array"
+          print errmsg, trim(arrayName), "found but not type Array"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
@@ -1874,7 +1891,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from an {\tt ESMF\_State}.
+!      Returns an integer attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1924,7 +1941,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer list attribute from an {\tt ESMF\_State}.
+!      Returns an integer list attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1936,7 +1953,7 @@ end function
 !      The number of values in the attribute.
 !     \item [value]
 !      The integer values of the named attribute.
-!      The list (fortran array)
+!      The list (Fortran array)
 !      must be at least {\tt count} long.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1988,7 +2005,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from an {\tt ESMF\_State}.
+!      Returns a real attribute from the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2039,7 +2056,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a list of real attributes from an {\tt ESMF\_State}.
+!      Returns a list of real attributes from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2051,7 +2068,7 @@ end function
 !      The number of values in the attribute.
 !     \item [value]
 !      The real values of the named attribute.  
-!      The list (fortran array)
+!      The list (Fortran array)
 !      must be at least {\tt count} long.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2103,7 +2120,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an logical attribute from an {\tt ESMF\_State}.
+!      Returns a logical attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2154,7 +2171,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an logical list attribute from an {\tt ESMF\_State}.
+!      Returns a logical list attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2166,7 +2183,7 @@ end function
 !      The number of values in the attribute.
 !     \item [value]
 !      The logical values of the named attribute.
-!      The list (fortran array)
+!      The list (Fortran array)
 !      must be at least {\tt count} long.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2218,7 +2235,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from an {\tt ESMF\_State}.
+!      Returns a character attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2266,7 +2283,8 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns the number of elements in the value list associated 
+!      with the given attribute.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2303,12 +2321,12 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttributeInfo()
-      subroutine ESMF_StateGetAttrInfoByName(state, name, type, count, rc)
+      subroutine ESMF_StateGetAttrInfoByName(state, name, datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character(len=*), intent(in) :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -2322,7 +2340,7 @@ end function
 !      An {\tt ESMF\_State} object.
 !     \item [name]
 !      The name of the attribute to query.
-!     \item [type]
+!     \item [datatype]
 !      The  data type of the attribute, which includes ESMF\_DATA\_INTEGER,
 !      ESMF\_DATA\_REAL, ESMF\_DATA\_LOGICAL, ESMF\_DATA\_CHARACTER.
 !     \item [count]
@@ -2348,7 +2366,7 @@ end function
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -2363,13 +2381,13 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttributeInfo()
-      subroutine ESMF_StateGetAttrInfoByNum(state, num, name, type, count, rc)
+      subroutine ESMF_StateGetAttrInfoByNum(state, index, name, datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
-      integer, intent(in) :: num
+      integer, intent(in) :: index
       character(len=*), intent(out), optional :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -2383,11 +2401,11 @@ end function
 !     \begin{description}
 !     \item [state]
 !      An {\tt ESMF\_State} object.
-!     \item [num]
-!      The number of the attribute to query.
+!     \item [index]
+!      The index number of the attribute to query.
 !     \item [name]
 !       Returns the name of the attribute.
-!     \item [type]
+!     \item [datatype]
 !       Returns the type of the attribute.
 !     \item [count]
 !       Returns the number of items in this attribute.  For character types,
@@ -2407,14 +2425,14 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, num, &
+      call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, index, &
                                         localName, localDt, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -2428,42 +2446,43 @@ end function
 ! !IROUTINE: ESMF_StateGetBundle - Retrieve a Bundle from a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetBundle(state, bundlename, bundle, statename, rc)
+      subroutine ESMF_StateGetBundle(state, bundleName, bundle, &
+                                     nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: bundlename
+      character (len=*), intent(in) :: bundleName
       type(ESMF_Bundle), intent(out) :: bundle
-      character (len=*), intent(in), optional :: statename
+      character (len=*), intent(in), optional :: nestedStateName
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_Bundle} from an {\tt ESMF\_State} by name.  
 !      If the {\tt ESMF\_State} contains the object directly, only
-!      {\tt bundlename} is required.
+!      {\tt bundleName} is required.
 !      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
 !      and the object is one level down, this routine can return the object
-!      in a single call by specifing the proper {\tt statename}.
+!      in a single call by specifing the proper {\tt nestedStateName}.
 !      {\tt ESMF\_State}s can be nested to any depth, but this routine 
 !      only searches in immediate descendents.  
-!      It is an error to specify a {\tt statename} if the
+!      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
 !
 !     The arguments are:
 !  \begin{description}     
 !  \item[state]
 !   State to query for a {\tt ESMF\_Bundle} named {\tt bundlename}.
-!  \item[bundlename]
+!  \item[bundleName]
 !    Name of {\tt ESMF\_Bundle} to be returned.
 !  \item[bundle]
 !    Returned reference to the {\tt ESMF\_Bundle}.
-!  \item[{[statename]}]
+!  \item[{[nestedStateName]}]
 !    Optional.  An error if specified when the {\tt state} argument contains
 !    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
-!    {\tt ESMF\_State} must be selected by this {\tt statename}.
+!    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2481,21 +2500,21 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty bundle to mark failure?
 
-      if (present(statename)) then
-          exists = ESMF_StateClassFindData(state%statep, statename, .true., &
+      if (present(nestedStateName)) then
+          exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           if (.not. exists) then
-              print errmsg, "no nested state named", trim(statename), "found"
+              print errmsg, "no nested state named", trim(nestedStateName), "found"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
               return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
-              print errmsg, trim(statename), "found but not type State"
+              print errmsg, trim(nestedStateName), "found but not type State"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
               return
@@ -2507,20 +2526,20 @@ end function
       endif
 
 
-      exists = ESMF_StateClassFindData(top%statep, bundlename, .true., &
+      exists = ESMF_StateClassFindData(top%statep, bundleName, .true., &
                                                           dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       if (.not. exists) then
-          print errmsg, "no Bundle found named", trim(bundlename)
+          print errmsg, "no Bundle found named", trim(bundleName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_BUNDLE) then
-          print errmsg, trim(bundlename), "found but not type Bundle"
+          print errmsg, trim(bundleName), "found but not type Bundle"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
@@ -2539,13 +2558,14 @@ end function
 ! !IROUTINE: ESMF_StateGetField - Retrieve a Field from a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetField(state, fieldname, field, statename, rc)
+      subroutine ESMF_StateGetField(state, fieldName, field, &
+                                    nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: fieldname
+      character (len=*), intent(in) :: fieldName
       type(ESMF_Field), intent(out) :: field
-      character (len=*), intent(in), optional :: statename
+      character (len=*), intent(in), optional :: nestedStateName
       integer, intent(out), optional :: rc             
 
 !
@@ -2555,26 +2575,26 @@ end function
 !      {\tt fieldname} is required.
 !      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
 !      and the object is one level down, this routine can return the object
-!      in a single call by specifing the proper {\tt statename}.
+!      in a single call by specifing the proper {\tt nestedStateName}.
 !      {\tt ESMF\_State}s can be nested to any depth, but this routine 
 !      only searches in immediate descendents.  
-!      It is an error to specify a {\tt statename} if the
+!      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
 !
 !     The arguments are:
 !  \begin{description}     
 !  \item[state]
-!   State to query for an {\tt ESMF\_Field} named {\tt fieldname}.
-!  \item[fieldname]
+!   State to query for an {\tt ESMF\_Field} named {\tt fieldName}.
+!  \item[fieldName]
 !    Name of {\tt ESMF\_Field} to be returned.
 !  \item[field]
 !    Returned reference to the {\tt ESMF\_Field}.
-!  \item[{[statename]}]
+!  \item[{[nestedStateName]}]
 !    Optional.  An error if specified when the {\tt state} argument contains
 !    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
-!    {\tt ESMF\_State} must be selected by this {\tt statename}.
+!    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2592,21 +2612,21 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty field to mark failure?
 
-      if (present(statename)) then
-          exists = ESMF_StateClassFindData(state%statep, statename, .true., &
+      if (present(nestedStateName)) then
+          exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           if (.not. exists) then
-              print errmsg, "no nested state named", trim(statename), "found"
+              print errmsg, "no nested state named", trim(nestedStateName), "found"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                          ESMF_CONTEXT, rc)
               return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
-              print errmsg, trim(statename), "found but not type State"
+              print errmsg, trim(nestedStateName), "found but not type State"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
               return
@@ -2618,13 +2638,13 @@ end function
       endif
 
 
-      exists = ESMF_StateClassFindData(top%statep, fieldname, .true., &
+      exists = ESMF_StateClassFindData(top%statep, fieldName, .true., &
                                                           dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       if (.not. exists) then
-          print errmsg, "no Field found named", trim(fieldname)
+          print errmsg, "no Field found named", trim(fieldName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                      ESMF_CONTEXT, rc)
           return
@@ -2749,24 +2769,24 @@ end function
 ! !IROUTINE: ESMF_StateGetNeeded - Query whether a data item is needed
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetNeeded(state, dataname, needed, rc)
+      subroutine ESMF_StateGetNeeded(state, itemName, needed, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: dataname
+      character (len=*), intent(in) :: itemName
       type(ESMF_StateItemNeeded), intent(out) :: needed
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !      Returns the status of the {\tt needed} flag for the data item
-!      named by {\tt dataname} in the {\tt ESMF\_State}.
+!      named by {\tt itemname} in the {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}     
 !     \item[state]
 !       The {\tt ESMF\_State} to query.
-!      \item[dataname]
+!      \item[itemName]
 !       Name of the data item to query.
 !      \item[needed]
 !       Status of data item.  Returns either {\tt ESMF\_STATEITEM\_NEEDED},
@@ -2785,13 +2805,13 @@ end function
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
 
-      exists = ESMF_StateClassFindData(state%statep, dataname, .true., &
+      exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       if (.not. exists) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, trim(dataname), &
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, trim(itemName), &
                                      ESMF_CONTEXT, rc)
           return
       endif
@@ -2809,19 +2829,18 @@ end function
 ! !IROUTINE: ESMF_StateGetState - Retrieve a State nested in a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetState(state, statename, nestedstate, rc)
+      subroutine ESMF_StateGetState(state, stateName, nestedState, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: statename
-      type(ESMF_State), intent(out) :: nestedstate
+      character (len=*), intent(in) :: stateName
+      type(ESMF_State), intent(out) :: nestedState
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !      Returns a nested {\tt ESMF\_State} from another {\tt ESMF\_State} 
-!      by name.
-!      Unlike the other routines, this does not allow the caller to
+!      by name.  This does not allow the caller to
 !      retrieve an {\tt ESMF\_State} from two levels down.  It returns
 !      immediate child objects only.
 !
@@ -2829,10 +2848,10 @@ end function
 !     \begin{description}     
 !     \item[state]
 !       The {\tt ESMF\_State} to query for a nested {\tt ESMF\_State} 
-!       named {\tt statename}.
-!     \item[statename]
+!       named {\tt stateName}.
+!     \item[stateName]
 !       Name of nested {\tt ESMF\_State} to return.
-!     \item[nestedstate]
+!     \item[nestedState]
 !       Returned {\tt ESMF\_State}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2850,26 +2869,26 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty state to mark failure?
 
-      exists = ESMF_StateClassFindData(state%statep, statename, .true., &
+      exists = ESMF_StateClassFindData(state%statep, stateName, .true., &
                                                          dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       if (.not. exists) then
-          print errmsg, "no nested state named", trim(statename), "found"
+          print errmsg, "no nested state named", trim(stateName), "found"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
-          print errmsg, trim(statename), "found but not type State"
+          print errmsg, trim(stateName), "found but not type State"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
-      nestedstate%statep => dataitem%datap%spp
+      nestedState%statep => dataitem%datap%spp
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2882,20 +2901,20 @@ end function
 ! !IROUTINE: ESMF_StateIsNeeded -- Return logical true if data item needed
 !
 ! !INTERFACE:
-      function ESMF_StateIsNeeded(state, dataname, rc)
+      function ESMF_StateIsNeeded(state, itemName, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_StateIsNeeded
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: dataname
+      character (len=*), intent(in) :: itemName
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !      Returns true if the status of the {\tt needed} flag for the data item
-!      named by {\tt dataname} in the {\tt ESMF\_State} is 
+!      named by {\tt itemName} in the {\tt ESMF\_State} is 
 !      {\tt ESMF\_STATEITEM\_NEEDED}.  Returns false for no item found 
 !      with the specified name or item marked not needed.  Also sets error
 !      code if {\tt dataname} not found.
@@ -2904,7 +2923,7 @@ end function
 !     \begin{description}     
 !     \item[state]
 !       {\tt ESMF\_State} to query.
-!      \item[dataname]
+!      \item[itemName]
 !       Name of the data item to query.
 !      \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2925,7 +2944,7 @@ end function
       ! should it be an error to ask about a state which doesn't exist?
       ! if the 3rd arg below is .true. then it's an error, if it's .false.
       ! then it's not.  for now, it's an error.
-      exists = ESMF_StateClassFindData(state%statep, dataname, .true., &
+      exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem, rc=localrc)
       if (.not. exists) then
           dummy=ESMF_LogMsgFoundError(localrc, &
@@ -3072,7 +3091,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateReadRestart"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateReadRestart -- ReadRestart the internal data from a State
 !
 ! !INTERFACE:
@@ -3101,7 +3120,7 @@ end function
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
 !
 ! TODO: code goes here
@@ -3124,24 +3143,24 @@ end function
 ! !IROUTINE: ESMF_StateSetNeeded - Set if a data item is needed
 !
 ! !INTERFACE:
-      subroutine ESMF_StateSetNeeded(state, dataname, needed, rc)
+      subroutine ESMF_StateSetNeeded(state, itemName, needed, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
-      character (len=*), intent(in) :: dataname
+      character (len=*), intent(in) :: itemName
       type(ESMF_StateItemNeeded), intent(in) :: needed
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !      Sets the status of the {\tt needed} flag for the data item
-!      named by {\tt dataname} in the {\tt ESMF\_State}.
+!      named by {\tt itemName} in the {\tt ESMF\_State}.
 !
 !     The arguments are:
 !      \begin{description}     
 !      \item[state]
 !        The {\tt ESMF\_State} to set.
-!       \item[dataname]
+!       \item[itemName]
 !        Name of the data item to set.
 !       \item[needed]
 !        Set status of data item to this.  Valid values are 
@@ -3160,10 +3179,10 @@ end function
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
 
-      exists = ESMF_StateClassFindData(state%statep, dataname, .true., &
+      exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem, rc=localrc)
       if (.not. exists) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, dataname, &
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, itemName, &
                                       ESMF_CONTEXT, rc)
           return
       endif
@@ -3290,7 +3309,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateWrite"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateWrite -- Write all or part of a State
 !
 ! !INTERFACE:
@@ -3317,8 +3336,8 @@ end function
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-        ! FIXME: hardcoded for interopability test
+!EOPI
+        ! TODO: hardcoded for interoperability test
         type(ESMF_Field) :: fred
         integer :: localrc
 
@@ -3745,6 +3764,7 @@ end function
 !
 !EOPI
 
+#if 0
       integer :: localrc                  ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
@@ -3904,6 +3924,7 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
+#endif
       end subroutine ESMF_StateClassAddArrayList
 
 !------------------------------------------------------------------------------
@@ -3938,6 +3959,7 @@ end function
 !
 !EOPI
 
+#if 0
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: fname
@@ -4100,6 +4122,7 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
+#endif
       end subroutine ESMF_StateClassAddFieldList
 
 !------------------------------------------------------------------------------
@@ -4134,6 +4157,7 @@ end function
 !
 !EOPI
 
+#if 0
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
@@ -4462,6 +4486,7 @@ end function
       endif
 
       ! do not reset rc here - it should already have a valid value.
+#endif
 
       end subroutine ESMF_StateClassAddBundleList
 
@@ -4498,6 +4523,7 @@ end function
 !
 !EOPI
 
+#if 0
       integer :: status                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: sname
@@ -4637,6 +4663,7 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
+#endif
       end subroutine ESMF_StateClassAddStateList
 
 !------------------------------------------------------------------------------
@@ -4689,6 +4716,7 @@ end function
 !
 !EOPI
 
+#if 0
       integer :: localrc                   ! local error status
       integer :: i, dcount, itemindex
       logical :: itemfound
@@ -4741,6 +4769,7 @@ end function
 
       if (present(rc)) rc = localrc
 
+#endif
       end function ESMF_StateClassFindData
 
 !------------------------------------------------------------------------------
@@ -4779,6 +4808,7 @@ end function
 !
 !EOPI
 
+#if 0
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       integer, allocatable, dimension(:) :: ntodo
@@ -4907,6 +4937,7 @@ end function
 
 
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_StateClassAddDataNameList
 
@@ -4941,6 +4972,7 @@ end function
 !
 !EOPI
 
+#if 0
       type(ESMF_StateItem), dimension(:), pointer :: temp_list
       integer :: i
       integer :: allocsize 
@@ -4994,10 +5026,18 @@ end function
       endif
    
       rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_StateClassExtendList
 
 
 
       end module ESMF_StateMod
+
+
+
+
+
+
+
 
