@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.5 2003/05/07 16:43:02 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.6 2003/05/07 17:37:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,6 +21,7 @@
 ! !DESCRIPTION:
 !
 ! This program shows examples of Time initialization and manipulation
+!EOP
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_Mod
@@ -29,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeEx.F90,v 1.5 2003/05/07 16:43:02 eschwab Exp $'
+      '$Id: ESMF_TimeEx.F90,v 1.6 2003/05/07 17:37:00 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a calendar

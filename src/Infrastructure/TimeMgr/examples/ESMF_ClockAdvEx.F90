@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.1 2003/05/07 16:46:26 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.2 2003/05/07 17:37:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,6 +23,7 @@
 ! This program shows some advanced examples of clock operation, including a
 ! simple user-defined single-shot alarm
 !
+!EOP
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_Mod
@@ -31,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.1 2003/05/07 16:46:26 eschwab Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.2 2003/05/07 17:37:00 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 

@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.2 2003/05/07 16:53:12 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.3 2003/05/07 17:39:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -24,6 +24,7 @@
 ! !DESCRIPTION:
 !
 ! This program tests calendar ranges
+!EOP
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod      ! test methods
@@ -33,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.2 2003/05/07 16:53:12 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.3 2003/05/07 17:39:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars

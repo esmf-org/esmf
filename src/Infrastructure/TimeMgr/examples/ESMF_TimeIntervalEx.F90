@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.1 2003/05/07 16:48:20 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.2 2003/05/07 17:37:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,6 +21,7 @@
 ! !DESCRIPTION:
 !
 ! This program shows examples of Time Interval initialization and manipulation
+!EOP
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_Mod
@@ -29,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalEx.F90,v 1.1 2003/05/07 16:48:20 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalEx.F90,v 1.2 2003/05/07 17:37:00 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate some time intervals

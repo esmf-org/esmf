@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.19 2003/05/07 16:55:17 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.20 2003/05/07 17:39:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,6 +27,7 @@
 ! The companion file ESMF\_Clock.F90 contains the definitions for the
 ! Clock methods.
 !
+!EOP
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod      ! test methods
@@ -36,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.19 2003/05/07 16:55:17 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.20 2003/05/07 17:39:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"

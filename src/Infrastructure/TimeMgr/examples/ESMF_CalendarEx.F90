@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.4 2003/05/07 16:36:36 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.5 2003/05/07 17:36:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,6 +21,7 @@
 ! !DESCRIPTION:
 !
 ! This program shows an example of how to set-up, run, and examine a basic clock
+!EOP
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_Mod
@@ -29,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarEx.F90,v 1.4 2003/05/07 16:36:36 eschwab Exp $'
+      '$Id: ESMF_CalendarEx.F90,v 1.5 2003/05/07 17:36:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
