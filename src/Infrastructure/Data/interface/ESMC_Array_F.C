@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.32 2003/04/14 16:40:24 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.33 2003/04/14 21:03:57 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,8 +47,8 @@ extern "C" {
                                         enum ESMC_DataKind kind,
                                         int *lbounds, int *ubounds, 
                                         int *strides, int *status) {
-             (*ptr) = ESMC_ArrayCreate(rank, type, kind, NULL,
-                                     lbounds, ubounds, strides, status);
+             (*ptr) = ESMC_ArrayCreate_F(rank, type, kind, NULL,
+                                     lbounds, ubounds, strides, NULL, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
