@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.4 2004/05/10 13:23:23 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.5 2004/05/12 12:15:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.4 2004/05/10 13:23:23 nscollins Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.5 2004/05/12 12:15:09 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -191,11 +191,11 @@ end function
 ! !IROUTINE:  ESMF_BundleDataMapInit - initialize the contents of a BundleDataMap
 
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapInit(bundledatamap, btype, rc)
+      subroutine ESMF_BundleDataMapInit(bundledatamap, bundleInterleave, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap) :: bundledatamap
-      type(ESMF_BundleInterleave), intent(in), optional :: btype
+      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -205,7 +205,7 @@ end function
 !     \begin{description} 
 !     \item [bundledatamap]
 !           An {\tt ESMF\_BundleDataMap} object.
-!     \item [{[btype]}]
+!     \item [{[bundleInterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
 !           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
 !           {\tt ESMF\_BIL\_BYFIELD}.  If not specified, the default
@@ -234,7 +234,7 @@ end function
         bundledatamap%bil = ESMF_BIL_BYFIELD
 
         ! initialize the contents of the bundle datamap
-        if (present(btype)) bundledatamap%bil = btype
+        if (present(bundleInterleave)) bundledatamap%bil = bundleInterleave
   
         ! mark object as initialized and ready to be used
         bundledatamap%status = ESMF_STATE_READY
@@ -290,11 +290,11 @@ end function
 ! !IROUTINE: ESMF_BundleDataMapGet - Get object from a BundleDataMap type.
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapGet(bundledatamap, btype, rc)
+      subroutine ESMF_BundleDataMapGet(bundledatamap, bundleInterleave, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(in) :: bundledatamap  
-      type(ESMF_BundleInterleave), intent(out), optional :: btype
+      type(ESMF_BundleInterleave), intent(out), optional :: bundleInterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -304,7 +304,7 @@ end function
 !     \begin{description}
 !     \item [bundledatamap]
 !           An {\tt ESMF\_BundleDataMap} object.
-!     \item [{[btype]}]
+!     \item [{[bundleInterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
 !           a single array.  Possible values are {\tt ESMF\_BIL\_BYITEM} and
 !           {\tt ESMF\_BIL\_BYFIELD}. 
@@ -329,7 +329,7 @@ end function
         endif
 
         ! if specified, return value
-        if (present(btype)) btype = bundledatamap%bil
+        if (present(bundleInterleave)) bundleInterleave = bundledatamap%bil
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -341,11 +341,11 @@ end function
 ! !IROUTINE: ESMF_BundleDataMapSet - Set a BundleDataMap type object.
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapSet(bundledatamap, btype, rc)
+      subroutine ESMF_BundleDataMapSet(bundledatamap, bundleInterleave, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(inout) :: bundledatamap  
-      type(ESMF_BundleInterleave), intent(in), optional :: btype
+      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -355,7 +355,7 @@ end function
 !     \begin{description}
 !     \item [bundledatamap]
 !           An {\tt ESMF\_BundleDataMap} object.
-!     \item [{[btype]}]
+!     \item [{[bundleInterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
 !           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
 !           {\tt ESMF\_BIL\_BYFIELD}.
@@ -381,7 +381,7 @@ end function
 
 
         ! if specified, set value
-        if (present(btype)) bundledatamap%bil = btype
+        if (present(bundleInterleave)) bundledatamap%bil = bundleInterleave
 
         if (rcpresent) rc = ESMF_SUCCESS
 
