@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.18 2003/09/04 18:57:56 cdeluca Exp $
+// $Id: ESMC_BaseTime.h,v 1.19 2003/10/22 01:18:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -202,11 +202,12 @@ class ESMC_BaseTime {
 
  // < declare the rest of the public interface methods here >
 
-    friend class ESMC_Calendar;
-
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:
+
+    friend class ESMC_Calendar;
+
 //
  // < declare private interface methods here >
 //

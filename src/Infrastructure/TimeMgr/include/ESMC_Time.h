@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.27 2003/09/10 03:32:49 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.28 2003/10/22 01:19:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -171,8 +171,6 @@
 
  // < declare the rest of the public interface methods here >
 
-    friend class ESMC_Calendar;
-
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:
@@ -187,6 +185,7 @@
     int ESMC_TimeGetDayOfYear(ESMF_KIND_R8 *dayOfYear) const; // (TMG 2.5.2)
     int ESMC_TimeGetDayOfYear(ESMC_TimeInterval *dayOfYear) const;
 
+    friend class ESMC_Calendar;
                                                         // (TMG 2.5.5)
 //
  // < declare private interface methods here >
