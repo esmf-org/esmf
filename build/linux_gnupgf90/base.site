@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base.site,v 1.2 2003/07/01 15:25:09 nscollins Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -11,7 +11,7 @@
 # Location of MPI (Message Passing Interface) software
 PGI_HOME       = /usr/local/pgi/linux86
 
-MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
+MPI_HOME       = ${ESMF_TOP_DIR}/src/Infrastructure/mpiuni
 MPI_LIB        = -lmpiuni
 MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun
