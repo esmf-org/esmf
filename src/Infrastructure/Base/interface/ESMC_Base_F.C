@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.16 2004/06/07 15:31:41 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.17 2004/06/08 07:56:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,13 +25,12 @@
 #include <stdlib.h>
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
-// no, this file doesn't exist yet
-// #include "ESMC_LogErr.h"  // will this work?
+#include "ESMC_LogErr.h"  // will this work?
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.16 2004/06/07 15:31:41 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.17 2004/06/08 07:56:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -82,13 +81,8 @@ extern "C" {
   if (superclass && (sclen > 0) && (superclass[0] != '\0')) {
       scname = ESMC_F90toCstring(superclass, sclen);
       if (!scname) {
-#if 1
-           fprintf(stderr, "bad attribute name\n");
-           status = ESMF_FAILURE;
-#else
            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
-#endif
           if (rc) *rc = status;
           return;
       }
@@ -168,12 +162,8 @@ extern "C" {
   char *copts = NULL;
 
   if (!base) {
-#if 1
-    printf("Uninitialized Base object\n");
-#else
     //printf("uninitialized Base object\n");
     ESMC_LogDefault.ESMC_LogWrite("Base object uninitialized", ESMC_LOG_INFO);
-#endif
     if (rc) *rc = ESMF_SUCCESS;
     return;
     // for Print, it's not a failure for an uninit object to be printed
@@ -375,13 +365,8 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-#if 1
-      fprintf(stderr, "bad attribute name\n");
-      status = ESMF_FAILURE;
-#else
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
-#endif
       if (rc) *rc = status;
       return;
   }
@@ -389,13 +374,8 @@ extern "C" {
   // copy and convert F90 string to null terminated one
   cname = ESMC_F90toCstring(name, nlen);
   if (!cname) {
-#if 1
-      fprintf(stderr, "bad attribute name\n");
-      status = ESMF_FAILURE;
-#else
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
-#endif
       if (rc) *rc = status;
       return;
   }
@@ -445,27 +425,17 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-#if 1
-      fprintf(stderr, "bad attribute name\n");
-      status = ESMF_FAILURE;
-#else
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       !printf("ESMF_AttributeSet: bad attribute name\n");
-#endif
       if (rc) *rc = status;
       return;
   }
 
   if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
-#if 1
-      fprintf(stderr, "bad attribute value\n");
-      status = ESMF_FAILURE;
-#else
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       !printf("ESMF_AttributeSet: bad attribute value\n");
-#endif
       if (rc) *rc = status;
       return;
   }
@@ -530,14 +500,9 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-#if 1
-      fprintf(stderr, "bad attribute name\n");
-      status = ESMF_FAILURE;
-#else
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       !printf("ESMF_AttributeSet: bad attribute name\n");
-#endif
       if (rc) *rc = status;
       return;
   }
@@ -550,59 +515,36 @@ extern "C" {
   }
 
   status = (*base)->ESMC_AttributeGet(cname, &attrDt, &attrCount, NULL);
-#if 1
-  if (status == ESMF_FAILURE) {
-      fprintf(stderr, "failed getting attribute type and count\n");
-#else
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute type and count", &status)) {
     !printf("ESMF_AttributeGetValue: failed getting attribute info\n");
-#endif
     delete [] cname;
     if (rc) *rc = status;
     return;
   }
 
   if (attrDt != *dt) {
-#if 1
-    fprintf(stderr, "attribute %s not expected type %s, actually type %d\n", 
-            name, ESMC_DataTypeString(*dt), ESMC_DataTypeString(attrDt));
-    status = ESMF_FAILURE;
-#else
     ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "attribute value not expected type", &status);
     !printf("attribute %s not expected type %s, actually type %d\n", 
     !       name, ESMC_DataTypeString(*dt), ESMC_DataTypeString(attrDt));
-#endif
     delete [] cname;
     if (rc) *rc = status;
     return;
   }
   if (attrCount != *count) {
-#if 1
-    fprintf(stderr, "expected count %d does not match actual count %d\n", 
-                *count, attrCount);
-    status = ESMF_FAILURE;
-#else
     ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "attribute value not expected count", &status);
     !printf("expected count %d does not match actual count %d\n", 
     !           *count, attrCount);
-#endif
     delete [] cname;
     if (rc) *rc = status;
     return;
   }
 
   status = (*base)->ESMC_AttributeGet(cname, NULL, NULL, value);
-#if 1
-  if (status != ESMF_SUCCESS)
-      fprintf(stderr, "failed getting attribute value\n");
-#else
   ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute value", &status);
-#endif
-
   delete [] cname;
   if (rc) *rc = status;
 
