@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2002/12/11 23:35:00 nscollins Exp $ 
+# $Id: base_variables,v 1.2 2002/12/12 15:59:56 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -9,18 +9,18 @@ OMAKE		   = ${MAKE}
 RANLIB		   = ranlib
 SHELL		   = /bin/sh
 SED		   = /usr/bin/sed
-SH_LD		   = gcc
+SH_LD		   = cc
 # ######################### C and Fortran compiler ########################
 #
-C_CC		   = gcc
+C_CC		   = cc
 C_FC		   = f95 
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CLINKER	   = gcc
+C_CLINKER	   = cc
 C_FLINKER	   = f95
 C_CCV		   = ${C_CC} --version
-C_FCV              = f95
+C_FCV              = f95 -V
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
 #C_SYS_LIB	   = -ldl -lc -lf2c -lm
 #C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
@@ -30,6 +30,12 @@ G_FOPTFLAGS	   = -g
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
+# ########################## Fortran compiler ##############################
+#
+F_FREECPP       = -ffree
+F_FIXCPP        = -ffixed
+F_FREENOCPP     = -ffree
+F_FIXNOCPP      = -ffixed
 # ########################## C++ compiler ##################################
 #
 CXX_CC		   = g++ -fPIC
