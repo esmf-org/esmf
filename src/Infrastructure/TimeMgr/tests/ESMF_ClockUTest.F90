@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.7 2003/04/17 21:34:09 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.8 2003/04/17 22:55:57 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.7 2003/04/17 21:34:09 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.8 2003/04/17 22:55:57 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,14 +51,15 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
+      logical :: bool
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock
+      type(ESMF_Clock) :: clock, clock1
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar
 
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep
+      type(ESMF_TimeInterval) :: timeStep, timeStep2
       type(ESMF_Time) :: startTime, stopTime
 
 
@@ -145,6 +146,9 @@
 
       ! perform non-exhaustive tests here;
       !   use same templates as above
+      print *, "****************** NON-EXHAUSTIVE FIELDS UNIT TESTS****************************"
+      print *
+
 
       ! initialize clock time intervals and instants
       !call ESMF_TimeIntervalInit(timeStep, S=1, rc=rc)
@@ -165,20 +169,49 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! initialize the clock
+      write(name, *) "Clock Initiation Test"
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! print out initialized variables
+      write(name, *) "Calendar Print Test"
       call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Time Interval Print Test"
       call ESMF_TimeIntervalPrint(timeStep, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Start Time Print Test"
       call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Stop Time Print Test"
       call ESMF_TimePrint(stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Clock Print Test"
       call ESMF_ClockPrint(clock, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
+      write(name, *) "ClockIsStopTime Test"
+      bool = ESMF_ClockIsStopTime(clock, rc)
+      !call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and.(bool.eq."F")), &
+      !                name, failMsg, result, ESMF_SRCLINE)
+      print *, "bool = ", bool
       ! time step from start time to stop time
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
+        write(name, *) "Clock Advance Test"
         call ESMF_ClockAdvance(clock, rc=rc)
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
         call ESMF_ClockPrint(clock, rc=rc)
       end do
+
+      bool = ESMF_ClockIsStopTime(clock1, rc)
+      print *, "bool = ", bool
 
       ! print out ending clock state
       call ESMF_ClockPrint(clock, rc=rc)
