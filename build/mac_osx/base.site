@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.1 2002/12/11 23:35:00 nscollins Exp $ 
+# $Id: base.site,v 1.2 2003/02/27 21:26:08 nscollins Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -10,11 +10,23 @@
 
 # Location of MPI (Message Passing Interface) software
 
-#ESMC_MPIRUN      = 
+# comment in one or the other, depending on whether you have
+# installed the mpich library.  (the first section assumes
+# it is installed under /usr/local - change MPI_HOME if other dir.)
+
+# with mpich installed in /usr/local:
+##ESMC_MPIRUN      = mpirun
+##MPI_HOME       =  /usr/local
+##MPI_LIB        = -lmpich -lpmpich
+##MPI_INCLUDE    = -I${MPI_HOME}/include
+##MPIRUN         =  ${MPI_HOME}/bin/mpirun
+
+# without mpich installed:
 MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
 MPI_LIB        = -lmpiuni
 MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun
+
 
 # MP_LIB is for openMP
 #MP_LIB          = 
