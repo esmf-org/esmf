@@ -173,11 +173,11 @@
 !  ESMF_ConfigGetInt ( cf, label, size,     returns next integer number 
 !                      default, rc )        (function)
 ! 
-!  ESMF_ConfigGetChar ( cf, label, rc )     returns next character array
-!                                           /word (function)
+!  ESMF_ConfigGetChar ( cf, label, size,    returns next character or
+!                       default, rc )       character array
 !
-!  ESMF_ConfigGetString ( cf, label,        retutns next string 
-!                         string, rc )
+!  ESMF_ConfigGetString ( cf, string,        retutns next string (word) 
+!                         label, default, rc )
 !
 !  ESMF_ConfigStringtoFloat ( string, rc )  transfrorms ASCII string to
 !                                           float (function)
@@ -242,8 +242,8 @@
        public :: ESMF_ConfigNextLine   ! selects next line (for tables)
        public :: ESMF_ConfigGetFloat ! returns next float number (function) 
        public :: ESMF_ConfigGetInt   ! returns next integer number (function)
-!       public :: ESMF_ConfigGetChar  ! returns next char array/word (function)
-!       public :: ESMF_ConfigGetString     ! retutns next string 
+       public :: ESMF_ConfigGetChar  ! returns next char or char array
+       public :: ESMF_ConfigGetString     ! retutns next string (word)
        public :: ESMF_ConfigStringtoFloat ! ASCII string to float (function)
        public :: ESMF_ConfigStringtoInt   ! ASCII string to integer (function)
        public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
