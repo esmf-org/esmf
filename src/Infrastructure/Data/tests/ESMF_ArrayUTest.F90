@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.1 2003/04/09 23:48:43 flanigan Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.2 2003/04/17 20:39:43 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -27,10 +27,13 @@
     integer :: nx, ny, arank, rc 
     integer :: i, j, k, l, m, ni, nj, nk, nl, nm
     type(ESMF_ArraySpec) :: arrayspec
+    integer :: counts(ESMF_MAXDIM)
     type(ESMF_Array) :: array1, array2, array3, array4
     real(ESMF_IKIND_R8), dimension(:,:,:), pointer :: real3dptr
     real(ESMF_IKIND_R8), dimension(:,:), pointer :: realptr, realptr2
     integer(ESMF_IKIND_I4), dimension(:), pointer :: intptr, intptr2
+    integer(ESMF_IKIND_I4), dimension(:,:), pointer :: int2Dptr
+    character(ESMF_MAXSTR) :: filename
 
     
 !-------------------------------------------------------------------------------
@@ -301,16 +304,47 @@
 !-------------------------------------------------------------------------------
 !   ! Test 7:
 !   !  Create based on an array specification.
-    ! print *, ">>> Test 6:"
+    ! print *, ">>> Test 7:"
  
 
     arank = 2
-!   !   arrayspec = ESMF_ArraySpecCreate(arank, ESMF_DATA_REAL, ESMF_KIND_R4, &
-    !                                         nx, ny, rc)
+    call ESMF_ArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
 
-!   !   array2 = ESMF_ArrayCreate(arrayspec, ESMF_NO_DATA, rc)
+    counts(1) = 10
+    counts(2) = 20
 
-     end program ESMF_ArrayTest
+    array2 = ESMF_ArrayCreate(arrayspec, counts(1:2), rc)
+
+
+!-------------------------------------------------------------------------------
+!   ! Test 8:
+!   !  Create based on an existing, allocated F90 pointer. 
+!   !  Data is type Integer, 1D.
+    print *, ">>> Test 8:"
+ 
+ 
+!   ! Allocate and set initial data values
+    ni = 35 
+    nj = 40
+    allocate(int2Dptr(ni,nj))
+    do i=1,ni
+      do j=1,nj
+       int2Dptr(i, j) = i + j
+      enddo
+    enddo
+
+    array1 = ESMF_ArrayCreate(int2Dptr, ESMF_NO_COPY, rc)
+    print *, "array 1 create returned"
+
+    call ESMF_ArrayWrite(array1, filename="./foo", rc=rc)
+    print *, "array 1 write returned"
+
+    call ESMF_ArrayDestroy(array1)
+    print *, "array 1 destroy returned"
+
+!-------------------------------------------------------------------------------
+
+    end program ESMF_ArrayTest
     
 !\end{verbatim}
     
