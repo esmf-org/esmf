@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.62 2004/06/21 07:41:46 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.63 2004/07/07 20:22:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.62 2004/06/21 07:41:46 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.63 2004/07/07 20:22:20 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -56,7 +56,7 @@
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
-      real, dimension(:,:), pointer :: f90ptr1, f90ptr2
+      real, dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3
       real(ESMF_KIND_R8) :: minCoord(2)
       type(ESMF_FieldDataMap) :: dm, dm1
       type(ESMF_RelLoc) :: rl
@@ -486,6 +486,44 @@
       call ESMF_Test((associated(f90ptr2)), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+
+      !EX_UTest
+      ! Verifing that a Field can be created with a name
+      f2 = ESMF_FieldCreateNoData("pressure", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating Field with name Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldPrint(f2)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Setting a data pointer directly in a Field
+      call ESMF_FieldSetDataPointer(f2, f90ptr1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an F90 pointer directly in a Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Getting the data pointer back from a Field
+      call ESMF_FieldGetDataPointer(f2, f90ptr3, rc=rc)
+      ! This print crashes
+      !print *, "data = ", f90ptr3(1,1)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting an F90 pointer directly back from a Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Bug 986852 opened
+      ! Verify the pointers are equal
+      !call ESMF_FieldGetDataPointer(f2, f90ptr3, rc=rc)
+      !print *, "data = ", f90ptr3(1,1)
+      !write(failMsg, *) "The pointers are not equal"
+      !write(name, *) "Compare F90 pointers Test"
+      !call ESMF_Test((f90ptr3.eq.f90ptr2), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Adding Attributes to a Field
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
