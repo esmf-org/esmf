@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.20 2003/06/11 06:58:43 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.21 2003/07/18 02:24:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.20 2003/06/11 06:58:43 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.21 2003/07/18 02:24:33 eschwab Exp $'
 
 !==============================================================================
 !
@@ -173,9 +173,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.1, TMG4.7
-!EOP
       call c_ESMC_AlarmSet(alarm, RingTime, RingInterval, &
                             StopTime, Enabled, rc)
 
@@ -205,10 +205,9 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.7
-!EOP
     
       call c_ESMC_AlarmGetRingInterval(alarm, RingInterval, rc)
 
@@ -239,9 +238,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.5.2, TMG4.7
-!EOP
     
       call c_ESMC_AlarmSetRingInterval(alarm, RingInterval, rc)
 
@@ -272,9 +271,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.7, TMG4.8
-!EOP
 
       call c_ESMC_AlarmGetRingTime(alarm, RingTime, rc)
 
@@ -305,9 +304,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.5.1, TMG4.7, TMG4.8
-!EOP
    
       call c_ESMC_AlarmSetRingTime(alarm, RingTime, rc)
 
@@ -338,9 +337,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.7, TMG4.8
-!EOP
 
       call c_ESMC_AlarmGetPrevRingTime(alarm, PrevRingTime, rc)
 
@@ -371,9 +370,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.7, TMG4.8
-!EOP
 
       call c_ESMC_AlarmSetPrevRingTime(alarm, PrevRingTime, rc)
 
@@ -404,9 +403,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.5.2, TMG4.7
-!EOP
    
       call c_ESMC_AlarmGetStopTime(alarm, StopTime, rc)
 
@@ -437,9 +436,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.5.2, TMG4.7
-!EOP
 
       call c_ESMC_AlarmSetStopTime(alarm, StopTime, rc)
 
@@ -466,10 +465,9 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.5.3
-!EOP
 
       call c_ESMC_AlarmEnable(alarm, rc)
 
@@ -496,10 +494,9 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.5.3
-!EOP
     
       call c_ESMC_AlarmDisable(alarm, rc)
 
@@ -528,9 +525,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.6
-!EOP
 
       call c_ESMC_AlarmTurnOn(alarm, rc)
 
@@ -557,10 +554,9 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.6
-!EOP
 
       call c_ESMC_AlarmTurnOff(alarm, rc)
 
@@ -590,10 +586,9 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.4
-!EOP
     
       call c_ESMC_AlarmIsRinging(alarm, ESMF_AlarmIsRinging, rc)
 
@@ -630,10 +625,9 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.4, TMG4.6
-!EOP
 
       call c_ESMC_AlarmCheckRingTime(alarm, ESMF_AlarmCheckRingTime, &
                                      ClockCurrTime, positive, rc)
@@ -666,8 +660,8 @@
 !          The second {\tt ESMF\_Alarm} to compare
 !     \end{description}
 !
-! !REQUIREMENTS:  
 !EOP
+! !REQUIREMENTS:  
 
       call c_ESMC_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
 
@@ -723,8 +717,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
       call c_ESMC_AlarmRead(alarm, RingInterval, RingTime, &
                             PrevRingTime, StopTime, Ringing, &
                             Enabled, ID, rc)
@@ -776,8 +770,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
       call c_ESMC_AlarmWrite(alarm, RingInterval, RingTime, &
                              PrevRingTime, StopTime, Ringing, &
                              Enabled, ID, rc)
@@ -809,9 +803,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
       
       call c_ESMC_AlarmValidate(alarm, opts, rc)
     
@@ -843,9 +837,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
       
       call c_ESMC_AlarmPrint(alarm, opts, rc)   
 

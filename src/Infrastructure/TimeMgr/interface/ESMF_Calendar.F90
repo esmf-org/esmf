@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.21 2003/06/11 06:58:44 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.22 2003/07/18 02:24:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.21 2003/06/11 06:58:44 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.22 2003/07/18 02:24:33 eschwab Exp $'
 
 !==============================================================================
 
@@ -167,9 +167,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !    
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
     
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSet(calendar, Type, rc)
@@ -214,9 +214,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !     
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSetGeneric(calendar, DaysPerMonth, &
@@ -273,9 +273,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
    
       call c_ESMC_CalendarRead(calendar, Type, DaysPerMonth, &
                                SecondsPerDay, DaysPerYear, &
@@ -326,9 +326,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
    
       call c_ESMC_CalendarWrite(calendar, Type, DaysPerMonth, &
                                 SecondsPerDay, DaysPerYear, &
@@ -361,9 +361,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
       
       call c_ESMC_CalendarValidate(calendar, opts, rc)
 
@@ -395,9 +395,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
   
       call c_ESMC_CalendarPrint(calendar, opts, rc)
 

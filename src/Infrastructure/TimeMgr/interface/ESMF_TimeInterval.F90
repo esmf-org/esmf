@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.25 2003/07/02 19:31:50 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.26 2003/07/18 02:24:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.25 2003/07/02 19:31:50 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.26 2003/07/18 02:24:33 eschwab Exp $'
 
 !==============================================================================
 !
@@ -434,9 +434,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.1
-!EOP
 
       ! use optional args for any subset
       call c_ESMC_TimeIntervalGet(timeinterval, YY, YYl, MO, MOl, D, Dl, &
@@ -544,9 +544,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
 
       ! use optional args for any subset
       call c_ESMC_TimeIntervalSet(timeinterval, YY, YYl, MO, MOl, D, Dl, &
@@ -581,9 +581,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.9
-!EOP
 
       call c_ESMC_TimeIntervalGetString(timeinterval, TimeString, rc)
 
@@ -612,9 +612,9 @@
 !          Absolute value returned as value of function.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.8
-!EOP
     
       call c_ESMC_TimeIntervalAbsValue(timeinterval, ESMF_TimeIntervalAbsValue)
 
@@ -643,9 +643,9 @@
 !          Negative absolute value returned as value of function.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.8
-!EOP
     
       call c_ESMC_TimeIntervalNegAbsValue(timeinterval, &
                                           ESMF_TimeIntervalNegAbsValue)
@@ -684,9 +684,9 @@
 !          The divisor
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.5
-!EOP
 
       call c_ESMC_TimeIntervalFQuot(timeinterval1, timeinterval2, &
                                     ESMF_TimeIntervalFQuot)
@@ -719,9 +719,9 @@
 !          The divisor
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.5
-!EOP
 
       call c_ESMC_TimeIntervalRQuot(timeinterval1, timeinterval2, &
                                     ESMF_TimeIntervalRQuot)
@@ -754,9 +754,9 @@
 !          The divisor
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !
-!EOP
 
       call c_ESMC_TimeIntervalRemainder(timeinterval1, timeinterval2, &
                                         ESMF_TimeIntervalRemainder)
@@ -789,9 +789,9 @@
 !          Integer divisor
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.6, TMG5.3, TMG7.2
-!EOP
 
       call c_ESMC_TimeIntervalQuotI(timeinterval, divisor, &
                                     ESMF_TimeIntervalQuotI)
@@ -824,9 +824,9 @@
 !          Double precision divisor
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.6, TMG5.3, TMG7.2
-!EOP
 
       call c_ESMC_TimeIntervalQuotR(timeinterval, divisor, &
                                     ESMF_TimeIntervalQuotR)
@@ -859,9 +859,9 @@
 !          Integer multiplier
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.7, TMG7.2
-!EOP
 
       call c_ESMC_TimeIntervalProdI(timeinterval, multiplier, &
                                     ESMF_TimeIntervalProdI)
@@ -894,9 +894,9 @@
 !          Fraction multiplier
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.7, TMG7.2
-!EOP
 
       call c_ESMC_TimeIntervalProdF(timeinterval, multiplier, &
                                     ESMF_TimeIntervalProdF)
@@ -928,9 +928,9 @@
 !          Double precision multiplier
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.7, TMG7.2
-!EOP
 
       call c_ESMC_TimeIntervalProdR(timeinterval, multiplier, &
                                     ESMF_TimeIntervalProdR)
@@ -968,10 +968,10 @@
 !          The addend
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, 
 !                 TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeSum(timeinterval1, timeinterval2, &
@@ -1007,9 +1007,9 @@
 !          The subtrahend
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeDiff(timeinterval1, timeinterval2, &
@@ -1044,9 +1044,9 @@
 !          Second time interval to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeEQ(timeinterval1, timeinterval2, ESMF_TimeIntervalEQ)
@@ -1080,9 +1080,9 @@
 !          Second time interval to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeNE(timeinterval1, timeinterval2, ESMF_TimeIntervalNE)
@@ -1116,9 +1116,9 @@
 !          Second time interval to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLT(timeinterval1, timeinterval2, ESMF_TimeIntervalLT)
@@ -1152,9 +1152,9 @@
 !          Second time interval to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGT(timeinterval1, timeinterval2, ESMF_TimeIntervalGT)
@@ -1189,9 +1189,9 @@
 !          Second time interval to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLE(timeinterval1, timeinterval2, ESMF_TimeIntervalLE)
@@ -1225,9 +1225,9 @@
 !          Second time interval to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGE(timeinterval1, timeinterval2, ESMF_TimeIntervalGE)
@@ -1276,9 +1276,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
    
       call c_ESMC_TimeIntervalRead(timeinterval, S, Sn, Sd, YY, MO, rc)
 
@@ -1321,9 +1321,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
    
       call c_ESMC_TimeIntervalWrite(timeinterval, S, Sn, Sd, YY, MO, rc)
 
@@ -1354,9 +1354,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
     
       call c_ESMC_TimeIntervalValidate(timeinterval, opts, rc)
 
@@ -1388,9 +1388,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
     
       call c_ESMC_TimeIntervalPrint(timeinterval, opts, rc)
 

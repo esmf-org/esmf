@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.22 2003/06/11 06:58:44 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.23 2003/07/18 02:24:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.22 2003/06/11 06:58:44 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.23 2003/07/18 02:24:33 eschwab Exp $'
 
 !==============================================================================
 
@@ -152,9 +152,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !     
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.1, TMG3.4.4
-!EOP
       call c_ESMC_ClockSet(clock, TimeStep, StartTime, StopTime, &
                            RefTime, rc)
     
@@ -185,10 +185,9 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.1
-!EOP
 
       call c_ESMC_ClockGetAdvanceCount(clock, AdvanceCount, rc)
     
@@ -219,9 +218,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.2
-!EOP
 
       call c_ESMC_ClockGetTimeStep(clock, TimeStep, rc)
     
@@ -252,9 +251,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.4.2
-!EOP
 
       call c_ESMC_ClockSetTimeStep(clock, TimeStep, rc)
 
@@ -285,9 +284,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.4
-!EOP
 
       call c_ESMC_ClockGetCurrTime(clock, CurrTime, rc)
     
@@ -318,9 +317,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.4.3
-!EOP
 
       call c_ESMC_ClockSetCurrTime(clock, CurrTime, rc)
     
@@ -351,9 +350,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.3
-!EOP
 
       call c_ESMC_ClockGetStartTime(clock, StartTime, rc)
     
@@ -384,9 +383,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.3
-!EOP
 
       call c_ESMC_ClockGetStopTime(clock, StopTime, rc)
     
@@ -417,9 +416,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.3
-!EOP
 
       call c_ESMC_ClockGetRefTime(clock, RefTime, rc)
     
@@ -450,9 +449,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.4
-!EOP
 
       call c_ESMC_ClockGetPrevTime(clock, PrevTime, rc)
     
@@ -483,9 +482,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.5
-!EOP
 
       call c_ESMC_ClockGetCurrSimTime(clock, CurrSimTime, rc)
     
@@ -516,9 +515,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.5
-!EOP
 
       call c_ESMC_ClockGetPrevSimTime(clock, PrevSimTime, rc)
    
@@ -550,9 +549,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !   
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.1, TMG4.2
-!EOP
     
       call c_ESMC_ClockAddAlarm(clock, Alarm, rc)
     
@@ -583,9 +582,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !   
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.3
-!EOP
 
       call c_ESMC_ClockGetAlarmList(clock, AlarmList, rc)
     
@@ -618,9 +617,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !   
+!EOP
 ! !REQUIREMENTS:
 !     TMG4.3
-!EOP
 
       call c_ESMC_ClockGetNumAlarms(clock, NumAlarms, rc)
     
@@ -648,9 +647,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !   
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.4.5
-!EOP
 
       call c_ESMC_ClockSyncToWallClock(clock, rc)
     
@@ -686,9 +685,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !  
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.4.1
-!EOP
 
       call c_ESMC_ClockAdvance(clock, RingingAlarmList, NumRingingAlarms, rc)
     
@@ -719,10 +718,9 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-
+!EOP
 ! !REQUIREMENTS:
 !     TMG3.5.6
-!EOP
 
       call c_ESMC_ClockIsStopTime(clock, ESMF_ClockIsStopTime, rc)
     
@@ -781,8 +779,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !     
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       call c_ESMC_ClockRead(clock, TimeStep, StartTime, StopTime, &
                             RefTime, CurrTime, PrevTime, AdvanceCount, &
@@ -838,8 +836,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !     
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       call c_ESMC_ClockWrite(clock, TimeStep, StartTime, StopTime, &
                              RefTime, CurrTime, PrevTime, AdvanceCount, &
@@ -872,9 +870,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
     
       call c_ESMC_ClockValidate(clock, opts, rc)
     
@@ -906,9 +904,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
       
       call c_ESMC_ClockPrint(clock, opts, rc)   
 

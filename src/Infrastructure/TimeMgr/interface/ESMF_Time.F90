@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.34 2003/06/11 06:58:44 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.35 2003/07/18 02:24:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -135,7 +135,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.34 2003/06/11 06:58:44 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.35 2003/07/18 02:24:33 eschwab Exp $'
 
 !==============================================================================
 !
@@ -423,9 +423,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG2.1, TMG2.5.1, TMG2.5.6
-!EOP
 
       ! use optional args for any subset
       call c_ESMC_TimeGet(time, YR, YRl, MM, DD, D, Dl, H, M, S, Sl, &
@@ -537,9 +537,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
 
       ! use optional args for any subset
       call c_ESMC_TimeSet(time, YR, YRl, MM, DD, D, Dl, H, M, S, Sl, &
@@ -573,9 +573,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
 
       call c_ESMC_TimeGetCalendarCopy(time, cal, rc)
     
@@ -606,9 +606,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
 
       call c_ESMC_TimeGetCalendarPtr(time, cal, rc)
     
@@ -639,9 +639,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
 
       call c_ESMC_TimeSetCalendarPtr(time, cal, rc)
     
@@ -673,9 +673,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
 
       call c_ESMC_TimeSetCalendarPtrPtr(time, cal, rc)
     
@@ -710,9 +710,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
 
       call c_ESMC_TimeIsSameCal(time1, time2, ESMF_TimeIsSameCal, rc)
     
@@ -743,9 +743,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG2.5.1
-!EOP
 
       call c_ESMC_TimeGetTimezone(time, Timezone, rc)
 
@@ -776,9 +776,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG2.5.1
-!EOP
 
       call c_ESMC_TimeSetTimezone(time, Timezone, rc)
 
@@ -809,9 +809,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG2.4.7
-!EOP
 
       call c_ESMC_TimeGetString(time, TimeString, rc)
 
@@ -844,9 +844,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG2.5.2
-!EOP
 
       call c_ESMC_TimeGetDayOfYearDouble(time, DayOfYear, rc)
 
@@ -878,8 +878,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       call c_ESMC_TimeGetDayOfYearInteger(time, DayOfYear, rc)
 
@@ -912,8 +912,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       call c_ESMC_TimeGetDayOfYearTimeInt(time, DayOfYear, rc)
 
@@ -945,9 +945,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG2.5.3
-!EOP
     
       call c_ESMC_TimeGetDayOfWeek(time, DayOfWeek, rc)
 
@@ -978,9 +978,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG2.5.4
-!EOP
 
       call c_ESMC_TimeGetDayOfMonth(time, DayOfMonth, rc)
 
@@ -1012,9 +1012,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG2.5.5
-!EOP
 
       call c_ESMC_TimeGetMidMonth(time, MidMonth, rc)
 
@@ -1043,9 +1043,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG2.5.7
-!EOP
 
       call c_ESMC_TimeGetRealTime(time, rc)
 
@@ -1080,9 +1080,9 @@
 !          The {\tt ESMF\_TimeInterval} to add to the given {\tt ESMF\_Time}
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
-!EOP
 
       ! copy ESMF_Time specific properties (e.g. calendar, timezone) 
       ESMF_TimeInc = time
@@ -1121,9 +1121,9 @@
 !          {\tt ESMF\_Time}
 !     \end{description}
 !     
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
-!EOP
 
       ! copy ESMF_Time specific properties (e.g. calendar, timezone) 
       ESMF_TimeDec = time
@@ -1162,9 +1162,9 @@
 !          The second {\tt ESMF\_Time} instant
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeDiff(time1, time2, ESMF_TimeDiff)
@@ -1198,9 +1198,9 @@
 !          Second time instant to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! invoke C to C++ entry point for ESMF_BaseTime base class function
       call c_ESMC_BaseTimeEQ(time1, time2, ESMF_TimeEQ)
@@ -1234,9 +1234,9 @@
 !          Second time instant to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeNE(time1, time2, ESMF_TimeNE)
@@ -1270,9 +1270,9 @@
 !          Second time instant to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLT(time1, time2, ESMF_TimeLT)
@@ -1306,9 +1306,9 @@
 !          Second time instant to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGT(time1, time2, ESMF_TimeGT)
@@ -1342,9 +1342,9 @@
 !          Second time instant to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLE(time1, time2, ESMF_TimeLE)
@@ -1378,9 +1378,9 @@
 !          Second time instant to compare
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMG1.5.3, TMG2.4.3, TMG7.2
-!EOP
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGE(time1, time2, ESMF_TimeGE)
@@ -1429,9 +1429,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
    
       call c_ESMC_TimeRead(time, S, Sn, Sd, cal, tz, rc)
 
@@ -1474,9 +1474,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
    
       call c_ESMC_TimeWrite(time, S, Sn, Sd, cal, tz, rc)
 
@@ -1507,9 +1507,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
    
       call c_ESMC_TimeValidate(time, opts, rc)
 
@@ -1541,9 +1541,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-!EOP
    
       call c_ESMC_TimePrint(time, opts, rc)
 
