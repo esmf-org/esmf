@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.42 2003/09/03 18:41:03 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.43 2003/09/03 18:58:17 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.42 2003/09/03 18:41:03 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.43 2003/09/03 18:58:17 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -612,8 +612,8 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Gets the system real time (wall clock time), returns it as an
-!     {\tt ESMF_Time}.
+!     Gets the system real time (wall clock time), and returns it as an
+!     {\tt ESMF\_Time}.
 !
 !     The arguments are:
 !     \begin{description}
