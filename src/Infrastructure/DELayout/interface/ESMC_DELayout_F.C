@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.5 2003/12/09 22:30:57 nscollins Exp $
+// $Id: ESMC_DELayout_F.C,v 1.6 2004/02/18 20:40:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -162,8 +162,23 @@ extern "C" {
 
        void FTN(c_esmc_delayoutprint)(ESMC_DELayout **ptr, char *opts,
                                       int *status){
+           if ((!ptr) || (*ptr == ESMC_NULL_POINTER)) {
+               *status = ESMF_FAILURE;
+               return;
+           }
+                 
            *status = (*ptr)->ESMC_DELayoutPrint();
            //*status = (*ptr)->ESMC_DELayoutPrint(opts);
+       }
+
+       void FTN(c_esmc_delayoutvalidate)(ESMC_DELayout **ptr, char *opts,
+                                      int *status){
+           if ((!ptr) || (*ptr == ESMC_NULL_POINTER)) {
+               *status = ESMF_FAILURE;
+               return;
+           }
+           *status = (*ptr)->ESMC_DELayoutValidate();
+           //*status = (*ptr)->ESMC_DELayoutValidate(opts);
        }
 
        void FTN(c_esmc_delayoutscatterna)(ESMC_DELayout **ptr,

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.7 2004/02/03 21:19:04 jwolfe Exp $
+! $Id: ESMF_DELayout.F90,v 1.8 2004/02/18 20:40:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,6 +121,7 @@
       public ESMF_DELayoutRead
  
       public ESMF_DELayoutPrint
+      public ESMF_DELayoutValidate
 
       public ESMF_DELayoutSendRecv
       public ESMF_DELayoutBcast
@@ -132,7 +133,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.7 2004/02/03 21:19:04 jwolfe Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.8 2004/02/18 20:40:25 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -550,6 +551,8 @@
         print *, "DELayout destruction error"
         return
       endif
+
+      layout%this = ESMF_NULL_POINTER
 
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
@@ -1554,6 +1557,55 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DELayoutPrint
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutValidate
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutValidate(layout, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!     Validate contents of a {\tt ESMF\_DELayout}.
+!
+!EOP
+
+!     Local variables.
+      character (len=6) :: defaultopts="brief"
+
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     ! Interface to call the C++ code
+      if(present(options)) then
+           call c_ESMC_DELayoutValidate(layout, options, status) 
+      else
+           call c_ESMC_DELayoutValidate(layout, defaultopts, status) 
+      endif
+
+      if (status .ne. ESMF_SUCCESS) then
+         print *, "DELayout validate error: bad DELayout object"
+         return
+      endif
+
+!     set return values
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DELayoutValidate
 
 !------------------------------------------------------------------------------
 !BOP
