@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.5 2003/09/04 22:24:20 cdeluca Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.6 2003/09/22 22:51:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -302,7 +302,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                        ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -425,7 +425,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                      ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -527,7 +527,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                           ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -646,7 +646,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                       ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\

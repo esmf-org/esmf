@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.1 2003/09/18 15:57:07 cdeluca Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.2 2003/09/22 22:53:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -288,7 +288,7 @@
         !endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -399,7 +399,7 @@
         counts = shape(f90arr) @\
  @\
         ! Call create routine @\
-        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -489,7 +489,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -596,7 +596,7 @@
         counts = shape(f90ptr) @\
  @\
         ! Call create routine @\
-        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
