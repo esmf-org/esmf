@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.54 2004/11/15 18:03:40 nscollins Exp $
+# $Id: makefile,v 1.55 2005/01/12 00:19:40 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -51,7 +51,7 @@ script_info:
 	  echo "C++ Compiler version:" ; ${CXX_CCV} ; echo "" ; fi
 	-@if [ -n "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
 	  echo "Fortran Compiler version:" ; ${C_FCV} ; echo "" ; fi
-	-@if [ -f ${ESMF_DIR}/src/include/ESMC_Macros.h ] ; then \
+	-@if [ -f ${ESMF_DIR}/src/Infrastructure/Base/include/ESMC_Macros.h ] ; then \
 	  fgrep ESMF_VERSION_STRING ${ESMF_DIR}/src/Infrastructure/Base/include/ESMC_Macros.h | ${SED} "s/^#define //" ; fi
 	-@echo "ESMF_DIR: ${ESMF_TOP_DIR}"
 	-@echo "ESMF_ARCH: ${ESMF_ARCH}"
@@ -60,6 +60,10 @@ script_info:
 	-@echo "ESMF_SITE: ${ESMF_SITE}"
 	-@echo "ESMF_COMM: ${ESMF_COMM}"
 	-@echo "ESMF_BOPT: ${ESMF_BOPT}"
+	-@if [ -n "${ESMF_COMPILER_VERSION}" ] ; then \
+	  echo "ESMF_COMPILER_VERSION: ${ESMF_COMPILER_VERSION}" ; fi
+	-@if [ -n "${ESMF_C_COMPILER}" ] ; then \
+	  echo "ESMF_C_COMPILER: ${ESMF_C_COMPILER}" ; fi
 #
 info:   script_info
 	-@echo "-----------------------------------------"
