@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.10 2004/01/31 02:26:24 eschwab Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.11 2004/02/02 19:15:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -221,7 +221,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 
 !BOP
 !\begin{verbatim}
-      clockCopy = ESMF_ClockCreateCopy(clock, rc)
+      clockCopy = ESMF_ClockCreate(clock, rc)
 !\end{verbatim}
 !EOP
       if (rc.NE.ESMF_SUCCESS) then
