@@ -1,4 +1,4 @@
- $Id: README,v 1.39 2003/09/29 21:51:38 flanigan Exp $
+ $Id: README,v 1.40 2003/10/14 17:11:46 cdeluca Exp $
 ================================================================================
                                    README
 
@@ -46,9 +46,9 @@ QuickStart information for the impatient.
 Directories
 -----------
 
-build_config:    Contains makefile fragments for specific platforms
-                 and compilers that are customizable by the user for 
-                 specific sites.
+build_config:    Contains makefile fragments that can 
+                 be customized by the user for specific platforms,
+                 compilers, and sites.
 
 build:           Contains the generic portion of the build, that a
                  user would not be expected to modify.
@@ -95,13 +95,13 @@ ESMF_SITE      Build configure site name or the value default.
 
 ESMF_COMPILER  Set to the name of the compiler to use.  If not set 
                then the default compiler is used.  Values can be 
-               default,absoft,intel,lahey or nag.
+               default, absoft, intel, lahey, pgi or nag.
 
 ESMF_PREC      Precision value of 32 or 64.  When possible the default
                value will be 64, otherwise it will be 32.
 
 ESMF_COMM      MPI communications library to use.  Set to mpiuni,
-               mpich,lam or mpi.   Default values will vary by
+               mpich, lam or mpi.   Default values will vary by
                machine.
 
 ESMF_BOPT      Build option value of g (for debug) or O (for Optimize). 
