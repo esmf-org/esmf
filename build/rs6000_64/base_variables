@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base_variables,v 1.2 2002/09/20 17:51:29 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -50,23 +50,6 @@ GCOMP_FOPTFLAGS	   = -g  -qfullpath
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O3 -qstrict -qspill=3000
 OCOMP_FOPTFLAGS	   = -O3
-# ########################### PETSc install options ###########################
-G_PETSCFLAGS	   = -DPETSC_USE_DEBUG  -DPETSC_USE_LOG -DPETSC_USE_BOPT_g \
-                     -DPETSC_USE_STACK 
-O_PETSCFLAGS	   = -DPETSC_USE_DEBUG  -DPETSC_USE_BOPT_O -DPETSC_USE_LOG
-GCXX_PETSCFLAGS	   = -DPETSC_USE_DEBUG  -DPETSC_USE_LOG -DPETSC_USE_BOPT_g \
-                     -DPETSC_USE_STACK
-OCXX_PETSCFLAGS	   = -DPETSC_USE_DEBUG  -DPETSC_USE_LOG -DPETSC_USE_BOPT_O
-GCOMP_PETSCFLAGS   = -DPETSC_USE_DEBUG  -DPETSC_USE_LOG -DPETSC_USE_BOPT_g \
-                     -DPETSC_USE_COMPLEX  -DPETSC_USE_FORTRAN_KERNELS -DPETSC_USE_STACK
-OCOMP_PETSCFLAGS   = -DPETSC_USE_DEBUG  -DPETSC_USE_LOG -DPETSC_USE_BOPT_O \
-                     -DPETSC_USE_COMPLEX  -DPETSC_USE_FORTRAN_KERNELS
-
-
-##################################################################################
-#
-#   PETSc installers should very rarely ever need to edit anything below this 
-#
 ##################################################################################
 #
 PARCH		   = rs6000_64

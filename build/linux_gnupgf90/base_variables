@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base_variables,v 1.2 2002/09/20 17:47:06 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -54,24 +54,6 @@ GCOMP_FOPTFLAGS	   = -g
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
-# ########################### ALICE install options ###########################
-#
-G_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_g \
-                     -DESMC_USE_STACK
-O_ALICEFLAGS	   = -DUSE_FOR_KERNELS -DESMC_USE_LOG -DESMC_DEBUG  \
-	             -DESMC_USE_BOPT_O
-GCXX_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_g \
-                     -DESMC_USE_STACK 
-OCXX_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_O
-GCOMP_ALICEFLAGS   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_g \
-                     -DESMC_USE_STACK -DESMC_USE_COMPLEX
-OCOMP_ALICEFLAGS   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_O \
-		     -DESMC_USE_COMPLEX
-
-##################################################################################
-#
-#   ALICE installers should very rarely ever need to edit anything below this 
-#
 ##################################################################################
 
 PARCH		   = linux
