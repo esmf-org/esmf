@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.99 2004/06/08 14:59:15 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.100 2004/06/10 21:43:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.99 2004/06/08 14:59:15 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.100 2004/06/10 21:43:38 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1494,8 +1494,9 @@ end function
        endif
 
        call ESMF_GetName(compp%base, cname, status)
-       write (msgbuf,*) "  name = ", trim(cname)
-       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+     !jw  write (msgbuf,*) "  name = ", trim(cname)
+     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       write (*,*) "  name = ", trim(cname)
        
        ! TODO: add more info here
 

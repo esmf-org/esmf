@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.49 2004/06/08 14:09:23 nscollins Exp $
+ $Id: ESMF_State.F90,v 1.50 2004/06/10 21:44:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -291,7 +291,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.49 2004/06/08 14:09:23 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.50 2004/06/10 21:44:25 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -2993,8 +2993,9 @@ end function
        ! TODO: Add code here
        ! print num of states, state type, etc
 
-       write(msgbuf,*) "StatePrint: "  
-       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+     !jw  write(msgbuf,*) "StatePrint: "  
+     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       write(*,*) "StatePrint: "  
        if (.not.associated(state%statep)) then 
            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "Uninitialized or already destroyed State", &
@@ -3006,23 +3007,28 @@ end function
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-       if (sp%st .eq. ESMF_STATEIMPORT) write(msgbuf, *) "  Import State"
-       if (sp%st .eq. ESMF_STATEEXPORT) write(msgbuf, *) "  Export State"
-       if (sp%st .eq. ESMF_STATELIST) write(msgbuf, *) "  State List"
+     !jw  if (sp%st .eq. ESMF_STATEIMPORT) write(msgbuf, *) "  Import State"
+     !jw  if (sp%st .eq. ESMF_STATEEXPORT) write(msgbuf, *) "  Export State"
+     !jw  if (sp%st .eq. ESMF_STATELIST) write(msgbuf, *) "  State List"
+       if (sp%st .eq. ESMF_STATEIMPORT) write(*, *) "  Import State"
+       if (sp%st .eq. ESMF_STATEEXPORT) write(*, *) "  Export State"
+       if (sp%st .eq. ESMF_STATELIST) write(*, *) "  State List"
        if (sp%st .eq. ESMF_STATEINVALID) then
            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "Uninitialized or already destroyed State", &
                                   ESMF_CONTEXT, rc)) return
        endif
-       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-       write(msgbuf, *) "  Number of members: ", sp%datacount
-       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+     !jw  write(msgbuf, *) "  Number of members: ", sp%datacount
+     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       write(*, *) "  Number of members: ", sp%datacount
       
        do i=1, sp%datacount
          dp => sp%datalist(i)
 
-         write(msgbuf, *) "  Item ", i, ":"
-         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+     !jw    write(msgbuf, *) "  Item ", i, ":"
+     !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+         write(*, *) "  Item ", i, ":"
          outbuf = "    Name= " // trim(dp%namep) // ", "
 
          select case (dp%otype%ot)
@@ -3049,7 +3055,8 @@ end function
              outbuf = trim(outbuf) //  " marked as NOT needed."
          end select
 
-        if (ESMF_LogWrite(outbuf, ESMF_LOG_INFO)) continue
+      !jw  if (ESMF_LogWrite(outbuf, ESMF_LOG_INFO)) continue
+        write(*,*) outbuf
 
         ! TODO: finish printing more info here
         !type(ESMF_StateDataReady) :: ready

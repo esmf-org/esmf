@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.52 2004/06/08 20:27:49 cdeluca Exp $
+! $Id: ESMF_GridComp.F90,v 1.53 2004/06/10 21:44:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.52 2004/06/08 20:27:49 cdeluca Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.53 2004/06/10 21:44:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -933,7 +933,8 @@
 !
 !EOP
 
-       if (ESMF_LogWrite("Gridded Component:", ESMF_LOG_INFO)) continue
+     !jw  if (ESMF_LogWrite("Gridded Component:", ESMF_LOG_INFO)) continue
+       print *, "Gridded Component:"
        call ESMF_CompPrint(gridcomp%compp, options, rc)
 
        end subroutine ESMF_GridCompPrint

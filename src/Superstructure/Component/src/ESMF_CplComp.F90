@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.43 2004/06/08 20:27:49 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.44 2004/06/10 21:43:51 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.43 2004/06/08 20:27:49 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.44 2004/06/10 21:43:51 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -882,7 +882,8 @@
 !
 !EOP
 
-       if (ESMF_LogWrite("Coupler Component:", ESMF_LOG_INFO)) continue
+     !jw  if (ESMF_LogWrite("Coupler Component:", ESMF_LOG_INFO)) continue
+       print *, "Coupler Component:"
        call ESMF_CompPrint(cplcomp%compp, options, rc)
 
        end subroutine ESMF_CplCompPrint
