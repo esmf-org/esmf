@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.171 2004/06/09 17:47:18 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.172 2004/06/13 23:53:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.171 2004/06/09 17:47:18 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.172 2004/06/13 23:53:12 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -205,7 +205,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddVertHeight"
 !BOP
-! !IROUTINE: ESMF_GridAddVertHeight - add a vertical subGrid to an existing Grid
+! !IROUTINE: ESMF_GridAddVertHeight - Add a vertical dimension to an existing Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridAddVertHeight(grid, delta, coord, vertStagger, &
@@ -403,7 +403,7 @@
 #define ESMF_METHOD "ESMF_GridCreateRead"
 ! TODO: make BOP when filled
 !BOPI
-! !IROUTINE: ESMF_GridCreate - Create a new Grid read in from a file
+! !IROUTINE: ESMF_GridCreate - Create a new Grid by reading in from a file
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCreate()
@@ -1030,7 +1030,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridDistribute"
 !BOP
-! !IROUTINE: ESMF_GridDistribute - Distribute a grid that has already been initialized
+! !IROUTINE: ESMF_GridDistribute - Distribute a Grid that has already been initialized
 
 ! !INTERFACE:
       subroutine ESMF_GridDistribute(grid, delayout, countsPerDEDim1, &
@@ -1131,7 +1131,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGet"
 !BOP
-! !IROUTINE: ESMF_GridGet - Gets a variety of information about the grid
+! !IROUTINE: ESMF_GridGet - Get a variety of information about a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGet(grid, horzRelLoc, vertRelLoc, &
@@ -1417,7 +1417,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetDE"
 !BOP
-! !IROUTINE: ESMF_GridGetDE - Get Local DE information for a Grid
+! !IROUTINE: ESMF_GridGetDE - Get local DE information for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGetDE(grid, horzRelLoc, vertRelLoc, &
@@ -1556,7 +1556,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGlobalToLocalIndex"
 !BOP
-! !IROUTINE: ESMF_GridGlobalToLocalIndex - Translate global indexing to local
+! !IROUTINE: ESMF_GridGlobalToLocalIndex - Translate global indexing to DE local
 
 ! !INTERFACE:
       subroutine ESMF_GridGlobalToLocalIndex(grid, horzRelLoc, vertRelLoc, &
@@ -1682,7 +1682,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalToGlobalIndex"
 !BOP
-! !IROUTINE: ESMF_GridLocalToGlobalIndex - Translate local indexing to global
+! !IROUTINE: ESMF_GridLocalToGlobalIndex - Translate DE local indexing to global
 
 ! !INTERFACE:
       subroutine ESMF_GridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
@@ -1886,7 +1886,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSet"
 !BOP
-! !IROUTINE: ESMF_GridSet - Sets a variety of information about the grid
+! !IROUTINE: ESMF_GridSet - Set a variety of information about a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridSet(grid, horzGridType, vertGridType, &
@@ -1992,7 +1992,7 @@
 #define ESMF_METHOD "ESMF_GridSetCoordCopy"
 ! TODO: make BOP when filled
 !BOPI
-! !IROUTINE: ESMF_GridSetCoord - Copies coordinates from one Grid to another
+! !IROUTINE: ESMF_GridSetCoord - Copy coordinates from one Grid to another
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridSetCoord()
@@ -2456,7 +2456,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridValidate"
 !BOP
-! !IROUTINE: ESMF_GridValidate - Check internal consistency of a Grid
+! !IROUTINE: ESMF_GridValidate - Check validity of a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridValidate(grid, opt, rc)
@@ -3169,3 +3169,20 @@
 !------------------------------------------------------------------------------
 
       end module ESMF_GridMod
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
