@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.22 2004/10/27 18:54:28 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.23 2004/12/01 01:19:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.22 2004/10/27 18:54:28 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.23 2004/12/01 01:19:29 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -988,6 +988,28 @@
       enddo
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.4), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm ringTime = clock startTime => should ring immediately
+      !  upon alarm creation.
+      write(failMsg, *) " Did not return alarm ringing and ESMF_SUCCESS"
+      write(name, *) "Test Alarm ringTime = Clock startTime"
+      call ESMF_TimeIntervalSet(timeStep, ms=10, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, m=59, s=59, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=startTime, rc=rc)
+
+      bool = ESMF_AlarmIsRinging(alarm4)
+
+      call ESMF_Test(((bool.eq..true.).and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
