@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.29 2004/12/18 15:26:02 nscollins Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.30 2005/01/14 18:59:12 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.29 2004/12/18 15:26:02 nscollins Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.30 2005/01/14 18:59:12 jwolfe Exp $'
 
 !==============================================================================
 
@@ -144,8 +144,8 @@
       real(ESMF_KIND_R8), dimension(:), pointer :: dstLocalCoordZ
       type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_Array) :: srcMaskArray
-      type(ESMF_Array), pointer :: dstLocalCoordArray
-      type(ESMF_Array), pointer :: srcLocalCoordArray
+      type(ESMF_Array), dimension(:), pointer :: dstLocalCoordArray
+      type(ESMF_Array), dimension(:), pointer :: srcLocalCoordArray
       type(ESMF_DomainList) :: recvDomainList 
       !type(ESMF_DomainList) :: recvDomainListTot
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
@@ -191,14 +191,18 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-!      call ESMF_GridGetCoord(dstGrid, relloc=dstRelLoc, &
-!                             vertCoord=dstLocalCoordArray, &
-!                             reorder=.false., rc=localrc)
-!      if (ESMF_LogMsgFoundError(localrc, &
-!                                ESMF_ERR_PASSTHRU, &
-!                                ESMF_CONTEXT, rc)) return
+      allocate(dstLocalCoordArray(1), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dstLocalCoordArray", &
+                                     ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayGetData(dstLocalCoordArray, dstLocalCoordZ, &
+      call ESMF_GridGetCoord(dstGrid, vertrelloc=dstRelLoc, &
+                             centerCoord=dstLocalCoordArray, &
+                             reorder=.false., rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordZ, &
                              ESMF_DATA_REF, localrc)
 
       ! get source grid info
@@ -214,15 +218,18 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      allocate(srcLocalCoordArray(1), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "srcLocalCoordArray", &
+                                     ESMF_CONTEXT, rc)) return
 
-!      call ESMF_GridGetCoord(srcGrid, relloc=srcRelLoc, &
-!                             vertCoord=srcLocalCoordArray, &
-!                             reorder=.false., total=.true., rc=localrc)
-!      if (ESMF_LogMsgFoundError(localrc, &
-!                                ESMF_ERR_PASSTHRU, &
-!                                ESMF_CONTEXT, rc)) return
+      call ESMF_GridGetCoord(srcGrid, vertrelloc=srcRelLoc, &
+                             centerCoord=srcLocalCoordArray, &
+                             reorder=.false., total=.true., rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayGetData(srcLocalCoordArray, srcLocalCoordZ, &
+      call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordZ, &
                              ESMF_DATA_REF, localrc)
 
       call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
