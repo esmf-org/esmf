@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.1 2003/10/31 13:04:04 cdeluca Exp $
+% $Id: AppDriver_desc.tex,v 1.2 2003/11/11 01:49:28 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,10 +10,79 @@
 
 %\subsection{Description}
 
-An Application Component is the top level Component in a
-Component hierarchy.
+The AppDriver directory contains examples of how to structure overall
+Applications using the ESMF Superstructure in a variety of styles.
 
-A Component can be run as a standalone Application
-with a generic driver program which creates
-the Component and calls the Init, Run, and Finalize methods.
+Overall options when deciding how to structure an Application include
+choices about:
+
+\begin{description}
+
+\item[Serial vs. Concurrent Execution]
+
+In a Serial Execution strategy each processor 
+executs the same Component until it has produced data needed
+by another Component, and then all processors change to
+running the next Component.  This has the appeal of simplicity
+of data consumption and production; when a Component starts
+all required data is available for use, and when a Component finishes
+all data produced has been computed.  This strategy also has
+the possibility of less data movement if the gridding and
+data decomposition is done such that each processor contains
+the data needed by the next Component.
+
+In a Concurrent Execution model subgroups of processors run
+a Component and all Components are active at the same time.  
+Data exchange must be coordinated between Components so that
+data deadlock does not occur.  This strategy has the advantage
+of allowing coupling to other Components at any time during
+the computational process, including not having to return to
+the calling level of code before making data available to 
+other components.
+
+\item[Coupling Strategy]
+
+Coupling components are responsible for taking data from one
+Component and putting it into the form expected by another Component.
+This might include regridding, change of units, averaging or binning.
+
+Couplers can be written for pairwise data exchange: the Coupler takes
+data from a single Component and formats it for another single Component.
+This simplifies the structure of the Component code.
+
+Coupler can also be written in the "hub and spoke" model where a
+single Coupler accepts data from all other Components, can do data
+merging or splitting, and format data for all other Compoents.
+
+Mixtures of these, and multiple Couplers, are also possible.
+
+\item[Implementation Language]
+
+The ESMF framework is implemented with a set of Fortran and C++ interfaces
+to all functions.  The main executable program can be written in either
+Fortran or C++.
+
+\item[Number of executables]
+
+On a multiple processor machine a cooperating job can either be run
+by starting the same executable on all nodes.  All processors run the
+same code, but the computation proceeds by each processor working on
+a different subset of data.  This is a {\tt SPMD} model, Single Process
+Multiple Data.  
+
+The alternative is to start a different executable on different
+processors.  This is a {\tt MPMD} model, Multiple Process Multiple Data.
+There are complications with many job control systems on multiprocessor
+machine in getting the different executables started, and getting
+inter-process communcations established.
+
+\end{description}
+
+
+Examples of a subset of these combinations are found in the
+subdirectories here.
+
+One of the simpler examples is the "seq_pairwise_fdriver_spmd", which
+has sequential component execution, a pairwise coupler, a main program
+in Fortran, and all processors launch the same executable.
 
