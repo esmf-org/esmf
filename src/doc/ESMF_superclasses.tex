@@ -118,7 +118,7 @@ components instantiated on a separate set of {\tt DE}s and running as
 another executable, and a {\tt Coupler} and {\tt Application Component} 
 instantiated across all {\tt DE}s.
 
-Figure \ref{fig:couplerscaling} illustrates scoping of components
+Figure~\ref{fig:couplerscaling} illustrates scoping of components
 in a coupled, hierarchically structured application.  At the top level, 
 a climate application consists of atmosphere and ocean components 
 instantiated on mutually exclusive {\tt DE} sets.  These components communicate 
@@ -210,9 +210,9 @@ receives data from the atmosphere but does not send any data back.  Atmosphere
 and ocean components are configured for concurrent execution.
 
 \begin{figure}
-\label{fig:1waycoupling}
 \caption[{Coupling Sequence}]{One-way coupling between an atmosphere and
 ocean executing concurrently.}
+\label{fig:1waycoupling}
 \scalebox{0.70}{\includegraphics{OneWayCoupling.eps}}
 \end{figure}
 
