@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.26 2003/07/23 02:11:34 eschwab Exp $
+! $Id: ESMF_DELayout.F90,v 1.27 2003/07/29 16:41:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.26 2003/07/23 02:11:34 eschwab Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.27 2003/07/29 16:41:25 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -984,6 +984,7 @@
 !     Local variables.
       integer :: size_gcount           ! size of the global counts array
       integer :: size_decomp           ! size of the decompids array
+      integer :: i
 
       integer :: status                ! Error status
       logical :: rcpresent             ! Return code present
@@ -1006,6 +1007,12 @@
           return
       endif
 
+!     Translate from C++ to Fortran
+      do i = 1,size_gcount
+        AIPtr(i)%min  = AIPtr(i)%min  + 1
+        AIPtr(i)%max  = AIPtr(i)%max  + 1
+      enddo
+
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1016,12 +1023,14 @@
 ! !IROUTINE: ESMF_DELayoutGatherArrayI
 !
 ! !INTERFACE:
-      subroutine ESMF_DELayoutGatherArrayI(layout, DistArray, decompids, &
-                                           AIPtr, AIPtr2, GlobalArray, rc)
+      subroutine ESMF_DELayoutGatherArrayI(layout, DistArray, global_dimlengths, &
+                                           decompids, AIPtr, AIPtr2, GlobalArray,&
+                                           rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
       integer, dimension(:), intent(in) :: DistArray
+      integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:) :: AIPtr
       type(ESMF_AxisIndex), dimension(:) :: AIPtr2
@@ -1061,8 +1070,8 @@
 
 !       Routine which interfaces to the C++ routine.
         size_decomp = size(decompids)
-        call c_ESMC_DELayoutGatherArrayI(layout, DistArray, decompids, &
-                                         size_decomp, AIPtr, AIPtr2, &
+        call c_ESMC_DELayoutGatherArrayI(layout, DistArray, global_dimlengths, &
+                                         decompids, size_decomp, AIPtr, AIPtr2, &
                                          GlobalArray, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutGatherArrayI error"
@@ -1087,12 +1096,14 @@
 ! !IROUTINE: ESMF_DELayoutGatherArrayR
 !
 ! !INTERFACE:
-      subroutine ESMF_DELayoutGatherArrayR(layout, DistArray, decompids, &
-                                           AIPtr, AIPtr2, GlobalArray, rc)
+      subroutine ESMF_DELayoutGatherArrayR(layout, DistArray, global_dimlengths, &
+                                           decompids, AIPtr, AIPtr2, GlobalArray,&
+                                           rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
       real(ESMF_IKIND_R4), dimension(:), intent(in) :: DistArray
+      integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:) :: AIPtr
       type(ESMF_AxisIndex), dimension(:) :: AIPtr2
@@ -1133,9 +1144,9 @@
 
 !       Routine which interfaces to the C++ routine.
         size_decomp = size(decompids)
-        call c_ESMC_DELayoutGatherArrayR(layout, DistArray, decompids, &
-                                       size_decomp, AIPtr, AIPtr2, &
-                                       GlobalArray, status)
+        call c_ESMC_DELayoutGatherArrayR(layout, DistArray, global_dimlengths, &
+                                         decompids, size_decomp, AIPtr, AIPtr2, &
+                                         GlobalArray, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutGatherArrayR error"
           ! Do *NOT* return before we put the +1 back.
