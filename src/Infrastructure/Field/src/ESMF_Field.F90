@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.185 2004/09/16 03:47:13 slswift Exp $
+! $Id: ESMF_Field.F90,v 1.186 2004/10/13 22:21:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.185 2004/09/16 03:47:13 slswift Exp $'
+      '$Id: ESMF_Field.F90,v 1.186 2004/10/13 22:21:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2050,7 +2050,6 @@
            call ESMF_GridPrint(fp%grid, "", status)
         endif
 
-
         call ESMF_StatusString(fp%datastatus, str, status)
       !jw  write(msgbuf, *)  "Data status = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
@@ -2060,8 +2059,14 @@
            call ESMF_ArrayPrint(fp%localfield%localdata, "", status)
         endif
 
-        call ESMF_FieldDataMapPrint(fp%mapping, "", status)
-
+        call ESMF_StatusString(fp%datamapstatus, str, status)
+      !jw  write(msgbuf, *)  "FieldDataMap status = ", trim(str)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+        write(*, *)  "FieldDataMap status = ", trim(str)
+        !TODO: add code here to print more info
+        if (fp%datamapstatus .eq. ESMF_STATUS_READY) then 
+           call ESMF_FieldDataMapPrint(fp%mapping, "", status)
+        endif
 
 
         ! global field contents
@@ -3106,8 +3111,8 @@
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
       integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
       integer :: gridrank, maprank, arrayrank, halo
-      !integer :: i, j
-      !character(len=ESMF_MAXSTR) :: msgbuf
+      logical :: hasgrid, hasarray, hasmap     ! decide what we can validate
+      integer :: i, j
     
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -3129,6 +3134,12 @@
                                  ESMF_CONTEXT, rc)) return
       endif 
 
+      ! figure out whether there is a grid, datamap, and/or arrays first
+      ! before doing tests to be sure they are consistent.
+      hasgrid = .FALSE.
+      hasarray = .FALSE.
+      hasmap = .FALSE.
+
       ! make sure there is data before asking the datamap questions.
       if (ftypep%datamapstatus .eq. ESMF_STATUS_READY) then
 
@@ -3139,6 +3150,13 @@
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
+          hasmap = .TRUE.
+      endif
+
+      ! if there is no datamap yet, then default horzRelloc to cell center
+      ! before asking thegrid for count information
+      if (.not. hasmap) then
+          horzRelloc = ESMF_CELL_CENTER
       endif
 
       ! make sure there is a grid before asking it questions.
@@ -3154,6 +3172,7 @@
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
+          hasgrid = .TRUE.
       endif
 
       ! make sure there is data before asking it questions.
@@ -3165,43 +3184,48 @@
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
+          hasarray = .TRUE.
       endif
 
-#if 0
       ! and now see if it is at all consistent.
-      if (arrayrank .ne. maprank) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                         "rank in fielddatamap must match rank in array", &
-                                   ESMF_CONTEXT, rc)) return
+      if (hasarray .and. hasmap) then
+          if (arrayrank .ne. maprank) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                             "rank in fielddatamap must match rank in array", &
+                                        ESMF_CONTEXT, rc)
+              return
+          endif
       endif
 
-      j = 1
-      do i = 1, arrayrank
-          if (maplist(i) .ne. 0) then
-              ! maplist is 0 if the axes does not correspond to the grid.
-              ! in that case, it must correspond to the counts in the map.
-              if (arraycounts(i) .ne. otheraxes(j)) then
-                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+      if (hasarray .and. hasmap .and. hasgrid) then
+          j = 1
+          do i = 1, arrayrank
+              if (maplist(i) .ne. 0) then
+                  ! maplist is 0 if the axes does not correspond to the grid.
+                  ! in that case, it must correspond to the counts in the map.
+                  if (arraycounts(i) .ne. otheraxes(j)) then
+                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
        "counts of non-grid axes in array must match counts in field datamap", &
-                                            ESMF_CONTEXT, rc)) return
-              
-              endif
-              j = j + 1
-          else
-              ! maplist is not 0, so this axes does correspond to the grid.
-              ! the sizes must match, taking into account the halo widths
-              ! and the index reordering.
-              if (arraycounts(maplist(i)) .ne. (gridcounts(i) + (2*halo))) then
-                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                                ESMF_CONTEXT, rc)
+                  
+                      return
+                  endif
+                  j = j + 1
+              else
+                  ! maplist is not 0, so this axes does correspond to the grid.
+                  ! the sizes must match, taking into account the halo widths
+                  ! and the index reordering.
+                  if (arraycounts(maplist(i)) .ne. (gridcounts(i) + (2*halo))) then
+                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                                "axes in array does not match counts in grid", &
-                                            ESMF_CONTEXT, rc)) return
-              
+                                                ESMF_CONTEXT, rc)
+                      return
+                  endif
+    
               endif
+          enddo
+      endif
 
-          endif
-      enddo
-
-#endif
       
       if (present(rc)) rc = ESMF_SUCCESS
 
