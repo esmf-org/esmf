@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.21 2004/06/23 22:21:29 cdeluca Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.20.2.1 2004/07/01 15:50:52 svasquez Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
