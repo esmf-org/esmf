@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.36 2004/06/21 22:52:01 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.37 2004/06/21 23:30:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,7 +54,11 @@ module ESMF_DELayoutMod
   type ESMF_DELayout
   sequence
   private
+#ifndef ESMF_NO_INITIALIZERS
+    type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+#else
     type(ESMF_Pointer) :: this
+#endif
   end type
 
 !------------------------------------------------------------------------------
@@ -142,7 +146,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.36 2004/06/21 22:52:01 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.37 2004/06/21 23:30:38 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -814,9 +818,17 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+    logical :: dummy
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    if (delayout%this .eq. ESMF_NULL_POINTER) then
+      dummy=ESMF_LogWrite("Uninitialized DELayout object", &
+                           ESMF_LOG_INFO)
+      rc = ESMF_FAILURE
+      return
+    endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutValidate(delayout, localrc)
