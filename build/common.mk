@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.19 2003/10/17 21:15:11 nscollins Exp $
+#  $Id: common.mk,v 1.20 2003/10/20 20:09:02 nscollins Exp $
 #
 #  common.mk
 #
@@ -996,5 +996,5 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 #
 #  Include site specific makefile fragment.
 #
-include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE).mk
+include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
 
