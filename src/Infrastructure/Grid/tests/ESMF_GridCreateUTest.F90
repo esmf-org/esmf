@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.16 2004/06/07 17:30:35 svasquez Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.17 2004/06/08 15:36:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.16 2004/06/07 17:30:35 svasquez Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.17 2004/06/08 15:36:54 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -251,18 +251,16 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
       ! Get the Grid name
-      call ESMF_GridGet(grid1, name=RgName, rc=rc)
-      write(name, *) "Get the Grid name Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS or the name is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. RgName.eq."test grid 2"),  name, failMsg, result, ESMF_SRCLINE)
-      print *, "Rgname = ", RgName
-      print *, " rc = ", rc
+      !call ESMF_GridGet(grid1, name=RgName, rc=rc)
+      !write(name, *) "Get the Grid name Test"
+      !write(failMsg, *) "Did not return ESMF_SUCCESS or the name is not correct"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS .and. RgName.eq."test grid 2"),  name, failMsg, result, ESMF_SRCLINE)
+      !print *, "Rgname = ", RgName
+      !print *, " rc = ", rc
 
 
       !------------------------------------------------------------------------
-      !EX_UTest
       write(name, *) "ESMF_Finalize Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
 #endif
