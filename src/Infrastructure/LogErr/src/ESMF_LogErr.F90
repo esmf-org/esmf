@@ -45,7 +45,7 @@
 
 
 !EOPI
-   implicit none
+implicit none
 
 type ESMF_LogFileType
       sequence
@@ -539,8 +539,8 @@ end subroutine ESMF_LogGet
       subroutine ESMF_LogInitialize(filename, rc)
 !
 ! !ARGUMENTS:
-      character(len=*)			:: filename
-      integer, intent(out),optional	:: rc
+      character(len=*)                          :: filename
+      integer, intent(out),optional	            :: rc
 
 ! !DESCRIPTION:
 !      This routine initializes the global log
@@ -556,22 +556,23 @@ end subroutine ESMF_LogGet
 ! 
 !EOPI
 	
-	integer 				:: status, i, rc2	
-	if (present(rc)) rc=ESMF_FAILURE
-	ESMF_LogDefault%FileIsOpen=ESMF_FALSE
-	if (ESMF_LogDefault%stdOutUnitNumber .gt. ESMF_LOG_UPPER) return
-	ESMF_LogDefault%nameLogErrFile=filename
-	ESMF_LogDefault%unitnumber=ESMF_LogDefault%stdOutUnitNumber
-	do i=ESMF_LogDefault%unitnumber, ESMF_LOG_UPPER
-     		inquire(unit=i,iostat=status)
-     		if (status .eq. 0) then
-       			ESMF_LogDefault%FileIsOpen = ESMF_TRUE
-       		exit
-     		endif
+    integer 				                    :: status, i, rc2	
+	
+    if (present(rc)) rc=ESMF_FAILURE
+    ESMF_LogDefault%FileIsOpen=ESMF_FALSE
+    if (ESMF_LogDefault%stdOutUnitNumber .gt. ESMF_LOG_UPPER) return
+    ESMF_LogDefault%nameLogErrFile=filename
+    ESMF_LogDefault%unitnumber=ESMF_LogDefault%stdOutUnitNumber
+    do i=ESMF_LogDefault%unitnumber, ESMF_LOG_UPPER
+        inquire(unit=i,iostat=status)
+        if (status .eq. 0) then
+            ESMF_LogDefault%FileIsOpen = ESMF_TRUE
+            exit
+     	endif
    	enddo 
 	if (ESMF_LogDefault%FileIsOpen .eq. ESMF_FALSE) return
 	ESMF_LogDefault%unitNumber = i  
-	!call c_ESMC_LogInitialize(filename,rc2)
+	call c_ESMC_LogInitialize(filename,rc2)
 	if (present(rc)) rc=ESMF_SUCCESS
 	
 end subroutine ESMF_LogInitialize
