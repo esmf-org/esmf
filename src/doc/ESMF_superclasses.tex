@@ -21,7 +21,7 @@ of nested higher resolution regions within a coarser grid.  The ability to
 couple components at varying scales both flexibly and efficiently requires
 careful design and implementation.  
 
-The important aspects of this design are as follows:
+The critical aspects of the superstructure design are as follows:
 \begin{itemize}
 \item The coupling specification {\it is entirely external to gridded 
 components involved in the coupling}, which makes it easier for the 
@@ -32,7 +32,9 @@ component code.  Changes to coupler or application code may be required.
 \item The ability to send data when it's ready from within a gridded
 component allows computation to overlap with communication.  
 \item It is not necessary to create return points from 
-within the time iteration loop of a gridded component.  
+within the time iteration loop of a gridded component.  This reduces the
+amount of work application groups will need to perform to adopt the 
+framework.
 \item Data may be sent between components without needing to 
 be sent to a set of coupler DEs as an intermediate step.
 \item The systematized approach to component scheduling will

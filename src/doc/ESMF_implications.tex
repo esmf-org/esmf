@@ -1,0 +1,50 @@
+\section{ESMF Compliance and Framework Adoption}
+\label{sec:implications}
+
+\subsection{ESMF Compliance}
+
+We define ESMF compliance for software components, including
+both coupler and gridded components.  In order to achieve compliance, 
+components must provide a minimal set of standard ESMF-defined 
+interfaces.  The implementation of these interfaces must enable the  
+components to be instantiated in parallel configurations
+and destroyed; to be initialized, finalized, and run; to be queried for 
+distribution, state, run status and other pertinent information;
+and, for gridded components, to interoperate with other components such
+that they do not need to maintain information about the coupling context.
+
+\subsection{Implications of Architecture for Framework Adoption}
+
+In this section we outline the types of changes that will be necessary for
+application groups to adapt their software components for ESMF.  {\it Since the
+functional interface to the ESMF is not yet fully defined, nor have we 
+explored all the implications of the architectural definition, this list is 
+necessarily tentative, incomplete, and non-specific.}
+
+\begin{itemize}
+\item Since gridded components will run on the same 
+DEs as the application component, often in conjunction with a coupler, 
+it is necessary to subroutinize
+them and provide standard methods such as {\tt ESMF\_CompInit}, 
+{\tt ESMF\_CompRun}, and {\tt ESMF\_CompFinalize}.  For gridded components
+with a time iteration loop, we expect the {\tt ESMF\_CompRun} command to 
+takes a time interval or number of timesteps as one of its arguments.
+\item Gridded components must define ESMF import and export state 
+structures.
+\item Coupler components must define and return any transforms or 
+sends that gridded components involved in a coupling interaction may 
+perform.
+\item Components will need to implement standard query methods to return
+their distribution, grid, state, run status, and other information in
+a standard format.
+\end{itemize}
+
+Components {\it will not} need to recast their internal data structures.
+They {\it will not} be required to insert return points at each timestep.
+Thus the amount of internal reorganization of codes required should be 
+kept to a minimum.  We hope, however, to provide high-performance infrastructure,
+both data structures and utilities, that can be leveraged by groups who see
+the ESMF effort as an opportunity to restructure their codes.
+
+
+
