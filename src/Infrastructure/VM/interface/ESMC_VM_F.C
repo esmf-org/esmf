@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.8 2004/04/29 21:22:15 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.9 2004/05/21 03:54:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,8 @@
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_VM.h"
+#include "ESMC.h"                         // for LogErr
+#include "ESMF_LogMacros.inc"             // for LogErr
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -43,74 +45,89 @@ extern "C" {
   // ESMC_VM interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  void FTN(c_esmc_vminitialize)(ESMC_VM **ptr, int *status){
-    *ptr = ESMC_VMInitialize(status);
-  }
-
-  void FTN(c_esmc_vmfinalize)(int *status){
-    ESMC_VMFinalize(status);
-  }
-
   void FTN(c_esmc_vmget)(ESMC_VM **ptr, int *mypet, int *npets, int *npes, 
-    int *mpic, ESMC_Logical *ok_openmp, int *status){
-    int rc = (*ptr)->ESMC_VMGet(
+    int *mpic, ESMC_Logical *ok_openmp, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmget()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_VMGet(
       ESMC_NOT_PRESENT_FILTER(mypet), 
       ESMC_NOT_PRESENT_FILTER(npets), 
       ESMC_NOT_PRESENT_FILTER(npes),
       ESMC_NOT_PRESENT_FILTER(mpic), 
-      ESMC_NOT_PRESENT_FILTER(ok_openmp));
-    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
-      *status = rc;
+      ESMC_NOT_PRESENT_FILTER(ok_openmp)),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN(c_esmc_vmgetpet)(ESMC_VM **ptr, int *petid, int *npes, int *ssiid,
-    int *nthreads, int *tid, int *status){
-    int rc = (*ptr)->ESMC_VMGetPET(petid, 
+    int *nthreads, int *tid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetpet()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_VMGetPET(
+      *petid, 
       ESMC_NOT_PRESENT_FILTER(npes), 
       ESMC_NOT_PRESENT_FILTER(ssiid), 
       ESMC_NOT_PRESENT_FILTER(nthreads), 
-      ESMC_NOT_PRESENT_FILTER(tid));
-    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
-      *status = rc;
+      ESMC_NOT_PRESENT_FILTER(tid)),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_vmprint)(ESMC_VM **ptr, int *status){
+  void FTN(c_esmc_vmprint)(ESMC_VM **ptr, int *rc){
     (*ptr)->vmachine_print();
-    *status = ESMF_SUCCESS;
-  }
-
-  void FTN(c_esmc_vmbarrier)(ESMC_VM **ptr, int *status){
-    (*ptr)->vmachine_barrier();
-    *status = ESMF_SUCCESS;
-  }
-
-  void FTN(c_esmc_vmthreadbarrier)(ESMC_VM **ptr, int *status){
-    (*ptr)->vmachine_threadbarrier();
-    *status = ESMF_SUCCESS;
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
 
   void FTN(c_esmc_vmsend)(ESMC_VM **ptr, void *message, int *size, int *dest,
-    int *status){
+    int *rc){
     (*ptr)->vmachine_send(message, *size, *dest);
-    *status = ESMF_SUCCESS;
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
 
   void FTN(c_esmc_vmrecv)(ESMC_VM **ptr, void *message, int *size, int *source,
-    int *status){
+    int *rc){
     (*ptr)->vmachine_recv(message, *size, *source);
-    *status = ESMF_SUCCESS;
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
 
   void FTN(c_esmc_vmscatter)(ESMC_VM **vm, void *input, void *output, int *size,
-    int *root, int *status){
+    int *root, int *rc){
     (*vm)->vmachine_scatter(input, output, *size, *root);
-    *status = ESMF_SUCCESS;
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
   
   void FTN(c_esmc_vmgather)(ESMC_VM **vm, void *input, void *output, int *size, 
-    int *root, int *status){
+    int *root, int *rc){
     (*vm)->vmachine_gather(input, output, *size, *root);
-    *status = ESMF_SUCCESS;
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+  }
+
+  void FTN(c_esmc_vmbarrier)(ESMC_VM **ptr, int *rc){
+    (*ptr)->vmachine_barrier();
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+  }
+
+  void FTN(c_esmc_vmthreadbarrier)(ESMC_VM **ptr, int *rc){
+    (*ptr)->vmachine_threadbarrier();
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+  }
+
+  void FTN(c_esmc_vminitialize)(ESMC_VM **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vminitialize()"
+    int localrc;
+    *ptr = ESMC_VMInitialize(&localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+  }
+
+  void FTN(c_esmc_vmfinalize)(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmfinalize()"
+    int localrc;
+    ESMC_VMFinalize(&localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
   }
 
   
@@ -120,7 +137,7 @@ extern "C" {
 
   
   void FTN(c_esmc_vmplanconstruct)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
-    int *npetlist, int *petlist, int *status){
+    int *npetlist, int *petlist, int *rc){
     (*ptr) = new ESMC_VMPlan;
     if (npetlist > 0)
       (*ptr)->vmplan_minthreads(**ptr_vm, 1, (int*)petlist, *npetlist);
@@ -137,13 +154,10 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    // Success...
-    int rc = ESMF_SUCCESS;
-    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
-      *status = rc;
+    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
   }
 
-  void FTN(c_esmc_vmplandestruct)(ESMC_VMPlan **ptr, int *status){
+  void FTN(c_esmc_vmplandestruct)(ESMC_VMPlan **ptr, int *rc){
     // Do garbage collection on this PET's VM instances that were allocated
     for (int i=0; i<(*ptr)->nspawn; i++)
       delete (*ptr)->myvms[i];
@@ -151,15 +165,12 @@ extern "C" {
     delete [] (*ptr)->myvmachs;
     // Now delete the actual ESMC_VMPlan object
     delete (*ptr);
-    // Success...
-    int rc = ESMF_SUCCESS;
-    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
-      *status = rc;
+    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
   }
   
   void FTN(c_esmc_vmplanmaxthreads)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *status){
+    int *npetlist, int *petlist, int *rc){
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -198,15 +209,12 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    // Success...
-    int rc = ESMF_SUCCESS;
-    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
-      *status = rc;
+    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
   }
   
   void FTN(c_esmc_vmplanminthreads)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *status){
+    int *npetlist, int *petlist, int *rc){
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -245,15 +253,12 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    // Success...
-    int rc = ESMF_SUCCESS;
-    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
-      *status = rc;
+    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
   }
   
   void FTN(c_esmc_vmplanmaxpes)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *status){
+    int *npetlist, int *petlist, int *rc){
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -292,10 +297,7 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    // Success...
-    int rc = ESMF_SUCCESS;
-    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
-      *status = rc;
+    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
   }
        
 };
