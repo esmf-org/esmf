@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.15 2003/02/21 21:19:44 jwolfe Exp $
+// $Id: ESMC_Layout.C,v 1.16 2003/02/26 20:15:10 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.15 2003/02/21 21:19:44 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.16 2003/02/26 20:15:10 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -858,16 +858,18 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
     // if decomp is 1, use nxLayout
     if (decompids[i] == 1) {
       int n1 = (global_counts[i]+nxLayout-1)/nxLayout; // round to nearest
-      AIPtr->l = x*n1;
-      AIPtr->r = ((x+1)*n1)-1;
+      AIPtr->l = 0;
+      AIPtr->r = n1;
       AIPtr->max = global_counts[i];
+      AIPtr->gstart = x*n1;
     }
     // if decomp is 2, use nyLayout
     if (decompids[i] == 2) {
       int n2 = (global_counts[i]+nyLayout-1)/nyLayout; // round to nearest
-      AIPtr->l = y*n2;
-      AIPtr->r = ((y+1)*n2)-1;
+      AIPtr->l = 0;
+      AIPtr->r = n2;
       AIPtr->max = global_counts[i];
+      AIPtr->gstart = y*n2;
     }
   }
    
@@ -891,7 +893,9 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
                                  //       axis for the array
       int size_decomp,           // in  - size of decomp arrays
       ESMC_AxisIndex *AIPtr,     // in  - pointer to array of AxisIndex
-                                 //       structures
+                                 //       structures for exclusive data
+      ESMC_AxisIndex *AIPtr2,    // in  - pointer to array of AxisIndex
+                                 //       structures for total data
       int *GlobalArray) {        // out - global array
 //
 // !DESCRIPTION:
@@ -922,12 +926,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         // chunks
         int rmax[2];
         int rsize[2];
+        int rsize_tot[2];
         int rskip[2];
         int rbreak[1];
         int rbcount = 0;
         for (i=0; i<size_decomp; i++) {
           rmax[i] = AIPtr[i].max;
           rsize[i] = AIPtr[i].r - AIPtr[i].l + 1;
+          rsize_tot[i] = AIPtr2[i].r - AIPtr2[i].l + 1;
           if (decompids[i] == 0) {
             rbreak[rbcount]=i;
             rbcount++;
@@ -947,24 +953,21 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         }
         // loop over ranks, skipping the first decomposed one, loading
         // up chunks of data to gather
-        int k;
+        int k, j_tot;
         int *sendbuf, *recvbuf;
         int sendcount;
         int* recvcounts = new int[nde];
         int* displs = new int[nde];
-        for (i=0; i<rsize[rbreak[1]]; i++) {
-          for (int j=0; j<rsize[rbreak[0]]; j++) {
-            sendbuf = &DistArray[j*rsize[rankx]
-                    + i*rsize[rankx]*rsize[rbreak[0]]];
-            sendcount = rsize[rankx];
-            recvbuf = &GlobalArray[j*rmax[rankx]
-                    + i*rmax[rankx]*rmax[rbreak[0]]];
-            for (int kx=0; kx<nx; kx++) {
-              for (int ky=0; ky<ny; ky++) {
-                k = ky*nx + kx;
-                recvcounts[k] = rsize[rankx]; // TODO: fix so variable
-                displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
-              }
+        for (int j=0; j<rsize[rbreak[0]]; j++) {
+          j_tot = j + AIPtr[ranky].l;
+          sendbuf = &DistArray[j_tot*rsize_tot[rankx] + AIPtr[rankx].l];
+          sendcount = rsize[rankx];
+          recvbuf = &GlobalArray[j*rmax[rankx]];
+          for (int kx=0; kx<nx; kx++) {
+            for (int ky=0; ky<ny; ky++) {
+              k = ky*nx + kx;
+              recvcounts[k] = rsize[rankx]; // TODO: fix so variable
+              displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
             }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
