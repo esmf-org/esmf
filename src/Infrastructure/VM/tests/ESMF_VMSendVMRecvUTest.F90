@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.13 2004/12/17 00:40:44 theurich Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.14 2005/01/28 17:41:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.13 2004/12/17 00:40:44 theurich Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.14 2005/01/28 17:41:55 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -80,6 +80,12 @@
 
       ! Allocate localData
       count = 2
+!      
+! IMPORTANT NOTE:
+!   The correct operation of this unit test depends on sufficient internal 
+!   buffering within VMSend and VMRecv! There will be an implementation 
+!   specific threshold for count above which this unit test will start to hang!
+!  
       allocate(localData(count))
       allocate(r8_localData(count))
       allocate(r4_localData(count))
