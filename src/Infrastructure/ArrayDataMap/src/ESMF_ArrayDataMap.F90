@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.10 2004/06/08 09:27:15 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.11 2004/06/08 10:54:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.10 2004/06/08 09:27:15 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.11 2004/06/08 10:54:00 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -430,24 +430,31 @@ end function
 !EOP
 
         integer :: i, j
+        character(len=ESMF_MAXSTR) :: msgbuf
 
-        print *, "ArrayDataMap print:"
+        print msgbuf, "ArrayDataMap print:"
+        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         if (datamap%status .ne. ESMF_STATE_READY) then
-          print *, "Uninitialized or Invalid object"
-          if (present(rc)) rc = ESMF_FAILURE
+          print msgbuf, "Uninitialized or Invalid object"
+          if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+          if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
 
         ! individual data item information
-        print *, " Data rank = ", datamap%dataRank
-        print *, " Data Index Order and Lengths for non-Grid Indices:"
+        print msgbuf, " Data rank = ", datamap%dataRank
+        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+        print msgbuf, " Data Index Order and Lengths for non-Grid Indices:"
+        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         j = 1
         do i=1, ESMF_MAXDIM
             if (datamap%dataDimOrder(i) .eq. 0) then
-               print *, i, "Non-Grid index, length = ", datamap%dataNonGridCounts(j)
+               print msgbuf, i, "Non-Grid index, length = ", datamap%dataNonGridCounts(j)
+               if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
                j = j + 1
             else
-               print *, i, "Grid index ", datamap%dataDimOrder(i)
+               print msgbuf, i, "Grid index ", datamap%dataDimOrder(i)
+               if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
             endif
         enddo
 
