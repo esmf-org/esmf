@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/03/28 17:19:41 svasquez Exp $ 
+# $Id: makefile,v 1.12 2003/04/02 20:55:03 svasquez Exp $ 
 
 ALL:  tests
 
@@ -42,7 +42,7 @@ CLOBBERDIRS =
 #  Bundles
 #
 $(ESMC_TESTDIR)/ESMF_BundleUTest: ESMF_BundleUTest.o
-	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_BundleUTest ESMF_BundleUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_BundleUTest ESMF_BundleUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_BundleUTest.o
 
 RUN_ESMF_BundleUTest:
@@ -60,7 +60,7 @@ ESMF_BundleUTest.rm:
 # Field
 #
 $(ESMC_TESTDIR)/ESMF_FieldUTest: ESMF_FieldUTest.o
-	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FieldUTest ESMF_FieldUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FieldUTest ESMF_FieldUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_FieldUTest.o
 
 RUN_ESMF_FieldUTest:
@@ -81,7 +81,7 @@ ESMF_FieldUTest.rm:
 # Field Route function
 #
 $(ESMC_TESTDIR)/ESMF_FRouteUTest: ESMF_FRouteUTest.o
-	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FRouteUTest ESMF_FRouteUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FRouteUTest ESMF_FRouteUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_FRouteUTest.o
 
 RUN_ESMF_FRouteUTest:

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/28 17:35:48 svasquez Exp $
+# $Id: makefile,v 1.5 2003/04/02 20:58:34 svasquez Exp $
 
 ALL:  tests
 
@@ -42,7 +42,7 @@ ESMF_RegridCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMC_RegridTest: chkopts ESMC_RegridTest.o
-	${CXXF90LD} -o ESMC_RegridTest ESMC_RegridTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	-${CXXF90LD} -o ESMC_RegridTest ESMC_RegridTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMC_RegridTest.o
 
 RUN_ESMC_RegridTest:

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/03/25 00:17:59 flanigan Exp $ 
+# $Id: makefile,v 1.11 2003/04/02 20:51:40 svasquez Exp $ 
 
 ALL:  tests
 
@@ -46,7 +46,7 @@ CLOBBERDIRS =
 ##
 
 ESMF_ArrayF90Ptr: ESMF_ArrayF90Ptr.o  
-	${F90CXXLD} -g -o ESMF_ArrayF90Ptr ESMF_ArrayF90Ptr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	-${F90CXXLD} -g -o ESMF_ArrayF90Ptr ESMF_ArrayF90Ptr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
 	${RM} ESMF_ArrayF90Ptr.o
 
 RUN_ESMF_ArrayF90Ptr:
@@ -63,7 +63,7 @@ ESMF_ArrayF90Ptr.rm:
 
 
 ESMF_ArrayTest: ESMF_ArrayTest.o  
-	${F90CXXLD} -g -o ESMF_ArrayTest ESMF_ArrayTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	-${F90CXXLD} -g -o ESMF_ArrayTest ESMF_ArrayTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
 	${RM} ESMF_ArrayTest.o
 
 RUN_ESMF_ArrayTest:
@@ -80,7 +80,7 @@ ESMF_ArrayTest.rm:
 
 ##
 ESMF_ArrayBasic: ESMF_ArrayBasic.o  
-	${F90CXXLD} -g -o ESMF_ArrayBasic ESMF_ArrayBasic.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	-${F90CXXLD} -g -o ESMF_ArrayBasic ESMF_ArrayBasic.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
 	${RM} ESMF_ArrayBasic.o
 
 RUN_ESMF_ArrayBasic:

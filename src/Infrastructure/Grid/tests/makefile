@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/04/01 23:56:33 svasquez Exp $ 
+# $Id: makefile,v 1.2 2003/04/02 20:56:13 svasquez Exp $ 
 
 ALL:  tests
 
@@ -34,7 +34,7 @@ CLOBBERDIRS =
 #  Grid
 #
 $(ESMC_TESTDIR)/ESMF_GridUTest: ESMF_GridUTest.o
-	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_GridUTest ESMF_GridUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_GridUTest ESMF_GridUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_GridUTest.o
 
 RUN_ESMF_GridUTest:
