@@ -1,4 +1,4 @@
-% $Id: xform_design.tex,v 1.1 2003/01/07 21:35:51 nscollins Exp $
+% $Id: xform_design.tex,v 1.2 2003/02/03 17:08:28 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,7 +10,18 @@
 
 %\subsection{Design}
 
-<Describe strategy for overall class design.>
+The Transform class is designed to encapsulate a
+series of data transformations needed to couple
+data between Components when the Components are 
+running concurrently.
 
+It stores the address of a call-back function
+which is called from within a Component.  It provides
+methods for storing the list of data transformation
+functions and arguments needed to accomplish the
+proper data manipulations for coupling.
 
+The F90 interfaces use
+C++ helper functions are used to perform the actual
+call-back function storage and dispatch.
 

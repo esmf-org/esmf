@@ -1,4 +1,4 @@
-% $Id: gcomp_desc.tex,v 1.1 2003/01/07 21:35:01 nscollins Exp $
+% $Id: gcomp_desc.tex,v 1.2 2003/02/03 17:08:24 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,4 +10,11 @@
 
 %\subsection{Description}
 
-<Describe class function and relation to other classes.>
+< a specialization of the generic Component object.  what's different...>
+
+< conceptually simplest is a sequential component, which 
+takes an import state, runs the requested time, and produces
+an export state.  also possible are concurrent components
+which take a transform as input, and then run until the stop
+time.  when communication is needed, the transform routine
+is called. all data goes thru states. >

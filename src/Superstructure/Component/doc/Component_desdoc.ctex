@@ -1,4 +1,4 @@
-% $Id: Component_desdoc.ctex,v 1.3 2003/01/30 23:42:33 nscollins Exp $
+% $Id: Component_desdoc.ctex,v 1.4 2003/02/03 17:08:21 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 \input{comppath/compex_fapi}
 #endif
 
-\subsection{Class API}
+%\subsection{Class API}
 #ifdef STANDALONE
 \input{comp_fapi}
 #elif defined(CONSTITUENT)
@@ -104,7 +104,7 @@
 \input{comppath/compex_ccapi}
 #endif
 
-\subsection{Class API}
+%\subsection{Class API}
 #ifdef STANDALONE
 \input{comp_ccapi}
 #elif defined(CONSTITUENT)
@@ -138,16 +138,16 @@
 
 \subsection{Application F90 Use and Examples}
 #ifdef STANDALONE
-\input{app_fex}
+\input{appex_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/app_fex}
+\input{comppath/appex_fapi}
 #endif
 
 \subsection{Application C++ Use and Examples}
 #ifdef STANDALONE
-\input{app_ccex}
+\input{appex_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/app_ccex}
+\input{comppath/appex_ccapi}
 #endif
 
 
@@ -179,16 +179,16 @@
 
 \subsection{Gridded Component F90 Use and Examples}
 #ifdef STANDALONE
-\input{gcomp_fex}
+\input{gcompex_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/gcomp_fex}
+\input{comppath/gcompex_fapi}
 #endif
 
 \subsection{Gridded Component C++ Use and Examples}
 #ifdef STANDALONE
-\input{gcomp_ccex}
+\input{gcompex_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/gcomp_ccex}
+\input{comppath/gcompex_ccapi}
 #endif
 
 
@@ -219,16 +219,16 @@
 
 \subsection{Coupler F90 Use and Examples}
 #ifdef STANDALONE
-\input{cpl_fex}
+\input{cplex_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/cpl_fex}
+\input{comppath/cplex_fapi}
 #endif
 
 \subsection{Coupler C++ Use and Examples}
 #ifdef STANDALONE
-\input{cpl_ccex}
+\input{cplex_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/cpl_ccex}
+\input{comppath/cplex_ccapi}
 #endif
 
 
@@ -268,7 +268,7 @@
 \input{comppath/stateex_fapi}
 #endif
 
-\subsection{Class API}
+%\subsection{Class API}
 #ifdef STANDALONE
 \input{state_fapi}
 #elif defined(CONSTITUENT)
@@ -279,12 +279,12 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{state_ccex}
+\input{stateex_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/state_ccex}
+\input{comppath/stateex_ccapi}
 #endif
 
-\subsection{Class API}
+%\subsection{Class API}
 #ifdef STANDALONE
 \input{state_ccapi}
 #elif defined(CONSTITUENT)
@@ -321,12 +321,12 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{xform_fex}
+\input{xformex_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/xform_fex}
+\input{comppath/xformex_fapi}
 #endif
 
-\subsection{Class API}
+%\subsection{Class API}
 #ifdef STANDALONE
 \input{xform_fapi}
 #elif defined(CONSTITUENT)
@@ -337,12 +337,12 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{xform_ccex}
+\input{xformex_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/xform_ccex}
+\input{comppath/xformex_ccapi}
 #endif
 
-\subsection{Class API}
+%\subsection{Class API}
 #ifdef STANDALONE
 \input{xform_ccapi}
 #elif defined(CONSTITUENT)

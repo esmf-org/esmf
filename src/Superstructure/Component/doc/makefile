@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/01/30 23:42:35 nscollins Exp $ 
+# $Id: makefile,v 1.7 2003/02/03 17:08:24 nscollins Exp $ 
 
 all: alldocs
 
@@ -114,23 +114,27 @@ Component_refdoc:
 
 ## stuff i added locally
 fsrc:
-	do_fprotex state ../src/ESMF_State.F90
+	do_fprotex compex ../examples/ESMF_CompEx.F90
 	do_fprotex comp ../src/ESMF_Comp.F90
-	do_fprotex app ../src/ESMF_App.F90
+	do_fprotex stateex ../examples/ESMF_StateEx.F90
+	do_fprotex state ../src/ESMF_State.F90
+	do_fprotex xformex ../examples/ESMF_XformEx.F90
 	do_fprotex xform ../src/ESMF_Xform.F90
-	do_fprotex cpl ../src/ESMF_Cpl.F90
-	touch gcomp_fapi.tex
-	do_fprotex stateex ../examples/ESMF_StateCreateEx.F90
-	do_fprotex compex ../examples/ESMF_CompCreateEx.F90
+	do_fprotex appex ../examples/ESMF_AppCompEx.F90
+	do_fprotex appex ../examples/ESMF_AppMainEx.F90
+	do_fprotex cplex ../examples/ESMF_CplEx.F90
+	do_fprotex gcompex ../examples/ESMF_GCompEx.F90
 
 ccsrc:
-	do_ccprotex state ../interface/ESMC_State.C
+	do_ccprotex compex ../examples/ESMC_CompEx.C
 	do_ccprotex comp ../interface/ESMC_Comp.C
-	do_ccprotex app ../interface/ESMC_App.C
+	do_ccprotex stateex ../examples/ESMC_StateEx.C
+	do_ccprotex state ../interface/ESMC_State.C
+	do_ccprotex xformex ../examples/ESMC_XformEx.C
 	do_ccprotex xform ../interface/ESMC_Xform.C
-	do_ccprotex cpl ../interface/ESMC_Cpl.C
-	touch gcomp_ccapi.tex
-	#do_ccprotex stateex ../examples/ESMC_StateCreateEx.C
-	#do_ccprotex compex ../examples/ESMC_CompCreateEx.C
+	do_ccprotex appex ../examples/ESMC_AppCompEx.C
+	do_ccprotex appex ../examples/ESMC_AppMainEx.C
+	do_ccprotex cplex ../examples/ESMC_CplEx.C
+	do_ccprotex gcompex ../examples/ESMC_GCompEx.C
 
 
