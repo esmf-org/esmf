@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2003/04/10 21:41:30 cdeluca Exp $ 
+# $Id: makefile,v 1.27 2003/04/17 19:19:31 cdeluca Exp $ 
 ALL: alldoc 
 
 
@@ -71,8 +71,11 @@ ${ESMC_DOCDIR}/ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 
 
 # Pdf files
-${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ${ESMC_DOCDIR}/ESMF_usrdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/ESMF_usrdoc.dvi ${ESMC_DOCDIR}/ESMF_usrdoc.pdf
+${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ESMF_usrdoc.dvi
+	dvipdf ESMF_usrdoc.dvi ${ESMC_DOCDIR}/ESMF_usrdoc.pdf
+
+${ESMC_DOCDIR}/ESMF_refdoc.pdf: ESMF_refdoc.dvi
+	dvipdf ESMF_refdoc.dvi ${ESMC_DOCDIR}/ESMF_refdoc.pdf
 
 
 # Html Files
