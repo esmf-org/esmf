@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/01/08 23:24:16 nscollins Exp $
+# $Id: makefile,v 1.7 2003/01/09 15:25:58 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -15,7 +15,8 @@ SOURCEC	  = ESMC_Machine.C ESMC_PE.C ESMC_DE.C ESMC_PEList.C ESMC_Layout.C ESMC_
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
 # if you have .h include files in this dir, list them all on the line below.
-STOREH	  = ESMC_Layout.h ESMC_PE.h ESMC_PEList.h ESMC_DE.h ESMC_Machine.h
+STOREH	  = ESMC_Comm.h ESMC_CommMem.h ESMC_DE.h ESMC_Layout.h ESMC_Machine.h \
+            ESMC_PE.h ESMC_PEList.h ESMF_CommMem.h
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
