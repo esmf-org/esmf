@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.38 2003/04/15 21:35:38 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.39 2003/04/17 19:36:16 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.38 2003/04/15 21:35:38 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.39 2003/04/17 19:36:16 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1086,7 +1086,7 @@
             imax = this->length[0];
             tcount = imax;
             for (i=0; i<tcount; i++) {
-                printf("(%2d) =  %lg\n", i+1, *((double *)(this->base_addr) + i));
+                printf("(%2d) =  %lg\n", i+1, *((float *)(this->base_addr) + i));
                 if ((tcount > 22) && ((i+1)==10)) {
                    printf(" skipping to end ...\n");
                    i = tcount - 11;
@@ -1102,7 +1102,7 @@
             for (j=0; j<jmax; j++) {
                 for (i=0; i<imax; i++) {
                     printf("(%2d,%2d) =  %lg\n", i+1, j+1, 
-                               *((double *)(this->base_addr) + i + j*imax) );
+                               *((float *)(this->base_addr) + i + j*imax) );
                     rcount++;
                     if ((tcount > 22) && (rcount==10)) {
                        printf(" skipping to end ...\n");
@@ -1123,7 +1123,7 @@
               for (j=0; j<jmax; j++) {
                 for (i=0; i<imax; i++) {
                 printf("(%2d,%2d,%2d) =  %g\n", i+1, j+1, k+1,
-                     *((double *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                     *((float *)(this->base_addr) + i + j*imax + k*jmax*imax));
                     rcount++;
                     if ((tcount > 22) && (rcount==10)) {
                        int krem;
@@ -1273,7 +1273,7 @@
             imax = this->length[0];
             tcount = imax;
             for (i=0; i<tcount; i++) {
-                fprintf(ffile, "%lg\n", *((double *)(this->base_addr) + i));
+                fprintf(ffile, "%lg\n", *((float *)(this->base_addr) + i));
             }
             break;
           case 2:
@@ -1285,7 +1285,7 @@
             for (j=0; j<jmax; j++) {
                 for (i=0; i<imax; i++) {
                     fprintf(ffile, "%lg ",  
-                               *((double *)(this->base_addr) + i + j*imax) );
+                               *((float *)(this->base_addr) + i + j*imax) );
                 }
                 fprintf(ffile, "\n");
             }
@@ -1301,7 +1301,7 @@
               for (j=0; j<jmax; j++) {
                 for (i=0; i<imax; i++) {
                     fprintf(ffile, "%lg ",
-                     *((double *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                     *((float *)(this->base_addr) + i + j*imax + k*jmax*imax));
                 }
                 fprintf(ffile, "\n");
               }
