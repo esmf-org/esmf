@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.15 2004/04/09 19:53:55 eschwab Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.16 2004/04/15 19:00:52 nscollins Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -27,7 +27,8 @@
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DataMap) :: datamap
-    type(ESMF_DELayout) :: delayout
+    type(ESMF_newDELayout) :: delayout
+    type(ESMF_VM) :: vm
     character (len = ESMF_MAXSTR) :: bname1, bname2, fname1, fname2
     type(ESMF_IOSpec) :: iospec
     type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, simplefield
@@ -44,18 +45,19 @@
 !-------------------------------------------------------------------------
     ! Initialize framework
     call ESMF_Initialize(rc=rc)
+    call ESMF_VMGetGlobal(vm, rc)
 
 !   !  Create several Fields and add them to a new Bundle.
  
     counts = (/ 100, 200 /)
     min_coord = (/  0.0,  0.0 /)
     max_coord = (/ 50.0, 60.0 /)
-    delayout = ESMF_DELayoutCreate(rc=rc)
+    delayout = ESMF_newDELayoutCreate(vm, rc=rc)
     grid = ESMF_GridCreateLogRectUniform(2, counts, min_coord, max_coord, &
                 horzGridType=ESMF_GridType_XY, &
                 horzStagger=ESMF_GridStagger_A, &
                 horzCoordSystem=ESMF_CoordSystem_Cartesian, &
-                layout=delayout, rc=rc)
+                delayout=delayout, rc=rc)
 
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
     field(1) = ESMF_FieldCreate(grid, arrayspec, &
