@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.7 2003/04/17 19:18:47 nscollins Exp $
+! $Id: FlowMod.F90,v 1.8 2003/04/17 20:13:57 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -12,20 +12,8 @@
 
     module FlowMod
     
-!   Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
-
 !   ESMF modules
-    use ESMF_BaseMod
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_ClockMod
-    use ESMF_ArrayMod
-    use ESMF_GridMod
-    use ESMF_DataMapMod
-    use ESMF_FieldMod
-    use ESMF_StateMod
-    use ESMF_CompMod
+    use ESMF_Mod
 
     use ArraysGlobalMod
     
@@ -54,10 +42,6 @@
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
-
-        ! If desired, this routine can register a private data block
-        ! to be passed in to the routines above:
-        ! call ESMF_CompSetData(comp, mydatablock, rc)
 
     end subroutine FlowMod_register
 
@@ -199,7 +183,7 @@
 !
 ! read in parameters   ! TODO: just set here for now
 !
-      uin = 1.50
+      uin = 1.00
       rhoin = 6.0
       siein= 0.50
       gamma = 1.40
@@ -316,6 +300,60 @@
             u(i,j) = uin
             rhoi(i,j) = rhoin*siein
             rhou(i,j) = rhoin*uin
+          endif
+        enddo
+      enddo
+!
+! add an obstacle
+!
+      if (x.eq.1 .and. y.eq.1) then
+        do j = 1,4
+          do i = 4,9
+            flag(i,j) = -1
+          enddo
+        enddo
+      endif
+!
+! obstacle normal boundary conditions here
+!
+      do j = jmin, jmax
+        do i = imin, imax
+          if (flag(i,j) .eq. -1.0) then
+            u(i,j) = 0.0
+            rhou(i,j) = 0.0
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+          if (flag(i+1,j) .eq. -1.0) then
+            u(i,j) = 0.0
+            rhou(i,j) = 0.0
+          endif
+          if (flag(i,j+1) .eq. -1.0) then
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+        enddo
+      enddo
+!
+! obstacle tangential boundary conditions here
+!
+      do j = jmin, jmax
+        do i = imin, imax
+          if (flag(i,j).eq.-1.0 .and. flag(i,j+1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
+            u(i,j) = u(i,j+1)
+            rhou(i,j) = rhou(i,j+1)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i,j-1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
+            u(i,j) = u(i,j-1)
+            rhou(i,j) = rhou(i,j-1)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i+1,j).ne.-1.0 .and. flag(i,j+1).eq.-1.0) then
+            v(i,j) = v(i+1,j)
+            rhov(i,j) = rhov(i+1,j)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i-1,j).ne.-1.0 .and. flag(i,j+1).eq.-1.0) then
+            v(i,j) = v(i-1,j)
+            rhov(i,j) = rhov(i-1,j)
           endif
         enddo
       enddo
@@ -742,7 +780,6 @@
         enddo
       enddo
         
-!  TODO:  if there are obstacles, set their normal velocities to zero
 !
 !  add boundary conditions  WARNING: these are not general
 !
@@ -774,7 +811,50 @@
             v(i,j) = 0.0
             rhov(i,j) = 0.0
           endif
-
+        enddo
+      enddo
+!
+! obstacle normal boundary conditions here
+!
+      do j = jmin, jmax
+        do i = imin, imax
+          if (flag(i,j) .eq. -1.0) then
+            u(i,j) = 0.0
+            rhou(i,j) = 0.0
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+          if (flag(i+1,j) .eq. -1.0) then
+            u(i,j) = 0.0
+            rhou(i,j) = 0.0
+          endif
+          if (flag(i,j+1) .eq. -1.0) then
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+        enddo
+      enddo
+!
+! obstacle tangential boundary conditions here
+!
+      do j = jmin, jmax
+        do i = imin, imax
+          if (flag(i,j).eq.-1.0 .and. flag(i,j+1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
+            u(i,j) = u(i,j+1)
+            rhou(i,j) = rhou(i,j+1)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i,j-1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
+            u(i,j) = u(i,j-1)
+            rhou(i,j) = rhou(i,j-1)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i+1,j).ne.-1.0 .and. flag(i,j+1).eq.-1.0) then
+            v(i,j) = v(i+1,j)
+            rhov(i,j) = rhov(i+1,j)
+          endif
+          if (flag(i,j).eq.-1.0 .and. flag(i-1,j).ne.-1.0 .and. flag(i,j+1).eq.-1.0) then
+            v(i,j) = v(i-1,j)
+            rhov(i,j) = rhov(i-1,j)
+          endif
         enddo
       enddo
       call ESMF_FieldHalo(field_u, status)
