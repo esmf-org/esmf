@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.67 2004/04/14 20:49:19 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.68 2004/04/23 17:00:37 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.67 2004/04/14 20:49:19 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.68 2004/04/23 17:00:37 jwolfe Exp $'
 
 !==============================================================================
 
@@ -268,8 +268,10 @@
 
       !-------------
       case(ESMF_RegridMethod_Conserv1)
-      !   routehandle = ESMF_RegridConstructConserv(srcarray, dstarray, &
-      !                                        regrid_name, order=1, rc=status)
+          routehandle = ESMF_RegridConstructConserv( &
+                                              srcarray, srcgrid, srcdatamap, &
+                                              dstarray, dstgrid, dstdatamap, &
+                                              srcmask, dstmask, order=1, rc=status)
       !-------------
       case(ESMF_RegridMethod_Conserv2) ! 2nd-order conservative
       !   routehandle = ESMF_RegridConstructConserv(srcarray, dstarray, &
@@ -300,9 +302,10 @@
          status = ESMF_FAILURE
       !-------------
       case(ESMF_RegridMethod_Linear) ! linear for 1-d regridding
-         print *, "ERROR in ESMF_RegridCreate: ", &
-                  "1-d linear methods not yet supported"
-         status = ESMF_FAILURE
+          routehandle = ESMF_RegridConstructLinear( &
+                                              srcarray, srcgrid, srcdatamap, &
+                                              dstarray, dstgrid, dstdatamap, &
+                                              srcmask, dstmask, rc=status)
       !-------------
       case(ESMF_RegridMethod_Spline) ! cubic spline for 1-d regridding
          print *, "ERROR in ESMF_RegridCreate: ", &
