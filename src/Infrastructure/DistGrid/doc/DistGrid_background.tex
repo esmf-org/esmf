@@ -1,4 +1,4 @@
-% $Id: DistGrid_background.tex,v 1.2 2002/03/11 01:07:43 vbalaji Exp $
+% $Id: DistGrid_background.tex,v 1.3 2002/03/11 02:05:53 vbalaji Exp $
 
 \section{Background}
 
@@ -47,7 +47,8 @@ contains all the operations for sharing data according to those
 dependencies. This includes familiar operations like the halo update
 and data transpose. It can perform global reductions (sum, max,
 min, maxloc, minloc) on distributed data. The sum has a bitwise exact
-option. It can create a copy of the global data on a single pe.
+option. It can create a copy of the global data on a single PE, and
+scatter a global array across a PElist.
 
 The DistGrid will perform sign flips, vector component interchanges,
 and redundancy checks as needed on certain types of grids (e.g

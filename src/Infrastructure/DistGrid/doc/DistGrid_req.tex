@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.2 2002/03/11 01:07:43 vbalaji Exp $
+% $Id: DistGrid_req.tex,v 1.3 2002/03/11 02:05:53 vbalaji Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -336,6 +336,23 @@ distribution for aggregate data transfer.
 \item[Notes]
 \end{reqlist}
 
+\sreq{Validation and invalidation of halo points}
+
+ESMF shall provide methods to declare halo points valid or invalid
+(i.e requiring a halo update prior to use).
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] This feature can be used to detect when to perform a halo
+  update. This may also be used to reduce the frequency of halo
+  updates on high-latency networks, by declaring wide halos and
+  performing redundant computations within them. See \cite{ref:b2001}
+  for details.
+\end{reqlist}
+
 \req{Data transpose}
 
 \sreq{Unblocked data transpose}
@@ -392,10 +409,15 @@ distribution for aggregate data transfer.
 \item[Notes]
 \end{reqlist}
 
-\req{Create global array}
+\req{Gather}
 
 It shall be possible to create a copy on any PE of the entire global
 array from a distributed array.
+
+\req{Scatter}
+
+It shall be possible to create a distributed array across a PElist
+from a copy on any PE of the entire global array.
 
 \req{Global reduction operations}
 
@@ -544,8 +566,8 @@ grids. We use the notation of \cite{ref:a1966} to specify staggering,
 together with a directional qualifier, e.g \texttt{NE} to specify a
 forward index offset in \texttt{X} and \texttt{Y}.
 
-\newcommand{\bgridne}{\texttt{BGRID\_NE} }
-\newcommand{\cgridne}{\texttt{CGRID\_NE} }
+\newcommand{\bgridne}{\texttt{BGRID\_NE}{}}
+\newcommand{\cgridne}{\texttt{CGRID\_NE}{}}
 \sreq{\bgridne}
 
 ESMF will support a \bgridne stencil: where the vector
@@ -564,7 +586,13 @@ and E faces $(i+\frac12,j)$ and $(i,j+\frac12)$ respectively.
 
 \req{Tripolar grid}
 
-\cite{ref:m1996}
+The tripolar grid \cite{ref:m1996} is used to address the pole problem
+in ocean models, by creating a grid with two poles in the Northern
+Hemisphere, both over land. This creates a grid topology with a
+fold. Vector components experience sign reversal on crossing a fold;
+also some points on the vector stencil may be redundant.
+
+(figure)
 
 \sreq{Vector component reversal}
 
@@ -583,7 +611,12 @@ invalid.
 
 \req{Cubed-sphere grid}
 
-\cite{ref:rpm1996}
+The cubed-sphere grid \cite{ref:rpm1996} is used to address the pole
+problem in ocean models, by creating a grid with eight weak poles,
+which may also be moved over land if one chooses. This creates a grid
+topology where vector components may need to be interchanged
+($(u,v)\longrightarrow(v,-u)$) on crossing a cube edge. Some points on
+the vecor stencil may be redundant.
 
 \sreq{Vector component interchange}
 
@@ -598,6 +631,8 @@ data there may diverge because of FP roundoff error. ESMF will provide
 methods to enforce exact redundancy.
 
 \req{Spectral grid}
+
+\req{Exchange grid}
 
 \req{Icosahedral grid}
 
