@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.5 2003/03/22 00:03:25 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.6 2003/03/24 17:51:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.5 2003/03/22 00:03:25 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.6 2003/03/24 17:51:35 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! Some common definitions.  This requires the C preprocessor.
@@ -50,10 +50,10 @@
       integer :: x, y, rc
       character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname, bname
       character(ESMF_MAXSTR) :: fieldname, fname
-      type(ESMF_Field) :: field1, field2
+      type(ESMF_Field) :: field1, field2, field3(3)
       type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3(1), bundle4(1)
       type(ESMF_State) :: state1, state2, state3, state4
-      type(ESMF_Array) :: array1
+      type(ESMF_Array) :: array1, array2(2)
       real, dimension(:,:), pointer :: f90ptr1
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -171,11 +171,9 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-print *, "StateUnitTest EXHAUSTIVE"
-#else
 
-      ! perform non-exhaustive tests here;
-      print *, "******************STATE NON-EXHAUSTIVE UNIT TESTS****************************"
+      ! perform exhaustive tests here;
+      print *, "******************STATE EXHAUSTIVE UNIT TESTS****************************"
       print *
 
       !------------------------------------------------------------------------
@@ -184,7 +182,7 @@ print *, "StateUnitTest EXHAUSTIVE"
       compname = "Atmosphere"
       state1 = ESMF_StateCreate(compname, ESMF_STATEIMPORT, rc)
       write(failMsg, *) ""
-      write(name, *) "Creating an empty input State Test"
+      write(name, *) "Creating an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -269,6 +267,7 @@ print *, "StateUnitTest EXHAUSTIVE"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname.eq."Humidity"), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
       ! Test Creation of an export State with Bundle
       ! This code crashes, it will be commented out until
       ! bug 707751 is fixed.
@@ -283,9 +282,197 @@ print *, "StateUnitTest EXHAUSTIVE"
       ! write(name, *) "Creating an export State with a Bundle Test"
       ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                      ! name, failMsg, result, ESMF_SRCLINE)
-       ! call  ESMF_StatePrint(state2, rc=rc)
+      ! call  ESMF_StatePrint(state2, rc=rc)
+      !------------------------------------------------------------------------
+
+      ! Test Creation of an export State with a Field
+      ! This code crashes, it will be commented out until
+      ! bug 708906 is fixed.
+      ! compname = "Atmosphere2"
+      ! statename = " Export State"
+      ! x = 1
+      ! fieldname = "Percipitation"
+      ! field3(3) = ESMF_FieldCreateNoData(fieldname, rc=rc)
+      ! state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, x, &
+			 !fields=field3, statename=statename, rc=rc)
+      ! write(failMsg, *) ""
+      ! write(name, *) "Creating an export State with a Field Test"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      !name, failMsg, result, ESMF_SRCLINE)
+      ! call  ESMF_StatePrint(state2, rc=rc)
+      !------------------------------------------------------------------------
+
+      ! Test Creation of an export State with an array
+      ! This code crashes, it will be commented out until
+      ! bug 708912 is fixed.
+      ! compname = "Atmosphere3"
+      ! statename = " Export State"
+      ! x  = 1
+      ! allocate(f90ptr1(10,20))
+      ! array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      ! state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, x, &
+			 ! arrays=array2, statename=statename, rc=rc)
+      ! write(failMsg, *) ""
+      ! write(name, *) "Creating an export State with a Array Test"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      ! name, failMsg, result, ESMF_SRCLINE)
+      ! call  ESMF_StatePrint(state2, rc=rc)
+      !------------------------------------------------------------------------
+
+      ! Test Destruction of State
+      call  ESMF_StateDestroy(state1, rc)
+      write(failMsg, *) ""
+      write(name, *) "Destruction of a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+#else
+
+      ! perform non-exhaustive tests here;
+      print *, "******************STATE NON-EXHAUSTIVE UNIT TESTS****************************"
+      print *
 
       !------------------------------------------------------------------------
+
+      ! Test Creation of an empty import State 
+      compname = "Atmosphere"
+      state1 = ESMF_StateCreate(compname, ESMF_STATEIMPORT, rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty import State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test Creation of an empty export State 
+      state1 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty export State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test adding Bundle to a State
+      bundlename = "Temperature"
+      bundle1 = ESMF_BundleCreate(bundlename, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddData(state1, bundle1, rc)
+      write(name, *) "Adding a Bundle to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test adding Field to a State
+      fieldname = "Humidity"
+      field1 = ESMF_FieldCreateNoData(fieldname, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddData(state1, field1, rc)
+      write(name, *) "Adding a Field to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test adding an Array to a State
+      allocate(f90ptr1(10,20))
+      array1 = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an Array Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddData(state1,array1, rc)
+      write(name, *) "Adding an Array to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test printing of State
+      call  ESMF_StatePrint(state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing of a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test getting Bundle from State
+      call  ESMF_StateGetData(state1, bundlename, bundle2(1), rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting Bundle from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGetName(bundle2(1), bname, rc)
+      write(failMsg, *) "Bundle name not 'Temperature'"
+      write(name, *) "Verifying that the Bundle has correct name Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname.eq."Temperature"), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test getting Field from State
+      call  ESMF_StateGetData(state1, fieldname, field2, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting Field from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldGetName(field2, fname, rc)
+      write(failMsg, *) "Field name not 'Humidity'"
+      write(name, *) "Verifying that the Field has correct name Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname.eq."Humidity"), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test Creation of an export State with Bundle
+      ! This code crashes, it will be commented out until
+      ! bug 707751 is fixed.
+      ! bundlename = "Humidity"
+      ! compname = "Atmosphere2"
+      ! statename = " Export State"
+      ! x = 1
+      ! bundle2(1) = ESMF_BundleCreate(bundlename, rc=rc)
+      ! state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, x, &
+			! bundles=bundle2, statename=statename, rc=rc)
+      ! write(failMsg, *) ""
+      ! write(name, *) "Creating an export State with a Bundle Test"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                     ! name, failMsg, result, ESMF_SRCLINE)
+      ! call  ESMF_StatePrint(state2, rc=rc)
+      !------------------------------------------------------------------------
+
+      ! Test Creation of an export State with a Field
+      ! This code crashes, it will be commented out until
+      ! bug 708906 is fixed.
+      ! compname = "Atmosphere2"
+      ! statename = " Export State"
+      ! x = 1
+      ! fieldname = "Percipitation"
+      ! field3(3) = ESMF_FieldCreateNoData(fieldname, rc=rc)
+      ! state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, x, &
+			 !fields=field3, statename=statename, rc=rc)
+      ! write(failMsg, *) ""
+      ! write(name, *) "Creating an export State with a Field Test"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      !name, failMsg, result, ESMF_SRCLINE)
+      ! call  ESMF_StatePrint(state2, rc=rc)
+      !------------------------------------------------------------------------
+
+      ! Test Creation of an export State with an array
+      ! This code crashes, it will be commented out until
+      ! bug 708912 is fixed.
+      ! compname = "Atmosphere3"
+      ! statename = " Export State"
+      ! x  = 1
+      ! allocate(f90ptr1(10,20))
+      ! array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      ! state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, x, &
+			 ! arrays=array2, statename=statename, rc=rc)
+      ! write(failMsg, *) ""
+      ! write(name, *) "Creating an export State with a Array Test"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      ! name, failMsg, result, ESMF_SRCLINE)
+      ! call  ESMF_StatePrint(state2, rc=rc)
+      !------------------------------------------------------------------------
+
       ! Test Destruction of State
       call  ESMF_StateDestroy(state1, rc)
       write(failMsg, *) ""
