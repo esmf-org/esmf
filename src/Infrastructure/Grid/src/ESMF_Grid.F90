@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.208 2004/12/17 21:15:34 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.209 2004/12/20 21:17:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.208 2004/12/17 21:15:34 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.209 2004/12/20 21:17:54 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4697,17 +4697,21 @@
 ! !IROUTINE: ESMF_GridBoxIntersectRecv - Determine a DomainList covering a box
 
 ! !INTERFACE:
-      subroutine ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, &
+      subroutine ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
                                            localMinPerDim, localMaxPerDim, &
-                                           domainList, srcRelloc, dstRelloc, &
+                                           domainList, hasDstData, hasSrcData, &
+                                           srcRelloc, dstRelloc, &
                                            total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: srcGrid
       type(ESMF_Grid) :: dstGrid
+      type(ESMF_VM), intent(in) :: parentVM
       real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
       type(ESMF_DomainList), intent(inout) :: domainList
+      logical, intent(in) :: hasDstData
+      logical, intent(in) :: hasSrcData
       type(ESMF_RelLoc), intent(in), optional :: srcRelloc
       type(ESMF_RelLoc), intent(in), optional :: dstRelloc
       logical, intent(in), optional :: total
@@ -4781,9 +4785,10 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, &
+        call ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
                                          localMinPerDim, localMaxPerDim, &
-                                         domainList, srcRelloc, dstRelloc, &
+                                         domainList, hasDstData, hasSrcData, &
+                                         srcRelloc, dstRelloc, &
                                          total, localrc)
 
       !-------------
