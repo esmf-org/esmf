@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.65 2004/06/18 20:00:18 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.65.2.1 2004/07/22 21:01:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.65 2004/06/18 20:00:18 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.65.2.1 2004/07/22 21:01:03 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -272,7 +272,9 @@
                                   //       unit conversions
       ESMC_CalendarType *calendarTypeIn, // in  - calendar type for calendar
                                          //       interval unit conversions
-      char *timeString) const {   // out - ISO 8601 format PyYmMdDThHmMsS
+      int   timeStringLen,          // in  - F90 time string size
+      int  *tempTimeStringLen,      // out - temp F90 time string size
+      char *tempTimeString) const { // out - ISO 8601 format PyYmMdDThHmMsS
 //
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_TimeInterval}'s values in user-specified format.
@@ -306,7 +308,6 @@
     // Determine startTime, endTime, and/or calendar, if any, we have to
     //   work with.
     //---------------------------------------------------------------------
-
     // get any calendar specified in Get() or Set(), on which to perform
     //   calendar (yy, mm, d) conversions
     tiToConvert.calendar = ESMC_NULL_POINTER;
@@ -406,8 +407,10 @@
             // TODO: use TimeInterval operators (/) and (-) when ready ?
 
             // get years using startTime/endTime, if available
-            if (tiToConvert.startTime.ESMC_TimeValidate() == ESMF_SUCCESS ||
-                tiToConvert.endTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+            if (tiToConvert.startTime.ESMC_TimeValidate("initialized")
+                  == ESMF_SUCCESS ||
+                tiToConvert.endTime.ESMC_TimeValidate("initialized")
+                  == ESMF_SUCCESS) {
               ESMC_TimeInterval oneYear(0, 0, 1, 1);
               ESMC_Time iTime = tiToConvert.startTime + oneYear;
               years = 0;
@@ -514,8 +517,10 @@
           // TODO: use TimeInterval operators (/) and (-) when ready ?
 
           // get months using startTime, if available
-          if (tiToConvert.startTime.ESMC_TimeValidate() == ESMF_SUCCESS ||
-              tiToConvert.endTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+          if (tiToConvert.startTime.ESMC_TimeValidate("initialized")
+                == ESMF_SUCCESS ||
+              tiToConvert.endTime.ESMC_TimeValidate("initialized")
+                == ESMF_SUCCESS) {
             ESMC_TimeInterval oneMonth(0, 0, 1, 0, 1);
             ESMC_Time iTime = tiToConvert.startTime + oneMonth;
             months = 0;
@@ -738,10 +743,11 @@
     }
 
     // if requested, return time interval in string format
-    if (timeString != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeIntervalGetString(timeString);
+    if (tempTimeString != ESMC_NULL_POINTER && timeStringLen > 0) {
+      rc = ESMC_TimeIntervalGetString(tempTimeString);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
+      *tempTimeStringLen = strlen(tempTimeString);
     }
 
     return(ESMF_SUCCESS);
@@ -2845,24 +2851,20 @@
       return(rc);
     }
 
-    ESMF_KIND_I8 d_i8;
+    ESMF_KIND_I8 yy_i8, mm_i8, d_i8;
     ESMF_KIND_I4 h, m, s;
 
     // TODO: use native C++ Get, not F90 entry point, when ready
     rc = ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
-                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          &yy_i8, ESMC_NULL_POINTER,
+                          &mm_i8, ESMC_NULL_POINTER,
                           &d_i8, &h, &m, &s, ESMC_NULL_POINTER);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
-    //ESMC_TimeIntervalGet(&yy_i8, &mm, &d, &h, &m, &s); // TODO: when
-                                                     // calendar intervals
-                                                     //  implemented
 
     // ISO 8601 format PyYmMdDThHmMsS
-    sprintf(timeString, "P%lldDT%dH%dM%dS\0", d_i8, h, m, s);
-    //sprintf(timeString, "P%lldY%dM%dDT%dH%dM%dS\0", // TODO: when calendar
-    //        yy_i8, mm, d, h, m, s);                 //  intervals implemented
+    sprintf(timeString, "P%lldY%lldM%lldDT%dH%dM%dS\0",
+		         yy_i8, mm_i8, d_i8, h, m, s);
 
     return(rc);
 
@@ -2903,7 +2905,7 @@
       case ESMC_CAL_GREGORIAN:
       case ESMC_CAL_NOLEAP:
         // use startTime to reduce yy,mm,d to seconds
-        if (startTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+        if (startTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
           endTime = startTime + *this;
           ESMC_TimeInterval ti = endTime - startTime;
           s = ti.s;
@@ -2914,7 +2916,7 @@
           yy = mm = d = 0;  // yy, mm, d all reduced to base seconds
 
         // use endTime to reduce yy,mm,d to seconds
-        } else if (endTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+        } else if (endTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
           startTime = endTime - *this;
           ESMC_TimeInterval ti = endTime - startTime;
           s = ti.s;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.65 2004/05/26 01:43:16 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.65.2.1 2004/07/22 21:01:00 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.65 2004/05/26 01:43:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.65.2.1 2004/07/22 21:01:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -929,9 +929,16 @@
  #define ESMC_METHOD "ESMC_TimeValidate()"
 
     int rc = ESMF_SUCCESS;
+    bool check_initialized = false;
 
     // parse options
     if (options != ESMC_NULL_POINTER) {
+
+      // only interested in rc ? (e.g. just to determine whether this time is
+      // initialized (used), such as TimeInterval's optional startTime or
+      // endTime.  TODO:  real solution is to use F95 initializers when fully
+      //                  available across all platforms)
+      check_initialized = strstr(options, "initialized") != ESMC_NULL_POINTER;
 
       // TODO:  put calendar and timezone validate logic into separate,
       //        private methods (inline?) to avoid duplicate code ?
@@ -939,8 +946,9 @@
       // validate calendar only, not time values
       if (strncmp(options, "calendar", 8) == 0) {
         if (this->calendar == ESMC_NULL_POINTER) {
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-                                                "; calendar is NULL", &rc);
+          rc = ESMC_RC_PTR_NULL;
+          if (!check_initialized)
+            ESMC_LogDefault.ESMC_LogMsgFoundError(rc,"; calendar is NULL", &rc);
           return(rc);
         }
         rc = this->calendar->ESMC_CalendarValidate();
@@ -959,8 +967,9 @@
       return(rc);
 
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; calendar is NULL", &rc);
+      rc = ESMC_RC_PTR_NULL;
+      if (!check_initialized)
+        ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "; calendar is NULL", &rc);
       return(rc);
     }
     rc = this->calendar->ESMC_CalendarValidate();

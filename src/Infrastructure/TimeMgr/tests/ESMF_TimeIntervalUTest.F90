@@ -1,4 +1,4 @@
-
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.28.2.1 2004/07/22 21:01:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.28 2004/06/23 16:57:19 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.28.2.1 2004/07/22 21:01:14 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -53,6 +53,9 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
+
+      ! to retrieve time in string format
+      character(ESMF_MAXSTR) :: timeString
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2, timeStep3
@@ -417,11 +420,13 @@
       call ESMF_TimeSet(endTime, yy=2004, mm=3, dd=31, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=60, rc=rc)
-      call ESMF_TimeIntervalGet(timeStep, mm=months, endTimeIn=endTime, rc=rc)
-      call ESMF_Test((months==2.and.rc==ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, endTimeIn=endTime, &
+                                timeString=timeString, rc=rc)
+      call ESMF_Test((months==2 .and. timeString=="P0Y0M60DT0H0M0S" .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       print *, "months = ", months
+      print *, "timeStep = ", timeString
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -1559,8 +1564,8 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Testing the * operator
-      ! resultTime = ESMF_TimeIntervalOperator(*)(timestep, integer)
+      ! Testing the x operator
+      ! resultTime = ESMF_TimeIntervalOperator(x)(timestep, integer)
       write(name, *) "No Calendar multiplication of a Time interval Test 1"
       write(failMsg, *) " Did not return (yy=9, mm=-15, d=90, h=20, m=37, s=15) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-5, d=30, h=7, m=-8, s=25, rc=rc)
@@ -1574,8 +1579,8 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Testing the * operator
-      ! resultTime = ESMF_TimeIntervalOperator(*)(integer, timestep)
+      ! Testing the x operator
+      ! resultTime = ESMF_TimeIntervalOperator(x)(integer, timestep)
       write(name, *) "No Calendar multiplication of a Time interval Test 2"
       write(failMsg, *) " Did not return (yy=9, mm=-15, d=90, h=20, m=37, s=15) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-5, d=30, h=7, m=-8, s=25, rc=rc)
@@ -2013,7 +2018,7 @@
 
       !EX_UTest
       ! Testing the * operator
-      ! resultTime = ESMF_TimeIntervalOperator(*)(timestep, integer)
+      ! resultTime = ESMF_TimeIntervalOperator(x)(timestep, integer)
       write(failMsg, *) "The time steps is not correct."
       write(name, *) "TimeInterval * operator Test"
       timeStep = timeStep2 * 86400    

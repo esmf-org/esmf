@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.25 2004/04/26 18:01:42 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.25.2.1 2004/07/22 21:01:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -106,11 +106,10 @@ extern "C" {
                 bool *enabled, bool *sticky, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_AlarmGet(
-                                           *nameLen, // always present
-                                                     //  internal argument.
-                                            tempNameLen, // always present
-                                                         //  internal argument.
-                    ESMC_NOT_PRESENT_FILTER(tempName),
+			                 // always presnet internal arguments
+                                           *nameLen, 
+                                            tempNameLen,
+                                            tempName,
                     ESMC_NOT_PRESENT_FILTER(clock),
                     ESMC_NOT_PRESENT_FILTER(ringTime),
                     ESMC_NOT_PRESENT_FILTER(prevRingTime),

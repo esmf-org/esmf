@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.73 2004/06/21 22:52:04 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.73.2.1 2004/07/22 21:01:12 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.73 2004/06/21 22:52:04 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.73.2.1 2004/07/22 21:01:12 eschwab Exp $'
 
 !==============================================================================
 !
@@ -639,8 +639,10 @@
       character (len=ESMF_MAXSTR) :: tempTimeString
 
       ! initialize time string lengths to zero for non-existent time string
-      integer :: timeStringLen = 0
-      integer :: tempTimeStringLen = 0
+      integer :: timeStringLen
+      integer :: tempTimeStringLen
+      timeStringLen = 0     
+      tempTimeStringLen = 0
 
       ! if used, get length of given timeString for C++ validation
       if (present(timeString)) then

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.5 2004/06/05 00:14:02 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.5.2.1 2004/07/22 21:01:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.5 2004/06/05 00:14:02 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.5.2.1 2004/07/22 21:01:14 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,6 +52,9 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
+
+      ! to retrieve time in string format
+      character(ESMF_MAXSTR) :: timeString
 
       ! instantiate timestep, start and stop times
       type(ESMF_Time) :: startTime, stopTime, startTime2
@@ -99,10 +102,14 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
 
-      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, &
+                        timeString=timeString, rc=rc)
       call ESMF_Test((YY==2004 .and. MM==1 .and. DD==29 .and. &
                       H==12 .and. M==17 .and. S==58 .and. &
+                      timeString=="2004-01-29T12:17:58" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "startTime = ", timeString
 
 
 #ifdef ESMF_EXHAUSTIVE

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.35 2004/06/17 18:48:09 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.35.2.1 2004/07/22 21:01:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -221,12 +221,10 @@ extern "C" {
                                     int *status) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->ESMC_CalendarGet(
-                                            *nameLen,     // always present
-                                                          //  internal argument.
-                                             tempNameLen, // always present
-                                                          //  internal argument.
-                                             tempName,    // always present
-                                                          //  internal argument.
+			                 // always present internal arguments.
+                                            *nameLen,
+                                             tempNameLen,
+                                             tempName,
                      ESMC_NOT_PRESENT_FILTER(calendarType),
                                              daysPerMonth, // always present
 
@@ -259,12 +257,10 @@ extern "C" {
                                     int *status) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->ESMC_CalendarGet(
-                                            *nameLen,     // always present
-                                                          //  internal argument.
-                                             tempNameLen, // always present
-                                                          //  internal argument.
-                                             tempName,    // always present
-                                                          //  internal argument.
+			                 // always present interval arguments.
+                                            *nameLen,
+                                             tempNameLen,
+                                             tempName,
                      ESMC_NOT_PRESENT_FILTER(calendarType),
                                              ESMC_NULL_POINTER,
                                                         // daysPerMonth missing
