@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.29 2003/04/28 17:44:58 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.30 2003/07/07 22:44:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,6 +79,12 @@ typedef enum {
     ESMC_DATA_NONE
 } ESMC_DataCopy;
 
+typedef enum { 
+    ESMC_DOMAIN_LOCAL = 1, 
+    ESMC_DOMAIN_COMPUTATIONAL,
+    ESMC_DOMAIN_EXCLUSIVE
+} ESMC_DomainType;
+
 // this should be public -
 typedef enum { 
     ESMC_ARRAY_NO_ALLOCATE = 0, 
@@ -114,13 +120,13 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     void *base_addr;               // real start of memory
     int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
     int counts[ESMF_MAXDIM];       // number of elements/dim
-    int stride[ESMF_MAXDIM];       // byte spacing between elements/dim
+    int bytestride[ESMF_MAXDIM];   // byte spacing between elements/dim
     struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
                                    // potentially these could be needed... 
-    int lbound[ESMF_MAXDIM];       // real lower indicies
-    int ubound[ESMF_MAXDIM];       // real upper indicies
  // void *first_element;           // memory address of the first element
-    struct ESMC_AxisIndex ai[ESMF_MAXDIM];   // global-local mapping help
+    struct ESMC_AxisIndex ai_local[ESMF_MAXDIM]; // limits for whole array
+    struct ESMC_AxisIndex ai_comp[ESMF_MAXDIM];  // for computational region
+    struct ESMC_AxisIndex ai_excl[ESMF_MAXDIM];  // never is sent or received
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -144,8 +150,8 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_ArraySetConfig(const ESMC_ArrayConfig *config);
 
  // optional index values for subsetting and handling arrays standalone
-    int ESMC_ArrayGetAxisIndex(struct ESMC_AxisIndex *index) const;
-    int ESMC_ArraySetAxisIndex(struct ESMC_AxisIndex *index);
+    int ESMC_ArrayGetAxisIndex(enum ESMC_DomainType dt, struct ESMC_AxisIndex *index) const;
+    int ESMC_ArraySetAxisIndex(enum ESMC_DomainType dt, struct ESMC_AxisIndex *index);
     
  // accessor methods for class members
     //int ESMC_ArrayGet<Value>(<value type> *value) const;
