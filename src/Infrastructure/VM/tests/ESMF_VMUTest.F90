@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.15 2004/12/14 19:35:16 theurich Exp $
+! $Id: ESMF_VMUTest.F90,v 1.16 2005/02/28 16:27:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,35 +9,14 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
-!
-      program ESMF_VMUTest
-
-!------------------------------------------------------------------------------
- 
 #include <ESMF_Macros.inc>
+!
 
-!==============================================================================
-!BOP
-! !PROGRAM: ESMF_VMTest - This unit test file verifies VM methods.
-!
-! !DESCRIPTION:
-!
-! The code in this file drives F90 VM unit tests.
-! The companion file ESMF\_VM.F90 contains the definitions for the
-! VM methods.
-!
-!-----------------------------------------------------------------------------
-! !USES:
-      use ESMF_TestMod     ! test methods
+      module ESMF_VMSubrs
       use ESMF_Mod
+      use ESMF_TestMod
 
-      implicit none
-
-!------------------------------------------------------------------------------
-! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.15 2004/12/14 19:35:16 theurich Exp $'
-!------------------------------------------------------------------------------
+      public
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -49,7 +28,7 @@
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
 
-!     !LOCAL VARIABLES:
+!     !Module global variables
       type(ESMF_VM):: vm
       integer:: localPet, npets
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
@@ -68,6 +47,483 @@
       real(ESMF_KIND_R4), allocatable:: f4array3(:), f4array3_soln(:)
       real(ESMF_KIND_R4), dimension(:,:), allocatable:: f4array2
       real(ESMF_KIND_R4):: float4_results, my_float4_results
+
+!==============================================================================
+      contains
+!==============================================================================
+
+      subroutine test_AllFullReduce_sum
+! This subroutine tests all the overloaded versions of the full ESMF global sum.
+
+      ! Test with integer arguments
+      !=============================
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_SUM Test"
+      call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, &
+                                count=nsize, reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      myresults = SUM(array2)
+      print *, 'Global sum:'
+      print *, localPet,' func_results: ', func_results, &
+                        ' myresults:', myresults
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Full Reduce ESMF_SUM Results Test"
+      call ESMF_Test((func_results.eq.myresults), name, failMsg, &
+                      result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R8 arguments
+      !=================================
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_SUM Test: ESMF_KIND_R8"
+      call ESMF_VMAllFullReduce(vm, sendData=farray1, recvData=float_results, &
+                                count=nsize, reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      my_float_results = SUM(farray2)
+      print *, 'Global sum:'
+      print *, localPet,' float_results: ', float_results, &
+                        ' my_float_results:', my_float_results
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_SUM Results Test: ESMF_KIND_R8"
+      call ESMF_Test((float_results.eq.my_float_results), name, failMsg, &
+                      result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R4 arguments
+      !=================================
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_SUM Test: ESMF_KIND_R4"
+      call ESMF_VMAllFullReduce(vm, sendData=f4array1, recvData=float4_results,&
+                                count=nsize, reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      my_float4_results = SUM(f4array2)
+      print *, 'Global sum:'
+      print *, localPet,' float4_results: ', float4_results, &
+                        ' my_float4_results:', my_float4_results
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_SUM Results Test: ESMF_KIND_R4"
+      call ESMF_Test((float4_results.eq.my_float4_results), name, failMsg, &
+                      result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+
+      end subroutine test_AllFullReduce_sum
+
+!==============================================================================
+
+      subroutine test_AllFullReduce_min
+! This subroutine tests all the overloaded versions of the full ESMF global min.
+
+      !Test with integer arguments
+      !===========================
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_MIN Test"
+      call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, &
+                                count=nsize, reduceflag=ESMF_MIN, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      myresults = MINVAL(array2)
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Full Reduce ESMF_MIN Results Test"
+      call ESMF_Test((func_results.eq.myresults), name, failMsg, &
+                      result, ESMF_SRCLINE)
+      print *, localPet,' func_results: ', func_results, &
+                        ' myresults:', myresults
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R8 arguments
+      !================================
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_MIN Test: ESMF_KIND_R8"
+      call ESMF_VMAllFullReduce(vm, sendData=farray1, recvData=float_results, &
+                                count=nsize, reduceflag=ESMF_MIN, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      my_float_results = MINVAL(farray2)
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Full Reduce ESMF_MIN Results Test:ESMF_KIND_R8"
+      call ESMF_Test((func_results.eq.myresults), name, failMsg, &
+                     result, ESMF_SRCLINE)
+      print *, localPet,' float_results: ', float_results, &
+                        ' my_float_results:', my_float_results
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R4 arguments
+      !================================
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_MIN Test: ESMF_KIND_R4"
+      call ESMF_VMAllFullReduce(vm, sendData=f4array1, recvData=float4_results,&
+                                count=nsize, reduceflag=ESMF_MIN, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      my_float4_results = MINVAL(f4array2)
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Full Reduce ESMF_MIN Results Test:ESMF_KIND_R4"
+      call ESMF_Test((func_results.eq.myresults), name, failMsg, &
+                      result, ESMF_SRCLINE)
+      print *, localPet,' float4_results: ', float4_results, &
+                        ' my_float4_results:', my_float4_results
+      !------------------------------------------------------------------------
+
+
+      end subroutine test_AllFullReduce_min
+
+!==============================================================================
+
+      subroutine test_AllFullReduce_max
+! This subroutine tests all the overloaded versions of the full ESMF global max.
+
+      !Test with Integer arguments
+      !===========================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_MAX Test"
+      call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, &
+                                count=nsize, reduceflag=ESMF_MAX, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      myresults = MAXVAL(array2)
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Full Reduce ESMF_MAX Results Test"
+      call ESMF_Test((func_results.eq.myresults), name, failMsg, &
+                      result, ESMF_SRCLINE)
+      print *, localPet,' func_results: ', func_results, &
+                        ' myresults:', myresults
+
+
+      !Test with ESMF_KIND_R8 arguments
+      !=================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_MAX Test:ESMF_KIND_R8"
+      call ESMF_VMAllFullReduce(vm, sendData=farray1, recvData=float_results, &
+                                count=nsize, reduceflag=ESMF_MAX, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      my_float_results = MAXVAL(farray2)
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Full Reduce ESMF_MAX Results Test:ESMF_KIND_R8"
+      call ESMF_Test((float_results.eq.my_float_results), name, failMsg, &
+                      result, ESMF_SRCLINE)
+      print *, localPet,' float_results: ', float_results, &
+                        ' my_float_results:', my_float_results
+
+
+      !Test with ESMF_KIND_R4 arguments
+      !================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_MAX Test:ESMF_KIND_R4"
+      call ESMF_VMAllFullReduce(vm, sendData=f4array1, recvData=float4_results,&
+                                count=nsize, reduceflag=ESMF_MAX, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      my_float4_results = MAXVAL(f4array2)
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Full Reduce ESMF_MAX Results Test:ESMF_KIND_R4"
+      call ESMF_Test((float4_results.eq.my_float4_results), name, failMsg, &
+                      result, ESMF_SRCLINE)
+      print *, localPet,' float4_results: ', float4_results, &
+                        ' my_float4_results:', my_float4_results
+
+      end subroutine test_AllFullReduce_max
+
+!=============================================================================
+      subroutine test_AllReduce_sum
+
+      !Test with Integer arguments
+      !===========================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_SUM Test"
+      call ESMF_VMAllReduce(vm, sendData=array1, recvData=array3, count=nsize, &
+                            reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      isum=0
+      do j=1,npets
+      end do
+      do i=1,nsize
+        array3_soln(i) = sum( array2(i,:) )
+        print *, localPet,'array3(',i,')=',array3(i), &
+                          'array3_soln(',i,')=',array3_soln(i)
+        isum=isum + abs( array3(i) - array3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
+      call ESMF_Test((isum.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !Test with ESMF_KIND_R8  arguments
+      !=================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_SUM Test"
+      call ESMF_VMAllReduce(vm, sendData=farray1, recvData=farray3, &
+                            count=nsize, reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fsum=0.
+      do i=1,nsize
+        farray3_soln(i) = sum( farray2(i,:) )
+        print *, localPet,'farray3(',i,')=',farray3(i), &
+                          'farray3_soln(',i,')=',farray3_soln(i)
+        fsum=fsum + abs( farray3(i) - farray3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
+      call ESMF_Test((fsum.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !Test with ESMF_KIND_R4  arguments
+      !=================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_SUM Test"
+      call ESMF_VMAllReduce(vm, sendData=f4array1, recvData=f4array3, &
+                            count=nsize, reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fsum=0.
+      do i=1,nsize
+        f4array3_soln(i) = sum( f4array2(i,:) )
+        print *, localPet,'f4array3(',i,')=',f4array3(i), &
+                          'f4array3_soln(',i,')=',f4array3_soln(i)
+        fsum=fsum + abs( f4array3(i) - f4array3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
+      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+      end subroutine test_AllReduce_sum
+
+!-----------
+      subroutine test_AllReduce_min
+      !Test with Integer arguments
+      !==========================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_MIN Test"
+      call ESMF_VMAllReduce(vm, sendData=array1, recvData=array3, &
+                            count=nsize, reduceflag=ESMF_MIN, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      isum=0
+      do i=1,nsize
+        array3_soln(i) = minval( array2(i,:) )
+        print *, localPet,'array3(',i,')=',array3(i), &
+                          'array3_soln(',i,')=',array3_soln(i)
+        isum=isum + abs( array3(i) - array3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_MIN Results Test"
+      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+      !Test with ESMF_KIND_R8 arguments
+      !================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_MIN Test: ESMF_KIND_R8"
+      call ESMF_VMAllReduce(vm, sendData=farray1, recvData=farray3, &
+                            count=nsize, reduceflag=ESMF_MIN, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fsum=0
+      do i=1,nsize
+        farray3_soln(i) = minval( farray2(i,:) )
+        print *, localPet,'farray3(',i,')=',farray3(i), &
+                          'farray3_soln(',i,')=',farray3_soln(i)
+        fsum=fsum + abs( farray3(i) - farray3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_MIN Results Test:ESMF_KIND_R8"
+      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !Test with ESMF_KIND_R4 arguments
+      !================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_MIN Test: ESMF_KIND_R4"
+      call ESMF_VMAllReduce(vm, sendData=f4array1, recvData=f4array3, &
+                            count=nsize, reduceflag=ESMF_MIN, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fsum=0
+      do i=1,nsize
+        f4array3_soln(i) = minval( f4array2(i,:) )
+        print *, localPet,'f4array3(',i,')=',f4array3(i), &
+                          'f4array3_soln(',i,')=',f4array3_soln(i)
+        fsum=fsum + abs( f4array3(i) - f4array3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_MIN Results Test:ESMF_KIND_R4"
+      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+      end subroutine test_AllReduce_min
+
+!-----------
+      subroutine test_AllReduce_max
+
+      !Tests using Integer arguments
+      !==================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_MAX Test"
+      call ESMF_VMAllReduce(vm, sendData=array1, recvData=array3, &
+                            count=nsize, reduceflag=ESMF_MAX, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      isum=0
+      do i=1,nsize
+        array3_soln(i) = maxval( array2(i,:) )
+        print *, localPet,'array3(',i,')=',array3(i), &
+                          'array3_soln(',i,')=',array3_soln(i)
+        isum=isum + abs( array3(i) - array3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_MAX Results Test"
+      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !Tests using ESMF_KIND_R8 arguments
+      !==================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_MAX Test: ESMF_KIND_R8"
+      call ESMF_VMAllReduce(vm, sendData=farray1, recvData=farray3, &
+                            count=nsize, reduceflag=ESMF_MAX, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      isum=0
+      do i=1,nsize
+        farray3_soln(i) = maxval( farray2(i,:) )
+        print *, localPet,'farray3(',i,')=',farray3(i), &
+                          'farray3_soln(',i,')=',farray3_soln(i)
+        isum=isum + abs( farray3(i) - farray3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_MAX Results Test: ESMF_KIND_R8"
+      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !Tests using ESMF_KIND_R4 arguments
+      !==================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_MAX Test: ESMF_KIND_R4"
+      call ESMF_VMAllReduce(vm, sendData=f4array1, recvData=f4array3, &
+                            count=nsize, reduceflag=ESMF_MAX, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      isum=0
+      do i=1,nsize
+        f4array3_soln(i) = maxval( f4array2(i,:) )
+        print *, localPet,'f4array3(',i,')=',f4array3(i), &
+                          'f4array3_soln(',i,')=',f4array3_soln(i)
+        isum=isum + abs( f4array3(i) - f4array3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_MAX Results Test: ESMF_KIND_R4"
+      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+      end subroutine test_AllReduce_max
+
+
+      end module
+!==============================================================================
+!==============================================================================
+
+
+      program ESMF_VMUTest
+
+!------------------------------------------------------------------------------
+ 
+
+!==============================================================================
+!BOP
+! !PROGRAM: ESMF_VMTest - This unit test file verifies VM methods.
+!
+! !DESCRIPTION:
+!
+! The code in this file drives F90 VM unit tests.
+! The companion file ESMF\_VM.F90 contains the definitions for the
+! VM methods.
+!
+!-----------------------------------------------------------------------------
+! !USES:
+      use ESMF_TestMod     ! test methods
+      use ESMF_Mod
+
+      use ESMF_VMSubrs     ! VM specific subroutines
+
+      implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter :: version = &
+      '$Id: ESMF_VMUTest.F90,v 1.16 2005/02/28 16:27:17 nscollins Exp $'
+!------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -157,442 +613,5 @@
 
 #endif
       call ESMF_TestEnd(result, ESMF_SRCLINE)
-
-#ifdef ESMF_EXHAUSTIVE
-
-      contains
-!===================================================================================
-
-      subroutine test_AllFullReduce_sum
-! This subroutine tests all the overloaded  versions of the full ESMF global sum. 
-
-      ! Test with integer arguments
-      !=============================
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Full Reduce ESMF_SUM Test"
-      call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, count=nsize, &
-      reduceflag=ESMF_SUM, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      ! print the scatter result
-      myresults = SUM(array2)
-      print *, 'Global sum:'
-      print *, localPet,' func_results: ', func_results, ' myresults:', myresults
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Full Reduce ESMF_SUM Results Test"
-      call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !Test with ESMF_KIND_R8 arguments
-      !=================================
-      !EX_UTest
-            write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Full Reduce ESMF_SUM Test: ESMF_KIND_R8"
-      call ESMF_VMAllFullReduce(vm, sendData=farray1, recvData=float_results, &
-        count=nsize, &
-        reduceflag=ESMF_SUM, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      ! print the scatter result
-      my_float_results = SUM(farray2)
-      print *, 'Global sum:'
-      print *, localPet,' float_results: ', float_results, &
-      ' my_float_results:', my_float_results
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify Reduce ESMF_SUM Results Test: ESMF_KIND_R8"
-      call ESMF_Test((float_results.eq.my_float_results), name, failMsg, &
-        result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !Test with ESMF_KIND_R4 arguments
-      !=================================
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Full Reduce ESMF_SUM Test: ESMF_KIND_R4"
-      call ESMF_VMAllFullReduce(vm, sendData=f4array1, recvData=float4_results, &
-        count=nsize, &
-        reduceflag=ESMF_SUM, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      ! print the scatter result
-      my_float4_results = SUM(f4array2)
-      print *, 'Global sum:'
-      print *, localPet,' float4_results: ', float4_results, &
-      ' my_float4_results:', my_float4_results
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify Reduce ESMF_SUM Results Test: ESMF_KIND_R4"
-      call ESMF_Test((float4_results.eq.my_float4_results), name, failMsg, &
-        result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-
-      end subroutine test_AllFullReduce_sum
-
-!=================================================================================
-
-      subroutine test_AllFullReduce_min
-! This subroutine tests all the overloaded  versions of the full ESMF global min. 
-
-      !Test with integer arguments
-      !===========================
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Full Reduce ESMF_MIN Test"
-      call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, count=nsize, &
-      reduceflag=ESMF_MIN, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      myresults = MINVAL(array2)
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Full Reduce ESMF_MIN Results Test"
-      call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
-      print *, localPet,' func_results: ', func_results, ' myresults:', myresults
-      !------------------------------------------------------------------------
-
-      !Test with ESMF_KIND_R8 arguments
-      !================================
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Full Reduce ESMF_MIN Test: ESMF_KIND_R8"
-      call ESMF_VMAllFullReduce(vm, sendData=farray1, recvData=float_results, count=nsize, &
-      reduceflag=ESMF_MIN, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      my_float_results = MINVAL(farray2)
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Full Reduce ESMF_MIN Results Test:ESMF_KIND_R8"
-      call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
-      print *, localPet,' float_results: ', float_results, &
-        ' my_float_results:', my_float_results
-      !------------------------------------------------------------------------
-
-      !Test with ESMF_KIND_R4 arguments
-      !================================
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Full Reduce ESMF_MIN Test: ESMF_KIND_R4"
-      call ESMF_VMAllFullReduce(vm, sendData=f4array1, recvData=float4_results, count=nsize, &
-      reduceflag=ESMF_MIN, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      my_float4_results = MINVAL(f4array2)
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Full Reduce ESMF_MIN Results Test:ESMF_KIND_R4"
-      call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
-      print *, localPet,' float4_results: ', float4_results, &
-        ' my_float4_results:', my_float4_results
-      !------------------------------------------------------------------------
-
-
-      end subroutine test_AllFullReduce_min
-
-!==============================================================================
-
-      subroutine test_AllFullReduce_max
-! This subroutine tests all the overloaded  versions of the full ESMF global max. 
-
-      !Test with Integer arguments
-      !===========================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Full Reduce ESMF_MAX Test"
-      call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, count=nsize, &
-      reduceflag=ESMF_MAX, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      myresults = MAXVAL(array2)
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Full Reduce ESMF_MAX Results Test"
-      call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
-      print *, localPet,' func_results: ', func_results, ' myresults:', myresults
-
-
-      !Test with ESMF_KIND_R8 arguments
-      !=================================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Full Reduce ESMF_MAX Test:ESMF_KIND_R8"
-      call ESMF_VMAllFullReduce(vm, sendData=farray1, recvData=float_results, count=nsize, &
-      reduceflag=ESMF_MAX, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      my_float_results = MAXVAL(farray2)
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Full Reduce ESMF_MAX Results Test:ESMF_KIND_R8"
-      call ESMF_Test((float_results.eq.my_float_results), name, failMsg, result, ESMF_SRCLINE)
-      print *, localPet,' float_results: ', float_results, ' my_float_results:', my_float_results
-
-
-      !Test with ESMF_KIND_R4 arguments
-      !================================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Full Reduce ESMF_MAX Test:ESMF_KIND_R4"
-      call ESMF_VMAllFullReduce(vm, sendData=f4array1, recvData=float4_results, count=nsize, &
-      reduceflag=ESMF_MAX, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      my_float4_results = MAXVAL(f4array2)
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Full Reduce ESMF_MAX Results Test:ESMF_KIND_R4"
-      call ESMF_Test((float4_results.eq.my_float4_results), name, failMsg, result, ESMF_SRCLINE)
-      print *, localPet,' float4_results: ', float4_results, ' my_float4_results:', my_float4_results
-
-      end subroutine test_AllFullReduce_max
-
-!=============================================================================
-      subroutine test_AllReduce_sum
-
-      !Test with Integer arguments
-      !===========================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_SUM Test"
-      call ESMF_VMAllReduce(vm, sendData=array1, recvData=array3, count=nsize, &
-      reduceflag=ESMF_SUM, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      isum=0
-      do j=1,npets
-      end do
-      do i=1,nsize
-        array3_soln(i) = sum( array2(i,:) )
-        print *, localPet,'array3(',i,')=',array3(i), &
-                          'array3_soln(',i,')=',array3_soln(i)
-        isum=isum + abs( array3(i) - array3_soln(i) )
-      end do
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
-      call ESMF_Test((isum.eq.0), name, failMsg, result, ESMF_SRCLINE)
-
-      !Test with ESMF_KIND_R8  arguments
-      !=================================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_SUM Test"
-      call ESMF_VMAllReduce(vm, sendData=farray1, recvData=farray3, count=nsize, &
-      reduceflag=ESMF_SUM, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      fsum=0.
-      do i=1,nsize
-        farray3_soln(i) = sum( farray2(i,:) )
-        print *, localPet,'farray3(',i,')=',farray3(i), &
-                          'farray3_soln(',i,')=',farray3_soln(i)
-        fsum=fsum + abs( farray3(i) - farray3_soln(i) )
-      end do
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
-      call ESMF_Test((fsum.eq.0), name, failMsg, result, ESMF_SRCLINE)
-
-      !Test with ESMF_KIND_R4  arguments
-      !=================================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_SUM Test"
-      call ESMF_VMAllReduce(vm, sendData=f4array1, recvData=f4array3, count=nsize, &
-      reduceflag=ESMF_SUM, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      fsum=0.
-      do i=1,nsize
-        f4array3_soln(i) = sum( f4array2(i,:) )
-        print *, localPet,'f4array3(',i,')=',f4array3(i), &
-                          'f4array3_soln(',i,')=',f4array3_soln(i)
-        fsum=fsum + abs( f4array3(i) - f4array3_soln(i) )
-      end do
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
-      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
-
-
-
-      end subroutine test_AllReduce_sum
-
-!-----------
-      subroutine test_AllReduce_min
-      !Test with Integer arguments
-      !==========================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_MIN Test"
-      call ESMF_VMAllReduce(vm, sendData=array1, recvData=array3, count=nsize, &
-      reduceflag=ESMF_MIN, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      isum=0
-      do i=1,nsize
-        array3_soln(i) = minval( array2(i,:) )
-        print *, localPet,'array3(',i,')=',array3(i), &
-                          'array3_soln(',i,')=',array3_soln(i)
-        isum=isum + abs( array3(i) - array3_soln(i) )
-      end do
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_MIN Results Test"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
-
-      !Test with ESMF_KIND_R8 arguments
-      !================================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_MIN Test: ESMF_KIND_R8"
-      call ESMF_VMAllReduce(vm, sendData=farray1, recvData=farray3, count=nsize, &
-      reduceflag=ESMF_MIN, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      fsum=0
-      do i=1,nsize
-        farray3_soln(i) = minval( farray2(i,:) )
-        print *, localPet,'farray3(',i,')=',farray3(i), &
-                          'farray3_soln(',i,')=',farray3_soln(i)
-        fsum=fsum + abs( farray3(i) - farray3_soln(i) )
-      end do
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_MIN Results Test:ESMF_KIND_R8"
-      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
-
-
-      !Test with ESMF_KIND_R4 arguments
-      !================================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_MIN Test: ESMF_KIND_R4"
-      call ESMF_VMAllReduce(vm, sendData=f4array1, recvData=f4array3, count=nsize, &
-      reduceflag=ESMF_MIN, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      fsum=0
-      do i=1,nsize
-        f4array3_soln(i) = minval( f4array2(i,:) )
-        print *, localPet,'f4array3(',i,')=',f4array3(i), &
-                          'f4array3_soln(',i,')=',f4array3_soln(i)
-        fsum=fsum + abs( f4array3(i) - f4array3_soln(i) )
-      end do
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_MIN Results Test:ESMF_KIND_R4"
-      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
-
-      end subroutine test_AllReduce_min
-
-!-----------
-      subroutine test_AllReduce_max
-
-      !Tests using Integer arguments
-      !==================================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_MAX Test"
-      call ESMF_VMAllReduce(vm, sendData=array1, recvData=array3, count=nsize, &
-      reduceflag=ESMF_MAX, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      isum=0
-      do i=1,nsize
-        array3_soln(i) = maxval( array2(i,:) )
-        print *, localPet,'array3(',i,')=',array3(i), &
-                          'array3_soln(',i,')=',array3_soln(i)
-        isum=isum + abs( array3(i) - array3_soln(i) )
-      end do
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_MAX Results Test"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
-
-
-      !Tests using ESMF_KIND_R8 arguments
-      !==================================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_MAX Test: ESMF_KIND_R8"
-      call ESMF_VMAllReduce(vm, sendData=farray1, recvData=farray3, count=nsize, &
-      reduceflag=ESMF_MAX, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      isum=0
-      do i=1,nsize
-        farray3_soln(i) = maxval( farray2(i,:) )
-        print *, localPet,'farray3(',i,')=',farray3(i), &
-                          'farray3_soln(',i,')=',farray3_soln(i)
-        isum=isum + abs( farray3(i) - farray3_soln(i) )
-      end do
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_MAX Results Test: ESMF_KIND_R8"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
-
-
-      !Tests using ESMF_KIND_R4 arguments
-      !==================================
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_MAX Test: ESMF_KIND_R4"
-      call ESMF_VMAllReduce(vm, sendData=f4array1, recvData=f4array3, count=nsize, &
-      reduceflag=ESMF_MAX, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      isum=0
-      do i=1,nsize
-        f4array3_soln(i) = maxval( f4array2(i,:) )
-        print *, localPet,'f4array3(',i,')=',f4array3(i), &
-                          'f4array3_soln(',i,')=',f4array3_soln(i)
-        isum=isum + abs( f4array3(i) - f4array3_soln(i) )
-      end do
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_MAX Results Test: ESMF_KIND_R4"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
-
-      end subroutine test_AllReduce_max
-
-
-#endif
 
       end program ESMF_VMUTest
