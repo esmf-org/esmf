@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.31 2004/09/21 16:23:42 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.32 2004/09/24 22:19:30 nscollins Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -411,7 +411,6 @@ end subroutine ESMF_LogFlush
 !      \end{description}
 ! 
 !EOP
-    logical :: logrc
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
 	integer::msglen=0
@@ -478,7 +477,6 @@ end function ESMF_LogFoundAllocError
 !      \end{description}
 ! 
 !EOP
-    logical :: logrc
 	
     ESMF_LogFoundError = .FALSE.
     if (present(rcToReturn)) rcToReturn = rcToCheck
@@ -656,7 +654,6 @@ end subroutine ESMF_LogInitialize
 !      \end{description}
 ! 
 !EOP
-    logical :: logrc
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen=0
@@ -728,7 +725,6 @@ end function ESMF_LogMsgFoundAllocError
 !      \end{description}
 ! 
 !EOP
-    logical :: logrc
 	
     ESMF_LogMsgFoundError=.FALSE.
 	if (present(rcToReturn)) rcToReturn = rcToCheck
@@ -791,7 +787,6 @@ end function ESMF_LogMsgFoundError
 !      \end{description}
 ! 
 !EOP
-    logical :: logrc
 	
     if (present(rcToReturn)) rcToReturn = rcValue
     if (rcValue .NE. ESMF_SUCCESS) then
@@ -965,9 +960,9 @@ end subroutine ESMF_LogSet
     
     character(len=10)               :: t
     character(len=8)                :: d
-    character(len=7)                :: lt
+    !character(len=7)                :: lt
     character(len=32)               ::tmethod,tfile
-    integer			    ::status,tline
+    integer			    ::tline
     integer                         ::h,m,s,ms,y,mn,dy
     integer			    ::rc2
     
