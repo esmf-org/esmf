@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.105 2004/08/13 21:54:34 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.106 2004/08/18 05:19:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -227,7 +227,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.105 2004/08/13 21:54:34 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.106 2004/08/18 05:19:59 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1748,7 +1748,7 @@ end function
       rc = ESMF_FAILURE
     endif
 
-#ifdef VM_DONT_SPAWN_PTHREADS
+#ifndef VM_DONT_SPAWN_PTHREADS
     ! call into C++ 
     call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
                          compp%vm_cargo, callrc, status)
