@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.12 2003/06/04 20:31:09 nscollins Exp $
+// $Id: ESMC_LogErr.C,v 1.13 2003/07/02 20:40:10 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 // !DESCRIPTION:
 //
 // The LogErr class (defined in ESMC_Log.C and declared in
-// the companion file ESMC_LogErr.h) provides the user a way to write Log data.
+// the companion file ESMC_LogErr.h) provides the user a way to write {\tt ESMC\_Log} data.
 //
 // insert any higher level, 3rd party or system includes here
 
@@ -43,7 +43,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.12 2003/06/04 20:31:09 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.13 2003/07/02 20:40:10 rstaufer Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
@@ -72,7 +72,7 @@ void ESMC_Log::ESMC_LogOpenCFile(
    )
 //
 // !DESCRIPTION
-// ESMC\_LogErrOpenFile takes two
+// {\tt ESMC\_LogErrOpenFile} takes two
 // arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
 // ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
 // ESMF\_LogConstants.h, set whether one file should be written for all 
@@ -140,8 +140,8 @@ void ESMC_Log::ESMC_LogOpenFortFile(
    )
 //
 // !DESCRIPTION
-// ESMC\_LogErrOpenFile takes two
-// arguments.  The first should be set to ESMF_SINGLE_LOG_FILE or
+// {\tt ESMC\_LogErrOpenFile} takes two
+// arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
 // ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
 // ESMF\_LogConstants.h, set whether one file should be written for all 
 // processes (ESMF_SINGLE\_LOG\_FILE), or whether one file per process should
@@ -203,9 +203,11 @@ bool ESMC_Log::ESMC_LogNameValid(
       int FortIO            //are we doing FortIO?
       )
 // !DESCRIPTION
-//    Checks to see if a file of the name name has been opened by Log.
+//    Checks to see if a file of the name name has been opened by {\tt ESMC\_Log}.
 //    If it has the function returns a false value.  Note: this function
-//    use a global array that all ESMC\_Log objects have access to.
+//    use a global array that all {\tt ESMC\_Log} objects have access to.
+//
+// EOP
 {
   int i;
   if (FortIO == ESMF_LOG_FALSE) {
@@ -240,7 +242,7 @@ void ESMC_Log::ESMC_LogInit(
     )
 
 // !DESCRIPTION
-// ESMC_LogInit initializes the log object.  The following items are set:
+//   {\tt ESMC\_LogInit} initializes the log object.  The following items are set:
 //   verbosity (whether or not something is written out, flush (is output 
 //   flushed?), whether or not the code halts on errors and warnings.  By
 //   default, all output goes to standard out.  This can be changed by calling
@@ -314,7 +316,7 @@ void ESMC_Log::ESMC_LogInfo(
     )
 //
 // !DESCRIPTION:
-// ESMC\_Log\_Info works similar to C's printf statement.
+// {\tt ESMC\_Log\_Info} works similar to C's printf statement.
 // The first argument is a character string that can include text to be
 // written as well as a description of the number and kind of characters
 // to be printed out.
@@ -323,7 +325,7 @@ void ESMC_Log::ESMC_LogInfo(
 // are supported: d (signed decimal integer), f (double values),
 // and s (string).
 //
-// Any number of data items may be passed to ESMC\_Log\_Print.
+// Any number of data items may be passed to {\tt ESMC\_Log\_Print}.
 // 
 // The items are printed on a single line.  Widths, precision, and
 // escape sequences are not supported.  If you specify these, the code
@@ -409,11 +411,11 @@ void ESMC_Log::ESMC_LogInfoFortran(
     )
 //
 // !DESCRIPTION:
-// ESMC\_LogInfoFortran is the version of LogInfo used for the Fortran
-// interface.  Instead of printing the data from the stack as ESMC\_LogInfo 
-// does, ESMC\_LogInfoFortran prints the data stored in the "Data" arrays. 
-// The routine is called from esmf\_logprint which is  defined in
-// ESMF\_LogInterface.C.  esmf\_logprint is callable from the user's
+// {\tt ESMC\_LogInfoFortran} is the version of {\tt ESMC\_LogInfo} used for the Fortran
+// interface.  Instead of printing the data from the stack as {\tt ESMC\_LogInfo} 
+// does, {\tt ESMC\_LogInfoFortran} prints the data stored in the "Data" arrays. 
+// The routine is called from {\tt ESMF\_LogPrint} which is  defined in
+// ESMF\_LogInterface.C.  {\tt ESMF\_LogPrint} is callable from the user's
 // from Fortran code.  It is this routine that takes the data
 // from the stack and stores it in the "Data" arrays.
 //
@@ -816,7 +818,7 @@ void ESMC_Log::ESMC_LogErrMsg_(
     )
 //
 // !DESCRIPTION:
-//  Same as ESMC\_LogErr, except execution is not stopped after
+//  Same as {\tt ESMC\_LogErr}, except execution is not stopped after
 //  printing message, except when haltOnWarn set to true
 //
 //EOP
@@ -853,7 +855,7 @@ void ESMC_Log::ESMC_LogErrMsg_(
     )
 //
 // !DESCRIPTION:
-//  Same as ESMC\_LogErr, except execution is not stopped after
+//  Same as {\tt ESMC\_LogErr}, except execution is not stopped after
 //  printing message, except when haltOnWarn set to true
 //
 //EOP
@@ -886,7 +888,7 @@ void ESMC_Log::ESMC_LogExit(
   )
 
 // !DESCRIPTION:
-// Used by Log to exit program.
+// Used by {\tt ESMC\_Log} to exit program.
 //
 //EOP
 
@@ -921,10 +923,10 @@ void ESMC_Log::ESMC_LogErrFortran(
     char msg[]           //msg
   )
 // !DESCRIPTION:
-//Similar to LogErr, except called by the fortran wrapper
+//Similar to {\tt ESMC\_LogErr}, except called by the fortran wrapper
 //esmf\_logerr which is defined in
 //ESMC\_Interface.C.  The major difference between this routine
-//and LogErr is that this
+//and {\tt ESMC\_LogErr} is that this
 //routine prints the printf style data from the Data arrays not the stack.
 //EOP
 
@@ -965,7 +967,7 @@ void ESMC_Log::ESMC_LogWarnFortran(
 
 )
 // !DESCRIPTION:
-// Similar to ESMC\_LogWarn, except called by the fortran
+// Similar to {\tt ESMC\_LogWarn}, except called by the fortran
 // wrapper esmf\_logerr which is
 // defined in ESMC\_Interface.C
 //EOP
@@ -1004,7 +1006,7 @@ void ESMC_Log:: ESMC_LogPrint(
   )
 
 // !DESCRIPTION: This is a private routine, used by many methods of
-// ESMC\_Log to print data to the log file. If used from Fortran, then
+// {\tt ESMC\_Log} to print data to the log file. If used from Fortran, then
 // Fortran I/O libraries are used.  Otherwise C I/O libraries are used.
 //EOP
 {
@@ -1074,7 +1076,7 @@ void ESMC_Log:: ESMC_LogPrint(
      ) const
 //
 // !DESCRIPTION:
-// GetErrMsg returns a string corresponding to the error code
+// {\tt ESMC\_GetErrMsg} returns a string corresponding to the error code
 //
 //EOP
 {
