@@ -1,4 +1,4 @@
-% $Id: Component_desdoc.ctex,v 1.1 2003/01/07 21:35:58 nscollins Exp $
+% $Id: Component_desdoc.ctex,v 1.2 2003/01/29 23:33:06 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{Component Design Document}
-\newcommand{\myauthors}{<Authors>}
+\newcommand{\myauthors}{Nancy Collins}
 #endif
 
 #ifdef STANDALONE
@@ -103,9 +103,9 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{comp_fex}
+\input{compex_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/comp_fex}
+\input{comppath/compex_fapi}
 #endif
 
 \subsection{Parameters and Definitions}
@@ -420,9 +420,9 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{state_fex}
+\input{stateex_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/state_fex}
+\input{comppath/stateex_fapi}
 #endif
 
 \subsection{Parameters and Definitions}
