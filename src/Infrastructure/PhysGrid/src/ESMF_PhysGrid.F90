@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.6 2002/11/07 20:37:19 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.7 2002/11/22 17:05:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,6 +54,57 @@
       end type
 
 !------------------------------------------------------------------------------
+!     !  ESMF_PhysGridSpec
+!
+!     ! Definition for a PhysGridSpec class.
+
+      type ESMF_PhysGridSpec
+      sequence
+      private
+
+        type (ESMF_Base) :: base         ! base class object
+        integer :: num_corners           ! number of corners for
+                                         ! each grid cell
+        integer :: num_faces             ! likely assume same as num_corners
+                                         ! but might specify storage of only
+                                         ! 2 of 4 faces, for example
+        integer :: num_metrics           ! a counter for the number of
+                                         ! metrics for this subgrid
+        integer :: num_lmasks            ! a counter for the number of
+                                         ! logical masks for this subgrid
+        integer :: num_mmasks            ! a counter for the number of
+                                         ! multiplicative masks for this
+                                         ! subgrid
+        integer :: num_region_ids        ! a counter for the number of
+                                         ! region identifiers for this
+                                         ! subgrid
+        real, dimension(:), pointer :: center_x   ! x-coord of center of
+                                                  ! each cell
+        real, dimension(:), pointer :: center_y   ! y-coord of center of
+                                                  ! each cell
+        real, dimension(:,:), pointer :: corner_x ! x-coord of each corner
+                                                  ! of each cell
+        real, dimension(:,:), pointer :: corner_y ! y-coord of each corner
+                                                  ! of each cell
+        real, dimension(:,:), pointer :: face_x   ! x-coord of each face
+                                                  ! center of each cell
+        real, dimension(:,:), pointer :: face_y   ! y-coord of each face
+                                                  ! center of each cell
+        real, dimension(:,:), pointer :: metrics  ! an array of defined metrics
+                                                  ! for each cell
+        character (len=ESMF_MAXSTR), dimension(:), pointer :: metric_names
+        logical, dimension(:,:), pointer :: lmask ! an array of defined logical
+                                                  ! masks for each cell
+        real, dimension(:,:), pointer :: mmask    ! an array of defined
+                                                  ! multiplicative masks for
+                                                  ! each cell
+        integer, dimension(:,:), pointer :: region_id ! an array of defined
+                                                      ! region identifiers
+                                                      ! for each cell
+
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_PhysGridType
 !
 !     !  Description of ESMF_PhysGrid. 
@@ -80,6 +131,7 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_PhysGridConfig
+      public ESMF_PhysGridSpec
       public ESMF_PhysGrid
 !------------------------------------------------------------------------------
 !
@@ -111,7 +163,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.6 2002/11/07 20:37:19 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.7 2002/11/22 17:05:11 jwolfe Exp $'
 
 !==============================================================================
 !
