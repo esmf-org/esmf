@@ -1,4 +1,4 @@
-// $Id: ESMC_CompRun.C,v 1.3 2003/11/11 18:42:48 nscollins Exp $
+// $Id: ESMC_CompRun.C,v 1.4 2004/02/23 20:52:05 nscollins Exp $
 //
 // Test code which creates a new Component in C++.  The called
 // component is still in F90.
@@ -40,7 +40,7 @@ main(int argc, char **argv)
 //   //
 //   //  Quick Test - Create, Init, Run, Finalize, Destroy a Component.
 
-    rc = ESMC_Initialize();
+    rc = ESMC_Initialize(argc, argv);
  
     printf("Component Test 1:\n");
 
