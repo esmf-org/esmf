@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.13 2004/06/23 19:22:39 cdeluca Exp $
+! $Id: ESMF_Init.F90,v 1.14 2004/10/11 19:38:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -196,32 +196,6 @@
           return
       endif
 
-      ! Open config file if specified
-      if (present(defaultConfigFileName)) then
-          !call ESMF_ConfigInitialize(defaultConfigFileName, status)
-          if (status .ne. ESMF_SUCCESS) then
-              print *, "Error opening the default config file"
-              return
-          endif
-      endif
-
-      ! Initialize the default time manager calendar
-      call ESMF_CalendarInitialize(defaultCalendar, status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing the default time manager calendar"
-          return
-      endif
-
-      if (present(defaultLogFileName)) then
-          call ESMF_LogInitialize(defaultLogFileName, status)
-      else
-          call ESMF_LogInitialize("ESMF_LogFile", status)
-      endif
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing the default log/error manager"
-          return
-      endif
-
       ! Initialize the VM. This creates the GlobalVM.
       ! Note that ESMF_VMInitialize _must_ be called before any other
       ! mechanism calls MPI_Init. This is because MPI_Init on some systems
@@ -235,6 +209,34 @@
           return
       endif
 
+      if (present(defaultLogFileName)) then
+          call ESMF_LogInitialize(defaultLogFileName, status)
+      else
+          call ESMF_LogInitialize("ESMF_LogFile", status)
+      endif
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error initializing the default log/error manager"
+          return
+      endif
+
+      ! Initialize the default time manager calendar
+      call ESMF_CalendarInitialize(defaultCalendar, status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error initializing the default time manager calendar"
+          return
+      endif
+
+      ! Open config file if specified
+      if (present(defaultConfigFileName)) then
+          ! TODO: write this and remove the fixed status= line
+          !call ESMF_ConfigInitialize(defaultConfigFileName, status)
+          status = ESMF_SUCCESS
+          if (status .ne. ESMF_SUCCESS) then
+              print *, "Error opening the default config file"
+              return
+          endif
+      endif
+
       ! Initialize the machine model, the comms, etc.  Old code, superceeded
       ! by VM code.
       !call ESMF_MachineInitialize(lang, status)
@@ -242,13 +244,6 @@
       !    print *, "Error initializing the machine characteristics"
       !    return
       !endif
-
-      ! Test getting the global VM
-      call ESMF_VMGetGlobal(testVM, rc)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error getting global vm"
-          return
-      endif
 
       already_init = .true.
 
@@ -298,17 +293,26 @@
           return
       endif
 
+      ! Close the Config file  
+      ! TODO: write this routine and remove the status= line
+      ! call ESMF_ConfigFinalize(status)
+      status = ESMF_SUCCESS
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error finalizing config file"
+          return
+      endif
+
+      ! Delete any internal built-in time manager calendars
+      call ESMF_CalendarFinalize(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error finalizing the time manager calendars"
+          return
+      endif
+
       ! Shut down the log file
       call ESMF_LogFinalize(status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error finalizing log file"
-          return
-      endif
-
-      ! Close the Config file
-      ! call ESMF_ConfigFinalize(status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error finalizing config file"
           return
       endif
 
@@ -321,13 +325,6 @@
 
       ! Where MPI is shut down, files closed, etc.
       !call ESMF_MachineFinalize()
-
-      ! Delete any internal built-in time manager calendars
-      call ESMF_CalendarFinalize(status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error finalizing the time manager calendars"
-          return
-      endif
 
       already_final = .true.
 
