@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.10 2004/06/14 13:16:47 cdeluca Exp $
+% $Id: ESMF_options.tex,v 1.11 2004/06/15 09:19:15 nscollins Exp $
 
 \section{Global Options and Parameters}
 
@@ -62,6 +62,23 @@ Valid values are:
 \item [ESMF\_INDEX\_GLOBAL]
       Refers to object-wide indices.
 \end{description}
+
+\subsubsection{ESMF\_Interleave}
+\label{opt:interleave}
+{\sf DESCRIPTION:\\}
+Interleave is used when there are multiple variables or
+if individual data items are vectors.  Used in {\tt ESMF\_FieldDataMap}
+and {\tt ESMF\_BundleDataMap}.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_INTERLEAVE\_BY\_BLOCK]
+         Items are listed in blocks, all items of one type followed
+         by all items of the next type.
+   \item [ESMF\_INTERLEAVE\_BY\_ITEM]
+         Items are interleaved item by item.
+\end{description}
+
 
 \subsubsection{ESMF\_NeededFlag}
 \label{opt:neededflag}
