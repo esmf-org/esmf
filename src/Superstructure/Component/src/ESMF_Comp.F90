@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.9 2003/02/06 22:18:41 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.10 2003/02/11 22:05:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,8 +36,8 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_LayoutMod
-      !use ESMF_TimeMod
-      !use ESMF_ClockMod
+      use ESMF_TimeMod
+      use ESMF_ClockMod
       use ESMF_StateMod
       implicit none
 
@@ -90,8 +90,7 @@
          type(ESMF_State) :: exportstate
          type(ESMF_State), dimension(:), pointer :: statelist
          integer :: instance_id
-         !TODO: add when clock module available
-         !type(ESMF_Clock) :: clock
+         type(ESMF_Clock) :: clock
          ! lists of required entry points supplied by the component code
          integer :: function_count
          character(len=ESMF_MAXSTR), dimension(:), pointer :: function_name
@@ -144,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.9 2003/02/06 22:18:41 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.10 2003/02/11 22:05:04 nscollins Exp $'
 
 !==============================================================================
 ! 
