@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.71 2004/11/05 04:05:54 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.72 2004/11/12 01:04:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.71 2004/11/05 04:05:54 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.72 2004/11/12 01:04:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1383,8 +1383,8 @@
       quotient.mm /= divisor;
       quotient.d  /= divisor;
 
-      // divide absolute s part  // TODO: fractions
-      quotient.ESMC_FractionSetw(quotient.ESMC_FractionGetw() / divisor);
+      // divide absolute seconds (and any fractional) part
+      quotient.ESMC_BaseTime::operator/=(divisor);
 
     } else {
       // TODO: write LogErr message (divide-by-zero)
@@ -1805,8 +1805,8 @@
     product.mm *= multiplier;
     product.d  *= multiplier;
 
-    // multiply absolute s part  // TODO: fractions
-    product.ESMC_FractionSetw(product.ESMC_FractionGetw() * multiplier);
+    // multiply absolute seconds (and any fractional) part
+    product.ESMC_BaseTime::operator*=(multiplier);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
