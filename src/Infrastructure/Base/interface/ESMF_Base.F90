@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.98 2004/05/07 09:02:25 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.99 2004/05/21 16:54:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -247,15 +247,15 @@
 
 !     ! WARNING: must match corresponding values in ../include/ESMC_Base.h
 
-      type ESMF_newOp
+      type ESMF_Op
       sequence
       private
           integer :: value
       end type
 
-      type(ESMF_newOp), parameter :: ESMF_newSUM   = ESMF_newOp(1), &
-                                     ESMF_newMIN   = ESMF_newOp(2), &
-                                     ESMF_newMAX   = ESMF_newOp(3)
+      type(ESMF_Op), parameter :: ESMF_SUM   = ESMF_Op(1), &
+                                  ESMF_MIN   = ESMF_Op(2), &
+                                  ESMF_MAX   = ESMF_Op(3)
                                      
 !------------------------------------------------------------------------------
 !
@@ -425,7 +425,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.98 2004/05/07 09:02:25 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.99 2004/05/21 16:54:53 theurich Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
