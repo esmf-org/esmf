@@ -1,4 +1,4 @@
-# $Id: do_ut_results,v 1.2 2003/04/04 22:19:12 svasquez Exp $
+# $Id: do_ut_results,v 1.3 2003/04/04 23:08:10 svasquez Exp $
 #!/bin/ksh
 # This script runs at the enf of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
@@ -14,7 +14,9 @@ then
 	echo "" 
 else
 	echo "Executable unit tests found:"
-	find $ESMF_DIR/test/testg/$ESMF_ARCH -name "*UTest" -print
+	cd $ESMF_DIR/test/testg/$ESMF_ARCH
+	find . -name "*UTest" -print
+	cd $ESMF_DIR
 	echo "" 
 	echo "All of these executable unit tests should have a corresponding stdout file." 
 	echo "If not, it's an indication that the unit test was not executed, or that it failed to execute." 
@@ -29,7 +31,9 @@ then
 	echo "" 
 else
 	echo "Unit Tests stdout files found: " 
-	ls -l $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout 
+	cd $ESMF_DIR/test/testg/$ESMF_ARCH
+	ls -l *UTest*.stdout 
+	cd $ESMF_DIR
 	echo "" 
 	echo "Unit test stdout files of zero length indicate that the unit test" 
 	echo "did not run because it failed to compile or it failed to execute. " 
@@ -37,7 +41,9 @@ else
 	if grep -q FAIL $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout
 	then
 		echo "The following Unit Tests Failed: "  
-		grep FAIL $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout
+		cd $ESMF_DIR/test/testg/$ESMF_ARCH
+		grep FAIL *UTest*.stdout
+		cd $ESMF_DIR
 		echo "" 
 	else
 		find $ESMF_DIR/test/testg/$ESMF_ARCH -name "*UTest*.stdout"  -size 0 -print | wc -l > zerofiles
