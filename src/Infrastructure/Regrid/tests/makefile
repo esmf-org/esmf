@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2004/11/02 19:59:42 nscollins Exp $
+# $Id: makefile,v 1.14 2005/01/07 20:32:47 jwolfe Exp $
 
 ALL:  build_tests
  
@@ -21,7 +21,8 @@ TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_RegridUTest
 
 TESTS_RUN     = RUN_ESMF_RegridUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI 
+# TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI   removed because the test for number of PEs errors
+TESTS_RUN_UNI =
 
 TESTS_RM      = 
 
