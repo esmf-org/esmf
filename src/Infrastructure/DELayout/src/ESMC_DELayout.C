@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.14 2004/06/04 17:32:57 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.15 2004/06/07 19:14:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.14 2004/06/04 17:32:57 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.15 2004/06/07 19:14:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -75,7 +75,20 @@ ESMC_DELayout *ESMC_DELayoutCreate(
     cyclic = *cyclic_opt;
 
   // decide whether this is a 1D or an ND layout
-  if (ndim==1){
+  if (ndim==0){
+    try {
+      layout = new ESMC_DELayout;
+      *rc = layout->ESMC_DELayoutConstruct1D(vm, 0, DEtoPET, len,
+        cyclic);
+      return(layout);
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
+      *rc = ESMF_FAILURE;
+      return(ESMC_NULL_POINTER);
+    }
+  }else if(ndim==1){
     try {
       layout = new ESMC_DELayout;
       *rc = layout->ESMC_DELayoutConstruct1D(vm, *nDEs, DEtoPET, len,

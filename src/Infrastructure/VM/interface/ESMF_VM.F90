@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.25 2004/06/03 22:55:34 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.26 2004/06/07 19:15:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_VM.F90"
 !
 ! ESMF VM Module
 module ESMF_VMMod
@@ -150,7 +151,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.25 2004/06/03 22:55:34 cdeluca Exp $'
+      '$Id: ESMF_VM.F90,v 1.26 2004/06/07 19:15:13 theurich Exp $'
 
 !==============================================================================
 
@@ -384,8 +385,8 @@ module ESMF_VMMod
       localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMAllReduceI4
 !------------------------------------------------------------------------------
@@ -469,8 +470,8 @@ module ESMF_VMMod
       localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMAllReduceR4
 !------------------------------------------------------------------------------
@@ -554,8 +555,8 @@ module ESMF_VMMod
       localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMAllReduceR8
 !------------------------------------------------------------------------------
@@ -639,8 +640,8 @@ module ESMF_VMMod
       operation, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMAllGlobalReduceI4
 !------------------------------------------------------------------------------
@@ -724,8 +725,8 @@ module ESMF_VMMod
       operation, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMAllGlobalReduceR4
 !------------------------------------------------------------------------------
@@ -809,8 +810,8 @@ module ESMF_VMMod
       operation, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMAllGlobalReduceR8
 !------------------------------------------------------------------------------
@@ -853,8 +854,8 @@ module ESMF_VMMod
     call c_ESMC_VMBarrier(vm, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMBarrier
 !------------------------------------------------------------------------------
@@ -937,8 +938,8 @@ module ESMF_VMMod
     call c_ESMC_VMGather(vm, sendData, recvData, size, root, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMGatherI4
 !------------------------------------------------------------------------------
@@ -1021,8 +1022,8 @@ module ESMF_VMMod
     call c_ESMC_VMGather(vm, sendData, recvData, size, root, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMGatherR4
 !------------------------------------------------------------------------------
@@ -1105,8 +1106,8 @@ module ESMF_VMMod
     call c_ESMC_VMGather(vm, sendData, recvData, size, root, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMGatherR8
 !------------------------------------------------------------------------------
@@ -1179,8 +1180,8 @@ module ESMF_VMMod
       okOpenMpFlag, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMGet
 !------------------------------------------------------------------------------
@@ -1283,8 +1284,8 @@ module ESMF_VMMod
       localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMGetPET
 !------------------------------------------------------------------------------
@@ -1326,8 +1327,8 @@ module ESMF_VMMod
     call c_ESMC_VMPrint(vm, localrc) 
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMPrint
 !------------------------------------------------------------------------------
@@ -1404,8 +1405,8 @@ module ESMF_VMMod
     call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMRecvI4
 !------------------------------------------------------------------------------
@@ -1482,8 +1483,8 @@ module ESMF_VMMod
     call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMRecvR4
 !------------------------------------------------------------------------------
@@ -1560,8 +1561,8 @@ module ESMF_VMMod
     call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMRecvR8
 !------------------------------------------------------------------------------
@@ -1644,8 +1645,8 @@ module ESMF_VMMod
     call c_ESMC_VMScatter(vm, sendData, recvData, size, root, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMScatterI4
 !------------------------------------------------------------------------------
@@ -1729,8 +1730,8 @@ module ESMF_VMMod
     call c_ESMC_VMScatter(vm, sendData, recvData, size, root, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMScatterR4
 !------------------------------------------------------------------------------
@@ -1814,8 +1815,8 @@ module ESMF_VMMod
     call c_ESMC_VMScatter(vm, sendData, recvData, size, root, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMScatterR8
 !------------------------------------------------------------------------------
@@ -1892,8 +1893,8 @@ module ESMF_VMMod
     call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMSendI4
 !------------------------------------------------------------------------------
@@ -1970,8 +1971,8 @@ module ESMF_VMMod
     call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMSendR4
 !------------------------------------------------------------------------------
@@ -2048,8 +2049,8 @@ module ESMF_VMMod
     call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMSendR8
 !------------------------------------------------------------------------------
@@ -2138,8 +2139,8 @@ module ESMF_VMMod
       recvData, recvSize, src, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMSendRecvI4
 !------------------------------------------------------------------------------
@@ -2228,8 +2229,8 @@ module ESMF_VMMod
       recvData, recvSize, src, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMSendRecvR4
 !------------------------------------------------------------------------------
@@ -2318,8 +2319,8 @@ module ESMF_VMMod
       recvData, recvSize, src, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMSendRecvR8
 !------------------------------------------------------------------------------
@@ -2363,8 +2364,8 @@ module ESMF_VMMod
     call c_ESMC_VMThreadBarrier(vm, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMThreadBarrier
 !------------------------------------------------------------------------------
@@ -2411,10 +2412,10 @@ module ESMF_VMMod
     localrc = ESMF_FAILURE  ! until there is really an implementation
 
     ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-!      rcToReturn=rc)) return
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg="Method not implemented", &
-      rcToReturn=rc)) return
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, "Method not implemented", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMWait
 !------------------------------------------------------------------------------
@@ -2453,8 +2454,8 @@ module ESMF_VMMod
     call c_ESMC_VMInitialize(GlobalVM, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMInitialize
 !------------------------------------------------------------------------------
@@ -2493,8 +2494,8 @@ module ESMF_VMMod
     call c_ESMC_VMFinalize(localrc)
     
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMFinalize
 !------------------------------------------------------------------------------
@@ -2550,8 +2551,8 @@ module ESMF_VMMod
     call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMPlanConstruct
 !------------------------------------------------------------------------------
@@ -2593,8 +2594,8 @@ module ESMF_VMMod
     call c_ESMC_VMPlanDestruct(vmplan, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMPlanDestruct
 !------------------------------------------------------------------------------
@@ -2660,8 +2661,8 @@ module ESMF_VMMod
       npetlist, petlist, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMPlanMaxThreads
 !------------------------------------------------------------------------------
@@ -2727,8 +2728,8 @@ module ESMF_VMMod
       npetlist, petlist, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMPlanMinThreads
 !------------------------------------------------------------------------------
@@ -2794,8 +2795,8 @@ module ESMF_VMMod
       npetlist, petlist, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
-      rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMPlanMaxPEs
 !------------------------------------------------------------------------------

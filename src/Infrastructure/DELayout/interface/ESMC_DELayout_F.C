@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.13 2004/06/04 17:32:57 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.14 2004/06/07 19:13:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,10 +38,11 @@
 extern "C" {
 
   void FTN(c_esmc_delayoutcreate)(ESMC_DELayout **ptr, ESMC_VM **vm,
-    int *nDEs, int *ndim, int *DEtoPET, int *len, int *status){
+    int *deCountList, int *len_deCountList, int *dePetList, int *len_dePetList,
+    int *rc){
     ESMC_Logical cyclic = ESMF_TRUE;
-    *ptr = ESMC_DELayoutCreate(**vm, nDEs, *ndim, DEtoPET, *len, &cyclic,
-      status);
+    *ptr = ESMC_DELayoutCreate(**vm, deCountList, *len_deCountList, dePetList,
+      *len_dePetList, &cyclic, rc);
   }
 
   void FTN(c_esmc_delayoutdestroy)(ESMC_DELayout **ptr, int *status){
@@ -141,7 +142,7 @@ extern "C" {
     }
   }
   
-  void FTN(c_esmc_delayoutglobreduce)(ESMC_DELayout **ptr, 
+  void FTN(c_esmc_delayoutallglobreduce)(ESMC_DELayout **ptr, 
     void ***datain, void *result, int *len, ESMC_DataKind *dtk,
     ESMC_Operation *op, ESMC_Logical *oneToOneFlag, int *status){
     if (*oneToOneFlag == ESMF_TRUE){
