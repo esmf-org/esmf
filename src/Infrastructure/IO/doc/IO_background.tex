@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.7 2002/05/07 03:18:46 lzaslavsky Exp $
+% $Id: IO_background.tex,v 1.8 2002/05/07 20:08:14 lzaslavsky Exp $
 
 
 Earth system modeling applications require efficient and robust tools
@@ -47,19 +47,21 @@ for phyical grids, {\em DistGrid} element for distributed grids, and
 ESMF I/O will support the following three models of data: 
 
 \begin{itemize}
-\item[Regular Gridded Data] The data of this kind are defined on a logically 
-rectangular grid. Multi-dimensional arrays can be used for storing the data 
-and operating. The neighbor relationships are defined naturally by geometry.
+\item[\bf Regular Gridded Data] The data of this kind are defined on a
+logically rectangular grid. Multi-dimensional arrays can be used for
+storing the data and operating. The neighbor relationships are defined
+naturally by geometry.
 
-\item[Data on Unstructured Grid] The data of this kind are defined on an 
+\item[\bf Data on Unstructured Grid] The data of this kind are defined on an 
 irregular grid such as in Finite-Element Methods. A list of neighbors should 
 be explicitly provided for each grid node. 
 
-\item[Observational Data] The data of this kind describe the 
+\item[\bf Observational Data] The data of this kind describe the 
 measurements. Each observation is associated with a a spatial point or region.
 A neighbor relationship is not defined for observations. 
 \end{itemize}
-As we have already mentioned, logically-rectangular grids are naturally 
+
+As we have already mentioned, logically rectangular grids are naturally 
 represented by multi-dimensional arrays. The two latter data models can be 
 represented as one-dimensional arrays of structures with each structure 
 containing information about location, field values associated with this 
@@ -73,10 +75,9 @@ the object, and often either accompanies the object or is embedded in the
 file header. As such, metadata can be very useful as the basis for 
 information storage and retrieval systems.
 
-The information about the object provided by metadata allows to provide an 
-optimal resource allocation and organize storage and retriaval of data in an 
-optimal fashion. In parallel computing such a knowledge may be especially 
-important. 
+The information about the object provided by metadata allows to optimize  
+resource allocation and organization of storage and retriaval of data. In 
+parallel computing, such a knowledge may be especially important. 
 
 If metadata are provided, the files may be either {\em self-described} or
 {\em co-described}, depending on the fashion how metadata are allocated.
@@ -96,8 +97,8 @@ and allocated to a companion metadata file.
 
 Some file formats that we discuss bellow, such as NetCDF and HDF, are 
 structured according to well-defined rules. Their structures and APIs enable 
-(but not require) creation of self-described files. Conventions, narrowing 
-the defintions, allow to provide a complete and unique definition of each 
+(but do not require) creation of self-described files. By narrowing 
+the defintions, conventions enable a complete and unique description of each 
 dataset.
 
 We assume that the NetCDF conventions for climate and forecast metadata, 
@@ -107,9 +108,9 @@ NetCDF is an array-oriented data format and a library for gridded data
 \cite{NetCDF_CF_v1_beta3} narrow NetCDF definitions, allowing a unique and 
 complete description of gridded data used in geoscience. 
 
-CF conventions specify standard dimensions as date or time ({\t t}), height 
-or depth ({\it z}), latitude ({\it y}), and longitude ({\it x}), and specify 
-standard units for these dimentions and other quantities. 
+CF conventions specify standard dimensions, such as date or time ({\t t}), 
+height or depth ({\it z}), latitude ({\it y}), and longitude ({\it x}), and 
+specify standard units for these dimensions and other quantities. 
 
 We expect ESMF metadata conventions to be defined as extensions to
 CF-conventions covering fields defined on both structural and unstructural 
@@ -137,17 +138,18 @@ machine-independent format for representing scientific data. Together,
 the interface, library, and format support the creation, access, and
 sharing of scientific data. The netCDF software was developed at the
 Unidata Program Center in Boulder, Colorado. See \cite{NetCDF3_UsersGuide_C}.
-In geoscience NetCDF can be naturally used for represenation of fields 
-defined on logically-rectangular grids. NetCDF use in geosciences is 
+In geoscience, NetCDF can be naturally used for represenation of fields 
+defined on logically rectangular grids. NetCDF use in geosciences is 
 specified by CF conventions mentioned above \cite{NetCDF_CF_v1_beta3}.
 
 Although NetCDF format can be used for representation of other kind of data 
-(since they can be represented by array in an old Fortran fashion), it would 
+(since they can be represented by array in the old Fortran fashion), it would 
 not provide an interface for structural representation of these data. 
 
-\item[DODS] The Distributed Oceanographic Data System is a system that allows 
-to access data over the internet. DODS is created and supported by Unidata 
-Program Center in Boulder, Colorado. DODS supports NetCDF API.See \cite{DODS}.
+\item[\bf DODS] The Distributed Oceanographic Data System is a system that 
+allows access to data over the internet. DODS is created and supported by 
+Unidata Program Center in Boulder, Colorado. DODS supports NetCDF API. See 
+\cite{DODS}.
 
 \item[\bf HDF] The Hierarchical Data Format (HDF) project provides
 interface,  software and file formats for scientific data management. 
@@ -166,7 +168,7 @@ formats are completely different and {\it not} compatible.  See
 \item[\bf HDF-EOS]  The Hierarchical Data Format - Earth Observing
 System (HDF-EOS) is the scientific data format standard selected by
 NASA as the baseline standard for the Earth Observing System (EOS). HDF-EOS
-is an extension of HDF and uses HDF library calls as underlying
+is an extension of HDF and uses HDF library calls as its underlying
 basis. Version 4.1r1 of HDF is used. The library and tools are written
 in C language and a Fortran interface is provided. See \cite{HDF-EOS}.
 As well as HDF, it can be used for different data models within ESMF. Its 
@@ -184,7 +186,7 @@ GRIB file itself.
 \item[\bf Binary]
 The most important way for a machine to represent data is to use a
 native binary data representation. There are  two choices of ordering of 
-bytes (so-called, {\it Big Endian} and {\it Little Endian}), and a lot of
+bytes (so-called {\it Big Endian} and {\it Little Endian}), and a lot of
 ambiguity in representing floating point data. The latter, however, is
 specified, if IEEE Floating Point Standard 754 is satisfied 
 (\cite{IEEE-Floating-Point}, \cite{Kahan-IEEE-754}). It is
@@ -204,24 +206,24 @@ internationally agreed tables. Thus, instead of writing all detailed
 definitions within a message, one will just write a number identifying
 a parameter with its descriptions.
 
-The expect a meta-data file to accompany a BUFR file. Information necessary 
+We expect a meta-data file to accompany a BUFR file. Information necessary 
 to create a companion metadata file can be extracted from a BUFR file itself. 
 \end{itemize}
 
-An experience exists of using complex data systems, such as 
-relational-database based Observational Data Base (ODB) software at  ECMWF
-\cite{ODB}. Modern data management approaches can potentially provide 
-significant advantages in manipulating with data and have to be carefully 
-studied. However, such systems are beyond the scope of the basic ESMF I/O. 
+Modern data management approaches could potentially provide significant 
+advantages in manipulating data and have to be carefully studied.
+For example, ESMWF has created and employed relational-database based 
+Observational Data Base (ODB) software \cite{ODB}.  However, such complex 
+data management systems are beyond the scope of the basic ESMF I/O. 
 
 
-\subsection{Parallel IO}
+\subsection{Parallel I/O}
 
 The future development of ESMF IO facility will require further
 optimization with an expected increase in IO amount over the next few
 years. Increase in amount of satellitte data will result in the
 increase of time spent to input observational data, as well as
-efficient manipulation of data in process of data assimilation. On the
+efficient processing of data in data assimilation. On the
 other hand, a customer's desire to download simulation results more 
 frequently leads to significant increase in the amount of gridded data IO.
 
@@ -239,17 +241,17 @@ There are several possibilities to perform IO in parallel (\cite{MPI-2}):
 \begin{itemize}
 \item {\bf Single-threaded IO.} A single process acquires all the data and
 writes them out. The features of hardware and OS are used to distribute the 
-data over multiple chanels and, possible, to muliple disks.
+data over multiple chanels and, possibly, to muliple disks.
 
-\item {\bf Multithreaded, multi-fileset IO} Many processers write to
-multiple independent files. These files may be later assembled. Since each of 
+\item {\bf Multithreaded, multi-fileset IO} Many processes write to
+multiple independent files. These files may be assembled later. Since each of 
 the processes operates with its file logically independently, we can again 
-rely on the hardware and OS to operate with multiple chanels and multiple 
-disks concurrently. 
+rely on the hardware and OS to operate concurrently with multiple chanels and 
+multiple disks. 
  
 \item {\bf Multithreaded/Single-fileset IO.} Many processes write to a
 single file. Although this approach is the most desirable one, its 
-implementation is the most complicated. Since it requires concurrent access, 
+implementation is the most complicated. Since it requires concurrent access 
 to the file by multiple processes, it can be implemented within the ESMF I/O 
 only when such functionality is provided by underlying I/O library. 
 \end{itemize}
@@ -265,7 +267,7 @@ It supports NetCDF and binary data formats.
 \subsection{Location}
 
 Input/Output (IO) is part of the ESMF Infrastructure.  It will provide
-efficient utilities to input/output gridded data and observation data
+efficient utilities to input/output gridded data and observational data
 to and from the disk. A standard API will allow manipulation of multiple
 standard formats.
 

@@ -1,4 +1,4 @@
-% $Id: IO_req.tex,v 1.5 2002/05/07 03:18:46 lzaslavsky Exp $
+% $Id: IO_req.tex,v 1.6 2002/05/07 20:08:14 lzaslavsky Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -190,9 +190,10 @@ observational data covered by ESMF metadata convensions.
 
 \sreq{Single-threaded IO of distribuded data}
 
-ESMF should provide single-treaded IO of distributed data when a
+ESMF should provide single-threaded IO of distributed data when a
 single process acquires all the data from other processors and writes
-them to the disk or read data from the disk and pass them to other processes. 
+them to the disk or read data from the disk and passes them to other 
+processes. 
 
 
 \begin{reqlist}
@@ -203,10 +204,10 @@ them to the disk or read data from the disk and pass them to other processes.
 \end{reqlist}
 
 
-\sreq{Multi-threaded IO of distribuded data to a multiple files}
+\sreq{Multi-threaded IO of distributed data to a multiple files}
 
 
-ESMF should provide multi-treaded IO of distributed data when each
+ESMF should provide multi-threaded IO of distributed data when each
 process reads data from and writes data to an independent file. 
 
 \begin{reqlist}
@@ -220,7 +221,7 @@ process reads data from and writes data to an independent file.
 \sreq{Multi-threaded IO of distribuded data to a single file}
 
 
-ESMF should provide multi-treaded IO of distributed data when each
+ESMF should provide multi-threaded IO of distributed data when each
 process reads data from the disk and writes data to the disk using the same 
 file.  
 
