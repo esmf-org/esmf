@@ -90,10 +90,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Calendar_usage}
-\input{Calendar_fex}
+\input{ESMF_CalendarEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Calendar_usage}
-\input{../Infrastructure/TimeMgr/doc/Calendar_fex}
+\input{../Infrastructure/TimeMgr/doc/ESMF_CalendarEx_fapi}
 #endif
 
 %\subsubsection{Restrictions}
