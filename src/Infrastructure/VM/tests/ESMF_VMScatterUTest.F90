@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterUTest.F90,v 1.1 2005/01/24 17:20:26 rfaincht Exp $
+! $Id: ESMF_VMScatterUTest.F90,v 1.2 2005/01/28 18:03:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMScatterUTest.F90,v 1.1 2005/01/24 17:20:26 rfaincht Exp $'
+      '$Id: ESMF_VMScatterUTest.F90,v 1.2 2005/01/28 18:03:29 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -50,7 +50,7 @@
       integer::  rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
-      integer:: nlen, nsize, i, scatterRoot, gatherRoot
+      integer:: nlen, nsize, i, scatterRoot
       integer, allocatable:: array1(:), array2(:)
       real(ESMF_KIND_R8), allocatable:: farray1(:), farray2(:)
       real(ESMF_KIND_R4), allocatable:: f4array1(:), f4array2(:)
@@ -73,7 +73,6 @@
       call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
 
       scatterRoot = 0
-      gatherRoot = petCount - 1
       ! allocate data arrays
       nsize = 2
       nlen = nsize * petCount
@@ -98,40 +97,8 @@
         f4array2(i) = 0.
       enddo
 
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Verify array1 data before scatter
-      write(failMsg, *) "Wrong data."
-      write(name, *) "Verifying array1 data before scatter Test"
-      rc = ESMF_SUCCESS
-      do i=1, nlen
-	if (array1(i)/=(localPet * 100 + i)) rc = ESMF_FAILURE
-      enddo
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      print *, 'contents before scatter:'
-      do i=1, nlen
-        print *, localPet,' array1: ', array1(i)
-      enddo
-
       ! Testing with Integer arguments
       !===============================
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Verify array2 data before scatter
-      write(failMsg, *) "Wrong data."
-      write(name, *) "Verifying array2 data before scatter Test"
-      rc = ESMF_SUCCESS
-      do i=1, nsize
-	if (array2(i)/=0) rc = ESMF_FAILURE
-      enddo
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      print *, 'contents before scatter:'
-      do i=1, nsize
-        print *, localPet,' array2: ', array2(i)
-      enddo
-
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Scatter from scatterRoot
