@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.38 2004/04/13 22:58:41 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.39 2004/04/14 15:25:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.38 2004/04/13 22:58:41 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.39 2004/04/14 15:25:53 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -407,13 +407,13 @@
       totalUse = .false.
       if(present(total)) totalUse = total
 
-      call ESMF_GridGetDELayout(srcGrid, srcDELayout, status)
+      call ESMF_GridGet(srcGrid, delayout=srcDELayout, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridRouteConstruct: GridGetDELayout ", &
                  "returned failure"
         return
       endif
-      call ESMF_newDELayoutGet(srcDELayout, localDE=myDE, status)
+      call ESMF_newDELayoutGet(srcDELayout, localDE=myDE, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridRouteConstruct: DELayoutGet ", &
                  "returned failure"
@@ -505,7 +505,7 @@
         enddo
 
       ! recvDomainList next
-        call ESMF_newDELayoutGet(srcDELayout, deCount=nDEs, status)
+        call ESMF_newDELayoutGet(srcDELayout, deCount=nDEs, rc=status)
         allocate(allAI(nDEs,dimCount))
         allocate(allLocalAI(nDEs,dimCount))
         if (totalUse) then
