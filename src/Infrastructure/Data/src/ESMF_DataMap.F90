@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.2 2003/07/30 17:49:45 pwjones Exp $
+! $Id: ESMF_DataMap.F90,v 1.3 2003/07/30 18:11:45 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,17 +99,18 @@
       end type
 
       type(ESMF_RelLoc), parameter :: &
-                           ESMF_CELL_CENTER   = ESMF_RelLoc( 1), &
-                           ESMF_CELL_NFACE    = ESMF_RelLoc( 2), &
-                           ESMF_CELL_SFACE    = ESMF_RelLoc( 3), &
-                           ESMF_CELL_EFACE    = ESMF_RelLoc( 4), &
-                           ESMF_CELL_WFACE    = ESMF_RelLoc( 5), &
-                           ESMF_CELL_NECORNER = ESMF_RelLoc( 6), &
-                           ESMF_CELL_NWCORNER = ESMF_RelLoc( 7), &
-                           ESMF_CELL_SECORNER = ESMF_RelLoc( 8), &
-                           ESMF_CELL_SWCORNER = ESMF_RelLoc( 9), &
-                           ESMF_CELL_CELL     = ESMF_RelLoc(10), &
-                           ESMF_CELL_VERTEX   = ESMF_RelLoc(11)
+                           ESMF_CELL_UNDEFINED = ESMF_RelLoc( 0), &
+                           ESMF_CELL_CENTER    = ESMF_RelLoc( 1), &
+                           ESMF_CELL_NFACE     = ESMF_RelLoc( 2), &
+                           ESMF_CELL_SFACE     = ESMF_RelLoc( 3), &
+                           ESMF_CELL_EFACE     = ESMF_RelLoc( 4), &
+                           ESMF_CELL_WFACE     = ESMF_RelLoc( 5), &
+                           ESMF_CELL_NECORNER  = ESMF_RelLoc( 6), &
+                           ESMF_CELL_NWCORNER  = ESMF_RelLoc( 7), &
+                           ESMF_CELL_SECORNER  = ESMF_RelLoc( 8), &
+                           ESMF_CELL_SWCORNER  = ESMF_RelLoc( 9), &
+                           ESMF_CELL_CELL      = ESMF_RelLoc(10), &
+                           ESMF_CELL_VERTEX    = ESMF_RelLoc(11)
 
  
 !------------------------------------------------------------------------------
@@ -183,12 +184,13 @@
              ESMF_IO_IJK, ESMF_IO_JIK, ESMF_IO_KJI, ESMF_IO_IKJ, &
              ESMF_IO_JKI, ESMF_IO_KIJ 
 
-      public ESMF_RelLoc,        ESMF_CELL_CENTER
-      public ESMF_CELL_NFACE,    ESMF_CELL_SFACE
-      public ESMF_CELL_EFACE,    ESMF_CELL_WFACE
-      public ESMF_CELL_NECORNER, ESMF_CELL_NWCORNER
-      public ESMF_CELL_SECORNER, ESMF_CELL_SWCORNER
-      public ESMF_CELL_CELL,     ESMF_CELL_VERTEX
+      public ESMF_RelLoc
+      public ESMF_CELL_UNDEFINED, ESMF_CELL_CENTER
+      public ESMF_CELL_NFACE,     ESMF_CELL_SFACE
+      public ESMF_CELL_EFACE,     ESMF_CELL_WFACE
+      public ESMF_CELL_NECORNER,  ESMF_CELL_NWCORNER
+      public ESMF_CELL_SECORNER,  ESMF_CELL_SWCORNER
+      public ESMF_CELL_CELL,      ESMF_CELL_VERTEX
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -214,7 +216,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.2 2003/07/30 17:49:45 pwjones Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.3 2003/07/30 18:11:45 pwjones Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -982,12 +984,18 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-        if (relloc .eq. ESMF_CELL_CENTER) string = "Cell Center"
-        if (relloc .eq. ESMF_CELL_NORTH) string = "Cell North"
-        if (relloc .eq. ESMF_CELL_EAST) string = "Cell East"
-        if (relloc .eq. ESMF_CELL_NE) string = "Cell NorthEast"
-        if (relloc .eq. ESMF_CELL_CELL) string = "Full Cell"
-        if (relloc .eq. ESMF_CELL_VERTEX) string = "Cell Vertex"
+        if (relloc .eq. ESMF_CELL_UNDEFINED) string = "Undefined"
+        if (relloc .eq. ESMF_CELL_CENTER)    string = "Cell Center"
+        if (relloc .eq. ESMF_CELL_NFACE)     string = "Cell North Face"
+        if (relloc .eq. ESMF_CELL_SFACE)     string = "Cell South Face"
+        if (relloc .eq. ESMF_CELL_EFACE)     string = "Cell East Face"
+        if (relloc .eq. ESMF_CELL_WFACE)     string = "Cell West Face"
+        if (relloc .eq. ESMF_CELL_NECORNER)  string = "Cell NorthEast Corner"
+        if (relloc .eq. ESMF_CELL_NWCORNER)  string = "Cell NorthWest Corner"
+        if (relloc .eq. ESMF_CELL_SECORNER)  string = "Cell SouthEast Corner"
+        if (relloc .eq. ESMF_CELL_SWCORNER)  string = "Cell SouthWest Corner"
+        if (relloc .eq. ESMF_CELL_CELL)      string = "Full Cell"
+        if (relloc .eq. ESMF_CELL_VERTEX)    string = "Cell Vertex"
 
         if (present(rc)) rc = ESMF_SUCCESS
 
