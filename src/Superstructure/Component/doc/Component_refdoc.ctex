@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.8 2003/04/28 20:20:37 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.9 2003/04/30 21:36:42 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@
 \input{../Superstructure/Component/doc/comp_rest}
 #endif
 
-\section{Component F90 Interface}
+%\section{Component F90 Interface}
 
 %% \subsection{Use and Examples}
 %% #ifdef STANDALONE
@@ -289,7 +289,7 @@
 \input{../Superstructure/Component/doc/state_rest}
 #endif
 
-\section{State F90 Interface}
+%\section{State F90 Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.6 2003/04/15 16:57:56 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.7 2003/04/30 21:36:42 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -97,7 +97,7 @@
 %\input{../Infrastructure/Field/doc/Field_rest}
 #endif
 
-\section{Field F90 Interface}
+%\section{Field F90 Interface}
 
 \subsection{Use and Examples}
 % #ifdef STANDALONE
@@ -173,7 +173,7 @@
 %\input{../Infrastructure/Field/doc/Bundle_rest}
 #endif
 
-\section{Bundle F90 Interface}
+%\section{Bundle F90 Interface}
 
 \subsection{Use and Examples}
 %% #ifdef STANDALONE
@@ -219,78 +219,6 @@
 %\input{../Infrastructure/Field/doc/ESMC_Bundle_chapi}
 %#endif
 
-
-\section{Array Design}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{Array_desc}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Array_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{Array_design}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Array_design}
-#endif
-
-\subsubsection{Class Definition}
-#ifdef STANDALONE
-\input{Array_def}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Array_def}
-#endif
-
-%\subsubsection{Restrictions}
-#ifdef STANDALONE
-%\input{Array_rest}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/Array_rest}
-#endif
-
-%%\section{Array F90 Interface}
-
-%% \subsection{Use and Examples}
-%% #ifdef STANDALONE
-%% \input{arrayex_fapi}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/arrayex_fapi}
-%% #endif
-
-%\subsection{Class API}
-%% #ifdef STANDALONE
-%% \input{array_fapi}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/array_fapi}
-%% #endif
-
-%% \section{Array C++ Interface}
-
-%% \subsection{Use and Examples}
-%% #ifdef STANDALONE
-%% \input{Array_ccex}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/Array_ccex}
-%% #endif
-
-% \subsection{Parameters and Definitions}
-% #ifdef STANDALONE
-% \input{DataArray_ccparam}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Field/doc/DataArray_ccparam}
-% #endif
-
-%\subsection{Class API}
-%% #ifdef STANDALONE
-%% \input{array_ccapi}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/array_ccapi}
-%% #endif
-
-
-
 \section{DataMap Design}
 
 \subsection{Description}
@@ -321,7 +249,7 @@
 %\input{../Infrastructure/Field/doc/DataMap_rest}
 #endif
 
-\section{DataMap F90 Interface}
+%\section{DataMap F90 Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
