@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.79 2004/12/17 22:35:45 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.80 2004/12/17 23:08:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.79 2004/12/17 22:35:45 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.80 2004/12/17 23:08:55 eschwab Exp $'
 
 !==============================================================================
 !
@@ -485,13 +485,13 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: ms
       integer(ESMF_KIND_I4),   intent(out), optional :: us
       integer(ESMF_KIND_I4),   intent(out), optional :: ns
-      real(ESMF_KIND_R8),      intent(out), optional :: d_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: h_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: m_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: s_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: us_r8
-      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
       integer(ESMF_KIND_I4),   intent(out), optional :: sN
       integer(ESMF_KIND_I4),   intent(out), optional :: sD
       type(ESMF_Calendar),     intent(out), optional :: calendar
