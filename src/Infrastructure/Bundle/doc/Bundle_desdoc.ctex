@@ -1,4 +1,4 @@
-% $Id: Field_desdoc.ctex,v 1.5 2003/09/17 21:26:29 cdeluca Exp $
+% $Id: Bundle_desdoc.ctex,v 1.1 2003/09/17 21:26:29 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -136,6 +136,82 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/ESMC_Field_chapi}
 #endif
+
+\section{Bundle Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Bundle_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Field/doc/Bundle_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{Bundle_design}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Field/doc/Bundle_design}
+#endif
+
+\subsubsection{Class Definition}
+#ifdef STANDALONE
+\input{Bundle_def}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Field/doc/Bundle_def}
+#endif
+
+%\subsubsection{Restrictions}
+#ifdef STANDALONE
+%\input{Bundle_rest}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Field/doc/Bundle_rest}
+#endif
+
+\section{Bundle F90 Interface}
+
+\subsection{Use and Examples}
+% #ifdef STANDALONE
+% \input{bundleex_fapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/bundleex_fapi}
+% #endif
+
+% \subsection{Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{Bundle_fparam}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/Bundle_fparam}
+% #endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMF_Bundle_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Field/doc/ESMF_Bundle_fapi}
+#endif
+
+\section{Bundle C++ Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{Bundle_ccex}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Field/doc/Bundle_ccex}
+#endif
+
+% \subsection{Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{Bundle_ccparam}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/Bundle_ccparam}
+% #endif
+
+%\subsection{Class API}
+% #ifdef STANDALONE
+% \input{bundle_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/bundle_ccapi}
+% #endif
 
 
 % \section{Array Design}

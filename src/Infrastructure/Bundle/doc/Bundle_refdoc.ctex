@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.10 2003/09/17 21:26:29 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.1 2003/09/17 21:26:29 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{Field Design}
+\newcommand{\mytitle}{Bundles Design}
 \newcommand{\myauthors}{Nancy Collins}
 #endif
 
@@ -67,48 +67,48 @@
 % %\input{../Infrastructure/Field/doc/Field_param}
 % #endif
 
-\section{Field Class}
+\section{Bundle Class}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Field_desc}
+\input{Bundle_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_desc}
+\input{../Infrastructure/Field/doc/Bundle_desc}
 #endif
 
 \subsection{Usage}
 #ifdef STANDALONE
-\input{Field_usage}
+\input{Bundle_usage}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_usage}
+\input{../Infrastructure/Field/doc/Bundle_usage}
 #endif
 
 %\subsubsection{Restrictions}
-#ifdef STANDALONE
-%\input{Field_rest}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/Field_rest}
-#endif
+%#ifdef STANDALONE
+%\input{Bundle_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Field/doc/Bundle_rest}
+%#endif
 
 %\subsection{Use and Examples}
-% #ifdef STANDALONE
-% \input{fieldex_fapi}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Field/doc/fieldex_fapi}
-% #endif
+%% #ifdef STANDALONE
+%% \input{bundleex_fapi}
+%% #elif defined(CONSTITUENT)
+%% \input{../Infrastructure/Field/doc/bundleex_fapi}
+%% #endif
 
 % \subsection{Parameters and Definitions}
 % #ifdef STANDALONE
-% \input{Field_fparam}
+% \input{Bundle_fparam}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Field/doc/Field_fparam}
+% \input{../Infrastructure/Field/doc/Bundle_fparam}
 % #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_Field_fapi}
+\input{ESMF_Bundle_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMF_Field_fapi}
+\input{../Infrastructure/Field/doc/ESMF_Bundle_fapi}
 #endif
 
 \section{DataMap Class}
