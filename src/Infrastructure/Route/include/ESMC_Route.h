@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.30 2003/08/27 14:26:06 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.31 2003/09/04 19:40:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,13 +59,13 @@
     ESMC_DELayout *snd_layout;
     int snd_DE; 
     int snd_AI_count; 
-    ESMC_AxisIndex snd_AI_exc[ESMF_MAXDIM]; 
-    ESMC_AxisIndex snd_AI_tot[ESMF_MAXDIM];
+    ESMC_AxisIndex *snd_AI_exc;
+    ESMC_AxisIndex *snd_AI_tot;
     ESMC_DELayout *rcv_layout;
     int rcv_DE; 
     int rcv_AI_count; 
-    ESMC_AxisIndex rcv_AI_exc[ESMF_MAXDIM]; 
-    ESMC_AxisIndex rcv_AI_tot[ESMF_MAXDIM];
+    ESMC_AxisIndex *rcv_AI_exc;
+    ESMC_AxisIndex *rcv_AI_tot;
     ESMC_Logical periodic[ESMF_MAXDIM];
     int routeid;
     ESMC_Route *theroute;
@@ -103,7 +103,7 @@
     int ESMC_RouteSetSend(int dst_de, ESMC_XPacket *xp);
     int ESMC_RouteSetRecv(int src_de, ESMC_XPacket *xp);
     
- // initialize the communication routines in this route object
+    // initialize the communication routines in this route object
     int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
                        ESMC_AxisIndex *AI_tot, int AI_count, 
                        int *global_start, int *global_count,
@@ -128,8 +128,21 @@
                        ESMC_DomainList *sendDomainList,
                        ESMC_DomainList *recvDomainList);
 
- // execute the communication routines set up in this route object
+    // execute the communication routines set up in this route object
     int ESMC_RouteRun(void *srcaddr, void *dstaddr);
+
+    // add a route to the cache table
+    int ESMC_RouteAddCache(int rank, 
+                       int my_DE_rcv, 
+                       ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
+                       int AI_rcv_count, ESMC_DELayout *layout_rcv,
+                       int my_DE_snd, 
+                       ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
+                       int AI_snd_count, ESMC_DELayout *layout_snd,
+                       ESMC_Logical *periodic);
+
+    // drop a route from the cache table
+    int ESMC_RouteDropCache(void);
 
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RouteValidate(const char *options) const;
