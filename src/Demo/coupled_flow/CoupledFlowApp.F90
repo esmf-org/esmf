@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.1 2003/05/02 19:24:24 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.2 2003/05/02 20:53:17 nscollins Exp $
 !
 ! ESMF Coupled Application Wrapper
 !
@@ -34,16 +34,15 @@
     type(ESMF_DELayout) :: layoutApp
     type(ESMF_State) :: flowstate
 
-    integer :: de_id, ndes, rc, delist(16)
-    integer :: i, mid, quart
-
-    ! instantiate a clock, a calendar, and timesteps
+    ! A clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
     type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
 
+    ! Return codes for error checks
+    integer :: rc
         
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -143,7 +142,7 @@
 !------------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_StateDestroy(stateDemo, rc)
+      call ESMF_StateDestroy(flowstate, rc)
 
       call ESMF_GridCompDestroy(compGridded, rc)
 

@@ -1,6 +1,7 @@
-! $Id: CoupledFlowDemo.F90,v 1.1 2003/05/02 19:24:24 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.2 2003/05/02 20:53:17 nscollins Exp $
 !
-! ESMF Coupled Flow Demo
+! ESMF Coupled Flow Demo - A Gridded Component which can be called either 
+!   directly from an Application Component or nested in a larger application.
 !
 
 !------------------------------------------------------------------------------
@@ -9,14 +10,14 @@
 !BOP
 !
 ! !DESCRIPTION:
-! ESMF Coupled Flow Demo
-!   2 components and 1 coupler, two-way coupling.
+! ESMF Coupled Flow Demo Component
+!   contains 2 nested components and 1 coupler, two-way coupling.
 !   Flow application.  
 !
 !
 !\begin{verbatim}
 
-    program ESMF_CoupledFlowDemo
+    module CoupledFlowMod
 
     ! ESMF Framework module, defines all ESMF data types and procedures
     use ESMF_Mod
@@ -27,22 +28,19 @@
     use    CouplerMod, only : Coupler_register
 
     implicit none
+    private
     
-    ! Local variables
+    ! Local (private) global variables
 
     ! Components
-    type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: INcomp, FScomp
     type(ESMF_CplComp) :: cpl
 
     ! States and Layouts
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
-    type(ESMF_DELayout) :: layoutApp, layoutIN, layoutFS
+    type(ESMF_DELayout) :: layoutTop, layoutIN, layoutFS
     type(ESMF_State) :: INimp, INexp, FSimp, FSexp
     type(ESMF_State) :: cplstateF2I, cplstateI2F, cplbothlists
-
-    integer :: de_id, ndes, rc, delist(16)
-    integer :: i, mid, quart
 
     ! instantiate a clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -51,28 +49,67 @@
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
 
+    ! Public entry point
+    public CoupledFlow_register
+
+!------------------------------------------------------------------------------
+
+    contains
         
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+!   Registration routine
 
-    print *, "Coupled Flow Demo"
+!   !  The Register routine sets the subroutines to be called
+!   !   as the init, run, and finalize routines.  Note that these are
+!   !   private to the module.
+
+    subroutine CoupledFlow_register(comp, rc)
+        type(ESMF_GridComp), intent(inout) :: comp
+        integer, intent(out) :: rc
+
+        print *, "in user register routine"
+
+        ! Register the callback routines.
+
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+                                        coupledflow_init, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+                                        coupledflow_run, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+                                        coupledflow_final, ESMF_SINGLEPHASE, rc)
+
+        print *, "Registered Initialize, Run, and Finalize routines"
+
+    end subroutine
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!    Create section
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!
+!    Init section
 
-    ! Create the top level application component.  This initializes the
-    ! ESMF Framework as well.
-    app = ESMF_AppCompCreate("Coupled Flow Demo", rc=rc)
+!-------------------------------------------------------------------------
+!   !  User Comp Component created by higher level calls, here is the
+!   !   Initialization routine.
 
-    ! Query application for layout.
-    call ESMF_AppCompGet(app, layout=layoutApp, rc=rc)
+
+subroutine coupledflow_init(gcomp, importstate, exportstate, clock, rc)
+    type(ESMF_GridComp), intent(inout) :: gcomp
+    type(ESMF_State), intent(inout) :: importstate, exportstate
+    type(ESMF_Clock), intent(in) :: clock
+    integer, intent(out) :: rc
+
+    integer :: ndes, delist(16)
+    integer :: i, mid, quart
+
+
+    ! Get our layout from the component
+    call ESMF_GridCompGet(gcomp, layout=layoutTop, rc=rc)
 
     ! Sanity check the number of DEs we were started on.
-    call ESMF_DELayoutGetNumDEs(layoutApp, ndes, rc)
+    call ESMF_DELayoutGetNumDEs(layoutTop, ndes, rc)
     !if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
     !    print *, "This demo needs to run at least 4-way and no more than 16-way."
     !    print *, "The requested number of processors was ", ndes
@@ -107,7 +144,7 @@
     FScomp = ESMF_GridCompCreate(cnameFS, layout=layoutFS, rc=rc)
 
     cplname = "Two-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, layout=layoutApp, rc=rc)
+    cpl = ESMF_CplCompCreate(cplname, layout=layoutTop, rc=rc)
 
 
     print *, "Comp Creates finished"
@@ -115,7 +152,7 @@
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!  Register section
+!  Register section for subcomponents
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
       call ESMF_GridCompSetServices(INcomp, Injector_register, rc)
@@ -127,35 +164,10 @@
       call ESMF_CplCompSetServices(cpl, Coupler_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
 
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!  Create and initialize a clock.
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-      ! initialize calendar to be Gregorian type
-      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
-
-      ! initialize time interval to 2 seconds
-      call ESMF_TimeIntervalInit(timeStep, S=int(2,kind=ESMF_IKIND_I8), rc=rc)
-
-      ! initialize start time to 12May2003, 9:00 am
-      call ESMF_TimeInit(startTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=5, DD=12, H=9, M=0, S=int(0,kind=ESMF_IKIND_I8), &
-                         cal=gregorianCalendar, rc=rc)
-
-      ! initialize stop time to 15May2003, 9:00 am
-      call ESMF_TimeInit(stopTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=5, DD=15, H=9, M=0, S=int(0,kind=ESMF_IKIND_I8), &
-                         cal=gregorianCalendar, rc=rc)
-
-      ! initialize the clock with the above values
-      call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
-
-
  
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!  Init section
+!  Init section for subcomponents
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
  
@@ -194,43 +206,71 @@
       call ESMF_CplCompInitialize(cpl, cplbothlists, clock, rc=rc)
       print *, "Coupler Initialize finished, rc =", rc
  
+end subroutine coupledflow_init
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !     Run section
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
 
-      print *, "Run Loop Start time"
-      call ESMF_ClockPrint(clock, "currtime string", rc)
+!   !  The Run routine where data is computed.
+!   !
 
-      do while (.not. ESMF_ClockIsStopTime(clock, rc))
+subroutine coupledflow_run(comp, importstate, exportstate, clock, rc)
+     type(ESMF_GridComp), intent(inout) :: comp
+     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_Clock), intent(inout) :: clock
+     integer, intent(out) :: rc
+
+     ! Local variables
+     type(ESMF_Clock) :: localclock
+
+     ! make our own local copy of the clock
+     localclock = clock
+  
+
+     print *, "Run Loop Start time"
+     call ESMF_ClockPrint(localclock, "currtime string", rc)
+
+     do while (.not. ESMF_ClockIsStopTime(localclock, rc))
 
         ! Run FlowSolver Component
-        call ESMF_GridCompRun(FScomp, FSimp, FSexp, clock, rc=rc)
+        call ESMF_GridCompRun(FScomp, FSimp, FSexp, localclock, rc=rc)
 
         ! Couple export state of FlowSolver to import of Injector
-        call ESMF_CplCompRun(cpl, cplstateF2I, clock, rc=rc)
+        call ESMF_CplCompRun(cpl, cplstateF2I, localclock, rc=rc)
   
         ! Run Injector Component
-        call ESMF_GridCompRun(INcomp, INimp, INexp, clock, rc=rc)
+        call ESMF_GridCompRun(INcomp, INimp, INexp, localclock, rc=rc)
   
         ! Couple export state of Injector to import of FlowSolver
-        call ESMF_CplCompRun(cpl, cplstateI2F, clock, rc=rc)
+        call ESMF_CplCompRun(cpl, cplstateI2F, localclock, rc=rc)
   
         ! Advance the time
-        call ESMF_ClockAdvance(clock, rc=rc)
-        !call ESMF_ClockPrint(clock, "currtime string", rc)
+        call ESMF_ClockAdvance(localclock, rc=rc)
+        !call ESMF_ClockPrint(localclock, "currtime string", rc)
 
 
-      enddo
-      print *, "Run Loop End time"
-      call ESMF_ClockPrint(clock, "currtime string", rc)
+     enddo
+     print *, "Run Loop End time"
+     call ESMF_ClockPrint(localclock, "currtime string", rc)
  
+end subroutine coupledflow_run
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !     Finalize section
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+
+!   !  The Finalization routine where things are deleted and cleaned up.
+!   !
+
+subroutine coupledflow_final(comp, importstate, exportstate, clock, rc)
+     type(ESMF_GridComp), intent(inout) :: comp
+     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_Clock), intent(in) :: clock
+     integer, intent(out) :: rc
+
+
+      ! First let subcomponents finalize
 
       ! Finalize Injector Component    
       call ESMF_GridCompFinalize(INcomp, INimp, INexp, clock, rc=rc)
@@ -241,12 +281,8 @@
       ! Finalize Coupler
       call ESMF_CplCompFinalize(cpl, cplstateI2F, clock, rc=rc)
 
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!     Destroy section
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!     Clean up
+
+      ! Then clean them up
 
       call ESMF_StateDestroy(INimp, rc)
       call ESMF_StateDestroy(INexp, rc)
@@ -262,13 +298,12 @@
       call ESMF_DELayoutDestroy(layoutIN, rc)
       call ESMF_DELayoutDestroy(layoutFS, rc)
 
-      call ESMF_AppCompDestroy(app, rc)
+      print *, "Coupled Flow Demo complete!"
 
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-10    print *, "Coupled Flow Demo complete!"
+end subroutine coupledflow_final
 
-      end program ESMF_CoupledFlowDemo
+
+      end module CoupledFlowMod
     
 !\end{verbatim}
     
