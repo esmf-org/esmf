@@ -1,0 +1,16 @@
+% $Id: Array_rest.tex,v 1.1 2003/10/22 02:20:18 cdeluca Exp $
+
+%\subsection{Restrictions}
+
+\begin{enumerate}
+
+\item {\bf 7D limit.}  Scalars and ranks up to 7D (the F90 limit) are 
+supported.
+
+\item {\bf Arrays of derived types not supported.}  Arrays of derived 
+types will not be directly supported by the framework.
+However, non-contiguous arrays which can be defined by (start/end/stride)
+triplets will be, so the user can construct a buffer by using a derived
+type and then define it as individual data arrays or a packed bundle array.
+
+\end{enumerate}

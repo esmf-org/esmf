@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.2 2003/09/18 17:21:27 cdeluca Exp $
+% $Id: Array_refdoc.ctex,v 1.3 2003/10/22 02:20:18 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,20 +41,6 @@
 \newpage
 #endif
 
-%\section{Synopsis}
-% #ifdef STANDALONE
-% \input{Data_syn}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Array/doc/Data_syn}
-% #endif
-
-%\section{Architecture}
-% #ifdef STANDALONE
-% \input{Data_arch}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Array/doc/Data_arch}
-% #endif
-
 \section{Array Class}
 
 \subsection{Description}
@@ -64,19 +50,33 @@
 \input{../Infrastructure/Array/doc/Array_desc}
 #endif
 
-%\subsection{Usage}
-%#ifdef STANDALONE
-%\input{Array_usage}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Array/doc/Array_usage}
-%#endif
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{Array_usage}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Array/doc/Array_usage}
+#endif
 
-% \subsection{Restrictions}
-% #ifdef STANDALONE
-% \input{class_rest}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Array/doc/class_rest}
-% #endif
+\subsection{Restrictions}
+#ifdef STANDALONE
+\input{Array_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Array/doc/Array_rest}
+#endif
+
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{Array_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Array/doc/Array_implnotes}
+#endif
+
+\subsection{Object Model}
+#ifdef STANDALONE
+\input{Array_obj}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Array/doc/Array_obj}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
@@ -85,24 +85,14 @@
 \input{../Infrastructure/Array/doc/ESMF_Array_fapi}
 #endif
 
-% \subsection{Use and Examples}
-% #ifdef STANDALONE
-% %\input{class_ex} 
-% #elif defined(CONSTITUENT)
-% %\input{../Infrastructure/Array/doc/class_ex} 
-% #endif
-
-%\newpage
-%\section{<Name2> Class} ...
-
 #ifdef STANDALONE
 %\section{Glossary}
 %\input{Data_glos}
 
 %\section{Bibliography}
-\bibliography{Data} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{Bibliography}
+%\bibliography{Data} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
 
 \newpage
 \setcounter{section}{1}
