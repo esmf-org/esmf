@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.75 2004/07/21 19:07:43 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.76 2004/10/27 18:52:25 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.75 2004/07/21 19:07:43 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.76 2004/10/27 18:52:25 eschwab Exp $'
 
 !==============================================================================
 !
@@ -575,11 +575,11 @@
 !     \item[{[s\_i8]}]
 !          Integer seconds (large, >= 64-bit).
 !     \item[{[ms]}]
-!          Integer milliseconds.  (Not implemented yet).
+!          Integer milliseconds.
 !     \item[{[us]}]
-!          Integer microseconds.  (Not implemented yet).
+!          Integer microseconds.
 !     \item[{[ns]}]
-!          Integer nanoseconds.  (Not implemented yet).
+!          Integer nanoseconds.
 !     \item[{[d\_r8]}]
 !          Double precision days.  (Not implemented yet).
 !     \item[{[h\_r8]}]
@@ -596,10 +596,8 @@
 !          Double precision nanoseconds.  (Not implemented yet).
 !     \item[{[sN]}]
 !          Integer numerator portion of fractional seconds (sN/sD).
-!          (Not implemented yet).
 !     \item[{[sD]}]
 !          Integer denominator portion of fractional seconds (sN/sD).
-!          (Not implemented yet).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}.
 !     \item[{[calendarType]}]
@@ -894,11 +892,11 @@
 !     \item[{[s\_i8]}]
 !          Integer seconds (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0.  (Not implemented yet).
+!          Integer milliseconds.  Default = 0.
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0.  (Not implemented yet).
+!          Integer microseconds.  Default = 0.
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0.  (Not implemented yet).
+!          Integer nanoseconds.  Default = 0.
 !     \item[{[d\_r8]}]
 !          Double precision days.  Default = 0.0.  (Not implemented yet).
 !     \item[{[h\_r8]}]
@@ -915,10 +913,10 @@
 !          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
 !     \item[{[sN]}]
 !          Integer numerator portion of fractional seconds (sN/sD).
-!          Default = 0.  (Not implemented yet).
+!          Default = 0.
 !     \item[{[sD]}]
 !          Integer denominator portion of fractional seconds (sN/sD).
-!          Default = 1.  (Not implemented yet).
+!          Default = 1.
 !     \item[calendar]
 !          Associated {\tt Calendar}.  Defaults to calendar
 !          {\tt ESMF\_CAL\_NOCALENDAR} or default specified in
