@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.15 2004/02/13 20:44:33 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.16 2004/02/23 22:57:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.15 2004/02/13 20:44:33 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.16 2004/02/23 22:57:42 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -4171,7 +4171,8 @@ end function
 !           The name of the Attribute to query.
 !
 !     \item [type]
-!           The type of the Attribute.
+!           The  data type of the Attribute, which includes ESMF\_DATA\_INTEGER,
+!            ESMF\_DATA\_REAL, ESMF\_DATA\_LOGICAL, ESMF\_DATA\_CHARACTER.
 !
 !     \item [count]
 !           The number of items in this Attribute.  For character types,
