@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.14 2003/04/08 23:05:28 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.15 2003/04/14 16:24:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.14 2003/04/08 23:05:28 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.15 2003/04/14 16:24:51 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -280,8 +280,21 @@
       endif
 
 !     Routine which interfaces to the C++ creation routine.
-      call c_ESMC_DELayoutCreateFParent(layout, parent, parent_offsets, &
-           de_indices, ndim, lengths, commtypes, status)
+!     Take care to not reference unspecified optional arguments; this
+!     seems to cause problems on the alpha.
+      if (present(parent_offsets) .and. present(de_indices)) then
+          call c_ESMC_DELayoutCreateFParent(layout, parent, parent_offsets, &
+                                 de_indices, ndim, lengths, commtypes, status)
+      else if (present(parent_offsets)) then
+          call c_ESMC_DELayoutCreateFParent(layout, parent, parent_offsets, &
+                                 0, ndim, lengths, commtypes, status)
+      else if (present(de_indices)) then
+          call c_ESMC_DELayoutCreateFParent(layout, parent, 0, &
+                                 de_indices, ndim, lengths, commtypes, status)
+      else 
+          print *, "Error: one of parent_offsets or de_indicies must be given"
+          return
+      endif
 
       if (status .ne. ESMF_SUCCESS) then
         print *, "DELayout creation error"
