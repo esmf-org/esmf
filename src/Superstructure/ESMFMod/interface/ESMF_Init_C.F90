@@ -1,4 +1,4 @@
-!  $Id: ESMF_Init_C.F90,v 1.3 2004/04/23 17:30:06 nscollins Exp $
+!  $Id: ESMF_Init_C.F90,v 1.4 2004/12/06 23:30:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Init_C.F90,v 1.3 2004/04/23 17:30:06 nscollins Exp $'
+!      '$Id: ESMF_Init_C.F90,v 1.4 2004/12/06 23:30:51 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -36,7 +36,9 @@
 !EOP
 !------------------------------------------------------------------------------
    subroutine f_esmf_frameworkinitialize(lang, defaultConfigFileName, &
-                                        defaultCalendar, defaultLogFileName, rc)
+                                        defaultCalendar, defaultLogFileName, &
+                                        defaultLogType, rc)
+       use ESMF_LogErrMod
        use ESMF_CalendarMod
        use ESMF_CompMod
        use ESMF_InitMod
@@ -45,10 +47,12 @@
        character(len=*) :: defaultConfigFileName
        type(ESMF_CalendarType) :: defaultCalendar
        character(len=*) :: defaultLogFileName
+       type(ESMF_LogType) :: defaultLogType
        integer :: rc
 
        call ESMF_FrameworkInternalInit(lang, defaultConfigFilename, &
-                                       defaultCalendar, defaultLogFileName, rc)
+                                       defaultCalendar, defaultLogFileName, &
+                                       defaultLogType, rc)
 
    end subroutine f_esmf_frameworkinitialize
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.5 2004/04/28 23:12:12 cdeluca Exp $
+// $Id: ESMC_Init.h,v 1.6 2004/12/06 23:30:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,6 +59,8 @@ extern "C" {
                                         char *defaultConfigFileName,
                                         ESMC_CalendarType *defaultCalendar,
                                         char *defaultLogFileName,
+                                        // ESMC_LogType *defaultLogType,
+                                        int *defaultLogType,
                                         int *rc);
    void FTN(f_esmf_frameworkfinalize)(int *rc);
 };

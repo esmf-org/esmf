@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.3 2004/04/23 20:22:58 nscollins Exp $
+// $Id: ESMC_Init.C,v 1.4 2004/12/06 23:30:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "ESMC_Start.h"
+#include "ESMC_LogErr.h"
 //#include "ESMC_Machine.h"
 #include "ESMC_Init.h"
 
@@ -47,7 +48,9 @@ char **globalargv;
       char *defaultConfigFilename,         // in - default config filename
       ESMC_CalendarType defaultCalendar,   // in - optional time manager
                                            //      default calendar type
-      char *defaultLogFilename) {          // in - default log filename
+      char *defaultLogFilename,            // in - default log filename
+      //ESMC_LogType defaultLogType) {     // in - default log type (single/multi)
+      int defaultLogType) {                // in - default log type (single/multi)
 //  
 // !DESCRIPTION:
 //
@@ -60,7 +63,8 @@ char **globalargv;
     globalargv = NULL;
 
     FTN(f_esmf_frameworkinitialize)((int*)&l, defaultConfigFilename, 
-                                    &defaultCalendar, defaultLogFilename, &rc);
+                                    &defaultCalendar, defaultLogFilename, 
+                                    &defaultLogType, &rc);
 
     return rc;
 
@@ -90,7 +94,7 @@ char **globalargv;
     globalargc = 0;
     globalargv = NULL;
 
-    FTN(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL, &rc);
+    FTN(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL, NULL, &rc);
 
     return rc;
 
@@ -122,7 +126,7 @@ char **globalargv;
     globalargc = argc;
     globalargv = argv;
 
-    FTN(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL, &rc);
+    FTN(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL, NULL, &rc);
 
     return rc;
 
