@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.6 2004/11/30 23:48:56 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.7 2004/12/01 18:32:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.6 2004/11/30 23:48:56 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.7 2004/12/01 18:32:30 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -231,10 +231,6 @@
                                    "Allocating buffer for child ID list", &
                                    ESMF_CONTEXT, rc)) return
 
-    ! TODO: this should be integrated with the info list blocks,
-    !  but for now, brute force this to get something working.
-    !
-    offset = 0
 
     ! shortname for use in the code below
     si => stateInfoList(1)
@@ -258,6 +254,7 @@
     si%mycount = state%statep%datacount 
     do i=1, state%statep%datacount
         stateitem => state%statep%datalist(i)
+        offset = 0
         select case (stateitem%otype%ot)
            case (ESMF_STATEITEM_BUNDLE%ot)
              call c_ESMC_GetID(stateitem%datap%bp%btypep, si%idsend(i), localrc)
@@ -279,7 +276,7 @@
              call c_ESMC_GetID(stateitem%datap%ap, si%idsend(i), localrc)
              si%objsend(i) = ESMF_ID_ARRAY%objectID
              bptr => si%blindsend(:,i)
-             call c_ESMC_ArraySerialize(stateitem%datap%ap, bptr(1), &
+             call c_ESMC_ArraySerializeNoData(stateitem%datap%ap, bptr(1), &
                                        bufsize, offset, rc)
             print *, "setting array, obj=", si%objsend(i), " id=", si%idsend(i)
 
@@ -543,7 +540,11 @@
                             k, si%idrecv(k), si%objrecv(k)
            enddo
 
-           offset = 0
+           !!! TODO: 
+           !!!   make a combined object id list here, so only one copy of
+           !!!   the missing object is sent.
+
+           !!offset = 0  !TODO: wrong place, yes??
            do k=1, si%theircount
              ihave = .false.
              do l=1, si%mycount
@@ -553,6 +554,7 @@
                  endif
              enddo
              if (.not. ihave) then
+                offset = 0  
                 select case (si%objrecv(k))
                    case (ESMF_ID_BUNDLE%objectID)
                     print *, "need to create proxy bundle, id=", si%idrecv(k)
@@ -569,7 +571,7 @@
                    case (ESMF_ID_ARRAY%objectID)
                     print *, "need to create proxy array, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    call c_ESMC_ArrayDeserialize(array, bptr, offset, localrc)
+                    call c_ESMC_ArrayDeserializeNoData(array, bptr, offset, localrc)
                     call ESMF_StateAddArray(state, array, rc=localrc)
 
                    case (ESMF_ID_STATE%objectID)
