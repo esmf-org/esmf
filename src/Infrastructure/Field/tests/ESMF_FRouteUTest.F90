@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.13 2003/06/05 17:42:11 svasquez Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.14 2003/06/06 14:25:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.13 2003/06/05 17:42:11 svasquez Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.14 2003/06/06 14:25:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -126,7 +126,7 @@
       vert_coord_system = ESMF_CoordSystem_Unknown
       gname = "test grid 1"
 
-      !NEX
+      !NEX_UTest
       grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
                              x_min=x_min, x_max=x_max, &
                              y_min=y_min, y_max=y_max, &
@@ -145,7 +145,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX
+      !NEX_UTest
       ! Verifing that an uninitialized Grid can be printed
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
@@ -171,7 +171,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX
+      !NEX_UTest
       ! Verifing that an Array can be created
       call ESMF_GridGetDE(grid1, lcelltot_index=g1_ai)
       allocate(f90ptr1(g1_ai(1)%r, g1_ai(2)%r))
@@ -183,7 +183,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX
+      !NEX_UTest
       ! second array
       call ESMF_GridGetDE(grid2, lcelltot_index=g2_ai)
       allocate(f90ptr2(g2_ai(1)%r, g2_ai(2)%r))
@@ -195,7 +195,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX
+      !NEX_UTest
       ! Verifing that a Field can be created with a Grid and Array
       f1 = ESMF_FieldCreate(grid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
@@ -204,7 +204,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX
+      !NEX_UTest
       ! second field
       f2 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    dm, "Field 1", ios, rc)
@@ -213,7 +213,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX
+      !NEX_UTest
       ! route test
       call ESMF_FieldRoute(f1, f2, layout1, rc)
       write(failMsg, *) ""
