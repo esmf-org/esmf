@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.27 2004/03/19 23:30:15 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.28 2004/03/22 20:31:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.27 2004/03/19 23:30:15 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.28 2004/03/22 20:31:08 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -1084,21 +1084,6 @@
       allocate(        srcCLocalAI(nDEs, gridrank), stat=status)
       allocate(        dstTLocalAI(nDEs, gridrank), stat=status)
       allocate(        srcTLocalAI(nDEs, gridrank), stat=status)
-     
-      ! Extract more information from the Grids
-      ! TODO: get decompids?
-      call ESMF_GridGet(dstGrid, globalCellCountPerDim=dstCellCountPerDim, &
-                        globalStartPerDEPerDim=dstStartPerDEPerDim, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedist: GridGet returned failure"
-         return
-      endif
-      call ESMF_GridGet(srcGrid, globalCellCountPerDim=srcCellCountPerDim, &
-                        globalStartPerDEPerDim=srcStartPerDEPerDim, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedist: GridGet returned failure"
-         return
-      endif
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
@@ -1106,21 +1091,40 @@
                            vertRelLoc=dstVertRelLoc, &
                            dataIorder=dstDimOrder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayRedist: DataMapGet returned failure"
+        print *, "ERROR in ArrayRedistStore: DataMapGet returned failure"
         return
       endif
       call ESMF_DataMapGet(srcDataMap, horzRelLoc=srcHorzRelLoc, &
                            vertRelLoc=srcVertRelLoc, &
                            dataIorder=srcDimOrder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayRedist: DataMapGet returned failure"
+        print *, "ERROR in ArrayRedistStore: DataMapGet returned failure"
         return
+      endif
+
+      ! Extract more information from the Grids
+      ! TODO: get decompids?
+      call ESMF_GridGet(dstGrid, &
+                        horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
+                        globalCellCountPerDim=dstCellCountPerDim, &
+                        globalStartPerDEPerDim=dstStartPerDEPerDim, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayRedistStore: GridGet returned failure"
+         return
+      endif
+      call ESMF_GridGet(srcGrid, &
+                        horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
+                        globalCellCountPerDim=srcCellCountPerDim, &
+                        globalStartPerDEPerDim=srcStartPerDEPerDim, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayRedistStore: GridGet returned failure"
+         return
       endif
 
       ! And get the Array sizes
       call ESMF_ArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedist: ArrayGet returned failure"
+         print *, "ERROR in ArrayRedistStore: ArrayGet returned failure"
          return
       endif
 
@@ -1150,7 +1154,8 @@
                                        localAI2D=dstTLocalAI, &
                                        globalAI2D=dstTotalAI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
+         print *, "ERROR in ArrayRedistStore: ", &
+                  "GridLocalToGlobalIndex returned failure"
          return
       endif
       call ESMF_GridLocalToGlobalIndex(srcGrid, &
@@ -1159,7 +1164,8 @@
                                        localAI2D=srcCLocalAI, &
                                        globalAI2D=srcCompAI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
+         print *, "ERROR in ArrayRedistStore: ", &
+                  "GridLocalToGlobalIndex returned failure"
          return
       endif
       call ESMF_GridLocalToGlobalIndex(srcGrid, &
@@ -1168,7 +1174,8 @@
                                        localAI2D=srcTLocalAI, &
                                        globalAI2D=srcTotalAI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
+         print *, "ERROR in ArrayRedistStore: ", &
+                  "GridLocalToGlobalIndex returned failure"
          return
       endif
 
