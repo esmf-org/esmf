@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.125 2005/01/14 16:03:00 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.126 2005/01/26 23:55:08 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,6 @@
  #include <ESMC_Start.h>
  #include <stdio.h>
  #include <stdlib.h>
- #include <iostream.h>
 
  // associated class definition file
  #include <ESMC_Route.h>
@@ -34,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.125 2005/01/14 16:03:00 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.126 2005/01/26 23:55:08 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1447,9 +1446,7 @@ static int maxroutes = 10;
   //        printf("Match1: %d, %d\n", theirDE, theirMatchingPET);
           //theirMatchingPET = theirDE;     // temporarily
           if (theirMatchingPET != theirDE) 
-	     cout << "theirDE = " << theirDE << ", parentDE = " 
-                  << theirMatchingPET << endl;
-
+	     printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
           // get "their" AI out of the dstAI array
           for (k=0; k<rank; k++) {
             theirAI[k]     =  dstCompAI[theirDE + k*dstAICount];
@@ -1512,8 +1509,7 @@ static int maxroutes = 10;
   //        printf("Match2: %d, %d\n", theirDE, theirMatchingPET);
           //theirMatchingPET = theirDE;     // temporarily
           if (theirMatchingPET != theirDE) 
-	     cout << "theirDE = " << theirDE << ", parentDE = " 
-                  << theirMatchingPET << endl;
+             printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
 
           // get "their" AI out of the srcAI array
           for (k=0; k<rank; k++) {
@@ -1691,8 +1687,7 @@ static int maxroutes = 10;
           dstdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
                                                   &theirMatchingPET, 1);
           if (theirMatchingPET != theirDE)
-             cout << "theirDE = " << theirDE << ", parentDE = "
-                  << theirMatchingPET << endl;
+             printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
     
           // loop over the number of AI's for their DE
           for (m=0; m<dstAICountPerDE[theirDE]; m++) {
@@ -1781,8 +1776,7 @@ static int maxroutes = 10;
           srcdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
                                                   &theirMatchingPET, 1);
           if (theirMatchingPET != theirDE)
-             cout << "theirDE = " << theirDE << ", parentDE = "
-                  << theirMatchingPET << endl;
+             printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
 
           // loop over the number of AI's for their DE
           for (m=0; m<srcAICountPerDE[theirDE]; m++) {
@@ -1945,8 +1939,7 @@ static int maxroutes = 10;
  //         printf("Match1: %d, %d\n", their_de, their_matching_pet);
           //their_matching_pet = their_de;     // temporarily
           if (their_matching_pet != their_de) 
-	     cout << "their_de = " << their_de << ", parent_de = " 
-                  << their_matching_pet << endl;
+	     printf("theirDE = %d, parentDE = %d\n", their_de, their_matching_pet);
 
           // get "their" AI out of the AI_rcv array
           for (k=0; k<rank; k++) {
@@ -2011,8 +2004,7 @@ static int maxroutes = 10;
   //        printf("Match2: %d, %d\n", their_de, their_matching_pet);
           //their_matching_pet = their_de;     // temporarily
           if (their_matching_pet != their_de) 
-	     cout << "their_de = " << their_de << ", parent_de = " 
-                  << their_matching_pet << endl;
+	     printf("theirDE = %d, parentDE = %d\n", their_de, their_matching_pet);
 
           // get "their" AI out of the AI_snd array
           for (k=0; k<rank; k++) {
