@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/03/17 18:05:20 svasquez Exp $ 
+# $Id: makefile,v 1.8 2003/03/17 21:53:19 nscollins Exp $ 
 
 ALL:  tests
 
@@ -16,15 +16,19 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldUTest \
+		$(ESMC_TESTDIR)/ESMF_FRouteUTest \
 		$(ESMC_TESTDIR)/ESMF_BundleUTest
 
 TESTS_RUN     = RUN_ESMF_FieldUTest \
+		RUN_ESMF_FRouteUTest \
 		RUN_ESMF_BundleUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
+		RUN_ESMF_FRouteUTestUNI \
 		RUN_ESMF_BundleUTestUNI 
 
 TESTS_RM      = ESMF_FieldUTest.rm \
+		ESMF_FRouteUTest.rm \
 		ESMF_BundleUTest.rm 
 
 include ${ESMF_DIR}/makefile
@@ -64,6 +68,27 @@ RUN_ESMF_FieldUTestUNI:
 
 ESMF_FieldUTest.rm:
 	echo "ESMF_FieldUTest.rm target called here."
+
+
+
+
+#
+# Field Route function
+#
+$(ESMC_TESTDIR)/ESMF_FRouteUTest: ESMF_FRouteUTest.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FRouteUTest ESMF_FRouteUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_FRouteUTest.o
+
+RUN_ESMF_FRouteUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
+
+RUN_ESMF_FRouteUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
+
+ESMF_FRouteUTest.rm:
+	echo "ESMF_FRouteUTest.rm target called here."
 
 
 
