@@ -1,4 +1,4 @@
-% $Id: PerfProf_req.tex,v 1.11 2003/03/10 05:40:47 cdeluca Exp $
+% $Id: PerfProf_req.tex,v 1.12 2003/07/24 15:50:50 cdeluca Exp $
 
 \req{Code section timing}
 
@@ -10,8 +10,7 @@ end of a passage of interest.
 {\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \sreq{Synchronized timers}
@@ -23,8 +22,7 @@ timers across a PEList at the beginning of a code section.
 {\bf Priority:} 1 \\
 {\bf Source:} GFDL \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \sreq{Named timers}
@@ -37,8 +35,7 @@ the results of the timing are reported, each timer will be associated with its n
 {\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \ssreq{Named timer reset}
@@ -49,8 +46,7 @@ A named timer may be reset at any time.  All data will be cleared.
 {\bf Priority:} 1 \\
 {\bf Source:} MIT, CAM-FV \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \sreq{Types of time}
@@ -84,8 +80,7 @@ System time can be recorded.
 {\bf Priority:} 2 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Approved-2 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 
@@ -97,8 +92,7 @@ Wall clock time can be recorded.
 {\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 
@@ -121,8 +115,7 @@ Collection of the following data will be supported, where available:
 {\bf Priority:} 2 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test\\
-{\bf Notes:} 
+{\bf Verification:} Unit-test
 \end{reqlist}
 
 \req{Process granularity}
@@ -134,8 +127,7 @@ from MPI process 3, thread 6).
 {\bf Priority:} 2 \\
 {\bf Source:}  CAM-FV, POP, CICE, PSAS, MIT \\
 {\bf Status:} Approved-2 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \sreq{Process level}
@@ -147,8 +139,7 @@ identify and report which process it was called from.
 {\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \sreq{Thread level}
@@ -160,8 +151,7 @@ identify and report which thread it was called from.
 {\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \req{Communication profiling}
@@ -175,8 +165,7 @@ messages sizes and times between a pair of caliper points.
 {\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \req{Reporting}
@@ -193,8 +182,7 @@ The profiler will write its output via the log.
 {\bf Priority:} 1 \\
 {\bf Source:}  MIT \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Code Inspection \\
-{\bf Notes:} 
+{\bf Verification:} Code Inspection 
 \end{reqlist}
 
 \sreq{API retrieval}
@@ -204,8 +192,7 @@ The profiler data will be accessible to the program by means of an API.
 {\bf Priority:} 2 \\
 {\bf Source:} MIT  \\
 {\bf Status:} Approved-2 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \sreq{Statistics}
@@ -223,8 +210,7 @@ deviation, and the mean.
 {\bf Priority:} 1 \\
 {\bf Source:}  MIT, CAM-EUL, CLM, CCSM-CPL \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit-test \\
-{\bf Notes:} 
+{\bf Verification:} Unit-test 
 \end{reqlist}
 
 \req{Call deactivation}

@@ -1,4 +1,4 @@
-% $Id: ESMF_reqdoc.ctex,v 1.11 2003/05/20 16:45:02 flanigan Exp $
+% $Id: ESMF_reqdoc.ctex,v 1.12 2003/07/24 15:50:50 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -220,19 +220,19 @@
 
 #include "../Infrastructure/PerfProf/doc/PerfProf_reqdoc.ctex"
 
-%% \newpage
-%% \begin{htmlonly}
-%% \addcontentsline{toc}{part}{Infrastructure Utilities: Log}
-%% \end{htmlonly}
-%% \part{Infrastructure Utilities: Log}
-%% \label{part:Infrastructure_Utilities:_Log}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
+\end{htmlonly}
+\part{Infrastructure Utilities: Log}
+\label{part:Infrastructure_Utilities:_Log}
 
-%% \setcounter{section}{0}
-%% \renewcommand{\thesection}{\shortname\arabic{section}}
-%% \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%% \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%% #include "../Infrastructure/LogErr/doc/Log_reqdoc.ctex"
+#include "../Infrastructure/LogErr/doc/LogErr_reqdoc.ctex"
 
 \newpage
 \begin{htmlonly}
@@ -248,19 +248,19 @@
 
 #include "../Infrastructure/IO/doc/IO_reqdoc.ctex"
 
-%% \newpage
-%% \begin{htmlonly}
-%% \addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
-%% \end{htmlonly}
-%% \part{Infrastructure Utilities: Configuration Attributes}
-%% \label{part:Infrastructure_Utilities:_CA}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
+\end{htmlonly}
+\part{Infrastructure Utilities: Configuration Attributes}
+\label{part:Infrastructure_Utilities:_CA}
 
-%% \setcounter{section}{0}
-%% \renewcommand{\thesection}{\shortname\arabic{section}}
-%% \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%% \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%% #include "../Infrastructure/ConfigAttr/doc/ConfigAttr_reqdoc.ctex"
+#include "../Infrastructure/ConfigAttr/doc/Config_reqdoc.ctex"
 
 \newpage
 \begin{htmlonly}

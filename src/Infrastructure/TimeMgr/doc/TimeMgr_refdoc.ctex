@@ -163,19 +163,14 @@
 \input{../Infrastructure/TimeMgr/doc/TimeInterval_usage}
 #endif
 
-%\subsubsection{Class Definition}
-%#ifdef STANDALONE
-%\input{TimeInterval_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/TimeInterval_def}
-%#endif
-
-%\subsubsection{Restrictions}
+%\subsection{Restrictions}
 %#ifdef STANDALONE
 %\input{TimeInterval_rest}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
+\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
 %#endif
+
+\input{../Infrastructure/TimeMgr/doc/TimeMgr_inote_BaseTime.tex}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
@@ -313,6 +308,7 @@
 % -----------
 
 \section{Clock Class}
+\label{sec:Clock}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -343,6 +339,7 @@
 #endif
 
 \subsection{Use and Examples}
+\label{sec:ClockEx}
 #ifdef STANDALONE
 \input{Clock_fex}
 #elif defined(CONSTITUENT)
@@ -368,6 +365,7 @@
 % -----------
 
 \section{Alarm Class}
+\label{sec:Alarm}
 
 \subsection{Description}
 #ifdef STANDALONE

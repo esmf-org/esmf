@@ -1,4 +1,4 @@
-% $Id: CommMem_req.tex,v 1.11 2003/03/13 22:56:08 cdeluca Exp $
+% $Id: CommMem_req.tex,v 1.12 2003/07/24 15:50:49 cdeluca Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -25,8 +25,8 @@ These include
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  \\
-{\bf Status:}  \\
+{\bf Source:} MIT \\
+{\bf Status:} Approved-1 \\
 {\bf Verification:} Unit tests. \\
 \end{reqlist}
 
@@ -37,8 +37,8 @@ heterogeneous applications.
 
 \begin{reqlist}
 {\bf Priority:} 3 \\
-{\bf Source:}  \\
-{\bf Status:}  \\
+{\bf Source:} MIT \\
+{\bf Status:} Proposed \\
 {\bf Verification:} Unit tests. \\
 \end{reqlist}
 
@@ -103,7 +103,7 @@ PEs.
 {\bf Priority:} 3 \\
 {\bf Source:}  CCSM-CPL (desired), GFDL(desired) \\
 {\bf Status:} Approved-2. \\
-{\bf Verification:} Unit test.
+{\bf Verification:} Unit test. \\
 {\bf Notes:}  Where the OS does not permit this identification, default
   to PE ID.
 \end{reqlist}
@@ -155,7 +155,7 @@ on which no other components have been scheduled.
   {\bf Status:} Approved-2. \\
   {\bf Verification:} Unit test.\\
   {\bf Notes:} For example, ``Component requests N free PEs.''
-  Exception if N too large.  {\bf Notes:} overlap with Components.
+  Exception if N too large.  Overlap with Components.
 \end{reqlist}
 
 \ssreq{Create based on memory node affinity}
@@ -198,8 +198,7 @@ It shall be possible to create PE lists based on processing node affinity.
 {\bf Verification:} Unit test. \\ 
 {\bf Notes:}  For example, ``component requests N PEs sharing a processing
 node''.  Throw exception if length is greater than number of PEs on 
-the processing node.
-{\bf Notes:} overlap with Components.
+the processing node.  Overlap with Components.
 \end{reqlist}
 
 \ssreq{Create based on component affinity}
@@ -212,12 +211,11 @@ to assign components which are closely linked to be assigned
 {\bf Priority:}  2 \\
 {\bf Source:}  CCSM-CPL (desired), POP (desired), CICE (desired), PSAS (desired),
 MIT(important - it could be hard to meet the 10\% degradation milestone without
-this control somewhere), GFDL
+this control somewhere), GFDL \\
 {\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\ 
 {\bf Notes:}  For example, ``atmospheric physics component would like 
-to be scheduled next to atmospheric dynamics''.
-{\bf Notes:} overlap with Components.
+to be scheduled next to atmospheric dynamics''.  Overlap with Components.
 \end{reqlist}
 
 \ssreq{Create a compact PE list}
@@ -232,8 +230,7 @@ memory extent is optimally compact.
 {\bf Verification:} Unit test?\\ 
 {\bf Notes:}  For example, ``give me N PEs distributed on the fewest possible
   memory nodes''. Other attributes could be optimized in deciding layout.
-A general graph and edge optimizer could be used.
-{\bf Notes:} overlap with Components.
+A general graph and edge optimizer could be used.  Overlap with Components.
 \end{reqlist}
 
 \ssreq{Create a subset of a PE list}
@@ -246,8 +243,7 @@ It is possible to request a PE list subset of an existing PE list.
 {\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.\\ 
 {\bf Notes:}  ``Of the 80p assigned to ocean+atmosphere, I'd like 32
-  for the atmosphere''.
-{\bf Notes:} overlap with Components.
+  for the atmosphere''.  Overlap with Components.
 \end{reqlist}
 
 \ssreq{Create a complementary PE lists}
@@ -261,8 +257,7 @@ PE list with respect to its parent.
 {\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.\\ 
 {\bf Notes:}  ``...and the other 48 for the ocean''.
-  Required for concurrent scheduling.
-{\bf Notes:} overlap with Components.
+  Required for concurrent scheduling.  Overlap with Components.
 \end{reqlist}
 
 \sreq{Deletion}
@@ -284,7 +279,7 @@ any time.
 {\bf Priority:} 3 \\
 {\bf Source:}  CCSM-CPL (desired), MIT(desired), GFDL(desired) \\
 {\bf Status:} Proposed. \\
-{\bf Verification:} System test.
+{\bf Verification:} System test. \\
 {\bf Notes:} overlap with Components.
 \end{reqlist}
 
@@ -325,8 +320,7 @@ Support for automated compute resource binding of tasks should
   certain optimality rules that are based of both knowledge of compute
   resources and of the distribution of grids over tasks within
   multiple, interacting components.  Alternatively automated binding
-  could be based on runtime measurement.
-{\bf Notes:} overlap with Components.
+  could be based on runtime measurement.  Overlap with Components.
 \end{reqlist}
 
 \sreq{Mapped memory region for data sharing}.
@@ -630,7 +624,7 @@ caliper pairs is limited to a pre-specifed value.
 {\bf Priority:} 2 \\
 {\bf Source:}  MIT \\
 {\bf Status:} Approved-1 \\
-{\bf Verification:} Unit tests, EVA tests 
+{\bf Verification:} Unit tests, EVA tests \\
 {\bf Notes:} Good candidate for deferral.
 \end{reqlist}
 

@@ -1,4 +1,4 @@
-% $Id: Coupler_req.tex,v 1.1 2003/02/24 22:59:05 cdeluca Exp $
+% $Id: Coupler_req.tex,v 1.2 2003/07/24 15:50:50 cdeluca Exp $
 
 \req{Components}
 \label{req:compall}
@@ -486,7 +486,7 @@ coupling timestep method.
 {\bf Priority:}  1 \\ 
 {\bf Source:}  CCSM-CPL, POP, CICE, PSAS, MIT, GFDL \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} 
+{\bf Verification:} System test. \\ 
 {\bf Notes:} E.g., timestep may be \emph{forward} in time,
 \emph{backward} in time, \emph{forward-backward} in time.  Data exchanges may be
 explicit or implicit (i.e., communication would include the implicit sensitivity 
@@ -503,7 +503,7 @@ be assigned.
 {\bf Priority:} 3 \\
 {\bf Source:} MIT, DAO \\
 {\bf Status:} Proposed.\\
-{\bf Verification:}  
+{\bf Verification:} System test. 
 \end{reqlist}
 
 \ssreq{Query case date}
@@ -513,7 +513,7 @@ began.
 {\bf Priority:} 3\\
 {\bf Source:} MIT \\
 {\bf Status:} Proposed.\\
-{\bf Verification:} 
+{\bf Verification:} System test.
 \end{reqlist}
 
 \sreq{Global PE list}
@@ -523,7 +523,7 @@ in an application.
 {\bf Priority:} 1 \\
 {\bf Source:}  CCSM-CPL, POP, CICE, PSAS, MIT, GFDL \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} \\ 
+{\bf Verification:} System test. \\ 
 {\bf Notes:}  Does this grow as MPMD executables check in? Can control
   retain control of these PEs if MPMD executables check out?
 \end{reqlist}
@@ -575,7 +575,7 @@ A gridded component can return a list of its grids.
 \begin{reqlist}
 {\bf Priority:} 3\\
 {\bf Source:} \\
-{\bf Status:} Proposed.
+{\bf Status:} Proposed. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 

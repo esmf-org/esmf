@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.31 2003/03/10 05:40:47 cdeluca Exp $
+% $Id: DistGrid_req.tex,v 1.32 2003/07/24 15:50:49 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -710,18 +710,6 @@ ESMF shall provide methods to declare halo points valid or invalid
   \end{itemize}
 \end{reqlist}
 
-\sreq{Arrays of derived type}
-
-All relevant operations in this Section~\ref{DG:halo} must apply to
-data arrays where each array element is a derived data type.
-
-\begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} \\
-{\bf Status:} Deferred. \\ 
-{\bf Verification:} \\
-\end{reqlist}
-
 \sreq{Adjoint of halo update}
 A "transpose" form (in the mathematical sense of the word) is required
 for all the permutations that a halo can perform.
@@ -775,19 +763,6 @@ issued unblocked data transpose.
 {\bf Verification:} Unit test.
 \end{reqlist}
 
-\sreq{Arrays of derived type}
-
-All relevant operations in this Section~\ref{DG:transpose} must apply to
-data arrays where each array element is a derived data type.
-
-\begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} \\
-{\bf Status:} Deferred. \\
-{\bf Verification:} Unit test.\\
-{\bf Notes:}
-\end{reqlist}
-
 \sreq{Adjoint of data transpose}
 A "transpose" form (in the mathematical sense of the word) is required
 for all the permutations that a data transpose can perform.
@@ -836,8 +811,7 @@ a gather along any specified axis.
 {\bf Priority:} 2 \\ 
 {\bf Source:} CAM-FV (2D decomposition), POP, MIT, GFDL \\
 {\bf Status:} Approved-2. \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:} 
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \sreq{Adjoint of gather}
@@ -874,8 +848,7 @@ a scatter along any specified axis.
 {\bf Priority:} 2 \\ 
 {\bf Source:} CAM-FV (2D decomposition), NSIPP. \\
 {\bf Status:} Approved-2. \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:} 
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \sreq{Adjoint of scatter}
@@ -1095,8 +1068,7 @@ distributed integer or FP array.
 {\bf Priority:} 1. \\ 
 {\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 
@@ -1109,8 +1081,7 @@ retrievable.
 {\bf Priority:} 1. \\ 
 {\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 
@@ -1123,8 +1094,7 @@ distributed integer or FP array.
 {\bf Priority:} 1. \\ 
 {\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 
@@ -1177,8 +1147,7 @@ cell center $(i,j)$.
 {\bf Priority:} 1. \\ 
 {\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, MIT, WRF (SISL, 3DVAR), GFDL \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \sreq{\bgrid}
