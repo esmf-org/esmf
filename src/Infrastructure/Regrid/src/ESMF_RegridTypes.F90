@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.24 2004/02/06 20:10:16 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.25 2004/02/10 00:08:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.24 2004/02/06 20:10:16 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.25 2004/02/10 00:08:17 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -275,7 +275,7 @@
 ! !ARGUMENTS:
 
       type(ESMF_TransformValues), intent(inout) :: tv
-      integer, intent(in) :: srcAdd
+      integer, dimension(2), intent(in) :: srcAdd
       integer, dimension(2), intent(in) :: dstAdd
       real(kind=ESMF_KIND_R8), intent(in) :: weight
       integer, intent(out), optional :: rc
@@ -334,7 +334,8 @@
       ! Add addresses and weights to regrid arrays
       dstPtr(2*(numList-1)+1) = dstAdd(1)
       dstPtr(2*(numList-1)+2) = dstAdd(2)
-      srcPtr(numList) = srcAdd
+      srcPtr(2*(numList-1)+1) = srcAdd(1)
+      srcPtr(2*(numList-1)+2) = srcAdd(2)
       wgtPtr(numList) = weight
       call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=rc)
