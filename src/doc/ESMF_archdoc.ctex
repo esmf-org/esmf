@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.ctex,v 1.7 2002/09/10 20:49:21 cdeluca Exp $
+% $Id: ESMF_archdoc.ctex,v 1.8 2003/01/28 18:18:29 cdeluca Exp $
 
 %
 \documentclass[]{article}
@@ -49,7 +49,7 @@
 
 \newpage
 %\section{Introduction}
-\input{ESMF_designintro}
+\input{ESMF_archintro}
 
 %\section{Scope of the ESMF}
 \input{ESMF_shortscope}

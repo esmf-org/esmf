@@ -14,9 +14,9 @@ on parallel computing platforms.  Each also represents a productive
 collaboration between scientists, computational scientists and software
 engineers that has continued into ESMF.  
 
-Object-oriented design concepts are used extensively in existing frameworks
-(see Section~\ref{sec:oop} for more on object-oriented design). For example, 
-in GEMS encapsulation 
+Object-oriented design concepts are used extensively in existing climate and
+weather frameworks (see Section~\ref{sec:oop} for more on object-oriented design). 
+For example, in GEMS encapsulation 
 via derived types and modules increases portability, hides details of the 
 computing platform from the user, and results in a very simple and natural
 interface for creating coupling applications.  
@@ -26,15 +26,15 @@ as the NCAR Flux Coupler use the concept of generic components to
 increase interoperability.  The WRF system is one of the few 
 examples anywhere of an operational code with a programming model 
 that effectively and simply allows users to create data structures 
-for a dual-tiered architecture, and that has been carefully designed 
-for high performance on both vector supercomputers and microprocessor-based 
-platforms \cite{wrfperfport}.
+for a cluster-type architecture that mixes shared and distributed memory, 
+and that has been carefully designed for high performance on both vector 
+supercomputers and microprocessor-based platforms \cite{wrfperfport}.
 
 In ESMF, we intend to retain the scientist-friendly 
 aspect of these frameworks as well as the strongest features of their design.  
 At the interface, they present coupling and
 communication in terms that scientists can easily understand, and they 
-offer a language interface, F90, that scientists are already familiar 
+offer a FORTRAN language interface that scientists are already familiar 
 with.  
 
 Many of these frameworks share features and design strategies in common, yet 

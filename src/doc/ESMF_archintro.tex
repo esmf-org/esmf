@@ -6,10 +6,23 @@ the main design features that will enable us to achieve interoperability, ease o
 use, performance portability, and reuse for climate, weather, and data assimilation
 applications.  Our goal is to create a software system capable of satisfying
 the extensive functional requirements laid out in the \htmladdnormallink{{\it ESMF 
-Requirements Document}}{http://www.esmf.ucar.edu/esmf\_docs/ESMF\_reqdoc/} \cite{bib:ESMFreqdoc}, 
-while retaining in its design a measure of intuitiveness and simplicity. 
+Requirements Document}}{http://www.esmf.ucar.edu/esmf\_docs/ESMF\_reqdoc/} 
+\cite{bib:ESMFreqdoc}, while retaining in its design a measure of intuitiveness 
+and simplicity. 
 
-We define a framework as a structured collection of software building blocks 
+This document is intended for those who require a detailed view of the ESMF
+from a software engineering perspective; for example, a software developer who
+wishes to extend the ESMF to include significantly new functionality.  It assumes 
+a basic knowledge of object-oriented design concepts and terminology, familiarity 
+with the C, C++, and FORTRAN programming languages, and an understanding of 
+diagramming using the Unified Modeling Language (UML).  Most scientific users will 
+not need or want this level of technical detail, and are advised to turn to 
+the {\it ESMF User's Guide}{\http://www.esmf.ucar.edu/esmf\_docs/ESMF\_usrdoc/} 
+and the {\it ESMF User's Reference}{\http://www.esmf.ucar.edu/esmf\_docs/ESMF\_refdoc/} 
+as their primary documentation.  These documents contain overviews of the system 
+design tailored to the user's perspective.
+
+The ESMF is a structured collection of software building blocks 
 that can be used or customized to develop model components, assemble them into an 
 application, and run the application.  Unlike a software library, in a framework some
 software elements are partly defined or unimplemented.  For example, a framework
@@ -46,10 +59,9 @@ conventions used to describe the ESMF design.
 Sections~\ref{sec:superclasses},~\ref{sec:fieldclasses}, and
 \ref{sec:utilclasses} contain descriptions of the 
 major classes in the framework, their structure, their relationship to each other, 
-and the sequence of events for key interactions.  Section~\ref{sec:implications} contains a preliminary definition of ESMF compliance, and outlines the sorts
-of modifications that will be required to adopt the framework.  Section~\ref{sec:fwdesign} 
-describes in detail the conventions and behavior
-that we wish to apply across {\it all} the ESMF software.  Section~\ref{sec:glos} is a 
+and the sequence of events for key interactions.  Section~\ref{sec:implications} 
+contains a preliminary definition of ESMF compliance, and outlines the sorts
+of modifications that will be required to adopt the framework.  Section~\ref{sec:glos} is a 
 glossary of terms.
 
 
