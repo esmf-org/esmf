@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.3 2004/06/09 06:02:28 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.4 2004/06/09 16:07:53 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,11 +23,12 @@
 !! this should be including ESMF.h, but since it also includes the cover
 !! log macros, it can't be included here.  so just include each file 
 !! individually.  if we add files to ESMF.h they also need to be added here.
-#include "ESMF_Macros.inc"
 #include "ESMF_Conf.inc"
-#include "ESMF_Version.inc"
 #include "ESMF_ErrReturnCodes.inc"
 #include "ESMF_LogConstants.inc"
+#include "ESMF_Macros.inc"
+#include "ESMF_Version.inc"
+
 
 !BOPI
 !============================================================================
@@ -66,11 +67,11 @@ type(ESMF_LogFileType), parameter           ::  &
 type ESMF_LOGENTRY
     private
     sequence
+    character(len=32) context
+    integer err_type
+    character(len=32) mod_name
 	integer number
-	integer pe_number
-	integer err_type
-	character(len=32) mod_name
-	character(len=32) context
+	integer pe_number	
 end type ESMF_LOGENTRY
 
 !     ! Log  
