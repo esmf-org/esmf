@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.27 2004/06/02 01:42:21 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.28 2004/06/03 17:18:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,12 +49,10 @@
       call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOP
-!\subsubsection{Example 1.  Time Initialization}
+!\subsubsection{Time Initialization}
 
 ! This example shows how to initialize two {\tt ESMF\_Time}s.
 !EOP
@@ -64,39 +62,31 @@
       call ESMF_TimeSet(time1, yy=2000, mm=2, dd=28, h=2, m=24, s=45, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Time1 = "
       call ESMF_TimePrint(time1, "string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize time2 to 3/1/2000 3:26:01
       call ESMF_TimeSet(time2, yy=2000, mm=3, dd=1, h=3, m=26, s=1, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Time2 = "
       call ESMF_TimePrint(time2, "string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOP
-!\subsubsection{Example 2.  Difference Between Two Times}
+!\subsubsection{Difference Between Two Times}
 
 ! This example shows how to determine the difference between two
 ! {\tt ESMF\_Time}s.
@@ -111,18 +101,14 @@
                " hours, ", M, " minutes, ", S, " seconds."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! finalize ESMF framework
       call ESMF_Finalize(rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
      if (finalrc.EQ.ESMF_SUCCESS) then
         print *, "PASS: ESMF_TimeEx.F90"
