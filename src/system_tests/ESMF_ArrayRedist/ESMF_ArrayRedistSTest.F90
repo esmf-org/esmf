@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.6 2004/04/14 21:52:18 nscollins Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.7 2004/04/14 22:00:41 jwolfe Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -37,7 +37,7 @@
     integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
     character(len=ESMF_MAXSTR) :: sname, gname, fname, aname
-    type(ESMF_DELayout) :: layout0, layout1, layout2
+    type(ESMF_newDELayout) :: delayout0, delayout1, delayout2
     type(ESMF_VM) :: vm
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
     type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
@@ -71,9 +71,9 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
  
     ! Create a default 1xN DELayout
-    layout0 = ESMF_newDELayoutCreate(vm, rc=rc)
+    delayout0 = ESMF_newDELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_newDELayoutGetNumDES(layout0, ndes, rc)
+    call ESMF_newDELayoutGet(delayout0, deCount=ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     if (ndes .eq. 1) then
@@ -83,12 +83,9 @@
 
     nde(1) = 2
     nde(2) = ndes/2
-    allocate(delist(ndes))
-    !delist = (/ (i, i=0, ndes-1) /)
-    layout1 = ESMF_newDELayoutCreate(layout0, (/ nde(1), nde(2) /), rc=rc)
+    delayout1 = ESMF_newDELayoutCreate(vm, (/nde(1), nde(2)/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "DELayout Create finished, rc =", rc
-    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Create the State
     sname = "Atmosphere Export State"
@@ -126,7 +123,7 @@
     do i = 1,3
       de_pos(i) = 1
     enddo
-    call ESMF_DELayoutGetDEPosition(layout1, de_pos(1), de_pos(2), rc)
+    call ESMF_newDELayoutGet(delayout1, deCountPerDim=de_pos, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Calculate global_positions -- would otherwise come from a grid call
@@ -153,17 +150,17 @@
       global_counts(i) = counts1(i)
       if (decompids1(i).ne.0) global_counts(i) = counts1(i)*nde(decompids1(i))
     enddo
-    call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
-                                   indexlist1, rc)
+!jw    call ESMF_DELayoutSetAxisIndex(delayout1, global_counts, decompids1, &
+!jw                                   indexlist1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
-                                   indexlist3, rc)
+!jw    call ESMF_DELayoutSetAxisIndex(delayout1, global_counts, decompids1, &
+!jw                                   indexlist3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     decompids2(1) = 1
     decompids2(2) = 0
     decompids2(3) = 2
-    call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids2, &
-                                   indexlist2, rc)
+!jw    call ESMF_DELayoutSetAxisIndex(delayout1, global_counts, decompids2, &
+!jw                                   indexlist2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     !! TODO: set & get the axis info here.  These need to be
     !!  different on each DE.
@@ -224,7 +221,7 @@
         global_start(i) = counts2(i)*(de_pos(decompids2(i))-1)
       endif
     enddo
-    call ESMF_ArrayRedist(array1, layout1, global_start, global_counts, &
+    call ESMF_ArrayRedist(array1, delayout1, global_start, global_counts, &
                           rank_trans, decompids1, decompids2, array2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -242,7 +239,7 @@
         global_start(i) = counts1(i)*(de_pos(decompids1(i))-1)
       endif
     enddo
-    call ESMF_ArrayRedist(array2, layout1, global_start, global_counts, &
+    call ESMF_ArrayRedist(array2, delayout1, global_start, global_counts, &
                           rank_trans, decompids2, decompids1, array3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -261,7 +258,7 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+    call ESMF_newDELayoutGet(delayout1, localDE=de_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "-----------------------------------------------------------------"
@@ -313,7 +310,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_ArrayDestroy(array3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_DELayoutDestroy(layout1, rc)
+    call ESMF_newDELayoutDestroy(delayout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 
