@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.9 2004/01/07 22:07:45 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.10 2004/01/07 23:04:31 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -37,7 +37,7 @@
 !\end{verbatim}
 !EOP
 
-    integer :: x, y, rc, mycell, finalrc       
+    integer :: finalrc       
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
 
