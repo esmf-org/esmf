@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_F.F90,v 1.2 2003/02/18 16:02:33 nscollins Exp $
+!  $Id: ESMF_Comp_F.F90,v 1.3 2003/02/18 17:00:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_F.F90,v 1.2 2003/02/18 16:02:33 nscollins Exp $'
+!      '$Id: ESMF_Comp_F.F90,v 1.3 2003/02/18 17:00:59 nscollins Exp $'
 !==============================================================================
 
    function f_esmf_compcreate(name, rc)
@@ -33,7 +33,8 @@
        character(*) :: name
        integer :: rc              
 
-       f_esmf_compcreate = ESMF_CompCreate(name, rc)
+       !f_esmf_compcreate = ESMF_CompCreate(name, rc)
+       f_esmf_compcreate = 0
     
    end function f_esmf_compcreate
 
@@ -45,7 +46,7 @@
        integer :: func
        integer :: rc              
 
-       call ESMF_CompDestroy(compp, rc)
+       !call ESMF_CompDestroy(compp, rc)
     
    end subroutine f_esmf_compdestroy
 
@@ -57,7 +58,7 @@
        integer :: func
        integer :: rc              
 
-       call ESMF_CompInit(compp, rc)
+       !call ESMF_CompInit(compp, rc)
     
    end subroutine f_esmf_compinit
 
@@ -69,7 +70,7 @@
        character(*) :: name
        integer :: rc     
 
-       call ESMF_CompRun(compp, rc)
+       !call ESMF_CompRun(compp, rc)
 
    end subroutine f_esmf_comprun
 
@@ -81,7 +82,7 @@
        character(*) :: name
        integer :: rc     
 
-       call ESMF_CompFinalize(compp, rc)
+       !call ESMF_CompFinalize(compp, rc)
 
    end subroutine f_esmf_compfinalize
 

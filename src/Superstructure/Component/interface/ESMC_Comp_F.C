@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.3 2003/02/18 16:02:32 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.4 2003/02/18 17:00:59 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,11 +38,11 @@ extern "C" {
 
      void FTN(c_esmc_compregister)(ESMC_Comp **ptr, int type, void (func)(), 
                                    int *status) {
-         *status = (*ptr)->ESMC_CompRegister(type, func);
+         //*status = (*ptr)->ESMC_CompRegister(type, func);
      }
 
      void FTN(c_esmc_compcall)(ESMC_Comp **ptr, int type, int *status) {
-         *status = (*ptr)->ESMC_CompCall(type, func);
+         //*status = (*ptr)->ESMC_CompCall(type, func);
      }
 
 };
