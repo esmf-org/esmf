@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.13 2005/02/08 23:39:35 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.4.2.1 2005/02/09 21:36:03 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 

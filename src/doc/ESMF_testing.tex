@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.19 2004/07/01 21:11:42 svasquez Exp $
+% $Id: ESMF_testing.tex,v 1.19.2.1 2005/02/09 21:41:25 svasquez Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -90,23 +90,65 @@ The following is a sample from the script output:
 
 \begin{verbatim}
 
-Unit Tests stdout files found: 
--rw-r--r--    1 svasquez scd           576 Apr 25 10:31 ESMF_ArrayBasicUTest.stdout
--rw-r--r--    1 svasquez scd           960 Apr 25 10:31 ESMF_ArrayF90PtrUTest.stdout
--rw-r--r--    1 svasquez scd          7791 Apr 25 10:31 ESMF_ArrayUTest.stdout
--rw-r--r--    1 svasquez scd            99 Apr 25 10:31 ESMF_BaseUTest.stdout
--rw-r--r--    1 svasquez scd          1690 Apr 25 10:31 ESMF_BundleUTest.stdout
--rw-r--r--    1 svasquez scd         73209 Apr 25 10:31 ESMF_ClockUTest.stdout
--rw-r--r--    1 svasquez scd          2585 Apr 25 10:31 ESMF_FieldUTest.stdout
--rw-r--r--    1 svasquez scd           399 Apr 25 10:31 ESMF_GridUTest.stdout
--rw-r--r--    1 svasquez scd          6484 Apr 25 10:32 ESMF_StateUTest.stdout
+There are a total of 1224 exhaustive multi processor unit tests, 1220 pass and 4 fail.
 
-Unit test stdout files of zero length indicate that the unit test
-did not run because it failed to compile or it failed to execute. 
+The unit tests in the following files all pass:
 
-112  Unit Tests passed 
+src/Infrastructure/Array/tests/ESMF_ArrayUTest.F90
+src/Infrastructure/ArrayDataMap/tests/ESMF_ArrayDataMapUTest.F90
+src/Infrastructure/Base/tests/ESMF_BaseUTest.F90
+src/Infrastructure/Bundle/tests/ESMF_BundleUTest.F90
+src/Infrastructure/BundleDataMap/tests/ESMF_BundleDataMapUTest.F90
+src/Infrastructure/Config/tests/ESMF_ConfigUTest.F90
+src/Infrastructure/DELayout/tests/ESMF_DELayoutUTest.F90
+src/Infrastructure/Field/tests/ESMF_FRoute4UTest.F90
+src/Infrastructure/Field/tests/ESMF_FieldUTest.F90
+src/Infrastructure/FieldComm/tests/ESMF_FieldGatherUTest.F90
+src/Infrastructure/FieldDataMap/tests/ESMF_FieldDataMapUTest.F90
+src/Infrastructure/Grid/tests/ESMF_GridUTest.F90
+src/Infrastructure/IOSpec/tests/ESMF_IOSpecUTest.F90
+src/Infrastructure/LocalArray/tests/ESMF_ArrayDataUTest.F90
+src/Infrastructure/LocalArray/tests/ESMF_ArrayF90PtrUTest.F90
+src/Infrastructure/LocalArray/tests/ESMF_LocalArrayUTest.F90
+src/Infrastructure/LogErr/tests/ESMF_LogErrUTest.F90
+src/Infrastructure/Regrid/tests/ESMF_Regrid1UTest.F90
+src/Infrastructure/Regrid/tests/ESMF_RegridUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_AlarmUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_CalRangeUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_ClockUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_TimeIntervalUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_TimeUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMBarrierUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMBroadcastUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMGatherUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMScatterUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMSendVMRecvUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMUTest.F90
+src/Superstructure/Component/tests/ESMF_CplCompCreateUTest.F90
+src/Superstructure/Component/tests/ESMF_GridCompCreateUTest.F90
+src/Superstructure/State/tests/ESMF_StateUTest.F90
 
-No Unit Tests Failed.
+
+The following unit test files failed to build, failed to execute or crashed during execution:
+
+src/Infrastructure/TimeMgr/tests/ESMF_CalendarUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMSendRecvUTest.F90
+
+
+The following unit test files had failed unit tests:
+
+src/Infrastructure/Field/tests/ESMF_FRoute8UTest.F90
+src/Infrastructure/Grid/tests/ESMF_GridCreateUTest.F90
+
+
+The following individual unit tests fail:
+
+  FAIL  DELayout Get Test, ESMF_FRoute8UTest.F90, line 139                                                                                                                                                                                                       
+  FAIL  Grid Distribute Test, ESMF_GridCreateUTest.F90, line 198                                                                                                                                                                                                 
+
+
+The stdout files for the unit tests can be found at:
+/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
 
 \end{verbatim}
 
@@ -190,58 +232,37 @@ The script output indicates whether there are any system test failures.
 The following is a sample from the script output:
 
 \begin{verbatim}
-The following is the analysis of the run system tests results:
-
-Executable System Tests found:
--rwxrwxr-x   1 svasquez ncar          65283 Jul 01 10:17 ESMF_CompCreateSTest
--rwxrwxr-x   1 svasquez ncar          89959 Jul 01 10:36 ESMF_FieldHaloPerSTest
--rwxrwxr-x   1 svasquez ncar          76960 Jul 01 10:22 ESMF_FieldHaloSTest
--rwxrwxr-x   1 svasquez ncar          65768 Jul 01 10:39 ESMF_FieldRedistSTest
--rwxrwxr-x   1 svasquez ncar         108616 Jul 01 10:47 ESMF_FieldRegridConsrvSTest
--rwxrwxr-x   1 svasquez ncar         111276 Jul 01 10:41 ESMF_FieldRegridMultiSTest
--rwxrwxr-x   1 svasquez ncar         110447 Jul 01 10:44 ESMF_FieldRegridOrderSTest
--rwxrwxr-x   1 svasquez ncar         108411 Jul 01 10:33 ESMF_FieldRegridSTest
--rwxrwxr-x   1 svasquez ncar         112839 Jul 01 10:25 ESMF_FlowCompSTest
--rwxrwxr-x   1 svasquez ncar         162127 Jul 01 10:28 ESMF_FlowWithCouplingSTest
--rwxrwxr-x   1 svasquez ncar          62157 Jul 01 10:20 ESMF_RowReduceSTest
--rwxrwxr-x   1 svasquez ncar          95323 Jul 01 10:14 ESMF_SimpleCouplingSTest
-
-All of the executable system tests should have a corresponding stdout file.
-If not, it's an indication that the examples ere not executed, or that it failed to execute.
-
-System Tests stdout files found: 
--rw-rw-r--   1 svasquez ncar          16359 Jul 01 12:43 ESMF_CompCreateSTest.stdout
--rw-rw-r--   1 svasquez ncar          50339 Jul 01 12:44 ESMF_FieldHaloPerSTest.stdout
--rw-rw-r--   1 svasquez ncar          23746 Jul 01 12:44 ESMF_FieldHaloSTest.stdout
--rw-rw-r--   1 svasquez ncar          12463 Jul 01 12:43 ESMF_FieldRedistSTest.stdout
--rw-rw-r--   1 svasquez ncar          19348 Jul 01 12:45 ESMF_FieldRegridConsrvSTest.stdout
--rw-rw-r--   1 svasquez ncar          15117 Jul 01 12:45 ESMF_FieldRegridMultiSTest.stdout
--rw-rw-r--   1 svasquez ncar          19321 Jul 01 12:45 ESMF_FieldRegridOrderSTest.stdout
--rw-rw-r--   1 svasquez ncar          19143 Jul 01 12:44 ESMF_FieldRegridSTest.stdout
--rw-rw-r--   1 svasquez ncar          10670 Jul 01 12:46 ESMF_FlowCompSTest.stdout
--rw-rw-r--   1 svasquez ncar           5174 Jul 01 12:48 ESMF_FlowWithCouplingSTest.stdout
--rw-rw-r--   1 svasquez ncar          12277 Jul 01 12:43 ESMF_RowReduceSTest.stdout
--rw-rw-r--   1 svasquez ncar         223944 Jul 01 12:45 ESMF_SimpleCouplingSTest.stdout
-
-System Tests stdout files of zero length indicate that the test
-did not run because it failed to compile or it failed to execute. 
-
-The following tests passed: 
-ESMF_CompCreateSTest.stdout
-ESMF_FieldHaloPerSTest.stdout
-ESMF_FieldHaloSTest.stdout
-ESMF_FieldRedistSTest.stdout
-ESMF_FieldRegridConsrvSTest.stdout
-ESMF_FieldRegridMultiSTest.stdout
-ESMF_FieldRegridOrderSTest.stdout
-ESMF_FieldRegridSTest.stdout
-ESMF_FlowCompSTest.stdout
-ESMF_FlowWithCouplingSTest.stdout
-ESMF_RowReduceSTest.stdout
-ESMF_SimpleCouplingSTest.stdout
+There are 14 system tests, 12 passed and 2 failed.
 
 
-No system tests Failed.
+The following system tests passed:
+
+
+src/system_tests/ESMF_CompCreate/ESMF_CompCreateSTest.F90
+src/system_tests/ESMF_FieldExcl/ESMF_FieldExclSTest.F90
+src/system_tests/ESMF_FieldHalo/ESMF_FieldHaloSTest.F90
+src/system_tests/ESMF_FieldHaloPer/ESMF_FieldHaloPerSTest.F90
+src/system_tests/ESMF_FieldRedist/ESMF_FieldRedistSTest.F90
+src/system_tests/ESMF_FieldRegrid/ESMF_FieldRegridSTest.F90
+src/system_tests/ESMF_FieldRegridMulti/ESMF_FieldRegridMultiSTest.F90
+src/system_tests/ESMF_FieldRegridOrder/ESMF_FieldRegridOrderSTest.F90
+src/system_tests/ESMF_FlowComp/ESMF_FlowCompSTest.F90
+src/system_tests/ESMF_FlowWithCoupling/ESMF_FlowWithCouplingSTest.F90
+src/system_tests/ESMF_SimpleCoupling/ESMF_SimpleCouplingSTest.F90
+src/system_tests/ESMF_VectorStorage/ESMF_VectorStorageSTest.F90
+
+
+The following system tests failed, did not build, or did not execute:
+
+
+src/system_tests/ESMF_FieldRegridConserv/ESMF_FieldRegridConsrvSTest.F90
+src/system_tests/ESMF_RowReduce/ESMF_RowReduceSTest.F90
+
+
+
+
+The stdout files for the system_tests can be found at:
+/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
 
 \end{verbatim}
 
