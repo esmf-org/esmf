@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.11 2004/04/16 15:40:37 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.12 2004/04/20 21:25:05 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1626,48 +1626,48 @@
 !
 ! And now test output to a file
 !
-      call ESMF_FieldAllGather(field_u, outarray, rc=status)
+      call ESMF_FieldGather(field_u, 0, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_ArrayDestroy(outarray, status)
       endif
-      call ESMF_ArrayDestroy(outarray, status)
 
-      call ESMF_FieldAllGather(field_v, outarray, rc=status)
+      call ESMF_FieldGather(field_v, 0, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_ArrayDestroy(outarray, status)
       endif
-      call ESMF_ArrayDestroy(outarray, status)
 
-      call ESMF_FieldAllGather(field_sie, outarray, rc=status)
+      call ESMF_FieldGather(field_sie, 0, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_ArrayDestroy(outarray, status)
       endif
-      call ESMF_ArrayDestroy(outarray, status)
 !
 ! First time through output two more files
 !
       if(file_no .eq. 1) then
-        call ESMF_FieldAllGather(field_flag, outarray, rc=status)
+        call ESMF_FieldGather(field_flag, 0, outarray, rc=status)
         if (de_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+          call ESMF_ArrayDestroy(outarray, status)
         endif
-        call ESMF_ArrayDestroy(outarray, status)
 
         do j = jmin, jmax
           do i = imin, imax
             de(i,j) = de_id
           enddo
         enddo
-        call ESMF_FieldAllGather(field_de, outarray, rc=status)
+        call ESMF_FieldGather(field_de, 0, outarray, rc=status)
         if (de_id .eq. 0) then
           write(filename, 20)  "DE", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+          call ESMF_ArrayDestroy(outarray, status)
         endif
-        call ESMF_ArrayDestroy(outarray, status)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
