@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.20 2004/06/18 22:03:23 jwolfe Exp $
+! $Id: CoupledFlowDemo.F90,v 1.21 2004/06/22 16:35:39 jwolfe Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -35,7 +35,7 @@
 
     ! States and Layouts for the Subcomponents
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
-    type(ESMF_DELayout) :: layoutTop, layoutIN, layoutFS
+    type(ESMF_DELayout), save :: layoutTop, layoutIN, layoutFS
     type(ESMF_State), save :: INimp, INexp, FSimp, FSexp
 
     ! Public entry point
