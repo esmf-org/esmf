@@ -144,6 +144,59 @@ user code.
 
 \end{itemize}
 
+\subsection{Common options for Print Methods}
+
+All objects have a Print method to print out internal information, usually
+for debugging purposes.  All print methods try to support a common
+set of options, including:
+
+\begin{itemize}
+\item{\bf "brief"}
+   Print the most important parts of the object, including information
+   about subobjects (e.g. Fields will call Print on their Grids, Arrays
+   and DataMaps).  This is the default if no option string is specified.
+\item{\bf "full"}
+   Print in excruiciating detail, as much information as possible.
+\item{\bf "object only"}
+   Print only information about the object itself, nothing about
+   subobjects it may contain (like states, bundles, fields).
+\item{\bf "label=mystring"}
+   Prepend {\tt mystring} in front of the print so user can give simple
+   labels to identify which object is being printed.
+
+\end{itemize}
+
+Multiple options can be specified by separating them with commas:
+
+{\tt call ESMF_XXXPrint(object, "brief, object only", rc) }
+{\tt call ESMF_XXXPrint(object, "full, label=Temperature", rc) }
+
+Objects may have in addition specific flags which select options
+that are only applicable to themselves.
+
+\subsection{Common options for Validate Methods}
+
+All objects have a Validate method to verify the object has been
+initialized and that it is internally consistent.
+All print methods try to support a common set of options, including:
+
+\begin{itemize}
+\item{\bf "brief"}
+   Validate the most important parts of the object, including 
+   subobjects (e.g. Fields will call Validate on their Grids, Arrays
+   and DataMaps).  This is the default if no option string is specified.
+\item{\bf "full"}
+   Validate in excruiciating detail, may be slow.
+\item{\bf "object only"}
+   Validate only information about the object itself, not validating any
+   subobjects it may contain.
+
+\end{itemize}
+
+Multiple options can be specified by separating them with commas:
+
+{\tt call ESMF_XXXValidate(object, "brief, object only", rc) }
+
 \subsection{The ESMF Data Hierarchy}
 
 The ESMF API is organized around an hierarchy of five classes that 
