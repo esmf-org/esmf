@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.9 2004/06/08 13:14:06 nscollins Exp $
+// $Id: ESMC_LocalArray.C,v 1.10 2004/06/15 07:18:41 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.9 2004/06/08 13:14:06 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.10 2004/06/15 07:18:41 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -780,6 +780,14 @@
     ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     sprintf(msgbuf,"            ");
     ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+ 
+    // some error checking against garbage pointers:
+    if (rank > 7) {
+        sprintf(msgbuf, "invalid rank, %d\n", this->rank);
+        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_ERROR);
+        return ESMC_RC_OBJ_BAD;
+    }
+
     for (i=0; i<this->rank; i++) {
         sprintf(msgbuf,"dim[%d] = %d  ", i, this->counts[i]);
         ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
