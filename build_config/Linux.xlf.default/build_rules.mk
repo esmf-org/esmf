@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.2 2004/12/17 21:01:39 nscollins Exp $
+#  $Id: build_rules.mk,v 1.3 2005/02/23 05:15:51 theurich Exp $
 #
 #  
 #
@@ -27,7 +27,7 @@ endif
 #
 
 # stubs for pthreads - pthreads are not supported on bgl
-PTHREAD_STUB_INCLUDE=-I$(ESMF_DIR)/src/Infrastructure/stubs/pthread
+CPPFLAGS        += -DESMF_NO_PTHREADS
 # another bgl exclusive:
 ESMF_PREC=32
 
