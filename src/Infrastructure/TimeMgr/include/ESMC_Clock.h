@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.3 2003/02/11 19:03:32 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.4 2003/03/26 01:04:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,47 +100,47 @@
   public:
 
     // Clock is a shallow class, so only Init methods are needed
-    int ESMC_ClockInit(ESMC_TimeInterval *TimeStep,
-                       ESMC_Time         *StartTime,
-                       ESMC_Time         *StopTime,
-                       ESMC_Time         *RefTime);
+    int ESMC_ClockInit(ESMC_TimeInterval *timeStep,
+                       ESMC_Time         *startTime,
+                       ESMC_Time         *stopTime,
+                       ESMC_Time         *refTime);
                        // (TMG 3.1, 3.4.4)
 
     // Clock doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
-    int ESMC_ClockAddAlarm(ESMC_Alarm *Alarm);  // (TMG 4.1, 4.2)
-    int ESMC_ClockGetAlarmList(ESMC_Alarm *AlarmList, int *NumAlarms);
-    int ESMC_ClockGetNumAlarms(int *NumAlarms); // (TMG 4.3)
+    int ESMC_ClockAddAlarm(ESMC_Alarm *alarm);  // (TMG 4.1, 4.2)
+    int ESMC_ClockGetAlarmList(ESMC_Alarm *alarmList, int *NumAlarms);
+    int ESMC_ClockGetNumAlarms(int *numAlarms); // (TMG 4.3)
 
     int ESMC_ClockSyncToWallClock(void); // TMG3.4.5
     // (see ESMC_Time::GetRealTime()
 
-    int ESMC_ClockAdvance(ESMC_Alarm *RingingList, int *NumRingingAlarms);
+    int ESMC_ClockAdvance(ESMC_Alarm *ringingList, int *NumRingingAlarms);
     // TMG3.4.1  after increment, for each alarm,
     //           calls ESMC_Alarm::CheckActive()
 
-    bool ESMC_ClockIsStopTime(void);    // TMG3.5.6
+    bool ESMC_ClockIsStopTime(int *rc) const;    // TMG3.5.6
 
     // accessor methods
 
-    int ESMC_ClockGetAdvanceCount(ESMF_IKIND_I8 *AdvanceCount);    // TMG3.5.1
+    int ESMC_ClockGetAdvanceCount(ESMF_IKIND_I8 *advanceCount);    // TMG3.5.1
 
-    int ESMC_ClockGetTimeInterval(ESMC_TimeInterval *TimeInterval);
+    int ESMC_ClockGetTimeInterval(ESMC_TimeInterval *timeInterval);
                                                                    // TMG3.5.2
-    int ESMC_ClockSetTimeInterval(ESMC_TimeInterval *TimeInterval);
+    int ESMC_ClockSetTimeInterval(ESMC_TimeInterval *timeInterval);
                                                                    // TMG3.4.2
 
-    int ESMC_ClockGetCurrTime(ESMC_Time *CurrTime);    // TMG3.5.4
-    int ESMC_ClockSetCurrTime(ESMC_Time *CurrTime);    // TMG3.4.3
+    int ESMC_ClockGetCurrTime(ESMC_Time *currTime);    // TMG3.5.4
+    int ESMC_ClockSetCurrTime(ESMC_Time *currTime);    // TMG3.4.3
 
-    int ESMC_ClockGetStartTime(ESMC_Time *StartTime);  // TMG3.5.3
-    int ESMC_ClockGetStopTime(ESMC_Time *StopTime);    // TMG3.5.3
-    int ESMC_ClockGetRefTime(ESMC_Time *RefTime);      // TMG3.5.3
-    int ESMC_ClockGetPrevTime(ESMC_Time *PrevTime);    // TMG3.5.4
+    int ESMC_ClockGetStartTime(ESMC_Time *startTime);  // TMG3.5.3
+    int ESMC_ClockGetStopTime(ESMC_Time *stopTime);    // TMG3.5.3
+    int ESMC_ClockGetRefTime(ESMC_Time *refTime);      // TMG3.5.3
+    int ESMC_ClockGetPrevTime(ESMC_Time *prevTime);    // TMG3.5.4
 
-    int ESMC_ClockGetCurrSimTime(ESMC_TimeInterval *CurrSimTime);   // TMG3.5.5
-    int ESMC_ClockGetPrevSimTime(ESMC_TimeInterval *PrevSimTime);   // TMG3.5.5
+    int ESMC_ClockGetCurrSimTime(ESMC_TimeInterval *currSimTime);   // TMG3.5.5
+    int ESMC_ClockGetPrevSimTime(ESMC_TimeInterval *prevSimTime);   // TMG3.5.5
 
     // required methods inherited and overridden from the ESMC_Base class
 
@@ -148,15 +148,15 @@
     int ESMC_BaseValidate(const char *options) const;
 
     // for persistence/checkpointing
-    int ESMC_BasePrint(ESMC_TimeInterval *TimeStep,
-                       ESMC_Time         *StartTime,
-                       ESMC_Time         *StopTime,
-                       ESMC_Time         *RefTime,
-                       ESMC_Time         *CurrTime,
-                       ESMC_Time         *PrevTime,
-                       ESMF_IKIND_I8     *AdvanceCount,
-                       ESMC_Alarm        *AlarmList[],
-                       int               *NumAlarms ) const;
+    int ESMC_BasePrint(ESMC_TimeInterval *timeStep,
+                       ESMC_Time         *startTime,
+                       ESMC_Time         *stopTime,
+                       ESMC_Time         *refTime,
+                       ESMC_Time         *currTime,
+                       ESMC_Time         *prevTime,
+                       ESMF_IKIND_I8     *advanceCount,
+                       ESMC_Alarm        *alarmList[],
+                       int               *numAlarms ) const;
 
     // for testing/debugging
     int ESMC_BasePrint(void) const;
