@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.8 2004/01/28 22:33:59 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.9 2004/01/31 00:07:35 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,6 +63,7 @@
 
     public ESMF_GridCreateLogRectUniform
     public ESMF_GridCreateLogRect
+    public ESMF_LRGridDistribute
     public ESMF_LRGridCreateRead
     public ESMF_LRGridCreateCopy
     public ESMF_LRGridCreateCutout
@@ -98,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.8 2004/01/28 22:33:59 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.9 2004/01/31 00:07:35 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -128,12 +129,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_LRGridSetCoordFromArray
          module procedure ESMF_LRGridSetCoordFromBuffer
-#if (PARCH != linux_intel)
-         ! don't include the following two in the interface def
-         ! for the intel build.  fails on jazz.
-         module procedure ESMF_LRGridSetCoordSpecd
-         module procedure ESMF_LRGridSetCoordUniform
-#endif
+         module procedure ESMF_LRGridSetCoordCompute
          module procedure ESMF_LRGridSetCoordCopy
 
 ! !DESCRIPTION:
@@ -201,29 +197,12 @@
        interface ESMF_LRGridAddPhysGrid
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_LRGridAddPhysGridSpecd
-          module procedure ESMF_LRGridAddPhysGridUniform
-          module procedure ESMF_LRGridAddVertPhysGridUni
+          module procedure ESMF_LRGridAddPhysGrid
+          module procedure ESMF_LRGridAddVertPhysGrid
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that
 !     search a {\tt ESMF\_Grid} for point(s).
-
-!EOPI
-       end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-       interface ESMF_LRGridSetBoundingBoxes
-
-! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_LRGridSetBBoxesUni
-          module procedure ESMF_LRGridSetBBoxesSpecd
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that
-!     set bounding boxes for all the DEs in a {\tt ESMF\_Grid}.
 
 !EOPI
        end interface
@@ -372,7 +351,8 @@
 
 !     if layout information available, call grid distribute method
       if (present(layout)) then
-        call ESMF_LRGridDistributeUniform(grid, layout, decompIds, name, status)
+        call ESMF_LRGridDistribute(grid, layout, decompIds=decompIds, &
+                                   name=name, rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridCreateLogRectUniform: Grid distribute"
           return
@@ -540,8 +520,8 @@
 
 !     if layout information available, call grid distribute method
       if (present(layout)) then
-        call ESMF_LRGridDistributeSpecd(grid, layout, countsPerDEDim1, &
-                                        countsPerDEDim2, decompIds, name, rc)
+        call ESMF_LRGridDistribute(grid, layout, countsPerDEDim1, &
+                                   countsPerDEDim2, decompIds, name, rc)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridCreateLogRect: Grid distribute"
           return
@@ -1396,470 +1376,12 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridDistributeUniform - Distribute a uniform Grid
+! !IROUTINE: ESMF_LRGridDistribute - Distribute a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridDistributeUniform(grid, layout, decompIds, &
-                                              name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
-      type(ESMF_DELayout), intent(in) :: layout
-      integer, dimension(:), intent(in), optional :: decompIds
-      character (len = *), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     ESMF routine which fills in the contents of an already
-!     allocated {\tt ESMF\_Grid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding {\tt ESMF\_GridDestruct}
-!     routine to free the additional memory.  Intended for internal
-!     ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
-!     {\tt ESMF\_GridConstruct}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid}
-!     \item[layout]
-!         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[decompIds]
-!          Identifier for which Grid axes are decomposed.
-!     \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS: TODO
-!EOPI
-
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      character(len=ESMF_MAXSTR) :: distGridName, physGridName
-      character(len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dimNames
-      character(len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dimUnits
-      integer :: distGridId, physGridId
-      integer :: i, numDE1, numDE2, numDims, numDimsGrid
-      integer, dimension(ESMF_MAXGRIDDIM) :: decompIdsUse, counts
-      integer, dimension(:,:), pointer :: countsPerAxis
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: delta, min, max
-      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
-      type(ESMF_RelLoc) :: relloc
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     Fill in defaults for necessary but optional variables
-      do i = 1,ESMF_MAXGRIDDIM
-        decompIdsUse(i) = 0
-      enddo
-      if(present(decompIds)) then
-        decompIdsUse = decompIds
-      else
-        do i = 1, numDims
-          decompIdsUse(i) = i
-        enddo
-      endif
-
-!     Extract some information from the Grid
-      numDims = grid%numDims
-      do i = 1,numDims
-        counts(i)   = grid%gridSpecific%logRectGrid%countPerDim(i)
-        min(i)      = grid%minGlobalCoordPerDim(i)
-        max(i)      = grid%maxGlobalCoordPerDim(i)
-        periodic(i) = grid%periodic(i)
-        dimNames(i) = grid%dimNames(i)
-        dimUnits(i) = grid%dimUnits(i)
-      enddo
-
-!     Create PhysGrid and DistGrid at cell center
-      numDimsGrid = numDims
-      if (numDims.eq.3) numDimsGrid = 2
-      distGridId = 1
-      distGridName = 'cell_center'
-      physGridId = 1
-      physGridName = 'cell_center'
-      relloc = ESMF_CELL_CENTER
-      call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                  layout, decompIdsUse(1:2), periodic, &
-                                  distGridName=distGridName, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-        return
-      endif
-      call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                  distGridId, relloc, min, max, physGridName, &
-                                  status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-        return
-      endif
-      distGridId = distGridId + 1 
-      physGridId = physGridId + 1 
-
-!     Create any other PhysGrids necessary for horizontal grid stagger
-!     TODO: finish filling out, look up D
-      select case (grid%horzStagger%stagger)
-
-        ! Arakawa A (centered velocity)
-        case (1)
-
-        ! Arakawa B_NE (velocities at NE grid corner)
-        case (2)
-          distGridName = 'cell_necorner'
-          physGridName = 'cell_necorner'
-          relloc = ESMF_CELL_NECORNER
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1 
-
-        ! Arakawa B_SW (velocities at SW grid corner)
-        case (3)
-          distGridName = 'cell_swcorner'
-          physGridName = 'cell_swcorner'
-          relloc = ESMF_CELL_SWCORNER
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1 
-
-        ! Arakawa B_SE (velocities at SE grid corner)
-        case (4)
-          distGridName = 'cell_secorner'
-          physGridName = 'cell_secorner'
-          relloc = ESMF_CELL_SECORNER
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-
-        ! Arakawa B_NW (velocities at NW grid corner)
-        case (5)
-          distGridName = 'cell_nwcorner'
-          physGridName = 'cell_nwcorner'
-          relloc = ESMF_CELL_NWCORNER
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-
-        ! Arakawa C_NE (U at E face, V at N face) and 
-        ! Arakawa D_NE (V at E face, U at N face)
-        case (6,10)
-          distGridName = 'cell_eface'
-          physGridName = 'cell_eface'
-          relloc = ESMF_CELL_EFACE
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-          distGridName = 'cell_nface'
-          physGridName = 'cell_nface'
-          relloc = ESMF_CELL_NFACE
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-
-        ! Arakawa C_SW (U at W face, V at S face) and
-        ! Arakawa D_SW (V at W face, U at S face)
-        case (7,11)
-          distGridName = 'cell_wface'
-          physGridName = 'cell_wface'
-          relloc = ESMF_CELL_WFACE
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-          distGridName = 'cell_sface'
-          physGridName = 'cell_sface'
-          relloc = ESMF_CELL_SFACE
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-
-        ! Arakawa C_SE (U at E face, V at S face) and
-        ! Arakawa D_SE (V at E face, U at S face)
-        case (8,12)
-          distGridName = 'cell_eface'
-          physGridName = 'cell_eface'
-          relloc = ESMF_CELL_EFACE
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-          distGridName = 'cell_sface'
-          physGridName = 'cell_sface'
-          relloc = ESMF_CELL_SFACE
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-
-        ! Arakawa C_NW (U at W face, V at N face) and
-        ! Arakawa D_NW (V at W face, U at N face)
-        case (9,13)
-          distGridName = 'cell_wface'
-          physGridName = 'cell_wface'
-          relloc = ESMF_CELL_WFACE
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-          distGridName = 'cell_nface'
-          physGridName = 'cell_nface'
-          relloc = ESMF_CELL_NFACE
-          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
-                                      layout, decompIdsUse(1:2), periodic, &
-                                      distGridName=distGridName, rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-            return
-          endif
-          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
-                                      distGridId, relloc, min, max, &
-                                      physGridName, status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
-            return
-          endif
-          distGridId = distGridId + 1
-          physGridId = physGridId + 1
-
-      end select
-
-!     Create vertical physGrid if requested
-      if (numDims.eq.3) then
-        distGridName = 'vertical center'
-        physGridName = 'vertical center'
-        relloc = ESMF_CELL_CELL    ! TODO: right relloc?
-        call ESMF_LRGridAddDistGrid(grid, distGridId, 1, counts(3:3), &
-                                    layout, decompIdsUse(3:3), &
-                                    periodic(3:3), &
-                                    distGridName=distGridName, rc=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-          return
-        endif
-        call ESMF_LRGridAddVertPhysGridUni(grid, counts(3), physGridId, &
-                                           distGridId, relloc, min(3), &
-                                           max(3), physGridName, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_LRGridDistributeUniform: Add vert PhysGrid"
-          return
-        endif
-        distGridId = distGridId + 1
-        physGridId = physGridId + 1
-
-        select case (grid%vertStagger%stagger)
-
-          ! ESMF_GridStagger_VertCenter - vertical velocity at vertical midpoints
-          case (16)
-
-          ! ESMF_GridStagger_VertFace - vertical velocity at top vertical face
-          case (17)
-            distGridName = 'vertical top face'
-            physGridName = 'vertical top face'
-            relloc = ESMF_CELL_TOPFACE
-            call ESMF_LRGridAddDistGrid(grid, distGridId, 1, counts(3:3), &
-                                        layout, decompIdsUse(3:3), &
-                                        periodic(3:3), &
-                                        distGridName=distGridName, rc=status)
-            if(status .NE. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
-              return
-            endif
-            call ESMF_LRGridAddVertPhysGridUni(grid, counts(3), physGridId, &
-                                               distGridId, relloc, min(3), &
-                                               max(3), physGridName, status)
-            if(status .NE. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_LRGridDistributeUniform: Add vert PhysGrid"
-              return
-            endif
-            distGridId = distGridId + 1
-            physGridId = physGridId + 1
-
-! TODO: add default in case vertical stagger is not defined
-        end select
-      endif
-
-!     Create the BoundingBoxes structure
-      do i = 1,numDims
-        if (counts(i).ne.0) then
-          delta(i) = (max(i)-min(i)) / real(counts(i))
-        endif
-      enddo
-      call ESMF_DELayoutGetSize(layout, numDE1, numDE2, status)
-      allocate(countsPerAxis(numDE1*numDE2, ESMF_MAXGRIDDIM), stat=status)
-      if (status .ne. 0) then
-         print *, "allocation error, countsperaxis(DE1*DE2,maxgrid) =", &
-                              numDE1, numDE2, ESMF_MAXGRIDDIM
-         return
-      endif
-      call ESMF_DistGridGetAllCounts(grid%distgrids(1)%ptr, countsPerAxis, &
-                                     rc=status)
-      call ESMF_LRGridSetBoundingBoxes(grid, numDims, min, delta, &
-                                       countsPerAxis, numDE1, numDE2, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridDistributeUniform: Grid set boxes"
-        return
-      endif
-
-      ! clean up
-      deallocate(countsPerAxis)
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_LRGridDistributeUniform
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_LRGridDistributeSpecd - Distribute a specified Grid
-
-! !INTERFACE:
-      subroutine ESMF_LRGridDistributeSpecd(grid, layout, &
-                                            countsPerDEDim1, countsPerDEDim2, &
-                                            decompIds, name, rc)
+      subroutine ESMF_LRGridDistribute(grid, layout, &
+                                       countsPerDEDim1, countsPerDEDim2, &
+                                       decompIds, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -1882,13 +1404,11 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid}
-!     \item[numDims]
-!          Number of grid dimensions.
 !     \item[layout]
 !         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[countsPerDEDim1]
+!     \item[{[countsPerDEDim1]}]
 !          Array of number of grid increments per DE in the x-direction.
-!     \item[countsPerDEDim2]
+!     \item[{[countsPerDEDim2]}]
 !          Array of number of grid increments per DE in the y-direction.
 !     \item[{[decompIds]}]
 !          Identifier for which Grid axes are decomposed.
@@ -1906,9 +1426,12 @@
       character(len=ESMF_MAXSTR) :: distGridName, physGridName
       character(len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dimNames
       character(len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dimUnits
-      integer :: distGridId, physGridId
+      integer :: distGridId, physGridId, numDE1, numDE2
       integer :: i, counts(ESMF_MAXGRIDDIM), numDims, numDimsGrid
       integer, dimension(ESMF_MAXGRIDDIM) :: decompIdsUse
+      integer, dimension(:), allocatable :: countsPerDE1Use, countsPerDE2Use, &
+                                            countsPerDE3Use
+      real(ESMF_KIND_R8) :: delta
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: min, max
       real(ESMF_KIND_R8), dimension(:), pointer :: coord1, coord2, coord3
       type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
@@ -1925,6 +1448,7 @@
 
 !     Fill in defaults for necessary but optional variables
 !  TODO: fill in countsPerDEDim if not present
+
       do i = 1,ESMF_MAXGRIDDIM
         decompIdsUse(i) = 0
       enddo
@@ -1948,11 +1472,45 @@
         dimNames(i) = grid%dimNames(i)
         dimUnits(i) = grid%dimUnits(i)
       enddo
-      call ESMF_LocalArrayGetData(coords(1), coord1, ESMF_DATA_REF, status)
-      if (numDims.ge.2) &
-        call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_REF, status)
-      if (numDims.ge.3) &
-        call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_REF, status)
+      if (associated(coords)) then
+        call ESMF_LocalArrayGetData(coords(1), coord1, ESMF_DATA_REF, status)
+        if (numDims.ge.2) &
+          call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_REF, status)
+        if (numDims.ge.3) &
+          call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_REF, status)
+      else              ! assume uniform grid, so no coords stored
+        allocate(coord1(counts(1)+1))
+        coord1(1) = min(1)
+        delta     = (max(1) - min(1)) / real(counts(1))
+        do i = 1,counts(1)
+          coord1(i+1) = coord1(i) + delta
+        enddo
+        if (numDims.ge.2) then
+          allocate(coord2(counts(2)+1))
+          coord2(1) = min(2)
+          delta     = (max(2) - min(2)) / real(counts(2))
+          do i = 1,counts(2)
+            coord2(i+1) = coord2(i) + delta
+          enddo
+        endif
+        if (numDims.ge.3) then
+          allocate(coord3(counts(3)+1))
+          coord3(1) = min(3)
+          delta     = (max(3) - min(3)) / real(counts(3))
+          do i = 1,counts(3)
+            coord3(i+1) = coord3(i) + delta
+          enddo
+        endif
+      endif
+
+      call ESMF_DELayoutGetSize(layout, numDE1, numDE2, status)
+      ! For now, but TODO modify the following by decompids
+      allocate(countsPerDE1Use(numDE1))
+      allocate(countsPerDE2Use(numDE2))
+      allocate(countsPerDE3Use(1     ))
+      countsPerDE1Use = countsPerDEDim1
+      countsPerDE2Use = countsPerDEDim2
+      countsPerDE3Use(1) = counts(3)
 
 !     Create DistGrid and PhysGrid at cell center
       numDimsGrid = numDims
@@ -1968,15 +1526,15 @@
                                   countsPerDEDim2=countsPerDEDim2, &
                                   distGridName=distGridName, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+        print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
         return
       endif
       distGridId = distGridId + 1 
       call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                  coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                  coord2, countsPerDEDim1, countsPerDEDim2, &
                                   dimNames, dimUnits, physGridName, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+        print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
         return
       endif
       physGridId = physGridId + 1 
@@ -1996,19 +1554,19 @@
           relloc = ESMF_CELL_NECORNER
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2020,19 +1578,19 @@
           relloc = ESMF_CELL_SWCORNER
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2044,19 +1602,19 @@
           relloc = ESMF_CELL_SECORNER
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2068,19 +1626,19 @@
           relloc = ESMF_CELL_NWCORNER
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2093,19 +1651,19 @@
           relloc = ESMF_CELL_EFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2114,19 +1672,19 @@
           relloc = ESMF_CELL_NFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2139,19 +1697,19 @@
           relloc = ESMF_CELL_WFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2160,19 +1718,19 @@
           relloc = ESMF_CELL_SFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2185,19 +1743,19 @@
           relloc = ESMF_CELL_EFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2206,19 +1764,19 @@
           relloc = ESMF_CELL_SFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2231,19 +1789,19 @@
           relloc = ESMF_CELL_WFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
@@ -2252,38 +1810,94 @@
           relloc = ESMF_CELL_NFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
-                                      countsPerDEDim1=countsPerDEDim1, &
-                                      countsPerDEDim2=countsPerDEDim2, &
+                                      countsPerDEDim1=countsPerDE1Use, &
+                                      countsPerDEDim2=countsPerDE2Use, &
                                       distGridName=distGridName, rc=status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
           distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      coord2, countsPerDE1Use, countsPerDE2Use, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
           physGridId = physGridId + 1 
 
       end select
 
-!     Create vertical PhysGrid if requested  TODO
+!     Create vertical PhysGrid if requested
+      if (numDims.eq.3) then
+        distGridName = 'vertical center'
+        physGridName = 'vertical center'
+        relloc = ESMF_CELL_CELL    ! TODO: right relloc?
+        call ESMF_LRGridAddDistGrid(grid, distGridId, 1, counts(3:3), &
+                                    layout, decompIdsUse(3:3), &
+                                    periodic(3:3), &
+                                    distGridName=distGridName, rc=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
+          return
+        endif
+        call ESMF_LRGridAddVertPhysGrid(grid, physGridId, relloc, coord3, &
+                                        countsPerDE3Use, physGridName, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridDistribute: Add vert PhysGrid"
+          return
+        endif
+        distGridId = distGridId + 1
+        physGridId = physGridId + 1
+
+        select case (grid%vertStagger%stagger)
+
+          ! ESMF_GridStagger_VertCenter - vertical velocity at vertical midpoints
+          case (16)
+
+          ! ESMF_GridStagger_VertFace - vertical velocity at top vertical face
+          case (17)
+            distGridName = 'vertical top face'
+            physGridName = 'vertical top face'
+            relloc = ESMF_CELL_TOPFACE
+            call ESMF_LRGridAddDistGrid(grid, distGridId, 1, counts(3:3), &
+                                        layout, decompIdsUse(3:3), &
+                                        periodic(3:3), &
+                                        distGridName=distGridName, rc=status)
+            if(status .NE. ESMF_SUCCESS) then
+              print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
+              return
+            endif
+            call ESMF_LRGridAddVertPhysGrid(grid, physGridId, relloc, coord3, &
+                                            countsPerDE3Use, physGridName, status)
+            if(status .NE. ESMF_SUCCESS) then
+              print *, "ERROR in ESMF_LRGridDistribute: Add vert PhysGrid"
+              return
+            endif
+            distGridId = distGridId + 1
+            physGridId = physGridId + 1
+
+! TODO: add default in case vertical stagger is not defined
+        end select
+      endif
 
 !     Create the BoundingBoxes structure
-      call ESMF_LRGridSetBoundingBoxes(grid, numDims, min, coord1, coord2, &
-                                       countsPerDEDim1, countsPerDEDim2, status)
+      call ESMF_LRGridSetBoundingBoxes(grid, numDims, coord1, coord2, &
+                                       countsPerDE1Use, countsPerDE2Use, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridDistributeSpecd: Grid set boxes"
+        print *, "ERROR in ESMF_LRGridDistribute: Grid set boxes"
         return
       endif
 
+!     Clean up
+      deallocate(countsPerDE1Use)
+      deallocate(countsPerDE2Use)
+      deallocate(countsPerDE3Use)
+
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridDistributeSpecd
+      end subroutine ESMF_LRGridDistribute
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -2476,223 +2090,14 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridAddPhysGridUniform - Add a uniform PhysGrid to a LogRectGrid
+! !IROUTINE: ESMF_LRGridAddPhysGrid - Add a PhysGrid to a LogRectGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridAddPhysGridUniform(grid, numDims, globalCounts, &
-                                               physGridId, distGridId, relloc, &
-                                               min, max, physGridName, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
-      integer, intent(in) :: numDims
-      integer, dimension(numDims), intent(in) :: globalCounts
-      integer, intent(out) :: physGridId
-      integer, intent(in)  :: distGridId
-      type(ESMF_RelLoc), intent(in) :: relloc
-      real(ESMF_KIND_R8), dimension(numDims), intent(in), optional :: min
-      real(ESMF_KIND_R8), dimension(numDims), intent(in), optional :: max
-      character (len=*), intent(in), optional :: physGridName
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Adds a {\tt ESMF\_PhysGrid} to a {\tt ESMF\_Grid}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Class to be queried.
-!     \item[numDims]
-!          Number of grid dimensions.
-!     \item[globalCounts]
-!          Array of global number of grid increments in each direction.
-!     \item [physGridId]
-!          Integer identifier for {\tt ESMF\_PhysGrid}.
-!     \item[relloc]
-!          Relative location of data at the centers, faces, and vertices of
-!          the {\tt Grid}.
-!     \item[{[min]}]
-!          Array of minimum physical coordinates in each direction.
-!     \item[{[max]}]
-!          Array of maximum physical coordinates in each direction.
-!     \item [{[physGridName]}]
-!          {\tt ESMF\_PhysGrid} name.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      integer :: i, i1, i2, j1, j2, gridBoundWidth
-      character(len=ESMF_MAXSTR), dimension(numDims) :: coordNames, coordUnits
-      logical, dimension(numDims) :: coordAligned, coordEqualSpaced, coordCyclic
-      integer, dimension(numDims) :: countsPlus, localCounts, localStart
-      integer, dimension(:), allocatable :: cellType1, cellType2
-      real(ESMF_KIND_R8) :: delta(numDims)
-      real(ESMF_KIND_R8) :: localMinCoord(numDims)
-      real(ESMF_KIND_R8) :: localMaxCoord(numDims)
-      type(ESMF_CoordKind), dimension(numDims) :: coordKind
-      type(ESMF_DistGrid), pointer :: distGrid
-      type(ESMF_PhysGrid) :: physGrid
-      type(ESMF_PhysCoord) :: tempCoord
-      type(ESMF_CoordSystem) :: coordSystem
-
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! initialize some values
-      gridBoundWidth = 1   ! TODO: move into structure, make input?
-      distGrid => grid%distGrids(distGridId)
-
-      do i = 1,numDims
-        if (globalCounts(i).ne.0) then
-          delta(i) = (max(i) - min(i)) / real(globalCounts(i))
-        else
-          print *, "ERROR in ESMF_LRGridAddPhysGridUniform: counts=0"
-          return
-        endif
-
-        localStart(i) = distGrid%ptr%myDEComp%globalAIPerDim(i)%min - 1
-        localMinCoord(i) = min(i) + delta(i) * real(localStart(i))
-        localMaxCoord(i) = min(i) + delta(i) &
-                         * real(distGrid%ptr%myDEComp%globalAIPerDim(i)%max)
-        localCounts(i)   = distGrid%ptr%myDEComp%globalAIPerDim(i)%max &
-                         - distGrid%ptr%myDEComp%globalAIPerDim(i)%min + 1
-      enddo
-
-      ! allocate and load cell type masks
-      allocate(cellType1(globalCounts(1)+2*gridBoundWidth), stat=status)
-      if (status .ne. 0) then
-        print *, "allocation error, counts(1) = ", &
-                  globalCounts(1)+2*gridBoundWidth
-        return
-      endif
-      allocate(cellType2(globalCounts(2)+2*gridBoundWidth), stat=status)
-      if (status .ne. 0) then
-        print *, "allocation error, counts(2) = ", &
-                  globalCounts(2)+2*gridBoundWidth
-        return
-      endif
-      cellType1 = 0
-      cellType2 = 0
-      do i = 1,gridBoundWidth
-        cellType1(i) = 1
-        cellType2(i) = 1
-        cellType1(globalCounts(1)+gridBoundWidth+i) = 1
-        cellType2(globalCounts(2)+gridBoundWidth+i) = 1
-      enddo
-      ! set parameters based on grid type
-      select case (grid%horzGridKind%gridKind)
-
-        ! ESMF_GridKind_LatLon
-        case (1)
-          coordSystem         = ESMF_CoordSystem_Spherical
-          coordNames(1)       = 'latitude'
-          coordNames(2)       = 'longitude'
-          coordKind(1)        = ESMF_CoordKind_Lat
-          coordKind(2)        = ESMF_CoordKind_Lon
-          coordUnits(:)       = 'degrees'
-          coordAligned(:)     = .true.
-          coordEqualSpaced(:) = .true.
-          coordCyclic(1)      = .true.
-          coordCyclic(2)      = .false.
-
-        ! ESMF_GridKind_XY
-        case (5)
-          coordSystem         = ESMF_CoordSystem_Cartesian
-          coordNames(1)       = 'x'
-          coordNames(2)       = 'y'
-          coordKind(1)        = ESMF_CoordKind_X
-          coordKind(2)        = ESMF_CoordKind_Y
-          coordUnits(:)       = ''
-          coordAligned(:)     = .true.
-          coordEqualSpaced(:) = .true.
-          coordCyclic(:)      = .false.
-
-        case default
-           print *,'Grid type not yet supported in LogRectGridAddPhysGrid'
-           status = ESMF_FAILURE
-
-      end select
-
-      ! Create the actual PhysGrid object
-      physGrid = ESMF_PhysGridCreate(numDims, relloc, physGridName, &
-                                     coordSystem, rc=status)
-
-      do i = 1,numDims
-        tempCoord = ESMF_PhysCoordCreate(coordKind=coordKind(i), &
-                                         name=coordNames(i), &
-                                         units=coordUnits(i), &
-                                         aligned=coordAligned(i), &
-                                         equalSpaced=coordEqualSpaced(i), &
-                                         cyclic=coordCyclic(i), &
-                                         minVal=localMinCoord(i), &
-                                         maxVal=localMaxCoord(i), rc=status)
-        call ESMF_PhysGridSetCoord(physGrid, tempCoord, dimOrder=i, rc=status)
-      enddo
-
-      ! now that it's created, add the physgrid to the grid
-      call ESMF_GridAddPhysGrid(grid, physGrid, status)
-      physGridId = grid%numPhysGrids
-
-      ! set coordinates using total cell count
-      countsPlus(1) = localCounts(1) + 2*gridBoundWidth
-      countsPlus(2) = localCounts(2) + 2*gridBoundWidth
-      call ESMF_LRGridSetCoordUniform(grid, physGridId, numDims, countsPlus, &
-                             gridBoundWidth, relloc, delta, localMinCoord, &
-                             total=.true., rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridUniform: Grid set coord"
-        return
-      endif
-      ! set coordinates using computational cell count
-      call ESMF_LRGridSetCoordUniform(grid, physGridId, numDims, localCounts, &
-                             0, relloc, delta, localMinCoord, &
-                             total=.false., rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridUniform: Grid set coord"
-        return
-      endif
-
-      ! set mask using total cell count
-      i1 = localStart(1) + 1
-      i2 = localStart(1) + countsPlus(1)
-      j1 = localStart(2) + 1
-      j2 = localStart(2) + countsPlus(2)
-      call ESMF_LRGridSetCellMask(grid, physGridId, numDims, countsPlus, &
-                                  gridBoundWidth, relloc, cellType1(i1:i2), &
-                                  cellType2(j1:j2), status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridUniform: Grid set cell mask"
-        return
-      endif
-
-      ! clean up
-      deallocate(cellType1)
-      deallocate(cellType2)
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_LRGridAddPhysGridUniform
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_LRGridAddPhysGridSpecd - Add a specified PhysGrid to a LogRectGrid
-
-! !INTERFACE:
-      subroutine ESMF_LRGridAddPhysGridSpecd(grid, physGridId, relloc, numDims, &
-                                             coord1, coord2, &
-                                             countsPerDEDim1, countsPerDEDim2, &
-                                             min, dimNames, dimUnits, &
-                                             physGridName, rc)
+      subroutine ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, &
+                                        coord1, coord2, &
+                                        countsPerDEDim1, countsPerDEDim2, &
+                                        dimNames, dimUnits, &
+                                        physGridName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType), target :: grid
@@ -2703,7 +2108,6 @@
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
       integer, dimension(:), intent(in) :: countsPerDEDim1
       integer, dimension(:), intent(in) :: countsPerDEDim2
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: min
       character (len=*), dimension(:), intent(in), optional :: dimNames
       character (len=*), dimension(:), intent(in), optional :: dimUnits
       character (len=*), intent(in), optional :: physGridName
@@ -2731,8 +2135,6 @@
 !          Array of number of grid increments per DE in the x-direction.
 !     \item[countsPerDEDim2]
 !          Array of number of grid increments per DE in the y-direction.
-!     \item[{[min]}]
-!          Array of minimum physical coordinates in each direction.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -2778,17 +2180,17 @@
       gridp%ptr => grid
       call ESMF_GridGetDELayout(gridp, layout, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: get delayout"
+        print *, "ERROR in ESMF_LRGridAddPhysGrid: get delayout"
         return
       endif
       call ESMF_DELayoutGetDEPosition(layout, myDE(1), myDE(2), status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: delayout get position"
+        print *, "ERROR in ESMF_LRGridAddPhysGrid: delayout get position"
         return
       endif
 
-      localMin(1) = min(1)
-      localMin(2) = min(2)
+      localMin(1) = 0.0
+      localMin(2) = 0.0
       localStart(1) = 0
       localStart(2) = 0
       if(myDE(1).ge.2) then
@@ -2829,7 +2231,6 @@
         return
       endif
 
-      coordUse1(gridBoundWidth+1) = min(1)
       do i = 1,compCount(1)
         coordUse1(i+1+gridBoundWidth) = coord1(i)
       enddo
@@ -2840,7 +2241,6 @@
         coordUse1(i+1) = coordUse1(i) &
                        + (coord1(compCount(1))-coord1(compCount(1)-1))
       enddo
-      coordUse2(gridBoundWidth+1) = min(2)
       do i = 1,compCount(2)
         coordUse2(i+1+gridBoundWidth) = coord2(i)
       enddo
@@ -2930,12 +2330,11 @@
       i2 = localStart(1) + counts(1) + 1
       j1 = localStart(2) + 1
       j2 = localStart(2) + counts(2) + 1
-      call ESMF_LRGridSetCoordSpecd(grid, physGridId, numDims, counts, &
-                             gridBoundWidth, relloc, coord1(i1:i2), &
-                             coord2(j1:j2), localMin, &
-                             total=.true., rc=status)
+      call ESMF_LRGridSetCoord(grid, physGridId, numDims, counts, &
+                               gridBoundWidth, relloc, coord1(i1:i2), &
+                               coord2(j1:j2), total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddPhysGrid: Grid set coord"
         return
       endif
       ! set coordinates using computational cell count
@@ -2945,11 +2344,11 @@
       i2 = i1 + counts(1)
       j1 = localStart(2) + 1 + gridBoundWidth
       j2 = j1 + counts(2)
-      call ESMF_LRGridSetCoordSpecd(grid, physGridId, numDims, counts, 0, relloc, &
-                             coord1(i1:i2), coord2(j1:j2), localMin, &
-                             total=.false., rc=status)
+      call ESMF_LRGridSetCoord(grid, physGridId, numDims, counts, 0, relloc, &
+                               coord1(i1:i2), coord2(j1:j2), total=.false., &
+                               rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddPhysGrid: Grid set coord"
         return
       endif
 
@@ -2964,7 +2363,7 @@
                                   gridBoundWidth, relloc, cellType1(i1:i2), &
                                   cellType2(j1:j2), status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddPhysGridSpecd: Grid set cell mask"
+        print *, "ERROR in ESMF_LRGridAddPhysGrid: Grid set cell mask"
         return
       endif
 
@@ -2975,25 +2374,22 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridAddPhysGridSpecd
+      end subroutine ESMF_LRGridAddPhysGrid
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridAddVertPhysGridUni - Add a uniform vertical PhysGrid to a LogRectGrid
+! !IROUTINE: ESMF_LRGridAddVertPhysGrid - Add a vertical PhysGrid to a LogRectGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridAddVertPhysGridUni(grid, count, physGridId, &
-                                               distGridId, relloc, min, &
-                                               max, physGridName, rc)
+      subroutine ESMF_LRGridAddVertPhysGrid(grid, physGridId, relloc, coord, &
+                                            countsPerDEDim, physGridName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
-      integer, intent(in) :: count
+      type(ESMF_GridType), target :: grid
       integer, intent(out) :: physGridId
-      integer, intent(in)  :: distGridId
       type(ESMF_RelLoc), intent(in) :: relloc
-      real(ESMF_KIND_R8), intent(in) :: min
-      real(ESMF_KIND_R8), intent(in) :: max
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: coord
+      integer, dimension(:), intent(in) :: countsPerDEDim
       character (len=*), intent(in), optional :: physGridName
       integer, intent(out), optional :: rc
 !
@@ -3004,19 +2400,15 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[count]
-!          Number of grid increments in the vertical direction.
 !     \item [physGridId]
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
-!     \item [distGridId]
-!          Integer identifier for the corresponding {\tt ESMF\_DistGrid}.
 !     \item[relloc]
 !          Relative location of data at the centers, faces, and vertices of
 !          the {\tt Grid}.
-!     \item[min]
-!          Minimum physical coordinate in the vertical direction.
-!     \item[max]
-!          Maximum physical coordinate in the vertical direction.
+!     \item[coord]
+!          Array of physical coordinates in the vertical direction.
+!     \item[countsPerDEDim]
+!          Array of number of grid increments per DE in the vertical direction.
 !     \item [{[physGridName]}]
 !          {\tt ESMF\_PhysGrid} name.
 !     \item[{[rc]}]
@@ -3028,18 +2420,18 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: i, i1, i2, gridBoundWidth
+      integer :: i, i1, i2, gridBoundWidth, myDE(2)
       character(len=ESMF_MAXSTR) :: coordName, coordUnit
       logical :: coordAligned, coordEqualSpaced, coordCyclic
-      integer :: localStart
-      integer, dimension(1) :: countPlus, localCount
+      integer :: count, compCount, localStart
+      integer, dimension(1) :: localCount
       integer, dimension(:), allocatable :: cellType
-      real(ESMF_KIND_R8), dimension(1) :: delta
-      real(ESMF_KIND_R8), dimension(1) :: localMinCoord
-      real(ESMF_KIND_R8) :: localMaxCoord
+      real(ESMF_KIND_R8) :: localMinCoord, localMaxCoord
+      real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse
       type(ESMF_CoordKind) :: coordKind
+      type(ESMF_DELayout) :: layout
       type(ESMF_PhysCoord) :: tempCoord
-      type(ESMF_DistGrid), pointer :: distGrid
+      type(ESMF_Grid) :: gridp
       type(ESMF_PhysGrid) :: physGrid
       type(ESMF_CoordSystem) :: coordSystem
 
@@ -3053,32 +2445,65 @@
 
       ! initialize some values
       gridBoundWidth = 1   ! TODO: move into structure, make input?
-      distGrid => grid%distgrids(distGridId)
 
-      if (count.ge.1) then
-        delta(1) = (max - min) / real(count)
-      else
-        print *, "ERROR in ESMF_LRGridAddVertPhysGridUni: count < 1"
+      ! figure out the position of myDE to get local counts
+      gridp%ptr => grid
+      call ESMF_GridGetDELayout(gridp, layout, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_LRGridAddPhysGrid: get delayout"
+        return
+      endif
+      call ESMF_DELayoutGetDEPosition(layout, myDE(1), myDE(2), status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_LRGridAddPhysGrid: delayout get position"
         return
       endif
 
-      localStart       = distGrid%ptr%myDEComp%globalAIPerDim(3)%min - 1
-      localMinCoord(1) = min + delta(1) * real(localStart)
-      localMaxCoord    = min + delta(1) &
-                       * real(distGrid%ptr%myDEComp%globalAIPerDim(3)%max)
-      localCount(1)    = distGrid%ptr%myDEComp%globalAIPerDim(3)%max &
-                       - distGrid%ptr%myDEComp%globalAIPerDim(3)%min + 1
+      localMinCoord = 0.0
+      localStart    = 0
+  !    if(myDE(1).ge.2) then    TODO: modify to use decompId to indirect address
+  !      do j = 1,myDE(1)-1
+  !        localStart = localStart + countsPerDEDim(j)
+  !      enddo
+  !    endif
+      i1 = localStart + 1
+  !    i2 = localStart + countsPerDEDim(myDE(1)) + 1
+      i2 = localStart + countsPerDEDim(1) + 1      ! for now
+      localMinCoord = minval(coord(i1:i2))
+      localMaxCoord = maxval(coord(i1:i2))
+
+      ! modify global counts to include ghost region
+      compCount = size(coord)
+      count     = compCount + 2*gridBoundWidth
+
+      ! allocate and load coords -- plus one for extra vertex
+      allocate(coordUse(count+1), stat=status)
+      if (status .ne. 0) then
+        print *, "allocation error, count =", count+1
+        return
+      endif
+
+      do i = 1,compCount
+        coordUse(i+1+gridBoundWidth) = coord(i)
+      enddo
+      do i = gridBoundWidth,1,-1
+        coordUse(i) = coordUse(i+1) - (coord(2)-coord(1))
+      enddo
+      do i = compCount,compCount+gridBoundWidth
+        coordUse(i+1) = coordUse(i) &
+                      + (coord(compCount)-coord(compCount-1))
+      enddo
 
       ! allocate and load cell type masks
-      allocate(cellType(count+2*gridBoundWidth), stat=status)
+      allocate(cellType(count), stat=status)
       if (status .ne. 0) then
-        print *, "allocation error, count =", count+2*gridBoundWidth
+        print *, "allocation error, count =", count
         return
       endif
       cellType = 0
       do i = 1,gridBoundWidth
         cellType(i) = 1
-        cellType(count+gridBoundWidth+i) = 1
+        cellType(compCount+gridBoundWidth+i) = 1
       enddo
 
       ! set parameters based on vertical coordinate system  TODO: better as a case
@@ -3116,46 +2541,53 @@
                                        aligned=coordAligned, &
                                        equalSpaced=coordEqualSpaced, &
                                        cyclic=coordCyclic, &
-                                       minVal=localMinCoord(1), &
+                                       minVal=localMinCoord, &
                                        maxVal=localMaxCoord, rc=status)
       call ESMF_PhysGridSetCoord(grid%physGrids(physGridId), tempCoord, &
                                  dimOrder=3, rc=status)
 
       ! set coordinates using total cell count
-      countPlus(1) = localCount(1) + 2*gridBoundWidth
-      call ESMF_LRGridSetCoordUniform(grid, physGridId, 1, countPlus, &
-                             gridBoundWidth, relloc, delta, localMinCoord, &
-                             total=.true., rc=status)
+      localCount(1) = countsPerDEDim(1) + 2*gridBoundWidth  ! TODO: indirect address for countPer
+      i1 = localStart + 1 + gridBoundWidth
+      i2 = localStart + localCount(1) + 1
+      call ESMF_LRGridSetCoord(grid, physGridId, 1, localCount, &
+                               gridBoundWidth, relloc, coord(i1:i2), &
+                               total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddVertPhysGridUni: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddVertPhysGrid: Grid set coord"
         return
       endif
       ! set coordinates using computational cell count
-      call ESMF_LRGridSetCoordUniform(grid, physGridId, 1, localCount, &
-                                      0, relloc, delta, localMinCoord, &
-                                      total=.false., rc=status)
+      localCount(1) = countsPerDEDim(1)  ! TODO: indirect address for countPer
+      i1 = localStart + 1
+      i2 = localStart + localCount(1) + 1
+      call ESMF_LRGridSetCoord(grid, physGridId, 1, localCount, &
+                               0, relloc, coord(i1:i2), &
+                               total=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddVertPhysGridUni: Grid set coord"
+        print *, "ERROR in ESMF_LRGridAddVertPhysGrid: Grid set coord"
         return
       endif
 
       ! set mask using total cell count
+      localCount(1) = countsPerDEDim(1) + 2*gridBoundWidth  ! TODO: indirect address for countPer
       i1 = localStart + 1
-      i2 = localStart + countPlus(1)
-      call ESMF_LRGridSetCellMask(grid, physGridId, 1, countPlus, &
+      i2 = localStart + localCount(1)
+      call ESMF_LRGridSetCellMask(grid, physGridId, 1, localCount, &
                                   gridBoundWidth, relloc, cellType(i1:i2), &
                                   rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridAddVertPhysGridUni: Grid set cell mask"
+        print *, "ERROR in ESMF_LRGridAddVertPhysGrid: Grid set cell mask"
         return
       endif
 
       ! clean up
+      deallocate(coordUse)
       deallocate(cellType)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridAddVertPhysGridUni
+      end subroutine ESMF_LRGridAddVertPhysGrid
 
 !------------------------------------------------------------------------------
 !BOP
@@ -3708,12 +3140,12 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LRGridSetCoordSpecd - Compute coordinates for a specified Grid
+! !IROUTINE: ESMF_LRGridSetCoordCompute - Compute coordinates for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridSetCoordSpecd(grid, physGridId, numDims, counts, &
-                                          gridBoundWidth, relloc, coord1, coord2, &
-                                          min, total, rc)
+      subroutine ESMF_LRGridSetCoordCompute(grid, physGridId, numDims, counts, &
+                                      gridBoundWidth, relloc, coord1, coord2, &
+                                      total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -3723,8 +3155,7 @@
       integer, intent(in) :: gridBoundWidth
       type(ESMF_RelLoc), intent(in) :: relloc
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
-      real(ESMF_KIND_R8), dimension(numDims), intent(in) :: min
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 !
@@ -3749,10 +3180,8 @@
 !          Relative location in grid cell for which this PhysGrid.
 !     \item[coord1]
 !          Array of specified grid coordinates in the first dimension.
-!     \item[coord2]
+!     \item[{[coord2]}]
 !          Array of specified grid coordinates in the second dimension.
-!     \item[min]
-!          Array of minimum local physical coordinates in each dimension.
 !     \item[{[total]}]
 !          Logical flag to optionally set physical coordinate arrays of total cells.
 !          Default is to set computational cells.
@@ -3767,209 +3196,6 @@
       logical :: rcpresent                    ! Return code present
       integer :: i, j, i1, j1
       real(ESMF_KIND_R8) :: coordUse1, coordUse2
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: temp1, temp2
-      type(ESMF_Array), dimension(:), pointer :: arrayTemp
-      type(ESMF_DataKind) :: kind
-      type(ESMF_DataType) :: type
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! TODO: different subroutines for different numDims?  or case?
-      ! TODO: could be a 1-D array for each coord axis later, but that
-      !       would have to be supported by Regrid first
-
-      ! allocate arrays
-      allocate(arrayTemp(numDims))
-
-      ! create ESMF_Arrays
-      kind = ESMF_R8
-      type = ESMF_DATA_REAL
-      arrayTemp(1) = ESMF_ArrayCreate(numDims, type, kind, counts, &
-                                      halo_width=gridBoundWidth, rc=status)
-      arrayTemp(2) = ESMF_ArrayCreate(numDims, type, kind, counts, &
-                                      halo_width=gridBoundWidth, rc=status)
-      call ESMF_ArrayGetData(arrayTemp(1), temp1, ESMF_DATA_REF, status)
-      call ESMF_ArrayGetData(arrayTemp(2), temp2, ESMF_DATA_REF, status)
-
-!     For now, an if construct for the different relative locations
-!     TODO: also set corners and faces
-      if (relloc .eq. ESMF_CELL_UNDEFINED) then
-        status = ESMF_FAILURE
-
-      elseif (relloc .eq. ESMF_CELL_CENTER) then
-        do i = 1,counts(1)
-          coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
-          do j = 1,counts(2)
-            coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
-            temp1(i,j) = coordUse1 
-            temp2(i,j) = coordUse2
-          enddo
-        enddo
-
-      elseif (relloc .eq. ESMF_CELL_NFACE) then
-        do i = 1,counts(1)
-          coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
-          do j = 1,counts(2)
-            coordUse2 = coord2(j+1)
-            temp1(i,j) = coordUse1 
-            temp2(i,j) = coordUse2
-          enddo
-        enddo
-
-      elseif (relloc .eq. ESMF_CELL_SFACE) then
-        do i = 1,counts(1)
-          coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
-          do j = 1,counts(2)
-            coordUse2 = coord2(j)
-            temp1(i,j) = coordUse1 
-            temp2(i,j) = coordUse2
-          enddo
-        enddo
-
-      elseif (relloc .eq. ESMF_CELL_EFACE) then
-        do i = 1,counts(1)
-          coordUse1 = coord1(i+1)
-          do j = 1,counts(2)
-            coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
-            temp1(i,j) = coordUse1 
-            temp2(i,j) = coordUse2
-          enddo
-        enddo
-
-      elseif (relloc .eq. ESMF_CELL_WFACE) then
-        do i = 1,counts(1)
-          coordUse1 = coord1(i)
-          do j = 1,counts(2)
-            coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
-            temp1(i,j) = coordUse1 
-            temp2(i,j) = coordUse2
-          enddo
-        enddo
-
-      elseif (relloc .eq. ESMF_CELL_NECORNER) then
-        do i = 1,counts(1)
-          coordUse1 = coord1(i+1)
-          do j = 1,counts(2)
-            coordUse2 = coord2(j+1)
-            temp1(i,j) = coordUse1 
-            temp2(i,j) = coordUse2
-          enddo
-        enddo
-
-      elseif (relloc .eq. ESMF_CELL_SWCORNER) then
-        do i = 1,counts(1)
-          coordUse1 = coord1(i)
-          do j = 1,counts(2)
-            coordUse2 = coord2(j)
-            temp1(i,j) = coordUse1 
-            temp2(i,j) = coordUse2
-          enddo
-        enddo
-
-      elseif (relloc .eq. ESMF_CELL_SECORNER) then
-        do i = 1,counts(1)
-          coordUse1 = coord1(i+1)
-          do j = 1,counts(2)
-            coordUse2 = coord2(j)
-            temp1(i,j) = coordUse1 
-            temp2(i,j) = coordUse2
-          enddo
-        enddo
-
-      elseif (relloc .eq. ESMF_CELL_NWCORNER) then
-        do i = 1,counts(1)
-          coordUse1 = coord1(i)
-          do j = 1,counts(2)
-            coordUse2 = coord2(j+1)
-            temp1(i,j) = coordUse1 
-            temp2(i,j) = coordUse2
-          enddo
-        enddo
-
-      else
-        print *, "This relative location not yet supported in ", &
-                 "LRGridSetCoordSpecd"
-        return
-      endif
-
-      ! now set the location array in PhysGrid
-      call ESMF_PhysGridSetLocations(grid%physGrids(physGridId), &
-                                     locationArray=arrayTemp, total=total, &
-                                     rc=status)
-            ! TODO: add name to set call
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridSetCoordSpecd: PhysGrid set locations"
-        return
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_LRGridSetCoordSpecd
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_LRGridSetCoordUniform - Compute coordinates for a uniform Grid
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetCoordUniform(grid, physGridId, numDims, counts, &
-                                            gridBoundWidth, relloc, delta, min, &
-                                            total, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
-      integer, intent(in) :: physGridId
-      integer, intent(in) :: numDims
-      integer, dimension(numDims), intent(in) :: counts
-      integer, intent(in) :: gridBoundWidth
-      type(ESMF_RelLoc), intent(in) :: relloc
-      real(ESMF_KIND_R8), dimension(numDims), intent(in) :: delta
-      real(ESMF_KIND_R8), dimension(numDims), intent(in) :: min
-      logical, intent(in), optional :: total
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set internally computes coordinates for a {\tt ESMF\_Grid} via a
-!     prescribed method.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[physGridId]
-!          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
-!     \item[numDims]
-!          Number of grid dimensions.
-!     \item[counts]
-!          Array of number of grid increments in each dimension.
-!     \item[gridBoundWidth]
-!          Number of extra cell layers in the internal coordinate representation
-!          for halo and ghost cells.  Used by {\tt ESMF\_Regrid}.
-!     \item[relloc]
-!          Relative location in grid cell for which this PhysGrid.
-!     \item[delta]
-!          Array of uniform grid increments in each dimension.
-!     \item[min]
-!          Array of minimum physical coordinates in each dimension.
-!     \item[{[total]}]
-!          Logical flag to optionally set physical coordinate arrays of total cells.
-!          Default is to set computational cells.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOP
-
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      integer :: i, j, i1, j1
-      real(ESMF_KIND_R8) :: coord1, coord2
       real(ESMF_KIND_R8), dimension(:), pointer :: temp
       real(ESMF_KIND_R8), dimension(:,:), pointer :: temp1, temp2
       type(ESMF_Array), dimension(:), pointer :: arrayTemp
@@ -4010,14 +3236,12 @@
 
         elseif (relloc.eq.ESMF_CELL_CENTER .or. relloc.eq.ESMF_CELL_CELL) then  ! TODO:?
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            temp(i) = delta(1)*0.5*real(i1+i1-1) + min(1)
+            temp(i) = 0.5d0*(coord1(i)+coord1(i+1))
           enddo
 
         elseif (relloc .eq. ESMF_CELL_TOPFACE) then   ! TODO: check bottom or top
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            temp(i) = delta(1)*real(i1) + min(1)
+            temp(i) = coord1(i+1)
           enddo
 
         else
@@ -4028,7 +3252,7 @@
 
 
       case(2)   ! 2D coordinates
- 
+
         ! get data
         call ESMF_ArrayGetData(arrayTemp(1), temp1, ESMF_DATA_REF, status)
         call ESMF_ArrayGetData(arrayTemp(2), temp2, ESMF_DATA_REF, status)
@@ -4040,118 +3264,99 @@
 
         elseif (relloc .eq. ESMF_CELL_CENTER) then
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            coord1 = delta(1)*0.5*real(i1+i1-1) + min(1)
+            coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
             do j = 1,counts(2)
-              j1 = j - gridBoundWidth
-              coord2 = delta(2)*0.5*real(j1+j1-1) + min(2)
-              temp1(i,j) = coord1 
-              temp2(i,j) = coord2 
+              coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
+              temp1(i,j) = coordUse1 
+              temp2(i,j) = coordUse2
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_NFACE) then
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            coord1 = delta(1)*0.5*real(i1+i1-1) + min(1)
+            coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
             do j = 1,counts(2)
-              j1 = j - gridBoundWidth
-              coord2 = delta(2)*real(j1) + min(2)
-              temp1(i,j) = coord1 
-              temp2(i,j) = coord2 
+              coordUse2 = coord2(j+1)
+              temp1(i,j) = coordUse1 
+              temp2(i,j) = coordUse2
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_SFACE) then
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            coord1 = delta(1)*0.5*real(i1+i1-1) + min(1)
+            coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
             do j = 1,counts(2)
-              j1 = j - gridBoundWidth
-              coord2 = delta(2)*real(j1-1) + min(2)
-              temp1(i,j) = coord1 
-              temp2(i,j) = coord2 
+              coordUse2 = coord2(j)
+              temp1(i,j) = coordUse1 
+              temp2(i,j) = coordUse2
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_EFACE) then
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            coord1 = delta(1)*real(i1) + min(1)
+            coordUse1 = coord1(i+1)
             do j = 1,counts(2)
-              j1 = j - gridBoundWidth
-              coord2 = delta(2)*0.5*real(j1+j1-1) + min(2)
-              temp1(i,j) = coord1 
-              temp2(i,j) = coord2 
+              coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
+              temp1(i,j) = coordUse1 
+              temp2(i,j) = coordUse2
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_WFACE) then
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            coord1 = delta(1)*real(i1-1) + min(1)
+            coordUse1 = coord1(i)
             do j = 1,counts(2)
-              j1 = j - gridBoundWidth
-              coord2 = delta(2)*0.5*real(j1+j1-1) + min(2)
-              temp1(i,j) = coord1 
-              temp2(i,j) = coord2 
+              coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
+              temp1(i,j) = coordUse1 
+              temp2(i,j) = coordUse2
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_NECORNER) then
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            coord1 = delta(1)*real(i1) + min(1)
+            coordUse1 = coord1(i+1)
             do j = 1,counts(2)
-              j1 = j - gridBoundWidth
-              coord2 = delta(2)*real(j1) + min(2)
-              temp1(i,j) = coord1 
-              temp2(i,j) = coord2 
+              coordUse2 = coord2(j+1)
+              temp1(i,j) = coordUse1 
+              temp2(i,j) = coordUse2
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_SWCORNER) then
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            coord1 = delta(1)*real(i1-1) + min(1)
+            coordUse1 = coord1(i)
             do j = 1,counts(2)
-              j1 = j - gridBoundWidth
-              coord2 = delta(2)*real(j1-1) + min(2)
-              temp1(i,j) = coord1 
-              temp2(i,j) = coord2 
+              coordUse2 = coord2(j)
+              temp1(i,j) = coordUse1 
+              temp2(i,j) = coordUse2
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_SECORNER) then
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            coord1 = delta(1)*real(i1) + min(1)
+            coordUse1 = coord1(i+1)
             do j = 1,counts(2)
-              j1 = j - gridBoundWidth
-              coord2 = delta(2)*real(j1-1) + min(2)
-              temp1(i,j) = coord1 
-              temp2(i,j) = coord2 
+              coordUse2 = coord2(j)
+              temp1(i,j) = coordUse1 
+              temp2(i,j) = coordUse2
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_NWCORNER) then
           do i = 1,counts(1)
-            i1 = i - gridBoundWidth
-            coord1 = delta(1)*real(i1-1) + min(1)
+            coordUse1 = coord1(i)
             do j = 1,counts(2)
-              j1 = j - gridBoundWidth
-              coord2 = delta(2)*real(j1) + min(2)
-              temp1(i,j) = coord1 
-              temp2(i,j) = coord2 
+              coordUse2 = coord2(j+1)
+              temp1(i,j) = coordUse1 
+              temp2(i,j) = coordUse2
             enddo
           enddo
 
         else
           print *, "This relative location not yet supported in ", &
-                   "LRGridSetCoordUnifrom"
+                   "LRGridSetCoordCompute"
           return
         endif
-
 
       case default
          print *,"ERROR in LRGridSetCoordUniform: ", &
@@ -4165,13 +3370,13 @@
                                      rc=status)
             ! TODO: add name to set call
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridSetCoordUniform: PhysGrid set locations"
+        print *, "ERROR in ESMF_LRGridSetCoordCompute: PhysGrid set locations"
         return
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridSetCoordUniform
+      end subroutine ESMF_LRGridSetCoordCompute
 
 !------------------------------------------------------------------------------
 !BOP
@@ -4928,142 +4133,18 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridSetBBoxesUni - Set the array of bounding boxes per DE
+! !IROUTINE: ESMF_LRGridSetBoundingBoxes - Set the array of bounding boxes per DE
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridSetBBoxesUni(grid, numDims, min, delta, &
-                                                countsPerAxis, numDE1, numDE2, rc)
+      subroutine ESMF_LRGridSetBoundingBoxes(grid, numDims, coord1, &
+                                             coord2, countsPerDEDim1, &
+                                             countsPerDEDim2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType), intent(inout) :: grid
       integer, intent(in) :: numDims
-      real(ESMF_KIND_R8), dimension(numDims), intent(in) :: min
-      real(ESMF_KIND_R8), dimension(numDims), intent(in) :: delta
-      integer, dimension(:,:), intent(in) :: countsPerAxis
-      integer, intent(in) :: numDE1
-      integer, intent(in) :: numDE2
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set assumes the region identifier data exists already
-!     and is being passed in through an {\tt ESMF\_LocalArray}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[numDims]
-!          Number of grid dimensions (directions).
-!     \item[min]
-!          Array of minimum physical coordinates in each direction.
-!     \item[delta]
-!          Array of uniform physical increments between nodes in each direction.
-!     \item[countsPerAxis]
-!          Array of number of grid increments per DE in each direction.
-!     \item[numDE1]
-!          Number of DEs in the first direction of the decomposition.
-!     \item[numDE2]
-!          Number of DEs in the second direction of the decomposition.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      integer :: DE, numDEs, rank, npts
-      integer :: i, j, jDE
-      real(ESMF_KIND_R8) :: start, stop
-      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
-
-!     Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      numDEs = numDE1*numDE2
-      rank   = 2   ! TODO: hard-coded for now
-      npts   = 2**rank
-
-!     TODO: break out by rank?
-!     Assume the following starage for bounding boxes:
-!       number of DEs * npts * rank
-!       where npts is the number of points necessary to describe a bounding box
-!       and rank is the number of dimensions.  For the time being, the points
-!       are stored in the following order:
-!                     1. (Xmin,Ymin,Zmin)
-!                     2. (Xmax,Ymin,Zmin)
-!                     3. (Xmax,Ymax,Zmin)
-!                     4. (Xmin,Ymax,Zmin)
-!                     5. (Xmin,Ymin,Zmax)
-!                     6. (Xmax,Ymin,Zmax)
-!                     7. (Xmax,Ymax,Zmax)
-!                     8. (Xmin,Ymax,Zmax)
-      allocate(boxes(numDEs,npts,rank), stat=status)
-      if (status .ne. 0) then
-         print *, "allocation error, boxes(nDE,npt,rank) = ", numDEs,npts,rank
-         return
-      endif
-      
-
-!     Calculate box for each DE
-!     Direction 1 first
-      start = min(1)
-      stop  = min(1)
-      do j = 1,numDE1
-        stop = stop + delta(1)*real(countsPerAxis(j,1))
-        do i = 1,numDE2
-          DE = (i-1)*numDE1 + j
-          boxes(DE,1,1) = start
-          boxes(DE,2,1) = stop
-          boxes(DE,3,1) = stop
-          boxes(DE,4,1) = start
-        enddo
-        start = stop
-      enddo
-
-!     Direction 2 next
-      start = min(2)
-      stop  = min(2)
-      do j = 1,numDE2
-        jDE  = (j-1)*numDE1 + 1
-        stop = stop + delta(2)*real(countsPerAxis(jDE,2))
-        do i = 1,numDE1
-          DE = (j-1)*numDE1 + i
-          boxes(DE,1,2) = start
-          boxes(DE,2,2) = stop
-          boxes(DE,3,2) = stop
-          boxes(DE,4,2) = start
-        enddo
-        start = stop
-      enddo
-
-      grid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_REF, status)
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_LRGridSetBBoxesUni
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_LRGridSetBBoxesSpecd - Set the array of bounding boxes per DE
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetBBoxesSpecd(grid, numDims, min, delta1, &
-                                                  delta2, countsPerDEDim1, &
-                                                  countsPerDEDim2, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridType), intent(inout) :: grid
-      integer, intent(in) :: numDims
-      real(ESMF_KIND_R8), dimension(numDims), intent(in) :: min
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
       integer, dimension(:), intent(in) :: countsPerDEDim1
       integer, dimension(:), intent(in) :: countsPerDEDim2
       integer, intent(out), optional :: rc
@@ -5078,12 +4159,10 @@
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[numDims]
 !          Number of grid dimensions (directions).
-!     \item[min]
-!          Array of minimum physical coordinate in each direction.
-!     \item[delta1]
-!          Array of physical increments between nodes in the first direction.
-!     \item[delta2]
-!          Array of physical increments between nodes in the second direction.
+!     \item[coord1]
+!          Array of physical coordinates in the first direction.
+!     \item[coord2]
+!          Array of physical coordinates in the second direction.
 !     \item[countsPerDEDim1]
 !          Array of number of grid increments per DE in the x-direction.
 !     \item[countsPerDEDim2]
@@ -5138,13 +4217,12 @@
 
 !     Calculate box for each DE
 !     Direction 1 first
-      start = min(1)
-      stop  = min(1)
+      start = 0.0
+      stop  = 0.0
       i1    = 0
       do j = 1,numDE1
-        do i = i1+1,i1+countsPerDEDim1(j)
-          stop = stop + delta1(i)
-        enddo
+        start = minval(coord1(i1+1:i1+countsPerDEDim1(j)))
+        stop  = maxval(coord1(i1+1:i1+countsPerDEDim1(j)))
         do i = 1,numDE2
           DE = (i-1)*numDE1 + j
           boxes(DE,1,1) = start
@@ -5156,13 +4234,12 @@
         i1    = i1 + countsPerDEDim1(j)
       enddo
 !     Direction 2 next
-      start = min(2)
-      stop  = min(2)
+      start = 0.0
+      stop  = 0.0
       i1    = 0
       do j = 1,numDE2
-        do i = i1+1,i1+countsPerDEDim2(j)
-          stop = stop + delta2(i)
-        enddo
+        start = minval(coord2(i1+1:i1+countsPerDEDim2(j)))
+        stop  = maxval(coord2(i1+1:i1+countsPerDEDim2(j)))
         do i = 1,numDE1
           DE = (j-1)*numDE1 + i
           boxes(DE,1,2) = start
@@ -5178,7 +4255,7 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridSetBBoxesSpecd
+      end subroutine ESMF_LRGridSetBoundingBoxes
 
 !------------------------------------------------------------------------------
 !BOP
