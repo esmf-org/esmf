@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.17 2003/02/26 22:16:02 jwolfe Exp $
+// $Id: ESMC_Layout.C,v 1.18 2003/02/28 22:34:12 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.17 2003/02/26 22:16:02 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.18 2003/02/28 22:34:12 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -854,12 +854,13 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       AIPtr->l = 0;
       AIPtr->r = global_counts[i]-1;
       AIPtr->max = global_counts[i];
+      AIPtr->gstart = 0;
     }
     // if decomp is 1, use nxLayout
     if (decompids[i] == 1) {
       int n1 = (global_counts[i]+nxLayout-1)/nxLayout; // round to nearest
       AIPtr->l = 0;
-      AIPtr->r = n1;
+      AIPtr->r = n1-1;
       AIPtr->max = global_counts[i];
       AIPtr->gstart = x*n1;
     }
@@ -867,7 +868,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
     if (decompids[i] == 2) {
       int n2 = (global_counts[i]+nyLayout-1)/nyLayout; // round to nearest
       AIPtr->l = 0;
-      AIPtr->r = n2;
+      AIPtr->r = n2-1;
       AIPtr->max = global_counts[i];
       AIPtr->gstart = y*n2;
     }
