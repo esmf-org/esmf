@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/03/24 15:45:58 cdeluca Exp $
+# $Id: makefile,v 1.4 2003/03/28 17:15:50 svasquez Exp $
 
 ALL:  tests
 
@@ -28,7 +28,7 @@ include ${ESMF_DIR}/makefile
 DIRS	  = 
 
 $(ESMC_TESTDIR)/ESMF_DELayoutUTest: chkopts ESMF_DELayoutUTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_DELayoutUTest ESMF_DELayoutUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_DELayoutUTest ESMF_DELayoutUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_DELayoutUTest.o
 
 RUN_ESMF_DELayoutUTest:

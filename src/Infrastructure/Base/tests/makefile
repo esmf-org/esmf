@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/03/28 16:35:21 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/03/28 17:14:20 svasquez Exp $ 
 
 ALL:  tests
 
@@ -38,7 +38,7 @@ CLOBBERDIRS =
 #  Base class
 #
 $(ESMC_TESTDIR)/ESMF_BaseUTest: ESMF_BaseUTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_BaseUTest ESMF_BaseUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_BaseUTest ESMF_BaseUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_BaseUTest.o
 
 RUN_ESMF_BaseUTest:
@@ -58,7 +58,7 @@ ESMF_BaseUTest.rm:
 ESMF_StringTest.o : ESMC_StringSubr.o
 
 $(ESMC_TESTDIR)/ESMF_StringTest: ESMC_StringSubr.o ESMF_StringTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StringTest ESMF_StringTest.o ESMC_StringSubr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StringTest ESMF_StringTest.o ESMC_StringSubr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_StringTest.o ESMC_StringSubr.o 
 
 RUN_ESMF_StringTest:
