@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.8 2002/12/10 00:03:42 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.9 2002/12/10 22:54:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.8 2002/12/10 00:03:42 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.9 2002/12/10 22:54:24 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -251,7 +251,7 @@ end function
 
 
 !       local vars
-        type (ESMF_Array), pointer :: ptr          ! opaque pointer to new C++ Array
+        type (ESMF_Array), pointer :: ptr   ! opaque pointer to new C++ Array
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
@@ -907,7 +907,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
-      character (len = *), intent(in) :: options
+      character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -919,9 +919,31 @@ end function
 !
 ! code goes here
 !
-        call c_ESMC_ArrayPrint(array%this, rc) 
+       character (len=6) :: defaultopts="brief"
+       integer :: status=ESMF_FAILURE      ! local error status
+       logical :: rcpresent=.FALSE.
 
-        end subroutine ESMF_ArrayPrint
+!      Initialize return code; assume failure until success is certain
+       if (present(rc)) then
+         rcpresent = .TRUE.
+         rc = ESMF_FAILURE
+       endif
+
+       if(present(options)) then
+           call c_ESMC_ArrayPrint(array%this, options, status) 
+       else
+           call c_ESMC_ArrayPrint(array%this, defaultopts, status) 
+       endif
+
+       if (status .ne. ESMF_SUCCESS) then
+         print *, "Array print error"
+         return
+       endif
+
+!      set return values
+       if (rcpresent) rc = ESMF_SUCCESS
+
+       end subroutine ESMF_ArrayPrint
 
 
         end module ESMF_ArrayMod
