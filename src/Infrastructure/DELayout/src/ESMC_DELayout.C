@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.31 2005/02/14 23:38:18 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.32 2005/02/15 17:07:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.31 2005/02/14 23:38:18 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.32 2005/02/15 17:07:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -773,7 +773,7 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
         *ip++ = dep->petid;
         *ip++ = dep->pid;
         *ip++ = dep->nconnect;
-        for (j=0; j<ndes; j++) {
+        for (j=0; j<dep->nconnect; j++) {
             *ip++ = dep->connect_de[j];
             *ip++ = dep->connect_w[j];
         }
@@ -861,7 +861,7 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
         dep->connect_de = new int[dep->nconnect];
         dep->connect_w = new int[dep->nconnect];
         dep->coord = new int[a->ndim];
-        for (j=0; j<a->ndes; j++) {
+        for (j=0; j<dep->nconnect; j++) {
             dep->connect_de[j] = *ip++;
             dep->connect_w[j] = *ip++;
         }
