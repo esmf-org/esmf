@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desc.tex,v 1.5 2003/08/13 02:39:58 cdeluca Exp $
+% $Id: TimeMgr_desc.tex,v 1.6 2003/08/13 20:52:48 cdeluca Exp $
 
 The ESMF Time Manager utility includes software for time and date 
 representation and calculations, model time advancement, and the 
@@ -20,10 +20,6 @@ Support for many calendar types, including user-customized calendars. \\
 Support for both concurrent and sequential modes of component execution. \\
 Support for varying and negative time steps. \\[.05in] \hline
 \end{tabular}
-\end{center}
-
-\begin{center}
-\includegraphics{TimeMgr_desc.eps}
 \end{center}
 
 \subsection{Time Manager Classes}
@@ -53,6 +49,10 @@ by ``ringing'' - returning a true value - at specified times.
 For example, an Alarm might be set to ring on the day of the 
 year when leaves start falling from the trees in a climate model.
 \end{itemize}
+
+\begin{center}
+\includegraphics*{TimeMgr_desc.eps}
+\end{center}
 
 In the remainder of this section, we briefly summarize the 
 functionality that the Time Manager classes provide.  Detailed 

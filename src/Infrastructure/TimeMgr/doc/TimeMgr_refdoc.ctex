@@ -4,12 +4,11 @@
 #ifdef STANDALONE
 \documentclass[]{article}
 
-\usepackage{epsf}
+\usepackage{graphicx}
 \usepackage{html}
 \usepackage{times}
 \usepackage{alltt}
 \usepackage[T1]{fontenc}
-\usepackage[dvips]{graphics,color}
 
 \textwidth 6.5in
 \textheight 8.5in
