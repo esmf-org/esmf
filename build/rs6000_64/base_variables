@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.13 2003/05/14 20:21:34 jwolfe Exp $ 
+# $Id: base_variables,v 1.14 2003/05/27 22:52:20 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -113,6 +113,7 @@ SL_LIBOPTS  = -G $(C_F90CXXLIBS)
 SL_LINKOPTS = -lC -brtl
 SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
+SL_LIBS_TO_MAKE = libesmf liboldworld
 
 
 include $(ESMF_BUILD_DIR)/common_variables
