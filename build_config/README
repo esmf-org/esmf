@@ -1,4 +1,4 @@
- $Id: README,v 1.1 2003/08/26 17:40:16 flanigan Exp $
+ $Id: README,v 1.2 2003/08/28 17:57:39 flanigan Exp $
 
 README file for esmf_build_config directory.
 
@@ -18,7 +18,7 @@ syntax defining build rules and actions, but do not constitute a
 complete build system.
 
 There are two makefile fragment files that are used.  The first one is
-common.mk in the esmf_build directory.  This file is designed to be
+common.mk in the build directory.  This file is designed to be
 included by the top level makefiles.  This file defines build rules
 and variables that are used across all platforms.  Users should have
 no need to edit this file.
@@ -27,7 +27,7 @@ common.mk will include a site specific makefile fragment file located
 in esmf_build_config.  The included will following this naming
 convention:
 
-     esmf_build_config/ESMF_ARCH.ESMF_SITE.mk
+     build_config/ESMF_ARCH.ESMF_SITE.mk
 
 
 ESMF_ARCH and ESMF_SITE are two environment variables that are either
@@ -48,12 +48,12 @@ settings for its architecture.
 
 ESMF_SITE may also be used to define makefile settings for different
 compilers on the same machine.  An example ESMF_SITE value using both
-the name and the compiler would be longs_lahey.  The following site
+the name and the compiler would be jazz_lahey.  The following site
 file contains settings for compiling with the Lahey Fortran90 compiler
-on a linux machine named longs:
+on a linux machine named jazz:
 
 
-      esmf_build_config/Linux.longs_lahey.mk
+      esmf_build_config/Linux.jazz_lahey.mk
 
 
 Current site files for supported platforms:
@@ -64,7 +64,7 @@ Current site files for supported platforms:
 
 Current site files for unsupported platforms:
 
-     esmf_build_config/Linux.longs_lahey.mk
+     esmf_build_config/Linux.lahey.mk
                        Darwin.defalut.mk
                        SunOS.default.mk
 
