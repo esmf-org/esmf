@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.45 2004/05/18 17:55:07 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.46 2004/05/18 21:51:14 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,6 +44,7 @@ enum ESMC_LogFileType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
 int ESMC_LogSetFilename(char filename[]);
 int ESMC_LogFinalize();
 void ESMC_TimeStamp(int *y,int* mn,int *d,int *h,int *m,int *s,int *ms);
+char *ESMC_LogGetErrMsg(int rc);
 
 class ESMC_Log {
 private:
@@ -92,7 +93,7 @@ private:
 
   private:
 // !PRIVATE MEMBER FUNCIONS:
-    char *ESMC_LogGetErrMsg(int rc);
+    
 };
 
 // the default global log object
