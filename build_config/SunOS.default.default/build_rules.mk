@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2004/03/16 22:11:12 nscollins Exp $
+# $Id: build_rules.mk,v 1.7 2004/03/18 00:28:38 nscollins Exp $
 #
 # SunOS.default.default.mk
 #
@@ -68,10 +68,10 @@ C_CLINKER	   = /opt/SUNWspro/bin/f90 -dalign
 C_FLINKER	   = /opt/SUNWspro/bin/f90 -dalign -R .
 C_CCV		   = ${C_CC} -V
 C_FCV              = /opt/SUNWspro/bin/f90 -dalign
-C_SYS_LIB	   = -L/opt/SUNWspro/SC5.0/lib -lF77 -lM77 -lfsu -lsunmath -lnsl -lsocket -lgen -ldl -lm
+C_SYS_LIB	   = -L/opt/SUNWspro/prod/lib -lF77 -lM77 -lfsu -lsunmath -lnsl -lsocket -lgen -ldl -lm
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS	   = -g -xs
-G_FOPTFLAGS	   = -g 
+G_COPTFLAGS	   = 
+G_FOPTFLAGS	   = 
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -fast -xO4 -fsimple=2 -xtarget=native
 O_FOPTFLAGS	   = -fast
@@ -93,25 +93,25 @@ CXX_CLINKER	   = /opt/SUNWspro/bin/CC
 CXX_FLINKER	   = /opt/SUNWspro/bin/CC 
 CXX_CCV		   = ${CXX_CC} -V
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
-C_F90CXXLD         = /opt/SUNWspro/bin/f90 -openmp
+C_F90CXXLD         = /opt/SUNWspro/bin/f90 
 C_F90CXXLIBS       = -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai \
 		     -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath \
                      -lCrun -lCstd -lCrun -lm -lcx -lc
 C_CXXF90LD         = /opt/SUNWspro/bin/CC
-C_CXXF90LIBS       = -L/opt/SUNWspro/lib -lfui -lfai -lfai2 -lfsumai \
+C_CXXF90LIBS       = -L/opt/SUNWspro/prod/lib -lfui -lfai -lfai2 -lfsumai \
                      -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai \
                      -lfsu -lsunmath -lm -lc
 C_CXXSO            = /opt/SUNWspro/bin/CC -G
 C_CXXSOLIBS        = -Kpic  -lCstd -lCrun -lm -lw -lcx -lc
 # ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS	   = -g
-GCXX_FOPTFLAGS	   = -g
+GCXX_COPTFLAGS	   = 
+GCXX_FOPTFLAGS	   = 
 # ------------------------- BOPT - O_c++ options ------------------------------
 OCXX_COPTFLAGS	   = -O 
 OCXX_FOPTFLAGS	   = -O
 # -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS	   = -g
-GCOMP_FOPTFLAGS	   = -g
+GCOMP_COPTFLAGS	   = 
+GCOMP_FOPTFLAGS	   = 
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
