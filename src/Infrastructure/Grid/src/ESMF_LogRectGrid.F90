@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.82 2004/06/16 16:42:58 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.83 2004/06/18 21:59:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.82 2004/06/16 16:42:58 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.83 2004/06/18 21:59:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -238,8 +238,8 @@
 ! !INTERFACE:
       function ESMF_GridCreateHorzLatLon(minGlobalCoordPerDim, &
                                          delta1, delta2, coord1, coord2, &
-                                         horzStagger, dimNames, dimUnits, &
-                                         coordOrder, coordIndex, periodic, &
+                                         horzstagger, dimNames, dimUnits, &
+                                         coordorder, coordindex, periodic, &
                                          name, rc)
 
 !
@@ -252,11 +252,11 @@
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
-      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzstagger
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
-      type(ESMF_CoordOrder), intent(in), optional :: coordOrder
-      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
+      type(ESMF_CoordOrder), intent(in), optional :: coordorder
+      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -289,16 +289,16 @@
 !          Array of physical coordinates in the first direction.
 !     \item[{[coord2]}]
 !          Array of physical coordinates in the second direction.
-!     \item[{[horzStagger]}]
+!     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
 !          stagger.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
-!     \item[{[coordOrder]}]
+!     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordIndex]}]
+!     \item[{[coordindex]}]
 !          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
@@ -337,11 +337,11 @@
                                      minGlobalCoordPerDim=minGlobalCoordPerDim, &
                                      delta1=delta1, delta2=delta2, &
                                      horzGridType=horzGridType, &
-                                     horzStagger=horzStagger, &
+                                     horzStagger=horzstagger, &
                                      horzCoordSystem=horzCoordSystem, &
                                      dimNames=dimNames, dimunits=dimUnits, &
-                                     coordOrder=coordOrder, &
-                                     coordIndex=coordIndex, &
+                                     coordOrder=coordorder, &
+                                     coordIndex=coordindex, &
                                      periodic=periodic, name=name, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -362,9 +362,9 @@
 ! !INTERFACE:
       function ESMF_GridCreateHorzLatLonUni(counts, minGlobalCoordPerDim, &
                                             maxGlobalCoordPerDim, &
-                                            deltaPerDim, horzStagger, &
+                                            deltaPerDim, horzstagger, &
                                             dimNames, dimUnits, &
-                                            coordOrder, coordIndex, periodic, &
+                                            coordorder, coordindex, periodic, &
                                             name, rc)
                                              
 !
@@ -378,11 +378,11 @@
                                                              maxGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
                                                              deltaPerDim
-      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzstagger
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
-      type(ESMF_CoordOrder), intent(in), optional :: coordOrder
-      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
+      type(ESMF_CoordOrder), intent(in), optional :: coordorder
+      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -416,16 +416,16 @@
 !          Array of maximum physical coordinates in each direction.
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
-!     \item[{[horzStagger]}]
+!     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
 !          stagger.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
-!     \item[{[coordOrder]}]
+!     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordIndex]}]
+!     \item[{[coordindex]}]
 !          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
@@ -463,10 +463,10 @@
       call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
                                        minGlobalCoordPerDim, &
                                        maxGlobalCoordPerDim, deltaPerDim, &
-                                       horzGridType, horzStagger, &
+                                       horzGridType, horzstagger, &
                                        horzCoordSystem, &
                                        dimNames, dimUnits, &
-                                       coordOrder, coordIndex, periodic, &
+                                       coordorder, coordindex, periodic, &
                                        name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -487,8 +487,8 @@
 ! !INTERFACE:
       function ESMF_GridCreateHorzXY(minGlobalCoordPerDim, &
                                      delta1, delta2, coord1, coord2, &
-                                     horzStagger, dimNames, dimUnits, &
-                                     coordOrder, coordIndex, periodic, &
+                                     horzstagger, dimNames, dimUnits, &
+                                     coordorder, coordindex, periodic, &
                                      name, rc)
 
 !
@@ -501,11 +501,11 @@
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
-      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzstagger
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
-      type(ESMF_CoordOrder), intent(in), optional :: coordOrder
-      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
+      type(ESMF_CoordOrder), intent(in), optional :: coordorder
+      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -538,16 +538,16 @@
 !          Array of physical coordinates in the first direction.
 !     \item[{[coord2]}]
 !          Array of physical coordinates in the second direction.
-!     \item[{[horzStagger]}]
+!     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
 !          stagger.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
-!     \item[{[coordOrder]}]
+!     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordIndex]}]
+!     \item[{[coordindex]}]
 !          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
@@ -611,9 +611,9 @@
 ! !INTERFACE:
       function ESMF_GridCreateHorzXYUni(counts, minGlobalCoordPerDim, &
                                         maxGlobalCoordPerDim, &
-                                        deltaPerDim, horzStagger, &
+                                        deltaPerDim, horzstagger, &
                                         dimNames, dimUnits, &
-                                        coordOrder, coordIndex, periodic, &
+                                        coordorder, coordindex, periodic, &
                                         name, rc)
                                              
 !
@@ -627,11 +627,11 @@
                                                              maxGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
                                                              deltaPerDim
-      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzstagger
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
-      type(ESMF_CoordOrder), intent(in), optional :: coordOrder
-      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
+      type(ESMF_CoordOrder), intent(in), optional :: coordorder
+      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -665,16 +665,16 @@
 !          Array of maximum physical coordinates in each direction.
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
-!     \item[{[horzStagger]}]
+!     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
 !          stagger.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
-!     \item[{[coordOrder]}]
+!     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordIndex]}]
+!     \item[{[coordindex]}]
 !          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
@@ -735,8 +735,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_LRGridAddVert(grid, minGlobalCoord, delta, coord, &
-                                    vertGridType, vertStagger, &
-                                    vertCoordSystem, dimName, dimUnit, &
+                                    vertgridtype, vertstagger, &
+                                    vertcoordsystem, dimName, dimUnit, &
                                     name, rc)
                                              
 !
@@ -745,9 +745,9 @@
       real(ESMF_KIND_R8), intent(in), optional :: minGlobalCoord
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord
-      type(ESMF_GridVertType), intent(in), optional :: vertGridType
-      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
-      type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
+      type(ESMF_GridVertType), intent(in), optional :: vertgridtype
+      type(ESMF_GridVertStagger), intent(in), optional :: vertstagger
+      type(ESMF_CoordSystem), intent(in), optional :: vertcoordsystem
       character(len=*), intent(in), optional :: dimName
       character(len=*), intent(in), optional :: dimUnit
       character(len=*), intent(in), optional :: name
@@ -774,11 +774,11 @@
 !          Array of physical increments in the vertical direction.
 !     \item[{[coord]}]
 !          Array of physical coordinates in the vertical direction.
-!     \item[{[vertGridType]}]
+!     \item[{[vertgridtype]}]
 !          {\tt ESMF\_GridVertType} specifier to denote vertical grid type.
-!     \item[{[vertStagger]}]
+!     \item[{[vertstagger]}]
 !          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
-!     \item[{[vertCoordSystem]}]
+!     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
@@ -1875,10 +1875,10 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! validate the layout before going any further
- !jw     call ESMF_DELayoutValidate(delayout, rc=localrc)
- !nsc    if (ESMF_LogMsgFoundError(localrc, &
- !nsc                              ESMF_ERR_PASSTHRU, &
- !nsc                              ESMF_CONTEXT, rc)) return
+      call ESMF_DELayoutValidate(delayout, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
       ! Extract some information from the Grid
       dimCount = grid%dimCount
