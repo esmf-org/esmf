@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.61 2004/11/05 08:14:50 theurich Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.62 2004/11/17 00:54:59 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -226,7 +226,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.61 2004/11/05 08:14:50 theurich Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.62 2004/11/17 00:54:59 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -426,6 +426,7 @@
       integer :: localrc
       integer, dimension(:), pointer :: srcPtr, dstPtr
       integer :: numList, i, i1
+      integer :: n1=1
       logical :: aggregateUse, newLink
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
@@ -459,13 +460,12 @@
           i1 = 2*(i-1)
           if ((dstPtr(i1+1) .eq. dstAdd(1)) .AND. &
               (dstPtr(i1+2) .eq. dstAdd(2)) .AND. &
-              (srcPtr(i)    .eq. srcAdd   )) then
-            newLink = .false.
+              (srcPtr(i)    .eq. srcAdd)) then
+            newLink   = .false.
             wgtPtr(i) = wgtPtr(i) + weight
-            go to 10
+            exit
           endif
         enddo
-   10   continue
       endif
 
       ! if this is a new link, increment number of links for this regrid
