@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.57 2003/06/19 16:12:18 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.58 2003/06/30 21:45:33 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,9 +28,9 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt Grid} class.  This class
-! provides a unified interface for both {\tt PhysGrid} and {\tt DistGrid}
-! information for model grids.  Functions for defining and computing {\tt Grid}
+! The code in this file implements the {\tt ESMF\_Grid} class.  This class
+! provides a unified interface for both {\tt ESMF\_PhysGrid} and {\tt ESMF\_DistGrid}
+! information for model grids.  Functions for defining and computing {\tt ESMF\_Grid}
 ! information are available through this class.
 !
 !------------------------------------------------------------------------------
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.57 2003/06/19 16:12:18 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.58 2003/06/30 21:45:33 rstaufer Exp $'
 
 !==============================================================================
 !
@@ -229,7 +229,7 @@
          module procedure ESMF_GridCreateExchange
 
 ! !DESCRIPTION:
-!     This interface provides a single entry point for {\tt Grid} create
+!     This interface provides a single entry point for {\tt ESMF\_Grid} create
 !     methods.
 !
 !EOP
@@ -246,7 +246,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct a
-!     complete {\tt Grid}.
+!     complete {\tt ESMF\_Grid}.
 !
 !EOP
       end interface
@@ -264,7 +264,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
-!     coordinates as part of a {\tt Grid}.
+!     coordinates as part of a {\tt ESMF\_Grid}.
 !
 !EOP
       end interface
@@ -282,7 +282,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
-!     logical masks as part of a {\tt Grid}.
+!     logical masks as part of a {\tt ESMF\_Grid}.
 !
 !EOP
       end interface
@@ -300,7 +300,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
-!     multiplicative masks as part of a {\tt Grid}.
+!     multiplicative masks as part of a {\tt ESMF\_Grid}.
 !
 !EOP
       end interface
@@ -335,7 +335,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
-!     region id's as part of a {\tt Grid}.
+!     region id's as part of a {\tt ESMF\_Grid}.
 !
 !EOP
       end interface
@@ -351,7 +351,7 @@
 !
 !! !DESCRIPTION:
 !!     This interface provides a single entry point for methods that
-!!     search a grid for point(s).
+!!     search a {\tt ESMF\_Grid} for point(s).
 !!
 !!EOP
 !      end interface
@@ -383,14 +383,14 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt Grid} object and constructs its
+!     Allocates memory for a new {\tt ESMF\_Grid} object and constructs its
 !     internals, but does not fill in any contents.  Return a pointer to
-!     the new {\tt Grid}.
+!     the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]
-!          {\tt Grid} name.
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -467,9 +467,9 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt Grid} object, constructs its
-!     internals, and internally generates the Grid.  Return a pointer to
-!     the new {\tt Grid}.
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and internally generates the {\tt ESMF\_Grid}.  Return a pointer to
+!     the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -486,7 +486,7 @@
 !     \item[{[y\_max]}]
 !          Maximum physical coordinate in the y-direction.
 !     \item[{[layout]}]
-!          DELayout of DE's.
+!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype.
 !     \item[{[vert\_gridtype]}]
@@ -500,7 +500,7 @@
 !     \item[{[vert\_coord\_system]}]
 !          Integer specifier to denote vertical coordinate system.
 !     \item[{[name]}]
-!          {\tt Grid} name.
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -564,16 +564,16 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt Grid} object, constructs its
-!     internals, and reads a {\tt Grid} in from a file.  Return a pointer to
-!     the new {\tt Grid}.
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and reads a {\tt ESMF\_Grid} in from a file.  Return a pointer to
+!     the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[iospec]}]
 !          File I/O specification.
 !     \item[{[name]}]
-!          {\tt Grid} name.
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -632,16 +632,16 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt Grid} object, constructs its
-!     internals, and copies attributes from another {\tt Grid}.  Return a
-!     pointer to the new {\tt Grid}.
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and copies attributes from another {\tt ESMF\_Grid}.  Return a
+!     pointer to the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[grid\_in]}]
-!          {\tt Grid} to be copied.
+!          {\tt ESMF\_Grid} to be copied.
 !     \item[{[name]}]
-!          {\tt Grid} name.
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -705,14 +705,14 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt Grid} object, constructs its
-!     internals, and copies a region from an existing {\tt Grid}.
-!     Return a pointer to the new {\tt Grid}.
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and copies a region from an existing {\tt ESMF\_Grid}.
+!     Return a pointer to the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[grid\_in]}]
-!          {\tt Grid} to be partially copied.
+!          {\tt ESMF\_Grid} to be partially copied.
 !     \item[{[i\_min]}]
 !          Minimum global i-index for the region of the grid to be cutout.
 !     \item[{[i\_max]}]
@@ -722,7 +722,7 @@
 !     \item[{[j\_max]}]
 !          Maximum global j-index for the region of the grid to be cutout.
 !     \item[{[name]}]
-!          {\tt Grid} name.
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -784,26 +784,26 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt Grid} object, constructs its
-!     internals, and creates a {\tt Grid} by either coarsening or refining an
-!     existing {\tt Grid}.  Return a pointer to the new {\tt Grid}.
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and creates a {\tt ESMF\_Grid} by either coarsening or refining an
+!     existing {\tt ESMF\_Grid}.  Return a pointer to the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[grid\_in]}]
-!          Source {\tt Grid} to be coarsened or refined.
+!          Source {\tt ESMF\_Grid} to be coarsened or refined.
 !     \item[{[i\_resolution]}]
 !          Integer resolution factor in the i-direction.
 !     \item[{[j\_resolution]}]
 !          Integer resolution factor in the j-direction.
 !          Note:  The above arguments assume refinement by factor if positive
 !          and coarsening by absolute value of the factor if negative.  For
-!          example, i\_resolution=4 indicates the new {\tt Grid} will be four
-!          times as resolved in the i-direction as the source {\tt Grid},
-!          whereas j\_resolution=-3 means the new {\tt Grid} will sample every
+!          example, i\_resolution=4 indicates the new {\tt ESMF\_Grid} will be four
+!          times as resolved in the i-direction as the source {\tt ESMF\_Grid},
+!          whereas j\_resolution=-3 means the new {\tt ESMF\_Grid} will sample every
 !          third point in the j-direction.
 !     \item[{[name]}]
-!          {\tt Grid} name.
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -863,18 +863,18 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt Grid} object, constructs its
-!     internals, and creates a new {\tt Grid} from the intersection of two
-!     existing {\tt Grids}.  Return a pointer to the new {\tt Grid}.
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and creates a new {\tt ESMF\_Grid} from the intersection of two
+!     existing {\tt ESMF\_Grids}.  Return a pointer to the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[grid\_in1]}]
-!          First source {\tt Grid}.
+!          First source {\tt ESMF\_Grid}.
 !     \item[{[grid\_in2]}]
-!          Second source {\tt Grid}.
+!          Second source {\tt ESMF\_Grid}.
 !     \item[{[name]}]
-!          New {\tt Grid} name.
+!          New {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -929,7 +929,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroys a {\tt Grid} object previously allocated
+!     Destroys a {\tt ESMF\_Grid} object previously allocated
 !     via an {\tt ESMF\_GridCreate routine}.
 !
 !     The arguments are:
@@ -1012,8 +1012,8 @@
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
-!     allocated {\tt Grid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF\_GridDestruct
+!     allocated {\tt ESMF\_Grid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding {\tt ESMF\_GridDestruct}
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
 !     {\tt ESMF\_GridConstruct}.
@@ -1021,7 +1021,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid}
+!          Pointer to a {\tt ESMF\_Grid}
 !     \item[{[i\_max]}]
 !          Number of grid increments in the i-direction.
 !     \item[{[j\_max]}]
@@ -1035,7 +1035,7 @@
 !     \item[{[y\_max]}]
 !          Maximum physical coordinate in the y-direction.
 !     \item[{[layout]}]
-!         DELayout of DE's.
+!         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype.
 !     \item[{[vert\_gridtype]}]
@@ -1135,8 +1135,8 @@
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
-!     allocated {\tt Grid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF\_GridDestruct
+!     allocated {\tt ESMF\_Grid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding {\tt ESMF\_GridDestruct}
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
 !     {\tt ESMF\_GridConstruct}.
@@ -1144,9 +1144,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid}
+!          Pointer to a {\tt ESMF\_Grid}
 !     \item[{[name]}]
-!          {\tt Grid} name.
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1206,7 +1206,7 @@
 ! !DESCRIPTION:
 !     ESMF routine which deallocates any space allocated by
 !    {\tt  ESMF\_GridConstruct}, does any additional cleanup before the
-!     original Grid object is freed.  Intended for internal ESMF
+!     original {\tt ESMF\_Gri} object is freed.  Intended for internal ESMF
 !     use only; end-users use {\tt ESMF\_GridDestroy}, which calls
 !     {\tt ESMF\_GridDestruct}.  
 !
@@ -1264,7 +1264,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Adds a {\tt PhysGrid} to a {\tt Grid}.
+!     Adds a {\tt ESMF\_PhysGrid} to a {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1275,7 +1275,7 @@
 !     \item[{[j\_max]}]
 !          Number of grid increments in the j-direction.
 !     \item [{[physgrid\_id]}]
-!          Integer identifier for {\tt PhysGrid}.
+!          Integer identifier for {\tt ESMF\_PhysGrid}.
 !     \item[{[x\_min]}]
 !          Minimum physical coordinate in the x-direction.
 !     \item[{[x\_max]}]
@@ -1285,7 +1285,7 @@
 !     \item[{[y\_max]}]
 !          Maximum physical coordinate in the y-direction.
 !     \item [{[physgrid\_name]}]
-!          {\tt PhysGrid} name.
+!          {\tt ESMF\_PhysGrid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1385,7 +1385,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Returns the set of resources the Grid object was configured with.
+!     Returns the set of resources the {\tt ESMF\_Grid} object was configured with.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1419,7 +1419,7 @@
 
 !
 ! !DESCRIPTION:
-!     Configures the Grid object with set of resources given.
+!     Configures the {\tt ESMF\_Grid} object with set of resources given.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1453,7 +1453,7 @@
 
 !
 ! !DESCRIPTION:
-!     Returns the value of Grid attribute <Value>.
+!     Returns the value of {\tt ESMF\_Grid} attribute <Value>.
 !     May be multiple routines, one per attribute.
 !
 !     The arguments are:
@@ -1489,12 +1489,12 @@
 !
 ! !DESCRIPTION:
 !     This version of set assumes the coordinates exist already and are being
-!     passed in through an {\tt Array}.
+!     passed in through an {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
 !     \item[{[id]}]
@@ -1542,18 +1542,18 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a DistGrid attribute with the given value.
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
 !     \item[{[MyDE]}]
-!          Identifier for this DE.
+!          Identifier for this {\tt ESMF\_DE}.
 !     \item[{[lcelltot\_count]}]
-!          Local (on this DE) number of total cells.
+!          Local (on this {\tt ESMF\_DE}) number of total cells.
 !     \item[{[lcellexc\_count]}]
-!          Local (on this DE) number of exclusive cells.
+!          Local (on this {\tt ESMF\_DE}) number of exclusive cells.
 !     \item[{[gcelltot\_start]}]
 !          Global index of starting count for total cells.
 !     \item[{[gcellexc\_start]}]
@@ -1604,14 +1604,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a DistGrid attribute with the given value.
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
 !     \item[{[AI]}]
-!          Array of {\tt AxisIndices} corresponding to the {\tt Grid}.
+!          Array of {\tt ESMF\_AxisIndices} corresponding to the {\tt ESMF\_Grid}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1654,14 +1654,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a DistGrid attribute with the given value.
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
 !     \item[{[layout]}]
-!          Pointer to the {\tt DELayout} corresponding to the {\tt Grid}.
+!          Pointer to the {\tt ESMF\_DELayout} corresponding to the {\tt ESMF\_Grid}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1707,7 +1707,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a DistGrid routine that translates an array of
+!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
 !     integer cell identifiers from global indexing to local indexing
 !
 !     The arguments are:
@@ -1715,16 +1715,16 @@
 !     \item[grid]
 !          Class to be used.
 !     \item[{[global1D]}]
-!          One-dimensional Array of global identifiers to be translated.
+!          One-dimensional {\tt ESMF\_Array} of global identifiers to be translated.
 !          Infers translating between positions in memory.
 !     \item[{[local1D]}]
-!          One-dimensional Array of local identifiers corresponding to
+!          One-dimensional {\tt ESMF\_Array} of local identifiers corresponding to
 !          global identifiers.
 !     \item[{[global2D]}]
-!          Two-dimensional Array of global identifiers to be translated.
+!          Two-dimensional {\tt ESMF\_Array} of global identifiers to be translated.
 !          Infers translating between indices in ij space.
 !     \item[{[local2D]}]
-!          Two-dimensional Array of local identifiers corresponding to
+!          Two-dimensional {\tt ESMF\_Array} of local identifiers corresponding to
 !          global identifiers.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1773,7 +1773,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a DistGrid routine that translates an array of
+!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
 !     integer cell identifiers from global indexing to local indexing
 !
 !     The arguments are:
@@ -1781,16 +1781,16 @@
 !     \item[grid]
 !          Class to be used.
 !     \item[{[local1D]}]
-!          One-dimensional Array of local identifiers to be translated.
+!          One-dimensional {\tt ESMF\_Array} of local identifiers to be translated.
 !          Infers translating between positions in memory.
 !     \item[{[global1D]}]
-!          One-dimensional Array of global identifiers corresponding to
+!          One-dimensional {\tt ESMF\_Array} of global identifiers corresponding to
 !          local identifiers.
 !     \item[{[local2D]}]
-!          Two-dimensional Array of local identifiers to be translated.
+!          Two-dimensional {\tt ESMF\_Array} of local identifiers to be translated.
 !          Infers translating between indices in ij space.
 !     \item[{[global2D]}]
-!          Two-dimensional Array of global identifiers corresponding to
+!          Two-dimensional {\tt ESMF\_Array} of global identifiers corresponding to
 !          local identifiers.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1842,7 +1842,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
 !     \item[{[id]}]
@@ -1878,15 +1878,15 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version of set internally computes coordinates for a Grid via a
+!     This version of set internally computes coordinates for a {\tt ESMF\_Grid} via a
 !     prescribed method.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[{[physgrid\_id]}]
-!          Identifier of the {\tt PhysGrid} to be modified.
+!          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1994,14 +1994,14 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version of set copies the coordinates of a Grid from another Grid.
+!     This version of set copies the coordinates of a {\tt ESMF\_Grid} from another Grid.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[grid\_in]
-!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
 !     \item[{[id]}]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
@@ -2049,13 +2049,13 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version sets a variety of information about a grid, depending
+!     This version sets a variety of information about a {\tt ESMF\_Grid}, depending
 !     on a list of optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype
 !     \item[{[vert\_gridtype]}]
@@ -2077,7 +2077,7 @@
 !     \item[{[global\_nmax]}]
 !          Numbers of global grid increments.
 !     \item[{[name]}]
-!          Grid name.
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2169,13 +2169,13 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version sets a variety of information about a grid, depending
+!     This version sets a variety of information about a {\tt ESMF\_Grid}, depending
 !     on a list of optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype
 !     \item[{[vert\_gridtype]}]
@@ -2234,12 +2234,12 @@
 !
 ! !DESCRIPTION:
 !     This version of set assumes the logical mask data exists already and is
-!     being passed in through an {\tt Array}.
+!     being passed in through an {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
 !     \item [{[name]}]
@@ -2276,11 +2276,11 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
 !     \item [{[name]}]
-!           {\tt LMask} name.
+!           {\tt ESMF\_LMask} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2313,11 +2313,11 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[{[mmask]}]
 !          Multiplicative mask identifier.
 !     \item [{[name]}]
-!           {\tt LMask} name.
+!           {\tt ESMF\_LMask} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2345,18 +2345,18 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version of set copies a logical mask for a Grid from another Grid.
+!     This version of set copies a logical mask for a {\tt ESMF\_Grid} from another {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[grid\_in]
-!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
 !     \item [{[name]}]
-!           {\tt LMask} name to be set.
+!           {\tt ESMF\_LMask} name to be set.
 !     \item [{[name\_in]}]
-!           {\tt LMask} name to be copied.
+!           {\tt ESMF\_LMask} name to be copied.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2384,16 +2384,16 @@
 !
 ! !DESCRIPTION:
 !     This version of set assumes the multiplicative mask data exists already
-!     and is being passed in through an {\tt Array}.
+!     and is being passed in through an {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
 !     \item [{[name]}]
-!           {\tt MMask} name.
+!           {\tt ESMF\_MMask} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2426,11 +2426,11 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
 !     \item [{[name]}]
-!           {\tt MMask} name.
+!           {\tt ESMF\_MMask} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2463,11 +2463,11 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[lmask]
 !          Logical mask identifier.
 !     \item [{[name]}]
-!           {\tt MMask} name.
+!           {\tt ESMF\_MMask} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2495,19 +2495,19 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version of set copies a multiplicative mask for a Grid from another
-!     Grid.
+!     This version of set copies a multiplicative mask for a {\tt ESMF\_Grid} from another
+!     {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[grid\_in]
-!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
 !     \item [{[name]}]
-!           {\tt MMask} name to be set.
+!           {\tt ESMF\_MMask} name to be set.
 !     \item [{[name\_in]}]
-!           {\tt MMask} name to be copied.
+!           {\tt ESMF\_MMask} name to be copied.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2535,16 +2535,16 @@
 !
 ! !DESCRIPTION:
 !     This version of set assumes the metric data exists already and is being
-!     passed in through an {\tt Array}.
+!     passed in through an {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
 !     \item [{[name]}]
-!           {\tt Metric} name.
+!           {\tt ESMF\_Metric} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2577,11 +2577,11 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
 !     \item [{[name]}]
-!           {\tt Metric} name.
+!           {\tt ESMF\_Metric} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2608,17 +2608,17 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version of set internally computes a metric for a Grid via a
+!     This version of set internally computes a metric for a {\tt ESMF\_Grid} via a
 !     prescribed method.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[{[id]}]
 !          Identifier for predescribed metrics.  TODO: make list
 !     \item [{[name]}]
-!           {\tt Metric} name.
+!           {\tt ESMF\_Metric} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2646,18 +2646,18 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version of set copies a metric for a Grid from another Grid.
+!     This version of set copies a metric for a {\tt ESMF\_Grid} from another {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item [{[name]}]
-!           {\tt Metric} name to be set.
+!           {\tt ESMF\_Metric} name to be set.
 !     \item[grid\_in]
-!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
 !     \item [{[name\_in]}]
-!           {\tt Metric} name to be copied.
+!           {\tt ESMF\_Metric} name to be copied.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2685,16 +2685,16 @@
 !
 ! !DESCRIPTION:
 !     This version of set assumes the region identifier data exists already
-!     and is being passed in through an {\tt Array}.
+!     and is being passed in through an {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
 !     \item [{[name]}]
-!           {\tt RegionID} name.
+!           {\tt ESMF\_RegionID} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2727,11 +2727,11 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
 !     \item [{[name]}]
-!           {\tt RegionID} name.
+!           {\tt ESMF\_RegionID} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2759,19 +2759,19 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version of set copies a region identifier for a Grid from another
-!     Grid.
+!     This version of set copies a region identifier for a {\tt ESMF\_Grid} from another
+!     {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Pointer to a {\tt Grid} to be modified.
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item [{[name]}]
-!           {\tt RegionID} name to be set.
+!           {\tt ESMF\_RegionID} name to be set.
 !     \item[grid\_in]
-!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
 !     \item [{[name\_in]}]
-!           {\tt RegionID} name to be copied.
+!           {\tt ESMF\_RegionID} name to be copied.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2799,19 +2799,18 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Call {\tt DistGrid} routines to perform a AllGather operation over the 
-!     data in a {\tt Grid}.  It returns the data in the {\tt dstarray}.
+!     Call {\tt ESMF\_DistGrid} routines to perform a AllGather operation over the{\tt ESMF\_Grid}. 
 !
 !     \begin{description}
 !     \item [grid]
-!           Grid on which data is defined.
+!           {\tt ESMF\_Grid} on which data is defined.
 !     \item [srcarray]
-!           Array containing data to be allgather'ed.  The data inside the
+!           {\tt ESMF\_Array} containing data to be allgather'ed.  The data inside the
 !           array is not altered, but annotation is attached to the array
 !           for later use (thus the intent must be 'inout'.)
 ! 
 !     \item [dstarray]
-!           Array containing the resulting data.
+!           {\tt ESMF\_Array} containing the resulting data.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -2860,23 +2859,23 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Call {\tt DistGrid} routines to perform a Gather operation over the 
-!     data in a {\tt Grid}.  It returns the data in the {\tt dstarray}.
+!     Call {\tt ESMF\_DistGrid} routines to perform a Gather operation over the 
+!     data in a {\tt ESMF\_Grid}.  It returns the data in the {\tt dstarray}.
 !
 !     \begin{description}
 !     \item [grid]
-!           Grid on which data is defined.
+!           {\tt ESMF\_Grid} on which data is defined.
 !     \item [srcarray]
-!           Array containing data to be gathered.  The data inside the
+!           {\tt ESMF\_Array} containing data to be gathered.  The data inside the
 !           array is not altered, but annotation is attached to the array
 !           for later use (thus the intent must be 'inout'.)
 !     \item [deid]
-!           Destination DE number to gather array onto.  The {\tt dstarray}
-!           return object is only valid on this DE.  On all other DEs in this
-!           layout the {\tt dstarray} return is an invalid {\tt Array}.
+!           Destination {\tt ESMF\_DE} number to gather array onto.  The {\tt dstarray}
+!           return object is only valid on this {\tt ESMF\_DE}.  On all other {\tt ESMF\_DEs in} this
+!           layout the {\tt dstarray} return is an invalid {\tt ESMF\_Array}.
 !     \item [dstarray]
-!           Array containing the resulting data on DE {\tt deid}.  On all other
-!           DE numbers in this it is an invalid array.
+!           {\tt ESMF\_Array} containing the resulting data on {\tt ESMF\_DE} {\tt deid}.  On all other
+!           {\tt ESMF\_DE} numbers in this it is an invalid array.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -2926,18 +2925,18 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Call {\tt DistGrid} routines to perform a Scatter operation over the 
-!     data in a {\tt Grid}.  It returns the data in the {\tt dstarray}.
+!     Call {\tt ESMF\_DistGrid} routines to perform a Scatter operation over the 
+!     data in a {\tt ESMF\_Grid}.  It returns the data in the {\tt dstarray}.
 !
 !     \begin{description}
 !     \item [grid]
-!           Grid on which output data will be defined.
+!           {\tt ESMF\_Grid} on which output data will be defined.
 !     \item [deid]
-!           Destination DE number to scatter array from.  The {\tt srcarray}
-!           input object is only valid on this DE.  On all other DEs in this
+!           Destination {\tt ESMF\_DE} number to scatter array from.  The {\tt srcarray}
+!           input object is only valid on this {\tt ESMF\_D}.  On all other {\tt ESMF\_DE}s in this
 !           layout the {\tt srcarray} argument is ignored.
 !     \item [srcarray]
-!           Array containing data to be scattered.  The data inside the
+!           {\tt ESMF\_Array} containing data to be scattered.  The data inside the
 !           array is not altered, but annotation is attached to the array
 !           for later use (thus the intent must be 'inout'.)
 !     \item [dimorder]
@@ -2945,8 +2944,8 @@
 !           how to spread dimensions of input array to output arrays.
 !           0 indicates no decomposition, 1 to Ndims indicate index order.
 !     \item [dstarray]
-!           Array containing the resulting data on DE {\tt deid}.  On all other
-!           DE numbers this is an invalid array.
+!           {\tt ESMF\_Array} containing the resulting data on {\tt ESMF\_DE} {\tt deid}.  On all other
+!           {\tt ESMF\_DE} numbers this is an invalid array.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -2993,15 +2992,15 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Call {\tt DistGrid} routines to perform a Halo operation over the data
-!     in a {\tt Grid}.  This routine updates the data inside the {\tt Array}
+!     Call {\tt ESMF\_DistGrid} routines to perform a Halo operation over the data
+!     in a {\tt ESMF\_Grid}.  This routine updates the data inside the {\tt ESMF\_Array}
 !     so there is no separate return argument.
 !
 !     \begin{description}
 !     \item [grid]
-!           Grid on which data is defined.
+!           {\tt ESMF\_Grid} on which data is defined.
 !     \item [array]
-!           Array containing data to be haloed.
+!           {\tt ESMF\_Array} containing data to be haloed.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -3046,7 +3045,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Validates that a Grid is internally consistent.
+!     Validates that a {\tt ESMF\_Grid} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3100,7 +3099,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Print information about a Grid.
+!      Print information about a {\t ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3262,12 +3261,12 @@
 !!     \item[x,y]
 !!          Coordinates of search point.
 !!     \item[DEid]
-!!          id of DE that owns search point.
+!!          id of {\tt ESMF\_DE} that owns search point.
 !!     \item[search\_grid]
-!!          ESMF Grid to search for location.
+!!          ESMF {\tt ESMF\_Grid} to search for location.
 !!     \item[{[phys\_grid\_id]}]
-!!          If more than one PhysGrid is contained in Grid, choose which
-!!          grid to search (default is 1st PhysGrid?).
+!!          If more than one {\tt ESMF\_PhysGrid} is contained in {\tt ESMF\_Grid}, choose which
+!!          grid to search (default is 1st {\tt ESMF\_PhysGrid}?).
 !!     \item[{[rc]}]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
