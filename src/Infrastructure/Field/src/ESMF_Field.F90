@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.188 2004/10/14 20:14:38 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.189 2004/10/14 22:50:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.188 2004/10/14 20:14:38 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.189 2004/10/14 22:50:17 nscollins Exp $'
 
 !==============================================================================
 !
@@ -493,19 +493,14 @@
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
    
       ! Initialize pointers
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNoDataPtr%ftypep)
 
       ! Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       allocate(ftype, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
@@ -521,7 +516,7 @@
 
       ! Set return values.
       ESMF_FieldCreateNoDataPtr%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoDataPtr
 
@@ -587,19 +582,14 @@
  
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
       
       ! Initialize pointers
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNoArray%ftypep)
 
       ! Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       allocate(ftype, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
@@ -615,7 +605,7 @@
 
       ! Set return values.
       ESMF_FieldCreateNoArray%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoArray
 
@@ -659,19 +649,14 @@
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
       
       ! Initialize pointers
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNoGridArray%ftypep)
 
       ! Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       allocate(ftype, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
@@ -685,7 +670,7 @@
 
       ! Set return values.
       ESMF_FieldCreateNoGridArray%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoGridArray
 
@@ -718,22 +703,18 @@
 
       ! Local variables
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
-      ! If already destroyed or never created, return ok
-      if (.not. associated(field%ftypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
+      ! TODO: If already destroyed or never created, return ok?
+      ! (should it be ok to destroy the same object twice without complaint?)
+      ! for now, no, you can't delete an object twice 
+      call ESMF_FieldValidate(field, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                 ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-      endif
 
       ! Destruct all field internals and then free field memory.
       call ESMF_FieldDestruct(field%ftypep, status)
@@ -747,7 +728,7 @@
                                        ESMF_CONTEXT, rc)) return
       endif 
            
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldDestroy
 
@@ -816,19 +797,13 @@
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
 
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
+        ! Validate object first
+        call ESMF_FieldValidate(field, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                 ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-        endif
  
         ftype => field%ftypep
-        if (ftype%fieldstatus .ne. ESMF_STATUS_READY) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
 
         if (present(grid)) then
             if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
@@ -942,32 +917,19 @@
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       !character(len=ESMF_MAXSTR) :: str
       type(ESMF_FieldType), pointer :: ftypep
 
       ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-      ! Minimal error checking 
-      if (.not.associated(field%ftypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
+      ! Validate first
+      call ESMF_FieldValidate(field, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ftypep => field%ftypep
-
-      if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
 
       if (ftypep%datastatus .ne. ESMF_STATUS_READY) then
            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -980,7 +942,7 @@
       array = ftypep%localfield%localdata
    
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetArray
 
@@ -2220,32 +2182,19 @@
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       !character(len=ESMF_MAXSTR) :: str
       type(ESMF_FieldType), pointer :: ftypep
 
       ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-      ! Minimal error checking 
-      if (.not.associated(field%ftypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
+      ! validate before using
+      call ESMF_FieldValidate(field, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-      endif
-
+ 
       ftypep => field%ftypep
-
-      if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
 
       ! TODO: do we allow this?  if so, do we just destroy the old array?
       !if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
@@ -2257,11 +2206,15 @@
       ftypep%localfield%localdata = array
       ftypep%datastatus = ESMF_STATUS_READY
    
-      ! TODO: add some validation here to be sure the array is the right
-      ! size for the grid decomposition
-
+      ! Now revalidate to be sure the grid and datamap, if they exist, are
+      ! consistent with the new array.
+      call ESMF_FieldValidate(field, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+ 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldSetArray
 
@@ -2908,34 +2861,30 @@
 !     \end{description}
 !
 !EOP
-
+        type(ESMF_FieldType), pointer :: ftype
         logical :: had_grid
+        integer :: localrc
 
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
 
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
- 
-        if (field%ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
+        ! Validate first
+        call ESMF_FieldValidate(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        ftype => field%ftypep
 
         ! decide if we're regridding or just adding a grid to a partially
         ! created field.
         had_grid = .FALSE.
-        if (field%ftypep%gridstatus .eq. ESMF_STATUS_READY) had_grid = .TRUE.
+        if (ftype%gridstatus .eq. ESMF_STATUS_READY) had_grid = .TRUE.
 
         if (.not. had_grid) then
            ! if no grid, just add it
-           field%ftypep%grid = grid
-           field%ftypep%gridstatus = ESMF_STATUS_READY
+           ftype%grid = grid
+           ftype%gridstatus = ESMF_STATUS_READY
         else
            ! this could be considered a request to regrid the data
            call ESMF_LogWrite("Replacing existing grid not yet supported", &
@@ -2945,6 +2894,13 @@
                                ESMF_LOG_WARNING, &
                                ESMF_CONTEXT)
         endif
+
+        ! now validate again to be sure that if the field had an existing
+        ! array or datamap, that we haven't created an inconsistent object
+        call ESMF_FieldValidate(field, "", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2982,25 +2938,18 @@
 !     \end{description}
 !
 !EOP
-
+        integer :: status
         logical :: had_data
 
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
 
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
+        ! Validate first
+        call ESMF_FieldValidate(field, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
  
-        if (field%ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
-
         ! decide if we're reordering data or just setting an initial map
         ! in an already created field without data.  (the latter is ok;
         ! the former is not implemented yet.)
@@ -3020,6 +2969,13 @@
                                ESMF_CONTEXT)
            return
         endif
+
+        ! and now revalidate to ensure a consistent datamap
+        call ESMF_FieldValidate(field, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+ 
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3106,6 +3062,7 @@
 
       type(ESMF_FieldType), pointer :: ftypep
       type(ESMF_Relloc) :: horzRelloc
+      character(len=ESMF_MAXSTR) :: msgbuf
       integer :: gridcounts(ESMF_MAXGRIDDIM)   ! how big the local grid is
       integer :: arraycounts(ESMF_MAXDIM)      ! how big the local array is
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
@@ -3119,9 +3076,10 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       if (.not.associated(field%ftypep)) then 
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rc)
+         return
       endif 
 
       ftypep => field%ftypep
@@ -3129,9 +3087,10 @@
 
       ! make sure the field is ready before trying to look at contents
       if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rc)
+         return
       endif 
 
       ! figure out whether there is a grid, datamap, and/or arrays first
@@ -3192,7 +3151,7 @@
           if (arrayrank .ne. maprank) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                              "rank in fielddatamap must match rank in array", &
-                                        ESMF_CONTEXT, rc)
+                                       ESMF_CONTEXT, rc)
               return
           endif
       endif
@@ -3208,13 +3167,18 @@
                   ! this, then change this test to ignore halo widths.
                   if (arraycounts(i) .ne. (otheraxes(j) + (2*halo))) then
                       if (arraycounts(i) .eq. otheraxes(j)) then
-                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-       "counts of non-grid axes in array must match counts in field datamap, including halo width", &
+                       write(msgbuf,*) "array index", i, "(", arraycounts(i), &
+                                       ") != datamap index", j, &
+                                       "(", otheraxes(j) + (2*halo), &
+                                       ") including halo width"
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
                                                    ESMF_CONTEXT, rc)
                           return
                       else 
-                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-       "counts of non-grid axes in array must match counts in field datamap", &
+                       write(msgbuf,*) "array index", i, "(", arraycounts(i), &
+                                       ") != datamap index", j, &
+                                       "(", otheraxes(j) + (2*halo), ")"
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
                                                    ESMF_CONTEXT, rc)
                   
                           return
@@ -3226,8 +3190,10 @@
                   ! the sizes must match, taking into account the halo widths
                   ! and the index reordering.
                   if (arraycounts(i) .ne. (gridcounts(maplist(i)) + (2*halo))) then
-                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                               "axes in array does not match counts in grid", &
+                      write(msgbuf,*) "array index", i, "(", arraycounts(i), &
+                                      ") != grid index", maplist(i), "(", &
+                                      gridcounts(maplist(i)) + (2*halo), ")"
+                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
                                                 ESMF_CONTEXT, rc)
                       return
                   endif
@@ -3281,7 +3247,6 @@
 
         ! Local variables
         integer :: status, de_id
-        logical :: rcpresent
         type(ESMF_Array) :: out_array
         type(ESMF_DataType) arr_type
         type(ESMF_DataKind) arr_kind
@@ -3302,13 +3267,9 @@
 
         ! Set initial values
         status = ESMF_FAILURE 
-        rcpresent = .FALSE.
 
         ! Initialize return code
-        if(present(rc)) then
-            rcpresent=.TRUE.
-            rc = ESMF_FAILURE      
-        endif
+        if (present(rc)) rc = ESMF_FAILURE      
            
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
@@ -3322,7 +3283,7 @@
               if (ESMF_LogMsgFoundError(status, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
-              if(rcpresent) rc = ESMF_SUCCESS
+              if (present(rc)) rc = ESMF_SUCCESS
               return
            else if (fileformat == ESMF_IO_FILEFORMAT_NETCDF) then
 #if (ESMF_NO_IOCODE)
@@ -3345,7 +3306,7 @@
               if (ESMF_LogMsgFoundError(status, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
-              if(rcpresent) rc = ESMF_SUCCESS
+              if (present(rc)) rc = ESMF_SUCCESS
 
               return
            else if (fileformat == ESMF_IO_FILEFORMAT_NETCDF) then
@@ -3625,7 +3586,7 @@
       endif ! (de_id .eq. 0) then  
 
         call ESMF_ArrayDestroy(out_array, status)
-        if (rcpresent) rc = ESMF_SUCCESS
+        if  (present(rc)) rc = ESMF_SUCCESS
         
       end subroutine ESMF_FieldWrite
 
@@ -3671,9 +3632,8 @@
 !EOPI
 
         ! Local variables
-        logical :: rcpresent
-      integer comm
-      integer IOComm
+        integer comm
+        integer IOComm
         type(ESMF_VM) :: vm
         character (80) SysDepInfo
         integer     :: DataHandle
@@ -3690,15 +3650,11 @@
 
         ! Set initial values
         status = ESMF_FAILURE 
-        rcpresent = .FALSE.
 
         wrf_type = WRF_REAL
 
         ! Initialize return code
-        if(present(rc)) then
-            rcpresent=.TRUE.
-            rc = ESMF_FAILURE      
-        endif
+        if (present(rc)) rc = ESMF_FAILURE      
            
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
@@ -3807,9 +3763,8 @@
 !EOPI
 
         ! Local variables
-        logical :: rcpresent
-      integer Comm
-      integer IOComm
+        integer Comm
+        integer IOComm
         type(ESMF_VM) :: vm
         character (80) SysDepInfo
         integer     :: DataHandle
@@ -3826,15 +3781,11 @@
 
         ! Set initial values
         status = ESMF_FAILURE 
-        rcpresent = .FALSE.
 
         wrf_type = WRF_DOUBLE
 
         ! Initialize return code
-        if(present(rc)) then
-            rcpresent=.TRUE.
-            rc = ESMF_FAILURE      
-        endif
+        if (present(rc)) rc = ESMF_FAILURE      
            
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
@@ -3943,7 +3894,6 @@
 !EOPI
 
         ! Local variables
-        logical :: rcpresent
       integer Comm
       integer IOComm
         type(ESMF_VM) :: vm
@@ -3962,15 +3912,11 @@
 
         ! Set initial values
         status = ESMF_FAILURE 
-        rcpresent = .FALSE.
 
         wrf_type = WRF_REAL
 
         ! Initialize return code
-        if(present(rc)) then
-            rcpresent=.TRUE.
-            rc = ESMF_FAILURE      
-        endif
+        if (present(rc)) rc = ESMF_FAILURE      
            
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
@@ -4084,9 +4030,8 @@
 !EOPI
 
         ! Local variables
-        logical :: rcpresent
-      integer Comm
-      integer IOComm
+        integer Comm
+        integer IOComm
         type(ESMF_VM) :: vm
         character (80) SysDepInfo
         integer     :: DataHandle
@@ -4103,15 +4048,11 @@
 
         ! Set initial values
         status = ESMF_FAILURE 
-        rcpresent = .FALSE.
 
         wrf_type = WRF_DOUBLE
 
         ! Initialize return code
-        if(present(rc)) then
-            rcpresent=.TRUE.
-            rc = ESMF_FAILURE      
-        endif
+        if (present(rc)) rc = ESMF_FAILURE      
            
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
@@ -4219,7 +4160,6 @@
 
         ! Local variables
         integer :: status, de_id
-        logical :: rcpresent
         type(ESMF_Array) :: outarray
         type(ESMF_Grid) :: grid
         type(ESMF_DELayout) :: delayout
@@ -4233,13 +4173,9 @@
 
         ! Set initial values
         status = ESMF_FAILURE 
-        rcpresent = .FALSE.
 
         ! Initialize return code
-        if(present(rc)) then
-            rcpresent=.TRUE.
-            rc = ESMF_FAILURE      
-        endif
+        if (present(rc)) rc = ESMF_FAILURE      
            
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
@@ -4289,7 +4225,7 @@
                                       ESMF_CONTEXT, rc)) return
         endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldWriteFileASCII
         
@@ -4411,7 +4347,6 @@
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_Array) :: array                   ! New array
       type(ESMF_RelLoc) :: hRelLoc
       type(ESMF_FieldDataMap) :: dmap
@@ -4422,11 +4357,7 @@
 
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! make sure hwidth has a value here.
       if (present(haloWidth)) then
@@ -4506,7 +4437,7 @@
       ftype%localfield%localdata = array
       ftype%datastatus = ESMF_STATUS_READY
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldConstructNew
 
@@ -4578,16 +4509,10 @@
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_Field) :: tfield                  ! temp field for error check
 
       ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! this validates the grid already, no need to validate it first.
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
@@ -4622,7 +4547,7 @@
           return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldConstructNewArray
 
@@ -4688,16 +4613,10 @@
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: gridRank, arrayRank
 
       ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
  
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
@@ -4751,7 +4670,7 @@
 
       ftype%fieldstatus = ESMF_STATUS_READY
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldConstructNoDataPtr
 
@@ -4813,16 +4732,10 @@
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: gridRank
 
       ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
@@ -4871,7 +4784,7 @@
      
       ftype%fieldstatus = ESMF_STATUS_READY
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if  (present(rc)) rc = ESMF_SUCCESS
       
       end subroutine ESMF_FieldConstructNoArray
 
@@ -4915,15 +4828,9 @@
 
       ! Local variables
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftypep%base, "Field", name, 0, status)
@@ -4945,7 +4852,7 @@
 ! add more code here
 !
      
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
       
       end subroutine ESMF_FieldConstructNoGridArray
 
@@ -4977,14 +4884,9 @@
 !EOPI
 
       integer :: status
-      logical :: rcpresent                          ! Return code present
 
       ! Initialize return code; assume failure until success is certain
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
 
       ! release the base class resources
@@ -4998,7 +4900,7 @@
 !
 
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if  (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldDestruct
 !
@@ -5043,7 +4945,6 @@
 !EOPI
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: my_DE, my_dst_DE, my_src_DE, gridrank
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: src_min, src_max
@@ -5057,12 +4958,7 @@
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc 
 
       ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       stypep = srcField%ftypep
       dtypep = dstField%ftypep
@@ -5113,7 +5009,7 @@
       ! if neither are true this DE cannot be involved in the communication
       !  and it can just return now.
       if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
-        if (rcpresent) rc = ESMF_SUCCESS
+        if  (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
@@ -5157,7 +5053,7 @@
                                        recvDomainList, rc=status)
       endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if  (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldBoxIntersect
 
