@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.4 2004/08/27 19:09:11 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.5 2004/09/02 21:38:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.4 2004/08/27 19:09:11 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.5 2004/09/02 21:38:58 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -114,7 +114,7 @@
 
 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VN All Full Reduce Test"
+      write(name, *) "VM All Full Reduce ESMF_SUM Test"
       call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, count=nsize, &
       reduceflag=ESMF_SUM, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -140,20 +140,37 @@
 
 
       !------------------------------------------------------------------------
-      !Not implemented
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "VN All Full Reduce Test"
-      !call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, count=nsize, &
-      !reduceflag=ESMF_MIN, rc=rc)
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_MIN Test"
+      call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, count=nsize, &
+      reduceflag=ESMF_MIN, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      
-      !myresults = MINVAL(array1)
-      !write(failMsg, *) "Returned wrong results"
-      !write(name, *) "Verify Reduce Results Test"
-      !call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
-      !print *, localPet,' func_results: ', func_results, ' myresults:', myresults
+      !EX_UTest
+      myresults = MINVAL(array2)
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_MIN Results Test"
+      call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
+      print *, localPet,' func_results: ', func_results, ' myresults:', myresults
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_MAX Test"
+      call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=func_results, count=nsize, &
+      reduceflag=ESMF_MAX, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      myresults = MAXVAL(array2)
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_MAX Results Test"
+      call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
+      print *, localPet,' func_results: ', func_results, ' myresults:', myresults
 
 
 
