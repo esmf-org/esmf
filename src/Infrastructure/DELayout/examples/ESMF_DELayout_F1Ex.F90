@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F1Ex.F90,v 1.2 2003/11/04 23:47:54 jwolfe Exp $
+! $Id: ESMF_DELayout_F1Ex.F90,v 1.3 2003/12/02 16:51:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,9 +34,10 @@ program ESMF_DELayout_FEx
 
   type(ESMF_DELayout) :: layout
   integer, dimension(2) :: delist
-  integer :: nx, ny, x, y, id, rc
+  integer :: nx, ny, x, y, id, rc, finalrc
   integer, dimension(20) :: array1, array2
   integer :: i, result, len
+  finalrc = ESMF_SUCCESS
 
   ! initialize framework
   call ESMF_Initialize(rc)
@@ -52,14 +53,29 @@ program ESMF_DELayout_FEx
 
   ! verify size of layout
   call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "ESMF_DELayoutGetSize(nx, ny) = ", nx, ny
 
   ! get our DE's position within the layout
   call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "ESMF_DELayoutGetDEPosition(x, y) = ", x, y
 
   ! get our DE id
   call ESMF_DELayoutGetDEid(layout, id, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "ESMF_DELayoutGetDEid(id) = ", id
 
   ! populate DE 0 array with first half of row 5
@@ -80,15 +96,46 @@ program ESMF_DELayout_FEx
   ! perform allreduce with our DE's array
   if (id .eq. 0) then
     call ESMF_DELayoutAllReduce(layout, array1, result, len, ESMF_SUM, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
   else
     call ESMF_DELayoutAllReduce(layout, array2, result, len, ESMF_SUM, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
   endif
 
   ! ... and the answer is ...
   print *, "ESMF_DELayoutAllReduce(sum) = ", result
 
+  if (result.NE.11620) then
+     finalrc = ESMF_FAILURE
+  end if
+
   call ESMF_DELayoutDestroy(layout, rc)
 
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
+
   call ESMF_Finalize(rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
+  if (finalrc.EQ.ESMF_SUCCESS) then
+     print *, "PASS: ESMF_BundleCreateEx.F90"
+  else
+     print *, "FAIL: ESMF_BundleCreateEx.F90"
+  end if
+
+
 
 end program ESMF_DELayout_FEx
