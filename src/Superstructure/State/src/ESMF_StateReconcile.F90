@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.17 2005/01/13 22:31:54 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.18 2005/01/14 03:49:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.17 2005/01/13 22:31:54 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.18 2005/01/14 03:49:50 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -511,17 +511,20 @@
                if (ESMF_LogMsgFoundError(localrc, &
                                          ESMF_ERR_PASSTHRU, &
                                          ESMF_CONTEXT, rc)) return
-               call ESMF_VMRecv(vm, count, 1, i, rc=localrc)
-               if (ESMF_LogMsgFoundError(localrc, &
-                                         ESMF_ERR_PASSTHRU, &
-                                         ESMF_CONTEXT, rc)) return
-               si%theircount = count(1)
-               if (si%theircount .ne. si%mycount) then
-                  !print *, "object counts not same; ", &
-                  !        si%mycount, " .ne. ", si%theircount
-               endif
+              !print *, "returned from send of obj count to ", i
 
+               ! TODO: this can be removed.  
+               !call ESMF_VMRecv(vm, count, 1, i, rc=localrc)
+               !if (ESMF_LogMsgFoundError(localrc, &
+               !                          ESMF_ERR_PASSTHRU, &
+               !                          ESMF_CONTEXT, rc)) return
+               !si%theircount = count(1)
+               !if (si%theircount .ne. si%mycount) then
+               !   print *, "object counts not same; ", &
+               !           si%mycount, " .ne. ", si%theircount
+               !endif
                ! at this point i know how many objects they have
+
         
                ! TODO:
                ! this code goes ahead and sends everything preemptively.
@@ -529,10 +532,17 @@
                ! object numbers which appear in my list and not in theirs.
 
                if (si%mycount .gt. 0) then
+                !print *, "i have ", si%mycount, "objects to send now"
                    call ESMF_VMSend(vm, si%idsend, si%mycount, i, rc=localrc)
                    if (ESMF_LogMsgFoundError(localrc, &
                                              ESMF_ERR_PASSTHRU, &
                                              ESMF_CONTEXT, rc)) return
+               !print *, "sent id list"
+                   call ESMF_VMSend(vm, si%objsend, si%mycount, i, rc=localrc)
+                   if (ESMF_LogMsgFoundError(localrc, &
+                                             ESMF_ERR_PASSTHRU, &
+                                             ESMF_CONTEXT, rc)) return
+               !print *, "sent obj list"
                    do k = 1, si%mycount
                        temp_vmid = si%vmidsend(k)
                        call ESMF_VMSendVMId(vm, temp_vmid, i, rc=localrc)
@@ -540,42 +550,41 @@
                                                  ESMF_ERR_PASSTHRU, &
                                                  ESMF_CONTEXT, rc)) return
                    enddo
-                   call ESMF_VMSend(vm, si%objsend, si%mycount, i, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
+                 !print *, "sent vm id list"
+               !print *, "skipped vm id list"
 
                    do m = 1, si%mycount
                      bptr => si%blindsend(:,m)
                      call ESMF_VMSend(vm, bptr, bufsize, i, rc=localrc)
-                    ! print *, "back from buf send, localrc=", localrc
+                     !print *, "back from buf send, m, localrc=", m, localrc
                      if (ESMF_LogMsgFoundError(localrc, &
                                                ESMF_ERR_PASSTHRU, &
                                                ESMF_CONTEXT, rc)) return
 
                    enddo
                endif
+             !print *, "i am ", mypet, " and i am done sending to ", i
                ! done sending to the next pet
            enddo
        else  ! i was not the sender this time, so i am receiving
-          ! print *, mypet, "receives from", j
+           !print *, mypet, "receives from", j
            call ESMF_VMRecv(vm, count, 1, j, rc=localrc)
            if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
+           !print *, "returned from recv of object count from ", j, "cnt =", count(1)
            si%theircount = count(1)
 
-           count(1) = si%mycount
-           call ESMF_VMSend(vm, count, 1, j, rc=localrc)
-           if (ESMF_LogMsgFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
-
-           if (si%theircount .ne. si%mycount) then
-              ! print *, "object counts not same; ", &
-              !            si%mycount, " .ne. ", si%theircount
-           endif
-  
+           !count(1) = si%mycount
+           !call ESMF_VMSend(vm, count, 1, j, rc=localrc)
+           !if (ESMF_LogMsgFoundError(localrc, &
+           !                          ESMF_ERR_PASSTHRU, &
+           !                          ESMF_CONTEXT, rc)) return
+           ! 
+           ! if (si%theircount .ne. si%mycount) then
+           !     !print *, "object counts not same; ", &
+           !               si%mycount, " .ne. ", si%theircount
+           ! endif
            ! at this point, i know how many objects they have.
 
            ! TODO:
@@ -584,6 +593,7 @@
            ! missing objects.
 
            if (si%theircount .gt. 0) then
+            !print *, "i am ", mypet, " and ", j, " has ", si%theircount, " objs to send me"
                allocate(si%idrecv(si%theircount), stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local ID list", &
@@ -602,10 +612,19 @@
                                    "Allocating buffer for local buf list", &
                                    ESMF_CONTEXT, rc)) return
    
+              !print *, "receiving ids from ", j
                call ESMF_VMRecv(vm, si%idrecv, si%theircount, j, rc=localrc)
                if (ESMF_LogMsgFoundError(localrc, &
                                          ESMF_ERR_PASSTHRU, &
                                          ESMF_CONTEXT, rc)) return
+              !print *, "receiving obj types from ", j
+               call ESMF_VMRecv(vm, si%objrecv, si%theircount, j, rc=localrc)
+               if (ESMF_LogMsgFoundError(localrc, &
+                                         ESMF_ERR_PASSTHRU, &
+                                         ESMF_CONTEXT, rc)) return
+
+              !print *, "skipping vm id recv"
+              !print *, "receiving vm ids from ", j
                do k = 1, si%theircount
                    call ESMF_VMIdCreate(temp_vmid)
                    call ESMF_VMRecvVMId(vm, temp_vmid, j, rc=localrc)
@@ -614,15 +633,11 @@
                                              ESMF_CONTEXT, rc)) return
                    si%vmidrecv(k) = temp_vmid
                enddo
-               call ESMF_VMRecv(vm, si%objrecv, si%theircount, j, rc=localrc)
-               if (ESMF_LogMsgFoundError(localrc, &
-                                         ESMF_ERR_PASSTHRU, &
-                                         ESMF_CONTEXT, rc)) return
 
                do m = 1, si%theircount
                    bptr => si%blindrecv(:,m)
                    call ESMF_VMRecv(vm, bptr, bufsize, j, rc=localrc)
-                  ! print *, "got buf ", m, " localrc=", localrc
+                   !print *, "got buf ", m, " localrc=", localrc
                    if (ESMF_LogMsgFoundError(localrc, &
                                              ESMF_ERR_PASSTHRU, &
                                              ESMF_CONTEXT, rc)) return
@@ -633,79 +648,96 @@
            ! space.  we just need to sort thru the lists and figure out
            ! if there are any which are missing from our list.
 
-           do k=1, si%mycount
-            ! print *, "i am", mypet, " my send ids and objs are:", &
-            !                k, si%idsend(k), si%objsend(k)
-           enddo
-           do k=1, si%theircount
-            ! print *, "i am", mypet, " my recv ids and objs are:", &
-            !                k, si%idrecv(k), si%objrecv(k)
-           enddo
+          !print *, "got all info from ", j
+           !do k=1, si%mycount
+           !  print *, "i am", mypet, " my send ids and objs are:", &
+           !                 k, si%idsend(k), si%objsend(k)
+           !enddo
+           !do k=1, si%theircount
+           !  print *, "i am", mypet, " my recv ids and objs are:", &
+           !                 k, si%idrecv(k), si%objrecv(k)
+           !enddo
 
            !!! TODO: 
            !!!   make a combined object id list here, so only one copy of
            !!!   the missing object is sent.
 
+         !print *, "ready to check object match"
            do k=1, si%theircount
              ihave = .false.
              do l=1, si%mycount
-                 if ((si%idrecv(k) .eq. si%idsend(l)) .and. &
-                 (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE)) then 
+                !print *, "ready to check remote id ", l
+                !print *, "idrecv, idsend = ", si%idrecv(k), si%idsend(l)
+                !print *, "vm compare says ", ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) 
+                if ((si%idrecv(k) .eq. si%idsend(l)) &
+                .and. & 
+       (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE)) then 
                      ihave = .true.
+                    !print *, "found match, exiting loop early"
                      exit
                  endif
              enddo
+            !print *, "ihave is ", ihave, "for k, l = ", k, l
              if (.not. ihave) then
+           !print *, "do not have, need to create proxy"
                 offset = 0  
                 select case (si%objrecv(k))
                    case (ESMF_ID_BUNDLE%objectID)
-                   ! print *, "need to create proxy bundle, id=", si%idrecv(k)
+                    !print *, "need to create proxy bundle, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     bundle = ESMF_BundleDeserialize(vm, bptr, offset, localrc)
+                    !print *, " bundle befor setting vmid"
+                    call ESMF_BundleValidate(bundle, rc=localrc)
                     call c_ESMC_SetVMId(bundle%btypep, si%vmidrecv(k), localrc)
+                    !print *, " bundle after setting vmid"
+                    call ESMF_BundleValidate(bundle, rc=localrc)
                     call ESMF_StateAddBundle(state, bundle, rc=localrc)
 
                    case (ESMF_ID_FIELD%objectID)
-                   ! print *, "need to create proxy field, id=", si%idrecv(k)
+                    !print *, "need to create proxy field, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     field = ESMF_FieldDeserialize(vm, bptr, offset, localrc)
+                    !print *, "field before set vmid"
+                    call ESMF_FieldValidate(field, rc=localrc)
                     call c_ESMC_SetVMId(field%ftypep, si%vmidrecv(k), localrc)
+                    !print *, "field after set vmid"
+                    call ESMF_FieldValidate(field, rc=localrc)
                     call ESMF_StateAddField(state, field, rc=localrc)
 
                    case (ESMF_ID_ARRAY%objectID)
-                   ! print *, "need to create proxy array, id=", si%idrecv(k)
+                    !print *, "need to create proxy array, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     call c_ESMC_ArrayDeserializeNoData(array, bptr, offset, localrc)
                     call c_ESMC_SetVMId(array, si%vmidrecv(k), localrc)
                     call ESMF_StateAddArray(state, array, rc=localrc)
 
                    case (ESMF_ID_STATE%objectID)
-                   ! print *, "need to create proxy state, id=", si%idrecv(k)
+                    !print *, "need to create proxy state, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     substate = ESMF_StateDeserialize(vm, bptr, offset, localrc)
                     call c_ESMC_SetVMId(substate%statep, si%vmidrecv(k), localrc)
                     call ESMF_StateAddState(state, substate, rc=localrc)
 
                    case (ESMF_STATEITEM_NAME%ot)
-                    ! print *, "placeholder name"
+                     !print *, "placeholder name"
                      call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                      call ESMF_StateAddNameOnly(state, thisname, rc=localrc)
          
                    case (ESMF_STATEITEM_INDIRECT%ot)
-                    ! print *, "field inside a bundle"
+                     !print *, "field inside a bundle"
                      call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                      ! do nothing here
             
                    case (ESMF_STATEITEM_UNKNOWN%ot)
-                    ! print *, "unknown type"
+                     !print *, "unknown type"
                      call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                      ! do nothing here
 
                    case default
-                   ! print *, "not needed yet, id=", si%idrecv(k)
+                    !print *, "not needed yet, id=", si%objrecv(k)
                 end select
              endif
            enddo
