@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.3 2004/03/04 21:21:04 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.4 2004/03/05 19:50:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.3 2004/03/04 21:21:04 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.4 2004/03/05 19:50:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -576,7 +576,7 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
   ESMC_VM &vm,    // reference to ESMC_VM object
   void **srcdata, // input array
   void **destdata,// output array
-  int len,        // number of elements in input and output arrays
+  int len,        // size in bytes that need to be copied from src to dest
   int srcDE,      // input DE
   int destDE){    // output DE
 //
@@ -585,7 +585,6 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
 //EOP
 //-----------------------------------------------------------------------------
   // len must be converted into bytes:
-  int blen = len * 4; // this is hard-coded for 32 bit integers
   int mypet = vm.vmachine_mypet();
   int srcpet = des[srcDE].petid;      // PETid where srcDE lives
   int destpet = des[destDE].petid;    // PETid where destDE lives
@@ -597,19 +596,19 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
     for (j=0; j<nmydes; j++)
       if (mydes[j]==destDE) break;
     // now i is this PETs srcDE index and j is this PETs destDE index
-    memcpy(destdata[j], srcdata[i], blen);
+    memcpy(destdata[j], srcdata[i], len);
   }else if (srcpet==mypet){
     // srcDE is on my PET, but destDE is on another PET
     int i;
     for (i=0; i<nmydes; i++)
       if (mydes[i]==srcDE) break;
-    vm.vmachine_send(srcdata[i], blen, destpet);
+    vm.vmachine_send(srcdata[i], len, destpet);
   }else if (destpet==mypet){
     // srcDE is on my PET, but destDE is on another PET
     int i;
     for (i=0; i<nmydes; i++)
       if (mydes[i]==destDE) break;
-    vm.vmachine_recv(destdata[i], blen, srcpet);
+    vm.vmachine_recv(destdata[i], len, srcpet);
   }
   return ESMF_SUCCESS;
 }
@@ -631,7 +630,7 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
   ESMC_VM &vm,    // reference to ESMC_VM object
   void **srcdata, // input array
   void **destdata,// output array
-  int len,        // number of elements in input and output arrays
+  int len,        // message size in bytes
   int rootDE){    // root DE
 //
 // !DESCRIPTION:
@@ -649,7 +648,7 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
     char *tempdata = (char *)srcdata[j];
     for (int i=0; i<ndes; i++){
       ESMC_newDELayoutCopy(vm, srcdata, destdata, len, rootDE, i);
-      tempdata += len*4;  // hardcoded for 32bit integer data array
+      tempdata += len;
       srcdata[j] = tempdata;
     }
     srcdata[j] = rootdata;  // restore correct start of root's src data
@@ -677,7 +676,7 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
   ESMC_VM &vm,    // reference to ESMC_VM object
   void **srcdata, // input array
   void **destdata,// output array
-  int len,        // number of elements in input and output arrays
+  int len,        // message size in bytes
   int rootDE){    // root DE
 //
 // !DESCRIPTION:
@@ -695,7 +694,7 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
     char *tempdata = (char *)destdata[j];
     for (int i=0; i<ndes; i++){
       ESMC_newDELayoutCopy(vm, srcdata, destdata, len, i, rootDE);
-      tempdata += len*4;  // hardcoded for 32bit integer data array
+      tempdata += len;
       destdata[j] = tempdata;
     }
     destdata[j] = rootdata;  // restore correct start of root's destdata
@@ -720,11 +719,12 @@ int ESMC_newDELayout::ESMC_newDELayoutAllGlobalReduce(
 //
 // !ARGUMENTS:
 //
-  ESMC_VM &vm,    // reference to ESMC_VM object
-  void **srcdata, // input array
-  int *result,    // result
-  int len,        // number of elements in each DE
-  ESMC_newOp op){ // reduction operation
+  ESMC_VM &vm,        // reference to ESMC_VM object
+  void **srcdata,     // input array
+  void *result,       // result
+  int len,            // number of elements in each DE
+  ESMC_DataKind dtk,  // data type kind
+  ESMC_newOp op){     // reduction operation
 //
 // !DESCRIPTION:
 //    Reduce data into a single value
@@ -733,19 +733,80 @@ int ESMC_newDELayout::ESMC_newDELayoutAllGlobalReduce(
 //-----------------------------------------------------------------------------
   // very crude implementation of a layout wide GlobalReduce
   int mypet = vm.vmachine_mypet();
+  void *localresult;
+  int local_i4;
+  float local_r4;
+  double local_r8;
   // first reduce across all of this PET's DEs
-  int localresult=0;
-  for (int i=0; i<nmydes; i++){
-    // looping over all of my DEs
-    int *tempdata = (int *)srcdata[i];  // hardcoded for 32bit integer data
-    for (int j=0; j<len; j++){
-      // looping over all the elements in this DE
-      localresult += tempdata[j];
+  switch (op){
+  case ESMF_newSUM:
+    switch (dtk){
+    case ESMF_I4:
+      {
+        localresult = (void *)&local_i4;
+        local_i4 = 0;
+        for (int i=0; i<nmydes; i++){
+          // looping over all of my DEs
+          int *tempdata = (int *)srcdata[i];
+          for (int j=0; j<len; j++){
+            // looping over all the elements in this DE
+            local_i4 += tempdata[j];
+          }
+        }
+      }
+      break;
+    case ESMF_R4:
+      {
+        localresult = (void *)&local_r4;
+        local_r4 = 0.;
+        for (int i=0; i<nmydes; i++){
+          // looping over all of my DEs
+          float *tempdata = (float *)srcdata[i];
+          for (int j=0; j<len; j++){
+            // looping over all the elements in this DE
+            local_r4 += tempdata[j];
+          }
+        }
+      }
+      break;
+    case ESMF_R8:
+      {
+        localresult = (void *)&local_r8;
+        local_r8 = 0.;
+        for (int i=0; i<nmydes; i++){
+          // looping over all of my DEs
+          double *tempdata = (double *)srcdata[i];
+          for (int j=0; j<len; j++){
+            // looping over all the elements in this DE
+            local_r8 += tempdata[j];
+          }
+        }
+      }
+      break;
     }
+    break;
+  case ESMF_newMIN:
+    printf("Reduce operation ESMF_newMIN is not yet implemented\n");
+    break;
+  case ESMF_newMAX:
+    printf("Reduce operation ESMF_newMIN is not yet implemented\n");
+    break;
   }
   // now each PET holds the reduced result for all its DEs
   // next is to allreduce this result across the entire VM
-  vm.vmachine_allreduce((void *)&localresult, result, 1, vmI4, (vmOp)op);
+  vmType vmt = vmI4;
+  switch (dtk){
+  case ESMF_I4:
+    vmt = vmI4;
+    break;
+  case ESMF_R4:
+    vmt = vmR4;
+    break;
+  case ESMF_R8:
+    vmt = vmR8;
+    break;
+  }
+  vm.vmachine_allreduce(localresult, result, 1, vmt, (vmOp)op);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout_F.C,v 1.3 2004/03/04 21:22:36 theurich Exp $
+// $Id: ESMC_newDELayout_F.C,v 1.4 2004/03/05 19:49:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,6 +122,13 @@ extern "C" {
   
   // ~~~ Communications ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        
+  void FTN(c_esmc_newdelayoutcopy)(ESMC_newDELayout **ptr, ESMC_VM **vm,
+    void ***datain, void ***dataout, int *len, int *src, int* dest,
+    int *status){
+    *status = (*ptr)->ESMC_newDELayoutCopy(**vm, *datain, *dataout, *len,
+      *src, *dest);
+  }
+  
   void FTN(c_esmc_newdelayoutscatter)(ESMC_newDELayout **ptr, ESMC_VM **vm,
     void ***datain, void ***dataout, int *len, int *root, int *status){
     *status = (*ptr)->ESMC_newDELayoutScatter(**vm, *datain, *dataout, *len,
@@ -135,10 +142,10 @@ extern "C" {
   }
   
   void FTN(c_esmc_newdelayoutallglobalreduce)(ESMC_newDELayout **ptr, 
-    ESMC_VM **vm, void ***datain, int *result, int *len, ESMC_newOp *op, 
-    int *status){
+    ESMC_VM **vm, void ***datain, void *result, int *len, ESMC_DataKind *dtk,
+    ESMC_newOp *op, int *status){
     *status = (*ptr)->ESMC_newDELayoutAllGlobalReduce(**vm, *datain, result,
-      *len, *op);
+      *len, *dtk, *op);
   }
 
   // ~~~ DELayoutData ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

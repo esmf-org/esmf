@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.4 2004/03/04 21:22:36 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.5 2004/03/05 19:49:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,13 +59,28 @@
 
 !------------------------------------------------------------------------------
 
+      ! type used to define DELayout data arrays
+      type ESMF_R4_AP
+        real(ESMF_KIND_R4), pointer:: ap(:)
+      end type
+
+!------------------------------------------------------------------------------
+
+      ! type used to define DELayout data arrays
+      type ESMF_R8_AP
+        real(ESMF_KIND_R8), pointer:: ap(:)
+      end type
+
+!------------------------------------------------------------------------------
+
       ! type to hold ESMF_DELayout data
-      type ESMF_DELayoutData_I4
+      type ESMF_DELayoutData
         sequence
         private
-        type(ESMF_Pointer):: this
-        integer:: n
-        integer, pointer:: len(:)
+        type(ESMF_Pointer):: this     ! C pointer to pointer vector
+        integer:: n                   ! number of pointers in pointer vector
+        integer, pointer:: len(:)     ! number of elements in each element
+        type(ESMF_DataKind):: dtk     ! type and kind of data
       end type
 
 !------------------------------------------------------------------------------
@@ -76,7 +91,9 @@
 ! !PUBLIC TYPES:
       public ESMF_newDELayout
       public ESMF_I4_AP
-      public ESMF_DELayoutData_I4
+      public ESMF_R4_AP
+      public ESMF_R8_AP
+      public ESMF_DELayoutData
       
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
@@ -102,9 +119,9 @@
       
       public ESMF_newDELayoutPrint
       
+      public ESMF_newDELayoutCopy
       public ESMF_newDELayoutScatter
       public ESMF_newDELayoutGather
-      
       public ESMF_newDELayoutAllGlobalReduce
 
       public ESMF_newDELayoutDataCreate
@@ -115,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.4 2004/03/04 21:22:36 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.5 2004/03/05 19:49:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -144,6 +161,27 @@
       
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_newDELayoutAllGlobalReduce -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_newDELayoutAllGlobalReduce
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_newDELayoutAllGlobalReduceI4
+      module procedure ESMF_newDELayoutAllGlobalReduceR4
+      module procedure ESMF_newDELayoutAllGlobalReduceR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_DELayoutAllGlobalReduce} functions.   
+!EOP 
+      end interface
+
+!==============================================================================
+      
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_newDELayoutDataCreate -- Generic interface create DELayoutData
 
 ! !INTERFACE:
@@ -152,6 +190,8 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_newDELayoutDataCreateI4
+      module procedure ESMF_newDELayoutDataCreateR4
+      module procedure ESMF_newDELayoutDataCreateR8
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -161,24 +201,6 @@
 
 !==============================================================================
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_newDELayoutDataDestroy -- Generic interface dest. DELayoutData
-
-! !INTERFACE:
-      interface ESMF_newDELayoutDataDestroy
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_newDELayoutDataDestroyI4
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_DELayoutDataDestroy} functions.   
-!EOP 
-      end interface
-
-!==============================================================================
 
 
 contains
@@ -720,6 +742,80 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_newDELayoutCopy - Copy data between DEs
+
+! !INTERFACE:
+  subroutine ESMF_newDELayoutCopy(layout, vm, datain, dataout, len, src, dest, &
+    rc)
+!
+! !ARGUMENTS:
+    type(ESMF_newDELayout), intent(in)      :: layout
+    type(ESMF_VM), intent(in)               :: vm
+    type(ESMF_DELayoutData), intent(in)     :: datain
+    type(ESMF_DELayoutData), intent(out)    :: dataout
+    integer, intent(in)                     :: len, src, dest
+    integer, intent(out), optional          :: rc
+!         
+!
+! !DESCRIPTION:
+!     Copy data between DEs
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout] 
+!          DELayout
+!     \item[vm] 
+!          VM object
+!     \item[datain] 
+!          Source data
+!     \item[dataout] 
+!          Destination data
+!     \item[len] 
+!          Number of elements sent to each DE
+!     \item[src] 
+!          Source DE
+!     \item[dest] 
+!          Destination DE
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: blen
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Determine the number of bytes that need to be copied dependent on type
+    if (datain%dtk == ESMF_I4) blen = len * 4 ! 4 bytes
+    if (datain%dtk == ESMF_R4) blen = len * 4 ! 4 bytes
+    if (datain%dtk == ESMF_R8) blen = len * 8 ! 8 bytes
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_newDELayoutCopy(layout, vm, datain, dataout, blen, src, dest, &
+      status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_newDELayoutCopy error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_newDELayoutCopy
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_newDELayoutScatter - MPI-like Scatter
 
 ! !INTERFACE:
@@ -728,8 +824,8 @@ contains
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
     type(ESMF_VM), intent(in)               :: vm
-    type(ESMF_DELayoutData_I4), intent(in)  :: datain
-    type(ESMF_DELayoutData_I4), intent(out) :: dataout
+    type(ESMF_DELayoutData), intent(in)     :: datain
+    type(ESMF_DELayoutData), intent(out)    :: dataout
     integer, intent(in)                     :: len, root
     integer, intent(out), optional          :: rc
 !         
@@ -760,6 +856,7 @@ contains
 
     integer :: status                 ! local error status
     logical :: rcpresent
+    integer :: blen
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -769,8 +866,13 @@ contains
       rc = ESMF_FAILURE
     endif
     
+    ! Determine the number of bytes that need to be copied dependent on type
+    if (datain%dtk == ESMF_I4) blen = len * 4 ! 4 bytes
+    if (datain%dtk == ESMF_R4) blen = len * 4 ! 4 bytes
+    if (datain%dtk == ESMF_R8) blen = len * 8 ! 8 bytes
+    
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutScatter(layout, vm, datain, dataout, len, root, &
+    call c_ESMC_newDELayoutScatter(layout, vm, datain, dataout, blen, root, &
       status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutScatter error"
@@ -793,8 +895,8 @@ contains
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
     type(ESMF_VM), intent(in)               :: vm
-    type(ESMF_DELayoutData_I4), intent(in)  :: datain
-    type(ESMF_DELayoutData_I4), intent(out) :: dataout
+    type(ESMF_DELayoutData), intent(in)     :: datain
+    type(ESMF_DELayoutData), intent(out)    :: dataout
     integer, intent(in)                     :: len, root
     integer, intent(out), optional          :: rc
 !         
@@ -825,6 +927,7 @@ contains
 
     integer :: status                 ! local error status
     logical :: rcpresent
+    integer :: blen
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -834,8 +937,13 @@ contains
       rc = ESMF_FAILURE
     endif
     
+    ! Determine the number of bytes that need to be copied dependent on type
+    if (datain%dtk == ESMF_I4) blen = len * 4 ! 4 bytes
+    if (datain%dtk == ESMF_R4) blen = len * 4 ! 4 bytes
+    if (datain%dtk == ESMF_R8) blen = len * 8 ! 8 bytes
+    
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGather(layout, vm, datain, dataout, len, root, &
+    call c_ESMC_newDELayoutGather(layout, vm, datain, dataout, blen, root, &
       status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutGather error"
@@ -850,16 +958,16 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutAllGlobalReduce - Reduce to a single value
+! !IROUTINE: ESMF_newDELayoutAllGlobalReduceI4 - Reduce to a single value
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutAllGlobalReduce(layout, vm, datain, dataout, len, &
-    op, rc)
+  subroutine ESMF_newDELayoutAllGlobalReduceI4(layout, vm, datain, dataout, &
+    len, op, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
     type(ESMF_VM), intent(in)               :: vm
-    type(ESMF_DELayoutData_I4), intent(in)  :: datain
+    type(ESMF_DELayoutData), intent(in)     :: datain
     integer, intent(out)                    :: dataout
     integer, intent(in)                     :: len
     type(ESMF_newOp), intent(in)            :: op
@@ -893,7 +1001,7 @@ contains
     
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_newDELayoutAllGlobalReduce(layout, vm, datain, dataout, &
-      len, op, status)
+      len, ESMF_I4, op, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutAllGlobalReduce error"
       return
@@ -902,9 +1010,124 @@ contains
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_newDELayoutAllGlobalReduce
+  end subroutine ESMF_newDELayoutAllGlobalReduceI4
 !------------------------------------------------------------------------------
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_newDELayoutAllGlobalReduceR4 - Reduce to a single value
+
+! !INTERFACE:
+  subroutine ESMF_newDELayoutAllGlobalReduceR4(layout, vm, datain, dataout, &
+    len, op, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_newDELayout), intent(in)      :: layout
+    type(ESMF_VM), intent(in)               :: vm
+    type(ESMF_DELayoutData), intent(in)     :: datain
+    real(ESMF_KIND_R4), intent(out)         :: dataout
+    integer, intent(in)                     :: len
+    type(ESMF_newOp), intent(in)            :: op
+    integer, intent(out), optional          :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Reduce to a single value
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout] 
+!          DELayout
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_newDELayoutAllGlobalReduce(layout, vm, datain, dataout, &
+      len, ESMF_R4, op, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_newDELayoutAllGlobalReduce error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_newDELayoutAllGlobalReduceR4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_newDELayoutAllGlobalReduceR8 - Reduce to a single value
+
+! !INTERFACE:
+  subroutine ESMF_newDELayoutAllGlobalReduceR8(layout, vm, datain, dataout, &
+    len, op, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_newDELayout), intent(in)      :: layout
+    type(ESMF_VM), intent(in)               :: vm
+    type(ESMF_DELayoutData), intent(in)     :: datain
+    real(ESMF_KIND_R8), intent(out)         :: dataout
+    integer, intent(in)                     :: len
+    type(ESMF_newOp), intent(in)            :: op
+    integer, intent(out), optional          :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Reduce to a single value
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout] 
+!          DELayout
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                 ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_newDELayoutAllGlobalReduce(layout, vm, datain, dataout, &
+      len, ESMF_R8, op, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_newDELayoutAllGlobalReduce error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_newDELayoutAllGlobalReduceR8
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -919,7 +1142,7 @@ contains
     integer, intent(out), optional          :: rc
 !         
 ! !RETURN VALUE:
-      type(ESMF_DELayoutData_I4) :: ESMF_newDELayoutDataCreateI4
+      type(ESMF_DELayoutData) :: ESMF_newDELayoutDataCreateI4
 !
 ! !DESCRIPTION:
 !     Create I4 DELayoutData
@@ -935,7 +1158,7 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    type(ESMF_DELayoutData_I4):: mydata ! opaque pointer to new C++ DELayout
+    type(ESMF_DELayoutData):: mydata    ! new object
     integer :: status                   ! local error status
     logical :: rcpresent
     integer :: i
@@ -952,11 +1175,12 @@ contains
     mydata%this = ESMF_NULL_POINTER
     
     ! Initialize members
-    mydata%n = size(array)
-    allocate(mydata%len(mydata%n))
+    mydata%n = size(array)          ! number of pointers in the pointer array
+    allocate(mydata%len(mydata%n))  
     do i=1, mydata%n
-      mydata%len(i) = size(array(i)%ap)
+      mydata%len(i) = size(array(i)%ap)! number of elments for this pointer el.
     enddo
+    mydata%dtk = ESMF_I4    !data type and kind
     
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_newDELayoutDataCreate(mydata, mydata%n, status)
@@ -982,13 +1206,161 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_newDELayoutDataCreateR4 - Create R4 DELayoutData
+
+! !INTERFACE:
+  function ESMF_newDELayoutDataCreateR4(array, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_R4_AP), intent(in)            :: array(:)
+    integer, intent(out), optional          :: rc
+!         
+! !RETURN VALUE:
+      type(ESMF_DELayoutData) :: ESMF_newDELayoutDataCreateR4
+!
+! !DESCRIPTION:
+!     Create R4 DELayoutData
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          ESMF_I4_AP array
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    type(ESMF_DELayoutData):: mydata    ! new object
+    integer :: status                   ! local error status
+    logical :: rcpresent
+    integer :: i
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! Initialize the pointer to null.
+    mydata%this = ESMF_NULL_POINTER
+    
+    ! Initialize members
+    mydata%n = size(array)          ! number of pointers in the pointer array
+    allocate(mydata%len(mydata%n))  
+    do i=1, mydata%n
+      mydata%len(i) = size(array(i)%ap)! number of elments for this pointer el.
+    enddo
+    mydata%dtk = ESMF_R4    !data type and kind
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_newDELayoutDataCreate(mydata, mydata%n, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_newDELayoutCreateData error"
+      return
+    endif
+
+    do i=1, mydata%n
+      call c_ESMC_newDELayoutDataAdd(mydata, array(i)%ap, i, status)
+      if (status /= ESMF_SUCCESS) then
+        print *, "c_ESMC_newDELayoutDataAdd error"
+        return
+      endif
+    enddo
+
+    ! set return values
+    ESMF_newDELayoutDataCreateR4 = mydata 
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end function ESMF_newDELayoutDataCreateR4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_newDELayoutDataCreateR8 - Create R8 DELayoutData
+
+! !INTERFACE:
+  function ESMF_newDELayoutDataCreateR8(array, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_R8_AP), intent(in)            :: array(:)
+    integer, intent(out), optional          :: rc
+!         
+! !RETURN VALUE:
+      type(ESMF_DELayoutData) :: ESMF_newDELayoutDataCreateR8
+!
+! !DESCRIPTION:
+!     Create R4 DELayoutData
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          ESMF_I4_AP array
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    type(ESMF_DELayoutData):: mydata    ! new object
+    integer :: status                   ! local error status
+    logical :: rcpresent
+    integer :: i
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! Initialize the pointer to null.
+    mydata%this = ESMF_NULL_POINTER
+    
+    ! Initialize members
+    mydata%n = size(array)          ! number of pointers in the pointer array
+    allocate(mydata%len(mydata%n))  
+    do i=1, mydata%n
+      mydata%len(i) = size(array(i)%ap)! number of elments for this pointer el.
+    enddo
+    mydata%dtk = ESMF_R8    !data type and kind
+    
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_newDELayoutDataCreate(mydata, mydata%n, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_newDELayoutCreateData error"
+      return
+    endif
+
+    do i=1, mydata%n
+      call c_ESMC_newDELayoutDataAdd(mydata, array(i)%ap, i, status)
+      if (status /= ESMF_SUCCESS) then
+        print *, "c_ESMC_newDELayoutDataAdd error"
+        return
+      endif
+    enddo
+
+    ! set return values
+    ESMF_newDELayoutDataCreateR8 = mydata 
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end function ESMF_newDELayoutDataCreateR8
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_newDELayoutDataDestroy - Destroy a DELayoutData object
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutDataDestroyI4(mydata, rc)
+  subroutine ESMF_newDELayoutDataDestroy(mydata, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayoutData_I4)          ::  mydata 
+    type(ESMF_DELayoutData)             ::  mydata 
     integer, intent(out), optional      ::  rc  
 !         
 !
@@ -998,7 +1370,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item[mydata] 
-!          ESMF_DELayoutData_I4 object
+!          ESMF_DELayoutData object
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1027,7 +1399,7 @@ contains
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_newDELayoutDataDestroyI4
+  end subroutine ESMF_newDELayoutDataDestroy
 !------------------------------------------------------------------------------
 
 
