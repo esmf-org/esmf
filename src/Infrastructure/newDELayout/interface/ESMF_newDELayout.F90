@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.2 2004/03/03 19:45:25 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.3 2004/03/03 19:49:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.2 2004/03/03 19:45:25 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.3 2004/03/03 19:49:46 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -740,6 +740,16 @@ contains
 !     \begin{description}
 !     \item[layout] 
 !          DELayout
+!     \item[vm] 
+!          VM object
+!     \item[datain] 
+!          Source data
+!     \item[dataout] 
+!          Destination data
+!     \item[len] 
+!          Number of elements sent to each DE
+!     \item[root] 
+!          Root DE
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -795,6 +805,16 @@ contains
 !     \begin{description}
 !     \item[layout] 
 !          DELayout
+!     \item[vm] 
+!          VM object
+!     \item[datain] 
+!          Source data
+!     \item[dataout] 
+!          Destination data
+!     \item[len] 
+!          Number of elements received from each DE
+!     \item[root] 
+!          Root DE
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
