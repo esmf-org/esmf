@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.22 2004/05/18 16:13:31 theurich Exp $
+! $Id: ESMF_BundleComm.F90,v 1.23 2004/05/24 16:44:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,8 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+!
+#define ESMF_FILENAME "ESMF_BundleComm.F90"
 !
 !     ESMF Bundle Communications module
       module ESMF_BundleCommMod
@@ -95,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.22 2004/05/18 16:13:31 theurich Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.23 2004/05/24 16:44:49 nscollins Exp $'
 
 !==============================================================================
 !
@@ -120,6 +122,8 @@
 !------------------------------------------------------------------------------
 #if 0
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAllGather"
 !BOP
 ! !IROUTINE: ESMF_BundleAllGather - Data AllGather operation on a Bundle
 
@@ -135,10 +139,10 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a {\tt ESMF\_AllGather} operation
+!     Perform an allgather operation
 !     over the data in a {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} is
-!     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
-!     entire collected data {\tt ESMF\_Array} on each of the N {\tt ESMF\_DE}s.
+!     decomposed over N {\tt DE}s, this routine returns a copy of the
+!     entire collected data {\tt ESMF\_Array} on each of the N {\tt DE}s.
 !
 !     The arguments are:
 !     \begin{description}
@@ -197,6 +201,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGather"
 !BOP
 ! !IROUTINE: ESMF_BundleGather - Data Gather operation on a Bundle
 
@@ -214,8 +220,8 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_Gather} operation
-!     over the data in a {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} is
+!     Perform a gather operation
+!     over the data in an {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} is
 !     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
 !     entire collected data {\tt ESMF\_Array} on the specified destination
 !     {\tt ESMF\_DE} number.  On all other {\tt ESMF\_DE}s, there is no return
@@ -280,6 +286,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleReduce"
 !BOP
 ! !IROUTINE: ESMF_BundleReduce - Reduction operation on a Bundle
 
@@ -296,7 +304,7 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a Reduction operation over the data in a {\tt ESMF\_Bundle}.
+!     Perform a reduction operation over the data in an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -352,6 +360,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleScatter"
 !BOP
 ! !IROUTINE: ESMF_BundleScatter - Data Scatter operation on a Bundle
 
@@ -368,40 +378,45 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a Scatter operation over the data
-!     in an {\tt ESMF\_Array}, returning it as the data array in a {\tt ESMF\_Bundle}.  
-!     If the Bundle is decomposed over N {\tt ESMF\_DE}s, this routine
-!     takes a single array on the specified {\tt ESMF\_DE} and returns a decomposed copy
-!     on each of the N {\tt ESMF\_DE}s, as the {\tt ESMF\_Array} associated with the given empty {\tt ESMF\_Bundle}.
+!   Perform a scatter operation over the data
+!   in an {\tt ESMF\_Array}, returning it as the data array 
+!   in a {\tt ESMF\_Bundle}.  
+!   If the Bundle is decomposed over N {\tt ESMF\_DE}s, this routine
+!   takes a single array on the specified {\tt ESMF\_DE} and 
+!   returns a decomposed copy
+!   on each of the N {\tt ESMF\_DE}s, as the {\tt ESMF\_Array} 
+!   associated with the given empty {\tt ESMF\_Bundle}.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [array] 
-!           Input {\tt ESMF\_Array} containing the collected data.
-!           It must be the size of the entire undecomposed grid.
-!     \item [sourceDE]
-!           Integer {\tt ESMF\_DE} number where the data to be Scattered is located.  The
-!           {\tt ESMF\_Array} input is ignored on all other {\tt ESMF\_DE}s.
-!     \item [bundle] 
-!           Empty Bundle containing {\tt ESMF\_Grid} which will correspond to the data 
-!           in the array which will be scattered.  When this routine returns
-!           each {\tt ESMF\_Bundle} will contain a valid data array containing the 
-!           subset of the decomposed data.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
-!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
-!           {\tt ESMF\_NONBLOCKING}.
-!     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!           argument is required.  Information about the pending operation
-!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!           or waited for later.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [array] 
+!         Input {\tt ESMF\_Array} containing the collected data.
+!         It must be the size of the entire undecomposed grid.
+!   \item [sourceDE]
+!         Integer {\tt ESMF\_DE} number where the data to be scattered 
+!         is located.  The
+!         {\tt ESMF\_Array} input is ignored on all other {\tt ESMF\_DE}s.
+!   \item [bundle] 
+!         Empty Bundle containing {\tt ESMF\_Grid} which will correspond to 
+!         the data 
+!         in the array which will be scattered.  When this routine returns
+!         each {\tt ESMF\_Bundle} will contain a valid data array containing 
+!         the subset of the decomposed data.
+!   \item [{[blocking]}]
+!         Optional argument which specifies whether the operation should
+!         wait until complete before returning or return as soon
+!         as the communication between {\tt DE}s has been scheduled.
+!         If not present, default is to do synchronous communications.
+!         Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!         {\tt ESMF\_NONBLOCKING}.
+!   \item [{[commhandle]}]
+!         If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!         argument is required.  Information about the pending operation
+!         will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!         or waited for later.
+!   \item [{[rc]}] 
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -477,6 +492,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleHalo"
 !BOP
 ! !IROUTINE: ESMF_BundleHalo - Execute a Data Halo operation on a Bundle
 
@@ -492,14 +509,14 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a {\tt Halo} operation over the data
+!     Perform a halo operation over the data
 !     in an {\tt ESMF\_Bundle}.  This routine updates the data 
 !     inside the {\tt ESMF\_Bundle} in place.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
-!           {\tt ESMF\_Bundle} containing data to be halo'd.
+!           {\tt ESMF\_Bundle} containing data to be haloed.
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} containing index of precomputed information
 !           about this Halo.
@@ -508,8 +525,6 @@
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is what was specified at Store time.
-!           If {\tt both} was specified at Store time, this defaults to  
-!           blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -543,6 +558,8 @@
       end subroutine ESMF_BundleHalo
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleHaloRelease"
 !BOP
 ! !IROUTINE: ESMF_BundleHaloRelease - Release resources associated w/ handle
 
@@ -555,13 +572,13 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Release all stored information about the Halo associated
+!     Release all stored information about the halo operation associated
 !     with this {\tt ESMF\_RouteHandle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} associated with this Bundle Halo.
+!           {\tt ESMF\_RouteHandle} associated with this halo operation.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -573,8 +590,10 @@
       end subroutine ESMF_BundleHaloRelease
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleHaloStore"
 !BOP
-! !IROUTINE: ESMF_BundleHaloStore - Precompute a Data Halo operation on a Bundle
+! !IROUTINE: ESMF_BundleHaloStore - Precompute a data halo operation on a Bundle
 
 ! !INTERFACE:
       subroutine ESMF_BundleHaloStore(bundle, routehandle, halodirection, rc)
@@ -587,18 +606,30 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a {\tt Halo} operation over the data
-!     in an {\tt ESMF\_Bundle}.  This routine updates the data 
-!     inside the {\tt ESMF\_Bundle} in place.
+!     Precompute the data movement or communication operations needed 
+!     to perform a halo operation over the data in an {\tt ESMF\_Bundle}. 
+!     The list of operations will be associated internally to the
+!     framework with the 
+!     {\tt ESMF\_RouteHandle} object.  
+!     To perform the actual halo operation
+!     the {\tt ESMF\_BundleHalo()} routine must be called with the
+!     {\tt ESMF\_Bundle} containing the data to be updated and the 
+!     {\tt ESMF\_RouteHandle} computed during this store call.
+!     Although probably less common with bundles than with fields,
+!     if more than one {\tt ESMF\_Bundle} has an identical 
+!     {\tt ESMF\_Grid} and contains identical {\tt ESMF\_Field}s, then
+!     the same {\tt ESMF\_RouteHandle} can be computed once and used
+!     in multiple executions of the halo operation.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
-!           {\tt ESMF\_Bundle} containing data to be halo'd.
+!           {\tt ESMF\_Bundle} containing data to be haloed.
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} containing index to precomputed 
-!           information for the Halo operation on this {\tt ESMF\_Bundle}.
-!           This handle must be supplied at run time to execute the Halo.
+!           {\tt ESMF\_RouteHandle} which will be returned after being
+!           associated with the precomputed 
+!           information for a halo operation on this {\tt ESMF\_Bundle}.
+!           This handle must be supplied at run time to execute the halo.
 !     \item [{halodirection]}]
 !           Optional argument to restrict halo direction to a subset of the
 !           possible halo directions.  If not specified, the halo is executed
@@ -652,6 +683,8 @@
       end subroutine ESMF_BundleHaloStore
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRedist"
 !BOP
 ! !IROUTINE: ESMF_BundleRedist - Data Redistribution operation on a Bundle
 
@@ -670,9 +703,11 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Perform a {\tt Redistribution} operation over the data
-!     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and leaves 
-!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_FieldDataMap}
+!     Perform a redistribution operation over the data
+!     in an {\tt ESMF\_Bundle}.  
+!     This routine reads the source bundle and leaves 
+!     the data untouched.  It reads the {\tt ESMF\_Grid} and 
+!     {\tt ESMF\_FieldDataMap}
 !     from the destination bundle and updates the array data in the destination.
 !     The {\tt ESMF\_Grid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
@@ -741,8 +776,10 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRedistRelease"
 !BOP
-! !IROUTINE: ESMF_BundleRedistRelease - Release resources associated w/ handle
+! !IROUTINE: ESMF_BundleRedistRelease - Release resources associated with handle
 
 ! !INTERFACE:
       subroutine ESMF_BundleRedistRelease(routehandle, rc)
@@ -753,7 +790,7 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Release all stored information about the Redist associated
+!     Release all stored information about the redist operation associated
 !     with this {\tt ESMF\_RouteHandle}.
 !
 !     The arguments are:
@@ -771,6 +808,8 @@
       end subroutine ESMF_BundleRedistRelease
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRedistStore"
 !BOP
 ! !IROUTINE: ESMF_BundleRedistStore - Data Redistribution operation on a Bundle
 
@@ -787,15 +826,16 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Precompute a {\tt Redistribution} operation over the data
-!     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and leaves 
-!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_FieldDataMap}
-!     from the destination bundle and updates the array data in the destination.
-!     The {\tt ESMF\_Grid}s may have different decompositions (different
-!     {\tt ESMF\_DELayout}s) or different data maps, but the source and
-!     destination grids must describe the same set of coordinates.
-!     Unlike {\tt ESMF\_Regrid} this routine does not do interpolation,
-!     only data movement.
+!     Precompute the data movement or communications operations needed to
+!     accomplish a data redistribution operation over the data
+!     in an {\tt ESMF\_Bundle}.  Data redistribution differs from regridding
+!     in that redistribution does no interpolation, only a 1-for-1 movement
+!     of data from one location to another.
+!     Therefore, while 
+!     the {\tt ESMF\_Grid}s for the source and destination may have
+!     different decompositions (different {\tt ESMF\_DELayout}s) 
+!     or different data maps, the source and destination grids 
+!     must describe the same set of coordinates.
 !
 !     The arguments are:
 !     \begin{description}
@@ -873,6 +913,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRegrid"
 !BOP
 ! !IROUTINE: ESMF_BundleRegrid - Execute a Regrid operation on a Bundle
 
@@ -890,8 +932,8 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Perform a {\tt ESMF\_Regrid} operation over the data
-!     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
+!     Perform a regrid operation over the data
+!     in an {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
 !     {\tt ESMF\_FieldDataMap} information in the destination bundle to
 !     control the transformation of data.  The array data in the 
@@ -950,6 +992,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRegridRelease"
 !BOP
 ! !IROUTINE: ESMF_BundleRegridRelease - Release information for this handle
 
@@ -962,13 +1006,13 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Release all stored information about the Regridding associated
-!     with this {\tt ESMF\_RouteHandle}.
+!     Release all stored information about the regridding operation
+!     associated with this {\tt ESMF\_RouteHandle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} associated with this Bundle Regridding.
+!           {\tt ESMF\_RouteHandle} associated with this regrid operation.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -981,26 +1025,32 @@
       end subroutine ESMF_BundleRegridRelease
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRegridStore"
 !BOP
 ! !IROUTINE: ESMF_BundleRegridStore - Precompute Regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentDElayout, rc)
+      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentDElayout, &
+                                        routehandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcbundle
       type(ESMF_Bundle), intent(inout) :: dstbundle
       type(ESMF_DELayout), intent(in) :: parentDElayout
+      type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Perform a {\tt ESMF\_Regrid} operation over the data
-!     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
-!     {\tt ESMF\_FieldDataMap} information in the destination bundle to
-!     control the transformation of data.  The array data in the 
-!     destination bundle is overwritten by this call.
+!     Precompute the data movement or communications operations plus the
+!     interpolation information needed to execute
+!     a regrid operation which will move and transform data 
+!     from the source
+!     bundle to the destination bundle. 
+!     This information is associated with the {\tt ESMF\_RouteHandle}
+!     which must then be supplied during the actual execution of the
+!     regrid operation.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1014,6 +1064,9 @@
 !           of the Coupler if the regridding is inter-component, but could 
 !           also be the individual layout for a component if the 
 !           regridding is intra-component.  
+!     \item [routehandle] 
+!           {\tt ESMF\_RouteHandle} containing precomputed information
+!           about this regrid operation.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
