@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.34 2004/12/22 19:06:22 jwolfe Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.35 2004/12/22 22:13:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.34 2004/12/22 19:06:22 jwolfe Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.35 2004/12/22 22:13:51 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -151,7 +151,7 @@
 
       !------------------------------------------------------------------------
       ! Grid Distribute Test
-      !N-E-X_UTest
+      !NEX_UTest
       call ESMF_GridDistribute(grid, delayout=layout, rc=status)
       
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
@@ -264,7 +264,7 @@
 
       !------------------------------------------------------------------------
       ! Grid Distribute Test.
-      !E-X_UTest
+      !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Grid Distribute Test"
       call ESMF_GridDistribute(grid, delayout=layout, countsPerDEDim1=DEDim1, &
@@ -274,6 +274,7 @@
 
       !------------------------------------------------------------------------
       ! Printing a Grid
+      !EX_UTest
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Printing a Grid Test"
@@ -318,7 +319,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !E-X_UTest
+      !EX_UTest
       ! Validate the Grid test
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Validate the Grid Test"
@@ -326,7 +327,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !E-X_UTest
+      !EX_UTest
       ! Distribute a Grid test
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Distribute the Grid Test"
@@ -334,7 +335,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !E-X_UTest
+      !EX_UTest
       ! Destroy the Grid test
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Destroy the Grid Test"
