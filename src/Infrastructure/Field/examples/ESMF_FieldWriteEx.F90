@@ -96,8 +96,6 @@
       if (status.NE.ESMF_SUCCESS) then
          print*, "'call ESMF_GridCreateHorzXYUni' failed"
          finalrc = ESMF_FAILURE
-      else
-         print*, "'call ESMF_GridCreateHorzXYUni' succeeded"
       end if
 
   call ESMF_GridDistribute(grid, delayout=layout, rc=status)
@@ -106,8 +104,6 @@
   if (status.NE.ESMF_SUCCESS) then
      print*, "'call ESMF_GridDistribute' failed"
          finalrc = ESMF_FAILURE
-      else
-         print*, "'call ESMF_GridDistribute' succeeded"
   endif
   
 !BOE
@@ -125,8 +121,6 @@
   if (status.NE.ESMF_SUCCESS) then
      print*, "'call ESMF_IOSpecSet' failed"
      finalrc = ESMF_FAILURE
-  else
-     print*, "'call ESMF_IOSpecSet' succeeded"
   endif
 
   call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
@@ -134,17 +128,13 @@
   if (status.NE.ESMF_SUCCESS) then
      print*, "' call ESMF_ArraySpecSet' failed"
      finalrc = ESMF_FAILURE
-  else
-     print*, "' call ESMF_ArraySpecSet' succeeded"
   endif
   
-  field_u2  = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
+  field_u2  = ESMF_FieldCreate(grid, arrayspec, &
        horzRelloc=ESMF_CELL_CENTER, &
        haloWidth=0, name="u2", iospec=iospec, rc=status)
   if (status.NE.ESMF_SUCCESS) then
      print*, "'field_u2  = ESMF_FieldCreate' failed"
-  else
-     print*, "'field_u2  = ESMF_FieldCreate' succeeded"
   endif
 
 !!$  call ESMF_FieldGetDataPointer(field_u2, u2, rc=status)
@@ -154,31 +144,11 @@
      print*, "'call ESMF_FieldGetArray( field_u2, array_temp, rc=status)' failed"
   endif
 
-call ESMF_ArrayPrint(array_temp)
-
   call ESMF_ArrayGetData(array_temp, u2, ESMF_DATA_REF, status)
   if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
      print*, "'call ESMF_ArrayGetData(array_temp, u2, ESMF_DATA_REF, status)' failed"
   endif
-
-  print *,'testWRFWrite u2 (5,6)   = ',u2(5,6)
-
-!!$  u2 = 999.0
-
-!!$     do j= 6, 6
-!!$        do i= 5, 5
-!!$           u2(i,j) = float(10*i+j)
-!!$        enddo
-!!$     enddo
-!!$
-  u2(5,6) = float( 10*5+6)
-
-!!$  print*, shape(u2)
-
-  print *,'testWRFWrite u2 (5,6)   = ',u2(5,6)
-
-  call ESMF_ArrayPrint(array_temp)
 
 !BOC
   call ESMF_TimeSet(timestamp, calendarType=ESMF_CAL_GREGORIAN, rc=status)
@@ -186,8 +156,6 @@ call ESMF_ArrayPrint(array_temp)
   if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
      print*, "'call ESMF_TimeSet(timestamp, calendarType=ESMF_CAL_GREGORIAN, status)' failed"
-  else
-     print*, "'call ESMF_TimeSet(timestamp, calendarType=ESMF_CAL_GREGORIAN, status)' succeeded"
   endif
 
 !BOC
@@ -196,8 +164,6 @@ call ESMF_ArrayPrint(array_temp)
   if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
      print*, "'call ESMF_TimeSyncToRealTime(timestamp, status)' failed"
-  else
-     print*, "'call ESMF_TimeSyncToRealTime(timestamp, status)' succeeded"
   endif
 
 !BOC
@@ -205,27 +171,14 @@ call ESMF_ArrayPrint(array_temp)
 !EOC
   if (status.NE.ESMF_SUCCESS) then
      print*, "'call ESMF_FieldWrite( field_u2, iospec, timestamp, status)' failed"
-  else
-     print*, "'call ESMF_FieldWrite( field_u2, iospec, timestamp, status)' succeeded"
   endif
   
 
-      print *, "Grid example 1 returned"
-
       call ESMF_GridDestroy(grid, rc)
-
-      print *, "Grid example 1 destroyed"
-
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
           print*, "'call ESMF_GridDestroy' failed"
-      end if
-
-
-      if (rc.ne.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-          print*, "'call ESMF_Finalize' failed"
       end if
 
      if (finalrc.eq.ESMF_SUCCESS) then
