@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.8 2003/10/21 04:42:06 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.9 2003/10/23 13:20:56 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -11,7 +11,7 @@
 \usepackage[dvips]{graphics,color}
 
 \textwidth 6.5in
-\textheight 8.5in
+\textheight 8.5
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{Bundles Design}
 \newcommand{\myauthors}{Nancy Collins}
@@ -85,16 +85,6 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Bundle/doc/ESMF_Bundle_fapi}
 #endif
-
-%#ifdef STANDALONE
-%\section{Review Status}
-%\input{Field_desrev}
-%#endif
-
-%#ifdef STANDALONE
-%\section{Glossary}
-%\input{Field_glos}
-%#endif
 
 #ifdef STANDALONE
 %\section{Bibliography}
