@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.8 2003/11/10 20:58:19 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.9 2003/11/13 16:46:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.8 2003/11/10 20:58:19 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.9 2003/11/13 16:46:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -292,7 +292,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -327,7 +327,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -363,7 +363,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -592,7 +592,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Clock Initialization with Gregorian CalendarTest"
       clock_gregorian = ESMF_ClockCreate("Gregorian Clock", timeStep, &
