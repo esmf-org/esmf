@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.6 2003/04/03 21:09:00 eschwab Exp $ 
+# $Id: base_variables,v 1.7 2003/04/03 22:53:13 eschwab Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -38,7 +38,7 @@ F_FREENOCPP     = -freeform -nocpp
 F_FIXNOCPP      = -fixedform -nocpp -extend_source
 # ########################## C++ compiler ##################################
 #
-CXX_CC		   = CC -n32 -mp -woff 1164 -ansiW
+CXX_CC		   = CC -n32 -mp -woff 1164 -LANG:std
 CXX_FC		   = f90 -cpp -n32 -mp -macro_expand
 CXX_CLINKER_SLFLAG = -rpath
 CXX_FLINKER_SLFLAG = -rpath
