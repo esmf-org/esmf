@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.14 2003/04/25 20:04:33 shep_smith Exp $
+! $Id: ESMF_LogErr.F90,v 1.15 2003/07/02 18:58:25 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,9 +25,9 @@ module ESMF_LogErrMod
 !
 ! !DESCRIPTION:
 !
-! The Fortran interface to the Log class is written in both Fortran and C/C++.
+! The Fortran interface to the {\tt ESMF\_Log} class is written in both Fortran and C/C++.
 ! This file contains the interface code written in Fortran.  It also contains
-! some utility functions used by the Log class.
+! some utility functions used by the {\tt ESMF\_Log} class.
 !
 !----------------------------------------------------------------------------
 !
@@ -99,11 +99,11 @@ subroutine ESMF_LogInit(aLog, verbose, flushflag, haltOnErr, haltOnWarn)
  integer, intent(in), optional :: haltOnWarn 
 !
 ! !DESCRIPTION:
-!   Most of the Fortran wrapper routines for the C/C++ ESMC\_Log class are
+!   Most of the Fortran wrapper routines for the C/C++ {\tt ESMC\_Log} class are
 !   written in C. This is the only routine that isn't. See the class design
 !   section for the rational for doing this. 
 !
-!   With the exception of the ESMF\_Log object, all the arguments are optional.
+!   With the exception of the {\tt ESMF\_Log} object, all the arguments are optional.
 !   See the Examples section of the document for a discussion of how to use the
 !   routine.
 !
@@ -159,7 +159,7 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
 !    line number, file, and directory of the error, and a message. A 
 !    preprocessor macro adds the predefined preprocessor symbolic
 !    constants \_\_LINE\_\_, \_\_FILE\_\_, and \_\_DIR\_\_ when
-!    ESMF_LogWarnMsg is called user code.  Note,
+!    {\tt ESMF\_LogWarnMsg} is called user code.  Note,
 !    the value of \_\_DIR\_\_ 
 !    must be suppliled by the user (usually done in
 !    the makefile.).  By default, execution continues after encountering
@@ -206,7 +206,7 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
 
 !
 ! !DESCRIPTION:
-!   This routine is identical to ESMF\_LogWarnMsg, except a msg is
+!   This routine is identical to {\tt ESMF\_LogWarnMsg}, except a msg is
 !   not written to the log file.
 !
 !EOP
@@ -246,7 +246,7 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
                                            !argument supplied by macro
 
 ! !DESCRIPTION:
-!   This routine is identical to ESMF\_LogErrMsg, except a msg is
+!   This routine is identical to {\tt ESMF\_LogErrMsg}, except a msg is
 !   not written to the log file.
 !
 !EOP
@@ -284,7 +284,7 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
                                            !argument supplied by macro
 
 ! !DESCRIPTION:
-!   This routine is identical to ESMF\_LogErrMsg, except a msg is
+!   This routine is identical to {\tt ESMF\_LogErrMsg}, except a msg is
 !   not written to the log file.
 !
 !EOP
@@ -317,7 +317,7 @@ subroutine ESMF_LogOpenFortran(isOpen, unitNumber, nameLogFile)
 !    
 !
 ! !DESCRIPTION:
-! This routine opens the log file and is called by ESMC\_LogWrite.
+! This routine opens the log file and is called by {\tt ESMC\_LogWrite}.
 ! See the ESMC\_LogErr.C file for more details.
 ! This routine is not a module procedure because F90 mangles
 ! the names of functions
