@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleTest.F90,v 1.1 2003/03/10 23:48:48 svasquez Exp $
+! $Id: ESMF_BundleTest.F90,v 1.2 2003/03/11 20:06:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleTest.F90,v 1.1 2003/03/10 23:48:48 svasquez Exp $'
+      '$Id: ESMF_BundleTest.F90,v 1.2 2003/03/11 20:06:09 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -115,7 +115,7 @@
 
      !  Verify that an creating a created Bundle is handled properly
      bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
-     write(failMsg, *) "The bundle should not have been created
+     write(failMsg, *) "The bundle should not have been created"
      write(name, *) "Creating a Bundle that has already been created Test"
      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
