@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.13 2005/02/08 23:39:35 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.14 2005/02/11 21:32:34 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -203,6 +203,11 @@ getopts("d:b:", \%options);
 			# Get *Ex files
 			@ex_x_files=grep (/Ex/, @all_files);
 			@stdout_ex_files = (); #Clear the file list.
+                        # Delete the .stdout from each file
+                        foreach ( @st_ex_files) {
+                                s/\.stdout//; # Delete stdout
+                        }
+
 			# Find the example executable fles that are in the st_ex_files
 			foreach $file ( @st_ex_files) {
                                 	push @stdout_ex_files, grep (/$file/, @ex_x_files);
