@@ -114,6 +114,10 @@ static int MPI_InitWrapper(void){
 void vmachine::vmachine_init(void){
   // initialize the physical machine and a default (all MPI) virtual machine
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
+#ifndef VM_DONT_SPAWN_PTHREADS
+  // Note that SIGUSR1 interferes with MPICH's CH_P4 device! Hence if you are
+  // planning on using CH_P4 you need to compile with VM_DONT_SPAWN_PTHREADS
+  // otherwise you will get stuck in MPI_Init.
   struct sigaction action;
   action.sa_handler = SIG_DFL;
   sigemptyset (&(action.sa_mask));
@@ -124,6 +128,7 @@ void vmachine::vmachine_init(void){
   sigaddset(&sigs_to_block, SIGUSR1);
   sigaddset(&sigs_to_block, SIGUSR2);
   sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block USR1 and USR2
+#endif
   // next check is whether MPI has been initialized yet
   // actually we need to indicate an error if MPI has been initialized before
   // because signal blocking might not reach all of the threads again...
