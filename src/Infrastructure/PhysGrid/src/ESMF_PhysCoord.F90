@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.6 2004/01/16 23:49:03 jwolfe Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.7 2004/02/10 16:31:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.6 2004/01/16 23:49:03 jwolfe Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.7 2004/02/10 16:31:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -779,7 +779,7 @@
 
 !     Now get requested extents
       if (present(minVal)) minVal = physCoord%ptr%minVal
-      if (present(minVal)) maxVal = physCoord%ptr%maxVal
+      if (present(maxVal)) maxVal = physCoord%ptr%maxVal
       if (present(originOffset)) originOffset = physCoord%ptr%originOffset
 
 !     Set return values.
