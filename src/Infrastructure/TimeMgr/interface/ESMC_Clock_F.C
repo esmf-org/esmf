@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.3 2003/03/24 17:41:38 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.4 2003/03/26 01:05:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,34 +32,29 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-#if 0
-       // keep these for deep classes, or see init below for shallow
-       void FTN(c_esmc_clockcreate)(ESMC_Clock **ptr, int *arg1, int *arg2,
-                                                   int *arg3, int *status) {
-           *ptr = ESMC_ClockCreate(*arg1, *arg2, *arg3, status);
-       }
-
-       void FTN(c_esmc_clockdestroy)(ESMC_Clock **ptr, int *status) {
-           *status = ESMC_ClockDestroy(*ptr);
-       }
-
        // keep this for shallow classes, get rid of create/destroy above
-       void FTN(c_esmc_clockinit)(ESMC_Clock **ptr, int *arg1, int *arg2,
-                                                   int *arg3, int *status) {
-           *status = (*ptr)->ESMC_ClockInit(*arg1, *arg2, *arg3);
+       void FTN(c_esmc_clockinit)(ESMC_Clock **ptr,
+                                  ESMC_TimeInterval *timeStep,
+                                  ESMC_Time *startTime,
+                                  ESMC_Time *stopTime,
+                                  ESMC_Time *refTime,
+                                  int *status) {
+           *status = (*ptr)->ESMC_ClockInit(timeStep, startTime, stopTime,
+                                            refTime);
        }
 
-       // for either shallow or deep classes, the following are needed. 
-       void FTN(c_esmc_clockgetconfig)(ESMC_Clock **ptr, 
-                                         ESMC_ClockConfig *config, int *status) {
-           *status = (*ptr)->ESMC_ClockGetConfig(&config);
+       void FTN(c_esmc_clockadvance)(ESMC_Clock **ptr,
+                                     ESMC_Alarm ***ringingList,
+                                     int *numRingingAlarms, int *status) {
+           *status = (*ptr)->ESMC_ClockAdvance(**ringingList, numRingingAlarms);
        }
 
-       void FTN(c_esmc_clocksetconfig)(ESMC_Clock **ptr, 
-                                         ESMC_ClockConfig *config, int *status) {
-           *status = (*ptr)->ESMC_ClockSetConfig(config);
+       void FTN(c_esmc_clockisstoptime)(ESMC_Clock **ptr, 
+                int *esmf_clockIsStopTime, int *status) {
+           *esmf_clockIsStopTime = (int) (*ptr)->ESMC_ClockIsStopTime(status);
        }
 
+#if 0
        void FTN(c_esmc_clockget)(ESMC_Clock **ptr, 
                                          <value> *value, int *status} {
            *status = (*ptr)->ESMC_ClockGet(&value);
