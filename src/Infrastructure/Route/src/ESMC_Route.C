@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.116 2004/12/18 22:34:53 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.117 2004/12/19 14:50:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.116 2004/12/18 22:34:53 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.117 2004/12/19 14:50:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -718,10 +718,10 @@ static int maxroutes = 10;
     char **srcbufstart, **rcvbufstart;
     vmk_commhandle **handle;
 
-    // TODO: don't hardcode
-    handle = new vmk_commhandle*[1000];
-    srcbufstart = new char*[1000];
-    rcvbufstart = new char*[1000];
+    // TODO: don't hardcode sizes
+    handle = new vmk_commhandle*[5000];
+    srcbufstart = new char*[5000];
+    rcvbufstart = new char*[5000];
     
     mypet = vm->vmk_mypet();
     rc = ct->ESMC_CommTableGetCount(&ccount);
@@ -1026,9 +1026,9 @@ static int maxroutes = 10;
 
     
     // printf("End of Route run on DE %d\n", mydeid);
-    delete handle[]; 
-    delete srcbufstart[];
-    delete rcvbufstart[];
+    delete [] handle; 
+    delete [] srcbufstart;
+    delete [] rcvbufstart;
 
     return rc;
 
