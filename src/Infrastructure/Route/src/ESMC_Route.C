@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.94 2004/04/30 21:32:15 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.95 2004/05/26 11:28:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.94 2004/04/30 21:32:15 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.95 2004/05/26 11:28:47 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -147,8 +147,8 @@ static int maxroutes = 10;
     int decount;         // total number of DE/PEs in src + dst layouts
 
     this->delayout = delayout;
-    delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, NULL, &myde,
-      NULL, NULL, NULL, NULL);
+    delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, 0, &myde,
+                                NULL, NULL, NULL, 0);
         
     routeid = rseqnum++;
     sendRT = ESMC_RTableCreate(myde, decount, &rc);
@@ -680,8 +680,8 @@ static int maxroutes = 10;
     char *srcptr, *rcvptr;
     int nbytes;
 
-    rc = delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, NULL, &mydeid,
-                                       NULL, NULL, NULL, NULL);
+    rc = delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, &mydeid,
+                                       NULL, NULL, NULL, 0);
     rc = ct->ESMC_CommTableGetCount(&ccount);
     
     //printf("ESMC_RouteRun: %p, %p\n", srcaddr, dstaddr);
@@ -921,7 +921,7 @@ static int maxroutes = 10;
 
     // Calculate the sending table.  If this DE is not part of the sending
     // TODO: this assumes a 2D layout?  (certainly < 3D)
-        delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, NULL, NULL,
+        delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, 0, NULL,
                                       NULL, NULL, nde, ESMF_MAXGRIDDIM);
 
     // Calculate the sending table.
@@ -947,7 +947,7 @@ static int maxroutes = 10;
     for (k=0; k<decount; k++) {
       their_de = k;
       delayout->ESMC_DELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
-                                      NULL, NULL, NULL, NULL, NULL);
+                                      NULL, 0, NULL, 0, NULL);
       // get "their" AI out of the AI_tot array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_tot[their_de + j*AI_count];
@@ -1005,7 +1005,7 @@ static int maxroutes = 10;
     for (k=0; k<decount; k++) {
       their_de = k;
       delayout->ESMC_DELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
-                                      NULL, NULL, NULL, NULL, NULL);
+                                      NULL, 0, NULL, 0, NULL);
       // get "their" AI out of the AI_exc array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_exc[their_de + j*AI_count];
@@ -1158,8 +1158,8 @@ static int maxroutes = 10;
                                      NULL, &myXP, &myXPCount);
 
       // loop over DE's from receiving layout to calculate send table
-      dstdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, NULL,
-                                       NULL, NULL, NULL, NULL, NULL);
+      dstdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0, 
+                                       NULL, NULL, NULL, NULL, 0);
       for (i=0; i<theirDECount; i++) {
           theirDE = i;
 
@@ -1379,8 +1379,8 @@ static int maxroutes = 10;
                                      NULL, &my_XP, &my_XPcount);
 
       // loop over DE's from receiving layout to calculate send table
-      delayout_rcv->ESMC_DELayoutGet(&their_decount, NULL, NULL, NULL, NULL,
-                                        NULL, NULL, NULL, NULL, NULL);
+      delayout_rcv->ESMC_DELayoutGet(&their_decount, NULL, NULL, NULL, 0,
+                                        NULL, NULL, NULL, NULL, 0);
       for (i=0; i<their_decount; i++) {
           their_de = i;
 
