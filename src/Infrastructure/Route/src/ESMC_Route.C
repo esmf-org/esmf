@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.121 2004/12/22 00:28:08 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.122 2004/12/22 00:40:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.121 2004/12/22 00:28:08 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.122 2004/12/22 00:40:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -753,9 +753,9 @@ static int maxroutes = 10;
     rc = ct->ESMC_CommTableGetCount(&ccount);
     
 
-    printf("Ready to run Route on PET %d, commtable count = %d:\n", mypet, ccount);  
-    printf("ESMC_RouteRun data address arguments: %p, %p\n", srcaddr, dstaddr);
-    ESMC_RoutePrint("brief");
+    //printf("Ready to run Route on PET %d, commtable count = %d:\n", mypet, ccount);  
+    //printf("ESMC_RouteRun data address arguments: %p, %p\n", srcaddr, dstaddr);
+    //ESMC_RoutePrint("brief");
     
     
     int req=0; // reset request counter
