@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.22 2005/01/14 18:06:07 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.23 2005/01/14 18:53:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
       endif
 
       ! Open config file if specified
-      if (present(defaultLogFileName)) then
+      if (present(defaultConfigFileName)) then
          if (len_trim(defaultConfigFileName).ne.0) then
             ! TODO: write this and remove the fixed status= line
             !call ESMF_ConfigInitialize(defaultConfigFileName, status)
