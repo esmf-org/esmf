@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.16 2003/10/16 17:04:22 flanigan Exp $
+#  $Id: common.mk,v 1.17 2003/10/16 22:31:36 nscollins Exp $
 #
 #  common.mk
 #
@@ -116,13 +116,13 @@ DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
 		  ${LOCAL_INCLUDE} \
-		  -I/usr/local/include \
 		  -I${ESMF_BUILD_DIR}/build_config/conf/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE) \
 		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR)
 
-CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} ${CPPFLAGS} \
+CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'
-FCPPFLAGS	= ${PCONF} ${ESMC_PARCH} ${FPPFLAGS} $(FCPP_EXHAUSTIVE)
+FCPPFLAGS	= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${FPPFLAGS} \
+                   $(FCPP_EXHAUSTIVE)
 C_SH_LIB_PATH	= ${CLINKER_SLFLAG}${LDIR} ${C_DYLIBPATH}
 F_SH_LIB_PATH	= ${FLINKER_SLFLAG}${LDIR} ${F_DYLIBPATH}
 #
