@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.18 2003/07/15 20:19:55 pwjones Exp $
+! $Id: ESMF_Regrid.F90,v 1.19 2003/07/15 22:25:52 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.18 2003/07/15 20:19:55 pwjones Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.19 2003/07/15 22:25:52 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -273,11 +273,11 @@
                                                   regrid_name, stat,    &
                                                   src_mask = src_mask,  &
                                                   dst_mask = dst_mask)
-         if (present(src_mask) .and. .not. present(dst_mask)) then
+         elseif (present(src_mask) .and. .not. present(dst_mask)) then
             regrid = ESMF_RegridConstructBilinear(src_field, dst_field, &
                                                   regrid_name, stat,    &
                                                   src_mask = src_mask)
-         if (.not. present(src_mask) .and. present(dst_mask)) then
+         elseif (.not. present(src_mask) .and. present(dst_mask)) then
             regrid = ESMF_RegridConstructBilinear(src_field, dst_field, &
                                                   regrid_name, stat,    &
                                                   dst_mask = dst_mask)

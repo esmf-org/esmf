@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.5 2003/07/15 20:19:55 pwjones Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.6 2003/07/15 22:26:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.5 2003/07/15 20:19:55 pwjones Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.6 2003/07/15 22:26:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -108,13 +108,13 @@
 
       integer, intent(in) :: order ! order (numerical accuracy) of regrid
 
-      integer, intent(out) :: rc
+      integer, intent(out), optional :: rc
 
-      type (ESMF_Array), intent(in) :: &
+      type (ESMF_Array), intent(in), optional :: &
          src_mask,          &! logical masks to determine which points
          dst_mask            !   take part in regridding
 
-      !type (ESMF_Array), intent(out) :: &
+      !type (ESMF_Array), intent(out), optional :: &
       !   dst_frac            ! area fraction of destination grid cell 
       !                       !   covered by unmasked source grid cells
       !                       !   (eg ocean fraction in each atm cell for an

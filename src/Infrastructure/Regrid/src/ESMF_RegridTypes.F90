@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.6 2003/07/15 20:19:55 pwjones Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.7 2003/07/15 22:26:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -87,6 +87,7 @@
            redistrb_option  ! option for redistributing data for regrid
 
         type (ESMF_Route), pointer :: & ! pre-stored redistribution patterns
+           gather,       &! not sure, just trying to get it to compile jw
            src_route,    &! route for redistribution on source side
            dst_route      ! route for redistribution on destination side
 
@@ -143,7 +144,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.6 2003/07/15 20:19:55 pwjones Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.7 2003/07/15 22:26:14 jwolfe Exp $'
 
 !==============================================================================
 !
