@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.71 2004/10/19 17:29:58 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.72 2004/11/01 23:40:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,206 +44,9 @@
       use ESMF_FieldMod
       use ESMF_BundleMod
       use ESMF_XformMod
+      use ESMF_StateTypesMod
       implicit none
 
-!------------------------------------------------------------------------------
-! !PRIVATE TYPES:
-      private
-
-!------------------------------------------------------------------------------
-!     ! ESMF_StateType
-!     !   Enumerated value for storing Import or Export State type.
-!
-      type ESMF_StateType
-      sequence
-      private
-         integer :: state
-      end type
-
-      type(ESMF_StateType), parameter :: &
-                ESMF_STATE_IMPORT   = ESMF_StateType(1), &
-                ESMF_STATE_EXPORT   = ESMF_StateType(2), &
-                ESMF_STATE_UNSPECIFIED = ESMF_StateType(3), &
-                ESMF_STATE_INVALID  = ESMF_StateType(4)
-
-!------------------------------------------------------------------------------
-!     ! ESMF_StateItemType
-!     !   Each entry in the list of states is either simply a name placeholder
-!     !   or an actual data item - Bundle, Field, Array, or State. 
-!
-      type ESMF_StateItemType
-      sequence
-      private
-         integer :: ot
-      end type
-
-      type(ESMF_StateItemType), parameter :: &
-                ESMF_STATEITEM_BUNDLE = ESMF_StateItemType(1), &
-                ESMF_STATEITEM_FIELD = ESMF_StateItemType(2), &
-                ESMF_STATEITEM_ARRAY = ESMF_StateItemType(3), &
-                ESMF_STATEITEM_STATE = ESMF_StateItemType(4), &
-                ESMF_STATEITEM_NAME = ESMF_StateItemType(5), &
-                ESMF_STATEITEM_INDIRECT = ESMF_StateItemType(6), &
-                ESMF_STATEITEM_UNKNOWN = ESMF_StateItemType(7)
-
-!------------------------------------------------------------------------------
-!     ! ESMF_NeededFlag
-!     !   For an Export State if all data which can potentially be created is
-!     !   not needed, this flag can be used to mark data which does not need
-!     !   to be created by the Component.
-!
-      type ESMF_NeededFlag
-      sequence
-      private
-         integer :: needed
-      end type
-
-      type(ESMF_NeededFlag), parameter :: &
-                ESMF_NEEDED = ESMF_NeededFlag(1), &
-                ESMF_NOTNEEDED = ESMF_NeededFlag(2)
-
-!------------------------------------------------------------------------------
-!     ! ESMF_ReadyFlag
-!
-      type ESMF_ReadyFlag
-      sequence
-      private
-         integer :: ready
-      end type
-
-      type(ESMF_ReadyFlag), parameter :: &
-                ESMF_READYTOWRITE = ESMF_ReadyFlag(1), &
-                ESMF_READYTOREAD = ESMF_ReadyFlag(2), &
-                ESMF_NOTREADY = ESMF_ReadyFlag(3)
-
-
-!------------------------------------------------------------------------------
-!     ! ESMF_ReqForRestartFlag
-!
-      type ESMF_ReqForRestartFlag
-      sequence
-      private
-         integer :: required4restart
-      end type
-
-      type(ESMF_ReqForRestartFlag), parameter :: &
-                ESMF_REQUIRED_FOR_RESTART = ESMF_ReqForRestartFlag(1), &
-                ESMF_NOTREQUIRED_FOR_RESTART = ESMF_ReqForRestartFlag(2)
-
-
-!------------------------------------------------------------------------------
-!     ! ESMF_ValidFlag
-!
-      type ESMF_ValidFlag
-      sequence
-      private
-         integer :: valid
-      end type
-
-      type(ESMF_ValidFlag), parameter :: &
-                ESMF_VALID = ESMF_ValidFlag(1), &
-                ESMF_INVALID= ESMF_ValidFlag(2), &
-                ESMF_VALIDITYUNKNOWN = ESMF_ValidFlag(3)
-
-
-!------------------------------------------------------------------------------
-!     ! ESMF_DataHolder
-!
-!     ! Make a single data type for Bundles, Fields, and Arrays.
-!     !  The ObjectType is one level up, because this structure is not
-!     !  allocated until it is actually needed.  This is a private type.
-
-!     ! state has to be different because it's a forward reference.
-
-      type ESMF_DataHolder
-#ifndef ESMF_SEQUENCE_BUG
-      sequence
-#endif
-      private
-          type(ESMF_Bundle) :: bp
-          type(ESMF_Field)  :: fp 
-          type(ESMF_Array)  :: ap
-          type(ESMF_StateClass), pointer  :: spp
-      end type
-
-!------------------------------------------------------------------------------
-!     ! ESMF_StateItem
-!
-!     ! Description of next Data item in list, or simply a name
-!     !  which holds the place for an optional Data item.
-
-      type ESMF_StateItem
-#ifndef ESMF_SEQUENCE_BUG
-      sequence
-#endif
-      private
-        type(ESMF_StateItemType) :: otype
-        character(len=ESMF_MAXSTR) :: namep
-        type(ESMF_DataHolder), pointer :: datap
-        integer :: indirect_index
-        type(ESMF_NeededFlag) :: needed
-        type(ESMF_ReadyFlag) :: ready
-        type(ESMF_ValidFlag) :: valid
-        type(ESMF_ReqForRestartFlag) :: reqrestart
-      end type
-
-!------------------------------------------------------------------------------
-!     ! ESMF_StateClass
-!
-!     ! Internal State data type.
-
-      type ESMF_StateClass
-#ifndef ESMF_SEQUENCE_BUG
-      sequence
-#endif
-      private
-        type(ESMF_Base) :: base
-        type(ESMF_Status) :: statestatus
-        type(ESMF_StateType) :: st
-        type(ESMF_NeededFlag) :: needed_default
-        type(ESMF_ReadyFlag) :: ready_default
-        type(ESMF_ValidFlag) :: stvalid_default
-        type(ESMF_ReqForRestartFlag) :: reqrestart_default
-        integer :: alloccount
-        integer :: datacount
-        type(ESMF_StateItem), dimension(:), pointer :: datalist
-      end type
-
-!------------------------------------------------------------------------------
-!     ! ESMF_State
-!
-!     ! State data type.
-
-      type ESMF_State
-#ifndef ESMF_SEQUENCE_BUG
-      sequence
-#endif
-      private
-#ifndef ESMF_NO_INITIALIZERS
-        type(ESMF_StateClass), pointer :: statep => NULL()
-#else
-        type(ESMF_StateClass), pointer :: statep
-#endif
-      end type
-
-!------------------------------------------------------------------------------
-! !PUBLIC TYPES:
-      public ESMF_State
-      public ESMF_StateItemType, ESMF_STATEITEM_BUNDLE, ESMF_STATEITEM_FIELD, &
-                                   ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_STATE, &
-                                   ESMF_STATEITEM_NAME
-      public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
-                                   ESMF_STATE_UNSPECIFIED
-      public ESMF_NeededFlag, ESMF_NEEDED, &
-                                   ESMF_NOTNEEDED
-      public ESMF_ReadyFlag,  ESMF_READYTOWRITE, &
-                                   ESMF_READYTOREAD, &
-                                   ESMF_NOTREADY
-      public ESMF_ReqForRestartFlag,  ESMF_REQUIRED_FOR_RESTART, &
-                                   ESMF_NOTREQUIRED_FOR_RESTART
-      public ESMF_ValidFlag,  ESMF_VALID, &
-                                   ESMF_INVALID, &
-                                   ESMF_VALIDITYUNKNOWN
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -278,21 +81,18 @@
       public ESMF_StateGetAttributeCount  ! number of Attributes
       public ESMF_StateGetAttributeInfo   ! get type, length by name or number
 
-      public ESMF_StateReconcile          ! make consistent for concurrent apps
-
       public ESMF_StateWriteRestart
       public ESMF_StateReadRestart
 
       public ESMF_StateWrite
       public ESMF_StatePrint, ESMF_StateValidate
 
-      public operator(.eq.), operator(.ne.)
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.71 2004/10/19 17:29:58 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.72 2004/11/01 23:40:24 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -520,108 +320,12 @@ end interface
 !EOPI
       end interface
 
-!
-!------------------------------------------------------------------------------
-
-interface operator (.eq.)
- module procedure ESMF_oteq
- module procedure ESMF_imexeq
- module procedure ESMF_needeq
- module procedure ESMF_redyeq
- module procedure ESMF_valideq
-end interface
-
-interface operator (.ne.)
- module procedure ESMF_otne
- module procedure ESMF_imexne
- module procedure ESMF_needne
- module procedure ESMF_redyne
- module procedure ESMF_validne
-end interface
-
 
 !==============================================================================
 
       contains
 
 !==============================================================================
-
-! functions to compare two ESMF types to see if they're the same or not
-
-function ESMF_oteq(s1, s2)
- logical ESMF_oteq
- type(ESMF_StateItemType), intent(in) :: s1, s2
-
- ESMF_oteq = (s1%ot .eq. s2%ot)
-end function
-
-function ESMF_otne(s1, s2)
- logical ESMF_otne
- type(ESMF_StateItemType), intent(in) :: s1, s2
-
- ESMF_otne = (s1%ot .ne. s2%ot)
-end function
-
-
-function ESMF_imexeq(s1, s2)
- logical ESMF_imexeq
- type(ESMF_StateType), intent(in) :: s1, s2
-
- ESMF_imexeq = (s1%state .eq. s2%state)
-end function
-
-function ESMF_imexne(s1, s2)
- logical ESMF_imexne
- type(ESMF_StateType), intent(in) :: s1, s2
-
- ESMF_imexne = (s1%state .ne. s2%state)
-end function
-
-
-function ESMF_needeq(s1, s2)
- logical ESMF_needeq
- type(ESMF_NeededFlag), intent(in) :: s1, s2
-
- ESMF_needeq = (s1%needed .eq. s2%needed)
-end function
-
-function ESMF_needne(s1, s2)
- logical ESMF_needne
- type(ESMF_NeededFlag), intent(in) :: s1, s2
-
- ESMF_needne = (s1%needed .ne. s2%needed)
-end function
-
-
-function ESMF_redyeq(s1, s2)
- logical ESMF_redyeq
- type(ESMF_ReadyFlag), intent(in) :: s1, s2
-
- ESMF_redyeq = (s1%ready .eq. s2%ready)
-end function
-
-function ESMF_redyne(s1, s2)
- logical ESMF_redyne
- type(ESMF_ReadyFlag), intent(in) :: s1, s2
-
- ESMF_redyne = (s1%ready .ne. s2%ready)
-end function
-
-
-function ESMF_valideq(s1, s2)
- logical ESMF_valideq
- type(ESMF_ValidFlag), intent(in) :: s1, s2
-
- ESMF_valideq = (s1%valid .eq. s2%valid)
-end function
-
-function ESMF_validne(s1, s2)
- logical ESMF_validne
- type(ESMF_ValidFlag), intent(in) :: s1, s2
-
- ESMF_validne = (s1%valid .ne. s2%valid)
-end function
-
 
 
 !------------------------------------------------------------------------------
@@ -2938,177 +2642,6 @@ end function
         ESMF_StateReadRestart = a 
  
         end function ESMF_StateReadRestart
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateReconcile"
-!BOPI
-! !IROUTINE: ESMF_StateReconcile -- Reconcile the internal data from a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateReconcile(state, vm, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_VM), intent(in) :: vm
-      character (len = *), intent(in), optional :: options              
-      integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-!     Called on an {\tt ESMF\_State} which might contain ESMF objects
-!     that have not been created on all the {\tt PET}s which the
-!     coupler runs on.  For example, if a coupler is operating on data
-!     which was created by another component which was running on a subset
-!     of the coupler's {\tt PET}s, the coupler must make this call first
-!     before operating on any data inside that {\tt ESMF\_State}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!       {\tt ESMF\_State} to reconcile.
-!     \item[vm]
-!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.
-!     \item[options]
-!       Currently unused.  Here for possible future expansion in the
-!       options for the reconciliation process.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-    integer :: pets, mypet, i, j, k, localrc
-    integer(ESMF_KIND_I4), allocatable, dimension(:) :: idsend, idrecv
-    integer(ESMF_KIND_I4) :: sendcount(1), recvcount(1)
-    type(ESMF_StateItem), pointer :: stateitem
-
-    ! each PET broadcasts the object ID lists and compares them to what
-    ! they get back.   eventually, hash the ID lists so we can send a
-    ! single number instead of having to scan the list each time.
-     
-    ! TODO: for now, broadcast the object counts
-    sendcount(1) = state%statep%datacount 
-    if (sendcount(1) .gt. 0) then
-        allocate(idsend(sendcount(1)), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-                                   "Allocating buffer for local ID list", &
-                                       ESMF_CONTEXT, rc)) return
-    endif
-    do i=1, state%statep%datacount
-        stateitem => state%statep%datalist(i)
-        select case (stateitem%otype%ot)
-           case (ESMF_STATEITEM_BUNDLE%ot)
-             call c_ESMC_GetID(stateitem%datap%bp, idsend(i), localrc)
-           case (ESMF_STATEITEM_FIELD%ot)
-             call c_ESMC_GetID(stateitem%datap%fp, idsend(i), localrc)
-           case (ESMF_STATEITEM_ARRAY%ot)
-             call c_ESMC_GetID(stateitem%datap%ap, idsend(i), localrc)
-           case (ESMF_STATEITEM_STATE%ot)
-             call c_ESMC_GetID(stateitem%datap%spp, idsend(i), localrc)
-           case (ESMF_STATEITEM_NAME%ot)
-             print *, "placeholder name"
-             idsend(i) = -1
-             localrc = ESMF_SUCCESS
-           case (ESMF_STATEITEM_INDIRECT%ot)
-             print *, "field inside a bundle"
-             idsend(i) = -2
-             localrc = ESMF_SUCCESS
-           case (ESMF_STATEITEM_UNKNOWN%ot)
-             print *, "unknown type"
-             idsend(i) = -3
-             localrc = ESMF_SUCCESS
-        end select
-        if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-    enddo
-       
-    ! get total num pets.
-    call ESMF_VMGet(vm, localPet=mypet, petCount=pets, rc=rc)
-
-    ! for i=0, npets-1, except us, send object count to each
-    do j = 0, pets-1
-       ! each takes turns sending to all, everyone else receives
-       if (mypet .eq. j) then
-           print *, j, "sends to everyone else"
-           do i = 0, pets-1
-               if (i .eq. j) cycle
-               print *, "calling send to", i
-               call ESMF_VMSend(vm, sendcount, 1, i, rc=localrc)
-               if (ESMF_LogMsgFoundError(localrc, &
-                                         ESMF_ERR_PASSTHRU, &
-                                         ESMF_CONTEXT, rc)) return
-               call ESMF_VMRecv(vm, recvcount, 1, i, rc=localrc)
-               if (ESMF_LogMsgFoundError(localrc, &
-                                         ESMF_ERR_PASSTHRU, &
-                                         ESMF_CONTEXT, rc)) return
-               if (recvcount(1) .ne. sendcount(1)) then
-                   print *, "object counts not same; more needed", &
-                          sendcount(1), " .ne. ", recvcount(1)
-
-                   if (sendcount(1) .gt. 0) then
-                       call ESMF_VMSend(vm, idsend, sendcount(1), i, rc=localrc)
-                       if (ESMF_LogMsgFoundError(localrc, &
-                                                 ESMF_ERR_PASSTHRU, &
-                                                 ESMF_CONTEXT, rc)) return
-
-                   endif
-               endif
-           enddo
-       else
-           print *, mypet, "receives from", j
-           call ESMF_VMRecv(vm, recvcount, 1, j, rc=localrc)
-           if (ESMF_LogMsgFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
-           call ESMF_VMSend(vm, sendcount, 1, j, rc=localrc)
-           if (ESMF_LogMsgFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
-
-           if (recvcount(1) .ne. sendcount(1)) then
-               print *, "object counts not same; more needed", &
-                          sendcount(1), " .ne. ", recvcount(1)
-
-               if (recvcount(1) .gt. 0) then
-                   allocate(idrecv(recvcount(1)), stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                       "Allocating buffer for local ID list", &
-                                       ESMF_CONTEXT, rc)) return
-     
-                   call ESMF_VMRecv(vm, idrecv, recvcount(1), j, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
-
-               endif
-               do k=1, sendcount(1)
-                 print *, "i am", mypet, " and my send ids are:", k, idsend(k)
-               enddo
-               do k=1, recvcount(1)
-                 print *, "i am", mypet, " and my recv ids are:", k, idrecv(k)
-               enddo
-
-               if (recvcount(1) .gt. 0) then
-                   deallocate(idrecv, stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                  "Deallocating buffer for local ID list", &
-                                   ESMF_CONTEXT, rc)) return
-               endif
-           endif
-       endif
-    enddo
-
-    if (sendcount(1) .gt. 0) then
-        deallocate(idsend, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-                                 "Deallocating buffer for local ID list", &
-                                       ESMF_CONTEXT, rc)) return
-    endif
-
-    if (present(rc)) rc = ESMF_SUCCESS
-
- 
-    end subroutine ESMF_StateReconcile
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

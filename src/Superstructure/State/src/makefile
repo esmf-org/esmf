@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/08/03 19:33:52 nscollins Exp $
+# $Id: makefile,v 1.7 2004/11/01 23:40:27 nscollins Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -12,7 +12,7 @@ FFLAGS    =
 AUTOGEN   = ESMF_StateGet.F90
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_State.F90  $(AUTOGEN)
+SOURCEF	  = ESMF_StateTypes.F90 ESMF_State.F90 ESMF_StateReconcile.F90  $(AUTOGEN)
 SOURCEH	  = 
 STOREH    = ESMC_State.h
 CPPFILES  = $(AUTOGEN)
@@ -40,4 +40,8 @@ CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
 
 ESMF_StateGet.o: ESMF_StateGet.cpp ESMF_StateMacros.h ESMF_State.o
+
+ESMF_State.o: ESMF_StateTypes.o
+
+ESMF_StateReconcile.o: ESMF_StateTypes.o
 
