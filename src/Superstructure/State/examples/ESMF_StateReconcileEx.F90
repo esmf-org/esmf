@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.2 2004/12/20 17:33:57 theurich Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.3 2004/12/22 00:16:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -114,6 +114,12 @@
 !
 !EOE
 
+    ! This is where the VM for each component is initialized.
+    ! Normally you would call SetEntryPoint inside set services,
+    ! but to make this example very short, they are called inline below.
+    call ESMF_GridCompSetServices(comp1, comp_dummy, rc)
+    call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
+
     print *, "ready to set entry point 1"
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
                                         comp1_init, ESMF_SINGLEPHASE, rc)
@@ -122,10 +128,6 @@
     call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
                                         comp2_init, ESMF_SINGLEPHASE, rc)
 
-
-    ! TODO: WHY IS THIS NEEDED?
-    call ESMF_GridCompSetServices(comp1, comp_dummy, rc)
-    call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
 
     print *, "ready to call init for comp 1"
     call ESMF_GridCompInitialize(comp1, state1, rc=rc)
