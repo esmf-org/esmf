@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.57 2003/07/18 20:39:24 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.58 2003/07/24 16:18:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -135,7 +135,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.57 2003/07/18 20:39:24 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.58 2003/07/24 16:18:45 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -700,7 +700,7 @@
 !          Array of the global number of cells in each dimension.
 !     \item[[global\_start]]
 !          Array of the global starting count on each DE in each dimension,
-!          dimensioned (nDEs, ESMF_MAXGRIDDIM)
+!          dimensioned (nDEs, ESMF\_MAXGRIDDIM)
 !     \item[[local\_cell\_max]]
 !          Maximum number of cells on any {\tt ESMF\_DE}.
 !     \item[[local\_cell\_max\_dim]]
