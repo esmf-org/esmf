@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/06/11 18:45:04 svasquez Exp $
+# $Id: makefile,v 1.4 2004/06/13 03:53:41 svasquez Exp $
 
 ALL:  build_tests
 
@@ -15,16 +15,16 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/ArrayDataMap/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest \
-	        $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest 
+#	        $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest 
 
 TESTS_RUN     = RUN_ESMF_ArrayDataMapUTest \
-		RUN_ESMC_ArrayDataMapUTest 
+#		RUN_ESMC_ArrayDataMapUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataMapUTestUNI \
-		RUN_ESMC_ArrayDataMapUTestUNI 
+#		RUN_ESMC_ArrayDataMapUTestUNI 
 
 TESTS_RM      = ESMF_ArrayDataMapUTest.rm \
-                ESMC_ArrayDataMapUTest.rm
+#                ESMC_ArrayDataMapUTest.rm
 
 
 include ${ESMF_DIR}/makefile
