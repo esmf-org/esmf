@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.11.4.2 2005/02/11 20:43:48 nscollins Exp $
+%  $Id: ESMF_builddetail.tex,v 1.11.4.3 2005/03/10 22:06:36 jwolfe Exp $
 
 
 \subsection{Make System}
@@ -94,13 +94,13 @@ is O.
 Defines which MPI communications library to use.  Many times a machine
 will come with its own MPI library and in those cases the default
 setting will be mpi.  Otherwise the default setting will be mpiuni so
-that the mpiuni library will be used.  Other possible settings are
-mpich and lam.
+that the mpiuni library will be used.  This is the case for Linux and
+Darwin systems.  Other possible settings are mpich and lam.
 
 \item{ESMF\_COMPILER}
 
 Variable specifying which compiler to use.  Value can be default,
-absoft, intel, lahey, xlf, or nag.  If the value is default or the
+absoft, intel, lahey, nag, pgi, or xlf.  If the value is default or the
 ESMF\_COMPILER is left unset, then the default compiler will be
 used. On systems which usually come with a single vendor-supplied
 compiler, the default is to use this compiler.  On systems like
