@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.3 2003/12/08 23:12:20 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.4 2003/12/09 22:30:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -152,6 +152,8 @@ typedef int ESMC_CommType;
                                 int decompids[], int size_decomp,
                                 ESMC_AxisIndex *AIPtr);
     int ESMC_DELayoutParse(int axis, int count, int *countsPerDE);
+#if 0
+    // OLD
     int ESMC_DELayoutGatherArrayI(int *DistArray, int global_dimlengths[],
                                   int decompids[], int size_decomp,
                                   int localDimCounts[], int localMaxDimCount[],
@@ -167,6 +169,12 @@ typedef int ESMC_CommType;
                                   int localDimCounts[], int localMaxDimCount[],
                                   ESMC_AxisIndex *AIPtr, ESMC_AxisIndex *AIPtr2, 
                                   double *GlobalArray);
+#endif
+    int ESMC_DELayoutGatherArray(void *DistArray, int global_dimlengths[],
+                                  int decompids[], int size_decomp,
+                                  int localDimCounts[], int localMaxDimCount[],
+                                  ESMC_AxisIndex *AIPtr, ESMC_AxisIndex *AIPtr2, 
+                                  ESMC_DataKind datatype, void *GlobalArray);
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_DELayoutValidate(void) const;

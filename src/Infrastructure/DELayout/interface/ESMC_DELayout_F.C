@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.4 2003/12/08 23:12:20 nscollins Exp $
+// $Id: ESMC_DELayout_F.C,v 1.5 2003/12/09 22:30:57 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -123,10 +123,11 @@ extern "C" {
                                              ESMC_AxisIndex *AIPtr, 
                                              ESMC_AxisIndex *AIPtr2, 
                                              int *GlobalArray, int *status) {
-           *status = (*ptr)->ESMC_DELayoutGatherArrayI(DistArray, 
+           *status = (*ptr)->ESMC_DELayoutGatherArray((void *)DistArray, 
                                              global_dimlengths, decompids, *size_decomp,
                                              localDimCounts, localMaxDimCount,
-                                             AIPtr, AIPtr2, GlobalArray);
+                                             AIPtr, AIPtr2, 
+                                             ESMF_I4, GlobalArray);
        }
 
        void FTN(c_esmc_delayoutgatherarrayr)(ESMC_DELayout **ptr,
@@ -137,10 +138,11 @@ extern "C" {
                                              ESMC_AxisIndex *AIPtr, 
                                              ESMC_AxisIndex *AIPtr2, 
                                              float *GlobalArray, int *status) {
-           *status = (*ptr)->ESMC_DELayoutGatherArrayF(DistArray,
+           *status = (*ptr)->ESMC_DELayoutGatherArray(DistArray,
                                              global_dimlengths, decompids, *size_decomp,
                                              localDimCounts, localMaxDimCount,
-                                             AIPtr, AIPtr2, GlobalArray);
+                                             AIPtr, AIPtr2, 
+                                             ESMF_R4, GlobalArray);
        }
 
        void FTN(c_esmc_delayoutgatherarrayr8)(ESMC_DELayout **ptr,
@@ -151,10 +153,11 @@ extern "C" {
                                              ESMC_AxisIndex *AIPtr, 
                                              ESMC_AxisIndex *AIPtr2, 
                                              double *GlobalArray, int *status) {
-           *status = (*ptr)->ESMC_DELayoutGatherArrayD(DistArray,
+           *status = (*ptr)->ESMC_DELayoutGatherArray(DistArray,
                                              global_dimlengths, decompids, *size_decomp, 
                                              localDimCounts, localMaxDimCount,
-                                             AIPtr, AIPtr2, GlobalArray);
+                                             AIPtr, AIPtr2, 
+                                             ESMF_R8, GlobalArray);
        }
 
        void FTN(c_esmc_delayoutprint)(ESMC_DELayout **ptr, char *opts,
