@@ -1,4 +1,4 @@
-% $Id: LogErr_implnotes.tex,v 1.7 2004/03/17 23:46:53 cdeluca Exp $
+% $Id: LogErr_implnotes.tex,v 1.8 2004/06/22 20:07:32 cpboulder Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -7,42 +7,36 @@
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
 % Licensed under the GPL.
-
 %\subsection{Implementation Notes}
-
 \begin{enumerate}
+\item The Log class was implemented in C/C++, but uses the Fortran I/O 
+libraries when the class methods are called from Fortran. We forced the C/C++
+methods to use the Fortran I/O library by creating utility functions that are
+written in Fortran, but callable from Log's C++ methods.  These utility 
+functions call the standard Fortran write, open and close functions.  If you
+call the Log methods from C/C++ code, you bypass the utility functions and 
+all I/O is done with the C I/O libraries.
+At initialization a LogArray is created.  This array is a container that holds
+multiple Logs.  Within the LogArray, one or more Logs may be created.  Each Log
+stores information for a specific Log file.   When working with more than one 
+Log file, multiple Logs are required (one Log for each Log file).  For each 
+Log, a handle is returned through the {\tt ESMF\_LogOpen()} method so that the
+user can manage the various Logs.  The properties of a specific Log are set 
+with the {\tt ESMF\_LogSet()} method.  Additionally, buffering occurs within a
+Log.  Every time the {\tt ESMF\_LogWrite()} method is called, LogEntry element
+is populated with the {\tt ESMF\_LogWrite()} information.  The user can set the
+number of LogEntry elements in the Log buffer.  When the buffer is full (i.e.,
+when all the LogEntry elements are populated), the buffer will be flushed and
+all the contents will be written to file.  If buffering is not needed 
+({\tt autoflush=false}), the {\tt ESMF\_LogWrite()} method will immediately 
+write to the Log files. 
 
-\item The Log class was implemented in C/C++, but uses the Fortran I/O libraries when
-the class methods are called from Fortran. We forced the C/C++ methods 
-to use the Fortran I/O library by creating 
-utility functions that are written in Fortran, but callable from Log's C++ methods.
-These utility functions call the standard Fortran write, open and close functions.
-If you call the Log methods from C/C++ code, you bypass the utility functions
-and all I/O is done with the C I/O libraries.
-
-At initialization a LogArray is created.  This array is a container 
-that holds multiple Logs.  Within the LogArray, one or more Logs may be created.  
-Each Log stores information for a specific Log file.   When working with 
-more than one Log file, multiple Logs are required (one Log for each Log file).  
-For each Log, a handle is returned through the {\tt ESMF\_LogOpen()} method so 
-that the user can manage the various Logs.  The properties of a specific 
-Log are set with the {\tt ESMF\_LogSet()} method.  Additionally, buffering 
-occurs within a Log.  Every time the {\tt ESMF\_LogWrite()} method is called, 
-LogEntry element is populated with the {\tt ESMF\_LogWrite()} information.  
-The user can set the number of LogEntry elements in the Log buffer.  When 
-the buffer is full (i.e., when all the LogEntry elements are populated), 
-the buffer will be flushed and all the contents will be written to file.  
-If buffering is not needed ({\tt autoflush=false}), the {\tt ESMF\_LogWrite()} 
-method will immediately write to the Log files. 
-
-Buffering allows ESMF to manage output data streams in a desired way.  
-For instance, a solution to clean streaming PE\_ordered output would be to 
-gather the buffers on root PE when flushing and order and stream them as 
-desired by the user.  Buffering the output provides a layer where the output 
-can be managed.  Writing to the buffer is transparent to the user because 
-all the Log entries are handled automatically by the {\tt ESMF\_LogWrite()} 
-method. 
-
+Buffering allows ESMF to manage output data streams in a desired way.  For 
+instance, a solution to clean streaming PE\_ordered output would be to gather
+the buffers on root PE when flushing and order and stream them as desired by
+the user.  Buffering the output provides a layer where the output can be
+managed.  Writing to the buffer is transparent to the user because all the Log
+entries are handled automatically by the {\tt ESMF\_LogWrite()} method. 
 \end{enumerate}
 
 
