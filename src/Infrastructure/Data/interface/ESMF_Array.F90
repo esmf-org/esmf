@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.13 2002/12/16 17:45:23 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.14 2002/12/16 18:56:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.13 2002/12/16 17:45:23 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.14 2002/12/16 18:56:19 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -160,16 +160,16 @@
 !  There are 4 options for 
 !  specifying the type/kind/rank of the {\tt ESMF\_Array}:
 !  \begin{description}
-!  \item{List}
+!  \item[List]
 !    The characteristics of the {\tt ESMF\_Array} are given explicitly
 !    by individual arguments to the create function.
-!  \item{ArraySpec}
+!  \item[ArraySpec]
 !    A previously created {\tt ESMF\_ArraySpec} object is given which
 !    describes the characteristics.
-!  \item{Fortran array}
+!  \item[Fortran array]
 !    An existing Fortran array is used to describe the array.
 !    (Only available from the Fortran interface.)
-!  \item{Fortran 90 Pointer}
+!  \item[Fortran 90 Pointer]
 !    An existing Fortran 90 array pointer is used to describe the array.
 !    (Only available from the Fortran interface.)
 !  \end{description}
@@ -177,15 +177,15 @@
 !  There are 4 options for setting the contents of the {\tt ESMF\_Array}
 !  at creation time:
 !  \begin{description}
-!  \item{No Data}
+!  \item[No Data]
 !    No data space is allocated.
-!  \item{Allocate Space Only}
+!  \item[Allocate Space Only]
 !    Data space is allocated but not initialized.  The caller can query
 !    for a pointer to the start of the space to address it directly.
-!  \item{Data Copy}
+!  \item[Data Copy]
 !    An existing Fortran array is specified and the data contents are copied
 !    into new space allocated by the {\tt ESMF\_Array}.
-!  \item{Data Reference}
+!  \item[Data Reference]
 !    An existing Fortran array is specified and the data contents reference
 !    it directly.  The caller must not deallocate the space; the
 !    {\tt ESMF\_Array} will free the space when it is destroyed.
