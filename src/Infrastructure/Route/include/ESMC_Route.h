@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.35 2004/03/06 00:01:51 jwolfe Exp $
+// $Id: ESMC_Route.h,v 1.36 2004/04/09 19:55:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,13 @@
 // 
 // !USES:
  #include <ESMC_Base.h>        // all classes inherit from the ESMC Base class.
- #include <ESMC_DELayout.h>
+
+#ifdef ESMF_ENABLE_VM
+#include "ESMC_newDELayout.h"
+#else
+#include <ESMC_DELayout.h>
+#endif
+ 
  #include <ESMC_XPacket.h>
  #include <ESMC_RTable.h>
  #include <ESMC_CommTable.h>
@@ -55,13 +61,21 @@
  // structure for matching precomputed routes
  typedef struct {
     int entrystatus;
-    int rank; 
+    int rank;
+#ifdef ESMF_ENABLE_VM
+    ESMC_newDELayout *snd_delayout;
+#else    
     ESMC_DELayout *snd_layout;
+#endif
     int snd_DE; 
     int snd_AI_count; 
     ESMC_AxisIndex *snd_AI_exc;
     ESMC_AxisIndex *snd_AI_tot;
+#ifdef ESMF_ENABLE_VM
+    ESMC_newDELayout *rcv_delayout;
+#else
     ESMC_DELayout *rcv_layout;
+#endif
     int rcv_DE; 
     int rcv_AI_count; 
     ESMC_AxisIndex *rcv_AI_exc;
@@ -84,7 +98,11 @@
    private:
      // name in base class
      int routeid;           // unique id, used later for cacheing
+#ifdef ESMF_ENABLE_VM
+     ESMC_newDELayout *delayout; // layout which includes all src + dst de's
+#else
      ESMC_DELayout *layout; // layout which includes all src + dst de's
+#endif
      ESMC_RTable *sendRT;   // send route table
      ESMC_RTable *recvRT;   // receive route table
      int recvitems;         // if >0, numitems needed in the destination array
@@ -95,7 +113,13 @@
   public:
  // ESMC_RouteCreate and ESMC_RouteDestroy are declared below,
  // outside the ESMC_Route declaration
-    int ESMC_RouteConstruct(ESMC_DELayout *layout);
+    int ESMC_RouteConstruct(
+#ifdef ESMF_ENABLE_VM
+          ESMC_newDELayout *delayout
+#else
+          ESMC_DELayout *layout
+#endif
+      );
     int ESMC_RouteDestruct(void);
 
  // accessor methods for class members
@@ -111,23 +135,46 @@
     int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
                        ESMC_AxisIndex *AI_tot, int AI_count, 
                        int *global_start, int *global_count,
-                       ESMC_DELayout *layout, ESMC_Logical *periodic = NULL);
+#ifdef ESMF_ENABLE_VM
+          ESMC_newDELayout *delayout,
+#else
+          ESMC_DELayout *layout,
+#endif
+                       ESMC_Logical *periodic = NULL);
     int ESMC_RoutePrecomputeRedist(int rank, int dstMyDE,
                        ESMC_AxisIndex *dstCompAI, ESMC_AxisIndex *dstTotalAI,
                        int dstAICount, int *dstGlobalStart, int *dstGlobalCount,
+#ifdef ESMF_ENABLE_VM
+                       ESMC_newDELayout *dstdeLayout,
+#else
                        ESMC_DELayout *dstLayout,
+#endif
                        int srcMyDE, 
                        ESMC_AxisIndex *srcCompAI, ESMC_AxisIndex *srcTotalAI,
                        int srcAICount, int *srcGlobalStart, int *srcGlobalCount,
+#ifdef ESMF_ENABLE_VM
+                       ESMC_newDELayout *srcdeLayout);
+#else
                        ESMC_DELayout *srcLayout);
+#endif
     int ESMC_RoutePrecomputeRegrid(int rank, int my_DE_rcv, 
                        ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
                        int AI_rcv_count, int *global_start_rcv,
-                       int *global_count_rcv, ESMC_DELayout *layout_rcv,
+                       int *global_count_rcv, 
+#ifdef ESMF_ENABLE_VM
+        ESMC_newDELayout *delayout_rcv,
+#else
+        ESMC_DELayout *layout_rcv,
+#endif
                        int my_DE_snd, 
                        ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
                        int AI_snd_count, int *global_start_snd,
-                       int *global_count_snd, ESMC_DELayout *layout_snd);
+                       int *global_count_snd, 
+#ifdef ESMF_ENABLE_VM
+        ESMC_newDELayout *delayout_snd);
+#else
+        ESMC_DELayout *layout_snd);
+#endif
     int ESMC_RoutePrecomputeDomList(int rank, int my_DE, 
                        ESMC_DomainList *sendDomainList,
                        ESMC_DomainList *recvDomainList);
@@ -139,10 +186,20 @@
     int ESMC_RouteAddCache(int rank, 
                        int my_DE_rcv, 
                        ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
-                       int AI_rcv_count, ESMC_DELayout *layout_rcv,
+                       int AI_rcv_count, 
+#ifdef ESMF_ENABLE_VM
+        ESMC_newDELayout *delayout_rcv,
+#else
+        ESMC_DELayout *layout_rcv,
+#endif
                        int my_DE_snd, 
                        ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
-                       int AI_snd_count, ESMC_DELayout *layout_snd,
+                       int AI_snd_count,
+#ifdef ESMF_ENABLE_VM
+        ESMC_newDELayout *delayout_snd,
+#else
+        ESMC_DELayout *layout_snd,
+#endif
                        ESMC_Logical *periodic);
 
     // drop a route from the cache table
@@ -172,15 +229,31 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Route object.
 
- ESMC_Route *ESMC_RouteCreate(ESMC_DELayout *layout, int *rc);
+ ESMC_Route *ESMC_RouteCreate(
+#ifdef ESMF_ENABLE_VM
+          ESMC_newDELayout *delayout,
+#else
+          ESMC_DELayout *layout,
+#endif
+          int *rc);
  int ESMC_RouteDestroy(ESMC_Route *route);
  int ESMC_RouteGetCached(int rank, 
                        int my_DE_rcv, 
                        ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
-                       int AI_rcv_count, ESMC_DELayout *layout_rcv,
+                       int AI_rcv_count, 
+#ifdef ESMF_ENABLE_VM
+          ESMC_newDELayout *delayout_rcv,
+#else
+          ESMC_DELayout *layout_rcv,
+#endif
                        int my_DE_snd, 
                        ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
-                       int AI_snd_count, ESMC_DELayout *layout_snd,
+                       int AI_snd_count, 
+#ifdef ESMF_ENABLE_VM
+     ESMC_newDELayout *delayout_snd,
+#else
+     ESMC_DELayout *layout_snd,
+#endif
                        ESMC_Logical *periodic,
                        ESMC_Logical *hascachedroute, ESMC_Route **route);
 

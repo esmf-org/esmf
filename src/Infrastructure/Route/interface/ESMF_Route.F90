@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.45 2004/04/08 16:14:28 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.46 2004/04/09 19:55:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,6 +35,9 @@
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
       use ESMF_DELayoutMod
+#ifdef ESMF_ENABLE_VM
+      use ESMF_newDELayoutMod    ! ESMF layout class
+#endif
       use ESMF_LocalArrayMod
       use ESMF_XPacketMod
       implicit none
@@ -94,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.45 2004/04/08 16:14:28 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.46 2004/04/09 19:55:35 theurich Exp $'
 
 !==============================================================================
 !
@@ -132,7 +135,11 @@
 ! !IROUTINE: ESMF_RouteCreate - Create a new Route
 
 ! !INTERFACE:
-      function ESMF_RouteCreate(layout, rc)
+      function ESMF_RouteCreate(layout, rc &
+#ifdef ESMF_ENABLE_VM
+                 , delayout &
+#endif
+            )
 !
 ! !RETURN VALUE:
       type(ESMF_Route) :: ESMF_RouteCreate
@@ -140,6 +147,9 @@
 ! !ARGUMENTS:
       type(ESMF_DELayout), intent(in) :: layout
       integer, intent(out), optional :: rc               
+#ifdef ESMF_ENABLE_VM
+      type(ESMF_newDELayout), intent(in), optional :: delayout
+#endif
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Route} object and constructs its
@@ -175,7 +185,11 @@
         endif
 
         ! Call C++ create code
+#ifdef ESMF_ENABLE_VM
+        call c_ESMC_RouteCreate(route, delayout, status)
+#else
         call c_ESMC_RouteCreate(route, layout, status)
+#endif        
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route create error"
           return  
@@ -552,7 +566,11 @@
       subroutine ESMF_RouteGetCached(rank, &
                  my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
                  my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, &
-                 periodic, hascachedroute, route, rc)
+                 periodic, hascachedroute, route, rc &
+#ifdef ESMF_ENABLE_VM
+                 , delayout_dst, delayout_src &
+#endif
+                 )
 !
 ! !ARGUMENTS:
       integer, intent(in) :: rank
@@ -570,6 +588,10 @@
       logical, intent(out) :: hascachedroute
       type(ESMF_Route), intent(out) :: route
       integer, intent(out), optional :: rc            
+#ifdef ESMF_ENABLE_VM
+      type(ESMF_newDELayout), intent(in), optional :: delayout_dst
+      type(ESMF_newDELayout), intent(in), optional :: delayout_src
+#endif
 
 !
 ! !DESCRIPTION:
@@ -638,10 +660,17 @@
         enddo
 
         ! Call C++  code
+#ifdef ESMF_ENABLE_VM
+        call c_ESMC_RouteGetCached(rank, &
+               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, delayout_dst, &
+               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, delayout_src, &
+               periodic, lcache, lroute, status)
+#else
         call c_ESMC_RouteGetCached(rank, &
                  my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
                  my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, &
                  periodic, lcache, lroute, status)
+#endif
 
         ! Translate AxisIndices back to  F90 from C++
         do j=1,rank
@@ -1032,7 +1061,11 @@
 ! !INTERFACE:
       subroutine ESMF_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
                                           AI_count, global_start, global_count, &
-                                          layout, periodic, rc)
+                                          layout, periodic, rc &
+#ifdef ESMF_ENABLE_VM
+                                          , delayout &
+#endif
+                                          )
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -1046,6 +1079,9 @@
       type(ESMF_DELayout), intent(in) :: layout
       type(ESMF_Logical), intent(in) :: periodic(:)
       integer, intent(out), optional :: rc
+#ifdef ESMF_ENABLE_VM
+      type(ESMF_newDELayout), intent(in), optional :: delayout
+#endif
 
 !
 ! !DESCRIPTION:
@@ -1089,9 +1125,15 @@
         enddo
 
         ! Call C++  code
+#ifdef ESMF_ENABLE_VM
+        call c_ESMC_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
+                                        AI_count, global_start, global_count, &
+                                        delayout, periodic, status)
+#else
         call c_ESMC_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
                                         AI_count, global_start, global_count, &
                                         layout, periodic, status)
+#endif
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Precompute Halo error"
           ! don't return before adding 1 back to AIs

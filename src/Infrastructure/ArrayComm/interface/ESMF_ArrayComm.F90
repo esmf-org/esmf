@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.31 2004/04/02 18:36:34 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.32 2004/04/09 19:57:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,6 +45,9 @@
       use ESMF_LocalArrayMod
       use ESMF_DataMapMod
       use ESMF_DELayoutMod
+#ifdef ESMF_ENABLE_VM
+      use ESMF_newDELayoutMod    ! ESMF layout class
+#endif
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
       use ESMF_GridTypesMod
@@ -76,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.31 2004/04/02 18:36:34 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.32 2004/04/09 19:57:56 theurich Exp $'
 !
 !==============================================================================
 !
@@ -708,6 +711,9 @@
       integer :: gridrank, datarank
       integer :: i, dimCount
       logical :: hascachedroute    ! can we reuse an existing route?
+#ifdef ESMF_ENABLE_VM
+      type (ESMF_newDELayout) :: delayout
+#endif
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -724,12 +730,20 @@
       routehandle = ESMF_RouteHandleCreate(status)
     
       ! Extract layout information from the Grid
+#ifdef ESMF_ENABLE_VM
+      call ESMF_GridGet(grid, delayout=delayout, rc=status)
+#else
       call ESMF_GridGetDELayout(grid, layout, status)
+#endif
       call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
+#ifdef ESMF_ENABLE_VM
+      call ESMF_newDELayoutGet(delayout, deCount=nDEs, localDe=my_DE, rc=status)
+#else
       call ESMF_DELayoutGetDEid(layout, my_DE, status)
       call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
+#endif
 
       ! Allocate temporary arrays
       allocate(              periodic(      gridrank), stat=status)
@@ -799,17 +813,29 @@
       call ESMF_RouteGetCached(datarank, my_DE, gl_dst_AI, gl_dst_AI, &
                                nDEs, layout, my_DE, gl_src_AI, gl_src_AI, &
                                nDEs, layout, periodic, hascachedroute, &
-                               route, status)
+                               route, status &
+#ifdef ESMF_ENABLE_VM
+                               , delayout, delayout &
+#endif
+                               )
 
       if (.not. hascachedroute) then
           ! Create the route object.
-          route = ESMF_RouteCreate(layout, rc)
+          route = ESMF_RouteCreate(layout, rc &
+#ifdef ESMF_ENABLE_VM
+               , delayout &
+#endif
+          )
 
           call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
                                         gl_dst_AI, nDEs, &
                                         globalStartPerDEPerDim, &
                                         globalCellCountPerDim, layout, &
-                                        periodic, status)
+                                        periodic, status &
+#ifdef ESMF_ENABLE_VM
+                                        , delayout &
+#endif
+                                        )
       endif
 
       ! and set route into routehandle object
