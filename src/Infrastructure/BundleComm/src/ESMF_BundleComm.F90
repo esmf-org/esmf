@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.38 2004/12/28 07:19:19 theurich Exp $
+! $Id: ESMF_BundleComm.F90,v 1.39 2005/01/12 18:16:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.38 2004/12/28 07:19:19 theurich Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.39 2005/01/12 18:16:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -317,6 +317,11 @@
 !           as the communication between DEs has been scheduled.
 !           If not present, default is what was specified at Store time.
 !      (This feature is not yet supported.  All operations are synchronous.)
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
