@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.34 2004/01/30 00:17:40 nscollins Exp $
+#  $Id: common.mk,v 1.35 2004/01/30 04:40:27 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -124,6 +124,7 @@ DO_LATEX	= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_latex
 DO_L2H		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_l2h
 
 LIBNAME		= $(ESMF_LIBDIR)/${LIBBASE}.a
+ESMFLIB		= $(ESMF_LIBDIR)/libesmf.a
 
 SOURCE		= ${SOURCEC} ${SOURCEF}
 OBJS		= ${OBJSC} ${OBJSF}
@@ -416,8 +417,8 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 #
 #  Link rule for Fortran system tests.
 #
-$(ESMC_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(LIBNAME)
-	$(SL_F_LINKER) -o $@ $(SYSTEM_TESTS_OBJ) $< -lesmf \
+$(ESMC_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
+	-$(SL_F_LINKER) -o $@ $(SYSTEM_TESTS_OBJ) $< -lesmf \
 	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
@@ -484,7 +485,7 @@ build_tests: chkopts chkdir_tests
 
 tree_build_tests: $(TESTS_BUILD) 
 
-$(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(LIBNAME)
+$(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 	-$(SL_F_LINKER) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf \
 	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
@@ -557,18 +558,18 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #
 #  Examples Link commands
 #
-$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(LIBNAME)
+$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
 	-$(SL_F_LINKER) -o $@ $< -lesmf ${F90CXXLIBS} \
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
-	rm -f  $^
+	rm -f  $<
 
 
-$(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(LIBNAME)
+$(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
 	-${SL_C_LINKER} -g -o $@ $< -lesmf \
         ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
         $(SL_LINKOPTS)
-	rm -f $^
+	rm -f $<
 
 #
 # run_examples
@@ -608,8 +609,8 @@ build_demo: chkopts chkdir_tests
 
 tree_build_demo: $(DEMO_BUILD) 
 
-$(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(LIBNAME)
-	$(SL_F_LINKER) -o $@ $< -lesmf ${F90CXXLIBS} \
+$(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(ESMFLIB)
+	$(SL_F_LINKER) -o $@ $< $(DEMO_OBJ) -lesmf ${F90CXXLIBS} \
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
