@@ -1,4 +1,4 @@
-% $Id: State_refdoc.ctex,v 1.3 2003/10/23 15:10:12 cdeluca Exp $
+% $Id: State_refdoc.ctex,v 1.4 2003/12/16 22:21:23 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,10 +57,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{State_usage}
-%\input{ESMF_StateEx_fapi}
+\input{ESMF_StateEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/State_usage}
-%\input{../Superstructure/State/doc/ESMF_StateEx_fapi}
+\input{../Superstructure/State/doc/ESMF_StateEx_fapi}
 #endif
 
 \subsection{Restrictions}
