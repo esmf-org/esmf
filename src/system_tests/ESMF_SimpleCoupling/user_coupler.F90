@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.12 2005/02/28 17:04:29 nscollins Exp $
+! $Id: user_coupler.F90,v 1.13 2005/02/28 22:06:34 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -85,7 +85,7 @@
 
         ! Precompute communication patterns
         call ESMF_FieldRedistStore(humidity1, humidity2, vm, &
-                                   routehandle, rc=status)
+                                   routehandle=routehandle, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
 
         ! This is where the model specific setup code goes.  
