@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.9 2003/04/04 16:11:58 nscollins Exp $
+! $Id: user_model.F90,v 1.10 2003/04/29 22:02:02 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -84,9 +84,9 @@
     
     subroutine user_init(comp, importstate, exportstate, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State), optional :: importstate, exportstate
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_Clock) :: clock
+        integer :: rc
 
 !     ! Local variables
         type(ESMF_Field) :: humidity
@@ -127,9 +127,9 @@
  
     subroutine user_run(comp, importstate, exportstate, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State), optional :: importstate, exportstate
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_Clock) :: clock
+        integer :: rc
 
         type(ESMF_Field) :: humidity
         type(ESMF_DELayout) :: mylayout
@@ -184,9 +184,9 @@
  
     subroutine user_final(comp, importstate, exportstate, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State), optional :: importstate, exportstate
-        type(ESMF_Clock), optional :: clock
-        integer, optional :: rc
+        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_Clock) :: clock
+        integer :: rc
 
 !     ! Local variables
         type(mydata), pointer :: mydatablock
