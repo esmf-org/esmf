@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.55 2004/01/06 00:08:03 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.56 2004/01/06 22:24:22 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,29 +101,29 @@
       private ESMF_TimeDec
       private ESMF_TimeDiff
 
-      public operator(.EQ.)
+      public operator(==)
       private ESMF_TimeEQ
 
-      public operator(.NE.)
+      public operator(/=)
       private ESMF_TimeNE
 
-      public operator(.LT.)
+      public operator(<)
       private ESMF_TimeLT
 
-      public operator(.LE.)
+      public operator(<=)
       private ESMF_TimeLE
 
-      public operator(.GT.)
+      public operator(>)
       private ESMF_TimeGT
 
-      public operator(.GE.)
+      public operator(>=)
       private ESMF_TimeGE
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.55 2004/01/06 00:08:03 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.56 2004/01/06 22:24:22 eschwab Exp $'
 
 !==============================================================================
 !
@@ -146,8 +146,8 @@
 ! 
 ! !DESCRIPTION:
 !     Overloads the (+) operator for the {\tt ESMF\_Time} class to increment
-!     an {\tt ESMF\_Time} with an {\tt ESMF\_TimeInterval} and returns the
-!     result as an {\tt ESMF\_Time}.
+!     {\tt time1} with {\tt timeInterval} and return the result as an
+!     {\tt ESMF\_Time}.
 !
 !     The arguments are:
 !     \begin{description} 
@@ -159,7 +159,7 @@
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeInc    ! internal implementation of overload
+      module procedure ESMF_TimeInc    ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMG2.4.4, TMG2.4.5, TMG5.1, TMG7.2
@@ -183,8 +183,8 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (-) operator for the {\tt ESMF\_Time} class to decrement
-!     an {\tt ESMF\_Time} with an {\tt ESMF\_TimeInterval}, and returns the
-!     result as an {\tt ESMF\_Time}.
+!     {\tt time1} with {\tt timeInterval}, and return the result as an
+!     {\tt ESMF\_Time}.
 ! 
 !     The arguments are:      
 !     \begin{description}
@@ -197,7 +197,7 @@
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeDec    ! internal implementation of overload
+      module procedure ESMF_TimeDec    ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMG2.4.4, TMG2.4.5, TMG5.1, TMG7.2
@@ -234,7 +234,7 @@
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeDiff   ! internal implementation of overload
+      module procedure ESMF_TimeDiff   ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMG2.4.6, TMG5.2, TMG7.2
@@ -249,10 +249,10 @@
       interface operator(==)
 !     if (time1 == time2) then ... endif
 !                  OR
-!     time3 = (time1 == time2)
+!     result = (time1 == time2)
 !
 ! !RETURN VALUE:
-!     logical :: time3
+!     logical :: result
 !
 ! !ARGUMENTS:
 !     type(ESMF_Time), intent(in) :: time1
@@ -272,7 +272,7 @@
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeEQ   ! internal implementation of overload
+      module procedure ESMF_TimeEQ   ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMG2.4.3, TMG7.2
@@ -287,10 +287,10 @@
       interface operator(/=)
 !     if (time1 /= time2) then ... endif
 !                  OR
-!     time3 = (time1 /= time2)
+!     result = (time1 /= time2)
 !
 ! !RETURN VALUE:
-!     logical :: time3
+!     logical :: result
 !
 ! !ARGUMENTS:
 !     type(ESMF_Time), intent(in) :: time1
@@ -310,7 +310,7 @@
 ! 
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeNE   ! internal implementation of overload
+      module procedure ESMF_TimeNE   ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMG2.4.3, TMG7.2
@@ -325,10 +325,10 @@
       interface operator(<)
 !     if (time1 < time2) then ... endif
 !                  OR
-!     time3 = (time1 < time2)
+!     result = (time1 < time2)
 !
 ! !RETURN VALUE:
-!     logical :: time3
+!     logical :: result
 !
 ! !ARGUMENTS:
 !     type(ESMF_Time), intent(in) :: time1
@@ -348,7 +348,7 @@
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeLT   ! internal implementation of overload
+      module procedure ESMF_TimeLT   ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMG2.4.3, TMG7.2
@@ -363,10 +363,10 @@
       interface operator(<=)
 !     if (time1 <= time2) then ... endif
 !                  OR
-!     time3 = (time1 <= time2)
+!     result = (time1 <= time2)
 !
 ! !RETURN VALUE:
-!     logical :: time3
+!     logical :: result
 !
 ! !ARGUMENTS:
 !     type(ESMF_Time), intent(in) :: time1
@@ -386,7 +386,7 @@
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeLE   ! internal implementation of overload
+      module procedure ESMF_TimeLE   ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMG2.4.3, TMG7.2
@@ -401,10 +401,10 @@
       interface operator(>)
 !     if (time1 > time2) then ... endif
 !                  OR
-!     time3 = (time1 > time2)
+!     result = (time1 > time2)
 !
 ! !RETURN VALUE:
-!     logical :: time3
+!     logical :: result
 !
 ! !ARGUMENTS:
 !     type(ESMF_Time), intent(in) :: time1
@@ -424,7 +424,7 @@
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeGT   ! internal implementation of overload
+      module procedure ESMF_TimeGT   ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMG2.4.3, TMG7.2
@@ -439,10 +439,10 @@
       interface operator(>=)
 !     if (time1 >= time2) then ... endif
 !                  OR
-!     time3 = (time1 >= time2)
+!     result = (time1 >= time2)
 !
 ! !RETURN VALUE:
-!     logical :: time3
+!     logical :: result
 !
 ! !ARGUMENTS:
 !     type(ESMF_Time), intent(in) :: time1
@@ -463,7 +463,7 @@
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeGE   ! internal implementation of overload
+      module procedure ESMF_TimeGE   ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMG2.4.3, TMG7.2
