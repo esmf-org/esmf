@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.6 2003/10/20 20:13:57 cdeluca Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.7 2003/10/22 04:16:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.6 2003/10/20 20:13:57 cdeluca Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.7 2003/10/22 04:16:58 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -595,9 +595,12 @@
       !NEX_UTest
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Clock Initialization with Gregorian CalendarTest"
-      call ESMF_ClockSetup(clock_gregorian, timeStep, startTime, stopTime, rc=rc)
+      clock_gregorian = ESMF_ClockCreate("Gregorian Clock", timeStep, &
+                                         startTime, stopTime, rc=rc)
+
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock_gregorian, rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -643,10 +646,12 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_ClockSetup(clock_no_leap, timeStep, startTime, stopTime, rc=rc)
+      clock_no_leap = ESMF_ClockCreate("No Leap Clock", timeStep, &    
+                                        startTime, stopTime, rc=rc) 
       write(name, *) "Clock initialization with above settings Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock_no_leap, rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -693,10 +698,12 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_ClockSetup(clock_360day, timeStep, startTime, stopTime, rc=rc)
+      clock_360day = ESMF_ClockCreate("360 Day Clock", timeStep, startTime, &
+                                         stopTime, rc=rc)
       write(name, *) "Clock initialization with above settings Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock_360day, rc)
 
       ! ----------------------------------------------------------------------------
 
