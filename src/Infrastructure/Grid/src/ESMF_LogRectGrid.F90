@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.2 2004/01/20 23:12:50 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.3 2004/01/21 23:29:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -83,6 +83,7 @@
     public ESMF_LRGridValidate
     public ESMF_LRGridBoxIntersectRecv
     public ESMF_LRGridBoxIntersectSend
+    public ESMF_LRGridDestruct
     !public ESMF_LRGridSearch
 
 !------------------------------------------------------------------------------
@@ -94,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.2 2004/01/20 23:12:50 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.3 2004/01/21 23:29:01 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -570,7 +571,7 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructNew(grid, name, status)
+      call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridCreateRead: Grid construct"
         return
@@ -640,7 +641,7 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructNew(grid, name, status)
+      call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridCreateCopy: Grid construct"
         return
@@ -716,7 +717,7 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructNew(grid, name, status)
+      call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridCreateCutout: Grid construct"
         return
@@ -796,7 +797,7 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructNew(grid, name, status)
+      call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridCreateChangeResolution: Grid construct"
         return
@@ -869,7 +870,7 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructNew(grid, name, status)
+      call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridCreateExchange: Grid construct"
         return
@@ -981,7 +982,7 @@
       endif
 
 !     Initialize the derived type contents
-      call ESMF_LRGridConstructNew(grid, name, status)
+      call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridConstructUniform: Grid construct"
         return
@@ -4460,7 +4461,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: i, j, rank, nDEs, num_domains
+      integer :: i, j, rank, nDEs, numDomains
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
@@ -4518,34 +4519,34 @@
 
       ! go through list of DEs to calculate the number of domains
       ! TODO: use David's DomainList routines, but they are untested
-      num_domains = 0
+      numDomains = 0
       do i = 1,nDEs
         if ((localMinPerDim(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
             (localMaxPerDim(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .or. &
             (localMinPerDim(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .or. &
             (localMaxPerDim(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
-        num_domains = num_domains + 1
+        numDomains = numDomains + 1
       enddo
 
-      domainList = ESMF_DomainListCreate(num_domains)
+      domainList = ESMF_DomainListCreate(numDomains)
 
       ! now fill in the domain list
       !  TODO: only one loop instead of two, one that figures the number
       !        of domains and one that fills it in
       ! TODO: move some of this code to Base and add a DomainList method?
-      num_domains = 0
+      numDomains = 0
       totalPoints  = 0
       do j = 1,nDEs
         if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
             (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
             (localMinPerDim(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .or. &
             (localMaxPerDim(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
-        num_domains = num_domains + 1
-        domainList%domains(num_domains)%DE   = j - 1  ! DEs start with 0
-        domainList%domains(num_domains)%rank = rank
+        numDomains = numDomains + 1
+        domainList%domains(numDomains)%DE   = j - 1  ! DEs start with 0
+        domainList%domains(numDomains)%rank = rank
         size = 1
         do i = 1,rank
-          domainList%domains(num_domains)%ai(i) = localAI(j,i)
+          domainList%domains(numDomains)%ai(i) = localAI(j,i)
           size = size * (localAI(j,i)%max - localAI(j,i)%min + 1)
         enddo
         totalPoints = totalPoints + size
@@ -4604,15 +4605,15 @@
 ! !IROUTINE: ESMF_LRGridBoxIntersectSend - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_LRGridBoxIntersectSend(dstGrid, srcGrid, local_min, &
-                                             local_max, myAI, domainList, rc)
+      subroutine ESMF_LRGridBoxIntersectSend(dstGrid, srcGrid, localMinPerDim, &
+                                             localMaxPerDim, myAI, domainList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: dstGrid
       type(ESMF_Grid) :: srcGrid
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: local_min
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
                                                          ! array of local mins
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: local_max
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
                                                          ! array of local maxs
       type(ESMF_AxisIndex), dimension(:), intent(in) :: myAI
       type(ESMF_DomainList), intent(inout) :: domainList ! domain list
@@ -4632,10 +4633,10 @@
 !     \item[srcGrid]
 !          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[local\_min]
+!     \item[localMinPerDim]
 !          Array of local minimum coordinates, one per rank of the array,
 !          defining the "box."
-!     \item[local\_max]
+!     \item[localMaxPerDim]
 !          Array of local maximum coordinates, one per rank of the array,
 !          defining the "box."
 !     \item[myAI]
@@ -4653,7 +4654,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: i, j, rank, nDEs, num_domains
+      integer :: i, j, rank, nDEs, numDomains
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
@@ -4697,33 +4698,33 @@
 
       ! go through list of DEs to calculate the number of domains
       ! TODO: use David's DomainList routines, but they are untested
-      num_domains = 0
+      numDomains = 0
       do i = 1,nDEs
-        if ((local_min(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
-            (local_max(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .or. &
-            (local_min(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .or. &
-            (local_max(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
-        num_domains = num_domains + 1
+        if ((localMinPerDim(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
+            (localMaxPerDim(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .or. &
+            (localMinPerDim(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .or. &
+            (localMaxPerDim(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
+        numDomains = numDomains + 1
       enddo
 
-      domainList = ESMF_DomainListCreate(num_domains)
+      domainList = ESMF_DomainListCreate(numDomains)
 
       ! now fill in the domain list  TODO: only one loop instead of two, one that
       ! figures the number of domains and one that fills it in
       ! TODO: move some of this code to Base and add a DomainList method
-      num_domains = 0
-      totalPoints  = 0
+      numDomains  = 0
+      totalPoints = 0
       do j = 1,nDEs
-        if ((local_min(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
-            (local_max(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
-            (local_min(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .or. &
-            (local_max(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
-        num_domains = num_domains + 1
-        domainList%domains(num_domains)%DE   = j - 1  ! DEs start with 0
-        domainList%domains(num_domains)%rank = rank
+        if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
+            (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
+            (localMinPerDim(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .or. &
+            (localMaxPerDim(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
+        numDomains = numDomains + 1
+        domainList%domains(numDomains)%DE   = j - 1  ! DEs start with 0
+        domainList%domains(numDomains)%rank = rank
         size = 1
         do i = 1,rank
-          domainList%domains(num_domains)%ai(i) = myLocalAI(i)
+          domainList%domains(numDomains)%ai(i) = myLocalAI(i)
           size = size * (myLocalAI(i)%max - myLocalAI(i)%min + 1)
         enddo
         totalPoints = totalPoints + size
