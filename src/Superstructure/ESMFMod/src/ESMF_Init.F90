@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.20 2004/12/28 07:19:24 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.21 2005/01/13 22:06:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -197,6 +197,7 @@
       logical :: rcpresent                       ! Return code present   
       integer :: status
       logical, save :: already_init = .false.    ! Static, maintains state.
+      type(ESMF_LogType) :: defaultLogTypeUse
       type(ESMF_VM) :: testVM
 
       ! Initialize return code
@@ -224,11 +225,23 @@
           return
       endif
 
-      if (present(defaultLogFileName)) then
-          call ESMF_LogInitialize(defaultLogFileName, logType=defaultLogType, &
+      ! check defaultLogType in case it is coming across from the C++ side with
+      ! an incorrect value
+      if (present(defaultLogType)) then
+        if (defaultLogType.eq.ESMF_LOG_SINGLE .OR. &
+            defaultLogType.eq.ESMF_LOG_MULTI) then
+          defaultLogTypeUse = defaultLogType
+        else
+          defaultLogTypeUse = ESMF_LOG_SINGLE
+        endif
+      endif
+
+      if (present(defaultLogFileName) .AND. &
+         (len_trim(defaultLogFileName).ne.0)) then
+          call ESMF_LogInitialize(defaultLogFileName, logType=defaultLogTypeUse, &
                                   rc=status)
       else
-          call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogType, &
+          call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
                                    rc=status)
       endif
       if (status .ne. ESMF_SUCCESS) then
@@ -252,7 +265,8 @@
       endif
 
       ! Open config file if specified
-      if (present(defaultConfigFileName)) then
+      if (present(defaultLogFileName) .AND. &
+         (len_trim(defaultConfigFileName).ne.0)) then
           ! TODO: write this and remove the fixed status= line
           !call ESMF_ConfigInitialize(defaultConfigFileName, status)
           status = ESMF_SUCCESS

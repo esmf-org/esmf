@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.5 2005/01/10 18:48:12 jwolfe Exp $
+// $Id: ESMC_Init.C,v 1.6 2005/01/13 22:07:10 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,8 +49,7 @@ char **globalargv;
       ESMC_CalendarType defaultCalendar,   // in - optional time manager
                                            //      default calendar type
       char *defaultLogFilename,            // in - default log filename
-      //ESMC_LogType defaultLogType) {     // in - default log type (single/multi)
-      int defaultLogType) {                // in - default log type (single/multi)
+      ESMC_LogType defaultLogType) {       // in - default log type (single/multi)
 //  
 // !DESCRIPTION:
 //
@@ -92,12 +91,13 @@ char **globalargv;
 
     int rc;
     ESMC_MainLanguage l = ESMF_MAIN_C;
+    ESMC_LogType lt = ESMC_LOG_SINGLE;
 
     globalargc = 0;
     globalargv = NULL;
 
     FTN(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL,
-                                    NULL, &rc, 0, 0);
+                                    &lt, &rc, 0, 0);
 
     return rc;
 
@@ -124,13 +124,14 @@ char **globalargv;
 
     int rc;
     ESMC_MainLanguage l = ESMF_MAIN_C;
+    ESMC_LogType lt = ESMC_LOG_SINGLE;
 
     // make this public so the mpi init code in Machine can grab them.
     globalargc = argc;
     globalargv = argv;
 
     FTN(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL, 
-                                    NULL, &rc, 0, 0);
+                                    &lt, &rc, 0, 0);
 
     return rc;
 
