@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.28 2004/03/19 14:08:28 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.29 2004/03/19 20:25:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.28 2004/03/19 14:08:28 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.29 2004/03/19 20:25:57 theurich Exp $'
 
 !==============================================================================
 !
@@ -510,7 +510,7 @@
 
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompFinalize(gridcomp, importState, &
-                                           exportState, clock, phase, rc)
+        exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -519,6 +519,7 @@
       type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -547,7 +548,7 @@
 ! !REQUIREMENTS:
 
         call ESMF_CompFinalize(gridcomp%compp, importState, exportState, &
-                                              clock=clock, phase=phase, rc=rc)
+          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
 
         end subroutine ESMF_GridCompFinalize
 
@@ -619,7 +620,7 @@
 
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompInitialize(gridcomp, importState, &
-                                           exportState, clock, phase, rc)
+        exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -628,6 +629,7 @@
       type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -655,7 +657,7 @@
 ! !REQUIREMENTS:
 
         call ESMF_CompInitialize(gridcomp%compp, importState, exportState, &
-                                              clock=clock, phase=phase, rc=rc)
+          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
 
         end subroutine ESMF_GridCompInitialize
 
@@ -741,7 +743,7 @@
 
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompRun(gridcomp, importState, &
-                                           exportState, clock, phase, rc)
+        exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -750,6 +752,7 @@
       type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -777,7 +780,7 @@
 ! !REQUIREMENTS:
 
         call ESMF_CompRun(gridcomp%compp, importState, exportState, &
-                                             clock=clock, phase=phase, rc=rc)
+          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
 
         end subroutine ESMF_GridCompRun
 
