@@ -1,0 +1,983 @@
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.1 2003/10/09 20:56:12 cdeluca Exp $
+!
+! System test FieldHaloPeriodic
+!  Field Halo with periodic boundary conditions.
+!  Description on Sourceforge under System Test #82899
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+!BOP
+!
+! !DESCRIPTION:
+! System test FieldHaloPeriodic.
+!
+!
+!\begin{verbatim}
+
+    module global_data
+
+      use ESMF_Mod
+
+      ! set to true to get more output
+      logical :: verbose = .false.
+   
+      ! which type of periodic boundaries
+      type(ESMF_Logical) :: periodic(2)
+
+      ! halo width on each edge
+      integer :: halo_width = 3
+
+      public :: verbose, periodic, halo_width
+
+    end module
+
+
+    program FieldHaloPeriodic
+
+#include <ESMF_Macros.inc>
+
+    ! ESMF Framework module
+    use ESMF_Mod
+    use ESMF_TestMod
+    use global_data
+    
+    implicit none
+    
+    ! Subroutine to set entry points.
+    external setserv
+
+    ! Global variables
+    type(ESMF_GridComp) :: comp1
+    type(ESMF_DELayout) :: layout1, deflayout
+    integer, dimension(32) :: delist
+    integer, dimension(2) :: shape
+    integer :: de_id
+    character(len=ESMF_MAXSTR) :: cname
+    type(ESMF_State) :: import
+    integer :: i, j, ndes, rc
+
+        
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    print *, "------------------------------"
+    print *, "System Test FieldHaloPeriodic:"
+    print *, "------------------------------"
+
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!    Create section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!
+    call ESMF_FrameworkInitialize(rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    deflayout = ESMF_DELayoutCreate(rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_DELayoutGetNumDEs(deflayout, ndes, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    call ESMF_DELayoutGetDEId(deflayout, de_id, rc) 
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    
+!   Create a DELayout for the Component
+    ! assign default DE numbers and only use as many as we get procs
+    delist = (/ (i, i=0, 31) /)
+    select case (ndes)
+       case (4)
+           shape(1) = 2
+           shape(2) = 2
+       case (6)
+           shape(1) = 3
+           shape(2) = 2
+       case (8)
+           shape(1) = 2
+           shape(2) = 4
+       case (12)
+           shape(1) = 3
+           shape(2) = 4
+       case (16)
+           shape(1) = 4
+           shape(2) = 4
+       case (24)
+           shape(1) = 4
+           shape(2) = 6
+       case (32)
+           shape(1) = 8
+           shape(2) = 4
+       case default
+           shape(1) = ndes
+           shape(2) = 1
+    end select
+    layout1 = ESMF_DELayoutCreate(delist, 2, shape, (/ 0, 0 /), rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    ! print out shape of DELayout
+    print *, ""
+    print *, "DE ID numbers:"
+    do j = shape(2)-1,0,-1
+      write(*,5) (j*shape(1) + i, i=0,shape(1)-1)
+ 5   format(25(1x,i2))
+    enddo
+    print *, ""
+
+    cname = "System Test FieldHaloPeriodic"
+    comp1 = ESMF_GridCompCreate(name=cname, layout=layout1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    if (verbose) print *, "Comp Create finished, name = ", trim(cname)
+
+    call ESMF_GridCompSetServices(comp1, setserv, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+!
+!-------------------------------------------------------------------------
+!  Init section
+!
+    import = ESMF_StateCreate("gridded comp import", ESMF_STATEIMPORT, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_GridCompInitialize(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    if (verbose) print *, "Comp Init returned"
+
+!
+!-------------------------------------------------------------------------
+!     Run section
+!
+
+    call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    if (verbose) print *, "Comp Run returned"
+
+!
+!-------------------------------------------------------------------------
+!     Finalize section
+
+    call ESMF_GridCompFinalize(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    if (verbose) print *, "Comp Finalize returned without error"
+
+!
+!-------------------------------------------------------------------------
+!     Destroy section
+! 
+
+    call ESMF_DELayoutDestroy(layout1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_GridCompDestroy(comp1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_StateDestroy(import, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (verbose) print *, "All Destroy routines done"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+10    print *, "System Test FieldHaloPeriodic complete!"
+
+    if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+      write(failMsg, *) "System Test failure"
+      write(testname, *) "System Test FieldHaloPeriodic: Field Halo Test"
+
+      call ESMF_Test(rc.eq.ESMF_SUCCESS, &
+                        testname, failMsg, testresult, ESMF_SRCLINE)
+
+      ! Separate message to console, for quick confirmation of success/failure
+      if (rc .eq. ESMF_SUCCESS) then
+        write(finalMsg, *) "SUCCESS!! Periodic Halo values are as expected"
+      else
+        write(finalMsg, *) "System Test did not succeed. ", &
+        "Periodic Halo values do not match expected, or error code set ", rc
+      endif
+      write(0, *) ""
+      write(0, *) trim(testname)
+      write(0, *) trim(finalMsg)
+      write(0, *) ""
+  
+    endif
+    
+    call ESMF_FrameworkFinalize(rc)
+
+    end program FieldHaloPeriodic
+    
+
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!  Set services
+!-------------------------------------------------------------------------
+!
+    subroutine setserv(comp, rc)
+      use ESMF_Mod
+      use global_data
+
+      type(ESMF_GridComp) :: comp
+      integer :: rc
+
+      external myinit, myrun, myfinal
+       
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, &
+                                                          ESMF_SINGLEPHASE, rc)
+      if (rc .ne. ESMF_SUCCESS) return
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, &
+                                                          ESMF_SINGLEPHASE, rc)
+      if (rc .ne. ESMF_SUCCESS) return
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, &
+                                                          ESMF_SINGLEPHASE, rc)
+      if (rc .ne. ESMF_SUCCESS) return
+  
+      rc = ESMF_SUCCESS
+
+    end subroutine setserv
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!  Init section
+!-------------------------------------------------------------------------
+!
+    subroutine myinit(comp, importstate, exportstate, clock, rc)
+      use ESMF_Mod
+      use global_data
+
+      type(ESMF_GridComp) :: comp
+      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_Clock) :: clock
+      integer :: rc
+
+      ! Local variables
+      integer :: i, j
+      type(ESMF_DELayout) :: layout1 
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      type(ESMF_Field) :: field(4)
+      type(ESMF_Grid) :: grid(4), thisgrid
+      type(ESMF_ArraySpec) :: arrayspec
+      type(ESMF_Array) :: array1
+      integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
+      integer :: de_id
+      integer, dimension(ESMF_MAXGRIDDIM) :: counts
+      integer :: horz_gridtype, vert_gridtype
+      integer :: horz_stagger, vert_stagger
+      integer :: horz_coord_system, vert_coord_system
+      real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
+      character(len=ESMF_MAXSTR) :: gname, fname
+
+      if (verbose) print *, "Entering Initialization routine"
+
+      ! Query component for layout
+      call ESMF_GridCompGet(comp, layout=layout1, rc=rc)
+      if (verbose) print *, "myinit: getting layout, rc = ", rc
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! The user creates a simple horizontal Grid internally by passing all
+      ! necessary information through the CreateInternal argument list.
+
+      counts(1) = 30
+      counts(2) = 36
+      x_min = 0.0
+      x_max = 15.0
+      y_min = 0.0
+      y_max = 12.0
+      horz_gridtype = ESMF_GridType_XY
+      horz_stagger = ESMF_GridStagger_A
+      horz_coord_system = ESMF_CoordSystem_Cartesian
+
+      print *, "Grid 1 is Periodic along the 1st dimension"
+      periodic(1) = ESMF_TRUE
+      periodic(2) = ESMF_FALSE
+
+      gname = "test grid 1"
+
+      grid(1) = ESMF_GridCreate(counts=counts, x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, layout=layout1, &
+                             horz_gridtype=horz_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             periodic=periodic, &
+                             name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      if (verbose) print *, "Grid Create returned"
+
+      print *, "Grid 2 is Periodic along the 2st dimension"
+      periodic(1) = ESMF_FALSE
+      periodic(2) = ESMF_TRUE
+
+      gname = "test grid 2"
+
+      grid(2) = ESMF_GridCreate(counts=counts, x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, layout=layout1, &
+                             horz_gridtype=horz_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             periodic=periodic, &
+                             name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      if (verbose) print *, "Grid Create returned"
+
+      print *, "Grid 3 is Periodic along both dimensions"
+      periodic(1) = ESMF_TRUE
+      periodic(2) = ESMF_TRUE
+
+      gname = "test grid 3"
+
+      grid(3) = ESMF_GridCreate(counts=counts, x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, layout=layout1, &
+                             horz_gridtype=horz_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             periodic=periodic, &
+                             name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      if (verbose) print *, "Grid Create returned"
+
+      print *, "Grid 4 is not Periodic along either dimension"
+      periodic(1) = ESMF_FALSE
+      periodic(2) = ESMF_FALSE
+
+      gname = "test grid 4"
+
+      grid(4) = ESMF_GridCreate(counts=counts, x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, layout=layout1, &
+                             horz_gridtype=horz_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             periodic=periodic, &
+                             name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      if (verbose) print *, "Grid Create returned"
+
+      ! Figure out our local processor id to use as data in the Field.
+      call ESMF_DELayoutGetDEID(layout1, de_id, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! Create an arrayspec for a 2-D array 
+      call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
+                              kind=ESMF_I4)
+
+      ! Create 4 Fields using the Grids and ArraySpec created above
+      fname = "Periodic in X"
+      thisgrid = grid(1)
+      field(1) = ESMF_FieldCreate(thisgrid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                                haloWidth=halo_width, name=fname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      fname = "Periodic in Y"
+      thisgrid = grid(2)
+      field(2) = ESMF_FieldCreate(thisgrid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                                haloWidth=halo_width, name=fname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      fname = "Periodic in both X and Y"
+      thisgrid = grid(3)
+      field(3) = ESMF_FieldCreate(thisgrid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                                haloWidth=halo_width, name=fname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      fname = "Not Periodic"
+      thisgrid = grid(4)
+      field(4) = ESMF_FieldCreate(thisgrid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                                haloWidth=halo_width, name=fname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! Add the fields to the import state.
+      call ESMF_StateAddData(importstate, field(1), rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_StateAddData(importstate, field(2), rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_StateAddData(importstate, field(3), rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_StateAddData(importstate, field(4), rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      if (verbose) call ESMF_StatePrint(importstate, "", rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      do k=1, 4
+
+          ! Get pointer to the actual data
+          call ESMF_FieldGetData(field(k), array1, rc=rc)
+          call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
+    
+          ! Set initial data values over whole array to -1
+          call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
+          if (rc .ne. ESMF_SUCCESS) goto 30
+          do j=index(2)%min,index(2)%max
+            do i=index(1)%min,index(1)%max
+              ldata(i,j) = -1
+            enddo
+          enddo
+    
+          ! Set initial data values over computational domain to the de identifier
+         call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
+         if (rc .ne. ESMF_SUCCESS) goto 30
+          do j=index(2)%min,index(2)%max
+            do i=index(1)%min,index(1)%max
+              ldata(i,j) =de_id
+            enddo
+          enddo
+
+      enddo
+      if (verbose) print *, "Exiting Initialization routine"
+
+30    continue
+      ! you come directly here on errors.  you also fall into this code
+      ! if all is well.  rc already has the error code (if any) so you
+      ! have nothing else to do but return at this point.
+
+    end subroutine myinit
+
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!     Run section
+!-------------------------------------------------------------------------
+!
+
+    subroutine myrun(comp, importstate, exportstate, clock, rc)
+      use ESMF_Mod
+      use global_data
+
+      type(ESMF_GridComp) :: comp
+      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_Clock) :: clock
+      integer :: rc
+
+      ! Local variables
+      type(ESMF_Field) :: field1
+
+      if (verbose) print *, "Entering Run routine"
+
+      if (verbose) call ESMF_StatePrint(importstate, "", rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! Get the field from the import state
+      if (verbose) print *, "About to get field from import state"
+      call ESMF_StateGetData(importstate, "Periodic in X", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! Call Field method to halo data.  This updates the data in place.
+      if (verbose) print *, "about to call Field Halo"
+      call ESMF_FieldHalo(field1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      if (verbose) print *, "returned from Field Halo call"
+
+
+      ! Get the field from the import state
+      if (verbose) print *, "About to get field from import state"
+      call ESMF_StateGetData(importstate, "Periodic in Y", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! Call Field method to halo data.  This updates the data in place.
+      if (verbose) print *, "about to call Field Halo"
+      call ESMF_FieldHalo(field1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      if (verbose) print *, "returned from Field Halo call"
+
+
+      ! Get the field from the import state
+      if (verbose) print *, "About to get field from import state"
+      call ESMF_StateGetData(importstate, "Periodic in both X and Y", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! Call Field method to halo data.  This updates the data in place.
+      if (verbose) print *, "about to call Field Halo"
+      call ESMF_FieldHalo(field1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      if (verbose) print *, "returned from Field Halo call"
+
+
+      ! Get the field from the import state
+      if (verbose) print *, "About to get field from import state"
+      call ESMF_StateGetData(importstate, "Not Periodic", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! Call Field method to halo data.  This updates the data in place.
+      if (verbose) print *, "about to call Field Halo"
+      call ESMF_FieldHalo(field1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      if (verbose) print *, "returned from Field Halo call"
+
+
+      if (verbose) print *, "Exiting Run routine"
+
+30    continue
+      ! you come directly here on errors.  you also fall into this code
+      ! if all is well.  rc already contains the return code, so there's
+      ! nothing to do here but return.
+
+      end subroutine myrun
+
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!     Finalize section
+!-------------------------------------------------------------------------
+
+
+    subroutine myfinal(comp, importstate, exportstate, clock, rc)
+      use ESMF_Mod
+      use global_data
+
+      type(ESMF_GridComp) :: comp
+      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_Clock) :: clock
+      integer :: rc
+
+      ! Local variables
+      type(ESMF_Field) :: field1
+      integer :: localrc, finalrc
+  
+
+      if (verbose) print *, "Entering Finalize routine"
+
+      ! set this up to run the validate code on all fields
+      ! so we can see and compare the output.  but if any of
+      ! the verify routines return error, return error at the end.
+      finalrc = ESMF_SUCCESS
+
+
+      ! Get Fields from import state
+      call ESMF_StateGetData(importstate, "Periodic in X", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) then 
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyhalo(field1, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    
+
+      call ESMF_StateGetData(importstate, "Periodic in Y", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) then 
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyhalo(field1, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    
+
+      call ESMF_StateGetData(importstate, "Periodic in both X and Y", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) then 
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyhalo(field1, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    
+
+      call ESMF_StateGetData(importstate, "Not Periodic", field1, rc=rc);
+      if (rc .ne. ESMF_SUCCESS) then 
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyhalo(field1, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+30 continue
+      ! come straight here if you cannot get the data from the state.
+      ! otherwise error codes are accumulated but ignored until the
+      ! end so we can see the output from all the cases to help track
+      ! down errors.
+
+      if (verbose) print *, "Exiting finalize routine"
+      rc = finalrc
+
+    end subroutine myfinal
+
+
+    subroutine verifyhalo(thisfield, rc)
+      use ESMF_Mod
+      use global_data
+
+      type(ESMF_Field), intent(in) :: thisfield
+      integer, intent(out) :: rc
+
+
+      ! Local variables
+      integer :: i, j, ni, nj, xpos, ypos, nx, ny
+      integer :: de_id, target
+      integer :: mismatch
+      integer :: pattern(3,3)
+      type(ESMF_Logical) :: pflags(2)
+      integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      type(ESMF_DELayout) :: layout
+      type(ESMF_Grid) :: grid1
+      type(ESMF_Array) :: array1
+      character(len=ESMF_MAXSTR) :: fname
+
+      if (verbose) print *, "Entering halo verification routine"
+
+      ! Get a pointer to the data Array in the Field
+      call ESMF_FieldGetData(thisfield, array1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 40
+      if (verbose) print *, "array back from field"
+
+      call ESMF_FieldGetGrid(thisfield, grid1, rc)
+      if (verbose) print *, "grid back from field"
+      call ESMF_GridGetDELayout(grid1, layout=layout, rc=rc)
+      call ESMF_GridGet(grid1, periodic=pflags, rc=rc)
+      if (verbose) print *, "layout, periodic flags back from grid"
+
+      call ESMF_FieldGetName(thisfield, fname, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 40
+      if (verbose) print *, "name back from field"
+
+      ! Get our de_id from layout
+      call ESMF_DELayoutGetDEID(layout, de_id, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 40
+
+      ! Get a pointer to the start of the data
+      call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 40
+      if (verbose) print *, "data back from array"
+
+
+      ! Get size of local array
+      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 40
+      ni = index(1)%max - index(1)%min + 1
+      nj = index(2)%max - index(2)%min + 1
+
+      ! get info about total number of DEs in each dim and which one
+      ! we are.  then use them to compute the values in the halo.
+      call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 40
+      call ESMF_DELayoutGetDEPosition(layout, xpos, ypos, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 40
+     
+      ! for the calculations below we need the first xpos=0, not 1
+      xpos = xpos - 1
+      ypos = ypos - 1
+
+
+      !!
+      ! construct the pattern for side, corners, and interior points
+      !!
+
+      ! start by filling in the pattern for an interior de and then
+      !  check for boundary de's and overwrite those.
+      pattern(1,1) = de_id - nx - 1
+      pattern(2,1) = de_id - nx
+      pattern(3,1) = de_id - nx + 1
+
+      pattern(1,2) = de_id - 1
+      pattern(2,2) = de_id
+      pattern(3,2) = de_id + 1
+
+      pattern(1,3) = de_id + nx - 1
+      pattern(2,3) = de_id + nx
+      pattern(3,3) = de_id + nx + 1
+
+
+      ! now edges minus corners
+
+      ! bottom middle
+      if (ypos .eq. 0) then
+        if (pflags(2) .eq. ESMF_TRUE) then
+          target = (ny-1)*nx + xpos 
+        else
+          target = -1
+        endif
+        pattern(2, 1) = target
+      endif
+
+      ! top middle
+      if (ypos .eq. ny-1) then
+        if (pflags(2) .eq. ESMF_TRUE) then
+          target = xpos 
+        else
+          target = -1
+        endif
+        pattern(2, 3) = target
+      endif
+      
+      ! left side middle
+      if (xpos .eq. 0) then
+        if (pflags(1) .eq. ESMF_TRUE) then
+          target = de_id + (nx-1)
+        else
+          target = -1
+        endif
+        pattern(1, 2) = target
+      endif
+      
+      ! right side middle
+      if (xpos .eq. nx-1) then
+        if (pflags(1) .eq. ESMF_TRUE) then
+          target = de_id - (nx-1)
+        else
+          target = -1
+        endif
+        pattern(3, 2) = target
+      endif
+
+      ! and finally corners
+
+      ! lower left
+      if ((xpos .eq. 0) .and. (ypos .eq. 0)) then
+        if ((pflags(1) .eq. ESMF_TRUE) .and. &
+            (pflags(2) .eq. ESMF_TRUE)) then
+          target = -1 ! ambiguous
+          !target = de_id + nx - 1  ! ambiguous
+          !target = de_id + (ny-1)*nx - 1 ! ambiguous
+        else
+          target = -1
+        endif
+        pattern(1, 1) = target
+      else if (xpos .eq. 0) then
+        if (pflags(1) .eq. ESMF_TRUE) then
+          target = de_id - 1
+        else
+          target = -1
+        endif
+        pattern(1, 1) = target
+      else if (ypos .eq. 0) then
+        if (pflags(2) .eq. ESMF_TRUE) then
+          target = de_id + (ny-1)*nx - 1
+        else
+          target = -1
+        endif
+        pattern(1, 1) = target
+      endif
+      
+      ! lower right
+      if ((xpos .eq. nx-1) .and. (ypos .eq. 0)) then
+        if ((pflags(1) .eq. ESMF_TRUE) .and. &
+            (pflags(2) .eq. ESMF_TRUE)) then
+          target = -1  ! ambiguous
+          !target = de_id - nx + 1  ! ambiguous
+          !target = de_id + (ny-1)*nx + 1  ! ambiguous
+        else
+          target = -1
+        endif
+        pattern(3, 1) = target
+      else if (xpos .eq. nx-1) then
+        if (pflags(1) .eq. ESMF_TRUE) then
+          target = de_id - 2*nx + 1
+        else
+          target = -1
+        endif
+        pattern(3, 1) = target
+      else if (ypos .eq. 0) then
+        if (pflags(2) .eq. ESMF_TRUE) then
+          target = de_id + (ny-1)*nx + 1
+        else
+          target = -1
+        endif
+        pattern(3, 1) = target
+      endif
+      
+      ! upper left
+      if ((xpos .eq. 0) .and. (ypos .eq. ny-1)) then
+        if ((pflags(1) .eq. ESMF_TRUE) .and. &
+            (pflags(2) .eq. ESMF_TRUE)) then
+          target = -1 ! ambiguous
+          !target = de_id + nx - 1  ! ambiguous
+          !target = xpos + nx - 1 ! ambiguous
+        else
+          target = -1
+        endif
+        pattern(1, 3) = target
+      else if (xpos .eq. 0) then
+        if (pflags(1) .eq. ESMF_TRUE) then
+          target = de_id + 2*nx - 1
+        else
+          target = -1
+        endif
+        pattern(1, 3) = target
+      else if (ypos .eq. ny-1) then
+        if (pflags(2) .eq. ESMF_TRUE) then
+          target = xpos - 1
+        else
+          target = -1
+        endif
+        pattern(1, 3) = target
+      endif
+      
+      ! upper right
+      if ((xpos .eq. nx-1) .and. (ypos .eq. ny-1)) then
+        if ((pflags(1) .eq. ESMF_TRUE) .and. &
+            (pflags(2) .eq. ESMF_TRUE)) then
+          target = -1  ! ambiguous
+          !target = de_id - nx + 1  ! ambiguous
+          !target = de_id + 1  ! ambiguous
+        else
+          target = -1
+        endif
+        pattern(3, 3) = target
+      else if (xpos .eq. nx-1) then
+        if (pflags(1) .eq. ESMF_TRUE) then
+          target = de_id + 1
+        else
+          target = -1
+        endif
+        pattern(3, 3) = target
+      else if (ypos .eq. ny-1) then
+        if (pflags(2) .eq. ESMF_TRUE) then
+          target = xpos + 1
+        else
+          target = -1
+        endif
+        pattern(3, 3) = target
+      endif
+
+
+
+      !!
+      ! compare pattern to actual values and count mismatches
+      !!
+
+      mismatch = 0
+
+      ! check interior points
+      target = pattern(2,2)
+      do j=1+halo_width,nj-halo_width
+        do i=1+halo_width,ni-halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! now edges minus corners
+
+      ! bottom middle
+      target = pattern(2, 1)
+      do j=1,halo_width
+        do i=1+halo_width,ni-halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! top middle
+      target = pattern(2, 3)
+      do j=nj-halo_width+1,nj
+        do i=1+halo_width, ni-halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! left side middle
+      target = pattern(1, 2)
+      do j=1+halo_width,nj-halo_width
+        do i=1, halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! right side middle
+      target = pattern(3, 2)
+      do j=1+halo_width,nj-halo_width
+        do i=ni-halo_width+1,ni
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! and finally corners
+
+      ! lower left
+      target = pattern(1, 1)
+      do j=1,halo_width
+        do i=1,halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! lower right
+      target = pattern(3, 1)
+      do j=1,halo_width
+        do i=ni-halo_width+1, ni
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! upper left
+      target = pattern(1, 3) 
+      do j=nj-halo_width+1,nj
+        do i=1, halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! upper right
+      target = pattern(3, 3) 
+      do j=nj-halo_width+1,nj
+        do i=ni-halo_width+1,ni
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      !!
+      ! Print what the results should look like
+      !!
+      print *, '------------------------------------------------------'
+      print *, 'DE ID = ', de_id, trim(fname)
+      print *, 'Pattern should look like:'
+      print *, pattern(1, 3), pattern(2, 3), pattern(3, 3)
+      print *, pattern(1, 2), pattern(2, 2), pattern(3, 2)
+      print *, pattern(1, 1), pattern(2, 1), pattern(3, 1)
+      print *, ''
+      ! Print results so we can see either way what was computed.
+      write(*,*) 'Actual values are:'
+      do j = nj,1,-1
+        write(*,10) (ldata(i,j), i=1,ni)
+ 10     format(25(1x,i2))
+      enddo
+      print *, '------------------------------------------------------'
+    
+      ! if any numbers are not what we expected, error out
+      if (mismatch .gt. 0) then
+        print *, "FAILURE: found ", mismatch, "mismatching values, returning error code"
+        rc = ESMF_FAILURE
+        return
+      endif
+
+40    continue
+      ! you come directly here on errors.  you also fall into this code
+      ! if all is well.  rc already contains the return code, so there's
+      ! nothing to do here but return.
+
+      if (verbose) print *, "Exiting verify halo routine"
+
+    end subroutine verifyhalo
+
+!\end{verbatim}
+    
