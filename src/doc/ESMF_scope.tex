@@ -34,7 +34,20 @@ as the ESMF utility {\it infrastructure}.\\
 
 \noindent The ESMF consists of:
 \begin{itemize}
-\item an interface specification for coupling components; 
+\item an interface specification for coupling components \footnote{
+The science needs of different users implies a wide variety of continually
+evolving component interfaces, for example aeolian dust
+deposition is currently being studies as a potentially singnificant
+process in climate evolution. Ten years ago almost no atmospheric general
+circulation models included these processes, ten years from now there will 
+almost certainly be other feedbacks to incorporate. The ESMF component 
+interface specifcation will provide generic mechanisms, with
+standard signatures and semantics, that support extensible, flexible and
+self-describing component model interfaces. Conceptually the approach we
+envisage has parallels wiith the SOAP and WSDL systems that are used 
+to {\bf wire} together e-Business internet applications.
+}
+; 
 \item a complete, portable, high-quality reference implementation
   accompanied by extensive developer and user documentation;
 \item a suite of application examples demonstrating how the ESMF
@@ -45,7 +58,12 @@ The model components that the ESMF supports include atmosphere, ocean,
 land and sea ice models, and data assimilation systems. Other
 well-defined high-level functions may also be represented as
 components in the ESMF superstructure.  It is at the level of these
-large-scale components that the ESMF interface specification applies.
+large-scale components that the ESMF interface specification applies
+\footnote{
+The component interface can be applied to smaller components within a model,
+but, the initial development will not deliver then as part of its milestones.
+}
+.
 Each compliant component will provide a specified set of methods that
 will enable it to interoperate with other components.  For the most
 part, we expect components to be able to provide the required
