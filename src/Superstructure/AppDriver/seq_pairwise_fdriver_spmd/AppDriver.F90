@@ -65,6 +65,7 @@
 
     ! Return codes for error checks
     integer :: rc
+    logical :: dummy
         
 !!------------------------------------------------------------------------------
 !!  Initialize the ESMF Framework
@@ -74,8 +75,7 @@
     if (rc .ne. ESMF_SUCCESS) stop 99 
 
 
-    ! call ESMF_LogErrMsg("ESMF AppDriver start")
-    print *, "ESMF AppDriver start"
+    dummy=ESMF_LogWrite("ESMF AppDriver start", ESMF_LOG_INFO)
 
     !
     ! Read in Configuration information from a default config file
@@ -114,8 +114,7 @@
     ! Create the top Gridded component, passing in the default layout.
     compGridded = ESMF_GridCompCreate(defaultvm, "ESMF Gridded Component", rc=rc)
 
-    ! call ESMF_LogErrMsg("Component Create finished")
-    print *, "Component Create finished"
+    dummy=ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
 
 
 !!------------------------------------------------------------------------------
@@ -124,8 +123,7 @@
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
       call ESMF_GridCompSetServices(compGridded, SetServices, rc)
-      ! call ESMF_LogErrMsg(rc, "Component SetServices finished")
-      print *, "Comp SetServices finished, rc= ", rc
+      if (ESMF_LogMsgFoundError(rc, "Registration failed", rc)) goto 10
 
 
 !!------------------------------------------------------------------------------
@@ -159,18 +157,15 @@
       ! Same with the grid.  Get a default layout based on the VM.
       defaultlayout = ESMF_DELayoutCreate(defaultvm, rc=rc)
 
-      grid = ESMF_GridCreateLogRectUniform(dimCount=2, &
-                             counts=(/i_max, j_max/), &
+      grid = ESMF_GridCreateHorzXYUni(counts=(/i_max, j_max/), &
                              minGlobalCoordPerDim=(/x_min, y_min/), &
                              maxGlobalCoordPerDim=(/x_max, y_max/), &
-                             delayout=defaultlayout, &   
-                             horzGridType=ESMF_GridType_XY, &
-                             horzStagger=ESMF_GridStagger_C_NE, &
-                             horzCoordSystem=ESMF_CoordSystem_Cartesian, &
+                             horzStagger=ESMF_GRID_HORZ_STAGGER_C_SE, &
                              name="source grid", rc=rc)
+      call ESMF_GridDistribute(grid, delayout=defaultlayout, rc=rc)
 
-     ! Attach the Grid to the Component
-     call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
+      ! Attach the Grid to the Component
+      call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
 
 
 !!------------------------------------------------------------------------------
@@ -189,22 +184,19 @@
  
       call ESMF_GridCompInitialize(compGridded, defaultstate, defaultstate, &
                                                                   clock, rc=rc)
-      ! call ESMF_LogErrMsg(rc, "Component Initialize finished")
-      print *, "Component Initialize finished, rc =", rc
+      if (ESMF_LogMsgFoundError(rc, "Initialize failed", rc)) goto 10
  
 
 
       call ESMF_GridCompRun(compGridded, defaultstate, defaultstate, &
                                                                   clock, rc=rc)
-      ! call ESMF_LogErrMsg(rc, "Component Run finished")
-      print *, "Component Run finished, rc =", rc
+      if (ESMF_LogMsgFoundError(rc, "Run failed", rc)) goto 10
  
 
 
       call ESMF_GridCompFinalize(compGridded, defaultstate, defaultstate, &
                                                                   clock, rc=rc)
-      ! call ESMF_LogErrMsg(rc, "Component Finalize finished")
-      print *, "Component Finalize finished, rc =", rc
+      if (ESMF_LogMsgFoundError(rc, "Finalize failed", rc)) goto 10
  
  
 !!------------------------------------------------------------------------------
@@ -227,6 +219,8 @@
 
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
+
+10 continue
 
       call ESMF_Finalize(rc)
 

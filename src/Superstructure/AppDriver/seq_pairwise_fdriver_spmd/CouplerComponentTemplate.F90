@@ -1,4 +1,4 @@
-! $Id: CouplerComponentTemplate.F90,v 1.3 2003/11/11 18:22:22 nscollins Exp $
+! $Id: CouplerComponentTemplate.F90,v 1.4 2004/06/08 17:52:49 nscollins Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -47,12 +47,12 @@
      
       type(ESMF_State) :: state1, state2
 
-      print *, "Coupler Initialize routine called"
+      if (ESMF_LogWrite("Coupler Initialize routine called", ESMF_LOG_INFO)) continue
 
       call ESMF_StateGetData(statelist,  "statename1", state1, rc)
       call ESMF_StateGetData(statelist,  "statename2", state2, rc)
 
-      print *, "Coupler Initialize routine returning"
+      if (ESMF_LogWrite("Coupler Initialize routine returning", ESMF_LOG_INFO)) continue
 
     end subroutine my_init
 
@@ -63,9 +63,9 @@
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
-      print *, "Coupler Run routine called"
+      if (ESMF_LogWrite("Coupler Run routine called", ESMF_LOG_INFO)) continue
 
-      print *, "Coupler Run routine returning"
+      if (ESMF_LogWrite("Coupler Run routine returning", ESMF_LOG_INFO)) continue
 
     end subroutine my_run
 
@@ -76,9 +76,9 @@
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
-      print *, "Coupler Finalize routine called"
+      if (ESMF_LogWrite("Coupler Finalize routine called", ESMF_LOG_INFO)) continue
 
-      print *, "Coupler Finalize routine returning"
+      if (ESMF_LogWrite("Coupler Finalize routine returning", ESMF_LOG_INFO)) continue
 
     end subroutine my_final
 
