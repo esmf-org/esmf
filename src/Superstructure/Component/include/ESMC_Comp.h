@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.20 2004/04/30 19:06:16 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.21 2004/05/26 14:23:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,6 +30,8 @@
 #define ESMF_INIT 1
 #define ESMF_RUN 2
 #define ESMF_FINAL 3
+#define ESMF_WRITERESTART 4
+#define ESMF_READRESTART 5
 
 enum ESMC_CompType { ESMF_COMPTYPE_GRID=1, ESMF_COMPTYPE_CPL, 
                      ESMF_COMPTYPE_UNKNOWN };
@@ -73,7 +75,7 @@ extern const char *ESMC_SetReadRestart;
 // !PRIVATE TYPES:
 
  // class declaration type
- class ESMC_Comp : public ESMC_Base {    // inherits from ESMC_Base class
+ class ESMC_Comp {       // a cover class for F90 - does NOT inherit from Base
 
    private:
     void *fortranclass;
@@ -83,29 +85,31 @@ extern const char *ESMC_SetReadRestart;
   public:
     int ESMC_CompRegister(void *);
 
+    // not at all the final interfaces - just something to start
+    // early testing with the C++ interfaces.
     int ESMC_CompInit(void);
     int ESMC_CompRun(int timesteps);
     int ESMC_CompFinal(void);
+    //int ESMC_CompWriteRestart(void);
+    //int ESMC_CompReadRestart(void);
 
- // accessor methods for class members.  these need more options.
+    // accessor methods for class members.  these need more options.
     int ESMC_CompGet(char *name) const;
     int ESMC_CompSet(const char *name);
     
- // required methods inherited and overridden from the ESMC_Base class
+    // standard methods
     int ESMC_CompValidate(const char *options) const;
     int ESMC_CompPrint(const char *options) const;
 
- // native C++ constructors/destructors
-	ESMC_Comp(void);
-	~ESMC_Comp(void);
+    // native C++ constructors/destructors
+    ESMC_Comp(void);
+    ~ESMC_Comp(void);
   
- // < declare the rest of the public interface methods here >
   
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private: 
 //
- // < declare private interface methods here >
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -119,10 +123,10 @@ extern const char *ESMC_SetReadRestart;
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Comp object.
 
- ESMC_Comp *ESMC_CompCreate(char *name,
-                                      enum ESMC_CompType ctype,
-                                      enum ESMC_GridCompType mtype,
-                                      char *filepath, int *rc);
+ // this is missing the config object, and a clock object.
+ ESMC_Comp *ESMC_CompCreate(char *name, enum ESMC_CompType ctype,
+                            enum ESMC_GridCompType mtype, char *filepath, 
+                            int *rc);
  int ESMC_CompDestroy(ESMC_Comp *comp);
 
 // prototypes for fortran interface routines
@@ -134,9 +138,11 @@ extern "C" {
    void FTN(f_esmf_compdelete)(ESMC_Comp *compp, int *rc);
    void FTN(f_esmf_compcreate)(ESMC_Comp *compp, char *name, int *rc, int nlen);
    void FTN(f_esmf_compdestroy)(ESMC_Comp *compp, char *name, int *rc, int nlen);
-   void FTN(f_esmf_compinit)(ESMC_Comp *compp, char *name, void *func, int *rc, int nlen);
+   void FTN(f_esmf_compinit)(ESMC_Comp *compp, char *name, void *func, 
+                             int *rc, int nlen);
    void FTN(f_esmf_comprun)(ESMC_Comp *compp, char *name, int *rc, int nlen);
-   void FTN(f_esmf_compfinalize)(ESMC_Comp *compp, char *name, int *rc, int nlen);
+   void FTN(f_esmf_compfinalize)(ESMC_Comp *compp, char *name, int *rc, 
+                                 int nlen);
 
 };
 

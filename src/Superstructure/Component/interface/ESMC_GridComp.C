@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.C,v 1.7 2004/04/23 22:11:59 nscollins Exp $
+// $Id: ESMC_GridComp.C,v 1.8 2004/05/26 14:23:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.7 2004/04/23 22:11:59 nscollins Exp $";
+           "$Id: ESMC_GridComp.C,v 1.8 2004/05/26 14:23:56 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -99,6 +99,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
       enum ESMC_GridCompType mtype,
       ESMC_Grid *grid,
       char *configFile,
+      ESMC_Clock *clock,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -113,9 +114,10 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     ESMC_GridComp *comp;
 
+    // the null is there because we have no C++ interface to config yet
     comp = new ESMC_GridComp;
-    FTN(f_esmf_gridcompcreate)(comp, name, &mtype, grid, NULL, 
-                         configFile, rc, strlen(name), strlen(configFile));
+    FTN(f_esmf_gridcompcreate)(comp, name, &mtype, grid, NULL, configFile, 
+                               clock, rc, strlen(name), strlen(configFile));
 
     return comp;
 
@@ -167,7 +169,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
       ESMC_State *importState,   // in/out: required data
       ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
-      int phase)  {              // in: if > 0, which phase of init to invoke
+      int phase,                 // in: if > 0, which phase of init to invoke
+      ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
 // !DESCRIPTION:
 //    Invokes the Initialize routine for an {\tt ESMC\_Component}.
@@ -177,7 +180,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
     int rc;
 
     FTN(f_esmf_gridcompinitialize)(this, importState, exportState, clock, 
-                                   &phase, &rc);
+                                   &phase, &blockingFlag, &rc);
 
     return rc;
 
@@ -197,7 +200,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
       ESMC_State *importState,   // in/out: required data
       ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
-      int phase)  {              // in: if > 0, which phase of run to invoke
+      int phase,                 // in: if > 0, which phase of init to invoke
+      ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
 // !DESCRIPTION:
 //    Invokes the Run routine for an {\tt ESMC\_Component}.
@@ -206,7 +210,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     int rc;
 
-    FTN(f_esmf_gridcomprun)(this, importState, exportState, clock, &phase, &rc);
+    FTN(f_esmf_gridcomprun)(this, importState, exportState, clock, 
+                            &phase, &blockingFlag, &rc);
 
     return rc;
 
@@ -226,7 +231,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
       ESMC_State *importState,   // in/out: required data
       ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
-      int phase)  {              // in: if > 0, which phase of finalize to invoke
+      int phase,                 // in: if > 0, which phase of init to invoke
+      ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
 // !DESCRIPTION:
 //    Invokes the Finalize routine for an {\tt ESMC\_Component}.
@@ -236,7 +242,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
     int rc;
 
     FTN(f_esmf_gridcompfinalize)(this, importState, exportState, clock, 
-                                 &phase, &rc);
+                                 &phase, &blockingFlag, &rc);
 
     return rc;
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.9 2004/04/23 21:49:37 nscollins Exp $
+// $Id: ESMC_CplComp.h,v 1.10 2004/05/26 14:23:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@
 // !PRIVATE TYPES:
 
  // class declaration type
- class ESMC_CplComp : public ESMC_Base {    // inherits from ESMC_Base class
+ class ESMC_CplComp {    // just a cover for the F90 class, no need for Base
 
   private:
     void *fortranclass;
@@ -66,18 +66,21 @@
   int ESMC_CplCompSetServices(void (*)(ESMC_CplComp *, int *));
 
   int ESMC_CplCompInitialize(ESMC_State *importState, ESMC_State *exportState, 
-                              ESMC_Clock *clock, int phase);
+                             ESMC_Clock *clock, int phase, 
+                             ESMC_BlockingFlag blockingFlag);
   int ESMC_CplCompRun(ESMC_State *importState, ESMC_State *exportState, 
-                       ESMC_Clock *clock, int phase);
+                      ESMC_Clock *clock, int phase, 
+                      ESMC_BlockingFlag blockingFlag);
   int ESMC_CplCompFinalize(ESMC_State *importState, ESMC_State *exportState, 
-                            ESMC_Clock *clock, int phase);
+                           ESMC_Clock *clock, int phase, 
+                           ESMC_BlockingFlag blockingFlag);
 
 
  // accessor methods for class members.  these need more options.
   int ESMC_CplCompGet(char *name) const;
   int ESMC_CplCompSet(const char *name);
     
- // required methods inherited and overridden from the ESMC_Base class
+  // standard routines
   int ESMC_CplCompValidate(const char *options) const;
   int ESMC_CplCompPrint(const char *options) const;
 
@@ -103,26 +106,29 @@
 // were a method, the ESMC_CplComp object on whose behalf it was being invoked
 // an ESMC_CplComp object.
 
- ESMC_CplComp *ESMC_CplCompCreate(char *name, 
-                                      char *configFile, int *rc);
+ ESMC_CplComp *ESMC_CplCompCreate(char *name, char *configFile, 
+                                  ESMC_Clock *clock, int *rc);
  int ESMC_CplCompDestroy(ESMC_CplComp *comp);
 
 
 // prototypes for fortran interface routines
 extern "C" {
  void FTN(f_esmf_cplcompcreate)(ESMC_CplComp *comp, char *name, 
-                         ESMC_Config *config, 
-                         char *configFile, int *rc, int nlen, int clen);
+                         ESMC_Config *config, char *configFile, 
+                         ESMC_Clock *clock, int *rc, int nlen, int clen);
  void FTN(f_esmf_cplcompdestroy)(ESMC_CplComp *comp, int *rc);
  void FTN(f_esmf_cplcompinitialize)(ESMC_CplComp *ccomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
-                         ESMC_Clock *clock, int *phase, int *rc);
+                         ESMC_Clock *clock, int *phase, 
+                         ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcomprun)(ESMC_CplComp *ccomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
-                         ESMC_Clock *clock, int *phase, int *rc);
+                         ESMC_Clock *clock, int *phase,
+                         ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcompfinalize)(ESMC_CplComp *ccomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
-                         ESMC_Clock *clock, int *phase, int *rc);
+                         ESMC_Clock *clock, int *phase, 
+                         ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcompget)(const ESMC_CplComp *ccomp, int *rc);
  void FTN(f_esmf_cplcompset)(ESMC_CplComp *ccomp, int *rc);
  void FTN(f_esmf_cplcompvalidate)(const ESMC_CplComp *ccomp, const char *options, int *rc, int olen);

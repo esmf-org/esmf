@@ -1,4 +1,4 @@
-// $Id: ESMC_AppMainEx.C,v 1.12 2004/04/26 15:34:17 nscollins Exp $
+// $Id: ESMC_AppMainEx.C,v 1.13 2004/05/26 14:23:56 nscollins Exp $
 //
 // Example code which creates a main Application program.
 // This is the cap component which creates other components below it.
@@ -32,6 +32,7 @@ main(int argc, char **argv) {
      ESMC_GridComp *gcomp1, *gcomp2, *gcomp3, *comp4;
      ESMC_CplComp *ccomp1;
      ESMC_Grid *grid = NULL;
+     ESMC_Clock *clock = NULL;
         
 //-------------------------------------------------------------------------
 //   // Setup:
@@ -43,7 +44,7 @@ main(int argc, char **argv) {
 
      vm = ESMC_VMGetGlobal(&rc);
      gcomp1 = ESMC_GridCompCreate("Atmosphere", ESMF_ATM, grid, 
-                                  "setup.rc", &rc);
+                                  "setup.rc", clock, &rc);
 
      rc = gcomp1->ESMC_GridCompSetServices(ATM_SetServices); 
      printf("Gridded Comp example 1 complete\n");

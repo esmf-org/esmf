@@ -1,4 +1,4 @@
-// $Id: ESMC_CompRun.C,v 1.9 2004/04/29 17:27:32 nscollins Exp $
+// $Id: ESMC_CompRun.C,v 1.10 2004/05/26 14:24:12 nscollins Exp $
 //
 // Test code which creates a new Component in C++.  The called
 // component is still in F90.
@@ -29,7 +29,7 @@ main(int argc, char **argv)
     ESMC_DELayout *delayout;
     ESMC_GridComp *comp1;
     ESMC_State *instate, *outstate;
-    ESMC_Clock *clock;
+    ESMC_Clock *clock = NULL;
         
 //-------------------------------------------------------------------------
 //   // Test 1:
@@ -43,7 +43,7 @@ main(int argc, char **argv)
     // TODO: query framework for default layout here
 
     cname = "Atmosphere";
-    comp1 = ESMC_GridCompCreate(cname, ESMF_ATM, NULL, "grid.rc", &rc);
+    comp1 = ESMC_GridCompCreate(cname, ESMF_ATM, NULL, "grid.rc", clock, &rc);
 
     printf("Grid Comp Create returned, name = '%s'\n", cname);
 
@@ -58,16 +58,16 @@ main(int argc, char **argv)
     instate = NULL;
     outstate = NULL;
     clock = NULL;
-    rc = comp1->ESMC_GridCompInitialize(instate, outstate, clock, 0);
+    rc = comp1->ESMC_GridCompInitialize(instate, outstate, clock, 0, ESMF_BLOCKING);
     printf("Grid Comp Initialize returned\n");
 
-    rc = comp1->ESMC_GridCompRun(instate, outstate, clock, 0);
+    rc = comp1->ESMC_GridCompRun(instate, outstate, clock, 0, ESMF_BLOCKING);
     printf("Grid Comp Run returned\n");
 
-    rc = comp1->ESMC_GridCompRun(instate, outstate, clock, 0);
+    rc = comp1->ESMC_GridCompRun(instate, outstate, clock, 0, ESMF_BLOCKING);
     printf("Grid Comp Run returned\n");
 
-    rc = comp1->ESMC_GridCompFinalize(instate, outstate, clock, 0);
+    rc = comp1->ESMC_GridCompFinalize(instate, outstate, clock, 0, ESMF_BLOCKING);
     printf("Grid Comp Finalize returned\n");
 
     rc = comp1->ESMC_GridCompPrint("");

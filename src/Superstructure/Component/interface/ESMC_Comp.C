@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.24 2004/04/23 22:09:10 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.25 2004/05/26 14:23:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.24 2004/04/23 22:09:10 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.25 2004/05/26 14:23:56 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -95,7 +95,8 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 
     // TODO: make this match the correct calling convention
 
-    //f_esmf_compcreate(&comp, name, ctype, mtype, filepath, rc)
+    comp = new ESMC_Comp;
+    //f_esmf_compcreate(&comp, name, ctype, mtype, NULL, filepath, &rc)
 
     *rc = ESMF_FAILURE;
     return NULL;
