@@ -1,4 +1,4 @@
-% $Header: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/Infrastructure/TimeMgr/doc/Attic/TimeMgr_reqdoc.ctex,v 1.2 2003/01/23 17:18:58 nscollins Exp $
+% $Header: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/Infrastructure/TimeMgr/doc/Attic/TimeMgr_reqdoc.ctex,v 1.3 2003/02/11 18:55:53 eschwab Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -6,6 +6,7 @@
 \usepackage{supertabular}
 \usepackage{html}
 \usepackage{times}
+\usepackage{alltt}
 \usepackage[T1]{fontenc}
 
 \newcommand{\docmttype}{Requirements}
