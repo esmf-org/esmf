@@ -569,7 +569,7 @@ in the ESMF superstructure layer can be found in individual class documentation.
 \scalebox{0.70}{\includegraphics{ESMFComponentDiagram.eps}}
 \end{figure}
 
-\subsubsection{Component (ESMF\_Comp)} 
+\subsection{Component (ESMF\_Comp)} 
 A {\tt Component} is a functionally related computational entity that 
 represents a large system.  The {\tt Component} base class defines a set of operations and
 attributes common to all {\tt Component}s.  These include methods such as:
@@ -578,7 +578,7 @@ and retrieve information about subcomponents.
 All {\tt Coupler}s, {\tt Gridded Component}s and {\tt Application}s possess 
 these methods. 
 
-\subsubsection{Application Component }
+\subsection{Application Component }
 
 The {\tt Application Component} class is responsible for managing those 
 functions that relate to an entire scientific application running under ESMF.
@@ -589,7 +589,7 @@ configures any resources needed to run the framework.  The {\tt Application}
 class can be queried for information such as an experiment name, model name, and run 
 type (ESMF\_INIT, ESMF\_BRANCH, etc.).  
 
-\subsubsection{Coupler Component }
+\subsection{Coupler Component }
 A {\tt Coupler} is a user-customized type of {\tt Component} that 
 encompasses all the functionality needed to communicate data between two or 
 more {\tt Component}s.  A {\tt Coupler} has a coupling initiation method that 
@@ -601,7 +601,7 @@ specific part of the coupling functionality, such as calculating fluxes
 or interpolation weights.
 
 
-\subsubsection{Gridded Component }
+\subsection{Gridded Component }
 \label{sec:griddedcomponent} 
 A {\tt Gridded Component} is a user-customized {\tt Component} 
 that typically represents a physical system discretized on some spatial grid.
@@ -610,7 +610,7 @@ fields and data to an import and export {\tt State}, for verifying that
 these states are fully or partially complete, and for returning these
 states when queried.
 
-\subsubsection{State (ESMF\_State)}
+\subsection{State (ESMF\_State)}
 A {\tt State} is a description of a set of data that a 
 {\tt Gridded Component} either needs to run or can make available.  
 {\tt State}s
@@ -634,7 +634,7 @@ components is shown in figure \ref{fig:ESMFSystemDiagram}.
 \scalebox{0.70}{\includegraphics{ESMFSystemdiagram.eps}}
 \end{figure}
 
-\subsubsection{Transform (ESMF\_XForm)} 
+\subsection{Transform (ESMF\_XForm)} 
 A {\tt Transform} acts on a {\tt State} or other type of 
 ESMF data.  It contains a function pointer to the transformation method
 and may contain data necessary to perform the transform, frequency 

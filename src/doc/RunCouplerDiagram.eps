@@ -2,11 +2,10 @@
 %%Title: (Java Printing)
 %%Version: 1 3
 %%Creator: (PScript5.dll Version 5.2)
-%%CreationDate: (D:20030201215421-05'00')
+%%CreationDate: (D:20030203211710-05'00')
 %%For: (btwomack)
 %%DocumentData: Clean7Bit
-%%LanguageLevel: 2
-%%BoundingBox: 75 106 522 458
+%%BoundingBox: 75 86 531 403
 %%Pages: 0
 %%DocumentProcessColors: Black
 %%DocumentNeededResources: (atend)
@@ -14,37 +13,10 @@
 %%+ procset (Adobe Acrobat - PDF operators) 1.2 0
 %%+ procset (Adobe Acrobat - type operators) 1.2 0
 %%EndComments
-75 106 moveto 522 106 lineto 522 458 lineto 75 458 lineto closepath clip newpath
+75 86 moveto 531 86 lineto 531 403 lineto 75 403 lineto closepath clip newpath
 %%BeginProlog
 %%EndProlog
 %%BeginSetup
-%%BeginResource: l2check
-%%Copyright: Copyright 1993 Adobe Systems Incorporated. All Rights Reserved.
-systemdict /languagelevel known
-{ systemdict /languagelevel get 1 eq }
-{ true }
-ifelse
-{
-initgraphics /Helvetica findfont 18 scalefont setfont
-72 600 moveto (Error: Your printer driver needs to be configured) dup show
-72 580 moveto (for printing to a PostScript Language Level 1 printer.) dup show
-exch = =
-/Helvetica-Bold findfont 16 scalefont setfont
-72 520 moveto (Windows and Unix) show
-/Times-Roman findfont 16 scalefont setfont
-72 500 moveto (Select \252Language Level 1\272 in the PostScript options section) show
-72 480 moveto (of the Acrobat print dialog.) show
-/Helvetica-Bold findfont 16 scalefont setfont
-72 440 moveto (Macintosh) show
-/Times-Roman findfont 16 scalefont setfont
-72 420 moveto (In the Chooser, select your printer driver.) show
-72 400 moveto (Then select your printer and click the Setup button.) show
-72 380 moveto (Follow any on-screen dialogs that may appear.) show
-showpage
-quit
-}
-if
-%%EndResource
 %%BeginResource: file Pscript_CFF PSVER
 userdict/ct_CffDict 6 dict put ct_CffDict begin/F0Subr{systemdict/internaldict
 known{1183615869 systemdict/internaldict get exec/FlxProc known{save true}{
@@ -193,6 +165,77 @@ def
 currentdict exch getifknown
 } bd
 /isdefined? { where { pop true } { false } ifelse } bd
+%%EndResource
+%%BeginResource: l2compat
+%%Version: 5.0 10
+%%Copyright: Copyright 1987-2001 Adobe Systems Incorporated. All Rights Reserved.
+%%LanguageLevel: 1
+%%Title: Level 1 emulation of level 2 operators
+/setcmykcolor isdefined? not
+{
+/setcmykcolor {
+1 sub 4 1 roll
+3 {
+3 index add neg dup 0 lt { pop 0 } if
+3 1 roll
+} repeat
+setrgbcolor
+pop
+} bd
+} if
+/rectclip isdefined? not
+{
+/rectclip { newpath re clip newpath } bd
+} if
+/rectfill isdefined? not
+{
+/rectfill { gsave newpath re fill grestore } bd
+} if
+/sethalftone isdefined? not
+{
+/sethalftone {
+begin
+HalftoneType 1 eq
+{ Frequency Angle /SpotFunction load setscreen }
+if
+end
+} bd
+} if
+Level1?
+{
+/pdf_show {show} bd
+/xshow
+{
+PDFVars /_pdf_showproc /pdf_show load put
+pdf_xshow
+} bd
+/yshow
+{
+PDFVars /_pdf_showproc /pdf_show load put
+pdf_yshow
+} bd
+/xyshow
+{
+PDFVars /_pdf_showproc /pdf_show load put
+pdf_xyshow
+} bd
+} if
+/getrampcolor {
+/indx exch def
+[
+0 1 NumComp 1 sub {
+dup
+Samples exch get
+dup type /stringtype eq { indx get } if
+exch
+Scaling exch get aload pop
+3 1 roll
+mul add
+} for
+]
+L1setcolor
+} bd
+/sssetbackground { L1setcolor } bd
 %%EndResource
 %%BeginResource: procset pdf
 %%Version: 5.0 7
@@ -693,46 +736,372 @@ end
 } ifelse
 } bd
 %%EndResource
-%%BeginResource: procset pdflev2
-%%Version: 5.0 15
+%%BeginResource: procset sep_ops
+%%Version: 4.0 1
+%%Copyright: Copyright 1987-1999 Adobe Systems Incorporated. All Rights Reserved.
+%%Title: Support for Separations in Level 1, following the conventions of Tech Note 5044
+userdict /sep_ops 50 dict dup begin put
+/bdef {bind def} bind def
+/xdef {exch def} bdef
+/colorimagebuffer {
+0 1 2 index length 1 sub {
+dup 2 index exch get 255 exch sub 2 index 3 1 roll put
+} for
+} bdef
+/addprocs {
+[ 3 1 roll
+/exec load
+dup 3 1 roll
+] cvx
+} bdef
+/L1? {
+systemdict /languagelevel known {
+systemdict /languagelevel get 2 lt
+}{
+true
+} ifelse
+} bdef
+/colorexists {
+statusdict /processcolors known {
+statusdict /processcolors get exec
+}{
+/deviceinfo where {
+pop deviceinfo /Colors known {
+deviceinfo /Colors get
+statusdict /processcolors {
+deviceinfo /Colors known {
+deviceinfo /Colors get
+}{
+1
+} ifelse
+} put
+}{
+1
+} ifelse
+}{
+1
+} ifelse
+} ifelse
+1 gt
+} bdef
+/colorplate colorexists { 0 } { 5 } ifelse def
+/negativecolorplate false def
+/setcmykcolor where {
+pop
+gsave
+1 0 0 0 setcmykcolor systemdict /currentgray get exec 1 exch sub
+0 1 0 0 setcmykcolor systemdict /currentgray get exec 1 exch sub
+0 0 1 0 setcmykcolor systemdict /currentgray get exec 1 exch sub
+0 0 0 1 setcmykcolor systemdict /currentgray get exec 1 exch sub
+4 {4 copy} repeat
+grestore
+1 dict begin
+/foureq {
+4 index eq 8 1 roll
+4 index eq 8 1 roll
+4 index eq 8 1 roll
+4 index eq 8 1 roll
+pop pop pop pop and and and
+} def
+1 0 0 0 foureq {/colorplate 1 store} if
+0 1 0 0 foureq {/colorplate 2 store} if
+0 0 1 0 foureq {/colorplate 3 store} if
+0 0 0 1 foureq {/colorplate 4 store} if
+0 0 0 0 foureq {/colorplate 6 store} if
+end
+} if
+0 systemdict /currenttransfer get exec exec
+1 systemdict /currenttransfer get exec exec
+2 copy
+eq
+{
+/colorplate 6 store
+pop
+/negativecolorplate exch 0.5 lt store
+}
+{
+gt /negativecolorplate exch store
+}
+ifelse
+/findcmykcustomcolor where { pop }
+{
+/findcmykcustomcolor {
+[ 6 1 roll ] readonly
+} bdef
+} ifelse
+/setoverprint where {
+pop
+}{
+/setoverprint {
+pop
+} bdef
+} ifelse
+/currentoverprint where {
+pop
+}{
+/currentoverprint {
+false
+} bdef
+} ifelse
+/setcustomcolor where {
+pop
+}{
+L1? {
+/setcustomcolor {
+exch
+aload pop pop
+4 { 4 index mul 4 1 roll } repeat
+5 -1 roll pop
+setcmykcolor
+} bdef
+}{
+/setcustomcolor {
+exch
+[ exch /Separation exch dup 4 get exch /DeviceCMYK exch
+0 4 getinterval
+[ exch /dup load exch cvx {mul exch dup}
+/forall load /pop load dup] cvx
+] setcolorspace setcolor
+} bdef
+} ifelse
+} ifelse
+/ik 0 def
+/iy 0 def
+/im 0 def
+/ic 0 def
+/imagetint {
+ic .3 mul
+im .59 mul
+iy .11 mul
+ik add add add dup
+1 gt {pop 1} if
+} bdef
+/setcmykcolor where {
+pop
+}{
+/setcmykcolor {
+/ik xdef /iy xdef /im xdef /ic xdef
+imagetint
+1 exch sub setgray
+} bdef
+} ifelse
+/customcolorimage where {
+pop
+}{
+L1? {
+/customcolorimage{
+gsave
+colorexists {
+aload pop pop
+/ik xdef /iy xdef /im xdef /ic xdef
+currentcolortransfer
+{ik mul ik sub 1 add} addprocs
+4 1 roll {iy mul iy sub 1 add} addprocs
+4 1 roll {im mul im sub 1 add} addprocs
+4 1 roll {ic mul ic sub 1 add} addprocs
+4 1 roll setcolortransfer
+/magentabuf 0 string def
+/yellowbuf 0 string def
+/blackbuf 0 string def
+{
+colorimagebuffer dup length magentabuf length ne
+{
+dup length dup dup
+/magentabuf exch string def
+/yellowbuf exch string def
+/blackbuf exch string def
+} if
+dup magentabuf copy yellowbuf copy
+blackbuf copy pop
+} addprocs
+{magentabuf}{yellowbuf}{blackbuf} true 4 colorimage
+}{
+aload pop pop /ik xdef /iy xdef /im xdef /ic xdef /tint
+imagetint def
+currenttransfer
+{tint mul 1 tint sub add} addprocs settransfer image
+} ifelse
+grestore
+} bdef
+}{
+/customcolorimage {
+gsave
+[ exch /Separation exch dup 4 get exch /DeviceCMYK exch
+0 4 getinterval
+[ exch /dup load exch cvx {mul exch dup}
+/forall load /pop load dup] cvx
+] setcolorspace
+10 dict begin
+/ImageType 1 def
+/DataSource exch def
+/ImageMatrix exch def
+/BitsPerComponent exch def
+/Height exch def
+/Width exch def
+/Decode [1 0] def
+currentdict end
+image
+grestore
+} bdef
+} ifelse
+} ifelse
+/setseparationgray where {
+pop
+}{
+L1? {
+/setseparationgray { 1 exch sub dup dup dup setcmykcolor } bdef
+}{
+/setseparationgray {
+[/Separation /All /DeviceCMYK {dup dup dup}] setcolorspace
+1 exch sub setcolor
+} bdef
+} ifelse
+} ifelse
+/separationimage where { pop }
+{
+/separationimage {
+gsave
+1 1 1 1 (All)
+findcmykcustomcolor customcolorimage
+grestore
+} bdef
+} ifelse
+currentdict readonly pop end
+%%EndResource
+%%BeginResource: procset pdflev15044
+%%Version: 5.0 13
 %%Copyright: Copyright 1987-2001 Adobe Systems Incorporated. All Rights Reserved.
-%%LanguageLevel: 2
-%%Title: PDF operators, with code specific for Level 2
+%%LanguageLevel: 1
+%%Title: PDF operators, Level 1, with emulated separations (TN 5044)
+/_ColorSep5044? true dd
 /docinitialize {
 PDF begin
-/_defaulthalftone currenthalftone dd
-/_defaultblackgeneration currentblackgeneration dd
-/_defaultundercolorremoval currentundercolorremoval dd
-/_defaultcolortransfer [currentcolortransfer] dd
-/_defaulttransfer currenttransfer dd
+/_defaulthalftone
+/currenthalftone where
+{ pop currenthalftone }
+{ 4 dict dup begin
+currentscreen
+/SpotFunction exch def
+/Angle exch def
+/Frequency exch def
+/HalftoneType 1 def
+end }
+ifelse
+dd
+/currentcolortransfer where
+{ pop /_defaultcolortransfer [ currentcolortransfer ] dd }
+{ /_defaultcolortransfer [currenttransfer dup dup dup] dd }
+ifelse
 end
-PDFVars /docSetupDone true put
 } bd
 /initialize {
-PDFVars /docSetupDone get {
+/overprintstack null dd
+sep_ops begin
+50 dict begin
 _defaulthalftone sethalftone
-/_defaultblackgeneration load setblackgeneration
-/_defaultundercolorremoval load setundercolorremoval
-_defaultcolortransfer aload pop setcolortransfer
-} if
-false setoverprint
 } bd
-/terminate { } bd
-/c /curveto ld
-/cs /setcolorspace ld
-/l /lineto ld
-/m /moveto ld
-/q /gsave ld
-/Q /grestore ld
-/sc /setcolor ld
-/setSA/setstrokeadjust ld
-/re {
-4 2 roll m
+/terminate {
+end end
+} bd
+/currentcolortransfer where
+{ pop }
+{
+/setcolortransfer
+{
+settransfer pop pop pop
+} bd
+} ifelse
+/pl {
+transform
+0.25 sub round 0.25 add exch
+0.25 sub round 0.25 add exch
+itransform
+} bd
+/m { _sa? { pl } if moveto } bd
+/l { _sa? { pl } if lineto } bd
+/c
+{
+_sa? {3 {pl 6 2 roll} repeat} if
+curveto
+} bd
+/ri/pop ld
+/setSA { /_sa? xdd } bd
+/re
+{
+_sa?
+{
+8 dict begin
+/:h exch def
+/:w exch def
+/:y exch def
+/:x exch def
+:x :y pl
+/:ymin exch def /:xmin exch def
+:x :w add :y :h add pl
+/:ymax exch def /:xmax exch def
+:xmin :ymin moveto
+:xmax :ymin lineto
+:xmax :ymax lineto
+:xmin :ymax lineto
+closepath
+end
+}
+{
+4 2 roll moveto
 1 index 0 rlineto
 0 exch rlineto
 neg 0 rlineto
-h
+closepath
+} ifelse
 } bd
+/q
+{
+gsave
+[currentoverprint overprintstack] /overprintstack xdd
+}
+[/overprintstack] bld
+/Q
+{
+overprintstack aload pop /overprintstack xdd setoverprint
+grestore
+}
+[/overprintstack] bld
+/AlmostFull?
+{ dup maxlength exch length sub 2 le
+} bd
+/Expand
+{ 1 index maxlength mul cvi dict
+dup begin exch { def } forall end
+} bd
+/xput
+{ 3 2 roll
+dup 3 index known not
+{ dup AlmostFull? { 1.5 Expand } if
+} if
+dup 4 2 roll put
+} bd
+/defineRes
+{ _categories 1 index known not
+{ /_categories _categories 2 index 10 dict xput store
+} if
+_categories exch 2 copy get 5 -1 roll 4 index xput put
+} bd
+/findRes {
+_categories exch get exch get
+} bd
+/L1setcolor {
+aload length
+dup 0 eq
+{ pop .5 setgray }
+{ dup 1 eq
+{ pop setgray }
+{ 3 eq
+{ setrgbcolor }
+{ setcmykcolor }
+ifelse }
+ifelse }
+ifelse
+} bind dd
 /concattransferfuncs {
 [ 3 1 roll /exec load exch /exec load ] cvx
 } bd
@@ -740,63 +1109,113 @@ h
 /_defaulttransfer load concattransferfuncs settransfer
 } bd
 /concatandsetcolortransfer {
+colorplate 0 eq
+{
 _defaultcolortransfer aload pop
 8 -1 roll 5 -1 roll concattransferfuncs 7 1 roll
 6 -1 roll 4 -1 roll concattransferfuncs 5 1 roll
 4 -1 roll 3 -1 roll concattransferfuncs 3 1 roll
 concattransferfuncs
 setcolortransfer
+} if
+colorplate 1 ge colorplate 4 le and
+{
+4 colorplate sub index 4 { exch pop } repeat
+concatandsettransfer
+} if
+colorplate 5 ge
+{
+0 index 4 { exch pop } repeat
+concatandsettransfer
+} if
 } bd
-/defineRes/defineresource ld
-/findRes/findresource ld
-currentglobal
-true systemdict /setglobal get exec
-[/Function /ExtGState /Form /Shading /FunctionDictionary /MadePattern /PatternPrototype /DataSource /Image]
-{ /Generic /Category findresource dup length dict copy /Category defineresource pop }
-forall
-systemdict /setglobal get exec
-/ri
+/tn5044sethalftone
 {
-/findcolorrendering isdefined?
-{
-mark exch
-findcolorrendering
-counttomark 2 eq
-{ type /booleantype eq
-{ dup type /nametype eq
-{ dup /ColorRendering resourcestatus
-{ pop pop
-dup /DefaultColorRendering ne
-{
-/ColorRendering findresource
-setcolorrendering
+begin
+HalftoneType 5 eq
+{ [/Default /Cyan /Magenta /Yellow /Black /Default /Default /Default]
+colorplate get
+here not {
+/Default here not { currentdict } if
 } if
-} if
-} if
-} if
-} if
-cleartomark
 }
-{ pop
+{ currentdict }
+ifelse
+end
+begin
+/TransferFunction here
+{
+concatandsettransfer
+currentdict dup length dict
+begin
+{
+1 index /TransferFunction ne { def } { pop pop } ifelse
+} forall
+currentdict
+end
+}
+{
+currentdict
+} ifelse
+end
+sethalftone
+} bd
+/paintimage
+{
+colorplate 0 eq
+{
+{ {currentfile cyanstr readstring pop}
+{currentfile magentastr readstring pop}
+{currentfile yellowstr readstring pop}
+{currentfile blackstr readstring pop
+currentfile graystr readstring pop pop}
+}
+{ {currentfile cyanstr readhexstring pop}
+{currentfile magentastr readhexstring pop}
+{currentfile yellowstr readhexstring pop}
+{currentfile blackstr readhexstring pop
+currentfile graystr readhexstring pop pop}
+} ifelse
+true 4 colorimage
+}
+{
+3 dict begin
+/binaryOK exch def
+[
+1 1 5 {
+dup
+/currentfile cvx
+[ /cyanstr /magentastr /yellowstr /blackstr /graystr ]
+3 -1 roll 1 sub get cvx
+binaryOK { /readstring } { /readhexstring } ifelse cvx
+/pop cvx
+5 -1 roll
+colorplate dup 5 gt { pop 5 } if
+eq not { /pop cvx } if
+} for
+] cvx bind
+end
+[
+colorplate 6 eq {
+/pop cvx
+negativecolorplate { 0 } { 1 } ifelse
+} if
+colorplate 4 le
+{
+1 /exch cvx /sub cvx
+} if
+colorplate 6 ne
+{
+systemdict /currenttransfer get exec
+aload pop
+} if
+] cvx
+gsave
+systemdict /settransfer get exec
+systemdict /image get exec
+grestore
 } ifelse
 } bd
-/knownColorants? {
-pop false
-} bd
-/getrampcolor {
-/indx exch def
-0 1 NumComp 1 sub {
-dup
-Samples exch get
-dup type /stringtype eq { indx get } if
-exch
-Scaling exch get aload pop
-3 1 roll
-mul add
-} for
-setcolor
-} bd
-/sssetbackground { aload pop setcolor } bd
 %%EndResource
 %%BeginResource: procset pdftext
 %%Version: 5.0 6
@@ -2508,8 +2927,7 @@ Level2? {setglobal} if
 currentdict readonly pop end
 %%EndResource
 PDFText begin
-[userdict /pdf_svglb currentglobal put true setglobal
-39/quotesingle 96/grave 128/Adieresis/Aring/Ccedilla/Eacute/Ntilde/Odieresis
+[39/quotesingle 96/grave 128/Adieresis/Aring/Ccedilla/Eacute/Ntilde/Odieresis
 /Udieresis/aacute/agrave/acircumflex/adieresis/atilde/aring/ccedilla/eacute
 /egrave/ecircumflex/edieresis/iacute/igrave/icircumflex/idieresis/ntilde
 /oacute/ograve/ocircumflex/odieresis/otilde/uacute/ugrave/ucircumflex
@@ -2547,8 +2965,6 @@ PDFText begin
 /ucircumflex/udieresis/yacute/thorn/ydieresis
 1 TE
 end
-
-userdict /pdf_svglb get setglobal
 currentdict readonly pop
 end end
 /currentpacking where {pop setpacking}if
@@ -2564,2194 +2980,1922 @@ PDFVars/DocInitAll get exec PDFVars/InitAll get exec
 PDFVars/TermAll get exec end end
 
 %%EndSetup
- PDF /docinitialize get exec
 PDFVars begin PDF begin PDFVars/InitAll get exec
-75 106 447 352 rectclip
-[ 0 -1 1 0 -31.07997 533.23999 ] concat
-74.92 106 352.32 447 re
+75 86 456 317 rectclip
+[ 0 -1 1 0 -10.64099 478.00096 ] concat
+75.04 85.681 317.28 456.24 re
 W
 n
 n
-77.32 156.121 13.68 -44.64 re
-[/DeviceGray] cs 1 sc
+77.44 136.681 13.8 -48.6 re
+1 setgray
 f
 2 J
 0.479996 w
 n
-77.32 111.481 m
-90.4 111.481 l
-90.4 155.641 l
-77.32 155.641 l
-77.32 111.481 l
-0 sc
+77.44 88.081 m
+90.76 88.081 l
+90.76 136.081 l
+77.44 136.081 l
+77.44 88.081 l
+0  setgray
 S
 n
-77.32 156.121 13.68 -44.64 re
-1 sc
+77.44 136.681 13.8 -48.6 re
+1  setgray
 f
 n
-77.32 111.481 m
-90.4 111.481 l
-90.4 155.641 l
-77.32 155.641 l
-77.32 111.481 l
-0 sc
+77.44 88.081 m
+90.76 88.081 l
+90.76 136.081 l
+77.44 136.081 l
+77.44 88.081 l
+0  setgray
 S
 n
-77.32 156.121 13.68 -44.64 re
-1 sc
+77.44 136.681 13.8 -48.6 re
+1  setgray
 f
 n
-77.32 111.481 m
-90.4 111.481 l
-90.4 155.641 l
-77.32 155.641 l
-77.32 111.481 l
-85.72 118.801 m
-85.72 148.801 l
-0 sc
+77.44 88.081 m
+90.76 88.081 l
+90.76 136.081 l
+77.44 136.081 l
+77.44 88.081 l
+85.96 97.081 m
+85.96 127.561 l
+0  setgray
 S
-85.2397 118.801 m
-/N10 [0 5.28 -5.28 0 0 0] Tf
-(Application : )
-[3.48004 3.00013 3.00013 1.2001 1.2001 2.64004 3.00013 1.43989 1.2001 3.00013 3.00013 
-1.43988 1.43989 1.43988 ] pdfys
+85.3597 97.081 m
+/N10 [0 5.39999 -5.39999 0 0 0] Tf
+(application : )
+[3.00132 3.00132 3.00132 1.19765 1.19765 2.75995 3.00132 1.56007 1.19765 3.00132 3.00132 
+1.56003 1.56007 1.56003 ] pdfys
 n
-91 133.561 m
-93.64 133.561 l
-96.28 133.561 m
-98.8 133.561 l
-101.44 133.561 m
-104.08 133.561 l
-106.72 133.561 m
-109.36 133.561 l
-112 133.561 m
-114.64 133.561 l
-117.28 133.561 m
-119.92 133.561 l
-122.56 133.561 m
-125.2 133.561 l
-127.72 133.561 m
-130.36 133.561 l
-133 133.561 m
-135.64 133.561 l
-138.28 133.561 m
-140.92 133.561 l
-143.56 133.561 m
-146.2 133.561 l
-148.84 133.561 m
-151.48 133.561 l
-154.12 133.561 m
-156.76 133.561 l
-159.28 133.561 m
-161.92 133.561 l
-164.56 133.561 m
-167.2 133.561 l
-169.84 133.561 m
-172.48 133.561 l
-175.12 133.561 m
-177.76 133.561 l
-180.4 133.561 m
-183.04 133.561 l
-185.68 133.561 m
-188.2 133.561 l
-190.84 133.561 m
-193.48 133.561 l
-196.12 133.561 m
-198.76 133.561 l
-201.4 133.561 m
-204.04 133.561 l
-206.68 133.561 m
-209.32 133.561 l
-211.96 133.561 m
-214.6 133.561 l
-217.12 133.561 m
-219.76 133.561 l
-222.4 133.561 m
-225.04 133.561 l
-227.68 133.561 m
-230.32 133.561 l
-232.96 133.561 m
-235.6 133.561 l
-238.24 133.561 m
-240.88 133.561 l
-243.52 133.561 m
-246.04 133.561 l
-248.68 133.561 m
-251.32 133.561 l
-253.96 133.561 m
-256.6 133.561 l
-259.24 133.561 m
-261.88 133.561 l
-264.52 133.561 m
-267.16 133.561 l
-269.8 133.561 m
-272.44 133.561 l
-274.96 133.561 m
-277.6 133.561 l
-280.24 133.561 m
-282.88 133.561 l
-285.52 133.561 m
-288.16 133.561 l
-290.8 133.561 m
-293.44 133.561 l
-296.08 133.561 m
-298.72 133.561 l
-301.36 133.561 m
-303.88 133.561 l
-306.52 133.561 m
-309.16 133.561 l
-311.8 133.561 m
-314.44 133.561 l
-317.08 133.561 m
-319.72 133.561 l
-322.36 133.561 m
-325 133.561 l
-327.64 133.561 m
-330.28 133.561 l
-332.8 133.561 m
-335.44 133.561 l
-338.08 133.561 m
-340.72 133.561 l
-343.36 133.561 m
-346 133.561 l
-348.64 133.561 m
-351.28 133.561 l
-353.92 133.561 m
-356.56 133.561 l
-359.2 133.561 m
-361.72 133.561 l
-364.36 133.561 m
-367 133.561 l
-369.64 133.561 m
-372.28 133.561 l
-374.92 133.561 m
-377.56 133.561 l
-380.2 133.561 m
-382.84 133.561 l
-385.48 133.561 m
-388.12 133.561 l
-390.76 133.561 m
-393.28 133.561 l
-395.92 133.561 m
-398.56 133.561 l
-401.2 133.561 m
-403.84 133.561 l
-404.92 131.401 m
-410.2 135.601 l
-404.92 135.601 m
-410.2 131.401 l
+91.24 112.081 m
+94 112.081 l
+96.64 112.081 m
+99.28 112.081 l
+101.92 112.081 m
+104.68 112.081 l
+107.32 112.081 m
+109.96 112.081 l
+112.6 112.081 m
+115.36 112.081 l
+118 112.081 m
+120.64 112.081 l
+123.28 112.081 m
+126.04 112.081 l
+128.68 112.081 m
+131.32 112.081 l
+133.96 112.081 m
+136.72 112.081 l
+139.36 112.081 m
+142 112.081 l
+144.64 112.081 m
+147.4 112.081 l
+150.04 112.081 m
+152.68 112.081 l
+155.44 112.081 m
+158.08 112.081 l
+160.72 112.081 m
+163.36 112.081 l
+166.12 112.081 m
+168.76 112.081 l
+171.4 112.081 m
+174.04 112.081 l
+176.8 112.081 m
+179.44 112.081 l
+182.08 112.081 m
+184.72 112.081 l
+187.48 112.081 m
+190.12 112.081 l
+192.76 112.081 m
+195.4 112.081 l
+198.16 112.081 m
+200.8 112.081 l
+203.44 112.081 m
+206.08 112.081 l
+208.84 112.081 m
+211.48 112.081 l
+214.12 112.081 m
+216.88 112.081 l
+219.52 112.081 m
+222.16 112.081 l
+224.8 112.081 m
+227.56 112.081 l
+230.2 112.081 m
+232.84 112.081 l
+235.48 112.081 m
+238.24 112.081 l
+240.88 112.081 m
+243.52 112.081 l
+246.16 112.081 m
+248.92 112.081 l
+251.56 112.081 m
+254.2 112.081 l
+256.84 112.081 m
+259.6 112.081 l
+262.24 112.081 m
+264.88 112.081 l
+267.52 112.081 m
+270.28 112.081 l
+272.92 112.081 m
+275.56 112.081 l
+278.2 112.081 m
+280.96 112.081 l
+283.6 112.081 m
+286.24 112.081 l
+289 112.081 m
+291.64 112.081 l
+294.28 112.081 m
+296.92 112.081 l
+299.68 112.081 m
+302.32 112.081 l
+304.96 112.081 m
+307.6 112.081 l
+310.36 112.081 m
+313 112.081 l
+315.64 112.081 m
+318.28 112.081 l
+321.04 112.081 m
+323.68 112.081 l
+326.32 112.081 m
+328.96 112.081 l
+331.72 112.081 m
+334.36 112.081 l
+337 112.081 m
+339.64 112.081 l
+342.4 112.081 m
+345.04 112.081 l
+347.68 112.081 m
+350.44 112.081 l
+353.08 112.081 m
+355.72 112.081 l
+358.36 112.081 m
+361.12 112.081 l
+363.76 112.081 m
+366.4 112.081 l
+369.04 112.081 m
+371.8 112.081 l
+374.44 112.081 m
+377.08 112.081 l
+379.72 112.081 m
+382.48 112.081 l
+385.12 112.081 m
+387.76 112.081 l
 S
 n
-109.36 136.681 105.24 -5.28 re
-1 sc
+366.4 115.321 24 -5.39999 re
+1  setgray
 f
 n
-109.36 131.401 m
-214 131.401 l
-214 136.201 l
-109.36 136.201 l
-109.36 131.401 l
-0 sc
+366.4 109.921 m
+389.92 109.921 l
+389.92 114.721 l
+366.4 114.721 l
+366.4 109.921 l
+0  setgray
 S
 n
-319.72 136.681 84.12 -5.28 re
-1 sc
+77.44 239.161 13.8 -81.12 re
+1  setgray
 f
 n
-319.72 131.401 m
-403.36 131.401 l
-403.36 136.201 l
-319.72 136.201 l
-319.72 131.401 l
-0 sc
+77.44 158.041 m
+90.76 158.041 l
+90.76 238.681 l
+77.44 238.681 l
+77.44 158.041 l
+0  setgray
 S
 n
-235.6 136.681 21 -5.28 re
-1 sc
+77.44 239.161 13.8 -81.12 re
+1  setgray
 f
 n
-235.6 131.401 m
-256.12 131.401 l
-256.12 136.201 l
-235.6 136.201 l
-235.6 131.401 l
-0 sc
+77.44 158.041 m
+90.76 158.041 l
+90.76 238.681 l
+77.44 238.681 l
+77.44 158.041 l
+0  setgray
 S
 n
-277.6 136.681 21.12 -5.28 re
-1 sc
+77.44 239.161 13.8 -81.12 re
+1  setgray
 f
 n
-277.6 131.401 m
-298.12 131.401 l
-298.12 136.201 l
-277.6 136.201 l
-277.6 131.401 l
-0 sc
+77.44 158.041 m
+90.76 158.041 l
+90.76 238.681 l
+77.44 238.681 l
+77.44 158.041 l
+85.96 167.041 m
+85.96 230.161 l
+0  setgray
+S
+85.3597 167.041 m
+(Atmos to Ocean coupler : )
+[3.60011 1.56003 4.55969 3.00021 2.75991 1.55945 1.56003 3.00021 1.55945 4.19955 2.75991 
+3.00075 3.00075 3.00075 1.55945 2.75991 3.00075 3.00075 3.00075 1.19707 3.00075 1.79651 
+1.55945 1.56003 1.55945 ] pdfys
+n
+91.24 198.601 m
+94 198.601 l
+96.64 198.601 m
+99.28 198.601 l
+101.92 198.601 m
+104.68 198.601 l
+107.32 198.601 m
+109.96 198.601 l
+112.6 198.601 m
+115.36 198.601 l
+118 198.601 m
+120.64 198.601 l
+123.28 198.601 m
+126.04 198.601 l
+128.68 198.601 m
+131.32 198.601 l
+133.96 198.601 m
+136.72 198.601 l
+139.36 198.601 m
+142 198.601 l
+144.64 198.601 m
+147.4 198.601 l
+150.04 198.601 m
+152.68 198.601 l
+155.44 198.601 m
+158.08 198.601 l
+160.72 198.601 m
+163.36 198.601 l
+166.12 198.601 m
+168.76 198.601 l
+171.4 198.601 m
+174.04 198.601 l
+176.8 198.601 m
+179.44 198.601 l
+182.08 198.601 m
+184.72 198.601 l
+187.48 198.601 m
+190.12 198.601 l
+192.76 198.601 m
+195.4 198.601 l
+198.16 198.601 m
+200.8 198.601 l
+203.44 198.601 m
+206.08 198.601 l
+208.84 198.601 m
+211.48 198.601 l
+214.12 198.601 m
+216.88 198.601 l
+219.52 198.601 m
+222.16 198.601 l
+224.8 198.601 m
+227.56 198.601 l
+230.2 198.601 m
+232.84 198.601 l
+235.48 198.601 m
+238.24 198.601 l
+240.88 198.601 m
+243.52 198.601 l
+246.16 198.601 m
+248.92 198.601 l
+251.56 198.601 m
+254.2 198.601 l
+256.84 198.601 m
+259.6 198.601 l
+262.24 198.601 m
+264.88 198.601 l
+267.52 198.601 m
+270.28 198.601 l
+272.92 198.601 m
+275.56 198.601 l
+278.2 198.601 m
+280.96 198.601 l
+283.6 198.601 m
+286.24 198.601 l
+289 198.601 m
+291.64 198.601 l
+294.28 198.601 m
+296.92 198.601 l
+299.68 198.601 m
+302.32 198.601 l
+304.96 198.601 m
+307.6 198.601 l
+310.36 198.601 m
+313 198.601 l
+315.64 198.601 m
+318.28 198.601 l
+321.04 198.601 m
+323.68 198.601 l
+326.32 198.601 m
+328.96 198.601 l
+331.72 198.601 m
+334.36 198.601 l
+337 198.601 m
+339.64 198.601 l
+342.4 198.601 m
+345.04 198.601 l
+347.68 198.601 m
+350.44 198.601 l
+353.08 198.601 m
+355.72 198.601 l
+358.36 198.601 m
+361.12 198.601 l
+363.76 198.601 m
+366.4 198.601 l
+369.04 198.601 m
+371.8 198.601 l
+374.44 198.601 m
+377.08 198.601 l
+379.72 198.601 m
+382.48 198.601 l
+385.12 198.601 m
+387.76 198.601 l
 S
 n
-77.32 228.121 13.68 -47.28 re
-1 sc
+109.96 201.841 21.36 -5.39999 re
+1  setgray
 f
 n
-77.32 180.841 m
-90.4 180.841 l
-90.4 227.641 l
-77.32 227.641 l
-77.32 180.841 l
-0 sc
+109.96 196.441 m
+130.84 196.441 l
+130.84 201.241 l
+109.96 201.241 l
+109.96 196.441 l
+0  setgray
 S
 n
-77.32 228.121 13.68 -47.28 re
-1 sc
+152.68 201.841 42.72 -5.39999 re
+1  setgray
 f
 n
-77.32 180.841 m
-90.4 180.841 l
-90.4 227.641 l
-77.32 227.641 l
-77.32 180.841 l
-0 sc
+152.68 196.441 m
+194.92 196.441 l
+194.92 201.241 l
+152.68 201.241 l
+152.68 196.441 l
+0  setgray
 S
 n
-77.32 228.121 13.68 -47.28 re
-1 sc
+216.88 201.841 21.36 -5.39999 re
+1  setgray
 f
 n
-77.32 180.841 m
-90.4 180.841 l
-90.4 227.641 l
-77.32 227.641 l
-77.32 180.841 l
-85.72 188.161 m
-85.72 220.801 l
-0 sc
-S
-85.2397 188.161 m
-(Atmosphere : )
-[3.47997 1.43982 4.45677 2.99425 2.63996 2.99425 2.99425 2.99425 1.81677 2.99425 1.4398 
-1.43982 1.4398 ] pdfys
-n
-91 204.481 m
-93.64 204.481 l
-96.28 204.481 m
-98.8 204.481 l
-101.44 204.481 m
-104.08 204.481 l
-106.72 204.481 m
-109.36 204.481 l
-112 204.481 m
-114.64 204.481 l
-117.28 204.481 m
-119.92 204.481 l
-122.56 204.481 m
-125.2 204.481 l
-127.72 204.481 m
-130.36 204.481 l
-133 204.481 m
-135.64 204.481 l
-138.28 204.481 m
-140.92 204.481 l
-143.56 204.481 m
-146.2 204.481 l
-148.84 204.481 m
-151.48 204.481 l
-154.12 204.481 m
-156.76 204.481 l
-159.28 204.481 m
-161.92 204.481 l
-164.56 204.481 m
-167.2 204.481 l
-169.84 204.481 m
-172.48 204.481 l
-175.12 204.481 m
-177.76 204.481 l
-180.4 204.481 m
-183.04 204.481 l
-185.68 204.481 m
-188.2 204.481 l
-190.84 204.481 m
-193.48 204.481 l
-196.12 204.481 m
-198.76 204.481 l
-201.4 204.481 m
-204.04 204.481 l
-206.68 204.481 m
-209.32 204.481 l
-211.96 204.481 m
-214.6 204.481 l
-217.12 204.481 m
-219.76 204.481 l
-222.4 204.481 m
-225.04 204.481 l
-227.68 204.481 m
-230.32 204.481 l
-232.96 204.481 m
-235.6 204.481 l
-238.24 204.481 m
-240.88 204.481 l
-243.52 204.481 m
-246.04 204.481 l
-248.68 204.481 m
-251.32 204.481 l
-253.96 204.481 m
-256.6 204.481 l
-259.24 204.481 m
-261.88 204.481 l
-264.52 204.481 m
-267.16 204.481 l
-269.8 204.481 m
-272.44 204.481 l
-274.96 204.481 m
-277.6 204.481 l
-280.24 204.481 m
-282.88 204.481 l
-285.52 204.481 m
-288.16 204.481 l
-290.8 204.481 m
-293.44 204.481 l
-296.08 204.481 m
-298.72 204.481 l
-301.36 204.481 m
-303.88 204.481 l
-306.52 204.481 m
-309.16 204.481 l
-311.8 204.481 m
-314.44 204.481 l
-317.08 204.481 m
-319.72 204.481 l
-322.36 204.481 m
-325 204.481 l
-327.64 204.481 m
-330.28 204.481 l
-332.8 204.481 m
-335.44 204.481 l
-338.08 204.481 m
-340.72 204.481 l
-343.36 204.481 m
-346 204.481 l
-348.64 204.481 m
-351.28 204.481 l
-353.92 204.481 m
-356.56 204.481 l
-359.2 204.481 m
-361.72 204.481 l
-364.36 204.481 m
-367 204.481 l
-369.64 204.481 m
-372.28 204.481 l
-374.92 204.481 m
-377.56 204.481 l
-380.2 204.481 m
-382.84 204.481 l
-385.48 204.481 m
-388.12 204.481 l
-390.76 204.481 m
-393.28 204.481 l
-395.92 204.481 m
-398.56 204.481 l
-401.2 204.481 m
-403.84 204.481 l
-406.48 204.481 m
-409.12 204.481 l
-411.76 204.481 m
-414.4 204.481 l
-417.04 204.481 m
-419.68 204.481 l
-422.2 204.481 m
-424.84 204.481 l
+216.88 196.441 m
+237.64 196.441 l
+237.64 201.241 l
+216.88 201.241 l
+216.88 196.441 l
+0  setgray
 S
 n
-130.36 207.721 42.12 -5.28 re
-1 sc
+259.6 201.841 21.36 -5.39999 re
+1  setgray
 f
 n
-130.36 202.441 m
-172 202.441 l
-172 207.121 l
-130.36 207.121 l
-130.36 202.441 l
-0 sc
+259.6 196.441 m
+280.36 196.441 l
+280.36 201.241 l
+259.6 201.241 l
+259.6 196.441 l
+0  setgray
 S
 n
-77.32 283.921 13.68 -34.68 re
-1 sc
+302.32 201.841 21.36 -5.39999 re
+1  setgray
 f
 n
-77.32 249.241 m
-90.4 249.241 l
-90.4 283.441 l
-77.32 283.441 l
-77.32 249.241 l
-0 sc
+302.32 196.441 m
+323.08 196.441 l
+323.08 201.241 l
+302.32 201.241 l
+302.32 196.441 l
+0  setgray
 S
 n
-77.32 283.921 13.68 -34.68 re
-1 sc
+345.04 201.841 21.36 -5.39999 re
+1  setgray
 f
 n
-77.32 249.241 m
-90.4 249.241 l
-90.4 283.441 l
-77.32 283.441 l
-77.32 249.241 l
-0 sc
+345.04 196.441 m
+365.92 196.441 l
+365.92 201.241 l
+345.04 201.241 l
+345.04 196.441 l
+0  setgray
 S
 n
-77.32 283.921 13.68 -34.68 re
-1 sc
+77.44 311.401 13.8 -50.76 re
+1  setgray
 f
 n
-77.32 249.241 m
-90.4 249.241 l
-90.4 283.441 l
-77.32 283.441 l
-77.32 249.241 l
-85.72 256.561 m
-85.72 276.001 l
-0 sc
-S
-85.2397 256.561 m
-(Ocean : )
-[4.07989 2.64004 3.00013 3.00013 3.00013 1.43988 1.43989 1.43988 ] pdfys
-n
-91 266.521 m
-93.64 266.521 l
-96.28 266.521 m
-98.8 266.521 l
-101.44 266.521 m
-104.08 266.521 l
-106.72 266.521 m
-109.36 266.521 l
-112 266.521 m
-114.64 266.521 l
-117.28 266.521 m
-119.92 266.521 l
-122.56 266.521 m
-125.2 266.521 l
-127.72 266.521 m
-130.36 266.521 l
-133 266.521 m
-135.64 266.521 l
-138.28 266.521 m
-140.92 266.521 l
-143.56 266.521 m
-146.2 266.521 l
-148.84 266.521 m
-151.48 266.521 l
-154.12 266.521 m
-156.76 266.521 l
-159.28 266.521 m
-161.92 266.521 l
-164.56 266.521 m
-167.2 266.521 l
-169.84 266.521 m
-172.48 266.521 l
-175.12 266.521 m
-177.76 266.521 l
-180.4 266.521 m
-183.04 266.521 l
-185.68 266.521 m
-188.2 266.521 l
-190.84 266.521 m
-193.48 266.521 l
-196.12 266.521 m
-198.76 266.521 l
-201.4 266.521 m
-204.04 266.521 l
-206.68 266.521 m
-209.32 266.521 l
-211.96 266.521 m
-214.6 266.521 l
-217.12 266.521 m
-219.76 266.521 l
-222.4 266.521 m
-225.04 266.521 l
-227.68 266.521 m
-230.32 266.521 l
-232.96 266.521 m
-235.6 266.521 l
-238.24 266.521 m
-240.88 266.521 l
-243.52 266.521 m
-246.04 266.521 l
-248.68 266.521 m
-251.32 266.521 l
-253.96 266.521 m
-256.6 266.521 l
-259.24 266.521 m
-261.88 266.521 l
-264.52 266.521 m
-267.16 266.521 l
-269.8 266.521 m
-272.44 266.521 l
-274.96 266.521 m
-277.6 266.521 l
-280.24 266.521 m
-282.88 266.521 l
-285.52 266.521 m
-288.16 266.521 l
-290.8 266.521 m
-293.44 266.521 l
-296.08 266.521 m
-298.72 266.521 l
-301.36 266.521 m
-303.88 266.521 l
-306.52 266.521 m
-309.16 266.521 l
-311.8 266.521 m
-314.44 266.521 l
-317.08 266.521 m
-319.72 266.521 l
-322.36 266.521 m
-325 266.521 l
-327.64 266.521 m
-330.28 266.521 l
-332.8 266.521 m
-335.44 266.521 l
-338.08 266.521 m
-340.72 266.521 l
-343.36 266.521 m
-346 266.521 l
-348.64 266.521 m
-351.28 266.521 l
-353.92 266.521 m
-356.56 266.521 l
-359.2 266.521 m
-361.72 266.521 l
-364.36 266.521 m
-367 266.521 l
-369.64 266.521 m
-372.28 266.521 l
-374.92 266.521 m
-377.56 266.521 l
-380.2 266.521 m
-382.84 266.521 l
-385.48 266.521 m
-388.12 266.521 l
-390.76 266.521 m
-393.28 266.521 l
-395.92 266.521 m
-398.56 266.521 l
-401.2 266.521 m
-403.84 266.521 l
-406.48 266.521 m
-409.12 266.521 l
-411.76 266.521 m
-414.4 266.521 l
-417.04 266.521 m
-419.68 266.521 l
-422.2 266.521 m
-424.84 266.521 l
+77.44 260.641 m
+90.76 260.641 l
+90.76 310.801 l
+77.44 310.801 l
+77.44 260.641 l
+0  setgray
 S
 n
-151.48 269.761 42 -5.28 re
-1 sc
+77.44 311.401 13.8 -50.76 re
+1  setgray
 f
 n
-151.48 264.481 m
-193 264.481 l
-193 269.161 l
-151.48 269.161 l
-151.48 264.481 l
-0 sc
+77.44 260.641 m
+90.76 260.641 l
+90.76 310.801 l
+77.44 310.801 l
+77.44 260.641 l
+0  setgray
 S
 n
-77.32 379.081 13.68 -74.16 re
-1 sc
+77.44 311.401 13.8 -50.76 re
+1  setgray
 f
 n
-77.32 304.921 m
-90.4 304.921 l
-90.4 378.601 l
-77.32 378.601 l
-77.32 304.921 l
-0 sc
+77.44 260.641 m
+90.76 260.641 l
+90.76 310.801 l
+77.44 310.801 l
+77.44 260.641 l
+85.96 268.561 m
+85.96 303.361 l
+0  setgray
+S
+85.3597 268.561 m
+(Export State : )
+[3.60011 2.75991 3.00075 3.00075 1.79651 1.56003 1.55945 3.60011 1.56003 3.00075 1.56003 
+3.00075 1.55945 1.56003 1.55945 ] pdfys
+n
+91.24 285.721 m
+94 285.721 l
+96.64 285.721 m
+99.28 285.721 l
+101.92 285.721 m
+104.68 285.721 l
+107.32 285.721 m
+109.96 285.721 l
+112.6 285.721 m
+115.36 285.721 l
+118 285.721 m
+120.64 285.721 l
+123.28 285.721 m
+126.04 285.721 l
+128.68 285.721 m
+131.32 285.721 l
+133.96 285.721 m
+136.72 285.721 l
+139.36 285.721 m
+142 285.721 l
+144.64 285.721 m
+147.4 285.721 l
+150.04 285.721 m
+152.68 285.721 l
+155.44 285.721 m
+158.08 285.721 l
+160.72 285.721 m
+163.36 285.721 l
+166.12 285.721 m
+168.76 285.721 l
+171.4 285.721 m
+174.04 285.721 l
+176.8 285.721 m
+179.44 285.721 l
+182.08 285.721 m
+184.72 285.721 l
+187.48 285.721 m
+190.12 285.721 l
+192.76 285.721 m
+195.4 285.721 l
+198.16 285.721 m
+200.8 285.721 l
+203.44 285.721 m
+206.08 285.721 l
+208.84 285.721 m
+211.48 285.721 l
+214.12 285.721 m
+216.88 285.721 l
+219.52 285.721 m
+222.16 285.721 l
+224.8 285.721 m
+227.56 285.721 l
+230.2 285.721 m
+232.84 285.721 l
+235.48 285.721 m
+238.24 285.721 l
+240.88 285.721 m
+243.52 285.721 l
+246.16 285.721 m
+248.92 285.721 l
+251.56 285.721 m
+254.2 285.721 l
+256.84 285.721 m
+259.6 285.721 l
+262.24 285.721 m
+264.88 285.721 l
+267.52 285.721 m
+270.28 285.721 l
+272.92 285.721 m
+275.56 285.721 l
+278.2 285.721 m
+280.96 285.721 l
+283.6 285.721 m
+286.24 285.721 l
+289 285.721 m
+291.64 285.721 l
+294.28 285.721 m
+296.92 285.721 l
+299.68 285.721 m
+302.32 285.721 l
+304.96 285.721 m
+307.6 285.721 l
+310.36 285.721 m
+313 285.721 l
+315.64 285.721 m
+318.28 285.721 l
+321.04 285.721 m
+323.68 285.721 l
+326.32 285.721 m
+328.96 285.721 l
+331.72 285.721 m
+334.36 285.721 l
+337 285.721 m
+339.64 285.721 l
+342.4 285.721 m
+345.04 285.721 l
+347.68 285.721 m
+350.44 285.721 l
+353.08 285.721 m
+355.72 285.721 l
+358.36 285.721 m
+361.12 285.721 l
+363.76 285.721 m
+366.4 285.721 l
+369.04 285.721 m
+371.8 285.721 l
+374.44 285.721 m
+377.08 285.721 l
+379.72 285.721 m
+382.48 285.721 l
+385.12 285.721 m
+387.76 285.721 l
 S
 n
-77.32 379.081 13.68 -74.16 re
-1 sc
+131.32 288.961 21.36 -5.39999 re
+1  setgray
 f
 n
-77.32 304.921 m
-90.4 304.921 l
-90.4 378.601 l
-77.32 378.601 l
-77.32 304.921 l
-0 sc
+131.32 283.561 m
+152.2 283.561 l
+152.2 288.361 l
+131.32 288.361 l
+131.32 283.561 l
+0  setgray
 S
 n
-77.32 379.081 13.68 -74.16 re
-1 sc
+77.44 392.041 13.8 -59.28 re
+1  setgray
 f
 n
-77.32 304.921 m
-90.4 304.921 l
-90.4 378.601 l
-77.32 378.601 l
-77.32 304.921 l
-85.72 312.361 m
-85.72 371.761 l
-0 sc
-S
-85.2397 312.361 m
-(Atmos to Oean Coupler : )
-[3.48003 1.43988 4.45895 2.99643 2.64003 1.43988 1.43988 3.00012 1.43988 4.07988 2.99643 
-2.99643 2.99643 1.43988 3.84009 2.99643 2.99643 2.99643 1.20009 2.99643 1.81895 1.43988 
-1.43988 1.43988 ] pdfys
-n
-91 341.761 m
-93.64 341.761 l
-96.28 341.761 m
-98.8 341.761 l
-101.44 341.761 m
-104.08 341.761 l
-106.72 341.761 m
-109.36 341.761 l
-112 341.761 m
-114.64 341.761 l
-117.28 341.761 m
-119.92 341.761 l
-122.56 341.761 m
-125.2 341.761 l
-127.72 341.761 m
-130.36 341.761 l
-133 341.761 m
-135.64 341.761 l
-138.28 341.761 m
-140.92 341.761 l
-143.56 341.761 m
-146.2 341.761 l
-148.84 341.761 m
-151.48 341.761 l
-154.12 341.761 m
-156.76 341.761 l
-159.28 341.761 m
-161.92 341.761 l
-164.56 341.761 m
-167.2 341.761 l
-169.84 341.761 m
-172.48 341.761 l
-175.12 341.761 m
-177.76 341.761 l
-180.4 341.761 m
-183.04 341.761 l
-185.68 341.761 m
-188.2 341.761 l
-190.84 341.761 m
-193.48 341.761 l
-196.12 341.761 m
-198.76 341.761 l
-201.4 341.761 m
-204.04 341.761 l
-206.68 341.761 m
-209.32 341.761 l
-211.96 341.761 m
-214.6 341.761 l
-217.12 341.761 m
-219.76 341.761 l
-222.4 341.761 m
-225.04 341.761 l
-227.68 341.761 m
-230.32 341.761 l
-232.96 341.761 m
-235.6 341.761 l
-238.24 341.761 m
-240.88 341.761 l
-243.52 341.761 m
-246.04 341.761 l
-248.68 341.761 m
-251.32 341.761 l
-253.96 341.761 m
-256.6 341.761 l
-259.24 341.761 m
-261.88 341.761 l
-264.52 341.761 m
-267.16 341.761 l
-269.8 341.761 m
-272.44 341.761 l
-274.96 341.761 m
-277.6 341.761 l
-280.24 341.761 m
-282.88 341.761 l
-285.52 341.761 m
-288.16 341.761 l
-290.8 341.761 m
-293.44 341.761 l
-296.08 341.761 m
-298.72 341.761 l
-301.36 341.761 m
-303.88 341.761 l
-306.52 341.761 m
-309.16 341.761 l
-311.8 341.761 m
-314.44 341.761 l
-317.08 341.761 m
-319.72 341.761 l
-322.36 341.761 m
-325 341.761 l
-327.64 341.761 m
-330.28 341.761 l
-332.8 341.761 m
-335.44 341.761 l
-338.08 341.761 m
-340.72 341.761 l
-343.36 341.761 m
-346 341.761 l
-348.64 341.761 m
-351.28 341.761 l
-353.92 341.761 m
-356.56 341.761 l
-359.2 341.761 m
-361.72 341.761 l
-364.36 341.761 m
-367 341.761 l
-369.64 341.761 m
-372.28 341.761 l
-374.92 341.761 m
-377.56 341.761 l
-380.2 341.761 m
-382.84 341.761 l
-385.48 341.761 m
-388.12 341.761 l
-390.76 341.761 m
-393.28 341.761 l
-395.92 341.761 m
-398.56 341.761 l
-401.2 341.761 m
-403.84 341.761 l
-406.48 341.761 m
-409.12 341.761 l
-411.76 341.761 m
-414.4 341.761 l
-417.04 341.761 m
-419.68 341.761 l
-422.2 341.761 m
-424.84 341.761 l
+77.44 332.761 m
+90.76 332.761 l
+90.76 391.441 l
+77.44 391.441 l
+77.44 332.761 l
+0  setgray
 S
 n
-214.6 344.881 21 -5.28 re
-1 sc
+77.44 392.041 13.8 -59.28 re
+1  setgray
 f
 n
-214.6 339.601 m
-235 339.601 l
-235 344.401 l
-214.6 344.401 l
-214.6 339.601 l
-0 sc
+77.44 332.761 m
+90.76 332.761 l
+90.76 391.441 l
+77.44 391.441 l
+77.44 332.761 l
+0  setgray
 S
 n
-77.32 476.881 13.68 -76.8 re
-1 sc
+77.44 392.041 13.8 -59.28 re
+1  setgray
 f
 n
-77.32 400.081 m
-90.4 400.081 l
-90.4 476.401 l
-77.32 476.401 l
-77.32 400.081 l
-0 sc
+77.44 332.761 m
+90.76 332.761 l
+90.76 391.441 l
+77.44 391.441 l
+77.44 332.761 l
+85.96 340.681 m
+85.96 383.521 l
+0  setgray
+S
+85.3597 340.681 m
+(Output XPacket : )
+[4.20012 2.9997 1.56061 2.9997 3.00024 1.56007 1.56003 3.60014 3.60014 2.9997 2.75941 
+2.75941 2.9997 1.56061 1.56003 1.56061 1.56003 ] pdfys
+n
+91.24 362.041 m
+94 362.041 l
+96.64 362.041 m
+99.28 362.041 l
+101.92 362.041 m
+104.68 362.041 l
+107.32 362.041 m
+109.96 362.041 l
+112.6 362.041 m
+115.36 362.041 l
+118 362.041 m
+120.64 362.041 l
+123.28 362.041 m
+126.04 362.041 l
+128.68 362.041 m
+131.32 362.041 l
+133.96 362.041 m
+136.72 362.041 l
+139.36 362.041 m
+142 362.041 l
+144.64 362.041 m
+147.4 362.041 l
+150.04 362.041 m
+152.68 362.041 l
+155.44 362.041 m
+158.08 362.041 l
+160.72 362.041 m
+163.36 362.041 l
+166.12 362.041 m
+168.76 362.041 l
+171.4 362.041 m
+174.04 362.041 l
+176.8 362.041 m
+179.44 362.041 l
+182.08 362.041 m
+184.72 362.041 l
+187.48 362.041 m
+190.12 362.041 l
+192.76 362.041 m
+195.4 362.041 l
+198.16 362.041 m
+200.8 362.041 l
+203.44 362.041 m
+206.08 362.041 l
+208.84 362.041 m
+211.48 362.041 l
+214.12 362.041 m
+216.88 362.041 l
+219.52 362.041 m
+222.16 362.041 l
+224.8 362.041 m
+227.56 362.041 l
+230.2 362.041 m
+232.84 362.041 l
+235.48 362.041 m
+238.24 362.041 l
+240.88 362.041 m
+243.52 362.041 l
+246.16 362.041 m
+248.92 362.041 l
+251.56 362.041 m
+254.2 362.041 l
+256.84 362.041 m
+259.6 362.041 l
+262.24 362.041 m
+264.88 362.041 l
+267.52 362.041 m
+270.28 362.041 l
+272.92 362.041 m
+275.56 362.041 l
+278.2 362.041 m
+280.96 362.041 l
+283.6 362.041 m
+286.24 362.041 l
+289 362.041 m
+291.64 362.041 l
+294.28 362.041 m
+296.92 362.041 l
+299.68 362.041 m
+302.32 362.041 l
+304.96 362.041 m
+307.6 362.041 l
+310.36 362.041 m
+313 362.041 l
+315.64 362.041 m
+318.28 362.041 l
+321.04 362.041 m
+323.68 362.041 l
+326.32 362.041 m
+328.96 362.041 l
+331.72 362.041 m
+334.36 362.041 l
+337 362.041 m
+339.64 362.041 l
+342.4 362.041 m
+345.04 362.041 l
+347.68 362.041 m
+350.44 362.041 l
+353.08 362.041 m
+355.72 362.041 l
+358.36 362.041 m
+361.12 362.041 l
+363.76 362.041 m
+366.4 362.041 l
+369.04 362.041 m
+371.8 362.041 l
+374.44 362.041 m
+377.08 362.041 l
+379.72 362.041 m
+382.48 362.041 l
+385.12 362.041 m
+387.76 362.041 l
 S
 n
-77.32 476.881 13.68 -76.8 re
-1 sc
+195.4 365.281 21.48 -5.28 re
+1  setgray
 f
 n
-77.32 400.081 m
-90.4 400.081 l
-90.4 476.401 l
-77.32 476.401 l
-77.32 400.081 l
-0 sc
+195.4 360.001 m
+216.28 360.001 l
+216.28 364.801 l
+195.4 364.801 l
+195.4 360.001 l
+0  setgray
 S
 n
-77.32 476.881 13.68 -76.8 re
-1 sc
+77.44 467.881 13.8 -54.48 re
+1  setgray
 f
 n
-77.32 400.081 m
-90.4 400.081 l
-90.4 476.401 l
-77.32 476.401 l
-77.32 400.081 l
-85.72 407.521 m
-85.72 469.561 l
-0 sc
+77.44 413.401 m
+90.76 413.401 l
+90.76 467.401 l
+77.44 467.401 l
+77.44 413.401 l
+0  setgray
 S
-85.2397 407.521 m
-(Ocean to Atmos Coupler : )
-[4.07988 2.64003 2.99643 2.99643 2.99643 1.43988 1.43988 3.00012 1.43988 3.48003 1.43988 
-4.45895 2.99643 2.64003 1.43988 3.84009 2.99643 2.99643 2.99643 1.20009 2.99643 1.81895 
-1.43988 1.43988 1.43988 ] pdfys
 n
-91 438.481 m
-93.64 438.481 l
-96.28 438.481 m
-98.8 438.481 l
-101.44 438.481 m
-104.08 438.481 l
-106.72 438.481 m
-109.36 438.481 l
-112 438.481 m
-114.64 438.481 l
-117.28 438.481 m
-119.92 438.481 l
-122.56 438.481 m
-125.2 438.481 l
-127.72 438.481 m
-130.36 438.481 l
-133 438.481 m
-135.64 438.481 l
-138.28 438.481 m
-140.92 438.481 l
-143.56 438.481 m
-146.2 438.481 l
-148.84 438.481 m
-151.48 438.481 l
-154.12 438.481 m
-156.76 438.481 l
-159.28 438.481 m
-161.92 438.481 l
-164.56 438.481 m
-167.2 438.481 l
-169.84 438.481 m
-172.48 438.481 l
-175.12 438.481 m
-177.76 438.481 l
-180.4 438.481 m
-183.04 438.481 l
-185.68 438.481 m
-188.2 438.481 l
-190.84 438.481 m
-193.48 438.481 l
-196.12 438.481 m
-198.76 438.481 l
-201.4 438.481 m
-204.04 438.481 l
-206.68 438.481 m
-209.32 438.481 l
-211.96 438.481 m
-214.6 438.481 l
-217.12 438.481 m
-219.76 438.481 l
-222.4 438.481 m
-225.04 438.481 l
-227.68 438.481 m
-230.32 438.481 l
-232.96 438.481 m
-235.6 438.481 l
+77.44 467.881 13.8 -54.48 re
+1  setgray
+f
+n
+77.44 413.401 m
+90.76 413.401 l
+90.76 467.401 l
+77.44 467.401 l
+77.44 413.401 l
+0  setgray
+S
+n
+77.44 467.881 13.8 -54.48 re
+1  setgray
+f
+n
+77.44 413.401 m
+90.76 413.401 l
+90.76 467.401 l
+77.44 467.401 l
+77.44 413.401 l
+85.96 421.441 m
+85.96 459.361 l
+0  setgray
+S
+85.3597 421.441 m
+(Input Xpacket : )
+[1.56008 3.00025 3.00025 3.00025 1.56008 1.56011 3.59961 3.00025 3.00025 2.75995 2.75995 
+2.99971 1.56008 1.56011 1.56008 1.56011 ] pdfys
+n
+91.24 440.641 m
+94 440.641 l
+96.64 440.641 m
+99.28 440.641 l
+101.92 440.641 m
+104.68 440.641 l
+107.32 440.641 m
+109.96 440.641 l
+112.6 440.641 m
+115.36 440.641 l
+118 440.641 m
+120.64 440.641 l
+123.28 440.641 m
+126.04 440.641 l
+128.68 440.641 m
+131.32 440.641 l
+133.96 440.641 m
+136.72 440.641 l
+139.36 440.641 m
+142 440.641 l
+144.64 440.641 m
+147.4 440.641 l
+150.04 440.641 m
+152.68 440.641 l
+155.44 440.641 m
+158.08 440.641 l
+160.72 440.641 m
+163.36 440.641 l
+166.12 440.641 m
+168.76 440.641 l
+171.4 440.641 m
+174.04 440.641 l
+176.8 440.641 m
+179.44 440.641 l
+182.08 440.641 m
+184.72 440.641 l
+187.48 440.641 m
+190.12 440.641 l
+192.76 440.641 m
+195.4 440.641 l
+198.16 440.641 m
+200.8 440.641 l
+203.44 440.641 m
+206.08 440.641 l
+208.84 440.641 m
+211.48 440.641 l
+214.12 440.641 m
+216.88 440.641 l
+219.52 440.641 m
+222.16 440.641 l
+224.8 440.641 m
+227.56 440.641 l
+230.2 440.641 m
+232.84 440.641 l
+235.48 440.641 m
+238.24 440.641 l
+240.88 440.641 m
+243.52 440.641 l
+246.16 440.641 m
+248.92 440.641 l
+251.56 440.641 m
+254.2 440.641 l
+256.84 440.641 m
+259.6 440.641 l
+262.24 440.641 m
+264.88 440.641 l
+267.52 440.641 m
+270.28 440.641 l
+272.92 440.641 m
+275.56 440.641 l
+278.2 440.641 m
+280.96 440.641 l
+283.6 440.641 m
+286.24 440.641 l
+289 440.641 m
+291.64 440.641 l
+294.28 440.641 m
+296.92 440.641 l
+299.68 440.641 m
+302.32 440.641 l
+304.96 440.641 m
+307.6 440.641 l
+310.36 440.641 m
+313 440.641 l
+315.64 440.641 m
+318.28 440.641 l
+321.04 440.641 m
+323.68 440.641 l
+326.32 440.641 m
+328.96 440.641 l
+331.72 440.641 m
+334.36 440.641 l
+337 440.641 m
+339.64 440.641 l
+342.4 440.641 m
+345.04 440.641 l
+347.68 440.641 m
+350.44 440.641 l
+353.08 440.641 m
+355.72 440.641 l
+358.36 440.641 m
+361.12 440.641 l
+363.76 440.641 m
+366.4 440.641 l
+369.04 440.641 m
+371.8 440.641 l
+374.44 440.641 m
+377.08 440.641 l
+379.72 440.641 m
+382.48 440.641 l
+385.12 440.641 m
+387.76 440.641 l
+S
+n
+238.24 443.881 21.36 -5.39999 re
+1  setgray
+f
+n
 238.24 438.481 m
-240.88 438.481 l
-243.52 438.481 m
-246.04 438.481 l
-248.68 438.481 m
-251.32 438.481 l
-253.96 438.481 m
-256.6 438.481 l
-259.24 438.481 m
-261.88 438.481 l
-264.52 438.481 m
-267.16 438.481 l
-269.8 438.481 m
-272.44 438.481 l
-274.96 438.481 m
-277.6 438.481 l
-280.24 438.481 m
-282.88 438.481 l
-285.52 438.481 m
-288.16 438.481 l
-290.8 438.481 m
-293.44 438.481 l
-296.08 438.481 m
-298.72 438.481 l
-301.36 438.481 m
-303.88 438.481 l
-306.52 438.481 m
-309.16 438.481 l
-311.8 438.481 m
-314.44 438.481 l
-317.08 438.481 m
-319.72 438.481 l
-322.36 438.481 m
-325 438.481 l
-327.64 438.481 m
-330.28 438.481 l
-332.8 438.481 m
-335.44 438.481 l
-338.08 438.481 m
-340.72 438.481 l
-343.36 438.481 m
-346 438.481 l
-348.64 438.481 m
-351.28 438.481 l
-353.92 438.481 m
-356.56 438.481 l
-359.2 438.481 m
-361.72 438.481 l
-364.36 438.481 m
-367 438.481 l
-369.64 438.481 m
-372.28 438.481 l
-374.92 438.481 m
-377.56 438.481 l
-380.2 438.481 m
-382.84 438.481 l
-385.48 438.481 m
-388.12 438.481 l
-390.76 438.481 m
-393.28 438.481 l
-395.92 438.481 m
-398.56 438.481 l
-401.2 438.481 m
-403.84 438.481 l
-406.48 438.481 m
-409.12 438.481 l
-411.76 438.481 m
-414.4 438.481 l
-417.04 438.481 m
-419.68 438.481 l
-422.2 438.481 m
-424.84 438.481 l
+259 438.481 l
+259 443.281 l
+238.24 443.281 l
+238.24 438.481 l
+0  setgray
 S
 n
-256.6 441.721 21 -5.28 re
-1 sc
+280.96 443.881 21.36 -5.39999 re
+1  setgray
 f
 n
-256.6 436.441 m
-277.12 436.441 l
-277.12 441.121 l
-256.6 441.121 l
-256.6 436.441 l
-0 sc
+280.96 438.481 m
+301.72 438.481 l
+301.72 443.281 l
+280.96 443.281 l
+280.96 438.481 l
+0  setgray
 S
 n
-77.32 536.281 13.68 -38.4 re
-1 sc
+77.44 540.001 13.8 -50.76 re
+1  setgray
 f
 n
-77.32 497.881 m
-90.4 497.881 l
-90.4 535.801 l
-77.32 535.801 l
-77.32 497.881 l
-0 sc
+77.44 489.241 m
+90.76 489.241 l
+90.76 539.521 l
+77.44 539.521 l
+77.44 489.241 l
+0  setgray
 S
 n
-77.32 536.281 13.68 -38.4 re
-1 sc
+77.44 540.001 13.8 -50.76 re
+1  setgray
 f
 n
-77.32 497.881 m
-90.4 497.881 l
-90.4 535.801 l
-77.32 535.801 l
-77.32 497.881 l
-0 sc
+77.44 489.241 m
+90.76 489.241 l
+90.76 539.521 l
+77.44 539.521 l
+77.44 489.241 l
+0  setgray
 S
 n
-77.32 536.281 13.68 -38.4 re
-1 sc
+77.44 540.001 13.8 -50.76 re
+1  setgray
 f
 n
-77.32 497.881 m
-90.4 497.881 l
-90.4 535.801 l
-77.32 535.801 l
-77.32 497.881 l
-85.72 505.321 m
-85.72 528.961 l
-0 sc
+77.44 489.241 m
+90.76 489.241 l
+90.76 539.521 l
+77.44 539.521 l
+77.44 489.241 l
+85.96 497.281 m
+85.96 531.481 l
+0  setgray
 S
-85.2397 505.321 m
-(Registry : )
-[3.84005 2.99111 2.99111 1.20005 2.63999 1.43984 1.81363 2.63999 1.43988 1.43984 1.43988 
-] pdfys
+85.3597 497.281 m
+(Import State : )
+[1.56061 4.55756 3.00024 3.00024 1.79979 1.56061 1.56003 3.60014 1.56007 3.00024 1.56007 
+2.9997 1.56003 1.56061 1.56003 ] pdfys
 n
-91 516.841 m
-93.64 516.841 l
-96.28 516.841 m
-98.8 516.841 l
-101.44 516.841 m
-104.08 516.841 l
-106.72 516.841 m
-109.36 516.841 l
-112 516.841 m
-114.64 516.841 l
-117.28 516.841 m
-119.92 516.841 l
-122.56 516.841 m
-125.2 516.841 l
-127.72 516.841 m
-130.36 516.841 l
-133 516.841 m
-135.64 516.841 l
-138.28 516.841 m
-140.92 516.841 l
-143.56 516.841 m
-146.2 516.841 l
-148.84 516.841 m
-151.48 516.841 l
-154.12 516.841 m
-156.76 516.841 l
-159.28 516.841 m
-161.92 516.841 l
-164.56 516.841 m
-167.2 516.841 l
-169.84 516.841 m
-172.48 516.841 l
-175.12 516.841 m
-177.76 516.841 l
-180.4 516.841 m
-183.04 516.841 l
-185.68 516.841 m
-188.2 516.841 l
-190.84 516.841 m
-193.48 516.841 l
-196.12 516.841 m
-198.76 516.841 l
-201.4 516.841 m
-204.04 516.841 l
-206.68 516.841 m
-209.32 516.841 l
-211.96 516.841 m
-214.6 516.841 l
-217.12 516.841 m
-219.76 516.841 l
-222.4 516.841 m
-225.04 516.841 l
-227.68 516.841 m
-230.32 516.841 l
-232.96 516.841 m
-235.6 516.841 l
-238.24 516.841 m
-240.88 516.841 l
-243.52 516.841 m
-246.04 516.841 l
-248.68 516.841 m
-251.32 516.841 l
-253.96 516.841 m
-256.6 516.841 l
-259.24 516.841 m
-261.88 516.841 l
-264.52 516.841 m
-267.16 516.841 l
-269.8 516.841 m
-272.44 516.841 l
-274.96 516.841 m
-277.6 516.841 l
-280.24 516.841 m
-282.88 516.841 l
-285.52 516.841 m
-288.16 516.841 l
-290.8 516.841 m
-293.44 516.841 l
-296.08 516.841 m
-298.72 516.841 l
-301.36 516.841 m
-303.88 516.841 l
-306.52 516.841 m
-309.16 516.841 l
-311.8 516.841 m
-314.44 516.841 l
-317.08 516.841 m
-319.72 516.841 l
-322.36 516.841 m
-325 516.841 l
-327.64 516.841 m
-330.28 516.841 l
-332.8 516.841 m
-335.44 516.841 l
-338.08 516.841 m
-340.72 516.841 l
-343.36 516.841 m
-346 516.841 l
-348.64 516.841 m
-351.28 516.841 l
-353.92 516.841 m
-356.56 516.841 l
-359.2 516.841 m
-361.72 516.841 l
-364.36 516.841 m
-367 516.841 l
-369.64 516.841 m
-372.28 516.841 l
-374.92 516.841 m
-377.56 516.841 l
-380.2 516.841 m
-382.84 516.841 l
-385.48 516.841 m
-388.12 516.841 l
-390.76 516.841 m
-393.28 516.841 l
-395.92 516.841 m
-398.56 516.841 l
-401.2 516.841 m
-403.84 516.841 l
-406.48 516.841 m
-409.12 516.841 l
-411.76 516.841 m
-414.4 516.841 l
-417.04 516.841 m
-419.68 516.841 l
-422.2 516.841 m
-424.84 516.841 l
+91.24 514.321 m
+94 514.321 l
+96.64 514.321 m
+99.28 514.321 l
+101.92 514.321 m
+104.68 514.321 l
+107.32 514.321 m
+109.96 514.321 l
+112.6 514.321 m
+115.36 514.321 l
+118 514.321 m
+120.64 514.321 l
+123.28 514.321 m
+126.04 514.321 l
+128.68 514.321 m
+131.32 514.321 l
+133.96 514.321 m
+136.72 514.321 l
+139.36 514.321 m
+142 514.321 l
+144.64 514.321 m
+147.4 514.321 l
+150.04 514.321 m
+152.68 514.321 l
+155.44 514.321 m
+158.08 514.321 l
+160.72 514.321 m
+163.36 514.321 l
+166.12 514.321 m
+168.76 514.321 l
+171.4 514.321 m
+174.04 514.321 l
+176.8 514.321 m
+179.44 514.321 l
+182.08 514.321 m
+184.72 514.321 l
+187.48 514.321 m
+190.12 514.321 l
+192.76 514.321 m
+195.4 514.321 l
+198.16 514.321 m
+200.8 514.321 l
+203.44 514.321 m
+206.08 514.321 l
+208.84 514.321 m
+211.48 514.321 l
+214.12 514.321 m
+216.88 514.321 l
+219.52 514.321 m
+222.16 514.321 l
+224.8 514.321 m
+227.56 514.321 l
+230.2 514.321 m
+232.84 514.321 l
+235.48 514.321 m
+238.24 514.321 l
+240.88 514.321 m
+243.52 514.321 l
+246.16 514.321 m
+248.92 514.321 l
+251.56 514.321 m
+254.2 514.321 l
+256.84 514.321 m
+259.6 514.321 l
+262.24 514.321 m
+264.88 514.321 l
+267.52 514.321 m
+270.28 514.321 l
+272.92 514.321 m
+275.56 514.321 l
+278.2 514.321 m
+280.96 514.321 l
+283.6 514.321 m
+286.24 514.321 l
+289 514.321 m
+291.64 514.321 l
+294.28 514.321 m
+296.92 514.321 l
+299.68 514.321 m
+302.32 514.321 l
+304.96 514.321 m
+307.6 514.321 l
+310.36 514.321 m
+313 514.321 l
+315.64 514.321 m
+318.28 514.321 l
+321.04 514.321 m
+323.68 514.321 l
+326.32 514.321 m
+328.96 514.321 l
+331.72 514.321 m
+334.36 514.321 l
+337 514.321 m
+339.64 514.321 l
+342.4 514.321 m
+345.04 514.321 l
+347.68 514.321 m
+350.44 514.321 l
+353.08 514.321 m
+355.72 514.321 l
+358.36 514.321 m
+361.12 514.321 l
+363.76 514.321 m
+366.4 514.321 l
+369.04 514.321 m
+371.8 514.321 l
+374.44 514.321 m
+377.08 514.321 l
+379.72 514.321 m
+382.48 514.321 l
+385.12 514.321 m
+387.76 514.321 l
 S
 n
-298.72 519.961 21 -5.15997 re
-1 sc
+323.68 517.561 21.36 -5.40002 re
+1  setgray
 f
 n
-298.72 514.801 m
-319.24 514.801 l
-319.24 519.481 l
-298.72 519.481 l
-298.72 514.801 l
-0 sc
+323.68 512.161 m
+344.56 512.161 l
+344.56 517.081 l
+323.68 517.081 l
+323.68 512.161 l
+0  setgray
 S
 n
-133 523.201 10.08 -310.32 re
-1 sc
+93.4 431.041 17.64 -230.88 re
+1  setgray
 f
 n
-133 212.881 m
-142.48 212.881 l
-142.48 522.601 l
-133 522.601 l
-133 212.881 l
-0 sc
+93.4 200.161 m
+110.56 200.161 l
+110.56 430.441 l
+93.4 430.441 l
+93.4 200.161 l
+0  setgray
 S
-0.104996 sc
-140.92 217.081 m
-/N21 [0 5.28 -5.28 0 0 0] Tf
-(See component finalization diagram for additional detail. Compone)
-[3.00012 2.3997 2.3997 1.32 2.3997 2.64002 4.09519 2.62735 2.62735 2.62735 2.3997 
-2.62735 1.45519 1.32 1.79994 1.43988 2.62735 2.3997 1.45519 1.45519 2.3997 2.40023 
-1.45519 1.45519 2.62735 2.62735 1.32 2.62735 1.45519 2.3997 2.64002 1.79994 2.40023 
-4.09519 1.32 1.79994 2.64002 1.79994 1.32 2.3997 2.62735 2.62735 1.45519 1.45519 
-1.45519 2.62735 2.62735 2.3997 1.45519 1.32 2.62735 2.40023 1.45519 2.3997 1.45519 
-1.45519 1.30735 1.32 3.48003 2.64002 4.09519 2.62735 2.62735 2.62735 2.33159 ] pdfys
-140.92 360.121 m
-(nt finalization is shown being )
-[2.63154 1.45938 1.32 1.7999 1.43984 2.63154 2.39967 1.45938 1.45938 2.39967 2.39967 
-1.45938 1.45938 2.63154 2.63154 1.32 1.45938 2.04542 1.32 2.04542 2.63154 2.63154 
-3.84005 2.63154 1.32 2.63154 2.39967 1.45938 2.63154 2.63154 1.32 ] pdfys
-140.92 423.961 m
-(done in parallel, but, could be)
-[2.63315 2.63315 2.63315 2.3997 1.32 1.46099 2.63315 1.32 2.63315 2.3997 1.79993 
-2.3997 1.46099 1.46099 2.3997 1.46099 1.31315 1.32 2.63315 2.63315 1.46099 1.31315 
-1.32 2.3997 2.63315 2.63315 1.46099 2.63315 1.32 2.63315 2.33739 ] pdfys
-140.92 487.081 m
-( done sequentially.)
-[1.32 2.6379 2.6379 2.6379 2.3997 1.32 2.05178 2.3997 2.6379 2.6379 2.3997 
-2.6379 1.43987 1.43987 2.40023 1.43987 1.43987 2.64002 1.3179 ] pdfys
+0.104996  setgray
+101.44 201.241 m
+/N21 [0 5.39999 -5.39999 0 0 0] Tf
+(This diagram describes the coupling portion of an ESMF application for c\omponents that run concurrently )
+[3.35876 2.75941 1.56061 2.15996 1.31976 2.75941 1.56061 2.39968 2.75995 1.79979 2.39968 
+4.20012 1.31976 2.75941 2.39968 2.15996 2.39968 1.79979 1.56007 2.75941 2.39968 2.15996 
+1.31976 1.56061 2.75941 2.39968 1.31976 2.39968 2.75941 2.75941 2.75941 1.56061 1.56061 
+2.75941 2.75941 1.31976 2.75941 2.75941 1.79979 1.56061 1.56061 2.75941 2.75941 1.31976 
+2.75941 1.79979 1.31976 2.39968 2.75995 1.31976 3.35876 3.00024 4.80002 3.00024 1.31976 
+2.39968 2.75941 2.75941 1.56061 1.56061 2.40022 2.39968 1.56061 1.56061 2.75941 2.75941 
+1.31976 1.79979 2.75995 1.79979 1.31976 2.39968 2.75995 4.20012 2.75941 2.75941 2.75941 
+2.39968 2.75941 1.56061 2.15996 1.31976 1.56061 2.75941 2.39968 1.56007 1.31976 1.79979 
+2.75941 2.75941 1.31976 2.39968 2.75941 2.75941 2.40022 2.75941 1.79979 1.79979 2.39968 
+2.75941 1.56061 1.56061 2.75941 1.31976 ] pdfys
+108.88 215.161 m
+(and coupling is done after components have completed calculations for th\e specified timespan.)
+[2.39968 2.75941 2.75941 1.31976 2.39968 2.75941 2.75941 2.75941 1.56061 1.56061 2.75941 
+2.75941 1.31976 1.56061 2.15996 1.31976 2.75941 2.75941 2.75941 2.39968 1.31976 2.39968 
+1.79979 1.56061 2.39968 1.79979 1.31976 2.39968 2.75995 4.20012 2.75941 2.75941 2.75941 
+2.39968 2.75941 1.56061 2.15996 1.31976 2.75941 2.39968 2.75941 2.39968 1.31976 2.40022 
+2.75995 4.20012 2.75995 1.56061 2.39968 1.56061 2.39968 2.75941 1.31976 2.39968 2.39968 
+1.56007 2.39968 2.75995 1.56061 2.39968 1.56061 1.56061 2.75941 2.75941 2.15996 1.31976 
+1.79979 2.75995 1.79979 1.31976 1.56061 2.75941 2.39968 1.31976 2.15996 2.75941 2.39968 
+2.40022 1.56061 1.79979 1.56061 2.39968 2.75941 1.31976 1.56061 1.56061 4.20012 2.39968 
+2.15996 2.75941 2.40022 2.75941 1.40941 ] pdfys
 n
-242.44 449.521 9.96001 -114.6 re
-1 sc
+110.2 112.561 m
+110.2 196.801 l
+109.72 196.801 l
+109.72 112.321 l
+110.2 112.321 l
+110.2 112.561 l
+0  setgray
 f
 n
-242.44 334.921 m
-251.92 334.921 l
-251.92 449.041 l
-242.44 449.041 l
-242.44 334.921 l
-0 sc
-S
-0.104996 sc
-250.36 335.401 m
-(See coupler finalization diagram for additional details.)
-[3.00013 2.39971 2.39971 1.32 2.39971 2.6263 2.6263 2.6263 1.45414 2.39971 1.79994 
-1.32 1.79994 1.43989 2.6263 2.39971 1.45414 1.45414 2.39971 2.39971 1.45414 1.45414 
-2.6263 2.6263 1.32 2.6263 1.45414 2.39971 2.64003 1.79994 2.40024 4.09414 1.32 
-1.79994 2.64003 1.79994 1.32 2.39971 2.6263 2.6263 1.45414 1.45414 1.45414 2.6263 
-2.6263 2.39971 1.45414 1.32 2.6263 2.39971 1.45414 2.39971 1.45414 1.45414 2.04018 
-1.3063 ] pdfys
-n
-93.04 540.001 10.08 -394.44 re
-1 sc
-f
-n
-93.04 145.561 m
-102.52 145.561 l
-102.52 539.521 l
-93.04 539.521 l
-93.04 145.561 l
-0 sc
-S
-0.104996 sc
-100.96 150.361 m
-(This diagram describes the Finalization portion of an ESMF application f\or components that run concurrently and coupling is don)
-[3.22499 2.63895 1.43986 2.04016 1.32 2.63895 1.43986 2.39969 2.64001 1.79992 2.39969 
-4.07986 1.32 2.63895 2.39969 2.05283 2.39969 1.79992 1.43986 2.63895 2.39969 2.05283 
-1.32 1.43986 2.64001 2.39969 1.32 3.0001 1.43986 2.63895 2.39969 1.43986 1.43986 
-2.39969 2.39969 1.43986 1.43986 2.63895 2.63895 1.32 2.63895 2.63895 1.79992 1.43986 
-1.43986 2.63895 2.63895 1.32 2.63895 1.79992 1.32 2.39969 2.64001 1.32 3.22499 
-3.0001 4.69283 3.0001 1.32 2.39969 2.63895 2.63895 1.43986 1.43986 2.39969 2.39969 
-1.43986 1.43986 2.63895 2.63895 1.32 1.79992 2.64001 1.79992 1.32 2.39969 2.64001 
-4.07986 2.63895 2.63895 2.63895 2.39969 2.63895 1.43986 2.05283 1.32 1.43986 2.64001 
-2.40022 1.43986 1.32 1.79992 2.63895 2.63895 1.32 2.40022 2.63895 2.63895 2.39969 
-2.63895 1.79992 1.79992 2.39969 2.63895 1.43986 1.43986 2.64001 1.32 2.39969 2.63895 
-2.63895 1.32 2.39969 2.63895 2.63895 2.63895 1.43986 1.43986 2.63895 2.63895 1.32 
-1.43986 2.04016 1.32 2.63895 2.63895 2.63895 ] pdfys
-100.96 425.881 m
-(e after components have completed a specified timespan.)
-[2.40023 1.32 2.40023 1.79994 1.45519 2.3997 1.79994 1.32 2.3997 2.64002 4.09519 
-2.62735 2.62735 2.62735 2.3997 2.62735 1.45519 2.04123 1.32 2.62735 2.3997 2.62735 
-2.3997 1.32 2.40023 2.64002 4.09519 2.62735 1.45519 2.3997 1.45519 2.3997 2.62735 
-1.32 2.3997 1.32 2.04123 2.62735 2.3997 2.3997 1.43988 1.79994 1.43988 2.3997 
-2.64002 1.32 1.45519 1.45519 4.09519 2.3997 2.04123 2.62735 2.40023 2.64002 1.30735 
-] pdfys
-n
-412.84 290.761 9.95999 -172.44 re
-1 sc
-f
-n
-412.84 118.321 m
-422.2 118.321 l
-422.2 290.281 l
-412.84 290.281 l
-412.84 118.321 l
-0 sc
-S
-0.104996 sc
-420.64 120.961 m
-(At this point the applications finalize method completes and the applica\tion exits)
-[3.84004 1.43983 1.32 1.43983 2.63997 1.43983 2.04012 1.32 2.63839 2.63839 1.43983 
-2.63839 1.43983 1.32 1.43983 2.63997 2.39965 1.32 2.39965 2.63839 2.63839 1.43983 
-1.43983 2.39965 2.39965 1.43983 1.43983 2.63839 2.63839 2.05227 1.32 1.79988 1.43983 
-2.63839 2.39965 1.43983 1.43983 2.39965 2.39965 1.32 4.07983 2.39965 1.43983 2.63839 
-2.63839 2.63839 1.32 2.39965 2.63997 4.07983 2.63997 1.43983 2.39965 1.43983 2.39965 
-2.05227 1.32 2.39965 2.63839 2.63839 1.32 1.43983 2.63997 2.39965 1.32 2.40018 
-2.63839 2.63839 1.43983 1.43983 2.40018 2.39965 1.43983 1.43983 2.63839 2.63839 1.32 
-2.39965 2.63997 1.43983 1.43983 2.05227 ] pdfys
-n
-109.6 136.681 m
-109.6 160.561 l
-109.12 160.561 l
-109.12 136.441 l
-109.6 136.441 l
-109.6 136.681 l
-0 sc
-f
-n
-109.36 160.081 m
-114.88 160.081 l
-114.88 160.561 l
-109.12 160.561 l
-109.12 160.081 l
-109.36 160.081 l
-f
-n
-114.4 160.321 m
-114.4 136.441 l
-114.88 136.441 l
-114.88 160.561 l
-114.4 160.561 l
-114.4 160.321 l
-f
-n
-114.64 137.161 m
-110.92 143.521 l
-118.36 143.521 l
+109.96 195.961 m
+113.68 189.481 l
+106.24 189.481 l
 eofill
 n
-114.88 137.281 m
-111.16 143.641 l
-110.92 143.521 l
-110.92 143.281 l
-118.36 143.281 l
-118.36 143.521 l
-118.12 143.641 l
-114.4 137.281 l
-114.64 137.161 l
-114.88 137.281 l
+109.72 195.841 m
+113.44 189.361 l
+113.68 189.481 l
+113.68 189.841 l
+106.24 189.841 l
+106.24 189.481 l
+106.48 189.361 l
+110.2 195.841 l
+109.96 195.961 l
+109.72 195.841 l
 h
-114.88 137.041 m
-118.6 143.401 l
-118.72 143.761 l
-110.44 143.761 l
-110.68 143.401 l
-114.4 137.041 l
-114.64 136.681 l
-114.88 137.041 l
+109.72 196.081 m
+106 189.721 l
+105.76 189.241 l
+114.16 189.241 l
+113.92 189.721 l
+110.2 196.081 l
+109.96 196.441 l
+109.72 196.081 l
 f
-107.8 111.961 m
-/N10 [0 5.28 -5.28 0 0 0] Tf
-(1 : Invoke finalize method)
-[2.99796 1.4398 1.43983 1.4398 1.43983 3.00007 2.63997 3.00007 2.63997 3.00007 1.4398 
-1.43983 1.20004 2.99796 2.99796 1.20004 1.20004 2.63997 2.99796 1.4398 4.46048 2.99796 
-1.43983 2.99796 2.99796 2.99796 ] pdfys
+108.4 132.961 m
+/N10 [0 5.39999 -5.39999 0 0 0] Tf
+(1 : Invoke coupler)
+[3.00075 1.56003 1.56003 1.56003 1.56003 3.00021 2.75991 3.00021 2.75991 3.00021 1.56003 
+2.75991 3.00075 3.00075 3.00075 1.19707 3.00075 1.79651 ] pdfys
 n
-130.72 136.681 m
-130.72 202.681 l
-130.12 202.681 l
-130.12 136.441 l
-130.72 136.441 l
-130.72 136.681 l
+131.56 201.841 m
+131.56 283.801 l
+131.08 283.801 l
+131.08 201.601 l
+131.56 201.601 l
+131.56 201.841 l
 f
 n
-130.36 201.841 m
-130.36 199.201 l
-126.76 195.601 l
+131.32 283.081 m
+135.04 276.601 l
+127.6 276.601 l
 eofill
 n
-130.12 201.841 m
-130.12 199.201 l
-130.36 199.201 l
-130.24 199.441 l
-126.52 195.721 l
-127 195.481 l
-130.6 201.721 l
-130.36 201.841 l
-130.12 201.841 l
+131.08 282.841 m
+134.8 276.481 l
+135.04 276.601 l
+135.04 276.841 l
+127.6 276.841 l
+127.6 276.601 l
+127.84 276.481 l
+131.56 282.841 l
+131.32 283.081 l
+131.08 282.841 l
 h
-130.24 201.961 m
-126.52 195.721 l
-125.44 193.921 l
-130.72 199.201 l
-130.72 202.801 l
-130.24 201.961 l
+131.08 283.201 m
+127.36 276.721 l
+127.12 276.361 l
+135.52 276.361 l
+135.28 276.721 l
+131.56 283.201 l
+131.32 283.561 l
+131.08 283.201 l
 f
-128.8 141.361 m
-(2 : Finalize Atmosphere)
-[2.99643 1.43988 1.43988 1.43988 3.23979 1.20009 2.99643 2.99643 1.20009 1.20009 2.64003 
-2.99643 1.43988 3.48003 1.43988 4.45895 2.99643 2.64003 2.99643 2.99643 2.99643 1.81895 
-2.99643 ] pdfys
+129.76 213.601 m
+(2 : get Export State info)
+[3.00075 1.56003 1.56003 1.56003 3.00075 3.00075 1.56003 1.56003 3.60011 2.75991 3.00075 
+3.00075 1.79651 1.56003 1.56003 3.60011 1.56003 3.00075 1.56003 3.00075 1.56003 1.19707 
+3.00075 1.56003 3.00075 ] pdfys
 n
-172.48 202.441 m
-172.48 199.801 l
-172.48 197.161 m
-172.48 194.521 l
-172.48 191.881 m
-172.48 189.241 l
-172.48 186.601 m
-172.48 183.961 l
-172.48 181.321 m
-172.48 178.801 l
-172.48 176.161 m
-172.48 173.521 l
-172.48 170.881 m
-172.48 168.241 l
-172.48 165.601 m
-172.48 162.961 l
-172.48 160.321 m
-172.48 157.681 l
-172.48 155.041 m
-172.48 152.401 l
-172.48 149.881 m
-172.48 147.241 l
-172.48 144.601 m
-172.48 141.961 l
-172.48 139.321 m
-172.48 136.681 l
-168.76 143.521 m
-172.48 137.161 l
-176.2 143.521 m
-172.48 137.161 l
+174.4 201.841 m
+174.4 226.081 l
+173.8 226.081 l
+173.8 201.601 l
+174.4 201.601 l
+174.4 201.841 l
+f
+n
+174.04 225.601 m
+179.68 225.601 l
+179.68 226.081 l
+173.8 226.081 l
+173.8 225.601 l
+174.04 225.601 l
+f
+n
+179.2 225.841 m
+179.2 201.601 l
+179.68 201.601 l
+179.68 226.081 l
+179.2 226.081 l
+179.2 225.841 l
+f
+n
+179.44 202.321 m
+175.72 208.801 l
+183.16 208.801 l
+eofill
+n
+179.68 202.441 m
+175.96 208.921 l
+175.72 208.801 l
+175.72 208.441 l
+183.16 208.441 l
+183.16 208.801 l
+182.92 208.921 l
+179.2 202.441 l
+179.44 202.321 l
+179.68 202.441 l
+h
+179.68 202.201 m
+183.4 208.681 l
+183.64 209.041 l
+175.24 209.041 l
+175.48 208.681 l
+179.2 202.201 l
+179.44 201.841 l
+179.68 202.201 l
+f
+172.48 162.241 m
+(3 : apply regridding, conversions, etc.)
+[3.00075 1.56003 1.56003 1.56003 3.00075 3.00075 3.00075 1.19707 2.75991 1.56003 1.79651 
+3.00075 3.00075 1.79651 1.19707 3.00075 3.00075 1.19707 3.00075 3.00075 1.56003 1.56003 
+2.75991 3.00075 3.00075 2.75991 3.00075 1.79651 2.75991 1.19977 3.00075 3.00075 2.75991 
+1.56003 1.56003 3.00075 1.56003 2.75991 1.49955 ] pdfys
+n
+195.76 201.841 m
+195.76 360.241 l
+195.16 360.241 l
+195.16 201.601 l
+195.76 201.601 l
+195.76 201.841 l
+f
+n
+195.4 359.401 m
+199.24 353.041 l
+191.68 353.041 l
+eofill
+n
+195.28 359.281 m
+199 352.921 l
+199.24 353.041 l
+199.24 353.281 l
+191.68 353.281 l
+191.68 353.041 l
+191.92 352.921 l
+195.64 359.281 l
+195.4 359.401 l
+195.28 359.281 l
+h
+195.28 359.521 m
+191.44 353.161 l
+191.2 352.801 l
+199.6 352.801 l
+199.48 353.161 l
+195.64 359.521 l
+195.4 360.001 l
+195.28 359.521 l
+f
+193.84 250.921 m
+(4 : Pack date in XPacket)
+[3.00075 1.56003 1.56003 1.56003 3.60011 3.00075 2.75991 2.75991 1.56003 3.00075 3.00075 
+1.56003 3.00075 1.56003 1.19707 3.00075 1.56003 3.60011 3.60011 3.00075 2.75991 2.75991 
+3.00021 1.49955 ] pdfys
+n
+238.48 201.841 m
+238.48 438.721 l
+237.88 438.721 l
+237.88 201.601 l
+238.48 201.601 l
+238.48 201.841 l
+f
+n
+238.24 438.001 m
+238.24 435.241 l
+234.4 431.521 l
+eofill
+n
+237.88 438.001 m
+237.88 435.241 l
+238.24 435.241 l
+238 435.481 l
+234.28 431.761 l
+234.4 431.521 l
+234.64 431.401 l
+238.48 437.881 l
+238.24 438.001 l
+237.88 438.001 l
+h
+238 438.121 m
+234.28 431.641 l
+233.2 429.961 l
+238.36 435.121 l
+238.48 435.121 l
+238.48 438.961 l
+238 438.121 l
+f
+236.56 244.561 m
+(5 : Output xpacket is sent to input xpacket for other component)
+[3.00075 1.56003 1.56003 1.56003 4.19955 3.00075 1.56003 3.00075 3.00075 1.56003 1.56003 
+2.75991 3.00075 3.00075 2.75991 2.75991 3.00021 1.56003 1.56003 1.19707 2.75991 1.56003 
+2.75991 3.00075 3.00075 1.56003 1.56003 1.56003 3.00021 1.56003 1.19707 3.00075 3.00075 
+3.00075 1.56003 1.56003 2.75991 3.00075 3.00075 2.75991 2.75991 3.00021 1.56003 1.56003 
+1.56003 3.00021 1.79651 1.56003 3.00075 1.56003 3.00075 3.00075 1.79651 1.56003 2.75991 
+2.99967 4.55969 3.00075 3.00075 3.00075 3.00075 3.00075 1.49955 ] pdfys
+n
+281.2 201.841 m
+281.2 438.721 l
+280.72 438.721 l
+280.72 201.601 l
+281.2 201.601 l
+281.2 201.841 l
+f
+n
+280.96 438.001 m
+284.68 431.521 l
+277.24 431.521 l
+eofill
+n
+280.72 437.881 m
+284.44 431.401 l
+284.68 431.521 l
+284.68 431.761 l
+277.24 431.761 l
+277.24 431.521 l
+277.48 431.401 l
+281.2 437.881 l
+280.96 438.001 l
+280.72 437.881 l
+h
+280.72 438.121 m
+277 431.641 l
+276.76 431.281 l
+285.16 431.281 l
+284.92 431.641 l
+281.2 438.121 l
+280.96 438.481 l
+280.72 438.121 l
+f
+279.28 285.121 m
+(6 : extract data from XPacket)
+[3.00075 1.56061 1.56057 1.56061 3.00075 2.76045 1.56057 1.80029 3.00075 2.76045 1.56057 
+1.56061 3.00075 3.00075 1.56057 3.00075 1.56061 1.56057 1.80029 3.00075 4.56077 1.56061 
+3.60011 3.60011 3.00075 2.76045 2.76045 3.00075 1.49955 ] pdfys
+n
+323.92 201.841 m
+323.92 512.521 l
+323.44 512.521 l
+323.44 201.601 l
+323.92 201.601 l
+323.92 201.841 l
+f
+n
+323.68 511.681 m
+327.4 505.321 l
+319.96 505.321 l
+eofill
+n
+323.44 511.561 m
+327.16 505.081 l
+327.4 505.321 l
+327.4 505.561 l
+319.96 505.561 l
+319.96 505.321 l
+320.2 505.081 l
+323.92 511.561 l
+323.68 511.681 l
+323.44 511.561 l
+h
+323.44 511.801 m
+319.72 505.441 l
+319.48 504.961 l
+327.88 504.961 l
+327.64 505.441 l
+323.92 511.801 l
+323.68 512.161 l
+323.44 511.801 l
+f
+322.12 303.841 m
+(7 : Update Import State of other Component)
+[3.00075 1.56061 1.56057 1.56061 3.96025 3.00075 3.00075 3.00075 1.56057 3.00075 1.56061 
+1.56057 4.56077 3.00075 3.00075 1.79651 1.56057 1.56061 3.60011 1.56057 3.00075 1.56057 
+3.00075 1.56061 3.00075 1.56057 1.56061 3.00075 1.56057 3.00075 3.00075 1.79651 1.56061 
+3.96025 3.00075 4.56023 3.00075 3.00075 3.00075 3.00075 3.00075 1.49955 ] pdfys
+n
+366.4 196.441 m
+366.4 193.801 l
+366.4 191.161 m
+366.4 188.521 l
+366.4 185.761 m
+366.4 183.121 l
+366.4 180.481 m
+366.4 177.841 l
+366.4 175.081 m
+366.4 172.441 l
+366.4 169.801 m
+366.4 167.041 l
+366.4 164.401 m
+366.4 161.761 l
+366.4 159.121 m
+366.4 156.361 l
+366.4 153.721 m
+366.4 151.081 l
+366.4 148.441 m
+366.4 145.681 l
+366.4 143.041 m
+366.4 140.401 l
+366.4 137.761 m
+366.4 135.001 l
+366.4 132.361 m
+366.4 129.721 l
+366.4 127.081 m
+366.4 124.321 l
+366.4 121.681 m
+366.4 119.041 l
+366.4 116.401 m
+366.4 115.321 l
+362.68 122.161 m
+366.4 115.801 l
+370.12 122.161 m
+366.4 115.801 l
+152.68 283.561 m
+152.68 280.921 l
+152.68 278.161 m
+152.68 275.521 l
+152.68 272.881 m
+152.68 270.241 l
+152.68 267.481 m
+152.68 264.841 l
+152.68 262.201 m
+152.68 259.561 l
+152.68 256.801 m
+152.68 254.161 l
+152.68 251.521 m
+152.68 248.881 l
+152.68 246.121 m
+152.68 243.481 l
+152.68 240.841 m
+152.68 238.201 l
+152.68 235.441 m
+152.68 232.801 l
+152.68 230.161 m
+152.68 227.521 l
+152.68 224.761 m
+152.68 222.121 l
+152.68 219.481 m
+152.68 216.841 l
+152.68 214.081 m
+152.68 211.441 l
+152.68 208.801 m
+152.68 206.041 l
+152.68 203.401 m
+152.68 201.841 l
+148.96 208.801 m
+152.68 202.321 l
+156.4 208.801 m
+152.68 202.321 l
+216.88 360.001 m
+216.88 357.241 l
+216.88 354.601 m
+216.88 351.961 l
+216.88 349.321 m
+216.88 346.561 l
+216.88 343.921 m
+216.88 341.281 l
+216.88 338.641 m
+216.88 335.881 l
+216.88 333.241 m
+216.88 330.601 l
+216.88 327.961 m
+216.88 325.201 l
+216.88 322.561 m
+216.88 319.921 l
+216.88 317.161 m
+216.88 314.521 l
+216.88 311.881 m
+216.88 309.241 l
+216.88 306.481 m
+216.88 303.841 l
+216.88 301.201 m
+216.88 298.561 l
+216.88 295.801 m
+216.88 293.161 l
+216.88 290.521 m
+216.88 287.881 l
+216.88 285.121 m
+216.88 282.481 l
+216.88 279.841 m
+216.88 277.201 l
+216.88 274.441 m
+216.88 271.801 l
+216.88 269.161 m
+216.88 266.521 l
+216.88 263.761 m
+216.88 261.121 l
+216.88 258.481 m
+216.88 255.841 l
+216.88 253.081 m
+216.88 250.441 l
+216.88 247.801 m
+216.88 245.041 l
+216.88 242.401 m
+216.88 239.761 l
+216.88 237.121 m
+216.88 234.361 l
+216.88 231.721 m
+216.88 229.081 l
+216.88 226.441 m
+216.88 223.681 l
+216.88 221.041 m
+216.88 218.401 l
+216.88 215.761 m
+216.88 213.001 l
 S
 n
-151.72 136.681 m
-151.72 264.721 l
-151.12 264.721 l
-151.12 136.441 l
-151.72 136.441 l
-151.72 136.681 l
-f
-n
-151.48 263.881 m
-151.48 261.361 l
-147.76 257.641 l
-eofill
-n
-151.12 263.881 m
-151.12 261.361 l
-151.48 261.361 l
-151.24 261.481 l
-147.52 257.761 l
-148 257.521 l
-151.72 263.761 l
-151.48 263.881 l
-151.12 263.881 l
-h
-151.24 264.121 m
-147.52 257.761 l
-146.56 255.961 l
-148 257.401 l
-151.6 261.121 l
-151.72 261.241 l
-151.72 264.961 l
-151.24 264.121 l
-f
-149.92 179.281 m
-(3 : Finalize Ocean)
-[3.00013 1.43988 1.43989 1.43988 3.2398 1.2001 3.00013 3.00013 1.2001 1.2001 2.64004 
-3.00013 1.43988 4.07989 2.64004 3.00013 3.00013 3.00013 ] pdfys
-n
-193.48 264.481 m
-193.48 261.841 l
-193.48 259.201 m
-193.48 256.561 l
-193.48 253.921 m
-193.48 251.281 l
-193.48 248.641 m
-193.48 246.001 l
-193.48 243.481 m
-193.48 240.841 l
-193.48 238.201 m
-193.48 235.561 l
-193.48 232.921 m
-193.48 230.281 l
-193.48 227.641 m
-193.48 225.001 l
-193.48 222.361 m
-193.48 219.721 l
-193.48 217.081 m
-193.48 214.561 l
-193.48 211.921 m
-193.48 209.281 l
-193.48 206.641 m
-193.48 204.001 l
-193.48 201.361 m
-193.48 198.721 l
-193.48 196.081 m
-193.48 193.441 l
-193.48 190.801 m
-193.48 188.161 l
-193.48 185.641 m
-193.48 183.001 l
-193.48 180.361 m
-193.48 177.721 l
-193.48 175.081 m
-193.48 172.441 l
-193.48 169.801 m
-193.48 167.161 l
-193.48 164.521 m
-193.48 161.881 l
-193.48 159.241 m
-193.48 156.721 l
-193.48 154.081 m
-193.48 151.441 l
-193.48 148.801 m
-193.48 146.161 l
-193.48 143.521 m
-193.48 140.881 l
-193.48 138.241 m
-193.48 136.681 l
-189.88 143.521 m
-193.48 137.161 l
-197.2 143.521 m
-193.48 137.161 l
+216.88 210.361 m
+216.88 207.721 l
+216.88 205.081 m
+216.88 202.321 l
+213.04 208.801 m
+216.88 202.321 l
+220.6 208.801 m
+216.88 202.321 l
+259.6 438.481 m
+259.6 435.841 l
+259.6 433.201 m
+259.6 430.441 l
+259.6 427.801 m
+259.6 425.161 l
+259.6 422.521 m
+259.6 419.761 l
+259.6 417.121 m
+259.6 414.481 l
+259.6 411.841 m
+259.6 409.081 l
+259.6 406.441 m
+259.6 403.801 l
+259.6 401.041 m
+259.6 398.401 l
+259.6 395.761 m
+259.6 393.121 l
+259.6 390.361 m
+259.6 387.721 l
+259.6 385.081 m
+259.6 382.441 l
+259.6 379.681 m
+259.6 377.041 l
+259.6 374.401 m
+259.6 371.761 l
+259.6 369.001 m
+259.6 366.361 l
+259.6 363.721 m
+259.6 361.081 l
+259.6 358.321 m
+259.6 355.681 l
+259.6 353.041 m
+259.6 350.401 l
+259.6 347.641 m
+259.6 345.001 l
+259.6 342.361 m
+259.6 339.601 l
+259.6 336.961 m
+259.6 334.321 l
+259.6 331.681 m
+259.6 328.921 l
+259.6 326.281 m
+259.6 323.641 l
+259.6 321.001 m
+259.6 318.241 l
+259.6 315.601 m
+259.6 312.961 l
+259.6 310.321 m
+259.6 307.561 l
+259.6 304.921 m
+259.6 302.281 l
+259.6 299.641 m
+259.6 296.881 l
+259.6 294.241 m
+259.6 291.601 l
+259.6 288.961 m
+259.6 286.201 l
+259.6 283.561 m
+259.6 280.921 l
+259.6 278.161 m
+259.6 275.521 l
+259.6 272.881 m
+259.6 270.241 l
+259.6 267.481 m
+259.6 264.841 l
+259.6 262.201 m
+259.6 259.561 l
+259.6 256.801 m
+259.6 254.161 l
+259.6 251.521 m
+259.6 248.881 l
+259.6 246.121 m
+259.6 243.481 l
+259.6 240.841 m
+259.6 238.201 l
+259.6 235.441 m
+259.6 232.801 l
+259.6 230.161 m
+259.6 227.521 l
+259.6 224.761 m
+259.6 222.121 l
+259.6 219.481 m
+259.6 216.841 l
+259.6 214.081 m
+259.6 211.441 l
+259.6 208.801 m
+259.6 206.041 l
+259.6 203.401 m
+259.6 201.841 l
+255.88 208.801 m
+259.6 202.321 l
+263.32 208.801 m
+259.6 202.321 l
+302.32 438.481 m
+302.32 435.841 l
+302.32 433.201 m
+302.32 430.441 l
+302.32 427.801 m
+302.32 425.161 l
+302.32 422.521 m
+302.32 419.761 l
+302.32 417.121 m
+302.32 414.481 l
+302.32 411.841 m
+302.32 409.081 l
+302.32 406.441 m
+302.32 403.801 l
+302.32 401.041 m
+302.32 398.401 l
+302.32 395.761 m
+302.32 393.121 l
+302.32 390.361 m
+302.32 387.721 l
+302.32 385.081 m
+302.32 382.441 l
+302.32 379.681 m
+302.32 377.041 l
+302.32 374.401 m
+302.32 371.761 l
 S
 n
-214.84 136.681 m
-214.84 339.961 l
-214.24 339.961 l
-214.24 136.441 l
-214.84 136.441 l
-214.84 136.681 l
-f
-n
-214.6 339.121 m
-218.2 332.761 l
-210.88 332.761 l
-eofill
-n
-214.36 339.001 m
-217.96 332.641 l
-218.2 332.761 l
-218.2 333.121 l
-210.88 333.121 l
-210.88 332.761 l
-211.12 332.641 l
-214.72 339.001 l
-214.6 339.121 l
-214.36 339.001 l
-h
-214.36 339.241 m
-210.64 333.001 l
-210.4 332.521 l
-218.68 332.521 l
-218.44 333.001 l
-214.72 339.241 l
-214.6 339.601 l
-214.36 339.241 l
-f
-212.92 215.521 m
-(4 : Finalize Coupler)
-[3.00013 1.43988 1.43989 1.43988 3.2398 1.2001 3.00013 3.00013 1.2001 1.2001 2.64004 
-3.00013 1.43988 3.8401 3.00013 3.00013 3.00013 1.2001 3.00013 1.82265 ] pdfys
-n
-256.84 136.681 m
-256.84 436.681 l
-256.36 436.681 l
-256.36 136.441 l
-256.84 136.441 l
-256.84 136.681 l
-f
-n
-256.6 435.841 m
-260.32 429.601 l
-252.88 429.601 l
-eofill
-n
-256.36 435.721 m
-260.08 429.481 l
-260.32 429.601 l
-260.32 429.841 l
-252.88 429.841 l
-252.88 429.601 l
-253.12 429.481 l
-256.84 435.721 l
-256.6 435.841 l
-256.36 435.721 l
-h
-256.36 435.961 m
-252.76 429.721 l
-252.52 429.361 l
-260.8 429.361 l
-260.56 429.721 l
-256.84 435.961 l
-256.6 436.441 l
-256.36 435.961 l
-f
-255.04 263.881 m
-(5 : Finalize Coupler)
-[3.00013 1.43988 1.43989 1.43988 3.2398 1.2001 3.00013 3.00013 1.2001 1.2001 2.64004 
-3.00013 1.43988 3.8401 3.00013 3.00013 3.00013 1.2001 3.00013 1.82265 ] pdfys
-n
-299.44 136.681 m
-299.44 515.041 l
-298.96 515.041 l
-298.96 136.441 l
-299.44 136.441 l
-299.44 136.681 l
-f
-n
-299.2 514.201 m
-302.92 507.961 l
-295.48 507.961 l
-eofill
-n
-298.96 514.081 m
-302.68 507.841 l
-302.92 507.961 l
-302.92 508.201 l
-295.48 508.201 l
-295.48 507.961 l
-295.72 507.841 l
-299.44 514.081 l
-299.2 514.201 l
-298.96 514.081 l
-h
-298.96 514.321 m
-295.24 508.081 l
-295.12 507.721 l
-303.4 507.721 l
-303.16 508.081 l
-299.44 514.321 l
-299.2 514.801 l
-298.96 514.321 l
-f
-297.64 302.281 m
-(6 : Finalize Registry)
-[2.99586 1.43988 1.43985 1.43988 3.23976 1.20005 2.99586 2.99586 1.20005 1.20005 2.63999 
-2.99586 1.43988 3.84005 2.99586 2.99586 1.20005 2.63999 1.43985 1.81838 2.70018 ] pdfys
-n
-340.96 136.681 m
-340.96 160.561 l
-340.48 160.561 l
-340.48 136.441 l
-340.96 136.441 l
-340.96 136.681 l
-f
-n
-340.72 160.081 m
-346.24 160.081 l
-346.24 160.561 l
-340.48 160.561 l
-340.48 160.081 l
-340.72 160.081 l
-f
-n
-345.76 160.321 m
-345.76 136.441 l
-346.24 136.441 l
-346.24 160.561 l
-345.76 160.561 l
-345.76 160.321 l
-f
-n
-346 137.161 m
-342.28 143.521 l
-349.72 143.521 l
-eofill
-n
-346.24 137.281 m
-342.52 143.641 l
-342.28 143.521 l
-342.28 143.281 l
-349.72 143.281 l
-349.72 143.521 l
-349.48 143.641 l
-345.76 137.281 l
-346 137.161 l
-346.24 137.281 l
-h
-346.24 137.041 m
-349.96 143.401 l
-350.2 143.761 l
-341.92 143.761 l
-342.04 143.401 l
-345.76 137.041 l
-346 136.681 l
-346.24 137.041 l
-f
-339.16 114.121 m
-(7 : do additional cleanup)
-[3.00013 1.43988 1.43989 1.43988 3.00013 3.00013 1.43988 3.00013 3.00013 3.00013 1.2001 
-1.43989 1.2001 3.00013 3.00013 3.00013 1.2001 1.43988 2.64004 1.2001 3.00013 3.00013 
-3.00013 3.00013 3.00013 ] pdfys
-n
-362.08 136.681 m
-362.08 160.561 l
-361.48 160.561 l
-361.48 136.441 l
-362.08 136.441 l
-362.08 136.681 l
-f
-n
-361.72 160.081 m
-367.36 160.081 l
-367.36 160.561 l
-361.48 160.561 l
-361.48 160.081 l
-361.72 160.081 l
-f
-n
-366.76 160.321 m
-366.76 136.441 l
-367.36 136.441 l
-367.36 160.561 l
-366.76 160.561 l
-366.76 160.321 l
-f
-n
-367 137.161 m
-363.4 143.521 l
-370.72 143.521 l
-eofill
-n
-367.24 137.281 m
-363.64 143.641 l
-363.4 143.521 l
-363.4 143.281 l
-370.72 143.281 l
-370.72 143.521 l
-370.48 143.641 l
-366.76 137.281 l
-367 137.161 l
-367.24 137.281 l
-h
-367.24 137.041 m
-370.96 143.401 l
-371.2 143.761 l
-362.92 143.761 l
-363.16 143.401 l
-366.76 137.041 l
-367 136.681 l
-367.24 137.041 l
-f
-360.16 120.361 m
-(8 : close open files)
-[3.00013 1.43988 1.43989 1.43988 2.64004 1.2001 3.00013 2.64004 3.00013 1.43988 3.00013 
-3.00013 3.00013 3.00013 1.43988 1.43989 1.2001 1.2001 3.00013 2.70445 ] pdfys
-n
-383.08 136.681 m
-383.08 160.561 l
-382.6 160.561 l
-382.6 136.441 l
-383.08 136.441 l
-383.08 136.681 l
-f
-n
-382.84 160.081 m
-388.36 160.081 l
-388.36 160.561 l
-382.6 160.561 l
-382.6 160.081 l
-382.84 160.081 l
-f
-n
-387.76 160.321 m
-387.76 136.441 l
-388.36 136.441 l
-388.36 160.561 l
-387.76 160.561 l
-387.76 160.321 l
-f
-n
-388.12 137.161 m
-384.4 143.521 l
-391.72 143.521 l
-eofill
-n
-388.24 137.281 m
-384.64 143.641 l
-384.4 143.521 l
-384.4 143.281 l
-391.72 143.281 l
-391.72 143.521 l
-391.48 143.641 l
-387.88 137.281 l
-388.12 137.161 l
-388.24 137.281 l
-h
-388.24 137.041 m
-391.96 143.401 l
-392.2 143.761 l
-383.92 143.761 l
-384.16 143.401 l
-387.88 137.041 l
-388.12 136.681 l
-388.24 137.041 l
-f
-381.28 107.281 m
-(9 : close open communicators)
-[2.99481 1.43988 1.43985 1.43988 2.64 1.20006 2.99481 2.64 2.99481 1.43988 2.99481 
-2.99481 2.99481 2.99481 1.43988 2.64 3.00009 4.45734 4.45734 2.99481 2.99481 1.20006 
-2.64 3.00009 1.43985 3.00009 1.81734 2.69914 ] pdfys
-n
-235.6 339.601 m
-235.6 337.081 l
-235.6 334.441 m
-235.6 331.801 l
-235.6 329.161 m
-235.6 326.521 l
-235.6 323.881 m
-235.6 321.241 l
-235.6 318.601 m
-235.6 315.961 l
-235.6 313.321 m
-235.6 310.681 l
-235.6 308.161 m
-235.6 305.521 l
-235.6 302.881 m
-235.6 300.241 l
-235.6 297.601 m
-235.6 294.961 l
-235.6 292.321 m
-235.6 289.681 l
-235.6 287.041 m
-235.6 284.401 l
-235.6 281.761 m
-235.6 279.241 l
-235.6 276.601 m
-235.6 273.961 l
-235.6 271.321 m
-235.6 268.681 l
-235.6 266.041 m
-235.6 263.401 l
-235.6 260.761 m
-235.6 258.121 l
-235.6 255.481 m
-235.6 252.841 l
-235.6 250.321 m
-235.6 247.681 l
-235.6 245.041 m
-235.6 242.401 l
-235.6 239.761 m
-235.6 237.121 l
-235.6 234.481 m
-235.6 231.841 l
-235.6 229.201 m
-235.6 226.561 l
-235.6 223.921 m
-235.6 221.281 l
-235.6 218.761 m
-235.6 216.121 l
-235.6 213.481 m
-235.6 210.841 l
-235.6 208.201 m
-235.6 205.561 l
-235.6 202.921 m
-235.6 200.281 l
-235.6 197.641 m
-235.6 195.001 l
-235.6 192.361 m
-235.6 189.841 l
-235.6 187.201 m
-235.6 184.561 l
-235.6 181.921 m
-235.6 179.281 l
-235.6 176.641 m
-235.6 174.001 l
-235.6 171.361 m
-235.6 168.721 l
-235.6 166.081 m
-235.6 163.441 l
-235.6 160.921 m
-235.6 158.281 l
-235.6 155.641 m
-235.6 153.001 l
-235.6 150.361 m
-235.6 147.721 l
-235.6 145.081 m
-235.6 142.441 l
-235.6 139.801 m
-235.6 137.161 l
-231.88 143.521 m
-235.6 137.161 l
-239.2 143.521 m
-235.6 137.161 l
-277.6 436.441 m
-277.6 433.801 l
-277.6 431.161 m
-277.6 428.521 l
-277.6 425.881 m
-277.6 423.241 l
-277.6 420.601 m
-277.6 417.961 l
-277.6 415.321 m
-277.6 412.801 l
-277.6 410.161 m
-277.6 407.521 l
-277.6 404.881 m
-277.6 402.241 l
-277.6 399.601 m
-277.6 396.961 l
-277.6 394.321 m
-277.6 391.681 l
-277.6 389.041 m
-277.6 386.401 l
-277.6 383.881 m
-277.6 381.241 l
-277.6 378.601 m
-277.6 375.961 l
-277.6 373.321 m
-277.6 370.681 l
-277.6 368.041 m
-277.6 365.401 l
-277.6 362.761 m
-277.6 360.121 l
-277.6 357.481 m
-277.6 354.961 l
-277.6 352.321 m
-277.6 349.681 l
-277.6 347.041 m
-277.6 344.401 l
-277.6 341.761 m
-277.6 339.121 l
-277.6 336.481 m
-277.6 333.841 l
-277.6 331.201 m
-277.6 328.561 l
-277.6 326.041 m
-277.6 323.401 l
-277.6 320.761 m
-277.6 318.121 l
+302.32 369.001 m
+302.32 366.361 l
+302.32 363.721 m
+302.32 361.081 l
+302.32 358.321 m
+302.32 355.681 l
+302.32 353.041 m
+302.32 350.401 l
+302.32 347.641 m
+302.32 345.001 l
+302.32 342.361 m
+302.32 339.601 l
+302.32 336.961 m
+302.32 334.321 l
+302.32 331.681 m
+302.32 328.921 l
+302.32 326.281 m
+302.32 323.641 l
+302.32 321.001 m
+302.32 318.241 l
+302.32 315.601 m
+302.32 312.961 l
+302.32 310.321 m
+302.32 307.561 l
+302.32 304.921 m
+302.32 302.281 l
+302.32 299.641 m
+302.32 296.881 l
+302.32 294.241 m
+302.32 291.601 l
+302.32 288.961 m
+302.32 286.201 l
+302.32 283.561 m
+302.32 280.921 l
+302.32 278.161 m
+302.32 275.521 l
+302.32 272.881 m
+302.32 270.241 l
+302.32 267.481 m
+302.32 264.841 l
+302.32 262.201 m
+302.32 259.561 l
+302.32 256.801 m
+302.32 254.161 l
+302.32 251.521 m
+302.32 248.881 l
+302.32 246.121 m
+302.32 243.481 l
+302.32 240.841 m
+302.32 238.201 l
+302.32 235.441 m
+302.32 232.801 l
+302.32 230.161 m
+302.32 227.521 l
+302.32 224.761 m
+302.32 222.121 l
+302.32 219.481 m
+302.32 216.841 l
+302.32 214.081 m
+302.32 211.441 l
+302.32 208.801 m
+302.32 206.041 l
+302.32 203.401 m
+302.32 201.841 l
+298.6 208.801 m
+302.32 202.321 l
+306.04 208.801 m
+302.32 202.321 l
+345.04 512.161 m
+345.04 509.521 l
+345.04 506.881 m
+345.04 504.241 l
+345.04 501.481 m
+345.04 498.841 l
+345.04 496.201 m
+345.04 493.561 l
+345.04 490.801 m
+345.04 488.161 l
+345.04 485.521 m
+345.04 482.881 l
+345.04 480.121 m
+345.04 477.481 l
+345.04 474.841 m
+345.04 472.201 l
+345.04 469.441 m
+345.04 466.801 l
+345.04 464.161 m
+345.04 461.521 l
+345.04 458.761 m
+345.04 456.121 l
+345.04 453.481 m
+345.04 450.841 l
+345.04 448.081 m
+345.04 445.441 l
+345.04 442.801 m
+345.04 440.041 l
+345.04 437.401 m
+345.04 434.761 l
+345.04 432.121 m
+345.04 429.361 l
+345.04 426.721 m
+345.04 424.081 l
+345.04 421.441 m
+345.04 418.681 l
+345.04 416.041 m
+345.04 413.401 l
+345.04 410.761 m
+345.04 408.001 l
+345.04 405.361 m
+345.04 402.721 l
+345.04 400.081 m
+345.04 397.321 l
+345.04 394.681 m
+345.04 392.041 l
+345.04 389.401 m
+345.04 386.641 l
+345.04 384.001 m
+345.04 381.361 l
+345.04 378.601 m
+345.04 375.961 l
+345.04 373.321 m
+345.04 370.681 l
+345.04 367.921 m
+345.04 365.281 l
+345.04 362.641 m
+345.04 360.001 l
+345.04 357.241 m
+345.04 354.601 l
 S
 n
-277.6 315.481 m
-277.6 312.841 l
-277.6 310.201 m
-277.6 307.561 l
-277.6 304.921 m
-277.6 302.281 l
-277.6 299.641 m
-277.6 297.121 l
-277.6 294.481 m
-277.6 291.841 l
-277.6 289.201 m
-277.6 286.561 l
-277.6 283.921 m
-277.6 281.281 l
-277.6 278.641 m
-277.6 276.001 l
-277.6 273.361 m
-277.6 270.721 l
-277.6 268.081 m
-277.6 265.561 l
-277.6 262.921 m
-277.6 260.281 l
-277.6 257.641 m
-277.6 255.001 l
-277.6 252.361 m
-277.6 249.721 l
-277.6 247.081 m
-277.6 244.441 l
-277.6 241.801 m
-277.6 239.161 l
-277.6 236.641 m
-277.6 234.001 l
-277.6 231.361 m
-277.6 228.721 l
-277.6 226.081 m
-277.6 223.441 l
-277.6 220.801 m
-277.6 218.161 l
-277.6 215.521 m
-277.6 212.881 l
-277.6 210.241 m
-277.6 207.721 l
-277.6 205.081 m
-277.6 202.441 l
-277.6 199.801 m
-277.6 197.161 l
-277.6 194.521 m
-277.6 191.881 l
-277.6 189.241 m
-277.6 186.601 l
-277.6 183.961 m
-277.6 181.321 l
-277.6 178.801 m
-277.6 176.161 l
-277.6 173.521 m
-277.6 170.881 l
-277.6 168.241 m
-277.6 165.601 l
-277.6 162.961 m
-277.6 160.321 l
-277.6 157.681 m
-277.6 155.041 l
-277.6 152.401 m
-277.6 149.881 l
-277.6 147.241 m
-277.6 144.601 l
-277.6 141.961 m
-277.6 139.321 l
-274 143.521 m
-277.6 137.161 l
-281.32 143.521 m
-277.6 137.161 l
-320.2 514.801 m
-320.2 512.161 l
-320.2 509.521 m
-320.2 506.881 l
-320.2 504.241 m
-320.2 501.601 l
-320.2 498.961 m
-320.2 496.321 l
-320.2 493.681 m
-320.2 491.041 l
-320.2 488.521 m
-320.2 485.881 l
-320.2 483.241 m
-320.2 480.601 l
-320.2 477.961 m
-320.2 475.321 l
-320.2 472.681 m
-320.2 470.041 l
-320.2 467.401 m
-320.2 464.761 l
-320.2 462.121 m
-320.2 459.601 l
-320.2 456.961 m
-320.2 454.321 l
-320.2 451.681 m
-320.2 449.041 l
-320.2 446.401 m
-320.2 443.761 l
-320.2 441.121 m
-320.2 438.481 l
-320.2 435.841 m
-320.2 433.201 l
-320.2 430.681 m
-320.2 428.041 l
-320.2 425.401 m
-320.2 422.761 l
-320.2 420.121 m
-320.2 417.481 l
-320.2 414.841 m
-320.2 412.201 l
-320.2 409.561 m
-320.2 406.921 l
-320.2 404.281 m
-320.2 401.761 l
-320.2 399.121 m
-320.2 396.481 l
-320.2 393.841 m
-320.2 391.201 l
-320.2 388.561 m
-320.2 385.921 l
-320.2 383.281 m
-320.2 380.641 l
-320.2 378.001 m
-320.2 375.361 l
-320.2 372.841 m
-320.2 370.201 l
+345.04 351.961 m
+345.04 349.321 l
+345.04 346.561 m
+345.04 343.921 l
+345.04 341.281 m
+345.04 338.641 l
+345.04 335.881 m
+345.04 333.241 l
+345.04 330.601 m
+345.04 327.961 l
+345.04 325.201 m
+345.04 322.561 l
+345.04 319.921 m
+345.04 317.161 l
+345.04 314.521 m
+345.04 311.881 l
 S
 n
-320.2 367.561 m
-320.2 364.921 l
-320.2 362.281 m
-320.2 359.641 l
-320.2 357.001 m
-320.2 354.361 l
-320.2 351.721 m
-320.2 349.081 l
-320.2 346.441 m
-320.2 343.921 l
-320.2 341.281 m
-320.2 338.641 l
-320.2 336.001 m
-320.2 333.361 l
-320.2 330.721 m
-320.2 328.081 l
-320.2 325.441 m
-320.2 322.801 l
-320.2 320.161 m
-320.2 317.521 l
-320.2 314.881 m
-320.2 312.361 l
-320.2 309.721 m
-320.2 307.081 l
-320.2 304.441 m
-320.2 301.801 l
-320.2 299.161 m
-320.2 296.521 l
-320.2 293.881 m
-320.2 291.241 l
-320.2 288.601 m
-320.2 285.961 l
-320.2 283.441 m
-320.2 280.801 l
-320.2 278.161 m
-320.2 275.521 l
-320.2 272.881 m
-320.2 270.241 l
-320.2 267.601 m
-320.2 264.961 l
-320.2 262.321 m
-320.2 259.681 l
-320.2 257.041 m
-320.2 254.521 l
-320.2 251.881 m
-320.2 249.241 l
-320.2 246.601 m
-320.2 243.961 l
-320.2 241.321 m
-320.2 238.681 l
-320.2 236.041 m
-320.2 233.401 l
-320.2 230.761 m
-320.2 228.121 l
-320.2 225.601 m
-320.2 222.961 l
-320.2 220.321 m
-320.2 217.681 l
-320.2 215.041 m
-320.2 212.401 l
-320.2 209.761 m
-320.2 207.121 l
-320.2 204.481 m
-320.2 201.841 l
-320.2 199.201 m
-320.2 196.681 l
-320.2 194.041 m
-320.2 191.401 l
-320.2 188.761 m
-320.2 186.121 l
-320.2 183.481 m
-320.2 180.841 l
-320.2 178.201 m
-320.2 175.561 l
-320.2 172.921 m
-320.2 170.281 l
-320.2 167.761 m
-320.2 165.121 l
-320.2 162.481 m
-320.2 159.841 l
-320.2 157.201 m
-320.2 154.561 l
-320.2 151.921 m
-320.2 149.281 l
-320.2 146.641 m
-320.2 144.001 l
-320.2 141.361 m
-320.2 138.841 l
-316.6 143.521 m
-320.2 137.161 l
-323.92 143.521 m
-320.2 137.161 l
+345.04 309.241 m
+345.04 306.481 l
+345.04 303.841 m
+345.04 301.201 l
+345.04 298.561 m
+345.04 295.801 l
+345.04 293.161 m
+345.04 290.521 l
+345.04 287.881 m
+345.04 285.121 l
+345.04 282.481 m
+345.04 279.841 l
+345.04 277.201 m
+345.04 274.441 l
+345.04 271.801 m
+345.04 269.161 l
+345.04 266.521 m
+345.04 263.761 l
+345.04 261.121 m
+345.04 258.481 l
+345.04 255.841 m
+345.04 253.081 l
+345.04 250.441 m
+345.04 247.801 l
+345.04 245.041 m
+345.04 242.401 l
+345.04 239.761 m
+345.04 237.121 l
+345.04 234.361 m
+345.04 231.721 l
+345.04 229.081 m
+345.04 226.441 l
+345.04 223.681 m
+345.04 221.041 l
+345.04 218.401 m
+345.04 215.761 l
+345.04 213.001 m
+345.04 210.361 l
+345.04 207.721 m
+345.04 205.081 l
+345.04 202.321 m
+345.04 201.841 l
+341.32 208.801 m
+345.04 202.321 l
+348.76 208.801 m
+345.04 202.321 l
 S
-n
-404.08 136.681 m
-404.08 160.561 l
-403.6 160.561 l
-403.6 136.441 l
-404.08 136.441 l
-404.08 136.681 l
-f
-n
-403.84 160.081 m
-409.36 160.081 l
-409.36 160.561 l
-403.6 160.561 l
-403.6 160.081 l
-403.84 160.081 l
-f
-n
-408.88 160.321 m
-408.88 136.441 l
-409.36 136.441 l
-409.36 160.561 l
-408.88 160.561 l
-408.88 160.321 l
-f
-n
-405.4 143.521 m
-409.12 137.161 l
-412.84 143.521 m
-409.12 137.161 l
-S
-402.28 132.481 m
-(10 : exit)
-[3.00013 3.00013 1.43988 1.43989 1.43988 3.00013 2.64004 1.2001 1.53229 ] pdfys
-107.8 111.961 m
-(1 : Invoke finalize method)
-[2.99796 1.4398 1.43983 1.4398 1.43983 3.00007 2.63997 3.00007 2.63997 3.00007 1.4398 
-1.43983 1.20004 2.99796 2.99796 1.20004 1.20004 2.63997 2.99796 1.4398 4.46048 2.99796 
-1.43983 2.99796 2.99796 2.99796 ] pdfys
-128.8 141.361 m
-(2 : Finalize Atmosphere)
-[2.99643 1.43988 1.43988 1.43988 3.23979 1.20009 2.99643 2.99643 1.20009 1.20009 2.64003 
-2.99643 1.43988 3.48003 1.43988 4.45895 2.99643 2.64003 2.99643 2.99643 2.99643 1.81895 
-2.99643 ] pdfys
-149.92 179.281 m
-(3 : Finalize Ocean)
-[3.00013 1.43988 1.43989 1.43988 3.2398 1.2001 3.00013 3.00013 1.2001 1.2001 2.64004 
-3.00013 1.43988 4.07989 2.64004 3.00013 3.00013 3.00013 ] pdfys
-212.92 215.521 m
-(4 : Finalize Coupler)
-[3.00013 1.43988 1.43989 1.43988 3.2398 1.2001 3.00013 3.00013 1.2001 1.2001 2.64004 
-3.00013 1.43988 3.8401 3.00013 3.00013 3.00013 1.2001 3.00013 1.82265 ] pdfys
-255.04 263.881 m
-(5 : Finalize Coupler)
-[3.00013 1.43988 1.43989 1.43988 3.2398 1.2001 3.00013 3.00013 1.2001 1.2001 2.64004 
-3.00013 1.43988 3.8401 3.00013 3.00013 3.00013 1.2001 3.00013 1.82265 ] pdfys
-297.64 302.281 m
-(6 : Finalize Registry)
-[2.99586 1.43988 1.43985 1.43988 3.23976 1.20005 2.99586 2.99586 1.20005 1.20005 2.63999 
-2.99586 1.43988 3.84005 2.99586 2.99586 1.20005 2.63999 1.43985 1.81838 2.70018 ] pdfys
-339.16 114.12 m
-(7 : do additional cleanup)
-[3.00013 1.43988 1.43989 1.43988 3.00013 3.00013 1.43988 3.00013 3.00013 3.00013 1.2001 
-1.43989 1.2001 3.00013 3.00013 3.00013 1.2001 1.43988 2.64004 1.2001 3.00013 3.00013 
-3.00013 3.00013 3.00013 ] pdfys
-360.16 120.36 m
-(8 : close open files)
-[3.00013 1.43988 1.43989 1.43988 2.64004 1.2001 3.00013 2.64004 3.00013 1.43988 3.00013 
-3.00013 3.00013 3.00013 1.43988 1.43989 1.2001 1.2001 3.00013 2.70445 ] pdfys
-381.28 107.28 m
-(9 : close open communicators)
-[2.99481 1.43988 1.43985 1.43988 2.64 1.20006 2.99481 2.64 2.99481 1.43988 2.99481 
-2.99481 2.99481 2.99481 1.43988 2.64 3.00009 4.45734 4.45734 2.99481 2.99481 1.20006 
-2.64 3.00009 1.43985 3.00009 1.81734 2.69914 ] pdfys
-402.28 132.48 m
-(10 : exit)
-[3.00013 3.00013 1.43988 1.43989 1.43988 3.00013 2.64004 1.2001 1.53229 ] pdfys
+108.4 132.961 m
+(1 : Invoke coupler)
+[3.00075 1.56003 1.56003 1.56003 1.56003 3.00021 2.75991 3.00021 2.75991 3.00021 1.56003 
+2.75991 3.00075 3.00075 3.00075 1.19707 3.00075 1.79651 ] pdfys
+129.76 213.601 m
+(2 : get Export State info)
+[3.00075 1.56003 1.56003 1.56003 3.00075 3.00075 1.56003 1.56003 3.60011 2.75991 3.00075 
+3.00075 1.79651 1.56003 1.56003 3.60011 1.56003 3.00075 1.56003 3.00075 1.56003 1.19707 
+3.00075 1.56003 3.00075 ] pdfys
+172.48 162.241 m
+(3 : apply regridding, conversions, etc.)
+[3.00075 1.56003 1.56003 1.56003 3.00075 3.00075 3.00075 1.19707 2.75991 1.56003 1.79651 
+3.00075 3.00075 1.79651 1.19707 3.00075 3.00075 1.19707 3.00075 3.00075 1.56003 1.56003 
+2.75991 3.00075 3.00075 2.75991 3.00075 1.79651 2.75991 1.19977 3.00075 3.00075 2.75991 
+1.56003 1.56003 3.00075 1.56003 2.75991 1.49955 ] pdfys
+193.84 250.921 m
+(4 : Pack date in XPacket)
+[3.00075 1.56003 1.56003 1.56003 3.60011 3.00075 2.75991 2.75991 1.56003 3.00075 3.00075 
+1.56003 3.00075 1.56003 1.19707 3.00075 1.56003 3.60011 3.60011 3.00075 2.75991 2.75991 
+3.00021 1.49955 ] pdfys
+236.56 244.561 m
+(5 : Output xpacket is sent to input xpacket for other component)
+[3.00075 1.56003 1.56003 1.56003 4.19955 3.00075 1.56003 3.00075 3.00075 1.56003 1.56003 
+2.75991 3.00075 3.00075 2.75991 2.75991 3.00021 1.56003 1.56003 1.19707 2.75991 1.56003 
+2.75991 3.00075 3.00075 1.56003 1.56003 1.56003 3.00021 1.56003 1.19707 3.00075 3.00075 
+3.00075 1.56003 1.56003 2.75991 3.00075 3.00075 2.75991 2.75991 3.00021 1.56003 1.56003 
+1.56003 3.00021 1.79651 1.56003 3.00075 1.56003 3.00075 3.00075 1.79651 1.56003 2.75991 
+2.99967 4.55969 3.00075 3.00075 3.00075 3.00075 3.00075 1.49955 ] pdfys
+279.28 285.12 m
+(6 : extract data from XPacket)
+[3.00075 1.56061 1.56057 1.56061 3.00075 2.76045 1.56057 1.80029 3.00075 2.76045 1.56057 
+1.56061 3.00075 3.00075 1.56057 3.00075 1.56061 1.56057 1.80029 3.00075 4.56077 1.56061 
+3.60011 3.60011 3.00075 2.76045 2.76045 3.00075 1.49955 ] pdfys
+322.12 303.841 m
+(7 : Update Import State of other Component)
+[3.00075 1.56061 1.56057 1.56061 3.96025 3.00075 3.00075 3.00075 1.56057 3.00075 1.56061 
+1.56057 4.56077 3.00075 3.00075 1.79651 1.56057 1.56061 3.60011 1.56057 3.00075 1.56057 
+3.00075 1.56061 3.00075 1.56057 1.56061 3.00075 1.56057 3.00075 3.00075 1.79651 1.56061 
+3.96025 3.00075 4.56023 3.00075 3.00075 3.00075 3.00075 3.00075 1.49955 ] pdfys
 PDFVars/TermAll get exec end end
 %%PageTrailer
 %%EndPage
