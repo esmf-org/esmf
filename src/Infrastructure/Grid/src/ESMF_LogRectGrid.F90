@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.28 2004/03/04 23:55:29 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.29 2004/03/05 17:15:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.28 2004/03/04 23:55:29 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.29 2004/03/05 17:15:43 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3026,7 +3026,7 @@
       subroutine ESMF_LRGridGetDE(grid, horzDistGridId, vertDistGridId, &
                                   horzPhysGridId, vertPhysGridId, &
                                   horzRelLoc, vertRelLoc, &
-                                  localCellCount, localCellCountPerDim, &
+                                  myDE, localCellCount, localCellCountPerDim, &
                                   globalStartPerDim, globalAIPerDim, total, rc)
 !
 ! !ARGUMENTS:
@@ -3037,6 +3037,7 @@
       integer, intent(in), optional :: vertPhysGridId
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      integer, intent(inout), optional :: myDE
       integer, intent(inout), optional :: localCellCount
       integer, dimension(:), intent(inout), optional :: localCellCountPerDim
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
@@ -3079,6 +3080,8 @@
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
+!     \item[{[myDE]}]
+!          Identifier for this {\tt ESMF\_DE}, zero-based.
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
 !     \item[{[localCellCountPerDim]}]
@@ -3229,6 +3232,10 @@
         return
       endif
 
+      ! use DELayout call instead of DistGrid to get myDE to avoid zero-based
+      ! vs. 1-based issues.  note: layout the same for all distgrids, so use 1
+      if (present(myDE)) &
+        call ESMF_DELayoutGetDEid(grid%ptr%distgrids(1)%ptr%layout, myDE, status) 
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
       horzCellCount = 1
