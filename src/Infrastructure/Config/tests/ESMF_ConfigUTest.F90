@@ -43,7 +43,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.5 2004/06/10 23:24:09 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.6 2004/06/11 15:54:34 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       type (ESMF_Config) cf 
@@ -927,7 +927,13 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
+     !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Get Dim Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Get Dim Test"
       call ESMF_ConfigGetDim(cf,'ObsErr*vCor_HH-7::', nlines, col, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
       if (rc /= 0) then
@@ -943,10 +949,23 @@ subroutine MultPar_SingleLine_V
          return
       endif
 
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Dim Verification Test
+     write(failMsg, *) "Attribute Dim values are incorrect"
+     write(name, *) "Verify Attribute Dim Values Test"
+     call ESMF_Test((nlines.eq.nlines_0), name, failMsg, result, ESMF_SRCLINE)
 
       
 !''''''''''''''''''''''''''''         
-         call ESMF_ConfigFindLabel ( cf,'ObsErr*vCor_HH-7::', rc )
+
+     !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Find Label Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Find Label Test"
+      call ESMF_ConfigFindLabel ( cf,'ObsErr*vCor_HH-7::', rc )
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
       if (rc == 0) then
@@ -967,22 +986,31 @@ subroutine MultPar_SingleLine_V
       counter_total =counter_total + 1
 !'''''''''''''''''''''''''''' 
       do line = 1, nlines
-         call ESMF_ConfigNextLine(cf, rc = rc)
+
+      call ESMF_ConfigNextLine(cf, rc = rc)
 !''''''''''''''''''''''''''''
          if (rc /= 0) then
             print *,'ESMF_ConfigNextLine failed, rc =', rc 
-            return        
+            exit        
          endif
 !''''''''''''''''''''''''''''    
       ncol(line) = ESMF_ConfigGetLen(cf, rc = rc) - 1
 !''''''''''''''''''''''''''''  
       if (rc /= 0) then
          print *,'ESMF_ConfigGetLen failed, rc =', rc
-         return
+         exit
       endif
 !''''''''''''''''''''''''''''  
       enddo
 !''''''''''''''''''''''''''''
+
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Next Line and Get Len Verification Test
+     write(failMsg, *) "Attribute Line values are incorrect"
+     write(name, *) "Verify Attribute Line Values Test"
+     call ESMF_Test((all(ncol.eq.ncol_0)), name, failMsg, result, ESMF_SRCLINE)
 
       if( any(ncol /= ncol_0 )) then
          print *,'ESMF_ConfigGetInt ERROR: got ncol =', ncol(1:nlines), &
@@ -996,7 +1024,13 @@ subroutine MultPar_SingleLine_V
 !            Looping over lines
 
 !''''''''''''''''''''''''''''   
-         call ESMF_ConfigFindLabel ( cf,'ObsErr*vCor_HH-7::', rc )
+     !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Find Label Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Find Label Test"
+      call ESMF_ConfigFindLabel ( cf,'ObsErr*vCor_HH-7::', rc )
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
       if (rc == 0) then
@@ -1011,9 +1045,10 @@ subroutine MultPar_SingleLine_V
       do line = 1, nlines
          call ESMF_ConfigNextLine( cf, end, rc )
 !''''''''''''''''''''''''''''
+
          if (rc /= 0) then
             print *,'ESMF_ConfigNextLine failed, rc =', rc 
-            return        
+            exit        
          endif
             
 !               Retrieve pressure level
@@ -1024,14 +1059,14 @@ subroutine MultPar_SingleLine_V
 !''''''''''''''''''''''''''''
          if (rc /= 0) then
             print *,'ESMF_ConfigNextLine failed, rc =', rc 
-            return
+            exit
          endif
 
          if( plev(line) /= plev_0(line) ) then
             print *,'ESMF_ConfigGetFloat ERROR: got plev =', &
                  plev(line), ' should be plev =',        &
                  plev_0(line) 
-            return
+            exit
          else
             counter_success =counter_success + 1
          endif
@@ -1049,7 +1084,7 @@ subroutine MultPar_SingleLine_V
 !''''''''''''''''''''''''''''
          if (rc /= 0) then
             print *,'ESMF_ConfigGetFloat failed, rc =', rc 
-            return        
+            exit        
          endif
 
          
@@ -1058,7 +1093,7 @@ subroutine MultPar_SingleLine_V
                print *,'ESMF_ConfigGetFloat:  Wrong value in vCorr line =', &
                     line,' col =', col,' VCorr = ', vCorr(col, line), &
                ' should be ', vCorr_0(line, col)
-               return
+               exit
             endif
          end do
          counter_success = counter_success + 1
@@ -1087,7 +1122,13 @@ subroutine MultPar_SingleLine_V
       integer :: result = 0
       rc = 0
 !''''''''''''''''''''''''''''
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Config Destroy
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Destroy Test"
       call ESMF_ConfigDestroy ( cf, rc ) 
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
