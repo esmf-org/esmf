@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.56.2.3 2004/07/06 15:31:54 svasquez Exp $
+#  $Id: common.mk,v 1.56.2.4 2004/07/06 19:25:18 svasquez Exp $
 #===============================================================================
 #   common.mk
 #
@@ -145,7 +145,7 @@ DO_EX_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results.bash
 DO_ST_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results
 DO_ST_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results.bash
 DO_SUM_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary
-DO_SUM_RESULTS.bash	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary.bash
+DO_SUM_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary.bash
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
