@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.6 2004/03/09 22:38:33 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.7 2004/03/19 14:46:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -110,9 +110,6 @@
       public ESMF_newDELayoutCreate
       public ESMF_newDELayoutDestroy
       
-      public ESMF_newDELayoutUnplug
-      public ESMF_newDELayoutPlug
-      
       public ESMF_newDELayoutGet
       public ESMF_newDELayoutGetDE
       public ESMF_newDELayoutMyDE
@@ -132,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.6 2004/03/09 22:38:33 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.7 2004/03/19 14:46:16 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -351,113 +348,10 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutUnplug - Unplug a layout from its VM
-
-! !INTERFACE:
-  subroutine ESMF_newDELayoutUnplug(layout, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_newDELayout), intent(in)  :: layout
-    integer, intent(out), optional      :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Unplug a layout from its VM
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[layout] 
-!          DELayout
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.
-      rc = ESMF_FAILURE
-    endif
-
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutUnplug(layout, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutUnplug error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_newDELayoutUnplug
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_newDELayoutPlug - Plug a layout into a VM
-
-! !INTERFACE:
-  subroutine ESMF_newDELayoutPlug(layout, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_newDELayout), intent(in)  :: layout
-    type(ESMF_VM),          intent(in)  :: vm
-    integer, intent(out), optional      :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Plug a layout into a VM
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[layout] 
-!          DELayout
-!     \item[vm] 
-!          VM opbject
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.
-      rc = ESMF_FAILURE
-    endif
-
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutPlug(layout, vm, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutPlug error"
-      return
-    endif
-
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_newDELayoutPlug
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_newDELayoutGet - Get internal info
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutGet(layout, nDEs, ndim, nmyDEs, myDEs, pstate, rc)
+  subroutine ESMF_newDELayoutGet(layout, nDEs, ndim, nmyDEs, myDEs, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)            :: layout
@@ -465,7 +359,6 @@ contains
     integer,                intent(out), optional :: ndim
     integer,                intent(out), optional :: nmyDEs
     integer,                intent(out), optional :: myDEs(:)
-    type(ESMF_Logical),     intent(out), optional :: pstate
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -495,7 +388,6 @@ contains
     logical :: rcpresent
     integer :: len
     integer :: dummy(0)     ! used to satisfy the C interface...
-    type(ESMF_Logical) :: pstat        ! local pstate variable
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -503,21 +395,6 @@ contains
     if (present(rc)) then
       rcpresent = .TRUE.  
       rc = ESMF_FAILURE
-    endif
-    
-    ! Determine whether this layout is plugged or unplugged
-    call c_ESMC_newDELayoutPlugged(layout, pstat, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutPlugged error"
-      return
-    endif
-    if (present(pstate)) pstate = pstat
-    
-    ! Look at the pstat variable and decide whether failure needs to be 
-    ! indicated.
-    if (pstat == ESMF_FALSE) then
-      if (present(nmyDEs)) return
-      if (present(myDEs)) return
     endif
     
     ! Deal with optional array argument

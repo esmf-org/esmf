@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout_F.C,v 1.4 2004/03/05 19:49:53 theurich Exp $
+// $Id: ESMC_newDELayout_F.C,v 1.5 2004/03/19 14:46:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,19 +57,6 @@ extern "C" {
     *status = ESMC_newDELayoutDestroy(*ptr);
   }
        
-  void FTN(c_esmc_newdelayoutunplug)(ESMC_newDELayout **ptr, int *status){
-    int rc = (*ptr)->ESMC_newDELayoutUnplug();
-    if (status != ESMC_NULL_POINTER)
-      *status = rc;
-  }
-       
-  void FTN(c_esmc_newdelayoutplug)(ESMC_newDELayout **ptr, ESMC_VM **vm, 
-    int *status){
-    int rc = (*ptr)->ESMC_newDELayoutPlug(**vm);
-    if (status != ESMC_NULL_POINTER)
-      *status = rc;
-  }
-       
   void FTN(c_esmc_newdelayoutget)(ESMC_newDELayout **ptr,
     int *nDEs, int *ndim, int *nmyDEs, int *myDEs, int *len, int *status){
     // Sort out the non-present F90 optional arguments. 
@@ -109,11 +96,6 @@ extern "C" {
   void FTN(c_esmc_newdelayoutmyde)(ESMC_newDELayout **ptr, 
     int *DE, ESMC_Logical *value, int *status){
     *status = (*ptr)->ESMC_newDELayoutMyDE(*DE, value);
-  }
-  
-  void FTN(c_esmc_newdelayoutplugged)(ESMC_newDELayout **ptr, 
-    ESMC_Logical *value, int *status){
-    *status = (*ptr)->ESMC_newDELayoutPlugged(value);
   }
   
   void FTN(c_esmc_newdelayoutprint)(ESMC_newDELayout **ptr, int *status){

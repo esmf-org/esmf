@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.4 2004/03/05 19:50:17 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.5 2004/03/19 14:46:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.4 2004/03/05 19:50:17 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.5 2004/03/19 14:46:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -335,58 +335,6 @@ int ESMC_newDELayout::ESMC_newDELayoutDestruct(void){
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_newDELayoutUnplug
-//
-// !INTERFACE:
-int ESMC_newDELayout::ESMC_newDELayoutUnplug(void){
-//
-// !RETURN VALUE:
-//    int error return code
-//
-//
-// !DESCRIPTION:
-//    Unplug the layout from its VM, i.e. delete the DE-to-PET mapping and
-//    local section
-//
-//EOP
-//-----------------------------------------------------------------------------
-  plugged = ESMF_FALSE;
-  nmydes = 0;
-  delete [] mydes;
-  return ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_newDELayoutPlug
-//
-// !INTERFACE:
-int ESMC_newDELayout::ESMC_newDELayoutPlug(ESMC_VM &vm){
-//
-// !RETURN VALUE:
-//    int error return code
-//
-//
-// !DESCRIPTION:
-//    Plug the layout into a VM, i.e. find DE-to-PET mapping setup local section
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // DE-to-PET mapping
-  int npets =  vm.vmachine_npets();   // get number of PETs
-  ESMC_newDELayoutFindDEtoPET(npets);
-  // Fill local part of layout object
-  int mypet = vm.vmachine_mypet();    // get my PET id
-  ESMC_newDELayoutFillLocal(mypet);
-  return ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_newDELayoutGet
 //
 // !INTERFACE:
@@ -488,31 +436,6 @@ int ESMC_newDELayout::ESMC_newDELayoutMyDE(
   *value = ESMF_FALSE;
   for (int i=0; i<nmydes; i++)
     if (mydes[i]==DE) *value = ESMF_TRUE;
-  return ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_newDELayoutPlugged
-//
-// !INTERFACE:
-int ESMC_newDELayout::ESMC_newDELayoutPlugged(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//
-  ESMC_Logical *value){   // out - plugged or unplugged
-//
-// !DESCRIPTION:
-//    Determine whether the layout is in the plugged or unplugged state
-//
-//EOP
-//-----------------------------------------------------------------------------
-  *value = plugged;
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -890,8 +813,6 @@ int ESMC_newDELayout::ESMC_newDELayoutFillLocal(int mypet){
       mydes[j]=i;
       ++j;
     }
-  // Indicate that now the layout is in the plugged state
-  plugged = ESMF_TRUE;
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
