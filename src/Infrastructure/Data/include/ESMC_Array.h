@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.14 2003/02/10 21:24:51 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.15 2003/02/13 22:43:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,6 +20,7 @@
 
 #include "ESMC_Alloc.h"
 #include <string.h>
+//#include <stdio.h>  // include for debug only
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -189,9 +190,15 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 
     // copy the contents of an f90 ptr
     int ESMC_ArraySetF90Ptr(struct c_F90ptr *p) {
+        //fprintf(stderr, "setting f90 ptr, from %lx to %lx, %d bytes\n", 
+        //                  (long int)p,  (long int)(&this->f90dopev), 
+        //                  sizeof(struct c_F90ptr));
         memcpy((void *)(&this->f90dopev), (void *)p, sizeof(struct c_F90ptr)); 
         return ESMF_SUCCESS; }
     int ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) {
+        //fprintf(stderr, "getting f90 ptr, from %lx to %lx, %d bytes\n", 
+        //                  (long int)(&this->f90dopev), (long int)p,
+        //                  sizeof(struct c_F90ptr));
         memcpy((void *)p, (void *)(&this->f90dopev), sizeof(struct c_F90ptr)); 
         return ESMF_SUCCESS; }
 
