@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.10 2003/08/05 17:48:57 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.11 2003/08/29 05:34:27 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.10 2003/08/05 17:48:57 eschwab Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.11 2003/08/29 05:34:27 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -47,12 +47,12 @@
       type(ESMF_TimeInterval) :: currSimTime, prevSimTime
 
       ! temp variables for Get functions
-      integer :: YR, MM, DD, D, H, M, S, yD
+      integer :: yr, mm, dd, d, h, m, s, yD
       type(ESMF_TimeInterval) :: time_step, time_step_copy
       type(ESMF_TimeInterval) :: time_diff
       type(ESMF_Time) :: curr_time, curr_time_copy, prev_time
-      integer(ESMF_IKIND_I8) :: advanceCount, YRl, Dl, Sl
-      double precision :: d_
+      integer(ESMF_IKIND_I8) :: advanceCount, yr_i8, d_i8, s_i8
+      double precision :: d_r8
       logical alarmRinging
 
       ! result code
@@ -69,30 +69,30 @@
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time interval to -1 day
-      call ESMF_TimeIntervalSet(timeStep, d_i4=-1, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=-1, rc=rc)
 
       ! initialize start time to 5/15/2003 12:00:00 noon
-      call ESMF_TimeSet(startTime, yr_i4=2003, &
-                        mm_i4=5, dd_i4=15, h_i4=12, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(startTime, yr=2003, mm=5, dd=15, h=12, &
+                        calendar=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 5/15/2002 12:00:00 noon
-      call ESMF_TimeSet(stopTime, yr_i4=2002, &
-                        mm_i4=5, dd_i4=15, h_i4=12, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yr=2002, mm=5, dd=15, h=12, &
+                        calendar=gregorianCalendar, rc=rc)
 
       ! initialize reference time to 1/1/2000 00:00:00 midnight
-      call ESMF_TimeSet(refTime, yr_i4=2000, &
-                        mm_i4=1, dd_i4=1, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(refTime, yr=2000, mm=1, dd=1, &
+                        calendar=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
-      call ESMF_ClockSet(clock, timeStep, startTime, stopTime, refTime, rc)
+      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, refTime, rc)
 
       ! print starting time (initial current time)
       call ESMF_ClockPrint(clock, "currtime", rc)        ! default format
       call ESMF_ClockPrint(clock, "currtime string", rc) ! string format
 
       ! initialize alarm time to July 4, 2002, noon
-      call ESMF_TimeSet(alarmTime, yr_i4=2002, &
-                        mm_i4=7, dd_i4=4, h_i4=12, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(alarmTime, yr=2002, mm=7, dd=4, h=12, &
+                        calendar=gregorianCalendar, rc=rc)
       alarmRinging = .false.
 
       !
@@ -103,7 +103,7 @@
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
         call ESMF_ClockAdvance(clock, rc=rc)
         call ESMF_ClockPrint(clock, "currtime string", rc)
-        call ESMF_ClockGetCurrTime(clock, curr_time, rc)
+        call ESMF_ClockGet(clock, currTime=curr_time, rc=rc)
         if (curr_time .le. alarmTime .and. .not.alarmRinging) then
           alarmRinging = .true.
           print *, "************************************"
@@ -120,70 +120,70 @@
       call ESMF_ClockPrint(clock, rc=rc)
 
       ! get and print clock's time_step
-      call ESMF_ClockGetTimeStep(clock, time_step, rc)
+      call ESMF_ClockGet(clock, timeStep=time_step, rc=rc)
       call ESMF_ClockPrint(clock, "timestep string", rc)
 
       ! get time step in integer days and seconds
-      call ESMF_TimeIntervalGet(time_step, d_i4=D, s_i4=S, rc=rc)
+      call ESMF_TimeIntervalGet(time_step, d=d, s=s, rc=rc)
       print *, "Clock's timestep = ", D, " integer days, ", &
                 S, " integer seconds."
 
       ! get time step in floating point days
-      call ESMF_TimeIntervalGet(time_step, d_r8=d_, rc=rc)
-      print *, "Clock's timestep = ", d_, " floating point days."
+      call ESMF_TimeIntervalGet(time_step, d_r8=d_r8, rc=rc)
+      print *, "Clock's timestep = ", d_r8, " floating point days."
 
       ! get start time's floating point day of the year
-      call ESMF_TimeGetDayOfYear(startTime, d_, rc=rc)
-      print *, "Start time's floating point day of the year = ", d_
+      call ESMF_TimeGet(startTime, dayOfYear_r8=d_r8, rc=rc)
+      print *, "Start time's floating point day of the year = ", d_r8
 
       ! get stop time's integer day of the year
-      call ESMF_TimeGetDayOfYear(stopTime, yD, rc=rc)
+      call ESMF_TimeGet(stopTime, dayOfYear=yD, rc=rc)
       print *, "Stop time's integer day of the year = ", yD
 
       ! get the number of times the clock was advanced
-      call ESMF_ClockGetAdvanceCount(clock, advanceCount, rc)
+      call ESMF_ClockGet(clock, advanceCount=advanceCount, rc=rc)
       print *, "The clock was advanced ", advanceCount, " times."
   
       ! calculate the difference between the start and stop times
       time_diff = stopTime - startTime
-      call ESMF_TimeIntervalGet(time_diff, d_i4=D, s_i4=S, rc=rc)
-      print *, "Difference between start and stop times = ", D, " days, ", &
-                S, " seconds."
+      call ESMF_TimeIntervalGet(time_diff, d=d, s=s, rc=rc)
+      print *, "Difference between start and stop times = ", d, " days, ", &
+                s, " seconds."
 
       ! get clock's start time
-      call ESMF_ClockGetStartTime(clock, startTime, rc)
-      call ESMF_TimeGet(startTime, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, rc=rc)
-      print *, "Clock's start time = ", YR, "/", MM, "/", DD, " ", H, " hours."
+      call ESMF_ClockGet(clock, startTime=startTime, rc=rc)
+      call ESMF_TimeGet(startTime, yr=yr, mm=mm, dd=dd, h=h, rc=rc)
+      print *, "Clock's start time = ", yr, "/", mm, "/", dd, " ", h, " hours."
 
       ! get clock's stop time
-      call ESMF_ClockGetStopTime(clock, stopTime, rc)
-      call ESMF_TimeGet(stopTime, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, rc=rc)
-      print *, "Clock's stop time = ", YR, "/", MM, "/", DD, " ", H, " hours."
+      call ESMF_ClockGet(clock, stopTime=stopTime, rc=rc)
+      call ESMF_TimeGet(stopTime, yr=yr, mm=mm, dd=dd, h=h, rc=rc)
+      print *, "Clock's stop time = ", yr, "/", mm, "/", dd, " ", h, " hours."
 
       ! get clock's reference time
-      call ESMF_ClockGetRefTime(clock, refTime, rc)
-      call ESMF_TimeGet(refTime, yr_i4=YR, mm_i4=MM, dd_i4=DD, rc=rc)
-      print *, "Clock's reference time = ", YR, "/", MM, "/", DD, " midnight."
+      call ESMF_ClockGet(clock, refTime=refTime, rc=rc)
+      call ESMF_TimeGet(refTime, yr=yr, mm=mm, dd=dd, rc=rc)
+      print *, "Clock's reference time = ", yr, "/", mm, "/", dd, " midnight."
 
       ! get clock's current time
-      call ESMF_ClockGetCurrTime(clock, curr_time, rc)
+      call ESMF_ClockGet(clock, currTime=curr_time, rc=rc)
       print *, "Clock's current time = "
       call ESMF_TimePrint(curr_time, "string", rc)
 
       ! get clock's previous time
-      call ESMF_ClockGetPrevTime(clock, prev_time, rc)
+      call ESMF_ClockGet(clock, prevTime=prev_time, rc=rc)
       print *, "Clock's previous time = "
       call ESMF_TimePrint(prev_time, "string", rc)
 
       ! get clock's current simulation time
-      call ESMF_ClockGetCurrSimTime(clock, currSimTime, rc)
-      call ESMF_TimeIntervalGet(currSimTime, d_i4=D, s_i4=S, rc=rc)
-      print *, "Clock's current simulation time = ", D, " days", S, " seconds."
+      call ESMF_ClockGet(clock, currSimTime=currSimTime, rc=rc)
+      call ESMF_TimeIntervalGet(currSimTime, d=d, s=s, rc=rc)
+      print *, "Clock's current simulation time = ", d, " days", s, " seconds."
 
       ! get clock's previous simulation time
-      call ESMF_ClockGetPrevSimTime(clock, prevSimTime, rc)
-      call ESMF_TimeIntervalGet(prevSimTime, d_i4=D, s_i4=S, rc=rc)
-      print *, "Clock's previous simulation time = ", D, " days", S, " seconds."
+      call ESMF_ClockGet(clock, prevSimTime=prevSimTime, rc=rc)
+      call ESMF_TimeIntervalGet(prevSimTime, d=d, s=s, rc=rc)
+      print *, "Clock's previous simulation time = ", d, " days", s, " seconds."
       print *
 
       !
@@ -205,8 +205,8 @@
       print *, "Current Time Step = "
       call ESMF_ClockPrint(clock, "timestep string", rc)
 
-      call ESMF_TimeIntervalSet(timeStep, d_i4=2, rc=rc)
-      call ESMF_ClockSetTimeStep(clock, timeStep, rc)
+      call ESMF_TimeIntervalSet(timeStep, d=2, rc=rc)
+      call ESMF_ClockSet(clock, timeStep=timeStep, rc=rc)
       print *, "Time Step reset to = "
       call ESMF_ClockPrint(clock, "timestep string", rc)
 
@@ -215,9 +215,9 @@
       print *, "Previous time = "
       call ESMF_ClockPrint(clock, "prevtime string", rc)
 
-      call ESMF_TimeSet(curr_time, yr_i4=1776, &
-                        mm_i4=7, dd_i4=4, calendar=gregorianCalendar, rc=rc)
-      call ESMF_ClockSetCurrTime(clock, curr_time, rc)
+      call ESMF_TimeSet(curr_time, yr=1776, &
+                        mm=7, dd=4, calendar=gregorianCalendar, rc=rc)
+      call ESMF_ClockSet(clock, currTime=curr_time, rc=rc)
       print *, "Current Time changed to = "
       call ESMF_ClockPrint(clock, "currtime string", rc)
       print *, "Previous Time changed to = "
