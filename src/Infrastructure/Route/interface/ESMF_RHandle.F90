@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.5 2003/08/29 20:21:44 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.6 2003/08/29 20:33:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.5 2003/08/29 20:21:44 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.6 2003/08/29 20:33:22 nscollins Exp $'
 
 !==============================================================================
 
@@ -280,6 +280,11 @@
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
+        integer :: oldhtype
+        type(ESMF_Route) :: oldroute1
+        type(ESMF_Route) :: oldroute2
+        type(ESMF_TransformValues) :: oldtdata
+        character(len=ESMF_MAXSTR) :: oldlabel
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -291,35 +296,35 @@
           rc = ESMF_FAILURE
         endif
 
-        if (present(htype)) then
-          ! code to be added here
-        endif
-
-        if (present(route1)) then
-          ! code to be added here
-        endif
-
-        if (present(route2)) then
-          ! code to be added here
-        endif
-
-        if (present(tdata)) then
-          ! code to be added here
-        endif
-
-        if (present(label)) then
-          ! code to be added here
-        endif
-
-
         ! Call C++  code
         ! TODO: handle label string going through the interface
-        call c_ESMC_RouteHandleGet(rhandle, htype, route1, route2, &
-                                   tdata, status)
+        call c_ESMC_RouteHandleGet(rhandle, oldhtype, oldroute1, oldroute2, &
+                                   oldtdata, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "RouteHandle Get error"
           return  
         endif
+
+        if (present(htype)) then
+            htype = oldhtype    
+        endif
+
+        if (present(route1)) then
+            route1 = oldroute1    
+        endif
+
+        if (present(route2)) then
+            route2 = oldroute2    
+        endif
+
+        if (present(tdata)) then
+            tdata = oldtdata    
+        endif
+
+        if (present(label)) then
+            label = oldlabel    
+        endif
+
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -372,11 +377,11 @@
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
         logical :: changed
-        integer, intent(in), optional :: oldhtype
-        type(ESMF_Route), intent(in), optional :: oldroute1
-        type(ESMF_Route), intent(in), optional :: oldroute2
-        type(ESMF_TransformValues), intent(in), optional :: oldtdata
-        character(len=ESMF_MAXSTR), intent(in), optional :: oldlabel
+        integer :: oldhtype
+        type(ESMF_Route) :: oldroute1
+        type(ESMF_Route) :: oldroute2
+        type(ESMF_TransformValues) :: oldtdata
+        character(len=ESMF_MAXSTR) :: oldlabel
 
         ! Set initial values
         status = ESMF_FAILURE
