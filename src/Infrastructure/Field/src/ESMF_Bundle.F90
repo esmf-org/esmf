@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.11 2003/06/26 17:57:39 rstaufer Exp $
+! $Id: ESMF_Bundle.F90,v 1.12 2003/06/26 21:17:14 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@
 !       !
 !       !  Data type to record the ordering information for multiple field
 !       !  data which is packed in a bundle.  Each has an associated
-!       !  {\tt DataMap} object to track the ordering of that Field's data
+!       !  {\tt ESMF\_DataMap} object to track the ordering of that {\tt ESMF\_Field}'s data
 !       !  in the packed buffer.
         type ESMF_FieldInterleave
         sequence
@@ -1343,8 +1343,8 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Used to alter memory ordering of packed Data array.  Implemented by 
-!      setting the desired options in an DataMap type and then passing it in
+!      Used to alter memory ordering of packed {\tt ESMF\_Data} array.  Implemented by 
+!      setting the desired options in an {\tt ESMF\_DataMap} type and then passing it in
 !      as a parameter to this routine.
 !
 ! !REQUIREMENTS:  FLD2.2, FLD2.3
@@ -1811,9 +1811,9 @@ end function
       integer, intent(out), optional :: rc        ! return code
 !
 ! !DESCRIPTION:
-!      For querying current ordering of packed DataArray type.
-!      Information is returned in the DataMap type, and then can
-!      be queried by DataMap subroutines for details.
+!      For querying current ordering of packed {\tt ESMF\_DataArray} type.
+!      Information is returned in the {\tt ESMF\_DataMap} type, and then can
+!      be queried by {\tt ESMF\_DataMap} subroutines for details.
 !
 ! !REQUIREMENTS:  FLD2.5.8 (pri 2)
 !EOP
