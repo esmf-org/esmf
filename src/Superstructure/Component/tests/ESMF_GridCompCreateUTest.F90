@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.9 2004/11/08 21:56:48 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.10 2004/11/08 22:11:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -69,7 +69,6 @@
     call ESMF_Initialize(vm=vm, rc=rc)
     call ESMF_VMGet(vm, petCount=npets, rc=rc)
     call ESMF_TestStart(npets, ESMF_SRCLINE)
-    print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
 
 
 !-------------------------------------------------------------------------
