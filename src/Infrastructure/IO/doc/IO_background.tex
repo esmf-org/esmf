@@ -1,5 +1,6 @@
-% $Id: IO_background.tex,v 1.16 2002/09/20 22:03:22 cdeluca Exp $
+% $Id: IO_background.tex,v 1.17 2002/09/27 22:06:21 nscollins Exp $
 
+\subsection{Background}
 
 Earth system modeling applications require efficient and robust tools
 for input and output of structured and unstructured gridded data, as
@@ -50,27 +51,27 @@ for physical grids, {\em DistGrid} element for distributed grids, and
 ESMF I/O will support input/output of data defined on all ESMF
 supported grids and location streams (\cite{ESMF-PhysGrid-Req},
 \cite{ESMF-DistGrid-Req}). For
-the purpose of this document, we will consider data beloging to three
+the purpose of this document, we will consider data belonging to three
 broad categories:
 
 \begin{description}
 
 \item[\bf Structured Gridded Data.] A {\em structured grid} is one on 
 on which the relationship between gridpoints can be derived from their
-indices, without he need for an explicit map.  A simple example fields
+indices, without the need for an explicit map.  A simple example is fields
 defined on a rectangular lat/lon grid.
 
 \item[\bf Unstructured Gridded Data.] For the more general 
 {\em unstructured grid} the relationship between gridpoints cannot be
 derived from their indices, and the specification of an explicit map
-is necessary.  An example is a {\em catchment grid} used by soime
+is necessary.  An example is a {\em catchment grid} used by some
 land-surface models.
 
-\item[\bf Observational Data on location streams.] As defined in the {\em Phisycal Grid Requirements}, a location stream contains a list of locations
-
-
+\item[\bf Observational Data on location streams.] As defined in 
+the {\em Physical Grid Requirements}, a location stream contains 
+a list of locations which 
 describe the measurements. Each observation is 
-associated with a a spatial point or region.A neighbor relationship is not 
+associated with a spatial point or region. A neighbor relationship is not 
 defined for observations. 
 \end{description}
 
@@ -80,7 +81,7 @@ represented as one-dimensional arrays of structures with each structure
 containing information about location, field values associated with this 
 location, and a list of neighbors, if relevant. 
 
-\subsection{Metadata. ESMF metadata conventions}
+\subsection{ESMF metadata conventions}
 
 {\bf Metadata} is data about a digital object, ``structured data about the 
 data''. The metadata is usually provided by the creator or distributor of 
@@ -89,8 +90,8 @@ file header. As such, metadata can be very useful as the basis for
 information storage and retrieval systems, as well as for utilization of the 
 data within Earth Science models.
 The information about the object provided by metadata allows optimization of  
-resource allocation and organization of storage and retriaval of data. In 
-parallel computing, such a knowledge may be especially important. 
+resource allocation and organization of storage and retrieval of data. In 
+parallel computing such knowledge may be especially important. 
 
 If metadata are provided, the files may be either {\em self-described} or
 {\em co-described}, depending on the fashion in which metadata are allocated.
@@ -108,10 +109,10 @@ complete description of their content, but the way data are represented might
 not allow rapid extraction of metadata. To make such a file co-described, its 
 metadata could be extracted and allocated to a companion metadata file.
 
-Some file formats that we discuss bellow, such as NetCDF and HDF, are 
+Some file formats that we discuss below, such as NetCDF and HDF, are 
 organized according to well-defined rules. Their structures and APIs enable 
 (but do not require) creation of self-described files. By narrowing 
-the defintions, conventions enable a complete and unique description of each 
+the definitions, conventions enable a complete and unique description of each 
 dataset.
 
 We assume that the NetCDF conventions for climate and forecast metadata, 
@@ -225,7 +226,7 @@ GRIdded Binary (GRIB) is the standard gridded data format from the
 World Meteorological Organization (WMO).  GRIB is a general purpose,
 bit-oriented data exchange format. Most NWP centers use GRIB for all the 
 files produced from its analyses and forecasts. Since the GRIB standard does 
-not specify standard API, NWP centers use a variety of software to process 
+not specify a standard API, NWP centers use a variety of software to process 
 GRIB files.
 
 The GRIB format used in ESMF shall be configurable, and shall allow the 
@@ -251,7 +252,7 @@ GrADS parlance these are refered to as {\em control files}). Files
 produced by the ESMF are intended to be GrADS redable, and the ESMF
 shall produce GrADS control files upon request.
 
-\item[\bf BUFR] Binary Universal Form of Represantation of the meteorological 
+\item[\bf BUFR] Binary Universal Form of Representation of the meteorological 
 data (BUFR) is a self-descriptive format for observational data
 transmission introduced by the World Meteorological Organization
 \cite{WMO-BUFR-CREX}. The form and content of data contained in a BUFR 
@@ -285,33 +286,33 @@ years. Two major factors contrubuting to the increase in I/O intensity are:
 \item[-] Enhancement in model resolution;
 \item[-] Increase in I/O frequency.
 \end{description}
-We also expect significant increase in amount of of satellitte data, although 
-amount of I/O related to observational data is not comparable with amount of 
-gridded I/O which drives our performance analysis. 
+We also expect significant increase in the amount of satellite data, although 
+the amount of I/O related to observational data is not comparable with 
+the amount of gridded I/O which drives our performance analysis. 
 
 There are two aspects of  parallel IO:
 
 \begin{description}
-\item[-] How dataset distributed among multiple processors can be
+\item[-] How a dataset distributed among multiple processors can be
 written to a single file efficiently;
 
-\item[-] How single file can be distributed accross multiple physical
-discs and IO channels.
+\item[-] How a single file can be distributed across multiple physical
+disks and IO channels.
 \end{description}
  
 There are several possibilities to perform IO in parallel (\cite{MPI-2}):
 \begin{description}
-\item {\bf Single-threaded IO.} A single process acquires all the data and
+\item {\bf Single-threaded IO:} A single process acquires all the data and
 writes them out. The features of hardware and OS are used to distribute the 
 data over multiple chanels and, possibly, to muliple disks.
 
-\item {\bf Multithreaded, multi-fileset IO} Many processes write to
+\item {\bf Multithreaded, multi-fileset IO:} Many processes write to
 multiple independent files. These files may be assembled later. Since each of 
 the processes operates with its file logically independently, we can again 
-rely on the hardware and OS to operate concurrently with multiple chanels and 
+rely on the hardware and OS to operate concurrently with multiple channels and 
 multiple disks. 
  
-\item {\bf Multithreaded/Single-fileset IO.} Many processes write to a
+\item {\bf Multithreaded, single-fileset IO:} Many processes write to a
 single file. Although this approach is the most desirable one, its 
 implementation is the most complicated. Since it requires concurrent access 
 to the file by multiple processes, it can be implemented within the ESMF I/O 
@@ -324,7 +325,7 @@ Balaji_Parallel_IO_1999, Balaji_Parallel_IO_2000}. Parallel IO implemented in
 GFDL (\cite{mpp_io}) supports parallel writing to single or multiple files. 
 It supports NetCDF and binary data formats.
 
-\subsection{Synchronous and asynchronous IO}
+\subsection{Synchronous and Asynchronous IO}
 
 ESMF shall provide an asynchronous option for all ESMF IO models.  It
 shall provide async read and write operations, the capability to wait
@@ -346,20 +347,6 @@ ESMF IO is meant to be used for standard API and underlying implementation,
 providing input and outut of gridded data and observational data streams to 
 and from the disk in multiple standard formats. I/O with different levels of 
 parallelism have to be provided.  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
