@@ -1,17 +1,18 @@
-% $Id: PhysGrid_reqdoc.tex,v 1.4 2002/03/07 17:38:02 cdeluca Exp $
+% $Id: PhysGrid_reqdoc.tex,v 1.5 2002/03/21 22:35:58 rhallberg Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
 \usepackage{supertabular}
 \usepackage{html}
-%\usepackage[T1]{fontenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
 
 \newcommand{\docmttype}{Requirements}
 \newcommand{\reqtitle}[1]{\shortname#1}
 \newcommand{\req}[1]{\section{\hspace{.3in}#1}}
 \newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
-\newcommand{\mytitle}{\longname \docmttype ~~- Draft <Num>}
+\newcommand{\mytitle}{\longname \docmttype ~~- Pre-Draft 1}
 \newenvironment
 {reqlist}
 {\begin{list} {} {} \rm \item[]}
@@ -23,7 +24,7 @@
 \newcommand{\longname}{Physical Grids }
 \newcommand{\funcname}{PhysGrid }
 \newcommand{\shortname}{PG}
-\newcommand{\myauthors}{<Authors>}
+\newcommand{\myauthors}{Robert Hallberg, Arlindo da Silva, Matt Harrison}
 %===============================================================================
 
 \begin{document}
@@ -31,11 +32,9 @@
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 % Title page
-%\input{../../../../scripts/doc_templates/templates/title_alldoc}
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
 
 \newpage
-
-PhysGrids Draft of March 6, 2002
 
 \tableofcontents
 
