@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2003/04/04 22:42:25 flanigan Exp $ 
+# $Id: makefile,v 1.23 2003/04/07 22:28:20 flanigan Exp $ 
 ALL: alldoc 
 
 #
@@ -56,7 +56,7 @@ CLOBBERDIRS =
 
 
 #
-# The build rules for the req and ref docs are in 
+# The build rules for the req are in 
 # build/common.
 #
 
@@ -66,7 +66,7 @@ ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USRDOC_DEP_FILES)
 	${DO_LATEX} ESMF usr
 	mv -f ESMF_usrdoc.dvi ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/ESMF_refdoc.dvi: $(REFDOC_DEP_FILES)
+${ESMC_DOCDIR}/ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	${DO_LATEX} ESMF ref
 	mv -f ESMF_refdoc.dvi ${ESMC_DOCDIR}
@@ -84,7 +84,7 @@ ${ESMC_DOCDIR}/ESMF_usrdoc: $(USRDOC_DEP_FILES)
 	${DO_L2H} ESMF usr
 	mv -f ESMF_usrdoc ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/ESMF_refdoc: $(REFDOC_DEP_FILES)
+${ESMC_DOCDIR}/ESMF_refdoc: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	-rm -rf $(ESMC_DOCDIR)/ESMF_refdoc
 	${DO_L2H} ESMF ref

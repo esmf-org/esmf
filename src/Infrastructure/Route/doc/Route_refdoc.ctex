@@ -1,4 +1,4 @@
-% $Id: Base_refdoc.ctex,v 1.2 2003/04/07 22:28:17 flanigan Exp $ 
+% $Id: Route_refdoc.ctex,v 1.1 2003/04/07 22:28:18 flanigan Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,9 +43,9 @@
 
 %\section{Synopsis}
 % #ifdef STANDALONE
-% \input{Base_syn}
+% \input{Route_syn}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Base/doc/Base_syn}
+% \input{../Infrastructure/Route/doc/Route_syn}
 % #endif
 
 \section{Installation and General Usage}
@@ -54,9 +54,9 @@ usage of the ESMF libraries.
 
 %\section{Architecture}
 % #ifdef STANDALONE
-% \input{Base_arch}
+% \input{Route_arch}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Base/doc/Base_arch}
+% \input{../Infrastructure/Route/doc/Route_arch}
 % #endif
 
 \newpage
@@ -66,21 +66,21 @@ usage of the ESMF libraries.
 % #ifdef STANDALONE
 % \input{class_desc}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Base/doc/class_desc}
+% \input{../Infrastructure/Route/doc/class_desc}
 % #endif
 
 % \subsection{Restrictions}
 % #ifdef STANDALONE
 % \input{class_rest}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Base/doc/class_rest}
+% \input{../Infrastructure/Route/doc/class_rest}
 % #endif
 
 % \subsection{Use and Examples}
 % #ifdef STANDALONE
 % %\input{class_ex} 
 % #elif defined(CONSTITUENT)
-% %\input{../Infrastructure/Base/doc/class_ex} 
+% %\input{../Infrastructure/Route/doc/class_ex} 
 % #endif
 
 \newpage
@@ -88,10 +88,10 @@ usage of the ESMF libraries.
 
 #ifdef STANDALONE
 %\section{Glossary}
-%\input{Base_glos}
+%\input{Route_glos}
 
 %\section{Bibliography}
-\bibliography{Base} 
+\bibliography{Route} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{Bibliography}
 
@@ -117,13 +117,13 @@ usage of the ESMF libraries.
 
 
 %
-%  There is no ESMF_Base.F90 to make 
-%  EMSF_Base_fapi.tex
+%  There is no ESMF_Route.F90 to make 
+%  EMSF_Route_fapi.tex
 %
 #ifdef STANDALONE
-%\input{ESMF_Base_fapi}
+%\input{ESMF_Route_fapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Base/doc/ESMF_Base_fapi}
+%\input{../Infrastructure/Route/doc/ESMF_Route_fapi}
 #endif
 
 \subsection{Private Classes}
