@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2003/12/02 20:12:55 svasquez Exp $
+# $Id: makefile,v 1.19 2004/01/30 01:29:49 eschwab Exp $
 
 ALL:  examples
 #
@@ -62,6 +62,7 @@ EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_TimeEx \
                     $(ESMF_EXDIR)/ESMF_ClockEx \
 		    $(ESMF_EXDIR)/ESMC_ClockEx \
                     $(ESMF_EXDIR)/ESMF_ClockAdvEx \
+                    $(ESMF_EXDIR)/ESMF_ClockAdv2Ex \
                     $(ESMF_EXDIR)/ESMF_AlarmEx
 
 #
@@ -79,6 +80,7 @@ EXAMPLES_RUN     =  run_ESMF_TimeEx \
                     run_ESMF_ClockEx \
 		    run_ESMC_ClockEx \
                     run_ESMF_ClockAdvEx \
+                    run_ESMF_ClockAdv2Ex \
                     run_ESMF_AlarmEx
 
 EXAMPLES_RUN_UNI =  run_ESMF_TimeEx_uni \
@@ -87,6 +89,7 @@ EXAMPLES_RUN_UNI =  run_ESMF_TimeEx_uni \
                     run_ESMF_ClockEx_uni \
 		    run_ESMC_ClockEx_uni \
                     run_ESMF_ClockAdvEx_uni \
+                    run_ESMF_ClockAdv2Ex_uni \
                     run_ESMF_AlarmEx_uni
 
 include ${ESMF_DIR}/makefile
@@ -100,65 +103,46 @@ CLOBBERDIRS =
 #
 #  ESMF_TimeEx
 #
-run_ESMF_TimeEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TimeEx > $(ESMF_EXDIR)/ESMF_TimeEx.stdout
-
-run_ESMF_TimeEx:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TimeEx > $(ESMF_EXDIR)/ESMF_TimeEx.stdout
-
-
+run_ESMF_TimeEx  run_ESMF_TimeEx_uni:
+	-${RUNALONE} $(ESMF_EXDIR)/ESMF_TimeEx > \
+					$(ESMF_EXDIR)/ESMF_TimeEx.stdout
 #
 # ESMF_TimeIntervalEx
 #
-run_ESMF_TimeIntervalEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TimeIntervalEx > $(ESMF_EXDIR)/ESMF_TimeIntervalEx.stdout
-
-run_ESMF_TimeIntervalEx:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TimeIntervalEx > $(ESMF_EXDIR)/ESMF_TimeIntervalEx.stdout
-
-
+run_ESMF_TimeIntervalEx  run_ESMF_TimeIntervalEx_uni:
+	-${RUNALONE} $(ESMF_EXDIR)/ESMF_TimeIntervalEx > \
+					$(ESMF_EXDIR)/ESMF_TimeIntervalEx.stdout
 #
 # ESMF_CalendarEx
 #
-run_ESMF_CalendarEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_CalendarEx > $(ESMF_EXDIR)/ESMF_CalendarEx.stdout
-
-run_ESMF_CalendarEx:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_CalendarEx > $(ESMF_EXDIR)/ESMF_CalendarEx.stdout
-
-
+run_ESMF_CalendarEx  run_ESMF_CalendarEx_uni:
+	-${RUNALONE} $(ESMF_EXDIR)/ESMF_CalendarEx > \
+					$(ESMF_EXDIR)/ESMF_CalendarEx.stdout
 #
 # ESMF_ClockEx
 #
-run_ESMF_ClockEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ClockEx > $(ESMF_EXDIR)/ESMF_ClockEx.stdout
-
-run_ESMF_ClockEx:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ClockEx > $(ESMF_EXDIR)/ESMF_ClockEx.stdout
-
+run_ESMF_ClockEx  run_ESMF_ClockEx_uni:
+	-${RUNALONE} $(ESMF_EXDIR)/ESMF_ClockEx > \
+					$(ESMF_EXDIR)/ESMF_ClockEx.stdout
 #
 # ESMC_ClockEx
 #
-run_ESMC_ClockEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ClockEx > $(ESMF_EXDIR)/ESMC_ClockEx.stdout
-
-run_ESMC_ClockEx:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ClockEx > $(ESMF_EXDIR)/ESMC_ClockEx.stdout
-
+run_ESMC_ClockEx  run_ESMC_ClockEx_uni:
+	-${RUNALONE} $(ESMF_EXDIR)/ESMC_ClockEx > \
+					$(ESMF_EXDIR)/ESMC_ClockEx.stdout
 #
 # ESMF_ClockAdvEx
 #
-run_ESMF_ClockAdvEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ClockAdvEx > $(ESMF_EXDIR)/ESMF_ClockAdvEx.stdout
-
-run_ESMF_ClockAdvEx:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ClockAdvEx > $(ESMF_EXDIR)/ESMF_ClockAdvEx.stdout
-
-# ESMF_AlarmEx
+run_ESMF_ClockAdvEx  run_ESMF_ClockAdvEx_uni:
+	-${RUNALONE} $(ESMF_EXDIR)/ESMF_ClockAdvEx > \
+					$(ESMF_EXDIR)/ESMF_ClockAdvEx.stdout
 #
-run_ESMF_AlarmEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_AlarmEx > $(ESMF_EXDIR)/ESMF_AlarmEx.stdout
-
-run_ESMF_AlarmEx:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_AlarmEx > $(ESMF_EXDIR)/ESMF_AlarmEx.stdout
-
+# ESMF_ClockAdv2Ex
+#
+run_ESMF_ClockAdv2Ex  run_ESMF_ClockAdv2Ex_uni:
+	-${RUNALONE} $(ESMF_EXDIR)/ESMF_ClockAdv2Ex > \
+					$(ESMF_EXDIR)/ESMF_ClockAdv2Ex.stdout
+#
+run_ESMF_AlarmEx  run_ESMF_AlarmEx_uni:
+	-${RUNALONE} $(ESMF_EXDIR)/ESMF_AlarmEx > \
+					 $(ESMF_EXDIR)/ESMF_AlarmEx.stdout
