@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.59 2004/07/21 20:31:31 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.60 2004/07/21 21:15:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1040,7 +1040,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetInt8Attr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 8-byte integer attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1054,7 +1054,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Returns a 8-byte integer attribute from the {\tt bundle}.
+!     Returns an 8-byte integer attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1091,7 +1091,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetInt8ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 8-byte integer list attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1106,7 +1106,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Returns an integer list attribute from the {\tt bundle}.
+!     Returns an 8-byte integer list attribute from the {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1266,7 +1266,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetReal8Attr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 8-byte real attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1280,7 +1280,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a 8-byte real attribute from the {\tt bundle}.
+!      Returns an 8-byte real attribute from the {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1315,7 +1315,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetReal8ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 8-byte real list attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1330,7 +1330,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Returns a 8-byte real list attribute from the {\tt bundle}.
+!     Returns an 8-byte real list attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1421,7 +1421,8 @@ end function
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1489,7 +1490,8 @@ end function
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, valueList, status)
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
+                                    valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1645,7 +1647,7 @@ end function
 !           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
 !           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
 !           or {\tt ESMF\_R8}.
-!           For all other types the value {\tt ESMF\_DATA\_NOKIND} is returned.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
 !     \item [{[count]}]
 !           The number of items in this attribute.  For character types,
 !           the length of the character string.
@@ -1699,8 +1701,9 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns information associated with the indexed attribute, including 
-!      {\tt name}, {\tt datatype}, and {\tt count}.
+!      Returns information associated with the indexed attribute, 
+!      including {\tt datatype}, {\tt datakind} (if applicable),
+!      and item {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1719,7 +1722,7 @@ end function
 !           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
 !           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
 !           or {\tt ESMF\_R8}.
-!           For all other types the value {\tt ESMF\_DATA\_NOKIND} is returned.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
 !     \item [{[count]}]
 !           Returns the number of items in this attribute.  For character types,
 !           the length of the character string.
@@ -2540,7 +2543,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetInt4Attr"
 !BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Add an integer attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Add a 4-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleSetAttribute()
@@ -2574,6 +2577,9 @@ end function
 
       integer :: status                           ! Error status
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I4, 1, &
                                     value, status)
@@ -2581,60 +2587,15 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleSetInt4Attr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetInt8Attr"
-!BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Add an integer attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetInt8Attr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
-      character (len = *), intent(in) :: name
-      integer(ESMF_KIND_I8), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a 8-byte integer attribute to the {\tt bundle}.  
-!      The attribute has a {\tt name} and a {\tt value}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to add.
-!     \item [value]
-!           The integer value of the attribute to add.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: status                           ! Error status
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
-                                    value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      end subroutine ESMF_BundleSetInt8Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetInt4ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set an integer list attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleSetAttribute()
@@ -2673,6 +2634,9 @@ end function
       integer :: status 
       integer :: limit
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -2687,13 +2651,67 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleSetInt4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetInt8Attr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Add an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetInt8Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte integer attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The integer value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetInt8Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetInt8ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set an integer list attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleSetAttribute()
@@ -2732,6 +2750,9 @@ end function
       integer :: status
       integer :: limit
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -2746,13 +2767,15 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleSetInt8ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetReal4Attr"
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a real attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleSetAttribute()
@@ -2784,6 +2807,11 @@ end function
 !
 !EOP
 
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R4, 1, &
                                     value, status)
@@ -2791,13 +2819,15 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleSetReal4Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetReal8Attr"
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a real attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleSetAttribute()
@@ -2811,7 +2841,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a 8-byte real attribute to the {\tt bundle}.  
+!      Attaches an 8-byte real attribute to the {\tt bundle}.  
 !      The attribute has a {\tt name} and a {\tt value}. 
 !
 !     The arguments are:
@@ -2829,6 +2859,11 @@ end function
 !
 !EOP
 
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R8, 1, &
                                     value, status)
@@ -2836,13 +2871,15 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleSetReal8Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetReal4ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a real list attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleSetAttribute()
@@ -2879,6 +2916,10 @@ end function
 !
 !EOP
       integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
@@ -2894,13 +2935,15 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleSetReal4ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetReal8ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a real list attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleSetAttribute()
@@ -2915,7 +2958,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Attaches a 8-byte real list attribute to the {\tt bundle}.
+!     Attaches an 8-byte real list attribute to the {\tt bundle}.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is given 
 !     by {\tt count}.
@@ -2937,6 +2980,10 @@ end function
 !
 !EOP
       integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
@@ -2951,6 +2998,8 @@ end function
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleSetReal8ListAttr
 
@@ -2989,12 +3038,20 @@ end function
 !
 !
 !EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
                                     value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleSetLogicalAttr
 
@@ -3039,6 +3096,10 @@ end function
 !
 !EOP
       integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
@@ -3053,6 +3114,8 @@ end function
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleSetLogicalListAttr
 
@@ -3091,10 +3154,18 @@ end function
 !
 !
 !EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
       call c_ESMC_AttributeSetChar(bundle%btypep%base, name, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleSetCharAttr
 
