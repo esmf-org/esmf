@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.34 2003/10/22 15:20:34 cdeluca Exp $
+! $Id: ESMF_Alarm.F90,v 1.35 2003/10/30 20:08:12 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.34 2003/10/22 15:20:34 cdeluca Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.35 2003/10/30 20:08:12 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1065,7 +1065,7 @@
 !     \item[alarm]
 !          {\tt ESMF\_Alarm} to validate.
 !     \item[{[options]}]
-!          Validate options.
+!          Validate options.  TODO:  To be determined.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 
@@ -1104,8 +1104,8 @@
 !          Print options. If none specified, prints all alarm property values.\\
 !          "name"         - print the alarm's name. \\
 !          "clock"        - print the associated clock's name. \\
-!          "ringinterval" - print the alarm's periodic ring interval. \\
-!          "ringduration" - print how long this alarm is to remain ringing. \\
+!          "ringInterval" - print the alarm's periodic ring interval. \\
+!          "ringDuration" - print how long this alarm is to remain ringing. \\
 !          "ringTime"     - print the alarm's next time to ring. \\
 !          "prevRingTime" - print the alarm's previous ring time. \\
 !          "stopTime"     - print when alarm intervals end. \\

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.39 2003/10/22 15:20:34 cdeluca Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.40 2003/10/30 20:08:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -140,7 +140,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.39 2003/10/22 15:20:34 cdeluca Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.40 2003/10/30 20:08:13 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1467,7 +1467,7 @@
 !     \item[timeInterval]
 !          {\tt ESMF\_TimeInterval} to validate.
 !     \item[{[options]}]
-!          Validate options.
+!          Validate options.  TODO:  To be determined.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
