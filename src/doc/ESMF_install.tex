@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.31 2003/08/28 17:14:37 flanigan Exp $
+% $Id: ESMF_install.tex,v 1.32 2003/09/25 21:22:39 flanigan Exp $
 
 \subsection{ESMF Download Options}
 
@@ -38,7 +38,7 @@ Currently the ESMF\_DIR environment variable must be set on all
 platforms.  ESMF\_DIR should be set to the path of the top
 level ESMF directory.  
 
-There are four other environment variables that the build system uses.
+There are six other environment variables that the build system uses.
 In most cases they do not have to be set by the user.  If they are not
 set, then the build system will assign default values to them.  For the
 current supported platforms, the default values are fine.  The other
@@ -49,14 +49,27 @@ environment variables are:
   \item[ESMF\_ARCH] Value of uname -s.  This will by AIX for IBM
                  RS6000's.  There should be almost no reason for the
                  user to set ESMF\_ARCH.
-      
+
+  \item[ESMF\_COMPILER] Variable specifying which compiler to use.  Value
+                   can be default, absoft, intel, lahey or nag. 
+                   If the value is default or ESMF\_COMPILER is 
+                   left unset, then the default compiler 
+                   will be used.      
+
+  \item[ESMF\_PREC] Precision value of 32 or 64.  When possible the
+                 default value will be 64, otherwise it will be 32.
+
 
   \item[ESMF\_SITE] Build configure file site name or the value
                  default.  If not set, then the value of default is
                  assumed.
 
-  \item[ESMF\_PREC] Precision value of 32 or 64.  When possible the
-                 default value will be 64, otherwise it will be 32.
+  \item[ESMF\_COMM] Defines which MPI communications library to use.  
+                   Many times a machine will come with its own MPI 
+                   library and in those cases the default setting 
+                   will be mpi.  Otherwise the default setting will be 
+                   mpiuni so that the mpiuni library will be used.
+                   Other possible settings are mpich and lam.
 
   \item[ESMF\_BOPT] Build option value of g (for debug) or O (for
                  Optimize).  Default value will be O.

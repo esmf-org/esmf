@@ -1,4 +1,4 @@
- $Id: README,v 1.35 2003/09/22 16:20:00 flanigan Exp $
+ $Id: README,v 1.36 2003/09/25 21:22:20 flanigan Exp $
 ================================================================================
                                    README
 
@@ -93,8 +93,16 @@ ESMF_ARCH      Normally value of uname -s.
 ESMF_SITE      Build configure site name or the value default.
                If not set, then the value of default is assumed.
 
+ESMF_COMPILER  Set to the name of the compiler to use.  In not set 
+               then the default compiler is used.  Values can be 
+               default,absoft,intel,lahey or nag.
+
 ESMF_PREC      Precision value of 32 or 64.  When possible the default
                value will be 64, otherwise it will be 32.
+
+ESMF_COMM      MPI communications library to use.  Set to mpiuni,
+               mpich,lam or mpi.   Default values will vary by
+               machine.
 
 ESMF_BOPT      Build option value of g (for debug) or O (for Optimize). 
                Default value will be O.
@@ -175,7 +183,7 @@ first if the unit tests have already been compiled without the
 ESMF_EXHAUSTIVE=ON option.
 
 Output files from the tests are directed to files in
-${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
 directories.
 
 To build documentation:
@@ -186,7 +194,7 @@ To build documentation:
 
 Final documentation files will be located in the ${ESMF_DIR}/doc
 directory.  If these doc build commands are used on a Linux machine,
-set the environment variable ESFM_SITE to the value of lahey.
+set the environment variable ESFM_COMPILER to the value of lahey.
 
 Usage
 -----
@@ -194,14 +202,14 @@ Usage
 To use ESMF from Fortran, add the directory that contains
 the ESMF *.mod file(s),
 
-${ESMF_DIR}/mod/mod${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)
+${ESMF_DIR}/mod/mod${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
 
 to your search path for *.mod files.  For most compilers this path is
 identified either with a -I or a -M.  You must also link with the ESMF
 shared object library.  This is a file called libesmf.so that is
 located in the following directory:
 
-${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)
+${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
 
 There is a single ESMF module, called ESMF_Mod, that should be
 included in applications with the Fortran USE statement.  It is not

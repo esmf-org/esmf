@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.13 2003/09/19 21:04:34 flanigan Exp $
+#  $Id: common.mk,v 1.14 2003/09/25 21:22:05 flanigan Exp $
 #
 #  common.mk
 #
@@ -12,13 +12,21 @@ ifndef ESMF_ARCH
 export ESMF_ARCH := $(shell uname -s)
 endif
 
-ifndef ESMF_SITE
-export ESMF_SITE := default
+ifndef ESMF_COMPILER
+export ESMF_COMPILER := default
 endif
 
 ifndef ESMF_PREC
 export ESMF_PREC := 64
 endif
+
+ifndef ESMF_SITE
+export ESMF_SITE := default
+endif
+
+#
+#  ESMF_COMM set in site files.
+#
 
 ifndef ESMF_BOPT
 export ESMF_BOPT := O
@@ -52,18 +60,18 @@ endif
 ESMF_BUILD	= $(ESMF_TOP_DIR)
 
 
-LDIR		= $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
+LDIR		= $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
 
-ESMF_LIBDIR     = $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
-ESMF_MODDIR     = $(ESMF_BUILD)/mod/mod${ESMF_BOPT}/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
-ESMF_TESTDIR    = $(ESMF_BUILD)/test/test$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
-ESMF_EXDIR      = $(ESMF_BUILD)/examples/examples$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
+ESMF_LIBDIR     = $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
+ESMF_MODDIR     = $(ESMF_BUILD)/mod/mod${ESMF_BOPT}/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
+ESMF_TESTDIR    = $(ESMF_BUILD)/test/test$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
+ESMF_EXDIR      = $(ESMF_BUILD)/examples/examples$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 
 # Building in the moddir solves problems about trying to copy module files
 # in after the fact.
 ESMC_OBJDIR	= ${ESMF_MODDIR}
-ESMC_TESTDIR	= $(ESMF_BUILD)/test/test${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)
+ESMC_TESTDIR	= $(ESMF_BUILD)/test/test${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
 ESMC_DOCDIR	= $(ESMF_TOP_DIR)/doc
 ESMF_BUILD_DOCDIR = $(ESMF_BUILD_DIR)/build/doc
 
@@ -85,7 +93,7 @@ ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
 		  ${LOCAL_INCLUDE} \
 		  -I/usr/local/include \
-		  -I${ESMF_BUILD_DIR}/build_config/conf/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE) \
+		  -I${ESMF_BUILD_DIR}/build_config/conf/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE) \
 		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR)
 
 CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} ${CPPFLAGS} \
@@ -949,4 +957,4 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 #
 #  Include site specific makefile fragment.
 #
-include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_SITE).mk
+include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE).mk

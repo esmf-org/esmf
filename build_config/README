@@ -1,4 +1,4 @@
- $Id: README,v 1.9 2003/09/02 17:11:09 cdeluca Exp $
+ $Id: README,v 1.10 2003/09/25 21:21:53 flanigan Exp $
 
 ================================================================================
 
@@ -31,51 +31,44 @@ common.mk includes a site specific makefile fragment file located
 in build_config.  The included file follows this naming
 convention:
 
-     build_config/ESMF_ARCH.ESMF_SITE.mk
+     build_config/ESMF_ARCH.ESMF_COMPILER.ESMF_SITE.mk
 
 
-ESMF_ARCH and ESMF_SITE are two environment variables that are either
-set by the user or are given default values in common.mk.  (These
-variables are described below.)
+ESMF_ARCH,ESMF_COMPILER and ESMF_SITE are two environment variables
+that are either set by the user or are given default values in
+common.mk.  (These variables are described below.)
 
 The site makefile fragments specify makefile settings for particular
-architecture and in some cases individual machines.  The ESMF_ARCH
-value used for the first part of the filename specifies the
-architecture that the file should be used for.  
+architecture and in some cases specific compilers and machines.  The
+ESMF_ARCH value used for the first part of the filename specifies the
+architecture that the file should be used for.
 
-The ESMF_SITE value used for the second part of the filename will
+The middle part of a makefile fragment name represents what compiler
+that the file configures for.  It will have one of ESMF_COMPILER's
+values. If default is used, then the default compiler will be used.
+
+The ESMF_SITE value used for the last part of the filename will
 either have the value default or a machine's name.  If default is used
 then the file in most cases can be used with any machine of the
 architecture given by ESMF_ARCH.  If a machine's name is used, then
 that particular machine uses makefile settings other then the default
 settings for its architecture.
 
-ESMF_SITE may also be used to define makefile settings for different
-compilers on the same architecture or machine.  ESMF_SITE can be set
-to a machine's name, a compiler's name or both.  An example ESMF_SITE
-value using both the machine name and the compiler name would be
-jazz_lahey.  The following example site file contains settings for
-compiling with the Lahey Fortran90 compiler on a linux machine named
-jazz:
-
-
-      build_config/Linux.jazz_lahey.mk
-
-
 Current site files for supported platforms:
 
-      build_config/AIX.default.mk
-                   IRIX64.default.mk
-                   OSF1.defalut.mk
+      build_config/AIX.default.default.mk
+                   IRIX64.default.default.mk
+                   OSF1.default.defalut.mk
 
 Current site files for unsupported platforms:
 
-      build_config/Linux.lahey.mk
-                   Darwin.default.mk
-                   SunOS.default.mk
+      build_config/Linux.lahey.default.mk
+                   Linux.intel.default.mk
+                   Darwin.absoft.default.mk
+                   SunOS.default.default.mk
 
-Notice that there is no default site value for Linux machines.  This
-is because there are a number of Fortran90 Linux compilers.
+Notice that there is no default compiler value for Linux machines.
+This is because there are a number of Fortran90 Linux compilers.
 
 The build system can be ported to other Unix platforms by adding new
 site and conf.h files.  The new site file has to follow the naming
@@ -83,21 +76,21 @@ convention used by the existing site files and be created in
 build_config.  The new site file will also have to define the same
 makefile variables as the existing site files.
 
-The conf.h files are used to define machine attributes within C and C++
-source code.  The build system stores the conf.h files in
+The conf.h files are used to define machine attributes within C and
+C++ source code.  The build system stores the conf.h files in
 subdirectories in build_config/conf.  The subdirectories following a
-naming convention using the environment variables ESMF_ARCH, ESMF_PREC
-and ESMF_SITE.  The naming convention is:
+naming convention using the environment variables ESMF_ARCH,
+ESMF_COMPILER, ESMF_PREC and ESMF_SITE.  The naming convention is:
   
-      build_config/conf/EMSF_ARCH.ESMF_PREC.ESMF_SITE/conf.h
+      build_config/conf/EMSF_ARCH.ESMF_COMPILER.ESMF_PREC.ESMF_SITE/conf.h
 
 Like site files, new conf.h files have to define the same machine
 attributes as existing conf.h files.  If a machine supports both 32
 and 64 bit precision, then two conf.h files and the directories they
 are stored in are needed.  Example:
 
-      build_config/conf/AIX.32.default/conf.h
-      build_config/conf/AIX.64.default/conf.h
+      build_config/conf/AIX.default.32.default/conf.h
+      build_config/conf/AIX.default.64.default/conf.h
 
 
 
@@ -108,16 +101,27 @@ Environment Variables
                    machine architecture.  Default value
                    is value returned by uname -s
 
+ ESMF_COMPILER     Variable specifying which compiler to use.  Value
+                   can be default, absoft, intel, lahey or nag. 
+                   If the value is default or ESMF_COMPILER is 
+                   left unset, then the default compiler 
+                   will be used.
+
  ESMF_PREC         Variable specifying the precision.  Value 
                    can be 32 or 64.  When possible the default 
                    value will be 64, otherwise it will be 32.
 
  ESMF_SITE         If ESMF_SITE is not set or has the value of
                    default,  default build settings for the
-                   current machine architecture will be used.
-                   Values are created from a machine's name and
-                   if needed, the compiler used.  Example ESMF_SITE
-                   values could be blackforest or jazz_lahey.
+                   current machine architecture and compiler will 
+                   be used.  Values are created from a machine's name.
+
+ ESMF_COMM         Defines which MPI communications library to use.  
+                   Many times a machine will come with its own MPI 
+                   library and in those cases the default setting 
+                   will be mpi.  Otherwise the default setting will be 
+                   mpiuni so that the mpiuni library will be used.
+                   Other possible settings are mpich and lam.
 
  ESMF_BOPT         Variable specifying that the build system
                    use either debugging  or optimization options.
