@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.117 2004/03/09 22:21:32 svasquez Exp $
+! $Id: ESMF_Field.F90,v 1.118 2004/03/11 16:13:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.117 2004/03/09 22:21:32 svasquez Exp $'
+      '$Id: ESMF_Field.F90,v 1.118 2004/03/11 16:13:51 svasquez Exp $'
 
 !==============================================================================
 !
@@ -412,7 +412,7 @@
       contains
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_FieldAttachData - Associate an Array object with a Field
 
 ! !INTERFACE:
@@ -441,14 +441,15 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.6.5
 
+!	BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 
         end subroutine ESMF_FieldAttachArray
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_FieldAttachData - Associate a data buffer with a field
 
 ! !INTERFACE:
@@ -479,14 +480,15 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.6.5
 
+!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 
         end subroutine ESMF_FieldAttachBuffer
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_FieldAttachData - Associate a Grid and an Array with a Field
 
 ! !INTERFACE:
@@ -519,9 +521,10 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.6.5
 
+!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 
         end subroutine ESMF_FieldAttachGridArray
 
@@ -2552,7 +2555,7 @@
         end subroutine ESMF_FieldPrint
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldRead - Read in a Field from external storage
 !
 ! !INTERFACE:
@@ -2587,7 +2590,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
 
@@ -2599,12 +2602,13 @@
         nullify(a%ftypep)
 
         ESMF_FieldRead = a
+!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 
 
         end function ESMF_FieldRead
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldReadRestart - Read back in a saved Field
 !
 ! !INTERFACE:
@@ -2634,9 +2638,10 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.6.8
 
+!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 
 !
 ! TODO: code goes here; this is just filler to make the compiler not complain
@@ -2784,7 +2789,7 @@
         end subroutine ESMF_FieldSetDataMap
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetDataValues - Set contents of Data array
 !
 ! !INTERFACE:
@@ -2814,10 +2819,11 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.6.7
 
 
+!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 !
 ! TODO: code goes here
 !
@@ -3385,7 +3391,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldWriteRestart - Save Field in the quickest manner possible
 !
 ! !INTERFACE:
@@ -3413,10 +3419,11 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.6.8
 
 
+!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 !
 ! TODO: code goes here
 !
