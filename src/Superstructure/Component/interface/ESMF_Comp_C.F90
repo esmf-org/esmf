@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.17 2004/04/20 19:03:26 nscollins Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.18 2004/04/23 13:32:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.17 2004/04/20 19:03:26 nscollins Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.18 2004/04/23 13:32:15 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -39,6 +39,52 @@
 ! 
 !EOP
 !------------------------------------------------------------------------------
+
+
+   recursive subroutine f_esmf_compget(comp, ctype, rc)
+       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+
+       type(ESMF_CWrap) :: comp
+       type(ESMF_CompType) :: ctype
+       integer :: rc
+
+       call ESMF_CompGet(comp%compp, ctype=ctype, rc=rc)
+
+   end subroutine f_esmf_compget
+
+   recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
+       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       use ESMF_VMMod
+
+       type(ESMF_CWrap) :: comp
+       type(ESMF_CWrap) :: comp_src
+       type(ESMF_VM)    :: vm
+       integer :: rc
+
+       type (ESMF_CompClass), pointer :: compclass  
+       
+       nullify(comp%compp)
+       nullify(compclass)
+       allocate(compclass)
+       compclass = comp_src%compp
+       call ESMF_CompSet(compclass, vm=vm)
+       comp%compp => compclass
+
+   end subroutine f_esmf_compreplicate
+
+   recursive subroutine f_esmf_compdelete(comp, rc)
+       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       
+       type(ESMF_CWrap) :: comp
+       integer :: rc
+       
+       deallocate(comp%compp)
+       nullify(comp%compp)
+       
+   end subroutine f_esmf_compdelete
 
    subroutine f_esmf_gridcompcreate(gcomp, name, layout, mtype, grid, clock, &
                                      config, configFile, rc)
