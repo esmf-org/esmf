@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/04/09 23:48:43 flanigan Exp $ 
+# $Id: makefile,v 1.13 2003/04/10 23:11:12 flanigan Exp $ 
 
 ALL:  tests
 
@@ -61,13 +61,13 @@ $(ESMF_TESTDIR)/ESMF_ArrayUTest: ESMF_ArrayUTest.o
 	-$(SL_F_LINKER) -g -o $(ESMF_TESTDIR)/ESMF_ArrayUTest ESMF_ArrayUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_ArrayUTest.o
 
-RUN_ESMF_ArrayTestUTest:
+RUN_ESMF_ArrayUTest:
 	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
 
-RUN_ESMF_ArrayTestUTestUNI:
+RUN_ESMF_ArrayUTestUNI:
 	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
 
-ESMF_ArrayTestUTest.rm:
+ESMF_ArrayUTest.rm:
 	-@echo "ESMF_ArrayTest.rm target called here."
 ##
 
