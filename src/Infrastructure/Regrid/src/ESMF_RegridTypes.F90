@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.54 2004/06/10 17:45:54 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.55 2004/06/14 22:32:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.54 2004/06/10 17:45:54 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.55 2004/06/14 22:32:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -574,9 +574,9 @@
                                      ESMF_CONTEXT, rc)) return
 
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
-                          globalAIPerDim=myAI, reorder=reorder, &
-                          total=totalUse, rc=localrc)
+      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=horzRelLoc, &
+                                   globalAIPerDim=myAI, reorder=reorder, &
+                                   total=totalUse, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -595,15 +595,15 @@
                                      ESMF_CONTEXT, rc)) return
 
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
-                          minLocalCoordPerDim=srcMin, &
-                          maxLocalCoordPerDim=srcMax, &
-                          reorder=.false., rc=localrc)
+      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=horzRelLoc, &
+                                   minLocalCoordPerDim=srcMin, &
+                                   maxLocalCoordPerDim=srcMax, &
+                                   reorder=.false., rc=localrc)
       call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDE(dstGrid, horzRelLoc=horzRelLoc, &
-                          minLocalCoordPerDim=dstMin, &
-                          maxLocalCoordPerDim=dstMax, &
-                          reorder=.false., rc=localrc)
+      call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=horzRelLoc, &
+                                   minLocalCoordPerDim=dstMin, &
+                                   maxLocalCoordPerDim=dstMax, &
+                                   reorder=.false., rc=localrc)
 
       ! calculate intersections
       call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &

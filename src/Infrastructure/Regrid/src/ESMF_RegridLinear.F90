@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.23 2004/06/08 09:27:19 nscollins Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.24 2004/06/14 22:31:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.23 2004/06/08 09:27:19 nscollins Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.24 2004/06/14 22:31:48 jwolfe Exp $'
 
 !==============================================================================
 
@@ -182,9 +182,9 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGetDE(dstGrid, horzRelLoc=dstRelLoc, &
-                          localCellCountPerDim=dstCounts, &
-                          reorder=.false., rc=localrc)
+      call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=dstRelLoc, &
+                                   localCellCountPerDim=dstCounts, &
+                                   reorder=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -205,9 +205,9 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGetDE(srcGrid, horzRelLoc=srcRelLoc, &
-                          localCellCountPerDim=srcCounts, &
-                          reorder=.false., rc=localrc)
+      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=srcRelLoc, &
+                                   localCellCountPerDim=srcCounts, &
+                                   reorder=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

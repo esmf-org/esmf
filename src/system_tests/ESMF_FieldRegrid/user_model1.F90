@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.24 2004/05/26 22:08:49 jwolfe Exp $
+! $Id: user_model1.F90,v 1.25 2004/06/14 22:26:32 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -217,8 +217,8 @@
         ! get the grid and coordinates
         allocate(coordArray(2))
         call ESMF_FieldGet(humidity, grid=grid, horzRelLoc=relloc, rc=status)
-        call ESMF_GridGetDE(grid, localCellCountPerDim=counts, &
-                            horzRelLoc=relloc, rc=status)
+        call ESMF_GridGetDELocalInfo(grid, localCellCountPerDim=counts, &
+                                     horzRelLoc=relloc, rc=status)
         call ESMF_GridGetCoord(grid, horzRelLoc=relloc, &
                                centerCoord=coordArray, rc=status)
         call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)

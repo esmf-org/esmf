@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.28 2004/06/11 19:50:05 jwolfe Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.29 2004/06/14 22:28:57 jwolfe Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -115,8 +115,8 @@
     call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
 
     ! Allocate and set initial data values.  These are different on each DE.
-    call ESMF_GridGetDE(grid1, localCellCount=ni, &
-                        horzRelloc=ESMF_CELL_CENTER, rc=rc)
+    call ESMF_GridGetDELocalInfo(grid1, localCellCount=ni, &
+                                 horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "allocating", ni, " cells on PET", pet_id
     allocate(idata(ni))
@@ -191,8 +191,8 @@
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size
-    call ESMF_GridGetDE(grid1, globalAIPerDim=index, &
-                        horzRelloc=ESMF_CELL_CENTER, rc=rc)
+    call ESMF_GridGetDELocalInfo(grid1, globalAIPerDim=index, &
+                                 horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
  
     ! Create a new Fortran array for just the part of this row on this DE

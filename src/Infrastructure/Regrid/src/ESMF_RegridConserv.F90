@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.35 2004/06/10 17:45:37 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.36 2004/06/14 22:31:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.35 2004/06/10 17:45:37 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.36 2004/06/14 22:31:26 jwolfe Exp $'
 
 !==============================================================================
 
@@ -280,9 +280,9 @@
                                 ESMF_CONTEXT, rc)) return
 
       dstCounts(3) = 2
-      call ESMF_GridGetDE(dstGrid, horzRelLoc=dstRelLoc, &
-                          localCellCountPerDim=dstCounts(1:2), &
-                          reorder=.false., rc=localrc)
+      call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=dstRelLoc, &
+                                   localCellCountPerDim=dstCounts(1:2), &
+                                   reorder=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -321,9 +321,9 @@
                                 ESMF_CONTEXT, rc)) return
 
       srcCounts(3) = 2
-      call ESMF_GridGetDE(srcGrid, horzRelLoc=srcRelLoc, &
-                          localCellCountPerDim=srcCounts(1:2), &
-                          reorder=.false., rc=localrc)
+      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=srcRelLoc, &
+                                   localCellCountPerDim=srcCounts(1:2), &
+                                   reorder=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
