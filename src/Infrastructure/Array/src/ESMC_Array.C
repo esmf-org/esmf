@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.11 2003/07/29 16:39:13 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.12 2003/07/31 19:08:58 atrayanov Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -898,7 +898,8 @@
       int global_dimlengths[],   // in
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
-      int size_decomp) {         // in  - size of decomp array
+      int size_decomp,           // in  - size of decomp array
+      int periodic[] ) {         // in  - logical, size ESMF_MAXGRIDDIM 
 //
 // !DESCRIPTION:
 //      
@@ -955,10 +956,16 @@
               int local, global;
               for (j=0; j<lmax[1]; j++) {
                 j_exc = j + lstart[1] - ai_comp[1].min;
-                if (j_exc>=0 && j_exc<ai_comp[1].max) {
+		if (periodic != NULL) {
+		  if (periodic[1] != 0) j_exc = j_exc%global_dimlengths[1];
+		}
+                if (j_exc>=0 && j_exc<global_dimlengths[1]) {
                   for (i=0; i<lmax[0]; i++) {
                     i_exc = i + lstart[0] - ai_comp[0].min;
-                    if (i_exc>=0 && i_exc<ai_comp[0].max) {
+		    if (periodic != NULL) {
+		      if (periodic[0] != 0) i_exc = i_exc%global_dimlengths[0];
+		    }
+                    if (i_exc>=0 && i_exc<global_dimlengths[0]) {
                       local  = lmax[0]*j + i;
                       global = gmax[1]*j_exc +
                                gmax[0]*i_exc;
@@ -1074,10 +1081,16 @@
               int local, global;
               for (j=0; j<lmax[1]; j++) {
                 j_exc = j + lstart[1] - ai_comp[1].min;
-                if (j_exc>=0 && j_exc<ai_comp[1].max) {
+		if (periodic != NULL) {
+		  if (periodic[1] != 0) j_exc = j_exc%global_dimlengths[1];
+		}
+                if (j_exc>=0 && j_exc<global_dimlengths[1]) {
                   for (i=0; i<lmax[0]; i++) {
                     i_exc = i + lstart[0] - ai_comp[0].min;
-                    if (i_exc>=0 && i_exc<ai_comp[0].max) {
+		    if (periodic != NULL) {
+		      if (periodic[0] != 0) i_exc = i_exc%global_dimlengths[0];
+		    }
+                    if (i_exc>=0 && i_exc<global_dimlengths[0]) {
                       local  = lmax[0]*j + i;
                       global = gmax[1]*j_exc +
                                gmax[0]*i_exc;
