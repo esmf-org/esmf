@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand.F90,v 1.15 2004/03/05 20:39:08 nscollins Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.16 2004/03/09 20:52:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand.F90,v 1.15 2004/03/05 20:39:08 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.16 2004/03/09 20:52:34 svasquez Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -414,32 +414,25 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Create a new Array and allocate data space, which remains uninitialized.
-! The return value is a new Array.
+!      Create a new Array and allocate data space, which remains uninitialized.
+!      The return value is a new Array.
 !
-! The arguments are:
-! \begin{description}
-!
-! \item[arrayspec]
-! ArraySpec object.
-!
-! \item[counts]
-! The number of items in each dimension of the array. This is a 1D
-! integer array the same length as the rank.
-!
-! \item[{[halo_width]}]
-! Set the maximum width of the halo region on all edges. Defaults to 0.
-!
-! \item[{[lbounds]}]
-! An integer array of length rank, with the lower index for each dimension.
-!
-! \item[{[ubounds]}]
-! An integer array of length rank, with the upper index for each dimension.
-!
-! \item[{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-! \end{description}
+!      The arguments are:
+!      \begin{description}
+!      \item[arrayspec]
+!       ArraySpec object.
+!      \item[counts]
+!       The number of items in each dimension of the array. This is a 1D
+!       integer array the same length as the rank.
+!      \item[{[halo_width]}]
+!       Set the maximum width of the halo region on all edges. Defaults to 0.
+!       \item[{[lbounds]}]
+!        An integer array of length rank, with the lower index for each dimension.
+!       \item[{[ubounds]}]
+!        An integer array of length rank, with the upper index for each dimension.
+!       \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -488,42 +481,33 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Create a new Array and allocate data space, which remains uninitialized.
-! The return value is a new Array.
+!      Create a new Array and allocate data space, which remains uninitialized.
+!      The return value is a new Array.
 !
-! The arguments are:
-! \begin{description}
-!
-! \item[rank]
-! Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 5D.
-!
-! \item[type]
-! Array type. Valid types include {\tt ESMF\_DATA\_INTEGER},
-! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
-! {\tt ESMF\_DATA\_CHARACTER}.
-!
-! \item[kind]
-! Array kind. Valid kinds include {\tt ESMF\_KIND\_I4},
-! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
-! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
-!
-! \item[counts]
-! The number of items in each dimension of the array. This is a 1D
-! integer array the same length as the rank.
-!
-! \item[{[halo_width]}]
-! Set the maximum width of the halo region on all edges. Defaults to 0.
-!
-! \item[{[lbounds]}]
-! An integer array of length rank, with the lower index for each dimension.
-!
-! \item[{[ubounds]}]
-! An integer array of length rank, with the upper index for each dimension.
-!
-! \item[{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-! \end{description}
+!      The arguments are:
+!      \begin{description}
+!      \item[rank]
+!      Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 5D.
+!      \item[type]
+!      Array type. Valid types include {\tt ESMF\_DATA\_INTEGER},
+!      {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
+!      {\tt ESMF\_DATA\_CHARACTER}.
+!      \item[kind]
+!      Array kind. Valid kinds include {\tt ESMF\_KIND\_I4},
+!      {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
+!      {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
+!      \item[counts]
+!      The number of items in each dimension of the array. This is a 1D
+!      integer array the same length as the rank.
+!      \item[{[halo_width]}]
+!      Set the maximum width of the halo region on all edges. Defaults to 0.
+!      \item[{[lbounds]}]
+!      An integer array of length rank, with the lower index for each dimension.
+!      \item[{[ubounds]}]
+!      An integer array of length rank, with the upper index for each dimension.
+!      \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -590,51 +574,41 @@ end interface
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
-! Take a partially created {\tt Array} and T/K/R information and call the
-! proper subroutine to create an F90 pointer, allocate space, and set the
-! corresponding values in the {\tt Array} object.
+!      Take a partially created {\tt Array} and T/K/R information and call the
+!      proper subroutine to create an F90 pointer, allocate space, and set the
+!      corresponding values in the {\tt Array} object.
 !
-! The arguments are:
-! \begin{description}
-!
-! \item[array]
-! Partially created {\tt ESMF\_Array} object. This entry point is used
-! during both the C++ and F90 create calls if we need to create an F90
-! pointer to be used later.
-!
-! \item[counts]
-! The number of items in each dimension of the array. This is a 1D
-! integer array the same length as the rank.
-!
-! \item[hwidth]
-! The halo width on all edges. Used to set the computational area
-! in the array.
-!
-! \item[rank]
-! Array rank.
-! This must match what is already in the array - it is here only as
-! a convenience.
-!
-! \item[type]
-! Array type.
-! This must match what is already in the array - it is here only as
-! a convenience.
-!
-! \item[kind]
-! Array kind.
-! This must match what is already in the array - it is here only as
-! a convenience.
-!
-! \item[lbounds]
-! The lower index values per rank.
-!
-! \item[ubounds]
-! The upper index values per rank.
-!
-! \item[rc]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-! \end{description}
+!      The arguments are:
+!      \begin{description}
+!      \item[array]
+!      Partially created {\tt ESMF\_Array} object. This entry point is used
+!      during both the C++ and F90 create calls if we need to create an F90
+!      pointer to be used later.
+!      \item[counts]
+!      The number of items in each dimension of the array. This is a 1D
+!      integer array the same length as the rank.
+!      \item[hwidth]
+!      The halo width on all edges. Used to set the computational area
+!      in the array.
+!      \item[rank]
+!      Array rank.
+!      This must match what is already in the array - it is here only as
+!      a convenience.
+!      \item[type]
+!      Array type.
+!      This must match what is already in the array - it is here only as
+!      a convenience.
+!      \item[kind]
+!      Array kind.
+!      This must match what is already in the array - it is here only as
+!      a convenience.
+!      \item[lbounds]
+!      The lower index values per rank.
+!      \item[ubounds]
+!      The upper index values per rank.
+!      \item[rc]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -18903,18 +18877,15 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Releases all resources associated with this {\tt Array}.
+!      Releases all resources associated with this {\tt Array}.
 !
-! The arguments are:
-! \begin{description}
-!
-! \item[array]
-! Destroy contents of this {\tt Array}.
-!
-! \item[[rc]]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-! \end{description}
+!      The arguments are:
+!      \begin{description}
+!      \item[array]
+!      Destroy contents of this {\tt Array}.
+!      \item[[rc]]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
 !
 ! To reduce the depth of crossings of the F90/C++ boundary we first
 ! query to see if we are responsible for deleting the data space. If so,
@@ -19000,28 +18971,29 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Allocate data contents for an array created from the C++ interface.
-! The arguments are:
-! \begin{description}
-! \item[array]
-! A partially created {\tt Array} object.
-! \item[rank]
-! The {\tt Array} rank.
-! \item[type]
-! The {\tt Array} type (integer, real/float, etc).
-! \item[kind]
-! The {\tt Array} kind (short/2, long/8, etc).
-! \item[counts]
-! An integer array, size {\tt rank}, of each dimension length.
-! \item[lbounds]
-! An integer array, size {\tt rank}, of each dimensions lower index.
-! \item[ubounds]
-! An integer array, size {\tt rank}, of each dimensions upper index.
-! \item[hwidth]
-! An integer width, single value, applied to each dimension.
-! \item[{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
+!      Allocate data contents for an array created from the C++ interface.
+!
+!      The arguments are:
+!      \begin{description}
+!      \item[array]
+!        A partially created {\tt Array} object.
+!      \item[rank]
+!        The {\tt Array} rank.
+!      \item[type]
+!        The {\tt Array} type (integer, real/float, etc).
+!       \item[kind]
+!        The {\tt Array} kind (short/2, long/8, etc).
+!       \item[counts]
+!         An integer array, size {\tt rank}, of each dimension length.
+!       \item[lbounds]
+!         An integer array, size {\tt rank}, of each dimensions lower index.
+!       \item[ubounds]
+!         An integer array, size {\tt rank}, of each dimensions upper index.
+!       \item[hwidth]
+!         An integer width, single value, applied to each dimension.
+!       \item[{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
 !
 !EOPI
 ! !REQUIREMENTS:
@@ -19767,20 +19739,20 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Deallocate data contents for an array created from the C++ interface.
-! The arguments are:
-! \begin{description}
-! \item[array]
-! A partially created {\tt Array} object.
-! \item[rank]
-! The {\tt Array} rank.
-! \item[type]
-! The {\tt Array} type (integer, real/float, etc).
-! \item[kind]
-! The {\tt Array} kind (short/2, long/8, etc).
-! \item[{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
+!      Deallocate data contents for an array created from the C++ interface.
+!      The arguments are:
+!      \begin{description}
+!      \item[array]
+!      A partially created {\tt Array} object.
+!      \item[rank]
+!      The {\tt Array} rank.
+!      \item[type]
+!      The {\tt Array} type (integer, real/float, etc).
+!      \item[kind]
+!      The {\tt Array} kind (short/2, long/8, etc).
+!      \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
 !
 !EOP
 ! !REQUIREMENTS:

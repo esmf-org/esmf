@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.13 2004/03/05 20:39:08 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.14 2004/03/09 20:52:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -268,20 +268,15 @@
 !  \begin{description} @\
 !  \item[f90arr] @\
 !   An allocatable (but currently unallocated) Fortran 90 array.  @\
-! @\
 !  \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
-! @\
 !  \item[{[halo_width]}] @\
 !   An integer count of the width of the halo region on all sides of @\
 !   the array. The default is 0, no halo region. @\
-! @\
 !  \item[{[lbounds]}] @\
 !  An integer array of lower index values.  Must be the same length as the rank. @\
-! @\
 !  \item[{[ubounds]}] @\
 ! An integer array of upper index values.  Must be the same length as the rank. @\
-! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -380,16 +375,13 @@
 !  \begin{description} @\
 !  \item[f90arr] @\
 !   An allocated Fortran 90 array.  @\
-! @\
 !  \item[{[docopy]}] @\
 !   Default to {\tt ESMF\_DATA\_REF}, makes the {\tt ESMF\_Array} reference @\
 !   the existing data array.  If set to {\tt ESMF\_DATA\_COPY} this routine @\
 !   allocates new space and copies the data from the pointer into the @\
 !   new array. @\
-! @\
 !  \item[{[halo_width]}] @\
 !   Set the maximum width of the halo region on all edges. Defaults to 0. @\
-! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -509,19 +501,14 @@
 !  \begin{description} @\
 !  \item[f90ptr] @\
 !   An unassociated Fortran 90 array pointer.  @\
-! @\
 !  \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
-! @\
 !  \item[{[halo_width]}] @\
 !   Set the maximum width of the halo region on all edges. Defaults to 0. @\
-! @\
 !  \item[{[lbounds]}] @\
 !  An integer array of lower index values.  Must be the same length as the rank. @\
-! @\
 !  \item[{[ubounds]}] @\
 ! An integer array of upper index values.  Must be the same length as the rank. @\
-! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -616,16 +603,13 @@
 !  \begin{description} @\
 !  \item[f90ptr] @\
 !   An allocated Fortran 90 array pointer.  @\
-! @\
 !  \item[{[docopy]}] @\
 !   Default to {\tt ESMF\_DATA\_REF}, makes the {\tt ESMF\_Array} reference @\
 !   the existing data array.  If set to {\tt ESMF\_DATA\_COPY} this routine @\
 !   allocates new space and copies the data from the pointer into the @\
 !   new array. @\
-! @\
 !  \item[{[halo_width]}] @\
 !   Set the maximum width of the halo region on all edges. Defaults to 0. @\
-! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -741,33 +725,25 @@
 !  Optional args are an existing F90 pointer which if given is used @\
 !  instead of a new one, and a docopy flag which if set to copy will @\
 !  do a contents copy or reference. @\
-! @\
 ! The arguments are: @\
 !  \begin{description} @\
 !  \item[array] @\
 !   The {\tt ESMF\_Array} to set the values into. @\
-! @\
 !  \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
-! @\
 !  \item[hwidth] @\
 !   An integer halo width. Width on each edge. @\
-! @\
 !  \item[{[f90ptr]}] @\
 !   An optional existing F90 pointer.  Will be used instead of an @\
 !   internally generated F90 pointer if given.  Must be given if the @\
 !   {\tt docopy} is specified. @\
-! @\
 !  \item[{[docopy]}] @\
 !   An optional copy flag which can be specified if an F90 pointer is also @\
 !   given.  Can either make a new copy of the data or ref existing data. @\
-! @\
 !  \item[{[lbounds]}] @\
 !  An integer array of lower index values.  Must be the same length as the rank. @\
-! @\
 !  \item[{[ubounds]}] @\
 ! An integer array of upper index values.  Must be the same length as the rank. @\
-! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
