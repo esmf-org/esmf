@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2004/02/13 15:35:53 nscollins Exp $ 
+# $Id: makefile,v 1.12 2004/06/09 16:42:17 slswift Exp $ 
 
 ALL:  build_examples
 
@@ -59,7 +59,8 @@ LOCDIR	  = src/Infrastructure/Field/examples
 #
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_FieldCreateEx \
-                 $(ESMF_EXDIR)/ESMF_FieldCreateEx
+                 $(ESMF_EXDIR)/ESMF_FieldCreateEx #\
+#                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
 #
 # List the example run targets in EXAMPLES_RUN and 
@@ -68,10 +69,12 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_FieldCreateEx \
 #
 
 EXAMPLES_RUN = run_ESMC_FieldCreateEx \
-               run_ESMF_FieldCreateEx 
+               run_ESMF_FieldCreateEx # \
+#               run_ESMF_FieldWriteEx 
 
 EXAPMLES_RUN_UNI = run_ESMC_FieldCreateEx_uni \
-                   run_ESMF_FieldCreateEx_uni
+                   run_ESMF_FieldCreateEx_uni# \
+#                   run_ESMF_FieldWriteEx_uni
 
 
 include $(ESMF_DIR)/makefile
@@ -100,6 +103,15 @@ run_ESMF_FieldCreateEx:
 
 run_ESMF_FieldCreateEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_FieldCreateEx > $(ESMF_EXDIR)/ESMF_FieldCreateEx_uni.stdout
+
+#
+# ESMF_FieldWriteEx
+#
+# run_ESMF_FieldWriteEx:
+# 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_FieldWriteEx > $(ESMF_EXDIR)/ESMF_FieldWriteEx.stdout
+
+# run_ESMF_FieldWriteEx_uni:
+# 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_FieldWriteEx > $(ESMF_EXDIR)/ESMF_FieldWriteEx_uni.stdout
 
 
 

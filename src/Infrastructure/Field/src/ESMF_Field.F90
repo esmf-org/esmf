@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.158 2004/06/09 16:06:27 slswift Exp $
+! $Id: ESMF_Field.F90,v 1.159 2004/06/09 16:42:17 slswift Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -282,7 +282,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.158 2004/06/09 16:06:27 slswift Exp $'
+      '$Id: ESMF_Field.F90,v 1.159 2004/06/09 16:42:17 slswift Exp $'
 
 !==============================================================================
 !
@@ -2921,7 +2921,7 @@
         call ESMF_DELayoutGet(delayout, localDE=de_id, rc=status)
 
         ! Output to file, from de_id 0 only
-        !call ESMF_FieldAllGather(field, out_array, rc=status)
+!!$        call ESMF_FieldAllGather(field, out_array, rc=status)
         call ESMF_ArrayGather(field%ftypep%localfield%localdata, &
                               field%ftypep%grid, field%ftypep%mapping, &
                               0, out_array, rc=status)
@@ -3308,7 +3308,7 @@
            DimNames(2) = 'Y'
         
         elseif (order == ESMF_COORD_ORDER_UNKNOWN) then
-           print*, 'Assuming XYZ coordinate ordering.'
+           print*, 'Assuming XY coordinate ordering.'
            MemOrd = "XY"
            DimNames(1) = 'X'
            DimNames(2) = 'Y'
