@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.11 2003/03/24 23:04:36 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.12 2003/04/24 21:42:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.11 2003/03/24 23:04:36 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.12 2003/04/24 21:42:42 nscollins Exp $'
 
 !==============================================================================
 !
@@ -438,8 +438,8 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src
       integer, intent(in) :: AI_src_count
       type(ESMF_DELayout), intent(in) :: layout_src
-      logical, intent(out), optional :: hascachedroute
-      type(ESMF_Route), intent(out), optional :: route
+      logical, intent(out) :: hascachedroute
+      type(ESMF_Route), intent(out) :: route
       integer, intent(out), optional :: rc            
 
 !
@@ -449,9 +449,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ needs to be updated ]
-!     \item[{[hascachedroute]}]
+!     \item[hascachedroute]
 !          Logical return code for whether a {\tt Route} was found.
-!     \item[{[route]}]
+!     \item[route]
 !          If found, the returned {\tt Route} object.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -464,12 +464,14 @@
         integer :: status                  ! local error status
         integer :: i,j                     ! counters
         logical :: rcpresent               ! did user specify rc?
-        logical :: lcache
+        type(ESMF_Logical) :: lcache
         type(ESMF_Route) :: lroute
 
         ! Set initial values
         status = ESMF_FAILURE
         rcpresent = .FALSE.   
+        hascachedroute = .FALSE.
+        route%this = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -512,8 +514,13 @@
           return  
         endif
 
-        if (present(hascachedroute)) hascachedroute = lcache
-        if (present(route)) route = lroute
+
+        ! Set return values
+        if (lcache .eq. ESMF_TF_TRUE) then
+            hascachedroute = .true.
+            route = lroute
+        endif
+
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_RouteGetCached

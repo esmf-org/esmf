@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.16 2003/03/13 22:57:03 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.17 2003/04/24 21:42:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -116,6 +116,6 @@
                              int AI_rcv_count, ESMC_DELayout *layout_rcv,
                              int my_DE_snd, ESMC_AxisIndex *AI_snd,
                              int AI_snd_count, ESMC_DELayout *layout_snd,
-			     int *hascachedroute, ESMC_Route **route);
+			     ESMC_Logical *hascachedroute, ESMC_Route **route);
 
  #endif  // ESMC_Route_H

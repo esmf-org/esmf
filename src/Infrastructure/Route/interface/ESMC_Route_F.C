@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.5 2003/03/25 15:46:15 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.6 2003/04/24 21:42:41 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,11 +89,11 @@ extern "C" {
        }
 
        void FTN(c_esmc_routegetcached)(int *rank, 
-                   int *my_DE_rcv, ESMC_AxisIndex *AI_rcv, int *AI_rcv_count,
-                   ESMC_DELayout **layout_rcv,
-                   int *my_DE_snd, ESMC_AxisIndex *AI_snd, int *AI_snd_count,
-                   ESMC_DELayout **layout_snd,
-                   int *hascachedroute, ESMC_Route **route, int *status) {
+                int *my_DE_rcv, ESMC_AxisIndex *AI_rcv, int *AI_rcv_count,
+                ESMC_DELayout **layout_rcv,
+                int *my_DE_snd, ESMC_AxisIndex *AI_snd, int *AI_snd_count,
+                ESMC_DELayout **layout_snd,
+                ESMC_Logical *hascachedroute, ESMC_Route **route, int *status) {
 
            *status = ESMC_RouteGetCached(*rank, 
                               *my_DE_rcv, AI_rcv, *AI_rcv_count, *layout_rcv,

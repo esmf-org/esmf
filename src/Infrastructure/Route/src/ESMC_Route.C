@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.34 2003/04/08 23:06:36 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.35 2003/04/24 21:42:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.34 2003/04/08 23:06:36 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.35 2003/04/24 21:42:45 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -247,7 +247,7 @@
                                    //       array (should be the same as the
                                    //       number of DE's in the snd layout)
       ESMC_DELayout *layout_snd,   // in  - pointer to the snd DELayout 
-      int *hascachedroute,         // out - 0=false, 1=true
+      ESMC_Logical *hascachedroute,  // out - ESMC_TF_TRUE, ESMC_TF_FALSE
       ESMC_Route **route) {        // out - if true, cached route
 
 //
@@ -258,7 +258,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    *hascachedroute = 0;
+    *hascachedroute = ESMF_TF_FALSE;
     *route = NULL;
 
     return ESMF_SUCCESS;
