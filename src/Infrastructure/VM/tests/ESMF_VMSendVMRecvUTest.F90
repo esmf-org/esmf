@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.1 2004/11/17 21:49:27 svasquez Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.2 2004/11/17 23:30:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.1 2004/11/17 21:49:27 svasquez Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.2 2004/11/17 23:30:32 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -69,7 +69,7 @@
 
       call ESMF_Initialize(vm=vm, rc=rc)
       call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
-      call ESMF_TestStart(npets, ESMF_SRCLINE)
+      call ESMF_TestStart(petCount, ESMF_SRCLINE)
 
       ! exit early if we have less than 4 procs
       if (petCount .lt. 4) then
