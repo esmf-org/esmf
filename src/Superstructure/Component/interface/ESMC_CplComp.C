@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.C,v 1.3 2004/04/13 17:30:46 nscollins Exp $
+// $Id: ESMC_CplComp.C,v 1.4 2004/04/23 17:25:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_CplComp.C,v 1.3 2004/04/13 17:30:46 nscollins Exp $";
+           "$Id: ESMC_CplComp.C,v 1.4 2004/04/23 17:25:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -69,7 +69,6 @@
 //
 // !ARGUMENTS:
       char *name,
-      ESMC_newDELayout *layout,
       enum ESMC_GridCompType mtype,
       char *configFile,
       int *rc) {           // out - return code
@@ -87,7 +86,7 @@
     ESMC_CplComp *comp;
 
     comp = new ESMC_CplComp;
-    FTN(f_esmf_cplcompcreate)(comp, name, layout, NULL, configFile, 
+    FTN(f_esmf_cplcompcreate)(comp, name, NULL, configFile, 
                              rc, strlen(name), strlen(configFile));
 
     return comp;

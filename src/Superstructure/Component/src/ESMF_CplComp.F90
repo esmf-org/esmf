@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.27 2004/04/23 13:42:02 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.28 2004/04/23 17:25:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,6 @@
       !use ESMF_MachineMod
       use ESMF_VMMod
       use ESMF_ConfigMod
-      use ESMF_newDELayoutMod
       use ESMF_ClockMod
       use ESMF_GridMod
       use ESMF_StateMod
@@ -62,8 +61,7 @@
       public ESMF_CplCompValidate
       public ESMF_CplCompPrint
  
-      ! These do argument processing, delayout checking, and then
-      !  call the user-provided routines.
+      ! These do argument processing and then call the user-provided routines.
       public ESMF_CplCompInitialize
       public ESMF_CplCompRun
       public ESMF_CplCompFinalize
@@ -88,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.27 2004/04/23 13:42:02 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.28 2004/04/23 17:25:17 theurich Exp $'
 
 !==============================================================================
 !
@@ -145,7 +143,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateNew(name, delayout, config, clock, rc)
+      function ESMF_CplCompCreateNew(name, config, clock, rc)
 !
 ! !RETURN VALUE:
       ! Private name; call using ESMF_CplCompCreate()      
@@ -153,7 +151,6 @@
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
-      type(ESMF_newDELayout), intent(in) :: delayout
       type(ESMF_Config), intent(in) :: config
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out), optional :: rc 
@@ -167,8 +164,6 @@
 !  \begin{description}
 !   \item[name]
 !    CplComp name.
-!   \item[delayout]
-!    CplComp delayout.
 !   \item[config]
 !    CplComp-specific configuration object.  
 !   \item[clock]
@@ -205,7 +200,7 @@
         endif
 
         ! Call construction method to initialize cplcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                     config=config, clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "CplComp construction error"
@@ -225,7 +220,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateConf(name, delayout, config, configFile, &
+      function ESMF_CplCompCreateConf(name, config, configFile, &
                                       clock, rc)
 !
 ! !RETURN VALUE:
@@ -233,7 +228,6 @@
 !
 ! !ARGUMENTS:
       character(len=*), intent(in), optional :: name
-      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_Config), intent(in), optional :: config
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Clock), intent(in), optional :: clock
@@ -248,8 +242,6 @@
 !  \begin{description}
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[delayout]}]
-!    CplComp delayout.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
@@ -289,7 +281,7 @@
         endif
    
         ! Call construction method to initialize cplcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
@@ -310,7 +302,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateVM(vm, name, delayout, config, configFile, &
+      function ESMF_CplCompCreateVM(vm, name, config, configFile, &
                                       clock, petList, rc)
 !
 ! !RETURN VALUE:
@@ -319,7 +311,6 @@
 ! !ARGUMENTS:
       type(ESMF_VM),        intent(in)              :: vm
       character(len=*), intent(in), optional :: name
-      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_Config), intent(in), optional :: config
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Clock), intent(in), optional :: clock
@@ -335,8 +326,6 @@
 !  \begin{description}
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[delayout]}]
-!    CplComp delayout.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
@@ -376,7 +365,7 @@
         endif
    
         ! Call construction method to initialize cplcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 vm=vm, petList=petList, clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
@@ -397,7 +386,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateGPar(parent, name, delayout, config, &
+      function ESMF_CplCompCreateGPar(parent, name, config, &
                                       configFile, clock, vm, petList, rc)
 !
 ! !RETURN VALUE:
@@ -406,7 +395,6 @@
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(in) :: parent
       character(len=*), intent(in), optional :: name
-      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_Config), intent(in), optional :: config
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Clock), intent(in), optional :: clock
@@ -425,8 +413,6 @@
 !    Parent component.
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[delayout]}]
-!    CplComp delayout.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
@@ -470,7 +456,7 @@
         endif
    
         ! Call construction method to initialize cplcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
                                 vm=vm, petList=petList, clock=clock, rc=status)
@@ -492,7 +478,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateCPar(parent, name, delayout, config, &
+      function ESMF_CplCompCreateCPar(parent, name, config, &
                                       configFile, clock, vm, petList, rc)
 !
 ! !RETURN VALUE:
@@ -501,7 +487,6 @@
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(in) :: parent
       character(len=*), intent(in), optional :: name
-      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_Config), intent(in), optional :: config
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Clock), intent(in), optional :: clock
@@ -520,8 +505,6 @@
 !    Parent component.
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[delayout]}]
-!    CplComp delayout.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
@@ -565,7 +548,7 @@
         endif
    
         ! Call construction method to initialize cplcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
                                 vm=vm, petList=petList, clock=clock, rc=status)
@@ -694,13 +677,12 @@
 ! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompGet(cplcomp, name, delayout, clock, &
+      subroutine ESMF_CplCompGet(cplcomp, name, clock, &
                                                    configFile, config, vm, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(in) :: cplcomp
       character(len=*), intent(out), optional :: name
-      type(ESMF_newDELayout), intent(out), optional :: delayout
       type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: configFile
       type(ESMF_Config), intent(out), optional :: config
@@ -720,8 +702,6 @@
 !    CplComp to query.
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[delayout]}]
-!    CplComp delayout.
 !   \item[{[clock]}]
 !    CplComp-specific clock.
 !   \item[{[configFile]}]
@@ -736,7 +716,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompGet(cplcomp%compp, name, delayout, vm=vm, clock=clock, &
+        call ESMF_CompGet(cplcomp%compp, name, vm=vm, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_CplCompGet
@@ -913,13 +893,12 @@
 ! !IROUTINE: ESMF_CplCompSet - Set or reset information about the CplComp
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompSet(cplcomp, name, delayout, clock, &
+      subroutine ESMF_CplCompSet(cplcomp, name, clock, &
                                                        configFile, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: cplcomp
       character(len=*), intent(in), optional :: name
-      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Config), intent(in), optional :: config
@@ -939,8 +918,6 @@
 !    CplComp to set information for. 
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[delayout]}]
-!    CplComp delayout.
 !   \item[{[clock]}]
 !    CplComp-specific clock.
 !   \item[{[configFile]}]
@@ -955,7 +932,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompSet(cplcomp%compp, name, delayout, clock=clock, &
+        call ESMF_CompSet(cplcomp%compp, name, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_CplCompSet

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.17 2004/04/23 13:27:53 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.18 2004/04/23 17:25:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -60,7 +60,6 @@ extern const char *ESMC_SetReadRestart;
 // !USES:
 #include "ESMC.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
-#include "ESMC_newDELayout.h"
 #include "ESMC_Calendar.h"
 #include "ESMC_State.h"
 #include "ESMC_FTable.h"  // function & data pointer table 
@@ -120,7 +119,7 @@ extern const char *ESMC_SetReadRestart;
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Comp object.
 
- ESMC_Comp *ESMC_CompCreate(char *name, ESMC_newDELayout *layout,
+ ESMC_Comp *ESMC_CompCreate(char *name,
                                       enum ESMC_CompType ctype,
                                       enum ESMC_GridCompType mtype,
                                       char *filepath, int *rc);

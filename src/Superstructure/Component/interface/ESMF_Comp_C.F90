@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.18 2004/04/23 13:32:15 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.19 2004/04/23 17:25:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.18 2004/04/23 13:32:15 theurich Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.19 2004/04/23 17:25:17 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -86,11 +86,10 @@
        
    end subroutine f_esmf_compdelete
 
-   subroutine f_esmf_gridcompcreate(gcomp, name, layout, mtype, grid, clock, &
+   subroutine f_esmf_gridcompcreate(gcomp, name, mtype, grid, clock, &
                                      config, configFile, rc)
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_ConfigMod
-       use ESMF_newDELayoutMod
        use ESMF_ClockMod
        use ESMF_GridTypesMod
        use ESMF_CompMod
@@ -98,7 +97,6 @@
 
        type(ESMF_GridComp) :: gcomp
        character(len=*) :: name
-       type(ESMF_newDELayout) :: layout
        type(ESMF_GridCompType) :: mtype
        type(ESMF_Grid) :: grid
        type(ESMF_Clock) :: clock
@@ -106,7 +104,7 @@
        character(len=*) :: configFile
        integer :: rc
 
-       gcomp = ESMF_GridCompCreate(name, layout, mtype, grid, clock, &
+       gcomp = ESMF_GridCompCreate(name, mtype, grid, clock, &
                                        config, configFile, rc)
     
    end subroutine f_esmf_gridcompcreate
@@ -234,22 +232,20 @@
 
 !------------------------------------------------------------------------------
 
-   subroutine f_esmf_cplcompcreate(ccomp, name, layout, config, configFile, clock, rc)
+   subroutine f_esmf_cplcompcreate(ccomp, name, config, configFile, clock, rc)
        !use ESMF_BaseMod    ! ESMF base class
-       use ESMF_newDELayoutMod
        use ESMF_ClockMod
        use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: ccomp
        character(len=*) :: name
-       type(ESMF_newDELayout) :: layout
        type(ESMF_Config) :: config
        character(len=*) :: configFile
        type(ESMF_Clock) :: clock
        integer :: rc
 
-       ccomp = ESMF_CplCompCreate(name, layout, config, configFile, clock, rc)
+       ccomp = ESMF_CplCompCreate(name, config, configFile, clock, rc)
     
    end subroutine f_esmf_cplcompcreate
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.7 2004/04/20 19:03:26 nscollins Exp $
+// $Id: ESMC_GridComp.h,v 1.8 2004/04/23 17:25:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -104,17 +104,15 @@
 // were a method, the ESMC_GridComp object on whose behalf it was being invoked
 // an ESMC_GridComp object.
 
- ESMC_GridComp *ESMC_GridCompCreate(char *name, ESMC_newDELayout *layout,
-                                      enum ESMC_GridCompType mtype,
-                                      ESMC_Grid *grid,
-                                      char *configFile, int *rc);
+ ESMC_GridComp *ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
+  ESMC_Grid *grid, char *configFile, int *rc);
  int ESMC_GridCompDestroy(ESMC_GridComp *comp);
 
 
 // prototypes for fortran interface routines
 extern "C" {
  void FTN(f_esmf_gridcompcreate)(ESMC_GridComp *comp, char *name, 
-                         ESMC_newDELayout *layout, ESMC_GridCompType *mtype, 
+                         ESMC_GridCompType *mtype, 
                          ESMC_Grid *grid, ESMC_Config *config, 
                          char *configFile, int *rc, int nlen, int clen);
  void FTN(f_esmf_gridcompdestroy)(ESMC_GridComp *comp, int *rc);

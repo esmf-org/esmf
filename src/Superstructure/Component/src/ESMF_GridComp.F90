@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.37 2004/04/23 13:43:33 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.38 2004/04/23 17:25:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,6 @@
       !use ESMF_MachineMod
       use ESMF_VMMod
       use ESMF_ConfigMod
-      use ESMF_newDELayoutMod
       use ESMF_ClockMod
       use ESMF_GridTypesMod
       use ESMF_StateMod
@@ -63,8 +62,7 @@
       public ESMF_GridCompValidate
       public ESMF_GridCompPrint
  
-      ! These do argument processing, delayout checking, and then
-      !  call the user-provided routines.
+      ! These do argument processing and then call the user-provided routines.
       public ESMF_GridCompInitialize
       public ESMF_GridCompRun
       public ESMF_GridCompFinalize
@@ -87,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.37 2004/04/23 13:43:33 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.38 2004/04/23 17:25:17 theurich Exp $'
 
 !==============================================================================
 !
@@ -136,14 +134,13 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
-      function ESMF_GridCompCreateNew(name, delayout, gridcomptype, grid, config, clock, rc)
+      function ESMF_GridCompCreateNew(name, gridcomptype, grid, config, clock, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateNew
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
-      type(ESMF_newDELayout), intent(in) :: delayout
       type(ESMF_GridCompType), intent(in) :: gridcomptype 
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Config), intent(in) :: config
@@ -159,8 +156,6 @@
 !  \begin{description}
 !   \item[name]
 !    GridComp name.
-!   \item[delayout]
-!    GridComp delayout.
 !   \item[gridcomptype]
 !    GridComp Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
@@ -202,7 +197,7 @@
         endif
 
         ! Call construction method to initialize gridcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
                       gridcomptype, config=config, grid=grid, clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "GridComp construction error"
@@ -222,7 +217,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
-      function ESMF_GridCompCreateConf(name, delayout, gridcomptype, grid, &
+      function ESMF_GridCompCreateConf(name, gridcomptype, grid, &
         clock, config, configFile, rc)
 !
 ! !RETURN VALUE:
@@ -231,7 +226,6 @@
 ! !ARGUMENTS:
       !external :: services
       character(len=*), intent(in), optional :: name
-      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(inout), optional :: clock
@@ -249,8 +243,6 @@
 !  \begin{description}
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[delayout]}]
-!    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
@@ -295,7 +287,7 @@
         endif
    
         ! Call construction method to initialize gridcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
                                 gridcomptype=gridcomptype, &
                                 configFile=configFile, &
                                 config=config, grid=grid, clock=clock, &
@@ -319,7 +311,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
       function ESMF_GridCompCreateVM(vm, &
-        name, delayout, gridcomptype, grid, clock, config, configFile, &
+        name, gridcomptype, grid, clock, config, configFile, &
         petList, rc)
 !
 ! !RETURN VALUE:
@@ -329,7 +321,6 @@
       !external :: services
       type(ESMF_VM),        intent(in)              :: vm
       character(len=*),     intent(in),    optional :: name
-      type(ESMF_newDELayout),  intent(in),    optional :: delayout
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
       type(ESMF_Grid),      intent(in),    optional :: grid
       type(ESMF_Clock),     intent(inout), optional :: clock
@@ -349,8 +340,6 @@
 !    GridComp name.
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[delayout]}]
-!    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp model type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
@@ -395,7 +384,7 @@
         endif
    
         ! Call construction method to initialize gridcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
                                 gridcomptype=gridcomptype, &
                                 configFile=configFile, &
                                 config=config, grid=grid, clock=clock, &
@@ -417,7 +406,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
-      function ESMF_GridCompCreateGPar(parent, name, delayout, &
+      function ESMF_GridCompCreateGPar(parent, name, &
                             gridcomptype, grid, clock, config, configFile, &
                             vm, petList, rc)
 !
@@ -428,7 +417,6 @@
       !external :: services
       type(ESMF_GridComp),  intent(in)  :: parent
       character(len=*),     intent(in),    optional :: name
-      type(ESMF_newDELayout),  intent(in),    optional :: delayout
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
       type(ESMF_Grid),      intent(in),    optional :: grid
       type(ESMF_Clock),     intent(inout), optional :: clock
@@ -449,8 +437,6 @@
 !    Parent Gridded Component.
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[delayout]}]
-!    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp model type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
@@ -499,7 +485,7 @@
         endif
    
         ! Call construction method to initialize gridcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
                                 gridcomptype=gridcomptype, &
                                 configFile=configFile, config=config, &
                                 grid=grid, clock=clock, parent=parent%compp, &
@@ -521,7 +507,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
-      function ESMF_GridCompCreateCPar(parent, name, delayout, &
+      function ESMF_GridCompCreateCPar(parent, name, &
                             gridcomptype, grid, clock, config, configFile, &
                             vm, petList, rc)
 !
@@ -532,7 +518,6 @@
       !external :: services
       type(ESMF_CplComp),  intent(in)  :: parent
       character(len=*),     intent(in),    optional :: name
-      type(ESMF_newDELayout),  intent(in),    optional :: delayout
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
       type(ESMF_Grid),      intent(in),    optional :: grid
       type(ESMF_Clock),     intent(inout), optional :: clock
@@ -553,8 +538,6 @@
 !    Parent Gridded Component.
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[delayout]}]
-!    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp model type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
@@ -603,7 +586,7 @@
         endif
    
         ! Call construction method to initialize gridcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
                                 gridcomptype=gridcomptype, &
                                 configFile=configFile, config=config, &
                                 grid=grid, clock=clock, parent=parent%compp, &
@@ -736,13 +719,12 @@
 ! !IROUTINE: ESMF_GridCompGet - Query a GridComp for information
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompGet(gridcomp, name, delayout, gridcomptype, &
+      subroutine ESMF_GridCompGet(gridcomp, name, gridcomptype, &
         grid, clock, configFile, config, vm, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(in) :: gridcomp
       character(len=*), intent(out), optional :: name
-      type(ESMF_newDELayout), intent(out), optional :: delayout
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
@@ -764,8 +746,6 @@
 !    GridComp to query.
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[delayout]}]
-!    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.
@@ -787,7 +767,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompGet(gridcomp%compp, name, delayout, vm=vm, &
+        call ESMF_CompGet(gridcomp%compp, name, vm=vm, &
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
 
@@ -969,13 +949,12 @@
 ! !IROUTINE: ESMF_GridCompSet - Set or reset information about the GridComp
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompSet(gridcomp, name, delayout, gridcomptype, grid, clock, &
+      subroutine ESMF_GridCompSet(gridcomp, name, gridcomptype, grid, clock, &
                                                        configFile, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: gridcomp
       character(len=*), intent(in), optional :: name
-      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
@@ -996,8 +975,6 @@
 !    GridComp to set value for.
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[delayout]}]
-!    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.
@@ -1017,7 +994,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompSet(gridcomp%compp, name, delayout, &
+        call ESMF_CompSet(gridcomp%compp, name, &
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
 

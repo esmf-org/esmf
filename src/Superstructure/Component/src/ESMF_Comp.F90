@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.91 2004/04/23 15:01:27 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.92 2004/04/23 17:25:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,6 @@
       !use ESMF_MachineMod
       use ESMF_VMMod
       use ESMF_ConfigMod
-      use ESMF_newDELayoutMod
       use ESMF_CalendarMod
       use ESMF_ClockMod
       use ESMF_GridTypesMod
@@ -109,7 +108,6 @@
          type(ESMF_Base) :: base                  ! base class
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
-         type(ESMF_newDELayout) :: delayout          ! component delayout
          type(ESMF_VM) :: vm          ! component VM
          type(ESMF_Clock) :: clock                ! private component clock
          logical :: multiphaseinit                ! multiple init, run, final
@@ -217,7 +215,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.91 2004/04/23 15:01:27 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.92 2004/04/23 17:25:17 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -286,7 +284,7 @@ end function
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
 ! !INTERFACE:
-      subroutine ESMF_CompConstruct(compp, ctype, name, delayout, gridcomptype, &
+      subroutine ESMF_CompConstruct(compp, ctype, name, gridcomptype, &
                           dirPath, configFile, config, grid, clock, parent, &
                           vm, petlist, rc)
 !
@@ -294,7 +292,6 @@ end function
       type (ESMF_CompClass), pointer :: compp
       type (ESMF_CompType), intent(in) :: ctype
       character(len=*), intent(in), optional :: name
-      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       character(len=*), intent(in), optional :: dirPath
       character(len=*), intent(in), optional :: configFile
@@ -317,8 +314,6 @@ end function
 !    Component type, where type is {\tt ESMF\_GRIDCOMP} or {\tt ESMF\_CPLCOMP}.
 !   \item[{[name]}]
 !    Component name.
-!   \item[{[delayout]}]
-!    Component delayout.
 !   \item[{[gridcomptype]}]
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
@@ -386,15 +381,6 @@ end function
           endif
         endif
       
-        ! either store or create a delayout
-        if (present(delayout)) then
-          compp%delayout = delayout
-        else
-          ! TODO: error check for presence of VM?
-          ! Create a default 1xN delayout over all processors.
-          compp%delayout = ESMF_newDELayoutCreate(compp%vm_parent, rc=status) 
-        endif 
-
         ! for gridded components, the model type it represents
         if (present(gridcomptype)) then
 	  compp%gridcomptype = gridcomptype
@@ -1124,13 +1110,12 @@ end function
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(compp, name, delayout, vm, gridcomptype, &
+      subroutine ESMF_CompGet(compp, name, vm, gridcomptype, &
         grid, clock, dirPath, configFile, config, ctype, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(out), optional :: name
-      type(ESMF_newDELayout), intent(out), optional :: delayout
       type(ESMF_VM), intent(out), optional :: vm
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
       type(ESMF_Grid), intent(out), optional :: grid
@@ -1169,10 +1154,6 @@ end function
 
         if (present(ctype)) then
           ctype = compp%ctype
-        endif
-
-        if (present(delayout)) then
-          delayout = compp%delayout
         endif
 
         if (present(vm)) then
@@ -1215,13 +1196,12 @@ end function
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompSet(compp, name, delayout, vm, gridcomptype, grid, &
+      subroutine ESMF_CompSet(compp, name, vm, gridcomptype, grid, &
                                         clock, dirPath, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(in), optional :: name
-      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_VM), intent(in), optional :: vm
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
@@ -1255,10 +1235,6 @@ end function
 
         if (present(name)) then
           call ESMF_SetName(compp%base, name, "Component", status)
-        endif
-
-        if (present(delayout)) then
-          compp%delayout = delayout
         endif
 
         if (present(vm)) then
@@ -1466,8 +1442,6 @@ end function
        call ESMF_GetName(compp%base, cname, status)
        print *, "  name = ", trim(cname)
        
-       call ESMF_newDELayoutPrint(compp%delayout, "", status)
-
        ! TODO: add more info here
 
        ! Set return values
