@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2004/05/18 11:31:02 nscollins Exp $
+# $Id: build_rules.mk,v 1.10 2004/05/28 20:16:08 jwolfe Exp $
 #
 # SunOS.default.default.mk
 #
@@ -112,17 +112,17 @@ CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = /opt/SUNWspro/bin/CC 
 CXX_FLINKER	   = /opt/SUNWspro/bin/CC 
 CXX_CCV		   = ${CXX_CC} -V
-CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
+CXX_SYS_LIB	   = -ldl -lc -lg2c -lm -lrt
 C_F90CXXLD         = /opt/SUNWspro/bin/f90 
 C_F90CXXLIBS       = -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai \
 		     -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath \
-                     -lCrun -lCstd -lCrun -lm -lcx -lc
+                     -lCrun -lCstd -lCrun -lm -lcx -lc -lrt
 C_CXXF90LD         = /opt/SUNWspro/bin/CC
 C_CXXF90LIBS       = -L/opt/SUNWspro/prod/lib -lfui -lfai -lfai2 -lfsumai \
                      -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai \
-                     -lfsu -lsunmath -lm -lc
+                     -lfsu -lsunmath -lm -lc -lrt
 C_CXXSO            = /opt/SUNWspro/bin/CC -G
-C_CXXSOLIBS        = -Kpic  -lCstd -lCrun -lm -lw -lcx -lc
+C_CXXSOLIBS        = -Kpic  -lCstd -lCrun -lm -lw -lcx -lc -lrt
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = 
 GCXX_FOPTFLAGS	   = 
