@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.12 2003/06/06 21:04:07 jwolfe Exp $ 
+# $Id: base_variables,v 1.13 2003/07/01 20:34:29 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -30,6 +30,12 @@ G_FOPTFLAGS	   = -g
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
+# ########################## Fortran compiler ##############################   
+#
+F_FREECPP          = -Mfreeform -Mpreprocess
+F_FIXCPP           = -Mnofreeform -Mpreprocess
+F_FREENOCPP        = -Mfreeform
+F_FIXNOCPP         = -Mnofreeform
 # ########################## C++ compiler ##################################
 #
 CXX_CC		   = pgCC -tlocal

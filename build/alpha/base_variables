@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.16 2003/06/06 21:03:03 jwolfe Exp $ 
+# $Id: base_variables,v 1.17 2003/07/01 20:34:28 nscollins Exp $ 
 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
@@ -26,6 +26,10 @@ REAL8			= -r8
 STRICT			= -nopipeline
 EXPAND_TEMPLATES        = -tweak
 FPPFLAGS		= $(FPPOPTS)
+F_FREECPP               = -free -cpp
+F_FIXCPP                = -cpp -extend_source
+F_FREENOCPP             = -free
+F_FIXNOCPP              = -extend_source
 # ######################### C and Fortran compiler ########################
 #
 C_CC			= cc
