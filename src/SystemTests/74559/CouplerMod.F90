@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.1 2003/04/28 23:38:39 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.2 2003/04/29 17:02:01 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -59,25 +59,38 @@
         integer :: rc
 
 !     ! Local variables
+        type(ESMF_State) :: flowstates, injectstates
         type(ESMF_State) :: toflow, fromflow
-        type(ESMF_Field) :: toflow_sie, toflow_u, toflow_v 
-        type(ESMF_Field) :: fromflow_sie, fromflow_u, fromflow_v 
+        type(ESMF_State) :: toinject, frominject
 
         print *, "Coupler Init starting"
 
-        call ESMF_StateGetData(statelist, "Coupler States Injector to FlowSolver", toflow, rc)
+        print *, "statelist before"
+        call ESMF_StatePrint(statelist)
+        call ESMF_StateGetData(statelist, &
+                     "Coupler States FlowSolver to Injector", flowstates, rc)
 
-        call ESMF_StateSetNeeded(toflow, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(toflow, "V", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(toflow, "RHO", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(toflow, "FLAG", ESMF_STATEDATAISNEEDED, rc)
-
-        call ESMF_StateGetData(statelist, "Coupler States FlowSolver to Injector", fromflow, rc)
-
+        call ESMF_StateGetData(flowstates, "FlowSolver Feedback", fromflow, rc)
         call ESMF_StateSetNeeded(fromflow, "SIE", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(fromflow, "V", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(fromflow, "RHO", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(fromflow, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+        print *, "from flow"
+        call ESMF_StatePrint(fromflow)
+
+        call ESMF_StateGetData(statelist, &
+                       "Coupler States Injector to FlowSolver", injectstates, rc)
+
+        call ESMF_StateGetData(injectstates, "Injection Feedback", frominject, rc)
+        call ESMF_StateSetNeeded(frominject, "SIE", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(frominject, "V", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(frominject, "RHO", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(frominject, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+        print *, "from inject"
+        call ESMF_StatePrint(frominject)
+
+        print *, "statelist after"
+        call ESMF_StatePrint(statelist)
 
         print *, "Coupler Init returning"
    
@@ -99,7 +112,8 @@
         type(ESMF_State) :: mysource, mydest
         type(ESMF_Field) :: srcfield, dstfield
         type(ESMF_DELayout) :: cpllayout
-
+      
+        character(len=ESMF_MAXSTR) :: statename
        
         integer :: status
         integer :: i, datacount
@@ -114,23 +128,25 @@
         datanames(6) = "Q"
         datanames(7) = "FLAG"
 
-        print *, "Coupler Run starting"
- 
         ! Find which direction we are coupling based on the name of the state we have.
-        call ESMF_StateGetData(statelist, "Coupler States Injector to FlowSolver", toflow, rc)
-        if (rc == ESMF_SUCCESS) then
+        call ESMF_StateGetName(statelist, statename, rc)
+        if (trim(statename) .eq. "Coupler States Injector to FlowSolver") then
+
+            ! Injector to FlowSolver
+            call ESMF_StateGetData(statelist, "Injection Feedback", mysource, rc)
+            call ESMF_StateGetData(statelist, "FlowSolver Input", mydest, rc)
+
+        else if (trim(statename) .eq. "Coupler States FlowSolver to Injector") then
 
             ! Get import and export states
-            call ESMF_StateGetData(toflow, "Injection Feedback", mysource, rc)
-            call ESMF_StateGetData(toflow, "FlowSolver Input", mydest, rc)
+            call ESMF_StateGetData(statelist, "FlowSolver Feedback", mysource, rc)
+            call ESMF_StateGetData(statelist, "Injection Input", mydest, rc)
 
         else
-            call ESMF_StateGetData(statelist, "Coupler States FlowSolver to Injector", toinjector, rc)
 
-            ! Get import and export states
-            call ESMF_StateGetData(toinjector, "FlowSolver Feedback", mysource, rc)
-            call ESMF_StateGetData(toinjector, "Injection Input", mydest, rc)
-
+           print *, "Unexpected Statelist in Coupler Run routine, named ", trim(statename)
+           rc = ESMF_FAILURE
+           return
         endif
 
         ! Get layout from coupler component
@@ -144,10 +160,10 @@
            endif
 
            call ESMF_StateGetData(mysource, datanames(i), srcfield, rc=status)
-           call ESMF_FieldPrint(srcfield, "", rc=rc)
+           !call ESMF_FieldPrint(srcfield, "", rc=rc)
 
            call ESMF_StateGetData(mydest, datanames(i), dstfield, rc=status)
-           call ESMF_FieldPrint(dstfield, "", rc=rc)
+           !call ESMF_FieldPrint(dstfield, "", rc=rc)
 
 
           ! These are fields on different layouts - call Route to rearrange
@@ -160,11 +176,8 @@
 
         enddo
 
-        call ESMF_StatePrint(mydest, rc=status)
-
+        !call ESMF_StatePrint(mydest, rc=status)
  
-        print *, "Coupler Run returning"
-
         rc = status
 
     end subroutine coupler_run

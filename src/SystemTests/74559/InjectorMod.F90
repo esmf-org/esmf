@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.2 2003/04/29 01:05:55 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.3 2003/04/29 17:02:03 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -71,9 +71,10 @@
         call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
         ! initialize start time to 13May2003, 3:00 pm
+        ! for testing, initialize start time to 13May2003, 10:00 am
         call ESMF_TimeInit(datablock%inject_start_time, &
                            YR=int(2003,kind=ESMF_IKIND_I8), &
-                           MM=5, DD=13, H=15, M=0, &
+                           MM=5, DD=13, H=10, M=0, &
                            S=int(0,kind=ESMF_IKIND_I8), &
                            cal=gregorianCalendar, rc=rc)
 
@@ -125,10 +126,19 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       !
       rc = ESMF_FAILURE
    
+      ! Grid parameters
+      i_max = 160
+      j_max = 80
+      x_min = 0.0
+      x_max = 2.0e+05
+      y_min = 0.0
+      y_max = 5.0e+04
+
       !
       ! Query component for information.
       !
       call ESMF_GridCompGet(gcomp, layout=layout, rc=rc)
+
       !
       ! Create the Grid
       !
@@ -153,13 +163,13 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
                              halo_width=halo_width, &
                              name="source grid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Heat_init:  grid create"
+        print *, "ERROR in injector_init:  grid create"
         return
       endif
 
       call ESMF_GridCompSet(gcomp, grid=grid, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Heat_init:  grid comp set"
+        print *, "ERROR in injector_init:  grid comp set"
         return
       endif
 
@@ -172,9 +182,19 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         return
       endif
 
+      ! For initialization, add all fields to the import state.  Only the ones
+      !  needed will be copied over to the export state for coupling.
+      call ESMF_StateAddData(importstate, field_sie, rc)
+      call ESMF_StateAddData(importstate, field_u, rc)
+      call ESMF_StateAddData(importstate, field_v, rc)
+      call ESMF_StateAddData(importstate, field_rho, rc)
+      call ESMF_StateAddData(importstate, field_p, rc)
+      call ESMF_StateAddData(importstate, field_q, rc)
+      call ESMF_StateAddData(importstate, field_flag, rc)
+
       ! This is adding names only to the export list, marked by default
-      !  as "not needed".  The coupler will consult with the other component
-      !  and mark the ones which are needed.
+      !  as "not needed". The coupler will mark the ones needed based
+      !  on the requirements of the component(s) this is coupled to.
       call ESMF_StateAddData(exportstate, "SIE", rc)
       call ESMF_StateAddData(exportstate, "U", rc)
       call ESMF_StateAddData(exportstate, "V", rc)
@@ -185,8 +205,6 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
 
       call ESMF_StatePrint(exportstate, rc=rc)
 
-      print *, "Injector Init returning"
-   
     end subroutine injector_init
 
 
@@ -201,21 +219,31 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         integer, intent(out) :: rc
 
       ! Local variables
-        type(ESMF_Field) :: field_sie, field_v, field_rho, field_flag
+        type(ESMF_Field) :: thisfield, field_sie, field_v, field_rho, field_flag
         type(ESMF_Array) :: array_sie, array_v, array_rho, array_flag
         real, dimension(:,:), pointer :: data_sie, data_v, data_rho, data_flag
         type(ESMF_Time) :: currtime
         type(injectdata), pointer :: datablock
         type(wrapper) :: wrap
 
-        print *, "HeatMod Run starting"
+        integer :: i, datacount
+        character(len=ESMF_MAXSTR), dimension(7) :: datanames
+
+        datacount = 7
+        datanames(1) = "SIE"
+        datanames(2) = "U"
+        datanames(3) = "V"
+        datanames(4) = "RHO"
+        datanames(5) = "P"
+        datanames(6) = "Q"
+        datanames(7) = "FLAG"
 
         ! Get our local info
         call ESMF_GridCompGetInternalState(comp, wrap, rc)
         datablock => wrap%ptr
 
 
-        ! Get the Field and Bundle data from the State
+        ! Get the Field and Bundle data from the State that we might update
         call ESMF_StateGetData(importstate, "SIE", field_sie, rc=rc)
         call ESMF_StateGetData(importstate, "V", field_v, rc=rc)
         call ESMF_StateGetData(importstate, "RHO", field_rho, rc=rc)
@@ -223,57 +251,50 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       
         ! Check time to see if we are still injecting
         call ESMF_ClockGetCurrTime(clock, currtime, rc)
-        if ((currtime .lt. datablock%inject_start_time) .or. &
-            (currtime .gt. datablock%inject_stop_time)) then
+        if ((currtime .ge. datablock%inject_start_time) .and. &
+            (currtime .le. datablock%inject_stop_time)) then
 
-            ! nothing to do - copy data from import state to export state
-            call ESMF_StateAddData(exportstate, field_sie, rc)
-            call ESMF_StateAddData(exportstate, field_v, rc=rc)
-            call ESMF_StateAddData(exportstate, field_rho, rc=rc)
-            call ESMF_StateAddData(exportstate, field_flag, rc=rc)
-
-            rc = rc
-            return
-        endif
-
-        ! Get pointers to data contents
-
-        ! Get the Field and Bundle data from the State
-        call ESMF_FieldGetData(field_sie, array_sie, rc=rc) 
-        call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
-            
-        call ESMF_FieldGetData(field_v, array_v, rc=rc) 
-        call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
-      
-        call ESMF_FieldGetData(field_rho, array_rho, rc=rc) 
-        call ESMF_ArrayGetData(array_rho, data_rho, ESMF_DATA_REF, rc)
-      
-        call ESMF_FieldGetData(field_flag, array_flag, rc=rc) 
-        call ESMF_ArrayGetData(array_flag, data_flag, ESMF_DATA_REF, rc)
-      
-
-        ! Update values.  Flag = 10 means override values with our own.
-        where (data_flag .eq. 10.0) 
-
-            data_sie = datablock%inject_energy
-            data_v = datablock%inject_velocity
-            data_rho = datablock%inject_density
-
-        end where
-
+            ! Get pointers to data contents
+    
+            ! Get the Field and Bundle data from the State
+            call ESMF_FieldGetData(field_sie, array_sie, rc=rc) 
+            call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
+                
+            call ESMF_FieldGetData(field_v, array_v, rc=rc) 
+            call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
+          
+            call ESMF_FieldGetData(field_rho, array_rho, rc=rc) 
+            call ESMF_ArrayGetData(array_rho, data_rho, ESMF_DATA_REF, rc)
+          
+            call ESMF_FieldGetData(field_flag, array_flag, rc=rc) 
+            call ESMF_ArrayGetData(array_flag, data_flag, ESMF_DATA_REF, rc)
+          
+    
+            ! Update values.  Flag = 10 means override values with our own.
+            where (data_flag .eq. 10.0) 
+    
+                data_sie = datablock%inject_energy
+                data_v = datablock%inject_velocity
+                data_rho = datablock%inject_density
+    
+            end where
+        endif 
  
-        ! Set updated fields into export data
-        call ESMF_StateAddData(exportstate, field_sie, rc)
-        call ESMF_StateAddData(exportstate, field_v, rc=rc)
-        call ESMF_StateAddData(exportstate, field_rho, rc=rc)
-        call ESMF_StateAddData(exportstate, field_flag, rc=rc)
+        ! Update any required fields in the export state
+        do i=1, datacount
 
-        call ESMF_StatePrint(exportstate, rc=rc)
+           ! check isneeded flag here
+           if (.not. ESMF_StateIsNeeded(importstate, datanames(i), rc)) then 
+               cycle
+           endif
+
+           call ESMF_StateGetData(importstate, datanames(i), thisfield, rc=rc)
+           call ESMF_StateAddData(exportstate, thisfield, rc=rc)
+
+        enddo
+
+        !call ESMF_StatePrint(exportstate, rc=rc)
  
-        print *, "HeatMod Run returning"
-
-        rc = rc
-
     end subroutine injector_run
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.5 2003/04/28 23:41:46 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.6 2003/04/29 17:02:02 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -67,7 +67,7 @@
 
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layoutApp, rc=rc)
-    call ESMF_DELayoutPrint(layoutApp, rc=rc)
+    !call ESMF_DELayoutPrint(layoutApp, rc=rc)
 
     call ESMF_DELayoutGetNumDEs(layoutApp, ndes, rc)
     if (ndes .lt. 4) then
@@ -93,14 +93,14 @@
     layoutHI = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
     HIcomp = ESMF_GridCompCreate(cnameHI, layout=layoutHI, rc=rc)
     print *, "Created component ", trim(cnameHI), "rc =", rc
-    call ESMF_DELayoutPrint(layoutHI, rc=rc)
+    !call ESMF_DELayoutPrint(layoutHI, rc=rc)
 
     cnameFS = "Flow Solver model"
     delist = (/ (i, i=0, ndes-1) /)
     layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
     FScomp = ESMF_GridCompCreate(cnameFS, layout=layoutFS, rc=rc)
     print *, "Created component ", trim(cnameFS), "rc =", rc
-    call ESMF_DELayoutPrint(layoutFS, rc=rc)
+    !call ESMF_DELayoutPrint(layoutFS, rc=rc)
 
     cplname = "Two-way coupler"
     cpl = ESMF_CplCompCreate(cplname, layout=layoutApp, rc=rc)
@@ -156,9 +156,9 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
  
-      HIimp = ESMF_StateCreate("Injection Feedback", ESMF_STATEIMPORT, &
+      HIimp = ESMF_StateCreate("Injection Input", ESMF_STATEIMPORT, &
                                cnameHI)
-      HIexp = ESMF_StateCreate("Injection Input", ESMF_STATEEXPORT, &
+      HIexp = ESMF_StateCreate("Injection Feedback", ESMF_STATEEXPORT, &
                                cnameHI)
 
       call ESMF_GridCompInitialize(HIcomp, HIimp, HIexp, clock, rc=rc)
@@ -198,16 +198,16 @@
 
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-        call ESMF_GridCompRun(HIcomp, HIimp, HIexp, clock, rc=rc)
-        print *, "Heat Model Run returned, rc =", rc
-  
-        call ESMF_CplCompRun(cpl, cplstateH2F, clock, rc=rc)
-        print *, "Coupler Run returned, rc =", rc
-  
         call ESMF_GridCompRun(FScomp, FSimp, FSexp, clock, rc=rc)
         print *, "Flow Model Run returned, rc =", rc
 
         call ESMF_CplCompRun(cpl, cplstateF2H, clock, rc=rc)
+        print *, "Coupler Run returned, rc =", rc
+  
+        call ESMF_GridCompRun(HIcomp, HIimp, HIexp, clock, rc=rc)
+        print *, "Heat Model Run returned, rc =", rc
+  
+        call ESMF_CplCompRun(cpl, cplstateH2F, clock, rc=rc)
         print *, "Coupler Run returned, rc =", rc
   
         call ESMF_ClockAdvance(clock, rc=rc)

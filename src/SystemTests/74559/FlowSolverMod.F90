@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.1 2003/04/28 23:38:39 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.2 2003/04/29 17:02:03 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -149,6 +149,29 @@
         print *, "ERROR in Flow_init:  grid create"
         return
       endif
+
+      ! For initialization, add all fields to the import state.  Only the ones
+      !  needed will be copied over to the export state for coupling.
+      call ESMF_StateAddData(import_state, field_sie, rc)
+      call ESMF_StateAddData(import_state, field_u, rc)
+      call ESMF_StateAddData(import_state, field_v, rc)
+      call ESMF_StateAddData(import_state, field_rho, rc)
+      call ESMF_StateAddData(import_state, field_p, rc)
+      call ESMF_StateAddData(import_state, field_q, rc)
+      call ESMF_StateAddData(import_state, field_flag, rc)
+
+      ! This is adding names only to the export list, marked by default
+      !  as "not needed".  The coupler will mark the ones needed based
+      !  on the requirements of the component(s) this is coupled to.
+      call ESMF_StateAddData(export_state, "SIE", rc)
+      call ESMF_StateAddData(export_state, "U", rc)
+      call ESMF_StateAddData(export_state, "V", rc)
+      call ESMF_StateAddData(export_state, "RHO", rc)
+      call ESMF_StateAddData(export_state, "P", rc)
+      call ESMF_StateAddData(export_state, "Q", rc)
+      call ESMF_StateAddData(export_state, "FLAG", rc)
+
+
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -411,33 +434,47 @@
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
       integer, optional, intent(out) :: rc
-!
-! Local variables
-!
+      !
+      ! Local variables
+      !
       integer :: status
       logical :: rcpresent
       integer :: counter = 0
       integer :: print_count = 0
       double precision :: s_
-!
-! Set initial values
-!
+
+      integer :: i, datacount
+      character(len=ESMF_MAXSTR), dimension(7) :: datanames
+      type(ESMF_Field) :: thisfield
+
+      datacount = 7
+      datanames(1) = "SIE"
+      datanames(2) = "U"
+      datanames(3) = "V"
+      datanames(4) = "RHO"
+      datanames(5) = "P"
+      datanames(6) = "Q"
+      datanames(7) = "FLAG"
+
+      !
+      ! Set initial values
+      !
       status = ESMF_FAILURE
       rcpresent = .FALSE.
-!
-! Initialize return code
-!
+      !
+      ! Initialize return code
+      !
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
-!
-! Increment counter
-!
+      !
+      ! Increment counter
+      !
       counter = counter + 1
-! 
-! Get timestep from clock
-!
+      ! 
+      ! Get timestep from clock
+      !
       call ESMF_ClockGetTimeStep(clock, time_step, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
@@ -449,49 +486,66 @@
         return
       endif
       dt = s_
-!
-! calculate RHOU's and RHOV's
-!
+
+      !
+      ! calculate RHOU's and RHOV's
+      !
       call FlowRhoVel(status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowrhovel"
         return
       endif
-!    
-! calculate RHOI's
-!
+      !    
+      ! calculate RHOI's
+      !
       call FlowRhoI(status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowrhoi"
         return
       endif
-!    
-! determine new densities and internal energies
-!
+      !    
+      ! determine new densities and internal energies
+      !
       call FlowRho(status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowrho"
         return
       endif
-!
-!  update velocities
-!
+      !
+      !  update velocities
+      !
       call FlowVel(status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowvel"
         return
       endif
-!
-!  new p's and q's
-!
+      !
+      !  new p's and q's
+      !
       call FlowState(status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve"
         return
       endif
-!
-! Print graphics every printout steps
-!
+      !
+      ! Update export state with needed fields
+      !
+      do i=1, datacount
+
+          ! check isneeded flag here
+          if (.not. ESMF_StateIsNeeded(export_state, datanames(i), rc)) then 
+              cycle
+          endif
+
+          ! Set export data in export state
+          call ESMF_StateGetData(import_state, datanames(i), thisfield, rc=status)
+          call ESMF_StateAddData(export_state, thisfield, rc=status)
+
+        enddo
+
+      !
+      ! Print graphics every printout steps
+      !
       if(mod(counter, printout) .eq. 0) then
         print_count = print_count + 1
         call FlowPrint(gcomp, clock, print_count, status)
@@ -1041,74 +1095,71 @@
       type(ESMF_Clock) :: clock
       integer, intent(in) :: file_no
       integer, optional, intent(out) :: rc
-!
-! Local variables
-!
+
+      !
+      ! Local variables
+      !
       integer :: status
       logical :: rcpresent
       integer :: ni, nj, i, j, de_id
       integer(kind=ESMF_IKIND_I8) :: frame
-      type(ESMF_Array) :: array2
+      type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout
       type(ESMF_AxisIndex), dimension(2) :: indext, indexe
       character(len=ESMF_MAXSTR) :: filename
-!
-! Set initial values
-!
+      !
+      ! Set initial values
+      !
       status = ESMF_FAILURE
       rcpresent = .FALSE.
-!
-! Initialize return code
-!
+      !
+      ! Initialize return code
+      !
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
-!
-! Collect results on DE 0 and output to a file
-!
+      !
+      ! Collect results on DE 0 and output to a file
+      !
       call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
       call ESMF_DELayoutGetDEID(layout, de_id, status)
-!
-! Frame number from computation
-!
+      !
+      ! Frame number from computation
+      !
       call ESMF_ClockGetAdvanceCount(clock, frame, status)
-!
-! And now test output to a file
-!
-!     call ESMF_StateGetData(import_state, "U", field_u, status)
-      call ESMF_FieldAllGather(field_u, array2, status)
+      !
+      ! And now test output to a file
+      !
+      call ESMF_FieldAllGather(field_u, outarray, status)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", file_no
-        call ESMF_ArrayWrite(array2, filename=filename, rc=status)
+        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-!     call ESMF_ArrayDestroy(array2, status)
+      call ESMF_ArrayDestroy(outarray, status)
 
-!     call ESMF_StateGetData(import_state, "V", field_v, status)
-      call ESMF_FieldAllGather(field_v, array2, status)
+      call ESMF_FieldAllGather(field_v, outarray, status)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
-        call ESMF_ArrayWrite(array2, filename=filename, rc=status)
+        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-!     call ESMF_ArrayDestroy(array2, status)
+      call ESMF_ArrayDestroy(outarray, status)
 
-!     call ESMF_StateGetData(import_state, "SIE", field_sie, status)
-      call ESMF_FieldAllGather(field_sie, array2, status)
+      call ESMF_FieldAllGather(field_sie, outarray, status)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
-        call ESMF_ArrayWrite(array2, filename=filename, rc=status)
+        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-!     call ESMF_ArrayDestroy(array2, status)
+      call ESMF_ArrayDestroy(outarray, status)
 
       if(file_no .eq. 1) then
-!       call ESMF_StateGetData(import_state, "FLAG", field_flag, status)
-        call ESMF_FieldAllGather(field_flag, array2, status)
+        call ESMF_FieldAllGather(field_flag, outarray, status)
         if (de_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
-          call ESMF_ArrayWrite(array2, filename=filename, rc=status)
+          call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
         endif
-!       call ESMF_ArrayDestroy(array2, status)
+        call ESMF_ArrayDestroy(outarray, status)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
