@@ -1,4 +1,4 @@
-% $Id: PhysGrid_background.tex,v 1.5 2002/05/23 20:07:18 jwolfe Exp $
+% $Id: PhysGrid_background.tex,v 1.6 2003/07/24 17:55:01 cdeluca Exp $
 
 \section{Background}
 
@@ -72,11 +72,9 @@ cartesian and cylindrical grids.
 }
 \end{figure}
 
-Gridding is a fumdamental aspect of models supported by ESMF.
+Gridding is a fundamental aspect of models supported by ESMF.
 Figure \ref{fig:pg_reqdoc:hgridmontage} shows a number of example 
-horizontal grids that must be supported by ESMF. 
-Figure \ref{fig:pg_reqdoc:vgridmontage} illustrates a subset of the 
-vertical gridding schemes that will be supported by ESMF.
+horizontal grids that must be supported by ESMF.
 For components to interoperate they will need to be able to exchange detailed 
 information representing specific configurations of the grid types
 shown in the figure.
@@ -85,7 +83,7 @@ shown in the figure.
 algorithm with spherical harmonic basis functions could be coupled
 together with a land surface component using a catchment area based grid
 and with an ocean circulation component using a rotated pole grid.
-As discussed in the ESMF Regrid requirements chapter \ref{}, exchanging information 
+As discussed in the ESMF Regrid requirements chapter, exchanging information 
 between these components, under appropriate conservation side-conditions, requires 
 detailed information about the grid discretization. For this example the
 information that is required includes such items as
