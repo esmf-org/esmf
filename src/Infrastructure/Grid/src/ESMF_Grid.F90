@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.19 2003/01/08 21:24:56 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.20 2003/01/09 22:52:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -195,7 +195,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.19 2003/01/08 21:24:56 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.20 2003/01/09 22:52:06 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1048,7 +1048,7 @@
 
 !     Create the DistGrid
 !     For time being, just set the number of DE
-      grid%distgrid = ESMF_DistGridCreate(nDE_i=1, nDE_j=1, &
+      grid%distgrid = ESMF_DistGridCreate(nDE_i=2, nDE_j=1, &
                                           i_max=i_max, j_max=j_max, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
@@ -1573,6 +1573,7 @@
         return
       endif
       DE_id = 1     ! TODO:  interface with layout to get DE identifier
+      DE_id = grid%distgrid%ptr%MyDE%MyDE
       call ESMF_DistGridGetCounts(grid%distgrid%ptr, DE_id, &
                                   global_start_dir1=global_nmin1, &
                                   global_end_dir1=global_nmax1, &

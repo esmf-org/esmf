@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.14 2003/01/08 21:25:41 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.15 2003/01/09 22:51:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,6 +41,7 @@
 ! !USES:
       use ESMF_ArrayMod
       use ESMF_BaseMod
+      use ESMF_LayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -124,7 +125,7 @@
 !     private
         type (ESMF_Base) :: base
 !       type (ESMF_Layout), dimension(:), pointer :: layouts
-!       type (ESMF_Layout) :: layout
+        type (ESMF_Layout) :: layout
         type (ESMF_Decomp) :: decomp       ! DE decomposition object
         type (ESMF_MyDE) :: MyDE           ! local DE identifiers
         integer :: gsize                   ! global number of cells
@@ -133,10 +134,15 @@
         type (ESMF_Array) :: DEids         ! array of all DE identifiers
         type (ESMF_Array) :: DEx
         type (ESMF_Array) :: DEy
-        type (ESMF_DecompAxis) :: global_dir1
-        type (ESMF_DecompAxis) :: global_dir2
-        type (ESMF_DecompAxis) :: memory_dir1
-        type (ESMF_DecompAxis) :: memory_dir2
+        integer, dimension(:), pointer :: start1
+        integer, dimension(:), pointer :: end1
+        integer, dimension(:), pointer :: size1
+        integer, dimension(:), pointer :: start2
+        integer, dimension(:), pointer :: end2
+        integer, dimension(:), pointer :: size2
+        integer, dimension(:), pointer :: gstart
+!       type (ESMF_DecompAxis), dimension(2) :: global_dir1
+!       type (ESMF_DecompAxis), dimension(2) :: global_dir2
         integer :: maxsize_dir1            ! maximum DE cell count in 1st dir
         integer :: maxsize_dir2            ! maximum DE cell count in 2nd dir
         logical :: covers_domain_dir1      ! identifiers if distgrid covers
@@ -188,7 +194,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.14 2003/01/08 21:25:41 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.15 2003/01/09 22:51:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -541,10 +547,15 @@
       distgrid%gsize = 0
       distgrid%gsize_dir1 = 0
       distgrid%gsize_dir2 = 0
-!     nullify(global_dir1)
-!     nullify(global_dir2)
-!     nullify(memory_dir1)
-!     nullify(memory_dir2)
+!      nullify(distgrid%start1)
+!      nullify(distgrid%end1)
+!      nullify(distgrid%size1)
+!      nullify(distgrid%start2)
+!      nullify(distgrid%end2)
+!      nullify(distgrid%size2)
+      nullify(distgrid%gstart)
+!     nullify(distgrid%global_dir1)
+!     nullify(distgrid%global_dir2)
       distgrid%maxsize_dir1 = 0
       distgrid%maxsize_dir2 = 0
       distgrid%covers_domain_dir1 = .false.
@@ -609,6 +620,7 @@
       integer, dimension(:), allocatable :: PEList
       logical :: cover_domain_dir1
       logical :: cover_domain_dir2
+      integer :: i
 
 !     Initialize return code
       if(present(rc)) then
@@ -636,20 +648,31 @@
       endif
 
 !     Create layout with specified decomposition
-      allocate(PEList(2))
-      PEList(1) = 1
-      PEList(2) = 2
-!     call ESMF_LayoutCreate(nDE_i, nDE_j, PEList, 0, status)
+      allocate(PEList(nDE_i*nDE_j))
+      do i = 1,nDE_i*nDE_j
+        PEList(i) = i
+      enddo
+      distgrid%layout = ESMF_LayoutCreate(nDE_i, nDE_j, PEList, &
+                                          ESMF_XFAST, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: Layout create"
         return
       endif
 
-!     Allocate resources based on number of DE's 
-!jw   allocate(distgrid%global_dir1(nDE_i*nDE_j), stat=status)
-!jw   allocate(distgrid%global_dir2(nDE_i*nDE_j), stat=status)
-!jw   allocate(distgrid%memory_dir1(nDE_i*nDE_j), stat=status)
-!jw   allocate(distgrid%memory_dir2(nDE_i*nDE_j), stat=status)
+!     Allocate resources based on number of DE's
+      allocate(distgrid%start1(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%end1(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%size1(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%start2(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%end2(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%size2(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%gstart(nDE_i*nDE_j), stat=status)
+!     allocate(distgrid%global_dir1(nDE_i*nDE_j), stat=status)
+!     allocate(distgrid%global_dir2(nDE_i*nDE_j), stat=status)
+
+!jw   allocate(distgrid%DEids(nDE_i*nDE_j), stat=status)  TODO: use ESMF_ArrayCreate
+!jw   allocate(distgrid%DEx(nDE_i*nDE_j), stat=status)
+!jw   allocate(distgrid%DEy(nDE_i*nDE_j), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
         return
@@ -1073,16 +1096,16 @@
 !                global_start_dir2 = distgrid%global_dir2(DE_id)%start
 !     if(present(global_end_dir2)) &
 !                global_end_dir2 = distgrid%global_dir2(DE_id)%end
-      if(present(size_dir1)) size_dir1 = distgrid%global_dir1%size
-      if(present(size_dir2)) size_dir2 = distgrid%global_dir2%size
+      if(present(size_dir1)) size_dir1 = distgrid%size1(DE_id)
+      if(present(size_dir2)) size_dir2 = distgrid%size2(DE_id)
       if(present(global_start_dir1)) &
-                 global_start_dir1 = distgrid%global_dir1%start
+                 global_start_dir1 = distgrid%start1(DE_id)
       if(present(global_end_dir1)) &
-                 global_end_dir1 = distgrid%global_dir1%end
+                 global_end_dir1 = distgrid%end1(DE_id)
       if(present(global_start_dir2)) &
-                 global_start_dir2 = distgrid%global_dir2%start
+                 global_start_dir2 = distgrid%start2(DE_id)
       if(present(global_end_dir2)) &
-                 global_end_dir2 = distgrid%global_dir2%end
+                 global_end_dir2 = distgrid%end2(DE_id)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1129,7 +1152,7 @@
 ! !REQUIREMENTS: 
 
       integer :: status=ESMF_FAILURE                 ! Error status
-      integer :: i, j                                !
+      integer :: i, j, de                            !
       integer :: ni, nj                              ! increment counters
       integer :: global_s, global_e                  ! global counters
       logical :: rcpresent=.FALSE.                   ! Return code present
@@ -1150,11 +1173,15 @@
       global_e = 0
       do i = 1,nDE_i
         global_e = min(global_e + ni, i_max)
-!       distgrid%global_dir1(i)%start = global_s
-!       distgrid%global_dir1(i)%end = global_e
-        distgrid%global_dir1%start = global_s
-        distgrid%global_dir1%end = global_e
-        distgrid%global_dir1%size = global_e - global_s + 1
+        do j = 1,nDE_j
+          de = (j-1)*nDE_j + i
+          distgrid%start1(de) = global_s
+          distgrid%end1(de) = global_e
+          distgrid%size1(de) = global_e - global_s + 1
+!         distgrid%global_dir1%start = global_s
+!         distgrid%global_dir1%end = global_e
+!         distgrid%global_dir1%size = global_e - global_s + 1
+        enddo
         global_s = global_e + 1
       enddo
       nj = j_max/nDE_j
@@ -1162,11 +1189,15 @@
       global_e = 0
       do j = 1,nDE_j
         global_e = min(global_e + nj, j_max)
-!       distgrid%global_dir2(j)%start = global_s
-!       distgrid%global_dir2(j)%end = global_e
-        distgrid%global_dir2%start = global_s
-        distgrid%global_dir2%end = global_e
-        distgrid%global_dir2%size = global_e - global_s + 1
+        do i = 1,nDE_i
+          de = (j-1)*nDE_j + i
+          distgrid%start2(de) = global_s
+          distgrid%end2(de) = global_e
+          distgrid%size2(de) = global_e - global_s + 1
+!         distgrid%global_dir2%start = global_s
+!         distgrid%global_dir2%end = global_e
+!         distgrid%global_dir2%size = global_e - global_s + 1
+        enddo
         global_s = global_e + 1
       enddo
 
@@ -1212,28 +1243,31 @@
         rc = ESMF_FAILURE
       endif
 
-      DEx = 1     ! TODO:  interface with layout to get DE identifier
-      DEy = 1     ! TODO:  interface with layout to get DE identifier
-      DE_id = 1
-!     call ESMF_LayoutGetPosition(distgrid%layout, DEx, DEy, status)
-!     call ESMF_LayoutGetIndex(distgrid%layout, DE_id, status)
-!     if(status .NE. ESMF_SUCCESS) then
-!       print *, "ERROR in ESMF_DistGridSetDEInternal: layout get position"
-!       return
-!     endif
-                    ! TODO:  identify neighbors
+      call ESMF_LayoutGetDEPosition(distgrid%layout, DEx, DEy, status)
+      call ESMF_LayoutGetDEid(distgrid%layout, DE_id, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridSetDEInternal: layout get position"
+        return
+      endif
+      DE_id = DE_id + 1    ! TODO:  have to add one to go from C
+!     TODO:  identify neighbors
 
       distgrid%MyDE%MyDE = DE_id
       distgrid%MyDE%MyDEx = DEx
       distgrid%MyDE%MyDEy = DEy
-!  TODO  after this, need to set similar information in distgrid arrays
-      distgrid%MyDE%n_dir1%start = distgrid%global_dir1%start ! TODO: global_dirs
+!     TODO: need to create the following with ESMFArrayCreate before doing this
+!     distgrid%DEids(DE_id) = DE_id        ! need to add capability for this
+!                                          ! not to be true
+!     distgrid%DEx(DE_id) = DEx
+!     distgrid%DEy(DE_id) = DEy
+
+      distgrid%MyDE%n_dir1%start = distgrid%start1(DE_id) ! TODO: global_dirs
                                                               ! should be an array
-      distgrid%MyDE%n_dir1%end = distgrid%global_dir1%end
-      distgrid%MyDE%n_dir1%size = distgrid%global_dir1%size
-      distgrid%MyDE%n_dir2%start = distgrid%global_dir2%start
-      distgrid%MyDE%n_dir2%end = distgrid%global_dir2%end
-      distgrid%MyDE%n_dir2%size = distgrid%global_dir2%size
+      distgrid%MyDE%n_dir1%end = distgrid%end1(DE_id)
+      distgrid%MyDE%n_dir1%size = distgrid%size1(DE_id)
+      distgrid%MyDE%n_dir2%start = distgrid%start2(DE_id)
+      distgrid%MyDE%n_dir2%end = distgrid%end2(DE_id)
+      distgrid%MyDE%n_dir2%size = distgrid%size2(DE_id)
       distgrid%MyDE%lsize = distgrid%MyDE%n_dir1%size * &
                             distgrid%MyDE%n_dir2%size
 
