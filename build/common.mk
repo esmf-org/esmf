@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.96 2005/03/01 18:24:07 nscollins Exp $
+#  $Id: common.mk,v 1.97 2005/03/01 20:53:08 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -483,7 +483,12 @@ tree_cppfiles:  $(CPPFILES)
 # target.  The current directory and directories below will be cleaned
 # or clobbered.  The clobber target first calls gmake with the clean target
 # before the clobber actions are taken.
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# default list of files and dirs to clean
+CLEAN_DEFDIRS = "coredir.*"
+CLEAN_DEFAULTS = "*.o *.mod *.txt *.stdout NULL core UTestLog *ESMF_LogFile"
+CLEAN_TEXFILES = "*.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG"
 
 clean:
 	$(MAKE) ACTION=tree_clean tree
@@ -499,13 +504,12 @@ clobber: clean
 
 # action for 'tree' target.
 tree_clean:
-	@for DIR in $(CLEANDIRS) foo ; do \
+	@for DIR in $(CLEANDIRS) $(CLEAN_DEFDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
-	      echo rm -rf $$DIR ;\
 	      rm -rf $$DIR ;\
 	   fi ;\
 	done
-	rm -f $(CLEANFILES)
+	rm -f $(CLEANFILES) $(CLEAN_DEFAULTS)
 
 # target which does a light cleaning - remove files only under the src dir 
 #  (logfiles, doc files, test output files, files made by preprocessing, etc)
