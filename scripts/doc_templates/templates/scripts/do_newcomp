@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newcomp,v 1.9 2003/02/28 01:03:13 eschwab Exp $
+# $Id: do_newcomp,v 1.10 2003/03/04 01:12:57 eschwab Exp $
 #
 #===============================================================================
 # do_newcomp
@@ -26,7 +26,7 @@
 #               c - C++
 #        
 # If a directory called <comp> doesn't already exist, it will be created in 
-# the directory where the script is called.  If the <comp> directory does exist, 
+# the directory where the script is called.  If the <comp> directory does exist,
 # the template files needed to create the new component will be added to it.  
 # Template files that relate to the entire component have <comp> as the root 
 # of their filename.  Template files that pertain to classes or modules have 
@@ -60,70 +60,109 @@ endif
 
 # Fill the source directories with template files
 
-# makefiles
+#
+# makefile templates
+#
+
+  # component-wide makefile
   if(!(-r $compdir/makefile)) then
-      cat $DOCT_DIR/makefile.comp | \
-      sed 's/<Comp>/'$comp'/g' > $compdir/makefile
+    cat $DOCT_DIR/makefile.comp | \
+    sed 's/<Comp>/'$comp'/g' > $compdir/makefile
   endif
 
+  # examples makefile
   if(!(-r $exdir/makefile)) then
-      cat $DOCT_DIR/makefile.examp | \
-      sed 's/<Comp>/'$comp'/g' > $exdir/makefile
+    cat $DOCT_DIR/makefile.examp | \
+    sed 's/<Comp>/'$comp'/g' > $exdir/makefile
   endif
 
+  # source makefile
   if(!(-r $srcdir/makefile)) then
-      cat $DOCT_DIR/makefile.srcinter | \
-      sed 's/<Comp>/'$comp'/g' > $srcdir/makefile
+    cat $DOCT_DIR/makefile.srcinter | \
+    sed 's/<Comp>/'$comp'/g' > $srcdir/makefile
   endif
 
+  # interface makefile
   if(!(-r $intfdir/makefile)) then
-      cat $DOCT_DIR/makefile.srcinter | \
-      sed 's/<Comp>/'$comp'/g' > $intfdir/makefile
+    cat $DOCT_DIR/makefile.srcinter | \
+    sed 's/<Comp>/'$comp'/g' > $intfdir/makefile
   endif
 
+  # unit test makefile
   if(!(-r $tstdir/makefile)) then
-      cat $DOCT_DIR/makefile.tests | \
-      sed 's/<Comp>/'$comp'/g' > $tstdir/makefile
+    cat $DOCT_DIR/makefile.tests | \
+    sed 's/<Comp>/'$comp'/g' > $tstdir/makefile
   endif
 
-# include files
+#
+# component-wide include file templates
+#
+
+  # F90 component-wide include file
   if(!(-r $incdir/ESMF_$comp.h)) then
-      cat $DOCT_DIR/ESMF_comp.h | \
-      sed 's/<Comp>/'$comp'/g' > $incdir/ESMF_$comp.h
+    cat $DOCT_DIR/ESMF_comp.h | \
+    sed 's/<Comp>/'$comp'/g' > $incdir/ESMF_$comp.h
   endif
 
-  if(!(-r $incdir/ESMC_class.h)) then
-      cat $DOCT_DIR/ESMC_class.h | \
-      sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_class.h
-  endif
-
+  # C++ component-wide include file
   if(!(-r $incdir/ESMC_$comp.h)) then
-      cat $DOCT_DIR/ESMC_comp.h | \
-      sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_$comp.h
+    cat $DOCT_DIR/ESMC_comp.h | \
+    sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_$comp.h
   endif
 
-# src files
+#
+# class src file templates 
+#
+
   switch ($lang) 
   case f:
+      # F90 implementation file
       if(!(-r $srcdir/ESMF_class.F90)) then
-          cat $DOCT_DIR/ESMF_class.F90 | \
-          sed 's/<Comp>/'$comp'/g' > $srcdir/ESMF_class.F90
+        cat $DOCT_DIR/ESMF_class.F90 | \
+        sed 's/<Comp>/'$comp'/g' > $srcdir/ESMF_class.F90
       endif
 
-      if(!(-r $intfdir/ESMC_class_F.C)) then
-          cp $DOCT_DIR/inter_ESMC_class_F.C $intfdir/ESMC_class_F.C
-          chmod 644 $intfdir/ESMC_class_F.C
-      endif
-      breaksw
-  case c:
-      if(!(-r $srcdir/ESMC_class.C)) then
-          cp $DOCT_DIR/ESMC_class.C $srcdir
-          chmod 644 $srcdir/ESMC_class.C
+      # C++ interface file
+      if(!(-r $intfdir/ESMC_class.C)) then
+        cat $DOCT_DIR/inter_ESMC_class.C | \
+        sed 's/<Comp>/'$comp'/g' > $intfdir/ESMC_class.C
       endif
 
+      # C++ interface include file
+      if(!(-r $incdir/ESMC_class.h)) then
+        cat $DOCT_DIR/inter_ESMC_class.h | \
+        sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_class.h
+      endif
+
+      # C++ to F90 intermediate glue code file (F77)
       if(!(-r $intfdir/ESMF_class_C.F90)) then
-          cat $DOCT_DIR/inter_ESMF_class_C.F90 | \
-          sed 's/<Comp>/'$comp'/g' > $intfdir/ESMF_class_C.F90
+        cat $DOCT_DIR/inter_ESMF_class_C.F90 | \
+        sed 's/<Comp>/'$comp'/g' > $intfdir/ESMF_class_C.F90
+      endif
+      breaksw
+  case c:
+      # C++ implementation file
+      if(!(-r $srcdir/ESMC_class.C)) then
+        cat $DOCT_DIR/ESMC_class.C | \
+        sed 's/<Comp>/'$comp'/g' > $srcdir/ESMC_class.C
+      endif
+
+      # C++ implementation include file
+      if(!(-r $incdir/ESMC_class.h)) then
+        cat $DOCT_DIR/ESMC_class.h | \
+        sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_class.h
+      endif
+
+      # F90 interface file
+      if(!(-r $intfdir/ESMF_class.F90)) then
+        cat $DOCT_DIR/inter_ESMF_class.F90 | \
+        sed 's/<Comp>/'$comp'/g' > $intfdir/ESMF_class.F90
+      endif
+
+      # F90 to C++ intermediate glue code file (C)
+      if(!(-r $intfdir/ESMC_class_F.C)) then
+        cat $DOCT_DIR/inter_ESMC_class_F.C | \
+        sed 's/<Comp>/'$comp'/g' > $intfdir/ESMC_class_F.C
       endif
       breaksw
   default:
@@ -131,22 +170,18 @@ endif
     exit
   endsw
 
-# test files
-  switch ($lang) 
-  case f:
-      if(!(-r $tstdir/ESMF_classTest.F90)) then
-          cat $DOCT_DIR/ESMF_classTest.F90 | \
-          sed 's/<Comp>/'$comp'/g' > $tstdir/ESMF_classTest.F90
-      endif
-      breaksw
-  case c:
-      if(!(-r $tstdir/ESMC_classTest.C)) then
-          cat $DOCT_DIR/ESMC_classTest.C | \
-          sed 's/<Comp>/'$comp'/g' > $tstdir/ESMC_classTest.C
-      endif
-      breaksw
-  default:
-    echo "Valid options are: [ c | f ]"
-    exit
-  endsw
-endif
+#
+# unit test templates (will need to drive tests from both languages)
+#
+
+  # F90 unit test driver
+  if(!(-r $tstdir/ESMF_classTest.F90)) then
+    cat $DOCT_DIR/ESMF_classTest.F90 | \
+    sed 's/<Comp>/'$comp'/g' > $tstdir/ESMF_classTest.F90
+  endif
+
+  # C++ unit test driver
+  if(!(-r $tstdir/ESMC_classTest.C)) then
+    cat $DOCT_DIR/ESMC_classTest.C | \
+    sed 's/<Comp>/'$comp'/g' > $tstdir/ESMC_classTest.C
+  endif
