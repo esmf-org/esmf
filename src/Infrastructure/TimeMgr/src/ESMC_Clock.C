@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.51 2004/02/11 21:56:51 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.52 2004/02/18 01:48:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.51 2004/02/11 21:56:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.52 2004/02/18 01:48:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -154,6 +154,12 @@ int ESMC_Clock::count=0;
     int returnCode;
     ESMC_Clock *clockCopy;
 
+    // can't copy a non-existent object
+    if (clock == ESMC_NULL_POINTER) {
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+      return(ESMC_NULL_POINTER);
+    }
+
     try {
       // allocate new clock and pass given clock to copy constructor.
       clockCopy = new ESMC_Clock(*clock);
@@ -161,16 +167,12 @@ int ESMC_Clock::count=0;
     catch (...) {
       // TODO:  call ESMF log/err handler
       cerr << "ESMC_ClockCreate() (copy) memory allocation failed\n";
-      if (rc != ESMC_NULL_POINTER) {
-        *rc = ESMF_FAILURE;
-      }
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = clockCopy->ESMC_ClockValidate();
-    if (rc != ESMC_NULL_POINTER) {
-      *rc = returnCode;
-    }
+    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
     return(clockCopy);
 
@@ -187,7 +189,7 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Clock *clock) {  // in - ESMC_Clock to destroy
+      ESMC_Clock **clock) {  // in - ESMC_Clock to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Clock object previously allocated
@@ -195,14 +197,13 @@ int ESMC_Clock::count=0;
 //
 //EOP
 
-  if (clock != ESMC_NULL_POINTER) {
-    //clock->ESMC_ClockDestruct(); constructor calls it!
-    delete clock;
-    clock = ESMC_NULL_POINTER;
-    return(ESMF_SUCCESS);
-  } else {
-    return(ESMF_FAILURE);
-  }
+  // TODO: don't really need (delete doesn't care) ?
+  if (*clock == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+
+   // TODO: clock->ESMC_ClockDestruct(); constructor calls it!
+   delete *clock;
+   *clock = ESMC_NULL_POINTER;
+   return(ESMF_SUCCESS);
 
  } // end ESMC_ClockDestroy
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.49 2004/02/13 01:01:59 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.50 2004/02/18 01:48:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.49 2004/02/13 01:01:59 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.50 2004/02/18 01:48:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -221,6 +221,12 @@ int ESMC_Calendar::count=0;
     int returnCode;
     ESMC_Calendar *calendarCopy;
 
+    // can't copy a non-existent object
+    if (calendar == ESMC_NULL_POINTER) {
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+      return(ESMC_NULL_POINTER);
+    }
+
     try {
       // allocate new calendar and pass given calendar to copy constructor.
       calendarCopy = new ESMC_Calendar(*calendar);
@@ -228,16 +234,12 @@ int ESMC_Calendar::count=0;
     catch (...) {
       // TODO:  call ESMF log/err handler
       cerr << "ESMC_CalendarCreate() (copy) memory allocation failed\n";
-      if (rc != ESMC_NULL_POINTER) {
-        *rc = ESMF_FAILURE;
-      }
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = calendarCopy->ESMC_CalendarValidate();
-    if (rc != ESMC_NULL_POINTER) {
-      *rc = returnCode;
-    }
+    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
     return(calendarCopy);     
 
@@ -254,7 +256,7 @@ int ESMC_Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Calendar *calendar) {  // in - ESMC_Calendar to destroy
+      ESMC_Calendar **calendar) {  // in - ESMC_Calendar to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Calendar object previously allocated
@@ -262,14 +264,13 @@ int ESMC_Calendar::count=0;
 //
 //EOP
 
-  if (calendar != ESMC_NULL_POINTER) {
-    //calendar->ESMC_CalendarDestruct(); constructor calls it!
-    delete calendar;
-    calendar = ESMC_NULL_POINTER;
-    return(ESMF_SUCCESS);
-  } else {
-    return(ESMF_FAILURE);
-  }
+  // TODO: don't really need (delete doesn't care) ?
+  if (*calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+
+  // TODO: calendar->ESMC_CalendarDestruct(); constructor calls it!
+  delete *calendar;
+  *calendar = ESMC_NULL_POINTER;
+  return(ESMF_SUCCESS);
 
  } // end ESMC_CalendarDestroy
 

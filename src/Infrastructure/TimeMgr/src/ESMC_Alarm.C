@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.31 2004/02/04 23:24:00 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.32 2004/02/18 01:48:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.31 2004/02/04 23:24:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.32 2004/02/18 01:48:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -199,6 +199,12 @@ int ESMC_Alarm::count=0;
     int returnCode;
     ESMC_Alarm *alarmCopy;
 
+    // can't copy a non-existent object
+    if (alarm == ESMC_NULL_POINTER) {
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+      return(ESMC_NULL_POINTER);
+    }
+
     try {
       // allocate new alarm and pass given alarm to copy constructor.
       alarmCopy = new ESMC_Alarm(*alarm);
@@ -206,16 +212,12 @@ int ESMC_Alarm::count=0;
     catch (...) {
       // TODO:  call ESMF log/err handler
       cerr << "ESMC_AlarmCreate() (copy) memory allocation failed\n";
-      if (rc != ESMC_NULL_POINTER) {
-        *rc = ESMF_FAILURE;
-      }
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = alarmCopy->ESMC_AlarmValidate();
-    if (rc != ESMC_NULL_POINTER) {
-      *rc = returnCode;
-    }
+    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
     return(alarmCopy);     
 
@@ -232,7 +234,7 @@ int ESMC_Alarm::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Alarm *alarm) {  // in - ESMC_Alarm to destroy
+      ESMC_Alarm **alarm) {  // in - ESMC_Alarm to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Alarm object previously allocated
@@ -240,14 +242,13 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 
-  if (alarm != ESMC_NULL_POINTER) {
-    //alarm->ESMC_AlarmDestruct(); constructor calls it!
-    delete alarm;
-    alarm = ESMC_NULL_POINTER;
-    return(ESMF_SUCCESS);
-  } else {
-    return(ESMF_FAILURE);
-  }
+  // TODO: don't really need (delete doesn't care) ?
+  if (*alarm == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+
+  // TODO: alarm->ESMC_AlarmDestruct(); constructor calls it!
+  delete *alarm;
+  *alarm = ESMC_NULL_POINTER;
+  return(ESMF_SUCCESS);
 
  } // end ESMC_AlarmDestroy
 
