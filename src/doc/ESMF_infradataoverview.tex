@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.11 2004/04/14 23:20:51 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.12 2004/04/15 20:19:18 cdeluca Exp $
 
 \section{Overview of Infrastructure Data Structures}
 
@@ -43,8 +43,8 @@ a later time.
 \hline
 \vspace{.01in}
 {\bf Key Features} \\[.01in]
-Hierarchy of data structures designed specifically for the Earth system domain 
-and high performance, parallel computing. \\
+Hierarchy of data structures designed specifically for the Earth 
+system domain and high performance, parallel computing. \\
 Multi-use ESMF structures simplify user code overall. \\
 Data objects support incremental construction and deferred allocation. \\ 
 Native Fortran arrays can be associated with or retrieved from ESMF data
@@ -57,18 +57,33 @@ objects, for ease of adoption, convenience, and performance. \\[.03in] \hline
 The main classes that are used for model and observational data manipulation
 are as follows:
 
-An Array contains a data pointer along with information
-about datatype, precision, and dimension.  It allows data within 
-ESMF to be handled consistently on the 
+\begin{itemize}
 
-A Field holds model and/or observational 
+\item {\bf Array}  An ESMF Array contains a data pointer, 
+information about its associated datatype, precision, and 
+dimension, and user-defined attributes.  
+
+Data regions in Arrays are partitioned into categories defined 
+by the role the data element plays in distributed halo operations.  
+Haloing - sometimes called ghosting - is the practice of 
+copying portions of Array data to multiple memory locations 
+to ensure that data dependencies can be satisfied quickly 
+when performing a calculation.  ESMF Arrays contain 
+an {\bf exclusive} domain, which contains data elements
+updated exclusively and definitively by one DE; a
+{\bf computational} domain, which contains the exclusive domain
+as well as data elements with whom the exclusive points have
+data dependencies; and {\bf total} domain - which you don't 
+compute but you get from your neighbors.
+
+\item {\bf Field}  A Field holds model and/or observational 
 data together with its underlying grid or set of spatial locations.  
 It provides methods for configuration, initialization, setting and
 retrieving data values, data I/O, data regridding, and 
 manipulation of attributes.
 
-Groups of Fields on the same underlying physical grid 
-can be collected into a single object called a Bundle.  
+\item {\bf Bundle} Groups of Fields on the same underlying 
+physical grid can be collected into a single object called a Bundle.  
 A Bundle provides two major functions: it allows groups of 
 Fields to be manipulated using a single identifier, for example 
 during export or import of data between Components; and 
@@ -82,12 +97,13 @@ This can improve performance on high-latency platforms.
 Bundle objects contain methods for setting and retrieving constituent 
 fields, regridding, data I/O, and reordering of data in memory.
 
+\end{itemize}
+
 \subsection{Distributed Data Methods}
 
 Bundles, Fields, and Arrays all have versions of the following
-communication methods.  These all involve movements of data between
-DEs.  The first three are higher level functions which are intended to
-map closely to needs of applications programs.  They are:
+data communication methods.  In ESMF, data is communicated 
+between DEs.  The DE abstraction
 
 There is a common object handle, an {\tt ESMF\_RouteHandle}, which
 allows the communication patterns to be precomputed during 
@@ -95,6 +111,10 @@ initialization and the information stored in that RouteHandle.
 By specifying the correct RouteHandle at execution time, only
 the source and destination data pointers must be supplied and the
 runtime overhead is minimized.
+
+The first three are higher level functions which are intended to
+map closely to needs of applications programs.
+
 
 \subsubsection{Halo}
 \input{../Infrastructure/ArrayComm/doc/ArrayHalo_desc}
