@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.64 2004/05/26 21:18:00 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.65 2004/06/18 20:00:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.64 2004/05/26 21:18:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.65 2004/06/18 20:00:18 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -350,7 +350,7 @@
           (yy == ESMC_NULL_POINTER && yy_i8 == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
             ", must Get() yy or yy_i8, since it was Set() with "
-            "ESMC_CAL_NOCALENDAR, otherwise impossible conversion is implied.",
+            "ESMC_CAL_NOCALENDAR; impossible conversion implied.",
             &rc); return(rc);
       }
       // if mm was set, must get it
@@ -358,7 +358,7 @@
           (mm == ESMC_NULL_POINTER && mm_i8 == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
             ", must Get() mm or mm_i8, since it was Set() with "
-            "ESMC_CAL_NOCALENDAR, otherwise impossible conversion is implied.",
+            "ESMC_CAL_NOCALENDAR; impossible conversion implied.",
             &rc); return(rc);
       }
       // if d was set, must get it
@@ -366,7 +366,7 @@
           (d == ESMC_NULL_POINTER && d_i8 == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
             ", must Get() d or d_i8, since it was Set() with "
-            "ESMC_CAL_NOCALENDAR, otherwise impossible conversion is implied.",
+            "ESMC_CAL_NOCALENDAR; impossible conversion implied.",
             &rc); return(rc);
       }
     }
