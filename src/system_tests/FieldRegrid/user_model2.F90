@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2003/09/23 16:31:23 jwolfe Exp $
+! $Id: user_model2.F90,v 1.4 2003/09/24 23:01:05 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -131,9 +131,9 @@
       ! Figure out our local processor id
       call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
-      ! Set up a 2D integer array
-      call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
-                              kind=ESMF_I4)
+      ! Set up a 2D real array
+      call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
+                              kind=ESMF_R8)
 
       ! Create the field and have it create the array internally
       humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
