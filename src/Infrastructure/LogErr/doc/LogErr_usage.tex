@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.7 2004/06/15 07:39:39 cpboulder Exp $
+% $Id: LogErr_usage.tex,v 1.8 2004/06/21 16:09:00 cpboulder Exp $
 
 
 
@@ -22,7 +22,14 @@ If a user wants to use a new or different log, the user must call
 
 {\tt ESMF\_LogOpen()} and pass in a log object and file name to open a Log 
 
-file.  
+file.
+  
+
+By default, the log file is not truncated at the start of a new run; it just
+
+gets appended to each time.  Future functionality could include an option to
+
+either truncate or append to the log file. 
 
 
 In all cases where a log is opened, a unit number is assigned to a specific

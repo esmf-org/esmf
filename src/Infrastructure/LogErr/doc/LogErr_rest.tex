@@ -1,4 +1,4 @@
-% $Id: LogErr_rest.tex,v 1.7 2004/06/13 00:41:31 cdeluca Exp $
+% $Id: LogErr_rest.tex,v 1.8 2004/06/21 16:08:59 cpboulder Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,6 +24,11 @@ not implemented.
 \item{\bf Flush after write.}
 Flushing occurs after every write instead of allowing the user to
 specify the buffer size.
+
+\item{\bf Log only appends entries.}
+Currently, all writing to the log is appended rather deleting the old contents
+and writing to a clean log.  Future enhancements include the option to either
+append to an existing log or write to a clean log.
 
 \item{\bf Avoiding conflicts with the default Log.}
 The private methods {\tt ESMF\_LogInitialize()} and {\tt ESMF\_LogFinalize()} 
