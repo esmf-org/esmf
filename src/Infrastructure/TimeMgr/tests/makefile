@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/04/24 17:08:47 svasquez Exp $
+# $Id: makefile,v 1.9 2003/05/02 01:19:51 eschwab Exp $
 
 ALL:  tests
 
@@ -15,17 +15,21 @@ LIBBASE	  =
 DIRS	  =
 LOCDIR	  = src/Infrastructure/TimeMgr/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ClockUTest 
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ClockUTest \
+		$(ESMC_TESTDIR)/ESMF_CalRangeUTest
 #	        $(ESMC_TESTDIR)/ESMC_ClockUTest 
 # remove temporarily
 
-TESTS_RUN     = RUN_ESMF_ClockUTest 
+TESTS_RUN     = RUN_ESMF_ClockUTest \
+		RUN_ESMF_CalRangeUTest
 #		RUN_ESMC_ClockUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_ClockUTestUNI 
+TESTS_RUN_UNI = RUN_ESMF_ClockUTestUNI \
+		RUN_ESMF_CalRangeUTestUNI
 #		RUN_ESMC_ClockUTestUNI 
 
-TESTS_RM      = ESMF_ClockUTest.rm 
+TESTS_RM      = ESMF_ClockUTest.rm \
+                ESMF_CalRangeUTest.rm
 #               ESMC_ClockUTest.rm
 
 include ${ESMF_DIR}/makefile
@@ -71,5 +75,23 @@ ESMF_ClockUTest.rm:
 #ESMC_ClockUTest.rm:
 #	echo "ESMC_ClockTest.rm target called here."
 
+
+#
+#
+#
+$(ESMC_TESTDIR)/ESMF_CalRangeUTest: ESMF_CalRangeUTest.o
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CalRangeUTest ESMF_CalRangeUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_CalRangeUTest.o
+
+RUN_ESMF_CalRangeUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CalRangeUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CalRangeUTest > $(ESMC_TESTDIR)/ESMF_CalRangeUTest.stdout
+
+RUN_ESMF_CalRangeUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CalRangeUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CalRangeUTest > $(ESMC_TESTDIR)/ESMF_CalRangeUTest.stdout
+
+ESMF_CalRangeUTest.rm:
+	echo "ESMF_CalRangeTest.rm target called here."
 
 
