@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/09/18 22:21:39 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2003/09/24 22:22:40 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -15,7 +15,7 @@ LIBBASE	  =
 LOCDIR	  = src/system_tests/CompCreate
 
 
-SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/CompCreate
+SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_CompCreateSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
