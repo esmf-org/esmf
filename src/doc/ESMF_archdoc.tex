@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.tex,v 1.12 2002/08/28 02:17:41 cdeluca Exp $
+% $Id: ESMF_archdoc.tex,v 1.13 2002/08/29 13:05:49 cdeluca Exp $
 
 %
 \documentclass[]{article}
@@ -8,6 +8,19 @@
 \usepackage{html}
 \usepackage[T1]{fontenc}
 
+\newcommand{\docmttype}{Requirements}
+\newcommand{\mytitle}{DRAFT \longname \docmttype ~~}
+
+%===============================================================================
+% User-defined commands
+%-------------------------------------------------------------------------------
+\newcommand{\longname}{ESMF }
+\newcommand{\funcname}{ESMF }
+\newcommand{\shortname}{ARCH}
+\newcommand{\myauthors}{Cecelia DeLuca, V. Balaji, Chris Hill, Max Suarez, Nancy Collins,
+Bob Hallberg, Arlindo da Silva, Mark Iredell, Mike Young, Brian Kauffman, Byron Boville, Tony Craig, Phil Jones, Brian Kauffman, Jay Larson, Rob Jacob, John Michalakes, David Neckels, Earl Schwab, Shepard Smithline, Leonid Zaslavsky}
+%===============================================================================
+
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
@@ -16,30 +29,11 @@
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
-\begin{titlepage}
+% Title page
 
-\begin{center}
-{\Large Earth System Modeling Framework } \\
-\vspace{.25in}
-{\Large {\bf ESMF Architecture}} \\
-\vspace{.25in}
-{\large {\it DRAFT}}
-\vspace{.5in}
-\end{center}
+\input{../../scripts/doc_templates/templates/title_alldoc}
 
-\begin{latexonly}
-\vspace{5.5in}
-\begin{tabular}{p{5in}p{.9in}}
-\hrulefill \\
-\noindent {\bf NASA High Performance Computing and Communications Program} \\
-\noindent Earth and Space Sciences Project \\
-\noindent CAN 00-OES-01 \\
-\noindent http://www.esmf.ucar.edu \\
-\end{tabular}
-\end{latexonly}
-
-\end{titlepage}
-
+\newpage
 \tableofcontents
 
 %\newpage
@@ -56,14 +50,18 @@
 \newpage
 %\section{Introduction}
 \input{ESMF_designintro}
+
+%\section{Scope of the ESMF}
 \input{ESMF_shortscope}
 
-%\section{General Design Concepts}
+%\section{Evolution of Earth Science Frameworks}
 \input{ESMF_archbackground}
+
+%\section{Software Design Paradigms}
 \input{ESMF_strategies}
-\input{ESMF_progmodel}
-\input{ESMF_language}
-\input{ESMF_designsummary}
+
+%\section{Document Conventions}
+\input{ESMF_conventions}
 
 %\section{Classes}
 \input{ESMF_superclasses}

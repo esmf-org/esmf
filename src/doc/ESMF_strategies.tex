@@ -1,12 +1,12 @@
-\section{Design Strategies}
+\section{Software Design Paradigms}
 \label{sec:strategies}
 
 Given the computational demands of Earth system modeling, the ESMF is by 
 necessity complicated software running on complicated hardware.  However,
 our goal is to develop a framework that is straightforward to understand and 
-start using, reasonable to maintain, and amenable to extension.  To these 
-ends we have adopted a design approach that modularizes the framework in a 
-systematic and intuitive way.  Our architecture combines elements of 
+use, reasonable to maintain, and amenable to extension.  
+To these ends, we are adopting an achitecture modularized in a  
+systematic and intuitive way.  The ESMF combines elements of 
 object-oriented design, component-based design, and software layering, 
 complementary approaches for ordering and decomposing software that apply
 at different scales.  Object-oriented design organizes software into families 
@@ -19,6 +19,7 @@ All of these are useful conceptual tools for designing, understanding, and
 explaining the structure of ESMF.
 
 \subsection{Object-Oriented Design}
+\label{sec:oop}
 
 The ESMF is being designed using object-oriented (OO) principles.  OO design
 is based on {\it classes}, which organize data, attributes, and associated 
@@ -26,6 +27,8 @@ operations into well-defined structures.  The OO approach distinguishes between
 the abstract concept of a class and an actual implementation or instance of the 
 class, which is called an {\it object}.  The actual implementation of an 
 abstract {\it operation} is called a {\it method}.
+
+\subsubsection{What is Object-Oriented Design?}
 
 OO design is characterized by {\it encapsulation}, {\it inheritance}, and 
 {\it polymorphism}.  Encapsulation means making data 
@@ -36,10 +39,33 @@ or more base
 classes.  Polymorphism allows a single method to accept a variety of 
 different argument lists when performing conceptually similar operations.  
 Together these OO strategies help to organize and streamline codes, making 
-them more flexible, maintainable, and extensible.  The ESMF will be
-implemented in the C++ and F90 languages, both of which support basic 
-implementation of these OO concepts.
+them more flexible, maintainable, and extensible.  
 
+\subsubsection{ESMF Classes}
+
+The ESMF is being implemented in the C++ and F90 languages, both of which support 
+basic implementation of the OOP concepts outlined above (see the {\it ESMF 
+Implementation Report} and other references, e.g. ~\cite{Decyk}).  
+
+Te ESMF architecture is class-based, as described in Sections~\ref{sec:superclasses}, 
+\ref{sec:fieldclasses}, and \ref{sec:utilclasses}.  Privacy descriptors 
+implement encapsulation.  The modularity provided by classes facilitates reuse
+and extensibility across the framework.  It also makes the system easier to 
+understand by breaking up the functionality into digestible portions.
+
+We define a base class for all the objects in ESMF, as well as a base class 
+from which all components will inherit.  See Sections~\ref{sec:esmfbase} and 
+\ref{sec:superclasses}, respectively, for further details.  These base
+classes are important to the architecture, because they provide consistency
+of behavior across the entire framework.  This makes the framework easier
+to use, since a user can leverage knowledge gained by working with one
+part of the framework to understand other parts.  For example, if all
+objects use a similar method to save their state, the user can learn it 
+once and be done with it.
+
+Function and operator overloading are employed throughout ESMF.  This too
+enhances ease of use since it reduces the number of individual interfaces
+the user must remember.  
 
 \subsection{Component-Based Design}
 
@@ -108,14 +134,15 @@ niceties such as allowing the ORB to automatically generate proxies and stubs.
 
 \subsubsection{ESMF Components}
 
-The ESMF architecture is based on those aspects of component-based design that
+Component-based architecture is most relevant to ESMF at the superstructure level. 
+The ESMF is based on those aspects of component-based design that
 provide the most immediate benefits, are feasible to implement within the
-timeframe of our project, and will enable us to be compatible with projects 
+timeframe of our project, and will facilitate compatibility with efforts
 such as the CCA as those projects evolve.  
 
-For example, the ESMF architecture includes a a base class for
-all ESMF components that defines a set of common and consistent attributes
-and methods.  This enables a variety of components - with different functionality, from different sources, at both large scales and small - to be handled
+The ESMF component base class described in Section~\ref{sec:oop} defines a set 
+of common and consistent attributes
+and methods for components.  This enables a variety of components - with different functionality, from different sources, at both large scales and small - to be handled
 in a coherent way and to reuse the same control, communication and utility
 mechanisms.  It also provides a clear definition of ESMF components so that
 project such as CCA can understand and support them.  
@@ -153,6 +180,7 @@ It is more useful to look at a number of layering strategies,
 and identify which of these apply to ESMF.
 
 \subsubsection{Types of Layering}
+\label{sec:layering}
 
 We use the term {\it hardware layering} to refer to a strategy to encapsulate 
 programming constructs and tools that reflect the structure of the underlying 
@@ -161,8 +189,8 @@ vendor-specific constructs.  Middle layers may automatically
 handle standard operations, such as distributed transposes, that do not involve  
 vendor-specific calls but still reflect the computer architecture.  At the highest
 level, the user handles objects that represent the application 
-domain and not the computing environment.  POOMA is an example of a framework
-that employs hardware layering.  
+domain and not the computing environment.  POOMA and FMS are examples of frameworks
+that employ hardware layering.  
 
 Hardware layering is one form of {\it layering by generality}; general 
 tools that can apply to many application domains are relegated to bottom layers, 
@@ -191,7 +219,7 @@ in this approach specifies data decompositions and controls
 the flow of execution.  The lowest ``model'' layer consists of physics routines that
 operate on simple arrays.  The middle ``mediation''layer is responsible for 
 extracting these simple arrays from the data structures in the driver.
-While task layering places domain-specific constructs in lower layers, hardware 
+While data structure layering places domain-specific constructs in lower layers, hardware 
 layering place domain-specific constructs in the upper layers.  
 
 Different layering strategies can be alternative ways of viewing the same
@@ -215,23 +243,21 @@ that provides such complex data objects.
 The ESMF utility infrastructure and superstructure utilize hardware layering, 
 and multi-component applications running under ESMF can be viewed as 
 being task layered.  The ESMF ``sandwich'' diagram presented in 
-Section~\ref{sec:sandwich}, Figure~\ref{fig:sandwich}, is an amalgamation 
+Section~\ref{sec:intro}, Figure~\ref{fig:sandwich}, is a combination 
 of both strategies.  The bottom layer utilities encapsulate 
 machine-specific constructs and also includes general tools useful throughout
 the framework.  The next layer of data objects representing
 fields and grids reflects some hardware details but is portable and increasingly
-geared to application constructs.  We consider these two layers, the ``bottom
-slice of bread'', the ESMF infrastructure.  The ``filling'' is a set of 
-mostly data parallel model components that utilize the underlying 
-infrastructure.  The ``top slice of bread'' is the ESMF superstructure, 
-which consists of tools for assembling and coupling applications.  The 
+geared to application constructs.  The 
 superstructure allows component models to execute in either a data or task 
 parallel fashion.  It also allows the user to work with constructs that are part
 of the application rather than the computing domain.  
 
-The ESMF does not place any restriction on the computational strategy used 
-within models.  Both the array-only WRF approach and the pervasive data 
-objects of Overture, etc. are compatible with the ESMF.
+The ESMF does not place restrictions on the computational layering 
+strategy used within user-supplied component models.  
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 \section{Evolution of Earth Science Frameworks}
-\label{sec:background}
+\label{sec:archbackground}
 
 The ESMF represents a next step in the evolution of Earth Science
 frameworks.  The ideas and the experience that inform its design
@@ -11,9 +11,11 @@ Advanced Software Framework.  Each of these frameworks is a modular,
 portable, high-performance system for creating multi-component applications
 on parallel computing platforms.  Each also represents a productive
 collaboration between scientists, computational scientists and software
-engineers that has continued into ESMF.
+engineers that has continued into ESMF.  
 
-In these frameworks, object-oriented design concepts are used extensively.  
+Object-oriented design concepts are used extensively in existing frameworks. 
+(See Section~\ref{sec:oop} for definitions and further discussion related to
+object-oriented design.)
 For example, in GEMS encapsulation 
 via derived types and modules increases portability, hides details of the 
 computing platform from the user, and results in a very simple and natural
@@ -28,12 +30,19 @@ for a dual-tiered architecture, and that is designed for high performance
 on both vector supercomputers and microprocessor-based platforms.
 
 In ESMF, we intend to retain the scientist-friendly 
-aspect of these frameworks as well as the strong features 
-of their design.  At the interface, they present coupling and
+aspect of these frameworks as well as the strongest features of their design.  
+At the interface, they present coupling and
 communication in terms that scientists can easily understand, and they 
 offer a language interface, F90, that scientists are already familiar 
 with.  
 
+Many of these frameworks share features and design strategies in common, yet 
+they are as a whole not
+interoperable with each other, nor can any currently address the requirements
+of the broad Earth system community.  In ESMF, the creators of 
+these successful smaller frameworks have joined to collectively create an
+entirely new system that extends the features of their frameworks and provides 
+enhanced cross-domain interoperability and reuse.
 
 
 

@@ -1,4 +1,5 @@
 \section{Introduction}
+\label{sec:intro}
 
 In this {\it Earth System Modeling Framework (ESMF) Architecture Document} we describe 
 the main design features that will enable us to achieve interoperability, ease of 
@@ -23,22 +24,39 @@ The functional split between developing and combining components is the
 foremost feature of the ESMF architecture.  The simplest view of the ESMF 
 is that it consists of an {\it infrastructure} of utilities and data 
 structures for building model components and a {\it superstructure} for coupling 
-and running them.  This document describes the interplay between ESMF 
-infrastructure and superstructure, and how they relate to user-provided components.
+and running them.  User-provided components fit between these 
+layers like the filling in a sandwich.  Each successively higher layer builds
+on elements of the one below it.  Utilities such as communication
+primitives, logging and profiling tools are used in methods that
+manipulate field and grid data structures.  These data structures may in 
+turn be integrated into user-supplied components, or they may simply 
+help to wrap a component's native data structures in order to provide 
+a standard interface.  The superstructure provides a systematic approach to 
+sequencing and synchronizing user-supplied components.  The main layers
+in the ESMF architecture are shown in Figure~\ref{fig:sandwich}.  
 
-We provide in the remainder of this introductory section a summary of the 
-scope of the ESMF.  The scope and motivating requirements are explained in more detail in the {\it ESMF Requirements Document}.  In Section~\ref{sec:background}, {\it Evolution of Earth System Frameworks} we place the ESMF in the context of existing frameworks in our community.  Section~\ref{sec:strategies} is 
-a {\it Design Overview}.  It includes 
-a description of the basic structure of an ESMF application and a discussion of 
-the design strategies
-used in ESMF.  Sections~\ref{sec:superclasses},~\ref{sec:fieldclasses}, and
+\begin{figure}
+\label{fig:sandwich}
+\scalebox{0.7}{\includegraphics{Sandwich.eps}}
+\caption[{ESMF Architecture}]{The simplest view of the ESMF architecture
+is that is consists of an infrastructure for composing models and a 
+superstructure for assembling them into applications and running them.}
+\end{figure}
+
+The document is organized as follows.  Section~\ref{sec:shortscope} is a summary of the 
+scope and motivating requirements of the ESMF, which are explained in more detail in 
+the {\it ESMF Requirements Document}.  In Section~\ref{sec:archbackground}, 
+we examine existing frameworks within our community and how they have motivated
+and influenced ESMF design.  
+Section~\ref{sec:strategies} describes how ESMF relates to several
+major design paradigms.
+Sections~\ref{sec:superclasses},~\ref{sec:fieldclasses}, and
 \ref{sec:utilclasses} contain descriptions of the 
 major classes in the framework, their structure, their relationships to each other, 
 and the sequence of events for key interactions.  Section~\ref{sec:fwdesign}, {\it 
 Framework-Wide Design Elements}, describes in detail the conventions and behavior
-that we wish to apply across the ESMF software.  It
-includes a description of function naming conventions and a base class whose behavior all 
-framework classes will share.  Section~\ref{sec:glos} is a glossary of terms.
+that we wish to apply across the ESMF software.  Section~\ref{sec:glos} is a 
+glossary of terms.
 
 
 
