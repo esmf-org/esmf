@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.15 2003/06/06 21:05:59 jwolfe Exp $ 
+# $Id: base_variables,v 1.16 2003/06/06 21:27:46 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -63,16 +63,13 @@ CXX_SYS_LIBS            = -lC_r
 C_CXXF90LD		= ${CXX_CC}
 C_F90CXXLD		= ${CXX_FC}
 
-C_CXXF90LIBS            = -L. \
-                          -lm_r -lxlf90_r -lC_r
+C_CXXF90LIBS            = -L. -lm_r -lxlf90_r -lC_r
 
-C_F90CXXLIBS            = -L. \
-                          -lmpi_r -lxlf90_r -lC_r
+C_F90CXXLIBS            = -L. -lxlf90_r -lC_r
 
 C_CXXSO                 = mpCC_r -G
 
-C_CXXSOLIBS             = -L. \
-                          -lm_r -lxlf90_r -lC_r
+C_CXXSOLIBS             = -L. -lm_r -lxlf90_r -lC_r
 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS		= -g  -qfullpath
@@ -96,7 +93,7 @@ PARCH			= rs6000_64
 # SL_C_LINKER = $(CXXF90LD) 
 
 SL_SUFFIX   = so
-SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS)
+SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
 SL_LINKOPTS = -brtl
 SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 SL_F_LINKER = $(F90CXXLD) -bloadmap:loadmap.txt
