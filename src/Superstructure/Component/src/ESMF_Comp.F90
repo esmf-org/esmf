@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.118 2004/12/03 20:47:50 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.119 2004/12/15 05:27:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,6 +155,7 @@
          type(ESMF_VMPlan)  :: vmplan             ! reference to VMPlan
          type(ESMF_Pointer) :: vm_info            ! holding pointer to info
          type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
+         logical            :: vm_released        ! flag whether vm is running
       end type
 
 !------------------------------------------------------------------------------
@@ -235,7 +236,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.118 2004/12/03 20:47:50 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.119 2004/12/15 05:27:58 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -494,6 +495,7 @@ end function
         ! Initialize the remaining vm members in compp
         compp%vm_info = ESMF_NULL_POINTER
         compp%vm_cargo = ESMF_NULL_POINTER
+        compp%vm_released = .false.
                                   
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
@@ -725,10 +727,13 @@ end function
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETINIT, phase, &
           status)
           
+        compp%vm_released = .true.
+          
         if (blocking) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
+          compp%vm_released = .false.
         endif
 
 #if 0
@@ -1092,10 +1097,14 @@ end function
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETFINAL, phase, &
           status)
+          
+        compp%vm_released = .true.
+         
         if (blocking == ESMF_BLOCKING) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
+          compp%vm_released = .false.
         endif
 #if 0
         ! old pre-VM interface
@@ -1253,10 +1262,14 @@ end function
         
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETRUN, phase, status)
+          
+        compp%vm_released = .true.          
+                                            
         if (blocking == ESMF_BLOCKING) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
+          compp%vm_released = .false.
         endif
 #if 0
         ! old pre-VM name
@@ -1964,13 +1977,23 @@ end function
                                   ESMF_CONTEXT, rc)) return
     endif
 
-    ! call into C++ 
-    call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-                         compp%vm_cargo, callrc, status)
-    ! TODO: what is the relationship between callrc and status and rc
-    if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+
+    !print *, 'compp%vm_released: ', compp%vm_released
+
+    if (compp%vm_released) then
+      compp%vm_released = .false.
+
+      ! call into C++ 
+      call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
+                           compp%vm_cargo, callrc, status)
+
+      ! TODO: what is the relationship between callrc and status and rc
+      if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rc)) return
+    else
+      callrc = ESMF_SUCCESS
+    endif
 
     ! Set return values
     if (rcpresent) rc = callrc
