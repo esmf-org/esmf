@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.5 2004/05/05 13:11:27 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.6 2004/06/07 09:07:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Xform.F90"
 !
 !     ESMF Xform module
       module ESMF_XformMod
@@ -35,6 +36,7 @@
 !
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_IOSpecMod
       !use ESMF_CompMod
       implicit none
@@ -75,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.5 2004/05/05 13:11:27 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.6 2004/06/07 09:07:14 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -97,6 +99,9 @@
 !
 ! This section includes the Transform Init method
 !
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformInit"
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_XformInit -- Fill in an Xform's data
@@ -154,6 +159,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformSet"
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_XformSet - Set information in a Transform
@@ -183,6 +190,9 @@
 ! 
 ! Query for information from the xform.
 !
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformGet"
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_XformGet - Get information from a Transform
@@ -217,6 +227,9 @@
 ! This section is I/O for Xforms
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformWriteRestart"
+!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_XformWriteRestart - Save Transform state
 !
@@ -245,6 +258,9 @@
         end subroutine ESMF_XformWriteRestart
 
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformReadRestart"
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_XformReadRestart - ReadRestart Transform state
@@ -289,6 +305,9 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformPrint"
+!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_XformPrint - Print information about a Transform object
 !
@@ -296,7 +315,7 @@
       subroutine ESMF_XformPrint(xform, options, rc)
 !
 !
-! !ARGUMENTS:
+!ARGUMENTS:
       type(ESMF_Xform) :: xform
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
