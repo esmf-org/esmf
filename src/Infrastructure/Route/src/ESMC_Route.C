@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.40 2003/05/02 16:19:34 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.41 2003/07/09 17:46:40 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.40 2003/05/02 16:19:34 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.41 2003/07/09 17:46:40 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -421,10 +421,10 @@ static int maxroutes = 10;
     ESMC_XPacket *sendxp, *recvxp;
     int srank, rrank, mrank;
     int srcbytes, rcvbytes;
-    int sleft, rleft;
-    int sright, rright;
-    int sstrides[ESMF_MAXDIM], rstrides[ESMF_MAXDIM];
-    int snums[ESMF_MAXDIM], rnums[ESMF_MAXDIM];
+    int soffset, roffset;
+    int scontig_length, rcontig_length;
+    int sstride[ESMF_MAXDIM], rstride[ESMF_MAXDIM];
+    int srep_count[ESMF_MAXDIM], rrep_count[ESMF_MAXDIM];
     void *srcmem, *rcvmem;
     int srccount, rcvcount;
 
@@ -447,16 +447,16 @@ static int maxroutes = 10;
         rc = sendRT->ESMC_RTableGetEntry(theirdeid, &xscount, &sendxp);
         if (xscount > 1) printf("WARNING! cannot handle multiple xps yet\n");
         if (xscount > 0) {
-            rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, sstrides, snums);
+            rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length, sstride, srep_count);
             //printf("RouteRun: sendxp\n");
             //sendxp->ESMC_XPacketPrint();
         } else {
             sendxp = NULL;
             srank = 0;
-            sleft=0; sright=0;
+            soffset=0; scontig_length=0;
             for(j=0; j<ESMF_MAXDIM; j++) {
-                snums[j]=0;
-                sstrides[j]=0;
+                srep_count[j]=0;
+                sstride[j]=0;
             }
             //printf("nothing to send\n");
         }
@@ -464,16 +464,16 @@ static int maxroutes = 10;
         rc = recvRT->ESMC_RTableGetEntry(theirdeid, &xrcount, &recvxp);
         if (xrcount > 1) printf("WARNING! cannot handle multiple xps yet\n");
         if (xrcount > 0) {
-            rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, rstrides, rnums);
+            rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length, rstride, rrep_count);
             //printf("RouteRun: recvxp\n");
             //recvxp->ESMC_XPacketPrint();
         } else {
             recvxp = NULL;
             rrank = 0;
-            rleft=0; rright=0;
+            roffset=0; rcontig_length=0;
             for(j=0; j<ESMF_MAXDIM; j++) {
-                rnums[j]=0;
-                rstrides[j]=0;
+                rrep_count[j]=0;
+                rstride[j]=0;
             }
             //printf("nothing to recv\n");
         }
@@ -490,10 +490,10 @@ static int maxroutes = 10;
         //printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
         //printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
         //                     (long int)srcaddr, (long int)dstaddr);
-        for (j=0, srcbytes = sleft, rcvbytes = rleft; j<mrank-1; j++) {
-            //printf("j=%d, snums[j]=%d, rnums[j]=%d\n", j, snums[j], rnums[j]);
-            for (l=0; l<snums[j] || l<rnums[j]; l++, 
-                            srcbytes += sstrides[j], rcvbytes += rstrides[j]) {
+        for (j=0, srcbytes = soffset, rcvbytes = roffset; j<mrank-1; j++) {
+            //printf("j=%d, srep_count[j]=%d, rrep_count[j]=%d\n", j, srep_count[j], rrep_count[j]);
+            for (l=0; l<srep_count[j] || l<rrep_count[j]; l++, 
+                            srcbytes += sstride[j], rcvbytes += rstride[j]) {
          
                  // TODO!!!  we need to standardize on either byte counts
                  // and void * from here down to the MPI level, or we need
@@ -503,8 +503,10 @@ static int maxroutes = 10;
          
                  srcmem = (void *)((char *)srcaddr+(srcbytes*sizeof(int))); 
                  rcvmem = (void *)((char *)dstaddr+(rcvbytes*sizeof(int))); 
-                 srccount = sendxp ? sright-sleft+1 : 0;
-                 rcvcount = recvxp ? rright-rleft+1 : 0;
+           // jw   srccount = sendxp ? scontig_length-soffset+1 : 0;
+           // jw   rcvcount = recvxp ? rcontig_length-roffset+1 : 0;
+                 srccount = sendxp ? scontig_length : 0;
+                 rcvcount = recvxp ? rcontig_length : 0;
 
                  // Debug:
                  if ((srccount == 0) && (rcvcount == 0)) 
@@ -517,10 +519,10 @@ static int maxroutes = 10;
 
                  //printf(" (l=%d, srcbytes=%d, rcvbytes=%d, ", 
                  //                l, srcbytes, rcvbytes);
-                 //printf("sleft=%d, sright=%d, rleft=%d, rright=%d)\n", 
-                 //                  sleft, sright, rleft, rright);
-                 //printf(" (j=%d, sstrides[j]=%d, rstrides[j]=%d)\n", 
-                 //                   j, sstrides[j], rstrides[j]);
+                 //printf("soffset=%d, scontig_length=%d, roffset=%d, rcontig_length=%d)\n", 
+                 //                  soffset, scontig_length, roffset, rcontig_length);
+                 //printf(" (j=%d, sstride[j]=%d, rstride[j]=%d)\n", 
+                 //                   j, sstride[j], rstride[j]);
 
              
                 //  theirdeid  is the other processor de number
