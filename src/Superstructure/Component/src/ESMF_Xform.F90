@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.8 2003/06/27 19:59:13 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.9 2003/07/23 22:27:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.8 2003/06/27 19:59:13 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.9 2003/07/23 22:27:58 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -189,7 +189,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Xform), intent(in) :: xform
-      character(len=*), intent(out), optional :: name
+      character(len=*), intent(out), optional :: name 
       integer, intent(out), optional :: subr
       integer, intent(out), optional :: rc             
 
@@ -202,9 +202,8 @@
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
+        name = xform%name
+
         end subroutine ESMF_XformGet
 
 !------------------------------------------------------------------------------
