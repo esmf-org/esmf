@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.21 2005/01/13 22:06:30 jwolfe Exp $
+! $Id: ESMF_Init.F90,v 1.22 2005/01/14 18:06:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -236,12 +236,16 @@
         endif
       endif
 
-      if (present(defaultLogFileName) .AND. &
-         (len_trim(defaultLogFileName).ne.0)) then
-          call ESMF_LogInitialize(defaultLogFileName, logType=defaultLogTypeUse, &
+      if (present(defaultLogFileName)) then
+         if (len_trim(defaultLogFileName).ne.0) then
+           call ESMF_LogInitialize(defaultLogFileName, logType=defaultLogTypeUse, &
                                   rc=status)
+         else
+           call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
+                                     rc=status)
+         endif
       else
-          call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
+         call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
                                    rc=status)
       endif
       if (status .ne. ESMF_SUCCESS) then
@@ -265,15 +269,16 @@
       endif
 
       ! Open config file if specified
-      if (present(defaultLogFileName) .AND. &
-         (len_trim(defaultConfigFileName).ne.0)) then
-          ! TODO: write this and remove the fixed status= line
-          !call ESMF_ConfigInitialize(defaultConfigFileName, status)
-          status = ESMF_SUCCESS
-          if (status .ne. ESMF_SUCCESS) then
+      if (present(defaultLogFileName)) then
+         if (len_trim(defaultConfigFileName).ne.0) then
+            ! TODO: write this and remove the fixed status= line
+            !call ESMF_ConfigInitialize(defaultConfigFileName, status)
+            status = ESMF_SUCCESS
+            if (status .ne. ESMF_SUCCESS) then
               print *, "Error opening the default config file"
               return
-          endif
+            endif
+         endif
       endif
 
       ! Initialize the machine model, the comms, etc.  Old code, superceeded
