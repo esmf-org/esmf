@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.54 2003/12/23 00:33:52 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.55 2004/01/06 00:08:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.54 2003/12/23 00:33:52 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.55 2004/01/06 00:08:03 eschwab Exp $'
 
 !==============================================================================
 !
@@ -131,115 +131,343 @@
 !
 !==============================================================================
 !BOP
+! !IROUTINE:  ESMF_TimeOverloadedOperator(+) - Increment a Time by a TimeInterval
+!
 ! !INTERFACE:
       interface operator(+)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeInc
-
+!     time2 = time1 + timeInterval      
+!
+! !RETURN VALUE:   
+!     type(ESMF_Time) :: time2
+!
+! !ARGUMENTS:
+!     type(ESMF_Time),         intent(in) :: time1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+! 
 ! !DESCRIPTION:
-!     This interface overloads the + operator for the {\tt ESMF\_Time} class.
+!     Overloads the (+) operator for the {\tt ESMF\_Time} class to increment
+!     an {\tt ESMF\_Time} with an {\tt ESMF\_TimeInterval} and returns the
+!     result as an {\tt ESMF\_Time}.
+!
+!     The arguments are:
+!     \begin{description} 
+!     \item[time1] 
+!          The {\tt ESMF\_Time} to increment.
+!     \item[timeInterval] 
+!          The {\tt ESMF\_TimeInterval} to add to the given {\tt ESMF\_Time}.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeInc    ! internal implementation of overload
+!
+! !REQUIREMENTS:
+!     TMG2.4.4, TMG2.4.5, TMG5.1, TMG7.2
+! 
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeOverloadedOperator(-) - Decrement a Time by a TimeInterval
+!
 ! !INTERFACE:
       interface operator(-)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeDec
-      module procedure ESMF_TimeDiff
-
+!     time2 = time1 - timeInterval      
+! 
+! !RETURN VALUE:
+!     type(ESMF_Time) :: time2
+! 
+! !ARGUMENTS:
+!     type(ESMF_Time),         intent(in) :: time1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!
 ! !DESCRIPTION:
-!     This interface overloads the - operator for the {\tt ESMF\_Time} class.
+!     Overloads the (-) operator for the {\tt ESMF\_Time} class to decrement
+!     an {\tt ESMF\_Time} with an {\tt ESMF\_TimeInterval}, and returns the
+!     result as an {\tt ESMF\_Time}.
+! 
+!     The arguments are:      
+!     \begin{description}
+!     \item[time1]
+!          The {\tt ESMF\_Time} to decrement.
+!     \item[timeInterval]
+!          The {\tt ESMF\_TimeInterval} to subtract from the given
+!          {\tt ESMF\_Time}.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeDec    ! internal implementation of overload
+!
+! !REQUIREMENTS:
+!     TMG2.4.4, TMG2.4.5, TMG5.1, TMG7.2
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeOverloadedOperator(-) - Return the difference between two Times
+!
+! !INTERFACE:
+!     interface operator(-)
+!     time3 = time1 - time2      
+!
+! !RETURN VALUE:
+!     type(ESMF_Time) :: time3
+! 
+! !ARGUMENTS:
+!     type(ESMF_Time),         intent(in) :: time1
+!     type(ESMF_Time),         intent(in) :: time2
+!
+! !DESCRIPTION:
+!     Overloads the (-) operator for the {\tt ESMF\_Time} class to return the
+!     difference between {\tt time1} and {\tt time2} as an
+!     {\tt ESMF\_TimeInterval}.  It is assumed that {\tt time1} is later than
+!     {\tt time2}; if not, the resulting {\tt ESMF\_TimeInterval} will have a
+!     negative value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          The first {\tt ESMF\_Time} in comparison.
+!     \item[time2]
+!          The second {\tt ESMF\_Time} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeDiff   ! internal implementation of overload
+!
+! !REQUIREMENTS:
+!     TMG2.4.6, TMG5.2, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeOverloadedOperator(==) - Test if Time 1 is equal to Time 2
+!
 ! !INTERFACE:
-      interface operator(.EQ.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeEQ
-
+      interface operator(==)
+!     if (time1 == time2) then ... endif
+!                  OR
+!     time3 = (time1 == time2)
+!
+! !RETURN VALUE:
+!     logical :: time3
+!
+! !ARGUMENTS:
+!     type(ESMF_Time), intent(in) :: time1
+!     type(ESMF_Time), intent(in) :: time2
+!
 ! !DESCRIPTION:
-!     This interface overloads the .EQ. operator for the {\tt ESMF\_Time} class.
+!     Overloads the (==) operator for the {\tt ESMF\_Time} class to return true
+!     if {\tt time1} and {\tt time2} are equal, and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First {\tt ESMF\_Time} in comparison.
+!     \item[time2]
+!          Second {\tt ESMF\_Time} in comparison.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeEQ   ! internal implementation of overload
+!
+! !REQUIREMENTS:
+!     TMG2.4.3, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !INTERFACE:
-      interface operator(.NE.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeNE
-
-! !DESCRIPTION:
-!     This interface overloads the .NE. operator for the {\tt ESMF\_Time} class.
+! !IROUTINE:  ESMF_TimeOverloadedOperator(/=) - Test if Time 1 is not equal to Time 2
 !
+! !INTERFACE:
+      interface operator(/=)
+!     if (time1 /= time2) then ... endif
+!                  OR
+!     time3 = (time1 /= time2)
+!
+! !RETURN VALUE:
+!     logical :: time3
+!
+! !ARGUMENTS:
+!     type(ESMF_Time), intent(in) :: time1
+!     type(ESMF_Time), intent(in) :: time2
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Time} class to return true
+!     if {\tt time1} and {\tt time2} are not equal, and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First {\tt ESMF\_Time} in comparison.
+!     \item[time2]
+!          Second {\tt ESMF\_Time} in comparison.
+!     \end{description}
+! 
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeNE   ! internal implementation of overload
+!
+! !REQUIREMENTS:
+!     TMG2.4.3, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeOverloadedOperator(<) - Test if Time 1 is less than Time 2
+!
 ! !INTERFACE:
-      interface operator(.LT.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeLT
-
+      interface operator(<)
+!     if (time1 < time2) then ... endif
+!                  OR
+!     time3 = (time1 < time2)
+!
+! !RETURN VALUE:
+!     logical :: time3
+!
+! !ARGUMENTS:
+!     type(ESMF_Time), intent(in) :: time1
+!     type(ESMF_Time), intent(in) :: time2
+!
 ! !DESCRIPTION:
-!     This interface overloads the .LT. operator for the {\tt ESMF\_Time} class.
+!     Overloads the (<) operator for the {\tt ESMF\_Time} class to return true
+!     if {\tt time1} is less than {\tt time2}, and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First {\tt ESMF\_Time} in comparison.
+!     \item[time2]
+!          Second {\tt ESMF\_Time} in comparison.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeLT   ! internal implementation of overload
+!
+! !REQUIREMENTS:
+!     TMG2.4.3, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeOverloadedOperator(<=) - Test if Time 1 is less than or equal to Time 2
+!
 ! !INTERFACE:
-      interface operator(.LE.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeLE
-
+      interface operator(<=)
+!     if (time1 <= time2) then ... endif
+!                  OR
+!     time3 = (time1 <= time2)
+!
+! !RETURN VALUE:
+!     logical :: time3
+!
+! !ARGUMENTS:
+!     type(ESMF_Time), intent(in) :: time1
+!     type(ESMF_Time), intent(in) :: time2
+!
 ! !DESCRIPTION:
-!     This interface overloads the .LE. operator for the {\tt ESMF\_Time} class.
+!     Overloads the (<=) operator for the {\tt ESMF\_Time} class to return true
+!     if {\tt time1} is less than or equal to {\tt time2}, and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First {\tt ESMF\_Time} in comparison.
+!     \item[time2]
+!          Second {\tt ESMF\_Time} in comparison.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeLE   ! internal implementation of overload
+!
+! !REQUIREMENTS:
+!     TMG2.4.3, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeOverloadedOperator(>) - Test if Time 1 is greater than Time 2
+!
 ! !INTERFACE:
-      interface operator(.GT.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeGT
-
+      interface operator(>)
+!     if (time1 > time2) then ... endif
+!                  OR
+!     time3 = (time1 > time2)
+!
+! !RETURN VALUE:
+!     logical :: time3
+!
+! !ARGUMENTS:
+!     type(ESMF_Time), intent(in) :: time1
+!     type(ESMF_Time), intent(in) :: time2
+!
 ! !DESCRIPTION:
-!     This interface overloads the .GT. operator for the {\tt ESMF\_Time} class.
+!     Overloads the (>) operator for the {\tt ESMF\_Time} class to return true
+!     if {\tt time1} is greater than {\tt time2}, and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First {\tt ESMF\_Time} in comparison.
+!     \item[time2]
+!          Second {\tt ESMF\_Time} in comparison.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeGT   ! internal implementation of overload
+!
+! !REQUIREMENTS:
+!     TMG2.4.3, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeOverloadedOperator(>=) - Test if Time 1 is greater than or equal to Time 2
+!
 ! !INTERFACE:
-      interface operator(.GE.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeGE
-
+      interface operator(>=)
+!     if (time1 >= time2) then ... endif
+!                  OR
+!     time3 = (time1 >= time2)
+!
+! !RETURN VALUE:
+!     logical :: time3
+!
+! !ARGUMENTS:
+!     type(ESMF_Time), intent(in) :: time1
+!     type(ESMF_Time), intent(in) :: time2
+!
 ! !DESCRIPTION:
-!     This interface overloads the .GE. operator for the {\tt ESMF\_Time} class.
+!     Overloads the (>=) operator for the {\tt ESMF\_Time} class to return true
+!     if {\tt time1} is greater than or equal to {\tt time2}, and false
+!     otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          First {\tt ESMF\_Time} in comparison.
+!     \item[time2]
+!          Second {\tt ESMF\_Time} in comparison.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeGE   ! internal implementation of overload
+!
+! !REQUIREMENTS:
+!     TMG2.4.3, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
@@ -664,7 +892,14 @@
       end subroutine ESMF_TimeSyncToRealTime
 
 !------------------------------------------------------------------------------
-!BOP
+!
+! This section includes the inherited ESMF_BaseTime class overloaded operators
+! internal, private implementation methods.
+! Note:  these functions do not have a return code, since F90 forbids more
+! than 2 arguments for arithmetic overloaded operators
+!
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_TimeInc - Increment a Time with a TimeInterval
 !
 ! !INTERFACE:
@@ -678,20 +913,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 !
 ! !DESCRIPTION:
-!     Increments a {\tt time} with a {\tt timeInterval} and
-!     returns the result as an {\tt ESMF\_Time}.
+!     This method overloads the (+) operator for the {\tt ESMF\_Time} class.
+!     See "interface operator(+)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The {\tt ESMF\_Time} to increment.
-!     \item[timeInterval]
-!          The {\tt ESMF\_TimeInterval} to add to the given {\tt ESMF\_Time}.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
+!EOPI
 
       ! copy ESMF_Time specific properties (e.g. calendar, timezone) 
       ESMF_TimeInc = time
@@ -701,7 +926,7 @@
 
       end function ESMF_TimeInc
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TimeDec - Decrement a Time with a TimeInterval
 !
 ! !INTERFACE:
@@ -715,21 +940,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 !
 ! !DESCRIPTION:
-!     Decrements an {\tt ESMF\_Time} with an {\tt ESMF\_TimeInterval},
-!     and returns the result as an {\tt ESMF\_Time}.
+!     This method overloads the (-) operator for the {\tt ESMF\_Time} class.
+!     See "interface operator(-)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The {\tt ESMF\_Time} to decrement.
-!     \item[timeInterval]
-!          The {\tt ESMF\_TimeInterval} to subtract from the given
-!          {\tt ESMF\_Time}.
-!     \end{description}
-!     
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
+!EOPI
 
       ! copy ESMF_Time specific properties (e.g. calendar, timezone) 
       ESMF_TimeDec = time
@@ -740,7 +954,7 @@
       end function ESMF_TimeDec
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeDiff - Return the difference between two Times
 !
 ! !INTERFACE:
@@ -754,23 +968,10 @@
       type(ESMF_Time), intent(in) :: time2
 
 ! !DESCRIPTION:
-!     Returns the difference between {\tt time1} and {\tt time2} as
-!     an {\tt ESMF\_TimeInterval}.  It is assumed that {\tt time1} is
-!     later than {\tt time2}; if not, the resulting {\tt ESMF\_TimeInterval} 
-!     will have a negative value.  This method is overloaded with the
-!     (-) operator.
+!     This method overloads the (-) operator for the {\tt ESMF\_Time} class.
+!     See "interface operator(-)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          The first {\tt ESMF\_Time} in comparison.
-!     \item[time2]
-!          The second {\tt ESMF\_Time} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeDiff(time1, time2, ESMF_TimeDiff)
@@ -778,7 +979,7 @@
       end function ESMF_TimeDiff
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TimeEQ - Test if Time 1 is equal to Time 2
 !
 ! !INTERFACE:
@@ -792,20 +993,10 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Returns true if {\tt time1} and {\tt time2} are equal, false
-!     otherwise.  This method is overloaded with the (==) operator.
+!     This method overloads the (==) operator for the {\tt ESMF\_Time} class.
+!     See "interface operator(==)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First {\tt ESMF\_Time} in comparison.
-!     \item[time2]
-!          Second {\tt ESMF\_Time} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! invoke C to C++ entry point for ESMF_BaseTime base class function
       call c_ESMC_BaseTimeEQ(time1, time2, ESMF_TimeEQ)
@@ -813,7 +1004,7 @@
       end function ESMF_TimeEQ
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TimeNE - Test if Time 1 is not equal to Time 2
 !
 ! !INTERFACE:
@@ -827,20 +1018,10 @@
       type(ESMF_Time), intent(in) :: time2
 
 ! !DESCRIPTION:
-!     Returns true if {\tt time1} and {\tt time2} are not equal, false
-!     otherwise.  This method is overloaded with the (!=) operator.
+!     This method overloads the (/=) operator for the {\tt ESMF\_Time} class.
+!     See "interface operator(/=)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First {\tt ESMF\_Time} in comparison.
-!     \item[time2]
-!          Second {\tt ESMF\_Time} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeNE(time1, time2, ESMF_TimeNE)
@@ -848,7 +1029,7 @@
       end function ESMF_TimeNE
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TimeLT - Test if Time 1 is less than Time 2
 !
 ! !INTERFACE:
@@ -862,20 +1043,10 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Returns true if {\tt time1} is less than {\tt time2}, false 
-!     otherwise.  This method is overloaded with the (<) operator.  
+!     This method overloads the (<) operator for the {\tt ESMF\_Time} class.
+!     See "interface operator(<)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First {\tt ESMF\_Time} in comparison.
-!     \item[time2]
-!          Second {\tt ESMF\_Time} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLT(time1, time2, ESMF_TimeLT)
@@ -883,7 +1054,7 @@
       end function ESMF_TimeLT
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TimeLE - Test if Time 1 is less than or equal to Time 2
 !
 ! !INTERFACE:
@@ -897,21 +1068,10 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Returns true if {\tt time1} is less than or equal to
-!     {\tt time2}, false otherwise.  This method is overloaded with
-!     the (<=) operator.
+!     This method overloads the (<=) operator for the {\tt ESMF\_Time} class.
+!     See "interface operator(<=)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First {\tt ESMF\_Time} in comparison.
-!     \item[time2]
-!          Second {\tt ESMF\_Time} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLE(time1, time2, ESMF_TimeLE)
@@ -919,7 +1079,7 @@
       end function ESMF_TimeLE
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TimeGT - Test if Time 1 is greater than Time 2
 !
 ! !INTERFACE:
@@ -933,20 +1093,10 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Returns true if {\tt time1} is greater than {\tt time2}, false
-!     otherwise.  This method is overloaded with the (>) operator.   
+!     This method overloads the (>) operator for the {\tt ESMF\_Time} class.
+!     See "interface operator(>)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First {\tt ESMF\_Time} in comparison.
-!     \item[time2]
-!          Second {\tt ESMF\_Time} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGT(time1, time2, ESMF_TimeGT)
@@ -954,7 +1104,7 @@
       end function ESMF_TimeGT
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TimeGE - Test if Time 1 is greater than or equal to Time 2
 !
 ! !INTERFACE:
@@ -968,21 +1118,10 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Returns true if {\tt time1} is greater than or equal to
-!     {\tt time2}, false otherwise.  This method is overloaded with
-!     the (>=) operator.
+!     This method overloads the (>=) operator for the {\tt ESMF\_Time} class.
+!     See "interface operator(>=)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          First {\tt ESMF\_Time} in comparison.
-!     \item[time2]
-!          Second {\tt ESMF\_Time} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGE(time1, time2, ESMF_TimeGE)
