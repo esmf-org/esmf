@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2003/03/06 17:45:01 flanigan Exp $
+# $Id: makefile,v 1.15 2003/03/06 21:53:50 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -252,6 +252,15 @@ system_tests: chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) BOPT=$(BOPT) ACTION=tree_system_tests tree
+
+system_tests_uni: chkopts chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_system_tests_uni tree
 
 build_system_tests: chkopts chkdir_tests
 	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
