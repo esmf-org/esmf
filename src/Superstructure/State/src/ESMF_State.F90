@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.7 2004/01/26 17:44:42 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.8 2004/01/28 00:35:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -277,7 +277,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.7 2004/01/26 17:44:42 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.8 2004/01/28 00:35:42 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -869,11 +869,8 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ! Initialize the base object.
-        call ESMF_BaseInit(stypep%base)
-
-        ! Set statename on base object
-        call ESMF_SetName(stypep%base, statename, "States", status)
+        ! Initialize the base object, set the name, etc.
+        call ESMF_BaseCreate(stypep%base, "States", statename, 0, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_StateConstructEmpty: SetName"
           return

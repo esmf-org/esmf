@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.96 2004/01/27 18:01:26 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.97 2004/01/28 00:35:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.96 2004/01/27 18:01:26 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.97 2004/01/28 00:35:14 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1206,7 +1206,8 @@
       endif     
  
       ! Construct a default name if one is not given
-      call ESMF_SetName(ftype%base, name, "Fields", status)
+      call ESMF_BaseCreate(ftype%base, "Fields", name, 0, status)
+      !call ESMF_SetName(ftype%base, name, "Fields", status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNoBuffer: SetName"
         return
@@ -1318,7 +1319,8 @@
       endif
 
       ! Construct a default name if one is not given
-      call ESMF_SetName(ftype%base, name, "Fields", status)
+      call ESMF_BaseCreate(ftype%base, "Fields", name, 0, status)
+      !call ESMF_SetName(ftype%base, name, "Fields", status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNoArray: SetName"
         return
@@ -1391,7 +1393,8 @@
       endif
 
       ! Construct a default name if one is not given
-      call ESMF_SetName(ftypep%base, name, "Fields", status)
+      call ESMF_BaseCreate(ftypep%base, "Fields", name, 0, status)
+      !call ESMF_SetName(ftypep%base, name, "Fields", status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNoGridArray: SetName"
         return
