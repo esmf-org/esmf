@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.24 2004/06/08 13:14:14 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.25 2004/11/01 23:39:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.24 2004/06/08 13:14:14 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.25 2004/11/01 23:39:13 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -421,11 +421,13 @@
     char msgbuf[ESMF_MAXSTR];
 
     sprintf(msgbuf, " myid=%d, decount=%d, commcount=%d\n", myid, decount, commcount);
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
     for (i=0; i<commcount; i++) {
         sprintf(msgbuf, " %2d: partner=%2d, needed=%1d\n", 
                          i, commpartner[i], commneeded[i]);
-        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+        //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+        printf(msgbuf);
     }
 
     return ESMF_SUCCESS;

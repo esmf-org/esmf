@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.101 2004/10/19 21:01:51 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.102 2004/11/01 23:39:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.101 2004/10/19 21:01:51 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.102 2004/11/01 23:39:13 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1736,22 +1736,28 @@ static int maxroutes = 10;
     char msgbuf[ESMF_MAXSTR];
 
     sprintf(msgbuf,"Route print:\n");
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
     sprintf(msgbuf," Routeid = %d\n", routeid);
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
 //    sprintf(msgbuf," DELayout:\n");
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+//    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 //    rc = layout->ESMC_DELayoutPrint(); // options);  // doesn't take opts yet
     sprintf(msgbuf," Send table:\n");
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
     rc = sendRT->ESMC_RTablePrint(options);
     sprintf(msgbuf," Recv table:\n");
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
     rc = recvRT->ESMC_RTablePrint(options);
     sprintf(msgbuf," Recv items: %d\n", recvitems);
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
     sprintf(msgbuf," Comm table:\n");
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
     rc = ct->ESMC_CommTablePrint(options);
 
     return rc;
