@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.6 2003/02/25 18:27:09 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.7 2003/02/26 01:17:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,6 +51,10 @@ extern "C" {
      // also note they CANNOT have prototypes in fortran because the routine 
      // types and data types are private/different for each call so there
      // is no correct prototype syntax which will work.
+
+     void FTN(esmf_compregister)(ESMC_Comp **ptr, void (func)(), int *status) {
+         //*status = (*ptr)->ESMC_CompRegister(func);
+     }
 
      void FTN(esmf_compsetroutine)(ESMC_Comp **ptr, int type, void (func)(), 
                                    int *status) {

@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.2 2003/02/25 19:56:50 nscollins Exp $
+// $Id: ESMC_FTable.h,v 1.3 2003/02/26 01:17:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,6 +80,9 @@
     void *ESMC_FTableGetFuncPtr(char *name);
     void *ESMC_FTableGetDataPtr(char *name);
 
+    int ESMC_FTableValidate(const char*) const;
+    int ESMC_FTablePrint(const char*) const;
+
  // native C++ constructors/destructors
     ESMC_FTable(void);
     ~ESMC_FTable(void);
@@ -105,7 +108,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_FTable object.
 
- ESMC_FTable *ESMC_FTableCreate(int nfunc, int ndata, int *rc);
+ //ESMC_FTable *ESMC_FTableCreate(int nfunc, int ndata, int *rc);
  int ESMC_FTableDestroy(ESMC_FTable *comp);
 
  #endif  // ESMC_FTable_H

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.24 2003/02/25 21:50:20 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.25 2003/02/26 01:17:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,14 +129,15 @@
       !public ESMF_CompGetState  ! (component, "import"/"export"/"list", state)
       !public ESMF_CompSetState  ! (component, "import"/"export"/"list", state)
       !public ESMF_CompQueryState 
-      !public ESMF_Comp{Get/Set} ! Clock, Layout, CompType, ModelType, Filepath
+      public ESMF_CompGet      ! Clock, Layout, CompType, ModelType, Filepath
+      public ESMF_CompSet      ! Clock, Layout, CompType, ModelType, Filepath
  
       public ESMF_CompValidate
       public ESMF_CompPrint
  
       ! These do argument processing, layout checking, and then
       !  call the user-provided routines.
-      public ESMF_CompInit      
+      public ESMF_CompInitialize      
       public ESMF_CompRun      
       public ESMF_CompFinalize 
 
@@ -150,7 +151,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.24 2003/02/25 21:50:20 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.25 2003/02/26 01:17:14 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -552,10 +553,10 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CompInit -- Call the Component's init routine
+! !IROUTINE: ESMF_CompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompInit(component, rc)
+      subroutine ESMF_CompInitialize(component, rc)
 !
 !
 ! !ARGUMENTS:
@@ -622,7 +623,7 @@ end interface
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_CompInit
+        end subroutine ESMF_CompInitialize
 
 
 !------------------------------------------------------------------------------
@@ -630,13 +631,11 @@ end interface
 ! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompRun(component, clock, timesteps, rc)
+      subroutine ESMF_CompRun(component, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_Comp) :: component 
-      type (ESMF_Clock), optional :: clock
-      integer, intent(in), optional :: timesteps
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -649,11 +648,11 @@ end interface
 !   \item[component]
 !    Component for which to call Run routine.
 !
-!   \item[clock]
-!    Clock time - used for stop time
+!   %\item[clock]
+!   % Clock time - used for stop time
 !
-!   \item[timesteps]
-!    How long the Run interval is.
+!   %\item[timesteps]
+!   % How long the Run interval is.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -823,17 +822,21 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 ! 
-! Query for information from the component.
+! Query/Set information from/in the component.
 !
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(component, rc)
+      subroutine ESMF_CompGet(comp, import, export, layout, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Comp) :: component
+      type(ESMF_Comp), intent(in) :: comp
+      type(ESMF_State), intent(out), optional :: import
+      type(ESMF_State), intent(out), optional :: export
+      type(ESMF_Layout), intent(out), optional :: layout
+      type(ESMF_Clock), intent(out), optional :: clock
       integer, intent(out), optional :: rc             
 
 !
@@ -846,10 +849,99 @@ end interface
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
+        ! local vars
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        if (present(import)) then
+          import = comp%compp%importstate
+        endif
+ 
+        if (present(export)) then
+          export = comp%compp%exportstate
+        endif
+ 
+        if (present(layout)) then
+          layout = comp%compp%layout
+        endif
+
+        if (present(clock)) then
+          clock = comp%compp%clock
+        endif
+
+        ! TODO: add rest of comp contents here
+
+        ! Set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_CompGet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CompSet -- Set various information in a Component
+!
+! !INTERFACE:
+      subroutine ESMF_CompSet(comp, import, export, layout, clock, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Comp), intent(inout) :: comp
+      type(ESMF_State), intent(in), optional :: import
+      type(ESMF_State), intent(in), optional :: export
+      type(ESMF_Layout), intent(in), optional :: layout
+      type(ESMF_Clock), intent(in), optional :: clock
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Reset information in a component.  For cases where the caller
+!      only wants a single value, specify the argument by name.
+!      All the arguments after the component input are optional 
+!      to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+        ! local vars
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        if (present(import)) then
+          comp%compp%importstate = import
+        endif
+ 
+        if (present(export)) then
+          comp%compp%exportstate = export
+        endif
+ 
+        if (present(layout)) then
+          comp%compp%layout = layout
+        endif
+
+        if (present(clock)) then
+          comp%compp%clock = clock
+        endif
+
+
+        ! Set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_CompSet
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

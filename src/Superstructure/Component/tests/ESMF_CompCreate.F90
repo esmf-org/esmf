@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreate.F90,v 1.1 2003/01/29 00:07:58 nscollins Exp $
+! $Id: ESMF_CompCreate.F90,v 1.2 2003/02/26 01:17:14 nscollins Exp $
 !
 ! Test code which creates a new Component.
 
@@ -28,7 +28,7 @@
 !   ! Local variables
     integer :: x, y, rc
     integer :: timestep
-    integer, dimension(2) :: delist
+    integer, dimension(2) :: pelist
     character(ESMF_MAXSTR) :: cname
     type(ESMF_Layout) :: layout
     type(ESMF_Comp) :: comp1, comp2, comp3, comp4
@@ -40,12 +40,12 @@
  
     print *, "Component Test 1:"
 
-    delist = (/ 0, 1 /)
-    layout = ESMF_LayoutCreate(2, 1, delist, ESMF_XFAST, rc)
+    pelist = (/ 0, 1 /)
+    layout = ESMF_LayoutCreate(2, 1, pelist, ESMF_XFAST, rc)
 
     cname = "Atmosphere"
-    comp1 = ESMF_CompCreate(cname, layout, ESMF_GRIDCOMP, &
-                                       ESMF_ATM, "/usr/local", rc=rc)  
+    comp1 = ESMF_CompCreate(cname, layout=layout, ctype=ESMF_GRIDCOMP, &
+                              mtype=ESMF_ATM, filepath="/usr/local", rc=rc)  
 
     print *, "Comp Create returned, name = ", trim(cname)
 
@@ -57,7 +57,7 @@
     !print *, "Comp Print returned"
 
     timestep = 1
-    call ESMF_CompRun(comp1, timestep, rc)
+    call ESMF_CompRun(comp1, timesteps=timestep, rc=rc)
     print *, "Comp Run returned"
 
 
