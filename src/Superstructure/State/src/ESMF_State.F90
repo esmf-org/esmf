@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.20 2004/03/02 05:28:16 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.21 2004/03/02 06:01:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.20 2004/03/02 05:28:16 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.21 2004/03/02 06:01:29 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -2996,7 +2996,7 @@ end function
 ! 
 !     \begin{description}
 !     \item [state]
-!           An {\tt ESMF_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -3066,7 +3066,7 @@ end function
 ! 
 !     \begin{description}
 !     \item [state]
-!           An {\tt ESMF_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -3127,7 +3127,7 @@ end function
 ! 
 !     \begin{description}
 !     \item [state]
-!           An {\tt ESMF_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
@@ -3196,7 +3196,7 @@ end function
 !
 !     \begin{description}
 !     \item [state]
-!           An {\tt ESMF_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to set.
