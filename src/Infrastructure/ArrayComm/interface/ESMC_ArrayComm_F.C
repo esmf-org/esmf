@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm_F.C,v 1.5 2004/04/13 22:54:36 jwolfe Exp $
+// $Id: ESMC_ArrayComm_F.C,v 1.6 2004/04/20 16:14:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,6 +58,7 @@ extern "C" {
                                   periodic);
      }
 
+#if 0
      void FTN(c_esmc_arrayallgather)(ESMC_Array **ptr, ESMC_newDELayout **delayout,
                                      int *decompids,  int *size_decomp,
                                      int *localAxisLengths, 
@@ -68,6 +69,7 @@ extern "C" {
                                                 global_dimlengths, local_maxlengths, 
                                                 Array_out);
      }
+#endif
 
      void FTN(c_esmc_arraygather)(ESMC_Array **ptr, ESMC_newDELayout **delayout,
                                   int *decompids,  int *size_decomp, int *deid,
