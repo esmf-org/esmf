@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.18 2004/06/22 14:17:44 nscollins Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.19 2004/06/22 16:32:53 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -33,8 +33,6 @@
 \setlength{\textheight}{8.5truein}
 \setlength{\oddsidemargin}{0in}
 \setlength{\unitlength}{1truecm}
-\setlength{\parskip}{1.5ex}
-\setlength{\parindent}{0em}
 
 \begin{document}
 
