@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.2 2003/05/07 20:05:36 jwolfe Exp $
+! $Id: CoupledFlowApp.F90,v 1.3 2003/05/07 20:26:25 jwolfe Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -264,7 +264,10 @@
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-10    print *, "Coupled Flow Application Demo complete!"
+      print *, "**********************************************************"
+      print *, "CONGRATULATIONS!  Your ESMF Coupled Flow Application Demo ", &
+               "successfully completed!"
+      print *, "**********************************************************"
 
       end program ESMF_ApplicationWrapper
     
