@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.2 2004/04/08 04:25:19 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.3 2004/04/08 16:19:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.2 2004/04/08 04:25:19 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.3 2004/04/08 16:19:51 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,6 +54,7 @@
       ! instantiate a clock 
       type(ESMF_Clock) :: clock, clock1, clock_gregorian, clock_julian, &
                           clock_no_leap, clock_360day
+      type(ESMF_Alarm) :: alarm1, alarm2, alarm3
 
       ! Random number
       real :: ranNum
@@ -116,7 +117,7 @@
 
       !NEX_UTest
       ! Test Setting the Start Time
-      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Start Time Initialization Test"
       call ESMF_TimeSet(startTime, yy=2003, mm=3, dd=13, &
                              	   h=18, m=45, s=27, &
@@ -127,7 +128,7 @@
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
-      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Stop Time Initialization Test"
       call ESMF_TimeSet(stopTime, yy=2003, mm=3, dd=24, &
                                   calendar=gregorianCalendar, rc=rc)
@@ -137,14 +138,21 @@
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
-      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Clock Initialization Test"
-      clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
+      clock1 = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
                                stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Create Alarm Test"
+      alarm1 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
 
   
