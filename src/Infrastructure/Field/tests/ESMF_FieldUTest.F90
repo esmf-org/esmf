@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.43 2004/03/18 18:40:17 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.44 2004/03/18 22:18:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.43 2004/03/18 18:40:17 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.44 2004/03/18 22:18:57 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -422,7 +422,7 @@
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
-      call ESMF_FieldGetArrayPointer(f3, f90ptr2, rc=rc)
+      call ESMF_FieldGetDataPointer(f3, f90ptr2, rc=rc)
       print *, "data = ", f90ptr2(1,1)
       write(failMsg, *) ""
       write(name, *) "Getting an F90 pointer directly back from a Field"
