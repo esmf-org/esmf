@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.36 2003/09/11 00:03:47 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.37 2003/09/12 17:14:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.36 2003/09/11 00:03:47 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.37 2003/09/12 17:14:39 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1385,9 +1385,9 @@
 !          Time interval to print out.
 !     \item[{[options]}]
 !          Print options.  If none specified, prints all TimeInterval
-!          property values.
+!          property values. \\
 !          "string" - prints TimeInterval's value in ISO 8601 format
-!                     PyYmMdDThHmMsS.  See ~\cite{ISO}.
+!                     PyYmMdDThHmMsS.  See ~\cite{ISO}. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

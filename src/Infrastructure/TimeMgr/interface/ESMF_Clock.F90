@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.30 2003/09/11 00:02:48 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.31 2003/09/12 17:14:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.30 2003/09/11 00:02:48 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.31 2003/09/12 17:14:39 eschwab Exp $'
 
 !==============================================================================
 
@@ -674,17 +674,17 @@
 !     \item[clock]
 !          {\tt ESMF\_Clock} to print out.
 !     \item[{[options]}]
-!          Print options.  If none specified, prints all clock property values.
-!          "timestep"     - print the clock's time step.
-!          "starttime"    - print the clock's start time.
-!          "stoptime"     - print the clock's stop time.
-!          "reftime"      - print the clock's reference time.
-!          "currtime"     - print the current clock time.
-!          "prevtime"     - print the previous clock time.
+!          Print options. If none specified, prints all clock property values.\\
+!          "timestep"     - print the clock's time step. \\
+!          "starttime"    - print the clock's start time. \\
+!          "stoptime"     - print the clock's stop time. \\
+!          "reftime"      - print the clock's reference time. \\
+!          "currtime"     - print the current clock time. \\
+!          "prevtime"     - print the previous clock time. \\
 !          "advancecount" - print the number of times the clock has been
-!                           advanced.
-!          "numalarms"    - print the number of alarms in the clock's list.
-!          "alarmlist"    - print the clock's alarm list.
+!                           advanced. \\
+!          "numalarms"    - print the number of alarms in the clock's list. \\
+!          "alarmlist"    - print the clock's alarm list. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
