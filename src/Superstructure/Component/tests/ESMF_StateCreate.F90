@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.2 2003/02/10 16:50:11 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.3 2003/02/11 18:24:31 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -45,13 +45,13 @@
     print *, "State Test 1: Empty State"
 
     cname = "Atmosphere"
-    state1 = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc)  
+    state1 = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(cname)
 
     call ESMF_StatePrint(state1, rc=rc)
     print *, "State Print returned", rc
 
-    call ESMF_StateDestroy(state1, rc)
+    call ESMF_StateDestroy(state1, rc=rc)
     print *, "State Destroy returned", rc
 
     print *, "State Test 1 finished"
@@ -65,22 +65,22 @@
     print *, "State Test 2: Export State"
 
     cname = "Ocean"
-    state2 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc)  
+    state2 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(cname)
 
     bundle1 = ESMF_BundleCreate(rc=rc)
     print *, "Bundle Create returned", rc
 
-    call ESMF_StateAddData(state2, bundle1, rc)
+    call ESMF_StateAddData(state2, bundle1, rc=rc)
     print *, "StateAddData returned", rc
     
     call ESMF_StatePrint(state2, rc=rc)
     print *, "State Print returned", rc
 
-    call ESMF_StateDestroy(state2, rc)
+    call ESMF_StateDestroy(state2, rc=rc)
     print *, "State Destroy returned", rc
 
-    call ESMF_BundleDestroy(bundle1, rc)
+    call ESMF_BundleDestroy(bundle1, rc=rc)
     print *, "Bundle Destroy returned", rc
 
     print *, "State Test 2 finished"
@@ -94,11 +94,11 @@
     print *, "State Test 3: Export State with Placeholder"
 
     cname = "Ocean"
-    state3 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc)  
+    state3 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
     print *, "State Create returned, name = ", trim(cname)
 
     sname = "Downward wind"
-    call ESMF_StateAddData(state3, sname, rc)
+    call ESMF_StateAddData(state3, sname, rc=rc)
     print *, "StateAddData (name only) returned", rc
     
     call ESMF_StatePrint(state3, rc=rc)
@@ -119,13 +119,13 @@
     ! inherit state3 from test above
 
     sname = "Downward wind"
-    call ESMF_StateSetNeeded(state3, sname, ESMF_STATEDATAISNEEDED, rc)
+    call ESMF_StateSetNeeded(state3, sname, ESMF_STATEDATAISNEEDED, rc=rc)
     print *, "StateSetNeeded returned", rc
     
     call ESMF_StatePrint(state3, rc=rc)
     print *, "State Print returned", rc
 
-    if (ESMF_StateIsNeeded(state3, sname, rc)) then
+    if (ESMF_StateIsNeeded(state3, sname, rc=rc)) then
       print *, "Data marked as needed", trim(sname)
 
       bname = sname
@@ -136,16 +136,16 @@
       field1 = ESMF_FieldCreateNoData(fname, rc=rc)
       print *, "Field Create returned", rc, "name =", trim(fname)
 
-      call ESMF_BundleAddFields(bundle2, field1, rc) 
+      call ESMF_BundleAddFields(bundle2, field1, rc=rc) 
       print *, "Bundle AddField returned", rc
 
-      call ESMF_StateAddData(state3, bundle1, rc)
+      call ESMF_StateAddData(state3, bundle1, rc=rc)
       print *, "StateAddData returned", rc
     else
       print *, "Data marked as not needed", trim(sname)
     endif
     
-    call ESMF_StateDestroy(state3, rc)
+    call ESMF_StateDestroy(state3, rc=rc)
     print *, "State Destroy returned", rc
 
     print *, "State Test 4 finished"
