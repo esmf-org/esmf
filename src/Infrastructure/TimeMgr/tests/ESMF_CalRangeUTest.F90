@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.20 2004/05/19 21:38:27 svasquez Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.21 2004/06/09 21:35:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.20 2004/05/19 21:38:27 svasquez Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.21 2004/06/09 21:35:21 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -224,7 +224,6 @@
           !MM = 10
           !DD = 3
 
-          !EX_UTest
           ! start back 1000 days, then come forward
           Dl = Dl - 1000
 
