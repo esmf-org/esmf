@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.14 2004/06/12 04:18:05 cdeluca Exp $
+! $Id: ESMF_StateEx.F90,v 1.15 2004/06/12 17:17:56 cdeluca Exp $
 
 
 !-------------------------------------------------------------------------
@@ -153,7 +153,7 @@
     ! is given an opportunity to mark which data items are needed.
 
     dataname = "Downward wind"
-    call ESMF_StateSetNeeded(state3, dataname, ESMF_STATEITEM_NEEDED, rc)
+    call ESMF_StateSetNeeded(state3, dataname, ESMF_NEEDED, rc)
     print *, "StateSetNeeded returned", rc
 !EOC
     if (rc.NE.ESMF_SUCCESS) then

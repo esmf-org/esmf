@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.59 2004/06/12 13:49:29 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.60 2004/06/12 17:17:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,63 +86,63 @@
                 ESMF_STATEITEM_UNKNOWN = ESMF_StateItemType(7)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateItemNeeded
+!     ! ESMF_NeededFlag
 !     !   For an Export State if all data which can potentially be created is
 !     !   not needed, this flag can be used to mark data which does not need
 !     !   to be created by the Component.
 !
-      type ESMF_StateItemNeeded
+      type ESMF_NeededFlag
       sequence
       private
          integer :: needed
       end type
 
-      type(ESMF_StateItemNeeded), parameter :: &
-                ESMF_STATEITEM_NEEDED = ESMF_StateItemNeeded(1), &
-                ESMF_STATEITEM_NOTNEEDED = ESMF_StateItemNeeded(2)
+      type(ESMF_NeededFlag), parameter :: &
+                ESMF_NEEDED = ESMF_NeededFlag(1), &
+                ESMF_NOTNEEDED = ESMF_NeededFlag(2)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateItemReady
+!     ! ESMF_ReadyFlag
 !
-      type ESMF_StateItemReady
+      type ESMF_ReadyFlag
       sequence
       private
          integer :: ready
       end type
 
-      type(ESMF_StateItemReady), parameter :: &
-                ESMF_STATEITEM_READYTOWRITE = ESMF_StateItemReady(1), &
-                ESMF_STATEITEM_READYTOREAD = ESMF_StateItemReady(2), &
-                ESMF_STATEITEM_NOTREADY = ESMF_StateItemReady(3)
+      type(ESMF_ReadyFlag), parameter :: &
+                ESMF_READYTOWRITE = ESMF_ReadyFlag(1), &
+                ESMF_READYTOREAD = ESMF_ReadyFlag(2), &
+                ESMF_NOTREADY = ESMF_ReadyFlag(3)
 
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateItemReqRestart
+!     ! ESMF_ReqForRestartFlag
 !
-      type ESMF_StateItemReqRestart
+      type ESMF_ReqForRestartFlag
       sequence
       private
          integer :: required4restart
       end type
 
-      type(ESMF_StateItemReqRestart), parameter :: &
-                ESMF_REQUIRED_FOR_RESTART = ESMF_StateItemReqRestart(1), &
-                ESMF_NOTREQUIRED_FOR_RESTART = ESMF_StateItemReqRestart(2)
+      type(ESMF_ReqForRestartFlag), parameter :: &
+                ESMF_REQUIRED_FOR_RESTART = ESMF_ReqForRestartFlag(1), &
+                ESMF_NOTREQUIRED_FOR_RESTART = ESMF_ReqForRestartFlag(2)
 
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateItemValid
+!     ! ESMF_ValidFlag
 !
-      type ESMF_StateItemValid
+      type ESMF_ValidFlag
       sequence
       private
          integer :: valid
       end type
 
-      type(ESMF_StateItemValid), parameter :: &
-                ESMF_STATEITEM_VALID = ESMF_StateItemValid(1), &
-                ESMF_STATEITEM_INVALID= ESMF_StateItemValid(2), &
-                ESMF_STATEITEM_VALIDITYUNKNOWN = ESMF_StateItemValid(3)
+      type(ESMF_ValidFlag), parameter :: &
+                ESMF_VALID = ESMF_ValidFlag(1), &
+                ESMF_INVALID= ESMF_ValidFlag(2), &
+                ESMF_VALIDITYUNKNOWN = ESMF_ValidFlag(3)
 
 
 !------------------------------------------------------------------------------
@@ -180,10 +180,10 @@
         character(len=ESMF_MAXSTR) :: namep
         type(ESMF_DataHolder), pointer :: datap
         integer :: indirect_index
-        type(ESMF_StateItemNeeded) :: needed
-        type(ESMF_StateItemReady) :: ready
-        type(ESMF_StateItemValid) :: valid
-        type(ESMF_StateItemReqRestart) :: reqrestart
+        type(ESMF_NeededFlag) :: needed
+        type(ESMF_ReadyFlag) :: ready
+        type(ESMF_ValidFlag) :: valid
+        type(ESMF_ReqForRestartFlag) :: reqrestart
       end type
 
 !------------------------------------------------------------------------------
@@ -199,10 +199,10 @@
         type(ESMF_Base) :: base
         type(ESMF_Status) :: statestatus
         type(ESMF_StateType) :: st
-        type(ESMF_StateItemNeeded) :: needed_default
-        type(ESMF_StateItemReady) :: ready_default
-        type(ESMF_StateItemValid) :: stvalid_default
-        type(ESMF_StateItemReqRestart) :: reqrestart_default
+        type(ESMF_NeededFlag) :: needed_default
+        type(ESMF_ReadyFlag) :: ready_default
+        type(ESMF_ValidFlag) :: stvalid_default
+        type(ESMF_ReqForRestartFlag) :: reqrestart_default
         integer :: alloccount
         integer :: datacount
         type(ESMF_StateItem), dimension(:), pointer :: datalist
@@ -233,16 +233,16 @@
                                    ESMF_STATEITEM_NAME
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
                                    ESMF_STATE_LIST
-      public ESMF_StateItemNeeded, ESMF_STATEITEM_NEEDED, &
-                                   ESMF_STATEITEM_NOTNEEDED
-      public ESMF_StateItemReady,  ESMF_STATEITEM_READYTOWRITE, &
-                                   ESMF_STATEITEM_READYTOREAD, &
-                                   ESMF_STATEITEM_NOTREADY
-      public ESMF_StateItemReqRestart,  ESMF_REQUIRED_FOR_RESTART, &
+      public ESMF_NeededFlag, ESMF_NEEDED, &
+                                   ESMF_NOTNEEDED
+      public ESMF_ReadyFlag,  ESMF_READYTOWRITE, &
+                                   ESMF_READYTOREAD, &
+                                   ESMF_NOTREADY
+      public ESMF_ReqForRestartFlag,  ESMF_REQUIRED_FOR_RESTART, &
                                    ESMF_NOTREQUIRED_FOR_RESTART
-      public ESMF_StateItemValid,  ESMF_STATEITEM_VALID, &
-                                   ESMF_STATEITEM_INVALID, &
-                                   ESMF_STATEITEM_VALIDITYUNKNOWN
+      public ESMF_ValidFlag,  ESMF_VALID, &
+                                   ESMF_INVALID, &
+                                   ESMF_VALIDITYUNKNOWN
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.59 2004/06/12 13:49:29 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.60 2004/06/12 17:17:56 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -570,14 +570,14 @@ end function
 
 function ESMF_needeq(s1, s2)
  logical ESMF_needeq
- type(ESMF_StateItemNeeded), intent(in) :: s1, s2
+ type(ESMF_NeededFlag), intent(in) :: s1, s2
 
  ESMF_needeq = (s1%needed .eq. s2%needed)
 end function
 
 function ESMF_needne(s1, s2)
  logical ESMF_needne
- type(ESMF_StateItemNeeded), intent(in) :: s1, s2
+ type(ESMF_NeededFlag), intent(in) :: s1, s2
 
  ESMF_needne = (s1%needed .ne. s2%needed)
 end function
@@ -585,14 +585,14 @@ end function
 
 function ESMF_redyeq(s1, s2)
  logical ESMF_redyeq
- type(ESMF_StateItemReady), intent(in) :: s1, s2
+ type(ESMF_ReadyFlag), intent(in) :: s1, s2
 
  ESMF_redyeq = (s1%ready .eq. s2%ready)
 end function
 
 function ESMF_redyne(s1, s2)
  logical ESMF_redyne
- type(ESMF_StateItemReady), intent(in) :: s1, s2
+ type(ESMF_ReadyFlag), intent(in) :: s1, s2
 
  ESMF_redyne = (s1%ready .ne. s2%ready)
 end function
@@ -600,14 +600,14 @@ end function
 
 function ESMF_valideq(s1, s2)
  logical ESMF_valideq
- type(ESMF_StateItemValid), intent(in) :: s1, s2
+ type(ESMF_ValidFlag), intent(in) :: s1, s2
 
  ESMF_valideq = (s1%valid .eq. s2%valid)
 end function
 
 function ESMF_validne(s1, s2)
  logical ESMF_validne
- type(ESMF_StateItemValid), intent(in) :: s1, s2
+ type(ESMF_ValidFlag), intent(in) :: s1, s2
 
  ESMF_validne = (s1%valid .ne. s2%valid)
 end function
@@ -1437,11 +1437,11 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddState()   
-      subroutine ESMF_StateAddStateList(state, stateCount, nestedStateList, rc)
+      subroutine ESMF_StateAddStateList(state, nestedStateCount, nestedStateList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
-      integer, intent(in) :: stateCount
+      integer, intent(in) :: nestedStateCount
       type(ESMF_State), dimension(:), intent(in) :: nestedStateList
       integer, intent(out), optional :: rc     
 !
@@ -1454,7 +1454,7 @@ end function
 !     \begin{description}
 !     \item[state]
 !      An {\tt ESMF\_State} object.  This is the container object.
-!     \item[stateCount]
+!     \item[nestedStateCount]
 !      The number of {\tt ESMF\_State}s to be added.
 !     \item[nestedStateList]
 !      The list (Fortran array) of {\tt ESMF\_State}s to be added.
@@ -1471,7 +1471,7 @@ end function
 !
 !EOP
 
-        call ESMF_StateClassAddStateList(state%statep, stateCount, nestedStateList, rc)
+        call ESMF_StateClassAddStateList(state%statep, nestedStateCount, nestedStateList, rc)
 
         end subroutine ESMF_StateAddStateList
 
@@ -1485,7 +1485,7 @@ end function
       function ESMF_StateCreate(stateName, statetype, &
                    bundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, &
-                   dataneeded, dataready, datavalid, datareqrestart, rc)
+                   neededflag, readyflag, validflag, reqforrestartflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreate
@@ -1499,10 +1499,10 @@ end function
       type(ESMF_State), dimension(:), intent(in), optional :: nestedStateList
       character(len=*), dimension(:), intent(in), optional :: nameList
       integer, intent(in), optional :: itemCount
-      type(ESMF_StateItemNeeded), optional :: dataneeded
-      type(ESMF_StateItemReady), optional :: dataready
-      type(ESMF_StateItemValid), optional :: datavalid
-      type(ESMF_StateItemReqRestart), optional :: datareqrestart
+      type(ESMF_NeededFlag), optional :: neededflag
+      type(ESMF_ReadyFlag), optional :: readyflag
+      type(ESMF_ValidFlag), optional :: validflag
+      type(ESMF_ReqForRestartFlag), optional :: reqforrestartflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1537,27 +1537,22 @@ end function
 !    If {\tt itemCount} is specified this routine
 !    will do an error check to verify the total number of items found
 !    in the argument lists matches this count of the expected number of items.
-!   \item[{[dataneeded]}]
+!   \item[{[neededflag]}]
+!    Set the default value for new items added to an {\tt ESMF\_State}.
+!    Possible values are listed in Section~\ref{opt:neededflag}.  
+!    If not specified, the default value is set to {\tt ESMF\_NEEDED}.
+!   \item[{[readyflag]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_STATEITEM\_NEEDED} or 
-!    {\tt ESMF\_STATEITEM\_NOTNEEDED}.  If not specified, the default value is
-!    set to {\tt ESMF\_STATEITEM\_NEEDED}.
-!   \item[{[dataready]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_STATEITEM\_READYTOWRITE},
-!    {\tt ESMF\_STATEITEM\_READYTOREAD}, or {\tt ESMF\_STATEITEMNOTREADY}.
-!    If not specified, the default value is set to 
-!    {\tt ESMF\_STATEITEM\_READYTOREAD}.
-!   \item[{[datavalid]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_STATEITEM\_VALID},
-!    {\tt ESMF\_STATEITEM\_INVALID}, or {\tt ESMF\_STATEITEM_VALIDITYUNKNOWN}.
-!    If not specified, the default value is set to 
-!    {\tt ESMF\_STATEITEM\_VALID}.
-!   \item[{[datareqrestart]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_REQUIRED\_FOR\_RESTART} or
-!    {\tt ESMF\_NOTREQUIRED\_FOR\_RESTART}. If not specified, the default 
+!    Possible values are listed in Section~\ref{opt:readyflag}. 
+!    If not specified, the default value is set to {\tt ESMF\_READYTOREAD}.
+!   \item[{[validflag]}]
+!    Set the default value for new items added to an {\tt ESMF\_State}.
+!    Possible values are listed in Section~\ref{opt:validflag}.   
+!    If not specified, the default value is set to {\tt ESMF\_VALID}.
+!   \item[{[reqforrestartflag]}]
+!    Set the default value for new items added to an {\tt ESMF\_State}. 
+!    Possible values are listed in Section~\ref{opt:reqforrestartflag}.    
+!    If not specified, the default 
 !    value is set to {\tt ESMF\_REQUIRED\_FOR\_RESTART}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1583,7 +1578,7 @@ end function
         call ESMF_StateConstruct(stypep, stateName, statetype, &
                    bundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, &
-                   dataneeded, dataready, datavalid, datareqrestart, rc)
+                   neededflag, readyflag, validflag, reqforrestartflag, rc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1673,8 +1668,8 @@ end function
 ! !IROUTINE: ESMF_StateGet - Get information about a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGet(state, name, statetype, &
-                                     itemCount, itemNameList, stateitemList, rc)
+      subroutine ESMF_StateGet(state, name, statetype, itemCount, &
+                               itemNameList, stateitemtypeList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
@@ -1682,7 +1677,7 @@ end function
       type(ESMF_StateType), intent(out), optional :: statetype
       integer, intent(out), optional :: itemCount
       character (len=*), intent(out), optional :: itemNameList(:)
-      type(ESMF_StateItemType), intent(out), optional :: stateitemList(:)
+      type(ESMF_StateItemType), intent(out), optional :: stateitemtypeList(:)
       integer, intent(out), optional :: rc             
 
 !
@@ -1696,20 +1691,20 @@ end function
 !      \item[{[name]}]
 !       Name of this {\tt ESMF\_State}.
 !      \item[{[statetype]}]
-!       Import or Export {\tt ESMF\_State}.  Returns either 
-!       {\tt ESMF\_STATE\_IMPORT},
-!       {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.
+!       Import or Export {\tt ESMF\_State}.  Possible values are 
+!       listed in Section~\ref{opt:statetype}.
 !      \item[{[itemCount]}]
 !        Count of items in {\tt state}, including all objects
 !        as well as placeholder names.
 !      \item[{[itemNameList]}]
 !        Array of item names in {\tt state}, 
-!        including placeholder names.  {\tt itemNames} must be at least
+!        including placeholder names.  {\tt itemNameList} must be at least
 !        {\tt itemCount} long.
-!      \item[{[stateitemList]}]
-!        Array of possible item object types in {\tt state}, including placeholder 
+!      \item[{[stateitemtypeList]}]
+!        Array of possible item object types in {\tt state}, including 
+!        placeholder 
 !        names. Must be at least {\tt itemCount} long.  Options are
-!        shown in Section~\ref{opt:stateitem}.
+!        listed in Section~\ref{opt:stateitemtype}.
 !      \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
@@ -1749,10 +1744,10 @@ end function
           enddo
       endif
 
-      if (present(stateitemList)) then
+      if (present(stateitemtypeList)) then
           do i=1, stypep%datacount
               nextitem => stypep%datalist(i)
-              stateitemList(i) = nextitem%otype
+              stateitemtypeList(i) = nextitem%otype
           enddo
       endif
 
@@ -2769,18 +2764,18 @@ end function
 ! !IROUTINE: ESMF_StateGetNeeded - Query whether a data item is needed
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetNeeded(state, itemName, needed, rc)
+      subroutine ESMF_StateGetNeeded(state, itemName, neededflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
       character (len=*), intent(in) :: itemName
-      type(ESMF_StateItemNeeded), intent(out) :: needed
+      type(ESMF_NeededFlag), intent(out) :: neededflag
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Returns the status of the {\tt needed} flag for the data item
-!      named by {\tt itemname} in the {\tt ESMF\_State}.
+!      Returns the status of the {\tt neededflag} for the data item
+!      named by {\tt itemName} in the {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}     
@@ -2788,9 +2783,10 @@ end function
 !       The {\tt ESMF\_State} to query.
 !      \item[itemName]
 !       Name of the data item to query.
-!      \item[needed]
-!       Status of data item.  Returns either {\tt ESMF\_STATEITEM\_NEEDED},
-!       or {\tt ESMF\_STATEITEM\_NOTNEEDED}.
+!      \item[neededflag]
+!       Whether state item is needed or not for a particular application
+!       configuration.  Possible values are listed in 
+!       Section~\ref{opt:neededflag}.
 !      \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -2816,7 +2812,7 @@ end function
           return
       endif
 
-      needed = dataitem%needed
+      neededflag = dataitem%needed
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2829,11 +2825,11 @@ end function
 ! !IROUTINE: ESMF_StateGetState - Retrieve a State nested in a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetState(state, stateName, nestedState, rc)
+      subroutine ESMF_StateGetState(state, nestedStateName, nestedState, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: stateName
+      character (len=*), intent(in) :: nestedStateName
       type(ESMF_State), intent(out) :: nestedState
       integer, intent(out), optional :: rc             
 
@@ -2849,7 +2845,7 @@ end function
 !     \item[state]
 !       The {\tt ESMF\_State} to query for a nested {\tt ESMF\_State} 
 !       named {\tt stateName}.
-!     \item[stateName]
+!     \item[nestedStateName]
 !       Name of nested {\tt ESMF\_State} to return.
 !     \item[nestedState]
 !       Returned {\tt ESMF\_State}.
@@ -2869,20 +2865,20 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty state to mark failure?
 
-      exists = ESMF_StateClassFindData(state%statep, stateName, .true., &
+      exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                          dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       if (.not. exists) then
-          print errmsg, "no nested state named", trim(stateName), "found"
+          print errmsg, "no nested state named", trim(nestedStateName), "found"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
-          print errmsg, trim(stateName), "found but not type State"
+          print errmsg, trim(nestedStateName), "found but not type State"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
@@ -2953,7 +2949,7 @@ end function
           return
       endif
 
-      if (dataitem%needed .eq. ESMF_STATEITEM_NEEDED) ESMF_StateIsNeeded = .TRUE.
+      if (dataitem%needed .eq. ESMF_NEEDED) ESMF_StateIsNeeded = .TRUE.
   
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3063,9 +3059,9 @@ end function
          end select
 
          select case (dp%needed%needed)
-           case (ESMF_STATEITEM_NEEDED%needed)
+           case (ESMF_NEEDED%needed)
              outbuf = trim(outbuf) //  " marked as needed."
-           case (ESMF_STATEITEM_NOTNEEDED%needed)
+           case (ESMF_NOTNEEDED%needed)
              outbuf = trim(outbuf) //  " marked as NOT needed."
          end select
 
@@ -3073,8 +3069,8 @@ end function
         write(*,*) outbuf
 
         ! TODO: finish printing more info here
-        !type(ESMF_StateItemReady) :: ready
-        !type(ESMF_StateItemValid) :: valid
+        !type(ESMF_ReadyFlag) :: ready
+        !type(ESMF_ValidFlag) :: valid
 
         !type(ESMF_DataHolder), pointer :: datap
 
@@ -3143,12 +3139,12 @@ end function
 ! !IROUTINE: ESMF_StateSetNeeded - Set if a data item is needed
 !
 ! !INTERFACE:
-      subroutine ESMF_StateSetNeeded(state, itemName, needed, rc)
+      subroutine ESMF_StateSetNeeded(state, itemName, neededflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
       character (len=*), intent(in) :: itemName
-      type(ESMF_StateItemNeeded), intent(in) :: needed
+      type(ESMF_NeededFlag), intent(in) :: neededflag
       integer, intent(out), optional :: rc             
 
 !
@@ -3162,9 +3158,9 @@ end function
 !        The {\tt ESMF\_State} to set.
 !       \item[itemName]
 !        Name of the data item to set.
-!       \item[needed]
-!        Set status of data item to this.  Valid values are 
-!        {\tt ESMF\_STATEITEM\_NEEDED}, or {\tt ESMF\_STATEITEM\_NOTNEEDED}. 
+!       \item[neededflag]
+!        Set status of data item to this.  See Section~\ref{opt:neededflag}
+!        for possible values.
 !       \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
@@ -3187,7 +3183,7 @@ end function
           return
       endif
 
-      dataitem%needed = needed
+      dataitem%needed = neededflag
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3401,7 +3397,7 @@ end function
 ! !INTERFACE:
       subroutine ESMF_StateConstruct(stypep, statename, statetype, & 
                          bundles, fields, arrays, states, names, itemcount, &
-                         dataneeded, dataready, datavalid, datareqrestart, rc)
+                         neededflag, readyflag, validflag, reqforrestartflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer :: stypep
@@ -3413,10 +3409,10 @@ end function
       type(ESMF_State), dimension(:), intent(in), optional :: states
       character(len=*), dimension(:), intent(in), optional :: names
       integer, intent(in), optional :: itemcount
-      type(ESMF_StateItemNeeded), optional :: dataneeded
-      type(ESMF_StateItemReady), optional :: dataready
-      type(ESMF_StateItemValid), optional :: datavalid
-      type(ESMF_StateItemReqRestart), optional :: datareqrestart
+      type(ESMF_NeededFlag), optional :: neededflag
+      type(ESMF_ReadyFlag), optional :: readyflag
+      type(ESMF_ValidFlag), optional :: validflag
+      type(ESMF_ReqForRestartFlag), optional :: reqforrestartflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -3447,24 +3443,24 @@ end function
 !    The total number of Bundles, Fields, Arrays, States, and Names specified.
 !    This argument is optional, and if specified is used as an error check
 !    to verify that the actual total number of items found matches this count.
-!   \item[{[dataneeded]}]
+!   \item[{[neededflag]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEITEM\_NEEDED} or 
 !    {\tt ESMF\_STATEITEM\_NOTNEEDED}.  If not specified, the default value is
 !    set to {\tt ESMF\_STATEITEM\_NEEDED}.
-!   \item[{[dataready]}]
+!   \item[{[readyflag]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEITEM\_READYTOWRITE},
 !    {\tt ESMF\_STATEITEM\_READYTOREAD}, or {\tt ESMF\_STATEITEMNOTREADY}.
 !    If not specified, the default value is set to 
 !    {\tt ESMF\_STATEITEM\_READYTOREAD}.
-!   \item[{[datavalid]}]
+!   \item[{[validflag]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEITEM\_VALID},
 !    {\tt ESMF\_STATEITEM\_INVALID}, or {\tt ESMF\_STATEITEM\_VALIDITYUNKNOWN}.
 !    If not specified, the default value is set to 
 !    {\tt ESMF\_STATEITEM\_VALID}.
-!   \item[{[datareqrestart}]
+!   \item[{[reqforrestartflag}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_REQUIRED\_FOR\_RESTART} or
 !    {\tt ESMF\_NOTREQUIRED\_FOR\_RESTART}. If not specified, the default 
@@ -3507,26 +3503,26 @@ end function
                                   ESMF_CONTEXT, rc)) return
 
         ! Set the defaults for objects added to this state
-        if (present(dataneeded)) then
-            stypep%needed_default = dataneeded
+        if (present(neededflag)) then
+            stypep%needed_default = neededflag
         else
-            stypep%needed_default = ESMF_STATEITEM_NEEDED
+            stypep%needed_default = ESMF_NEEDED
         endif
 
-        if (present(dataready)) then
-            stypep%ready_default = dataready
+        if (present(readyflag)) then
+            stypep%ready_default = readyflag
         else
-            stypep%ready_default = ESMF_STATEITEM_READYTOREAD
+            stypep%ready_default = ESMF_READYTOREAD
         endif
 
-        if (present(datavalid)) then
-            stypep%stvalid_default = datavalid
+        if (present(validflag)) then
+            stypep%stvalid_default = validflag
         else
-            stypep%stvalid_default = ESMF_STATEITEM_VALID
+            stypep%stvalid_default = ESMF_VALID
         endif
 
-        if (present(datareqrestart)) then
-            stypep%reqrestart_default = datareqrestart
+        if (present(reqforrestartflag)) then
+            stypep%reqrestart_default = reqforrestartflag
         else
             stypep%reqrestart_default = ESMF_REQUIRED_FOR_RESTART
         endif
@@ -3865,9 +3861,9 @@ end function
             dataitem%datap%ap = arrays(i)
         
             ! don't update flags on existing entry
-            !dataitem%needed = ESMF_STATEITEM_NEEDED
-            !dataitem%ready = ESMF_STATEITEM_READYTOREAD
-            !dataitem%valid = ESMF_STATEITEM_VALIDITYUNKNOWN
+            !dataitem%needed = ESMF_NEEDED
+            !dataitem%ready = ESMF_READYTOREAD
+            !dataitem%valid = ESMF_VALIDITYUNKNOWN
         endif
       enddo
 
@@ -4060,9 +4056,9 @@ end function
         
             ! If we're replacing an existing item, then we shouldn't
             !  alter existing settings on the data state.
-            !dataitem%needed = ESMF_STATEITEM_NEEDED
-            !dataitem%ready = ESMF_STATEITEM_READYTOREAD
-            !dataitem%valid = ESMF_STATEITEM_VALIDITYUNKNOWN
+            !dataitem%needed = ESMF_NEEDED
+            !dataitem%ready = ESMF_READYTOREAD
+            !dataitem%valid = ESMF_VALIDITYUNKNOWN
         endif
       enddo
 
@@ -4261,9 +4257,9 @@ end function
             dataitem%datap%bp = bundles(i)
         
             ! Don't change flags of existing entry
-            !dataitem%needed = ESMF_STATEITEM_NEEDED
-            !dataitem%ready = ESMF_STATEITEM_READYTOREAD
-            !dataitem%valid = ESMF_STATEITEM_VALIDITYUNKNOWN
+            !dataitem%needed = ESMF_NEEDED
+            !dataitem%ready = ESMF_READYTOREAD
+            !dataitem%valid = ESMF_VALIDITYUNKNOWN
         endif
 
         ! and now the same for each field in the bundle
@@ -4601,9 +4597,9 @@ end function
             dataitem%datap%spp => states(i)%statep
         
             ! don't update flags on existing entry
-            !dataitem%needed = ESMF_STATEITEM_NEEDED
-            !dataitem%ready = ESMF_STATEITEM_READYTOREAD
-            !dataitem%valid = ESMF_STATEITEM_VALIDITYUNKNOWN
+            !dataitem%needed = ESMF_NEEDED
+            !dataitem%ready = ESMF_READYTOREAD
+            !dataitem%valid = ESMF_VALIDITYUNKNOWN
         endif
       enddo
 

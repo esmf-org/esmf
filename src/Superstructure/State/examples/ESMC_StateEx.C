@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.5 2004/06/12 04:18:05 cdeluca Exp $
+// $Id: ESMC_StateEx.C,v 1.6 2004/06/12 17:17:56 cdeluca Exp $
 //
 // Example/test code which creates a new State.
 
@@ -125,7 +125,7 @@ main(int argc, char **argv) {
     // is given an opportunity to mark which data items are needed.
 
     dataname = "Downward wind";
-    rc = ESMF_StateSetNeeded(state3, dataname, ESMF_STATEITEM_NEEDED);
+    rc = ESMF_StateSetNeeded(state3, dataname, ESMF_NEEDED);
     printf("StateSetNeeded returned, rc = %d\n", rc);
 
 

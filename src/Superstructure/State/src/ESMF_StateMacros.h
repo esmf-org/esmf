@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.6 2004/06/07 05:21:10 nscollins Exp $
+! $Id: ESMF_StateMacros.h,v 1.7 2004/06/12 17:17:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,14 +33,15 @@
 ! !IROUTINE: ESMF_StateGetDataPointer - Retrieve Fortran pointer directly from a State @\
 ! @\
 ! !INTERFACE: @\
-!      subroutine ESMF_StateGetDataPointer<rank><type><kind>(state, dataname, fptr, copyflag, statename, rc) @\
+!      subroutine ESMF_StateGetDataPointer<rank><type><kind>(state, itemName, @\
+!                                 dataPointer, copyflag, nestedStateName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_State), intent(in) :: state @\
-!      character(len=*), intent(in) :: dataname @\
-!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!      character(len=*), intent(in) :: itemName @\
+!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: dataPointer @\
 !      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
-!      character(len=*), intent(in), optional :: statename @\
+!      character(len=*), intent(in), optional :: nestedStateName @\
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -51,9 +52,9 @@
 !  \begin{description} @\
 !  \item[state] @\
 !   The {\tt ESMF\_State} to query. @\
-!  \item[dataname] @\
+!  \item[itemName] @\
 !   The name of the Bundle, Field, or Array to return data from. @\
-!  \item[fptr] @\
+!  \item[dataPointer] @\
 !   An unassociated Fortran pointer of the proper Type, Kind, and Rank as the data @\
 !   in the State.  When this call returns successfully, the pointer will now reference @\
 !   the data in the State.  This is either a reference or a copy, depending on the @\
@@ -61,7 +62,7 @@
 !  \item[{[copyflag]}] @\
 !   Defaults to {\tt ESMF\_DATA\_REF}.  If set to {\tt ESMF\_DATA\_COPY}, a separate @\
 !   copy of the data will be made and the pointer will point at the copy. @\
-!  \item[{[statename]}] @\
+!  \item[{[nestedStateName]}] @\
 !   Optional.  If multiple states are present, a specific state name must be given. @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -81,13 +82,14 @@
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_StateGetDataPointer" @\
-      subroutine ESMF_StateGetDataPointer##mrank##D##mtypekind(state, dataname, fptr, copyflag, statename, rc) @\
+      subroutine ESMF_StateGetDataPointer##mrank##D##mtypekind(state, & @\
+                        itemName, dataPointer, copyflag, nestedStateName, rc) @\
  @\
       type(ESMF_State), intent(in) :: state @\
-      character(len=*), intent(in) :: dataname @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
+      character(len=*), intent(in) :: itemName @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataPointer @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
-      character(len=*), intent(in), optional :: statename @\
+      character(len=*), intent(in), optional :: nestedStateName @\
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
@@ -108,7 +110,7 @@
         endif @\
  @\
         ! Test to see if array already associated, and fail if so. @\
-        if (associated(fptr)) then @\
+        if (associated(dataPointer)) then @\
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, & @\
                               "Data Pointer cannot already be associated", & @\
                                ESMF_CONTEXT, rc)) return @\
@@ -116,7 +118,7 @@
  @\
         ! TODO: make this check the data type, and switch based on that. @\
         ! For now, assume field only. @\
-        call ESMF_StateGetField(state, dataname, field, statename, status) @\
+        call ESMF_StateGetField(state, itemName, field, nestedStateName, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -126,7 +128,7 @@
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-        call ESMF_ArrayGetData(array, fptr, copyflag, rc=status) @\
+        call ESMF_ArrayGetData(array, dataPointer, copyflag, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -137,5 +139,13 @@
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
+
+
+
+
+
+
+
+
 
 
