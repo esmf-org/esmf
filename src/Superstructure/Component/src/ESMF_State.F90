@@ -1,0 +1,1034 @@
+! $Id: ESMF_State.F90,v 1.1 2003/01/29 00:00:28 nscollins Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+!
+!     ESMF State module
+      module ESMF_StateMod
+!
+!==============================================================================
+!
+! This file contains the State class definition and all State
+! class methods.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+!------------------------------------------------------------------------------
+#include "ESMF.h"
+!------------------------------------------------------------------------------
+!BOP
+! !MODULE: ESMF_StateMod - Manage data states uniformly between F90 and C++     
+!
+! !DESCRIPTION:
+!
+! The code in this file implements the Fortran interfaces to the
+! {\tt State} class and associated functions and subroutines.  
+!
+!
+!------------------------------------------------------------------------------
+! !USES:
+      use ESMF_BaseMod
+      use ESMF_IOMod
+      !use ESMF_ComponentMod
+      implicit none
+
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+      private
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateImpExpType
+!     !   Enumerated value for storing Import or Export State type.
+!
+      type ESMF_StateImpExpType
+      sequence
+      private
+         integer :: state
+      end type
+
+      type(ESMF_StateImpExpType), parameter :: &
+                ESMF_STATEIMPORT = ESMF_StateImpExpType(1), &
+                ESMF_STATEEXPORT = ESMF_StateImpExpType(2), &
+                ESMF_STATEUNKNOWN = ESMF_StateImpExpType(3)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateObjectType
+!     !   Each entry in the list of states is either simply a name placeholder
+!     !   or an actual data item - Bundle, Field, or Array.  The state list
+!     !   can either be a linked list or an array of derived types.
+!     !   For a linked list, the Last is the end of the list.
+!
+      type ESMF_StateObjectType
+      sequence
+      private
+         integer :: ot
+      end type
+
+      type(ESMF_StateObjectType), parameter :: &
+                ESMF_BUNDLE = ESMF_StateObjectType(1), &
+                ESMF_FIELD = ESMF_StateObjectType(2), &
+                ESMF_ARRAY = ESMF_StateObjectType(3), &
+                ESMF_DATANAME = ESMF_StateObjectType(4), &
+                ESMF_LAST = ESMF_StateObjectType(5), &
+                ESMF_OBJTYPEUNKNOWN = ESMF_StateObjectType(6)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateDataNeeded
+!     !   For an Export State if all data which can potentially be created is
+!     !   not needed, this flag can be used to mark data which does not need
+!     !   to be created by the Component.
+!
+      type ESMF_StateDataNeeded
+      sequence
+      private
+         integer :: needed
+      end type
+
+      type(ESMF_StateDataNeeded), parameter :: &
+                ESMF_NEEDED = ESMF_StateDataNeeded(1), &
+                ESMF_NOTNEEDED= ESMF_StateDataNeeded(2), &
+                ESMF_DONOTCARE = ESMF_StateDataNeeded(3), &
+                ESMF_NEEDUNKNOWN = ESMF_StateDataNeeded(4)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateDataReady
+!
+      type ESMF_StateDataReady
+      sequence
+      private
+         integer :: ready
+      end type
+
+      type(ESMF_StateDataReady), parameter :: &
+                ESMF_READYTOWRITE = ESMF_StateDataReady(1), &
+                ESMF_READYTOREAD= ESMF_StateDataReady(2), &
+                ESMF_DONOTCARE = ESMF_StateDataReady(3), &
+                ESMF_READYUNKNOWN = ESMF_StateDataReady(4)
+
+
+!------------------------------------------------------------------------------
+!     ! ESMF_DataHolder
+!
+!     ! Make a single data type for Bundles, Fields, and Arrays.
+!     !  The ObjectType is one level up, because this structure is not
+!     !  allocated until it is actually needed.  This is a private type.
+
+      type ESMF_DataHolder
+      sequence
+      private
+          type(ESMC_Bundle), pointer :: bp
+          type(ESMC_Field), pointer :: fp 
+          type(ESMC_Array), pointer :: ap
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateData
+!
+!     ! Description of next Data item in list, or simply a name
+!     !  which holds the place for an optional Data item.
+
+      type ESMF_StateData
+      sequence
+      private
+        type(ESMF_StateObjectType) :: otype
+        character, pointer :: namep
+        type(ESMF_DataHolder), pointer :: datap
+        type(ESMF_StateDataNeeded) :: needed
+        type(ESMF_StateDataReady) :: ready
+        type(ESMF_StateData), pointer :: nextdata
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateType
+!
+!     ! Internal State data type.
+
+      type ESMF_StateType
+      sequence
+      private
+        type(ESMF_StateImpExpType) :: st
+        character (len=ESMF_MAXSTR) :: compname
+        integer :: listlength
+        ! this will be either an allocatable array (simpler to random access
+        ! but harder to resize), or a linked list (slightly more overhead to
+        ! iterate (less memory contiguity) but easy to add and delete items from.
+        type(ESMF_StateData), pointer :: listhead
+        ! or
+        type(ESMF_StateData), dimension(:), pointer :: states
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_State
+!
+!     ! State data type.
+
+      type ESMF_State
+      sequence
+      private
+        type(ESMF_StateType), pointer :: statep
+      end type
+
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+      public ESMF_State
+!------------------------------------------------------------------------------
+
+! !PUBLIC MEMBER FUNCTIONS:
+
+      public ESMF_StateCreate           ! for import/for export
+      public ESMF_StateDestroy
+
+      public ESMF_StateSetData          ! interface does Bundles/Fields/Arrays
+      public ESMF_StateGetData          ! interface does Bundles/Fields/Arrays
+      public ESMF_StateGetInfo          ! comp name, type, data count
+      public ESMF_StateAddNameOnly      ! placeholder name but no data
+      !public ESMF_State{Get/Set}Needed ! set if data required
+      !public ESMF_State{Get/Set}Ready  ! is data ready
+      !public ESMF_State{Get/Set}CompName  ! set only if not given at create time
+ 
+      public ESMF_StateCheckpoint
+      public ESMF_StateRestore
+ 
+      public ESMF_StatePrint
+!EOP
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_State.F90,v 1.1 2003/01/29 00:00:28 nscollins Exp $'
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+!BOP
+! !IROUTINE: ESMF_StateCreate -- Generic interface to create an State
+
+! !INTERFACE:
+     interface ESMF_StateCreate
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+        module procedure ESMF_StateCreateNew
+        module procedure ESMF_StateCreateEmpty
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StateCreate} functions.   
+!  
+!EOP 
+end interface
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddData -- Add Bundles, Fields, and Arrays to a State
+
+! !INTERFACE:
+     interface ESMF_StateAddData
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+        module procedure ESMF_StateAddBundle
+        module procedure ESMF_StateAddBundleList
+        module procedure ESMF_StateAddField
+        module procedure ESMF_StateAddFieldList
+        module procedure ESMF_StateAddArray
+        module procedure ESMF_StateAddArrayList
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StateAddData} functions.   
+!  
+!EOP 
+end interface
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetData -- Retrieve Bundles, Fields, or Arrays from a State
+
+! !INTERFACE:
+     interface ESMF_StateGetData
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+        module procedure ESMF_StateGetBundle
+        module procedure ESMF_StateGetField
+        module procedure ESMF_StateGetArray
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StateGetData} functions.   
+!  
+!EOP 
+end interface
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddNameOnly -- Add names as placeholders to the State
+
+! !INTERFACE:
+     interface ESMF_StateAddNameOnly
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+        module procedure ESMF_StateAddDataName
+        module procedure ESMF_StateAddDataNameList
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StateAddNameOnly} functions.   
+!  
+!EOP 
+end interface
+
+
+
+
+!==============================================================================
+
+      contains
+
+!==============================================================================
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
+! This section includes the State Create and Destroy methods.
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateCreateNew -- Create a new State specifying all options.
+
+! !INTERFACE:
+      function ESMF_StateCreateNew(rc)
+!
+! !RETURN VALUE:
+      type(ESMF_State) :: ESMF_StateCreateNew
+!
+! !ARGUMENTS:
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new State and set the decomposition characteristics.
+!
+!  The return value is a new State.
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+
+!       local vars
+        type (ESMF_State), pointer :: ptr   ! opaque pointer to new C++ State
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       Initialize the pointer to null.
+        nullify(ptr)
+
+!       Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ creation routine.
+        call c_ESMC_StateCreate(status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "State construction error"
+          return
+        endif
+
+!       set return values
+        ESMF_StateCreateNew%this => ptr 
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_StateCreateNew
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateCreateEmpty -- Create a new State specifying no data
+
+! !INTERFACE:
+      function ESMF_StateCreateEmpty(compname, statetype, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_State) :: ESMF_StateCreateEmpty
+!
+! !ARGUMENTS:
+      character(len=ESMF_MAXSTR), intent(in), optional :: compname 
+      type(ESMF_StateImpExpType), intent(in), optional :: statetype
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new empty {\tt State}.  The return value is a new {\tt State}.
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[[compname]]
+!    Name of the {\tt Component} this {\tt State} is associated with.
+!
+!   \item[[statetype]]
+!    Import or Export {\tt State}.  Returns either {\tt ESMF\_STATEIMPORT},
+!    {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATEUNKNOWN}.
+!
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+
+!       local vars
+        type (ESMF_State), pointer :: ptr   ! opaque pointer to new C++ State
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       Initialize the pointer to null.
+        nullify(ptr)
+
+!       Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ creation routine.
+        call c_ESMC_StateCreate(status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "State construction error"
+          return
+        endif
+
+!       set return values
+        ESMF_StateCreateEmpty%this => ptr 
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_StateCreateEmpty
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_StateDestroy(state, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State) :: state
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Releases all resources associated with this {\tt State}.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[state]
+!       Destroy contents of this {\tt State}.
+!
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       call Destroy to release resources on the C++ side
+        call c_ESMC_StateDestroy(state%this, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "State contents destruction error"
+          return
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_StateDestroy
+
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddBundle - Add a Bundle to a State.
+!
+! !INTERFACE:
+      subroutine ESMF_StateAddBundle(state, bundle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_Bundle), intent(in) :: bundle
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a single {\tt Bundle} reference to an existing {\tt State}.
+!      The {\tt Bundle} name must be unique within the {\tt State}
+!
+! !REQUIREMENTS: 
+!EOP
+      type(ESMF_Bundle) :: temp_list(1)
+
+      temp_list(1) = bundle
+
+      call ESMF_StateTypeAddBundleList(state%statep, 1, temp_list, rc)      
+
+      end subroutine ESMF_StateAddBundle
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddBundleList - Add a list of Bundles to a State
+!
+! !INTERFACE:
+      subroutine ESMF_StateAddBundleList(state, bcount, bundles, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state 
+      integer, intent(in) :: bcount
+      type(ESMF_Bundle), dimension(:), intent(in) :: bundles
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple bundles to a {\tt State}.
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_StateTypeAddBundleList(state%statep, bcount, bundles, rc)
+
+        end subroutine ESMF_StateAddBundleList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateTypeAddBundleList - Add a list of Bundles to a StateType
+!
+! !INTERFACE:
+      subroutine ESMF_StateTypeAddBundleList(statep, bcount, bundles, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_StateType), intent(inout) :: statep
+      integer, intent(in) :: bcount
+      type(ESMF_Bundle), dimension(:), intent(in) :: bundles
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple bundles to a {\tt State}.  Internal routine only.
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_FAILURE              ! Error status
+      integer :: i                                ! temp var
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     ! Initialize return code.  Assume failure until success assured.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     ! TODO: check for name collisions
+
+!     ! Add the bundles to the state, checking for name clashes
+      if(btype%field_count .eq. 0) then
+          allocate(btype%flist(fieldcount), stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
+            return
+          endif
+         
+!         now add the fields to the new list
+          do i=1, fieldcount
+            btype%flist(i) = fields(i)
+          enddo
+
+          btype%field_count = fieldcount
+      else
+!         make a list the right length
+          allocate(temp_flist(btype%field_count + fieldcount), stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
+            return
+          endif
+
+!         preserve old contents
+          do i = 1, btype%field_count
+            temp_flist(i) = btype%flist(i)
+          enddo
+
+!         and append the new fields to the list
+          do i=btype%field_count+1, btype%field_count + fieldcount
+            temp_flist(i) = fields(i)
+          enddo
+
+!         delete old list
+          deallocate(btype%flist, stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
+          endif
+
+!         and now make this the permanent list
+          btype%flist => temp_flist
+          btype%field_count = btype%field_count + fieldcount
+
+      endif
+
+!     If packed data buffer requested, create or update it here.
+      if (btype%pack_flag .eq. ESMF_PACK_FIELD_DATA) then
+
+         call ESMF_BundleTypeRepackData(btype, rc=rc)
+
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+
+        end subroutine ESMF_StateTypeAddBundleList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddDataName - Add a Name as placeholder to a State.
+!
+! !INTERFACE:
+      subroutine ESMF_StateAddDataName(state, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      character (len=*), intent(in) :: name
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a {\tt name} to an existing {\tt State}.
+!      The {\tt name} must be unique within the {\tt State}
+!      It is available to be marked {\tt needed} by the
+!      consumer of the export {\tt State}. Then the data 
+!      provider can replace the name with the actual {\tt Bundle},
+!      {\tt Field}, or {\tt Array} which carries the needed data.
+!
+! !REQUIREMENTS: 
+!EOP
+      character(len=*) :: temp_list(1)
+      
+      temp_list(1) = name
+
+      call ESMF_StateAddDataNameList(state, 1, temp_list, rc)      
+
+      end subroutine ESMF_StateAddDataName
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddDataNameList - Add a list of Names as placeholder to a State.
+!
+! !INTERFACE:
+      subroutine ESMF_StateAddDataNameList(state, namecount, namelist, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      integer, intent(in) :: namecount
+      character (len=*), intent(in) :: namelist(:)
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a {\tt name} to an existing {\tt State}.
+!      The {\tt name} must be unique within the {\tt State}
+!      It is available to be marked {\tt needed} by the
+!      consumer of the export {\tt State}. Then the data 
+!      provider can replace the name with the actual {\tt Bundle},
+!      {\tt Field}, or {\tt Array} which carries the needed data.
+!      Unneeded data need not be generated.
+!
+! !REQUIREMENTS: 
+!EOP
+      call ESMF_StateTypeAddDataNameList(state%statep, namecount, namelist, rc)      
+
+      end subroutine ESMF_StateAddDataNameList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateTypeAddDataNameList - internal routine
+!
+! !INTERFACE:
+      subroutine ESMF_StateTypeAddDataNameList(statep, namecount, namelist, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_StateType), intent(inout) :: statep
+      integer, intent(in) :: namecount
+      character (len=*), intent(in) :: namelist(:)
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a list of {\tt name}s to an existing {\tt State}.
+!      The {\tt name}s must be unique within the {\tt State}
+!      They are available to be marked {\tt needed} by the
+!      consumer of the export {\tt State}. Then the data 
+!      provider can replace the name with the actual {\tt Bundle},
+!      {\tt Field}, or {\tt Array} which carries the needed data.
+!      Unneeded data need not be generated.
+!
+! !REQUIREMENTS: 
+!EOP
+
+      integer :: status=ESMF_FAILURE              ! Error status
+      integer :: i                                ! temp var
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code.  Assume failure until success assured.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Add the names in the list, checking for collisions.
+      if(btype%field_count .eq. 0) then
+          allocate(btype%flist(fieldcount), stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
+            return
+          endif
+         
+!         now add the fields to the new list
+          do i=1, fieldcount
+            btype%flist(i) = fields(i)
+          enddo
+
+          btype%field_count = fieldcount
+      else
+!         make a list the right length
+          allocate(temp_flist(btype%field_count + fieldcount), stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
+            return
+          endif
+
+!         preserve old contents
+          do i = 1, btype%field_count
+            temp_flist(i) = btype%flist(i)
+          enddo
+
+!         and append the new fields to the list
+          do i=btype%field_count+1, btype%field_count + fieldcount
+            temp_flist(i) = fields(i)
+          enddo
+
+!         delete old list
+          deallocate(btype%flist, stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
+          endif
+
+!         and now make this the permanent list
+          btype%flist => temp_flist
+          btype%field_count = btype%field_count + fieldcount
+      endif 
+!     If packed data buffer requested, create or update it here.
+      if (btype%pack_flag .eq. ESMF_PACK_FIELD_DATA) then 
+         call ESMF_BundleTypeRepackData(btype, rc=rc)
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateTypeAddDataNameList
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+! 
+! Query for information from the state.
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_StateGetInfo(state, compname, statetype, statecount, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state
+      character (len=*), intent(out), optional :: compname
+      type(ESMF_StateImpExpType), intent(out), optional :: statetype
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns the name of the {\tt Component) this state is associated with.
+!      Also returns the type of {\tt State}, either {\tt Import} or 
+!      {\tt Export}.
+!
+!  \begin{description}     
+!  \item[state]
+!    {\tt State} to query.
+!   \item[[compname]]
+!    Name of the {\tt Component} this {\tt State} is associated with.
+!   \item[[statetype]]
+!    Import or Export {\tt State}.  Returns either {\tt ESMF\_STATEIMPORT},
+!    {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATEUNKNOWN}.
+!   \item[[statecount]]
+!    Count of data items in this {\tt state}, including placeholder names.
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        end subroutine ESMF_StateGetInfo
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_StateGetBundle(state, name, bundle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state
+      character (len=*), intent(in) :: name
+      type(ESMF_Bundle), intent(out) :: bundle
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns a {\tt Bundle} from a {\tt State} by name.
+!
+!  \begin{description}     
+!  \item[state]
+!    State to query for a {\tt Bundle} named {\tt name}.
+!  \item[name]
+!    {\tt Bundle} name to be returned.
+!  \item[bundle]
+!    Where the {\tt bundle} is returned.
+!  \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        end subroutine ESMF_StateGetBundle
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_StateGetField(state, name, field, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state
+      character (len=*), intent(in) :: name
+      type(ESMF_Field), intent(out) :: field
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns a {\tt Field} from a {\tt State} by name.
+!
+!  \begin{description}     
+!  \item[state]
+!    State to query for a {\tt Field} named {\tt name}.
+!  \item[name]
+!    {\tt Field} name to be returned.
+!  \item[field]
+!    Where the {\tt field} is returned.
+!  \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        end subroutine ESMF_StateGetField
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_StateGetArray(state, name, array, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state
+      character (len=*), intent(in) :: name
+      type(ESMF_Array), intent(out) :: array
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns a {\tt Array} from a {\tt State} by name.
+!
+!  \begin{description}     
+!  \item[state]
+!    State to query for a {\tt Array} named {\tt name}.
+!  \item[name]
+!    {\tt Array} name to be returned.
+!  \item[array]
+!    Where the {\tt array} is returned.
+!  \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        end subroutine ESMF_StateGetArray
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
+! This section is I/O for States
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_StateCheckpoint(state, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State):: state 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!      Used to save all data to disk as quickly as possible.  
+!      (see Read/Write for other options).  Internally this routine uses the
+!      same I/O interface as Read/Write, but the default options are to
+!      select the fastest way to save data to disk.
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        end subroutine ESMF_StateCheckpoint
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      function ESMF_StateRestore(name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_State) :: ESMF_StateRestore
+!
+!
+! !ARGUMENTS:
+      character (len = *), intent(in) :: name              ! state name to restore
+      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
+      integer, intent(out), optional :: rc                 ! return code
+!
+! !DESCRIPTION:
+!      Used to reinitialize
+!      all data associated with a State from the last call to Checkpoint.
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        type (ESMF_State) :: a 
+
+!       this is just to shut the compiler up
+        type (ESMF_State), target :: b 
+        a%this => b
+        nullify(a%this)
+
+!
+! TODO: add code here
+!
+
+        ESMF_StateRestore = a 
+ 
+        end function ESMF_StateRestore
+
+
+!------------------------------------------------------------------------------
+!BOP
+!
+!
+! !INTERFACE:
+      subroutine ESMF_StatePrint(state, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_State) :: state
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about an state.
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+       character (len=6) :: defaultopts="brief"
+       integer :: status=ESMF_FAILURE      ! local error status
+       logical :: rcpresent=.FALSE.
+
+!      Initialize return code; assume failure until success is certain
+       if (present(rc)) then
+         rcpresent = .TRUE.
+         rc = ESMF_FAILURE
+       endif
+
+!      ! Interface to call the C++ print code
+       if(present(options)) then
+           call c_ESMC_StatePrint(state%this, options, status) 
+       else
+           call c_ESMC_StatePrint(state%this, defaultopts, status) 
+       endif
+
+       if (status .ne. ESMF_SUCCESS) then
+         print *, "State print error"
+         return
+       endif
+
+!      set return values
+       if (rcpresent) rc = ESMF_SUCCESS
+
+       end subroutine ESMF_StatePrint
+
+
+       end module ESMF_StateMod
+
