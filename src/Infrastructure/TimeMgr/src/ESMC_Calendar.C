@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.74 2004/08/06 22:32:03 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.75 2004/10/27 18:50:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.74 2004/08/06 22:32:03 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.75 2004/10/27 18:50:28 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -999,7 +999,7 @@ int ESMC_Calendar::count=0;
                              (3 * ((yy + 4900 + temp) / 100)) / 4 + dd - 32075;
 
             // convert Julian days to basetime seconds (>= 64 bit)
-            t->s = jdays * secondsPerDay;
+            t->ESMC_FractionSetw(jdays * secondsPerDay);
 
             break;
         }
@@ -1027,11 +1027,13 @@ int ESMC_Calendar::count=0;
             // TODO: upper bounds date range check dependent on machine
             //  word size
 
-            t->s = yy * secondsPerYear;
+            t->ESMC_FractionSetw(yy * secondsPerYear);
             for(int month=0; month < mm-1; month++) {
-              t->s += daysPerMonth[month] * secondsPerDay;
+              t->ESMC_FractionSetw(t->ESMC_FractionGetw() +
+                                   daysPerMonth[month] * secondsPerDay);
             }
-            t->s += (dd-1) * secondsPerDay + 148600915200LL;
+            t->ESMC_FractionSetw(t->ESMC_FractionGetw() +
+                                 (dd-1) * secondsPerDay + 148600915200LL);
                                           // ^ adjust to match Julian time zero
                                           // = (1/1/0000) - (11/24/-4713)
             break;
@@ -1050,9 +1052,9 @@ int ESMC_Calendar::count=0;
             // TODO: upper bounds date range check dependent on machine
             //  word size
 
-            t->s  = yy * secondsPerYear
+            t->ESMC_FractionSetw(yy * secondsPerYear
                   + (mm-1) * 30 * secondsPerDay   // each month has 30 days
-                  + (dd-1) * secondsPerDay + 146565244800LL;
+                  + (dd-1) * secondsPerDay + 146565244800LL);
                                           // ^ adjust to match Julian time zero
                                           // = (1/1/0000) - (11/24/-4713)
             break;
@@ -1075,7 +1077,7 @@ int ESMC_Calendar::count=0;
             //  word size
 
             // convert Julian days to basetime seconds (>= 64 bit)
-            t->s = d * secondsPerDay;
+            t->ESMC_FractionSetw(d * secondsPerDay);
 
             break;
         }
@@ -1162,13 +1164,13 @@ int ESMC_Calendar::count=0;
             //    (4*templ = 2^63)
 
             // convert basetime seconds to Julian days
-            ESMF_KIND_I8 jdays = t->s / secondsPerDay;
+            ESMF_KIND_I8 jdays = t->ESMC_FractionGetw() / secondsPerDay;
 
             if (d != ESMC_NULL_POINTER) {
               if (jdays > INT_MIN && jdays <= INT_MAX) {
                 *d = (ESMF_KIND_I4) jdays;
                 // adjust for negative time (reverse integer division)
-                if (t->s % secondsPerDay < 0) (*d)--;
+                if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d)--;
               } else {
                 // too large to fit in given int
                 char logMsg[ESMF_MAXSTR];
@@ -1181,10 +1183,11 @@ int ESMC_Calendar::count=0;
             if (d_i8 != ESMC_NULL_POINTER) {
               *d_i8 = jdays;
               // adjust for negative time (reverse integer division)
-              if (t->s % secondsPerDay < 0) (*d_i8)--;
+              if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_KIND_R8) t->s / (ESMF_KIND_R8) secondsPerDay;
+              *d_r8 = (ESMF_KIND_R8) t->ESMC_FractionGetw() /
+                                     (ESMF_KIND_R8) secondsPerDay;
             }
 
             // convert Julian days to Gregorian date
@@ -1228,7 +1231,7 @@ int ESMC_Calendar::count=0;
         // convert Time => No Leap Date
         case ESMC_CAL_NOLEAP:
         {
-            ESMF_KIND_I8 tmpS = t->s - 148600915200LL;
+            ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw() - 148600915200LL;
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
@@ -1298,7 +1301,7 @@ int ESMC_Calendar::count=0;
         // convert Time => 360 Day Date
         case ESMC_CAL_360DAY:
         {
-            ESMF_KIND_I8 tmpS = t->s - 146565244800LL;
+            ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw() - 146565244800LL;
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
@@ -1366,11 +1369,11 @@ int ESMC_Calendar::count=0;
         {
             // convert basetime seconds to Julian days
             if (d != ESMC_NULL_POINTER) {
-              ESMF_KIND_I8 day = t->s / secondsPerDay;
+              ESMF_KIND_I8 day = t->ESMC_FractionGetw() / secondsPerDay;
               if (day > INT_MIN && day <= INT_MAX) {
                 *d = (ESMF_KIND_I4) day;    // >= 32-bit
                 // adjust for negative time (reverse integer division)
-                if (t->s % secondsPerDay < 0) (*d)--;
+                if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d)--;
               } else {
                 // too large to fit in given int
                 char logMsg[ESMF_MAXSTR];
@@ -1381,12 +1384,13 @@ int ESMC_Calendar::count=0;
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
-              *d_i8 = t->s / secondsPerDay;  // >= 64-bit
+              *d_i8 = t->ESMC_FractionGetw() / secondsPerDay;  // >= 64-bit
                 // adjust for negative time (reverse integer division)
-                if (t->s % secondsPerDay < 0) (*d_i8)--;
+                if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_KIND_R8) t->s / (ESMF_KIND_R8) secondsPerDay;
+              *d_r8 = (ESMF_KIND_R8) t->ESMC_FractionGetw() /
+                                     (ESMF_KIND_R8) secondsPerDay;
             }
             break;
         }
