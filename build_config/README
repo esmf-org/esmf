@@ -51,30 +51,13 @@ architecture given by ESMF_ARCH.  If a machine's name is used, then
 that particular machine uses makefile settings other then the default
 settings for its architecture.
 
-Current build files for supported platforms:
+The ESMF Users Guide, section 6.2.3, has an exhaustive list of all
+platforms and options for which we provide makefiles, and also a list
+of all platform configurations which are tested regularly and fully
+supported.  The Downloads and Documentation link on the ESMF home page
+also lists the platform configurations which are tested regularly
+and fully supported.
 
-      build_config/AIX.default.default
-                   Darwin.absoft.default
-                   Darwin.xlf.default
-                   IRIX64.default.default
-                   Linux.absoft.default
-                   Linux.intel.default
-                   Linux.lahey.default
-                   Linux.nag.default
-                   Linux.pgi.default
-                   OSF1.default.default
-                   Unicos.default.default
-
-Current build files for unsupported platforms:
-
-      build_config/Darwin.nag.default
-                   Linux.xlf.default
-                   SunOS.default.default
-
-Notice that there is no default compiler value for Linux or Darwin
-(Mac) machines.  This is because there are a number of Fortran90 Linux
-compilers.  If ESMF_COMPILER is left unset then the default value
-for Linux machines will be lahey and for Darwin machines absoft.
 
 Customizing the ESMF Build
 --------------------------
@@ -166,8 +149,8 @@ Environment Variables
                    makefile fragments to point the framework to the location
                    of the include and library files.
 
- ESMF_PREC         Variable specifying the precision.  Value 
-                   can be 32 or 64.  When possible the default 
+ ESMF_PREC         Variable specifying the default pointer size.  
+                   Value can be 32 or 64.  When possible the default 
                    value will be 64, otherwise it will be 32.
 
  ESMF_SITE         If ESMF_SITE is not set or has the value of
@@ -214,7 +197,7 @@ provided only for the supported platforms.
 
 
 ================================================================================
- $Id: README,v 1.18.2.2 2005/03/10 23:54:04 jwolfe Exp $
+ $Id: README,v 1.18.2.3 2005/03/11 17:31:45 nscollins Exp $
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
