@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.86 2004/12/10 18:17:08 nscollins Exp $
+#  $Id: common.mk,v 1.87 2005/01/28 18:15:30 jwolfe Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -738,9 +738,9 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #  Examples Link commands
 #
 $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
-	-$(SL_F_LINKER) -o $@ $< -lesmf ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} \
-	${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} $(SL_LINKOPTS)
-	rm -f  $<
+	-$(SL_F_LINKER) -o $@ $(EXAMPLE_$(*)_OBJS) $< -lesmf ${MPI_LIB} ${MP_LIB} \
+	${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} $(SL_LINKOPTS)
+	${RM} -f *.o *.mod
 
 
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
