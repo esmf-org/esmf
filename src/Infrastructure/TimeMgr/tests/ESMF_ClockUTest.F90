@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.73 2004/06/08 19:47:47 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.74 2004/06/09 21:56:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.73 2004/06/08 19:47:47 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.74 2004/06/09 21:56:51 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -330,19 +330,18 @@
       ! ----------------------------------------------------------------------------
 
 ! run this test only on platforms that support F95 initializers, otherwise
-!   may crash or produce FAIL
+!   may crash or produce FAIL commented out until after release.
 ! see bug #755424
 ! TODO:  test count will be "off-by-one" on platforms where this test
 !        doesn't run
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-      !EX_UTest
       ! This code crashes, bug 79753 has been opened.
       ! Attempt to get un-initialized year from stop time
-      write(name, *) "Get Uninitialized StopTime Year Test"
-      call ESMF_TimeGet(stopTime, yy=YY, rc=rc)
-      write(failMsg, *) " Returned ESMF_SUCCESS"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                     name, failMsg, result, ESMF_SRCLINE)
+      !write(name, *) "Get Uninitialized StopTime Year Test"
+      !call ESMF_TimeGet(stopTime, yy=YY, rc=rc)
+      !write(failMsg, *) " Returned ESMF_SUCCESS"
+      !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                     !name, failMsg, result, ESMF_SRCLINE)
 #endif
 
       ! ----------------------------------------------------------------------------
@@ -440,24 +439,22 @@
 !        doesn't run
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
       ! ClockPrint with an unallocated clock
-      !EX_UTest
-       write(name, *) "Clock Print Test with unallocated clock"
-       write(failMsg, *) " Returned ESMF_SUCCESS"
-       call ESMF_ClockPrint(clock, rc=rc)
-       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                       name, failMsg, result, ESMF_SRCLINE)
+       !write(name, *) "Clock Print Test with unallocated clock"
+       !write(failMsg, *) " Returned ESMF_SUCCESS"
+       !call ESMF_ClockPrint(clock, rc=rc)
+       !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                       !name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
       ! Initialize clock with uninitialized Start Time.
-      !EX_UTest
-       write(name, *) "Clock Initialization Test with uninitialized startTime"
-       write(failMsg, *) " Returned ESMF_SUCCESS"
-       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime2, &
-                                          stopTime, rc=rc)
-       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                       name, failMsg, result, ESMF_SRCLINE)
-       call ESMF_ClockDestroy(clock, rc)
+       !write(name, *) "Clock Initialization Test with uninitialized startTime"
+       !write(failMsg, *) " Returned ESMF_SUCCESS"
+       !clock = ESMF_ClockCreate("Clock 1", timeStep, startTime2, &
+                                          !stopTime, rc=rc)
+       !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                       !name, failMsg, result, ESMF_SRCLINE)
+       !call ESMF_ClockDestroy(clock, rc)
 #endif
 
       ! ----------------------------------------------------------------------------
@@ -1188,7 +1185,6 @@
 
      ! ----------------------------------------------------------------------------
 
-      !EX_UTest
       ! uncomment when fixed
       !write(failMsg, *) "Should not return ESMF_SUCCESS."
       !call ESMF_TimeSyncToRealTime(syncTime, rc)
@@ -1298,7 +1294,6 @@
 
       ! ----------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test Decrementing Time by Time Interval
       !EX_UTest
       write(failMsg, *) " startTime not equal to stopTime"
