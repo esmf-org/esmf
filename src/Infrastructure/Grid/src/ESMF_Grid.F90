@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.179 2004/06/22 18:04:50 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.180 2004/06/22 22:55:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.179 2004/06/22 18:04:50 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.180 2004/06/22 22:55:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1598,6 +1598,12 @@
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be used.
+!     \item[horzrelloc]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[{[vertrelloc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
 !     \item[{[global1D]}]
 !          One-dimensional array of global identifiers to be
 !          translated.  Infers translating between positions in memory.
@@ -1706,6 +1712,12 @@
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be used.
+!     \item[horzrelloc]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[{[vertrelloc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
 !     \item[{[local1D]}]
 !          One-dimensional array of local identifiers to be
 !          translated.  Infers translating between positions in memory.
