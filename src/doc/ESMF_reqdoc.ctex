@@ -1,4 +1,4 @@
-% $Id: ESMF_reqdoc.ctex,v 1.12 2003/07/24 15:50:50 cdeluca Exp $
+% $Id: ESMF_reqdoc.ctex,v 1.13 2003/07/24 20:43:27 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -262,17 +262,31 @@
 
 #include "../Infrastructure/ConfigAttr/doc/Config_reqdoc.ctex"
 
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{arabic{section}}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{References}
+\end{htmlonly}
+\part{References}
+\label{part:References}
+
+%\section{References}
+\bibliography{ESMF}
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{References}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{arabic{section}}
+
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Glossary}
 \end{htmlonly}
 \part{Glossary}
 \label{part:Glossary}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 %\section{Glossary}
 \input{ESMF_terms}
