@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_FEx3.F90,v 1.1 2003/07/11 01:12:05 eschwab Exp $
+! $Id: ESMF_DELayout_FEx3.F90,v 1.2 2003/07/18 01:55:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,13 +30,26 @@ program ESMF_DELayout_FEx3
   integer, dimension(6) :: delist
   integer, dimension(2) :: layoutDims, layoutCommTypes
   integer :: nx, ny, x, y, id, rc
-  real(ESMF_IKIND_R8), dimension(120) :: sArrayR8
-  real(ESMF_IKIND_R8), dimension(20) :: rArrayR8
-  real(ESMF_IKIND_R4), dimension(120) :: sArrayR4
-  real(ESMF_IKIND_R4), dimension(20) :: rArrayR4
-  integer(ESMF_IKIND_I4), dimension(120) :: sArrayI4
-  integer(ESMF_IKIND_I4), dimension(20) :: rArrayI4
-  integer :: i, len, rootDEid
+  integer :: i, len, srcDEid
+
+  real(ESMF_IKIND_R8), dimension(:), pointer :: sArrayR8
+  real(ESMF_IKIND_R8), dimension(:), pointer :: rArrayR8
+  real(ESMF_IKIND_R4), dimension(:), pointer :: sArrayR4
+  real(ESMF_IKIND_R4), dimension(:), pointer :: rArrayR4
+  integer(ESMF_IKIND_I4), dimension(:), pointer :: sArrayI4
+  integer(ESMF_IKIND_I4), dimension(:), pointer :: rArrayI4
+
+  type(ESMF_LocalArray) :: sndArrayR8, rcvArrayR8, &
+                           sndArrayR4, rcvArrayR4, &
+                           sndArrayI4, rcvArrayI4
+
+  ! allocate data arrays
+  allocate(sArrayR8(120))
+  allocate(rArrayR8(20))
+  allocate(sArrayR4(120))
+  allocate(rArrayR4(20))
+  allocate(sArrayI4(120))
+  allocate(rArrayI4(20))
 
   ! 2x3 DE layout
   layoutDims = (/ 2, 3 /)
@@ -75,9 +88,17 @@ program ESMF_DELayout_FEx3
   call ESMF_DELayoutGetDEid(layout, id, rc)
   print *, "ESMF_DELayoutGetDEid(id) = ", id
 
+  ! create ESMF_LocalArray containers for the data arrays
+  sndArrayR8 = ESMF_LocalArrayCreate(sArrayR8, rc=rc)
+  rcvArrayR8 = ESMF_LocalArrayCreate(rArrayR8, rc=rc)
+  sndArrayR4 = ESMF_LocalArrayCreate(sArrayR4, rc=rc)
+  rcvArrayR4 = ESMF_LocalArrayCreate(rArrayR4, rc=rc)
+  sndArrayI4 = ESMF_LocalArrayCreate(sArrayI4, rc=rc)
+  rcvArrayI4 = ESMF_LocalArrayCreate(rArrayI4, rc=rc)
+
   ! root DE populates send array and sends it
-  rootDEid = 2
-  if (id .eq. rootDEid) then
+  srcDEid = 2
+  if (id .eq. srcDEid) then
     do i=1,120
       sArrayR8(i) = i
       sArrayR4(i) = i
@@ -90,16 +111,24 @@ program ESMF_DELayout_FEx3
     print *, "sArrayI4 = ", sArrayI4
   endif
 
-  call ESMF_DELayoutScatter(layout, sArrayR8, rArrayR8, len, rootDEid, rc)
+  ! scatter 'em!
+  call ESMF_DELayoutScatter(layout, sndArrayR8, rcvArrayR8, len, srcDEid, rc)
   print *, "DE ", id, " rArrayR8() = ", rArrayR8
 
-  call ESMF_DELayoutScatter(layout, sArrayR4, rArrayR4, len, rootDEid, rc)
+  call ESMF_DELayoutScatter(layout, sndArrayR4, rcvArrayR4, len, srcDEid, rc)
   print *, "DE ", id, " rArrayR4() = ", rArrayR4
 
-  call ESMF_DELayoutScatter(layout, sArrayI4, rArrayI4, len, rootDEid, rc)
+  call ESMF_DELayoutScatter(layout, sndArrayI4, rcvArrayI4, len, srcDEid, rc)
   print *, "DE ", id, " rArrayI4() = ", rArrayI4
 
+  ! clean up
   call ESMF_DELayoutDestroy(layout, rc)
+  call ESMF_LocalArrayDestroy(sndArrayR8, rc)
+  call ESMF_LocalArrayDestroy(rcvArrayR8, rc)
+  call ESMF_LocalArrayDestroy(sndArrayR4, rc)
+  call ESMF_LocalArrayDestroy(rcvArrayR4, rc)
+  call ESMF_LocalArrayDestroy(sndArrayI4, rc)
+  call ESMF_LocalArrayDestroy(rcvArrayI4, rc)
 
   ! Finalize ESMF
   call ESMF_FrameworkFinalize(rc)
