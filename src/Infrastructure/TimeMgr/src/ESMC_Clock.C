@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.62 2004/06/08 00:28:55 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.63 2004/06/08 21:24:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.62 2004/06/08 00:28:55 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.63 2004/06/08 21:24:47 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -942,8 +942,9 @@ int ESMC_Clock::count=0;
 
     // set current time to wall clock time
     int rc = currTime.ESMC_TimeSyncToRealTime();
-    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
-    return(rc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
+    return(ESMC_ClockValidate());
 
  } // end ESMC_ClockSyncToRealTime
 
