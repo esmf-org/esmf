@@ -3,7 +3,7 @@
 !BOP
 !
 ! !DESCRIPTION:
-! This example demonstrates how to use the VMAllGlobalReduce method to 
+! This example demonstrates how to use the VMAllFullReduce method to 
 ! find the VM-wide global sum of a data set.
 !
 !EOP
@@ -48,7 +48,7 @@ program ESMF_VMTest5Ex
 
 !BOC
   ! global sum
-  call ESMF_VMAllGlobalReduce(vm, array1, result, nsize, ESMF_SUM, rc=rc)
+  call ESMF_VMAllFullReduce(vm, array1, result, nsize, ESMF_SUM, rc=rc)
 !EOC
   
   ! print the scatter result
