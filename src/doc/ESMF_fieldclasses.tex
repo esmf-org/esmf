@@ -60,9 +60,9 @@ how the decomposition maps to the underlying hardware
 and system software.
 \item Communication patterns often include sending multiple
 variables from one decomposition subset to another.  
-The design of the Bundle object
+The design of the {\tt Bundle} class
 allows these to be grouped for efficiency.
-\item The Field object consists of separate grid and data 
+\item The {\tt Field} class consists of separate grid and data 
 objects to allow multiple data items and different data staggerings
 to share the same grid.  The decomposition is based solely on
 the grid, and once the decomposition is defined all corresponding
@@ -86,15 +86,15 @@ and decomposition information, {\tt Data} carries the actual
 data values, and {\tt Fields} and {\tt Bundles} tie these objects 
 together with metadata descriptions.
 
-The {\tt Field} class connects {\tt Data Arrays}, their underlying
-{\tt Grid}s, optional {\tt Mask}s and {\tt IOspec}s and metadata 
+The {\tt Field} class connects {\tt Data}, the underlying
+{\tt Grid}s, optional {\tt Mask}s and {\tt IOSpec}s and metadata 
 {\tt Attribute} objects.  It provides methods
 for setting, retrieving, configuring, and querying its internal classes,
 as well as methods for manipulating the relationship between the
 data and the grid.  It also contains methods for data I/O, either
 between parts of the same {\tt Field} during halo updates and other
 communications, or as 
-Read/Write calls to and from persistent storage.
+read/write calls to and from persistent storage.
 {\tt Field}s uses information from {\tt Grid}s to provide
 two different types of views to the calling code.
 One is a unified logical view of the entire {\tt Field} as a whole,
@@ -150,11 +150,11 @@ related data structures form an hierarchy within a {\tt Gridded Component}.}
 
 \subsubsection{Bundle (ESMF\_Bundle)}
 \label{sec:bundle} 
-A {\tt Bundle} contains one or more Fields which are defined on 
-the same Grid.  It allows the application to manipulate multiple fields in 
+A {\tt Bundle} contains one or more {\tt Field}s which are defined on 
+the same {\tt Grid}.  It allows the application to manipulate multiple fields in 
 an identical manner with a single set of calls.  It also allows the option 
 of interleaving data from multiple fields into a single {\tt Data} array for 
-more efficient memory access patterns.  The Bundle class provides methods 
+more efficient memory access patterns.  The {\tt Bundle} class provides methods 
 for querying information about the underlying grid, for requesting the 
 packing of data, the reordering of that packed data, and detaching and 
 attaching the data.
@@ -185,20 +185,15 @@ It provides methods for returning a pointer to the memory
 location of the start of the data, and conversion routines 
 for altering the characteristics of the data.  
 Information about how the data array is laid
-out in memory is managed by the Ordering class.
+out in memory is managed by the {\tt Ordering} class.
 
-Data Arrays can contain either homogeneous or composite data types 
-(e.g records or structures).
-Data Arrays can be associated with a Field object or with a Bundle object.
-Data associated with a Field object consist of only a single variable.  
-Data associated
-with a Bundle object can have data from multiple Fields packed into a single
-buffer with the items interleaved in memory.  
+{\tt Data} can be associated with a {\tt Field} or with a {\tt Bundle}.
+{\tt Data} associated with a {\tt Field} consists of only a single variable,
+while {\tt Bundle Data} can have data from multiple {\tt Field}s packed 
+into a single buffer with the items interleaved in memory.  
 The application may use a packed array to increase
 locality of reference while iterating the array, 
 or for ease in subsetting multiple data values in one operation.
-Information about the multi-field packing and methods to reorder the
-data are managed by the Ordering class.
 
 
 \subsubsection{Ordering (ESMF\_Ordering)}
@@ -224,44 +219,42 @@ decomposition information.
 
 \subsubsection{Physical Grid (ESMF\_PhysGrid)}
 \label{sec:physgrid} 
-A Physical Grid is a discrete representation of a continuous physical space.
-There are a multitude of types of physical grids.
-The grid contains the physical coordinates, sometimes as data values, but possibly
+A {\tt Physical Grid} is a discrete representation of a continuous physical space.  It contains the physical coordinates, sometimes as data values, but possibly
 as a parametric description of the actual locations.  
-The PhysGrid class provides methods for creating a variety of grid 
+The {\tt Physical Grid} class provides methods for creating a variety of grid 
 types, including both reading grid information
 and generating grids from parameters.  It provides methods for regridding, or translating
 one grid to another, used for example when exchanging data through the coupler.
-The PhysGrid class does not handle grid decomposition issues related to 
-distributed processing; see the Distributed Grid class in Section~\ref{sec:distgrid}.
+The {\tt Physical Grid} class does not handle grid decomposition issues related to 
+distributed processing; see the {\tt Distributed Grid} class in 
+Section~\ref{sec:distgrid}.
 
 \subsubsection{Distributed Grid (ESMF\_DistGrid)} 
 \label{sec:distgrid} 
-A Distributed Grid is a collection of subgrids which
+A {\tt Distributed Grid} is a collection of subgrids which
 constitute a single logical grid.  The subgrids can be operated on in
-parallel on a multiple processor machine.  The DistGrid class contains the mapping
+parallel on a multiprocessor machine.  The {\tt Distributed Grid} class contains the mapping
 between the local grid decompositions and the global logical grid. 
 It contains methods to 
 synchronize data values between the boundaries of subsets, and to
 collect and communicate global data values.  It interacts closely with
-the Physical Grid object (see Section~\ref{sec:physgrid}).
-It uses a Layout object to identify and manage the processing elements 
-available for the computation.
+the {\tt Physical Grid} object (see Section~\ref{sec:physgrid}).
 
-\subsubsection{Input/Output Specification (ESMF\_IOspec)}
+\subsubsection{Input/Output Specification (ESMF\_IOSpec)}
 \label{sec:iospec} 
-An Input/Output specfication contains all 
+An {\tt Input/Output Specification} contains all 
 information necessary to read or write objects.  It includes the 
 destination information (e.g. file, socket), the name,
 the format, and any additional parameters needed to complete the I/O.
-The IOspec class provides a format-independent layer by
-providing generic methods such as Initialize/Finalize, Open/Close, 
-and Read/Write which are not specific to any one input or output format.
+The {\tt IOSpec} class provides a format-independent layer by
+providing generic methods such as initialize/finalize, open/close, 
+and read/write which are not specific to any one input or output format.
 The methods
 within the IO layer will encapsulate format dependent parameters and calls.
-The IO layer will write not only the simulation output (large, computational
-data) but also the metadata which is required to document what the data is
-and information about how it was generated.
+The {\tt IOSpec} will write not only the simulation output 
+but also the metadata which is required to document what the data is
+and information about how it was generated.  (This may be implicit in
+some formats.)
 The ESMF will probably strive simply to
 support the existing variety of file formats which are in common use in
 the climate community, but looking forward

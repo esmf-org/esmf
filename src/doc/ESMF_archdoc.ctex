@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.ctex,v 1.4 2002/09/09 23:23:29 cdeluca Exp $
+% $Id: ESMF_archdoc.ctex,v 1.5 2002/09/10 18:11:35 cdeluca Exp $
 
 %
 \documentclass[]{article}
@@ -81,7 +81,7 @@
 \section{Review Status}
 
 \noindent{\bf Architecture Review}
-\input{ESMF_auth}
+\input{ESMF_archauth}
 
 \section{Bibliography}
 \bibliography{ESMF} 
