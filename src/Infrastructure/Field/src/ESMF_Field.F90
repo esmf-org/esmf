@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.60 2003/08/13 22:58:35 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.61 2003/08/14 21:55:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -227,7 +227,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.60 2003/08/13 22:58:35 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.61 2003/08/14 21:55:23 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2494,6 +2494,7 @@
       integer, dimension(:,:), allocatable :: global_start
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: ai_global
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
       type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
       integer :: AI_count
 
@@ -2536,6 +2537,8 @@
       allocate(global_start(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(gl_src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(gl_dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       call ESMF_GridGet(ftypep%grid, global_cell_dim=global_count, &
                         global_start=global_start, &
                         periodic=periodic, rc=status)
@@ -2543,36 +2546,42 @@
          print *, "ERROR in FieldHalo: GridGet returned failure"
          return
       endif
-      call ESMF_GridGetDE(ftypep%grid, ai_global=ai_global, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-         print *, "ERROR in FieldHalo: GridGetDE returned failure"
-         return
-      endif
-      ! TODO:  once the system test for periodic boundaries functions,
-      !        clean up this part -- if AI's can go in as global, then no
-      !        need for global_ai
 
       ! set up things we need to find a cached route or precompute one
       call ESMF_ArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%grid, &
                                        totalindex=dst_AI, compindex=src_AI, &
                                        rc=status)       
+
+      ! translate AI's into global numbering
+      call ESMF_GridLocalToGlobalIndex(ftypep%grid, localAI2D=dst_AI, &
+                                       globalAI2D=gl_dst_AI, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+         print *, "ERROR in FieldHalo: GridLocalToGlobalIndex returned failure"
+         return
+      endif
+      call ESMF_GridLocalToGlobalIndex(ftypep%grid, localAI2D=src_AI, &
+                                       globalAI2D=gl_src_AI, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+         print *, "ERROR in FieldHalo: GridLocalToGlobalIndex returned failure"
+         return
+      endif
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
-       call ESMF_RouteGetCached(datarank, my_DE, dst_AI, dst_AI, &
-                                AI_count, layout, my_DE, src_AI, src_AI, &
-                                AI_count, layout, periodic, &
-                                hascachedroute, route, status)
+      call ESMF_RouteGetCached(datarank, my_DE, gl_dst_AI, gl_dst_AI, &
+                               AI_count, layout, my_DE, gl_src_AI, gl_src_AI, &
+                               AI_count, layout, periodic, &
+                               hascachedroute, route, status)
 
-       if (.not. hascachedroute) then
+      if (.not. hascachedroute) then
           ! Create the route object.
           route = ESMF_RouteCreate(layout, rc) 
 
-          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, src_AI, dst_AI, &
-                                        AI_count, global_start, global_count, &
-                                        ai_global, layout, periodic, status)
+          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
+                                        gl_dst_AI, AI_count, global_start, &
+                                        global_count, layout, periodic, status)
 
-       endif
+      endif
 
       ! Once table is full, execute the communications it represents.
 
@@ -2590,6 +2599,8 @@
       if (allocated(global_start)) deallocate(global_start, stat=status)
       if (associated(src_AI)) deallocate(src_AI, stat=status)
       if (associated(dst_AI)) deallocate(dst_AI, stat=status)
+      if (associated(gl_src_AI)) deallocate(gl_src_AI, stat=status)
+      if (associated(gl_dst_AI)) deallocate(gl_dst_AI, stat=status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -2932,6 +2943,8 @@
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_exc, gl_dst_AI_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_tot, gl_dst_AI_tot
       integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
       integer, dimension(:,:), allocatable :: src_global_start
       integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
@@ -3041,9 +3054,16 @@
 
           allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(gl_src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(gl_src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(stypep%localfield%localdata, &
                                            stypep%grid, src_AI_tot, &
                                            src_AI_exc, rc=rc)
+          ! translate the AI's to global index
+          call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_tot, &
+                                           globalAI2D=gl_src_AI_tot, rc=rc)
+          call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_exc, &
+                                           globalAI2D=gl_src_AI_exc, rc=rc)
       else
           AI_snd_count = 0
       endif
@@ -3057,9 +3077,16 @@
 
           allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(gl_dst_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(gl_dst_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(dtypep%localfield%localdata, &
                                            dtypep%grid, dst_AI_tot, &
                                            dst_AI_exc, rc=rc)
+          ! translate the AI's to global index
+          call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_tot, &
+                                           globalAI2D=gl_dst_AI_tot, rc=rc)
+          call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_exc, &
+                                           globalAI2D=gl_dst_AI_exc, rc=rc)
       else
           AI_rcv_count = 0
       endif
@@ -3084,10 +3111,10 @@
           route = ESMF_RouteCreate(parentlayout, rc) 
 
           call ESMF_RoutePrecomputeRedist(route, datarank, &
-                                    my_dst_DE, dst_AI_exc, dst_AI_tot, &
+                                    my_dst_DE, gl_dst_AI_exc, gl_dst_AI_tot, &
                                     AI_rcv_count, dst_global_start, &
                                     dst_global_count, dstlayout,  &
-                                    my_src_DE, src_AI_exc, src_AI_tot, &
+                                    my_src_DE, gl_src_AI_exc, gl_src_AI_tot, &
                                     AI_snd_count, src_global_start, &
                                     src_global_count, srclayout, &
                                     rc=status)
@@ -3123,6 +3150,10 @@
       if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
       if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
       if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
+      if (associated(gl_src_AI_tot)) deallocate(gl_src_AI_tot, stat=status)
+      if (associated(gl_src_AI_exc)) deallocate(gl_src_AI_exc, stat=status)
+      if (associated(gl_dst_AI_tot)) deallocate(gl_dst_AI_tot, stat=status)
+      if (associated(gl_dst_AI_exc)) deallocate(gl_dst_AI_exc, stat=status)
       if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
       if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
 
