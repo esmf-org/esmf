@@ -34,9 +34,16 @@
       character, parameter :: fname ='ESMF_Resource_File_Sample.rc'
       integer, parameter   :: nDE_0 = 32      
       real, parameter      :: tau_0 = 14.0
-      character, parameter ::restart_file_0 = 'RestartFile123'
-      character(len=1)   :: answer_0 = 'y'
- 
+      character, parameter :: restart_file_0 = 'RestartFile123'
+      character, parameter   :: answer_0 = 'y'
+      character, parameter :: u_dataType_0 = 'u_UprAir'
+      character, parameter :: v_dataType_0 = 'v_UprAir'
+      integer, parameter   :: nu_0 = 6
+      integer, parameter   :: nv_0 = 6
+      real, dimension(nu_0), parameter :: sigU_0 = (/ 2.0, 2.0, 2.2, 2.3, 2.7, 3.2 /)
+      real, dimension(nv_0), parameter :: sigV_0 = (/ 2.2, 2.2, 2.3, 2.7, 3.2, 3.4 /) 
+
+
       character(len=255) :: restart_file
       integer :: rc
       logical :: unique
@@ -184,33 +191,140 @@
 
 
       rc = 0
-
+ 
+!*********************************************************************
       call ESMF_ConfigFindLabel ( cf, 'u-wind-error:', rc ) ! identifies label
-      call ESMF_ConfigGetString ( cf, u_dataType, rc =rc )  ! first token
+!*********************************************************************
+      counter_total =counter_total + 1
+      if (rc == 0) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigFindLabel failed, rc =', rc 
+         go to 100        
+      endif
 
-      print *,'ESMF_ConfigGetString: u_dataType= ', u_dataType, &
-           ' rc =', rc
+!*********************************************************************
+      call ESMF_ConfigGetString ( cf, u_dataType, rc =rc )  ! first token   
+!*********************************************************************
+      counter_total =counter_total + 1
+      if (rc /= 0) then
+         print *,'ESMF_ConfigGetString failed, rc =', rc
+         go to 100
+      endif
 
+      if(u_dataType ==  u_dataType_0) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigGetString ERROR: got  =', u_dataType, &
+              ' should be', u_dataType_0
+         go to 100
+      endif
+
+
+!*********************************************************************
       nu = ESMF_ConfigGetInt ( cf, rc = rc )                 ! second token
-      print *,'ESMF_ConfigGetInts: nu =', nu, ' rc =', rc
+!*********************************************************************
+      counter_total =counter_total + 1
+      if (rc /= 0) then
+         print *,'ESMF_ConfigGetInt failed, rc =', rc
+         go to 100
+      endif
 
-      call ESMF_ConfigGetFloats ( cf, sigU, nu,  rc=rc )     ! tokens 3 thru 8 
-      print *,'ESMF_ConfigGetFloats: sigU(1,', nu,') =', &
-           sigU(1:nu), ' rc =', rc 
+      if( nu == nu_0 ) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigGetInt ERROR: got  =', nu, &
+              ' should be', nu_0 
+         go to 100
+      endif
 
+!*********************************************************************
+      call ESMF_ConfigGetFloats ( cf, sigU, nu,  rc=rc )     ! tokens 3 thru 8
+!*********************************************************************
+      counter_total =counter_total + 1
+      if (rc /= 0) then
+         print *,'ESMF_ConfigGetFloats failed, rc =', rc
+         go to 100
+      endif
+
+      if( any(sigU /= sigU_0) ) then
+         print *,'ESMF_ConfigGetInt ERROR: got sigU =', sigU(1:nu), &
+              ' should be sigU =', sigU_0(1:nu) 
+         go to 100
+      else
+         counter_success =counter_success + 1
+      endif
+
+!----------------
+100   continue
+!----------------
+
+!*********************************************************************
       call ESMF_ConfigFindLabel ( cf, 'v-wind-error:', rc )
+!*********************************************************************
+      counter_total =counter_total + 1
+      if (rc == 0) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigFindLabel failed, rc =', rc 
+         go to 200        
+      endif
 
+!*********************************************************************
       call ESMF_ConfigGetString ( cf, v_dataType, rc = rc )
-      print *,'ESMF_ConfigGetString: v_dataType= ', v_dataType, &
-           ' rc =', rc
+!*********************************************************************
+      counter_total =counter_total + 1
+      if (rc /= 0) then
+         print *,'ESMF_ConfigGetString failed, rc =', rc
+         go to 200
+      endif
 
+      if(v_dataType ==  v_dataType_0) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigGetString ERROR: got  =', v_dataType, &
+              ' should be', v_dataType_0
+         go to 200
+      endif
+
+!*********************************************************************
       nv = ESMF_ConfigGetInt ( cf, rc = rc )
-      print *,'ESMF_ConfigGetInts: nv =', nv, ' rc =', rc
+!*********************************************************************
+      counter_total =counter_total + 1
+      if (rc /= 0) then
+         print *,'ESMF_ConfigGetInt failed, rc =', rc
+         go to 200
+      endif
 
+      if( nv == nv_0 ) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigGetInt ERROR: got  =', nv, &
+              ' should be', nv_0 
+         go to 200
+      endif
+
+!*********************************************************************
       call ESMF_ConfigGetFloats ( cf, sigV, nsize=nv, rc=rc )
-      print *,'ESMF_ConfigGetFloats: sigV(1,', nv,') =', &
-           sigV(1:nv), ' rc =', rc 
+!*********************************************************************
 
+      counter_total =counter_total + 1
+      if (rc /= 0) then
+         print *,'ESMF_ConfigGetFloats failed, rc =', rc
+         go to 200
+      endif
+
+      if( any(sigV /= sigV_0) ) then
+         print *,'ESMF_ConfigGetInt ERROR: got sigV =', sigV(1:nv), &
+              ' should be sigV =', sigV_0(1:nv) 
+         go to 200
+      else
+        counter_success =counter_success + 1
+      endif
+
+!----------------
+200   continue
+!----------------
   
 ! NOTE: Order is not relevant; first label found is returned
 
