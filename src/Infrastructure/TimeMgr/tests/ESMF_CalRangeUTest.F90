@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.1 2003/05/02 01:11:24 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.2 2003/05/07 16:53:12 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.1 2003/05/02 01:11:24 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.2 2003/05/07 16:53:12 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -51,7 +51,7 @@
       integer(ESMF_IKIND_I8), parameter :: ly1 = 400, ly2 = 4, ly3 = 100
       integer(ESMF_IKIND_I8), parameter :: tenthousand = 10000
       integer, parameter :: HIGH_LO = 1, HIGH_HI = 2
-      integer :: test
+      integer :: test, first_test, last_test
       logical :: broken, done
       integer :: rc
 
@@ -155,7 +155,15 @@
       ! range (TODO: parallelize?)                                       !
       !------------------------------------------------------------------!
 
-      do test = HIGH_LO, HIGH_HI
+#ifdef ESMF_EXHAUSTIVE
+      first_test = HIGH_LO
+      last_test  = HIGH_HI
+#else
+      first_test = HIGH_HI
+      last_test  = HIGH_HI
+#endif
+
+      do test = first_test, last_test
 
         if (test.eq.HIGH_LO) then
 
@@ -183,6 +191,7 @@
           D = D * 100000  !  since F90 constants
           D = D + 67300   !    are 32-bit
 
+#ifdef ESMF_EXHAUSTIVE
           ! start back a few 10,000 years, then come forward
           D = D - 20000000
 
@@ -192,6 +201,17 @@
           YR = YR + 156   !     are 32-bit
           MM = 9
           DD = 7
+#else
+          ! start back 1000 days, then come forward
+          D = D - 1000
+
+          ! matching start date is February 2, 292,277,019,912
+          YR = 292277019  ! break up initialization,
+          YR = YR * 1000  !   since F90 constants
+          YR = YR + 912   !     are 32-bit
+          MM = 2
+          DD = 2
+#endif
 
         endif
 
