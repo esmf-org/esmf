@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.5 2004/03/16 18:00:52 nscollins Exp $
+#  $Id: build_rules.mk,v 1.6 2004/05/15 00:25:51 slswift Exp $
 #
 #  Darwin.nag.default.mk
 #
@@ -21,6 +21,22 @@ endif
 
 
 ############################################################
+#
+#  The following naming convention is used:
+#     XXX_LIB - location of library XXX
+#     XXX_INCLUDE - directory for include files needed for library XXX
+#
+# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
+# for information on retrieving them.
+#
+#
+BLAS_LIB         = -L/sw/lib -latlas
+LAPACK_LIB       = -L/sw/lib -llapack
+NETCDF_LIB       = -L/sw/lib -lnetcdf
+NETCDF_INCLUDE   = -I/sw/include
+HDF_LIB          = -L/sw/lib/ -lmfhdf -ldf -ljpeg -lz
+HDF_INCLUDE      = -I/sw/include
+
 # Location of MPI (Message Passing Interface) software
 
 # comment in one or the other, depending on whether you have

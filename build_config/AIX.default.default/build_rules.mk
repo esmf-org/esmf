@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.13 2004/05/04 22:30:54 slswift Exp $
+#  $Id: build_rules.mk,v 1.14 2004/05/15 00:25:51 slswift Exp $
 #
 #  AIX.default.default.mk
 #
@@ -17,8 +17,7 @@ endif
 ############################################################
 #
 # ? Location of MPI.  the following is an older comment.
-# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
-# for information on retrieving them.
+# Location of BLAS and LAPACK.  
 #
 # Important: If you use the IBM version of lapack you must include 
 #  -lessl at the end of the line defining the BLAS libraries.
@@ -27,12 +26,26 @@ endif
 # PCONF line at the bottom of this file.
 #
 BLAS_LIB         = -lblas ${FC_LIB}
+
+ifeq ($(ESMF_PREC),32)
 # LAPACK_LIB     =  -lesslp2 -L/usr/local/lib32/r4i4 -llapack
 LAPACK_LIB       =  -L/usr/local/lib32/r4i4 -llapack -lessl
 NETCDF_INCLUDE   = -I/usr/local/include
 NETCDF_LIB       = -L/usr/local/lib32/r4i4 -lnetcdf
-NETCDF64_INCLUDE = -I/usr/local/include
-NETCDF64_LIB     = -L/usr/local/lib64/r4i4 -lnetcdf
+HDF_INCLUDE	 = -I/usr/local/include/hdf
+HDF_LIB		 = -L/usr/local/lib32/r4i4 -lmfhdf
+endif
+# end 32 bit section
+ifeq ($(ESMF_PREC),64)
+# LAPACK_LIB     =  -lesslp2 -L/usr/local/lib64/r4i4 -llapack
+LAPACK_LIB       =  -L/usr/local/lib64/r4i4 -llapack -lessl
+NETCDF_INCLUDE = -I/usr/local/include
+NETCDF_LIB     = -L/usr/local/lib64/r4i4 -lnetcdf
+HDF_INCLUDE	 = -I/usr/local/include/hdf
+HDF_LIB		 = -L/usr/local/lib64/r4i4 -lmfhdf
+endif
+# end 64 bit section
+
 #
 # Location of MPI (Message Passing Interface) software
 #
@@ -44,7 +57,6 @@ MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.rs6000_sp
 #MPI64_LIB      = -L/usr/local/mpi64/ppe.poe/lib -lmpi_r -lvtd_r \
 #		 -L/usr/local/mpi64/ppe.poe/lib/us -lmpci_r
 MPI64_LIB      = -lmpi_r -lvtd_r -lmpci_r
-HDF_INCLUDE    = -I/usr/local/include/hdf
 endif
 
 ifeq ($(ESMF_COMM),mpiuni)
@@ -202,8 +214,6 @@ OCOMP_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 SL_SUFFIX   = so
 SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
 SL_LINKOPTS = -brtl
-#SL_LIB_LINKER = mpCC_r -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
-#SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_LIBS_TO_MAKE = libesmf

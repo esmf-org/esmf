@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.6 2004/04/30 21:00:56 nscollins Exp $
+#  $Id: build_rules.mk,v 1.7 2004/05/15 00:25:52 slswift Exp $
 #
 #  Linus.absoft.default.mk
 #
@@ -27,6 +27,21 @@ endif
 
 ############################################################
 #
+#  The following naming convention is used:
+#     XXX_LIB - location of library XXX
+#     XXX_INCLUDE - directory for include files needed for library XXX
+#
+# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
+# for information on retrieving them.
+#
+#
+BLAS_LIB         = -L/usr/local/lib -latlas
+LAPACK_LIB       = -L/usr/local/lib -llapack
+NETCDF_LIB       = -L/usr/local/lib -lnetcdf
+NETCDF_INCLUDE   = -I/usr/local/include
+HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
+HDF_INCLUDE      = -I/usr/local/include
+
 # Location of MPI (Message Passing Interface) software
 
 # comment in one or the other, depending on whether you have

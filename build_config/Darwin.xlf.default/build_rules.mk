@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.1 2004/03/18 22:29:55 nscollins Exp $
+#  $Id: build_rules.mk,v 1.2 2004/05/15 00:25:52 slswift Exp $
 #
 #  Darwin.xlf.default.mk
 #
@@ -16,11 +16,29 @@ export ESMF_COMM := mpiuni
 endif
 
 
-
 ############################################################
 #
-# Location of MPI (Message Passing Interface) software
+#  The following naming convention is used:
+#     XXX_LIB - location of library XXX
+#     XXX_INCLUDE - directory for include files needed for library XXX
 #
+# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
+# for information on retrieving them.
+#
+#
+BLAS_LIB         = -L/sw/lib -latlas
+LAPACK_LIB       = -L/sw/lib -llapack
+NETCDF_LIB       = -L/sw/lib -lnetcdf
+NETCDF_INCLUDE   = -I/sw/include
+HDF_LIB          = -L/sw/lib/ -lmfhdf -ldf -ljpeg -lz
+HDF_INCLUDE      = -I/sw/include
+
+# Location of MPI (Message Passing Interface) software
+
+# comment in one or the other, depending on whether you have
+# installed the mpich library.  (the first section assumes
+# it is installed under /usr/local - change MPI_HOME if other dir.)
+
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed in /usr/local:
 MPI_HOME       =

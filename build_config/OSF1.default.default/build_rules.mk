@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.8 2004/05/14 22:34:23 slswift Exp $
+#  $Id: build_rules.mk,v 1.9 2004/05/15 00:25:53 slswift Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -34,12 +34,7 @@ BLAS_LIB         =
 LAPACK_LIB       = -L/usr/lib -lcxml
 NETCDF_LIB       = -L/usr/local/unsupported/netcdf-3.5.0/lib -lnetcdf
 NETCDF_INCLUDE   = -I/usr/local/unsupported/netcdf-3.5.0/include
-NETCDF64_LIB     = -L/usr/local/unsupported/netcdf-3.5.0/lib -lnetcdf
-NETCDF64_INCLUDE = -I/usr/local/unsupported/netcdf-3.5.0/include
-HDF_LIB          = /usr/local/unsupported/HDF4.1r5/lib/libmfhdf.a \
-                   /usr/local/unsupported/HDF4.1r5/lib/libdf.a \
-                   /usr/local/unsupported/HDF4.1r5/lib/libjpeg.a \
-                   /usr/local/unsupported/HDF4.1r5/lib/libz.a
+HDF_LIB          = -L/usr/local/unsupported/HDF4.1r5/lib/ -lmfhdf -ldf -ljpeg -lz
 HDF_INCLUDE      = -I/usr/local/unsupported/HDF4.1r5/include
 #
 # Location of MPI (Message Passing Interface) software

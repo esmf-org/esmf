@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2004/04/28 20:32:13 nscollins Exp $
+# $Id: build_rules.mk,v 1.8 2004/05/15 00:25:52 slswift Exp $
 #
 # Linux.intel.default.mk
 #
@@ -16,6 +16,51 @@ endif
 # if using PBS system, export this for run time
 ifdef PBS_NODEFILE
 export ESMF_NODES := -machinefile $(PBS_NODEFILE)
+endif
+
+############################################################
+#
+#  The following naming convention is used:
+#     XXX_LIB - location of library XXX
+#     XXX_INCLUDE - directory for include files needed for library XXX
+#
+# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
+# for information on retrieving them.
+#
+# BLAS usually comes with SGI. Do NOT use the parallel (library names with 
+# mp in them) version of the SGI BLAS.
+#
+BLAS_LIB       = -lscs ${FC_LIB}
+LAPACK_LIB     = -lscs
+ifeq ($(ESMF_PREC),32)
+NETCDF_LIB       = -L/usr/freeware/lib32 -lnetcdf
+NETCDF_INCLUDE   = -I/usr/freeware/include
+HDF_LIB          = -L /usr/freeware/lib32 -lmfhdf -ldf -ljpeg -lz
+HDF_INCLUDE      = -I /usr/freeware/include
+endif
+# end 32 bit section
+ifeq ($(ESMF_PREC),64)
+NETCDF_LIB       = -L/usr/freeware/lib64 -lnetcdf
+NETCDF_INCLUDE   = -I/usr/freeware/include
+HDF_LIB          = -L /usr/freeware/lib64 -lmfhdf -ldf -ljpeg -lz
+HDF_INCLUDE      = -I /usr/freeware/include
+endif
+# end 64 bit section
+#
+# Location of MPI (Message Passing Interface) software  
+#
+# We recommend using SGI's MPI implementation over MPICH on the Origin and 
+# Powerchallenge.
+#
+# If you are using the MPICH implementation of MPI with version BELOW 1.1,
+# you should remove the -DESMC_HAVE_INT_MPI_COMM. If you are using MPICH 
+# Version 1.1 or SGI's version of MPI you MUST retain it.
+#
+ifeq ($(ESMF_COMM),mpi)
+ESMC_MPIRUN      = mpirun 
+MPI_LIB        = -lmpi -lmpi++
+MPI_INCLUDE     = -DESMC_HAVE_INT_MPI_COMM
+MPIRUN          = ${ESMC_MPIRUN}
 endif
 
 # Location of MPI (Message Passing Interface) software

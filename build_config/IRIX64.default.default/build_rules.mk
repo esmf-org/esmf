@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2004/04/27 21:04:59 slswift Exp $
+# $Id: build_rules.mk,v 1.7 2004/05/15 00:25:52 slswift Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -25,19 +25,22 @@ endif
 # BLAS usually comes with SGI. Do NOT use the parallel (library names with 
 # mp in them) version of the SGI BLAS.
 #
-BLAS_LIB       = -lblas ${FC_LIB}
-LAPACK_LIB     = -lcomplib.sgimath
-#BLAS_LIB     = /home/alice/software/blaslapack/blas_IRIX64.a ${FC_LIB}
-#LAPACK_LIB     = /home/alice/software/blaslapack/lapack_IRIX64.a
-NETCDF_LIB       = -L/ford1/local/irix5.3/pkg/netcdf-3.5.1/lib -lnetcdf
-NETCDF_INCLUDE   = -I/ford1/local/irix5.3/pkg/netcdf-3.5.1/include
-NETCDF64_LIB     = -L/ford1/local/irix5.3/pkg/netcdf-3.5.1/lib -lnetcdf
-NETCDF64_INCLUDE = -I/ford1/local/irix5.3/pkg/netcdf-3.5.1/include
-HDF_LIB          = /ford1/local/irix5.3/hdf4.1r2/lib/libmfhdf.a \
-                   /ford1/local/irix5.3/hdf4.1r2/lib/libdf.a \
-                   /ford1/local/irix5.3/hdf4.1r2/lib/libjpeg.a \
-                   /ford1/local/irix5.3/hdf4.1r2/lib/libz.a
-HDF_INCLUDE      = -I/ford1/local/irix5.3/hdf4.1r2/include
+BLAS_LIB       = -latlas ${FC_LIB}
+LAPACK_LIB     = -llapacko
+ifeq ($(ESMF_PREC),32)
+NETCDF_LIB       = -L/usr/local/lib -lnetcdf
+NETCDF_INCLUDE   = -I/usr/local/include
+HDF_LIB          = -L /usr/local/lib -lmfhdf -ldf -ljpeg -lz
+HDF_INCLUDE      = -I /usr/local/include
+endif
+# end 32 bit section
+ifeq ($(ESMF_PREC),64)
+NETCDF_LIB       = -L/usr/local/lib -lnetcdf
+NETCDF_INCLUDE   = -I/usr/local/include
+HDF_LIB          = -L /usr/local/lib -lmfhdf -ldf -ljpeg -lz
+HDF_INCLUDE      = -I /usr/local/include
+endif
+# end 64 bit section
 #
 # Location of MPI (Message Passing Interface) software  
 #

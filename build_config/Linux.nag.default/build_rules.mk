@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.8 2004/03/18 20:28:21 nscollins Exp $
+#  $Id: build_rules.mk,v 1.9 2004/05/15 00:25:53 slswift Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -31,6 +31,16 @@ endif
 #     XXX_LIB - location of library XXX
 #     XXX_INCLUDE - directory for include files needed for library XXX
 #
+# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
+# for information on retrieving them.
+#
+#
+BLAS_LIB         = -L/usr/local/lib -latlas
+LAPACK_LIB       = -L/usr/local/lib -llapack
+NETCDF_LIB       = -L/usr/local/lib -lnetcdf
+NETCDF_INCLUDE   = -I/usr/local/include
+HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
+HDF_INCLUDE      = -I/usr/local/include
 
 # Location of MPI (Message Passing Interface) software
 
