@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.30 2003/08/27 14:26:06 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.31 2003/08/29 21:10:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.30 2003/08/27 14:26:06 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.31 2003/08/29 21:10:24 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -912,8 +912,8 @@
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: rank
       integer, intent(in) :: my_DE
-      type(ESMF_DomainList), pointer :: sendDomainList
-      type(ESMF_DomainList), pointer :: recvDomainList
+      type(ESMF_DomainList) :: sendDomainList
+      type(ESMF_DomainList) :: recvDomainList
       integer, intent(out), optional :: rc
 
 !
