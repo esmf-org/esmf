@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/18 21:59:21 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/19 21:16:10 jwolfe Exp $ 
 
 ALL: system_tests
 
@@ -14,7 +14,7 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/system_tests/ArrayRedist
 
-SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ArrayRedist
+SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
@@ -38,11 +38,11 @@ CLOBBERDIRS =
 
 RUN_ArrayRedist:
 	-@rm -f testlog stdlog.* logfile.* ArrayRedist.tmps
-	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ArrayRedist > $(ESMC_TESTDIR)/ArrayRedist.stdout
+	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest > $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest.stdout
 
 RUN_ArrayRedistUNI:
-	-@rm -f testlog stdlog.* logfile.* ArrayRedist.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ArrayRedist > $(ESMC_TESTDIR)/ArrayRedist.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayRedistSTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest > $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest.stdout
 
 ArrayRedist.rm:
 	echo "ArrayRedist.rm target called here."
