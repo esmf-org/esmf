@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.31 2003/04/14 15:21:22 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.32 2003/04/14 15:53:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.31 2003/04/14 15:21:22 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.32 2003/04/14 15:53:57 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2019,7 +2019,7 @@ end function
             endif
 
             dataitem%otype = ESMF_STATESTATE
-            dataitem%datap%spp = states(i)%statep
+            dataitem%datap%spp => states(i)%statep
         
             dataitem%needed = ESMF_STATEDATAISNEEDED
             dataitem%ready = ESMF_STATEDATAREADYTOREAD
@@ -2069,7 +2069,7 @@ end function
               print *, "Error: adding state to a state"
               return
             endif
-            nextitem%datap%spp = states(i)%statep
+            nextitem%datap%spp => states(i)%statep
  
             nextitem%needed = ESMF_STATEDATAISNEEDED
             nextitem%ready = ESMF_STATEDATAREADYTOREAD
@@ -3029,7 +3029,7 @@ end function
           return
       endif
 
-      nestedstate%statep = dataitem%datap%spp
+      nestedstate%statep => dataitem%datap%spp
 
       if (present(rc)) rc=ESMF_SUCCESS
 
