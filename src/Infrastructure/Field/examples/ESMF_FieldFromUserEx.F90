@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldFromUserEx.F90,v 1.1 2005/01/28 18:13:58 jwolfe Exp $
+! $Id: ESMF_FieldFromUserEx.F90,v 1.2 2005/02/09 00:37:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -147,7 +147,8 @@
                                      dataIndexList=dataIndexList, rc=rc)
     field2 = ESMF_FieldCreate(grid, f90ptr2, ESMF_DATA_REF, &
                               horzRelloc=ESMF_CELL_CENTER, &
-                              datamap=datamap, name="concentration", rc=rc)
+                              datamap=datamap, name="concentration", &
+                              haloWidth=halo, rc=rc)
 
     call ESMF_FieldPrint(field1, "", rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
