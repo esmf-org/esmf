@@ -1,11 +1,11 @@
-% $Id: Grid_implnotes.tex,v 1.4 2003/11/17 20:48:57 jwolfe Exp $
+% $Id: Grid_implnotes.tex,v 1.5 2004/08/16 22:53:57 jwolfe Exp $
 
 %\subsection{Design and Implementation Notes}
 
 Overall Grid design strategy...
 
 \subsubsection{Grid Classes}
-The Grid class contains two internal classes: the DistGrid (Distributed
+The Grid class contains two internal private classes: the DistGrid (Distributed
 Grid) class and the PhysGrid (Physical Grid) class.  The separation into two
 classes allows the code to differentiate between functions which define the
 local decomposition of data and the local representation of the grid.  The Grid
