@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.42 2004/04/28 23:11:47 cdeluca Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.43 2004/05/10 15:40:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_LocalArrayMod
-      use ESMF_DataMapMod
+      use ESMF_ArrayDataMapMod
       use ESMF_DELayoutMod    ! ESMF layout class
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
@@ -51,6 +51,7 @@
       use ESMF_GridMod
       use ESMF_RHandleMod
       use ESMF_RouteMod
+      use ESMF_FieldDataMapMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -77,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.42 2004/04/28 23:11:47 cdeluca Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.43 2004/05/10 15:40:29 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -272,7 +273,7 @@
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_DataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(in) :: datamap
       integer, intent(in) :: rootDE
       type(ESMF_Array), intent(out) :: array_out
       integer, intent(out), optional :: rc
@@ -314,11 +315,11 @@
 
 ! Query the datamap and set info for grid so it knows how to match up the
 ! array indices and the grid indices.
-      call ESMF_DataMapGet(datamap, dataIorder=dimOrder, &
+      call ESMF_FieldDataMapGet(datamap, dataIndices=dimOrder, &
                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                            rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayAllGatherGrid: DataMapGet returned failure"
+        print *, "ERROR in ArrayAllGatherGrid: FieldDataMapGet returned failure"
         return
       endif
 
@@ -400,7 +401,7 @@
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_DataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(in) :: datamap
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: totalindex
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: compindex
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: exclindex
@@ -429,7 +430,7 @@
 
       ! allocate dimOrder array and get from datamap
       allocate(dimOrder(datarank), stat=status)
-      call ESMF_DataMapGet(datamap, dataIorder=dimOrder, &
+      call ESMF_FieldDataMapGet(datamap, dataIndices=dimOrder, &
                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                            rc=status)
 
@@ -672,7 +673,7 @@
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_DataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(in) :: datamap
       type(ESMF_RouteHandle), intent(out) :: routehandle
       type(ESMF_HaloDirection), intent(in), optional :: halodirection
       integer, intent(out), optional :: rc
@@ -681,7 +682,7 @@
 !     Perform a {\tt Halo} operation over the data
 !     in an {\tt ESMF\_Array}.  This routine updates the data
 !     inside the {\tt ESMF\_Array} in place.  It uses the {\tt ESMF\_Grid}
-!     and {\tt ESMF\_DataMap} as a template to understand how this
+!     and {\tt ESMF\_FieldDataMap} as a template to understand how this
 !     {\tt ESMF\_Array} relates to {\tt ESMF\_Array}s on other {\tt DE}s.
 !
 !     \begin{description}
@@ -690,7 +691,7 @@
 !     \item [grid]
 !           {\tt ESMF\_Grid} which matches how this array was decomposed.
 !     \item [datamap]
-!           {\tt ESMF\_DataMap} which matches how this array relates to the
+!           {\tt ESMF\_FieldDataMap} which matches how this array relates to the
 !           given grid.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} is returned to be used during the
@@ -753,11 +754,11 @@
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(datamap, horzRelLoc=horzRelLoc, &
+      call ESMF_FieldDataMapGet(datamap, horzRelLoc=horzRelLoc, &
                            vertRelLoc=vertRelLoc, &
-                           dataIorder=dimorder, rc=status)
+                           dataIndices=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayHalo: DataMapGet returned failure"
+        print *, "ERROR in ArrayHalo: FieldDataMapGet returned failure"
         return
       endif
      
@@ -1015,10 +1016,10 @@
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
       type(ESMF_Grid), intent(in) :: srcGrid
-      type(ESMF_DataMap), intent(in) :: srcDataMap
+      type(ESMF_FieldDataMap), intent(in) :: srcDataMap
       type(ESMF_Array), intent(inout) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
-      type(ESMF_DataMap), intent(in) :: dstDataMap
+      type(ESMF_FieldDataMap), intent(in) :: dstDataMap
       type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
@@ -1112,18 +1113,18 @@
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
                            vertRelLoc=dstVertRelLoc, &
-                           dataIorder=dstDimOrder, rc=status)
+                           dataIndices=dstDimOrder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayRedistStore: DataMapGet returned failure"
+        print *, "ERROR in ArrayRedistStore: FieldDataMapGet returned failure"
         return
       endif
-      call ESMF_DataMapGet(srcDataMap, horzRelLoc=srcHorzRelLoc, &
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelLoc=srcHorzRelLoc, &
                            vertRelLoc=srcVertRelLoc, &
-                           dataIorder=srcDimOrder, rc=status)
+                           dataIndices=srcDimOrder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayRedistStore: DataMapGet returned failure"
+        print *, "ERROR in ArrayRedistStore: FieldDataMapGet returned failure"
         return
       endif
 

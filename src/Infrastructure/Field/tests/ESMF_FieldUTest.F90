@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.50 2004/04/28 23:11:51 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.51 2004/05/10 15:45:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.50 2004/04/28 23:11:51 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.51 2004/05/10 15:45:18 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,7 +58,7 @@
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr1, f90ptr2
       real(ESMF_KIND_R8) :: minCoord(2)
-      type(ESMF_DataMap) :: dm
+      type(ESMF_FieldDataMap) :: dm
       type(ESMF_RelLoc) :: rl
       character (len = 20) :: fname, fname1, fname2
       character (len = 20) :: gname, gname3
@@ -339,7 +339,7 @@
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
       ! Verifing that a Field can be created with a Grid and Array
-      call ESMF_DataMapInit(dm, ESMF_INDEX_IJ)
+      call ESMF_FieldDataMapInit(dm, ESMF_INDEX_IJ)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 2, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
@@ -553,7 +553,7 @@
       write(failMsg, *) ""
       write(name, *) "Getting a DataMap from a Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_DataMapPrint(dm, "", rc=rc)
+      call ESMF_FieldDataMapPrint(dm, "", rc=rc)
 
       ! Requirement 1.3 Index Order
       ! It shall be possible to specify the index order of field data and 

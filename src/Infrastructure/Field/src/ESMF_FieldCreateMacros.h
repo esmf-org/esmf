@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.1 2004/04/19 22:01:50 nscollins Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.2 2004/05/10 15:43:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
 !     type(ESMF_RelLoc), intent(in), optional :: horzRelloc @\
 !     type(ESMF_RelLoc), intent(in), optional :: vertRelloc  @\
 !     integer, intent(in), optional :: haloWidth @\
-!     type(ESMF_DataMap), intent(in), optional :: datamap @\
+!     type(ESMF_FieldDataMap), intent(in), optional :: datamap @\
 !     character (len=*), intent(in), optional :: name  @\
 !     type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !     integer, intent(out), optional :: rc @\
@@ -104,7 +104,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc @\
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc  @\
       integer, intent(in), optional :: haloWidth @\
-      type(ESMF_DataMap), intent(in), optional :: datamap @\
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap @\
       character (len=*), intent(in), optional :: name  @\
       type(ESMF_IOSpec), intent(in), optional :: iospec @\
       integer, intent(out), optional :: rc @\
@@ -192,7 +192,7 @@
 !     integer, intent(in), optional :: haloWidth @\
 !     integer, dimension(:), intent(in), optional :: lbounds @\
 !     integer, dimension(:), intent(in), optional :: ubounds @\
-!     type(ESMF_DataMap), intent(in), optional :: datamap @\
+!     type(ESMF_FieldDataMap), intent(in), optional :: datamap @\
 !     character (len=*), intent(in), optional :: name  @\
 !     type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !     integer, intent(out), optional :: rc @\
@@ -262,7 +262,7 @@
       integer, intent(in), optional :: haloWidth @\
       integer, dimension(:), intent(in), optional :: lbounds @\
       integer, dimension(:), intent(in), optional :: ubounds @\
-      type(ESMF_DataMap), intent(in), optional :: datamap @\
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap @\
       character (len=*), intent(in), optional :: name  @\
       type(ESMF_IOSpec), intent(in), optional :: iospec @\
       integer, intent(out), optional :: rc @\

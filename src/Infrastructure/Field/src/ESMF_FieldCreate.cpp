@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.2 2004/04/28 23:11:51 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.3 2004/05/10 15:43:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
-      use ESMF_DataMapMod
+      use ESMF_ArrayDataMapMod
       use ESMF_DELayoutMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
@@ -39,6 +39,7 @@
       use ESMF_ArrayGetMod
       use ESMF_ArrayCreateMod
       use ESMF_ArrayCommMod
+      use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_FieldGetMod
       implicit none
@@ -56,7 +57,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.2 2004/04/28 23:11:51 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.3 2004/05/10 15:43:47 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -119,7 +120,7 @@ InterfaceMacro(FieldCreateEPtr)
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap          
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap          
       character (len=*), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -218,7 +219,7 @@ InterfaceMacro(FieldCreateEPtr)
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap           
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
       character (len = *), intent(in), optional :: name   
       type(ESMF_IOSpec), intent(in), optional :: iospec   
       integer, intent(out), optional :: rc                
@@ -317,7 +318,7 @@ InterfaceMacro(FieldCreateEPtr)
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap              
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap              
       character (len = *), intent(in), optional :: name   
       type(ESMF_IOSpec), intent(in), optional :: iospec   
       integer, intent(out), optional :: rc                
@@ -344,7 +345,7 @@ InterfaceMacro(FieldCreateEPtr)
 !     \item [{[halowidth]}]
 !           Halo width.
 !     \item [{[datamap]}]
-!           {\tt ESMF\_DataMap}
+!           {\tt ESMF\_FieldDataMap}
 !     \item [{[name]}]
 !       {\tt ESMF\_Field} name.
 !     \item [{[iospec]}]

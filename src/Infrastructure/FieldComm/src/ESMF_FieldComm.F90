@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.31 2004/04/28 23:11:51 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.32 2004/05/10 15:45:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,9 +44,10 @@
       use ESMF_RHandleMod
       use ESMF_RouteMod
       use ESMF_ArrayCommMod
+      use ESMF_ArrayDataMapMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
-      use ESMF_DataMapMod
+      use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_RegridMod
       implicit none
@@ -92,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.31 2004/04/28 23:11:51 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.32 2004/05/10 15:45:25 nscollins Exp $'
 
 !==============================================================================
 !
@@ -567,7 +568,7 @@
 ! !DESCRIPTION:
 !     Perform a redistribution operation over the data
 !     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves 
-!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_DataMap}
+!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_FieldDataMap}
 !     from the destination field and updates the array data in the destination.
 !     The {\tt ESMF\_Grid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
@@ -678,7 +679,7 @@
 ! !DESCRIPTION:
 !     Precompute a redistribution operation over the data
 !     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves 
-!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_DataMap}
+!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_FieldDataMap}
 !     from the destination field and updates the array data in the destination.
 !     The {\tt ESMF\_Grid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
@@ -784,7 +785,7 @@
 !     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves 
 !     the data untouched.  This version of RedistStore creates the
 !     destination {\tt ESMF\_Field} and its underlying {\tt ESMF\_Grid} and
-!     {\tt ESMF\_DataMap} from the source grid and input decompIds.
+!     {\tt ESMF\_FieldDataMap} from the source grid and input decompIds.
 !     Unlike {\tt ESMF\_FieldRegrid} this routine does not do interpolation,
 !     only data movement.
 !
@@ -891,7 +892,7 @@
 !     Perform a regrid operation over the data
 !     in a {\tt ESMF\_Field}.  This routine reads the source field and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
-!     {\tt ESMF\_DataMap} information in the destination field to
+!     {\tt ESMF\_FieldDataMap} information in the destination field to
 !     control the transformation of data.  The array data in the 
 !     destination field is overwritten by this call.
 !
@@ -939,7 +940,7 @@
       !integer :: my_DE
       type(ESMF_Array) :: src_array, dst_array
       type(ESMF_Grid) :: src_grid, dst_grid
-      type(ESMF_DataMap) :: src_datamap, dst_datamap
+      type(ESMF_FieldDataMap) :: src_datamap, dst_datamap
 
    
       ! Initialize return code   
@@ -1078,7 +1079,7 @@
 !     Precompute a regrid operation over the data
 !     in an {\tt ESMF\_Field}.  This routine reads the source field and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
-!     {\tt ESMF\_DataMap} information in the destination field to
+!     {\tt ESMF\_FieldDataMap} information in the destination field to
 !     control the transformation of data.  The {\tt routehandle} is
 !     returned to identify the stored information, and must be supplied
 !     to the execution call to actually move the data.
@@ -1121,7 +1122,7 @@
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_Array) :: src_array, dst_array
       type(ESMF_Grid) :: src_grid, dst_grid
-      type(ESMF_DataMap) :: src_datamap, dst_datamap
+      type(ESMF_FieldDataMap) :: src_datamap, dst_datamap
 
    
       ! Initialize return code   
@@ -1267,9 +1268,9 @@
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(ftypep%mapping, dataIorder=dimorder, rc=status)
+      call ESMF_FieldDataMapGet(ftypep%mapping, dataIndices=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldScatter: DataMapGet returned failure"
+        print *, "ERROR in FieldScatter: FieldDataMapGet returned failure"
         return
       endif 
 
@@ -1402,11 +1403,11 @@
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(ftypep%mapping, &
+      call ESMF_FieldDataMapGet(ftypep%mapping, &
                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                           dataIorder=dimorder, rc=status)
+                           dataIndices=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHalo: DataMapGet returned failure"
+        print *, "ERROR in FieldHalo: FieldDataMapGet returned failure"
         return
       endif 
 

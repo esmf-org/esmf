@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.14 2004/04/28 23:12:09 cdeluca Exp $
+! $Id: ESMF_RouteEx.F90,v 1.15 2004/05/10 15:47:30 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -31,7 +31,7 @@
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: arraya, arrayb
-    type(ESMF_DataMap) :: datamap
+    type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_VM) :: vm
     type(ESMF_RouteHandle) :: halo_rh, redist_rh, regrid_rh

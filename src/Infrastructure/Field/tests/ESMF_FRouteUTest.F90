@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.36 2004/04/28 23:11:51 cdeluca Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.37 2004/05/10 15:45:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.36 2004/04/28 23:11:51 cdeluca Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.37 2004/05/10 15:45:18 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -55,7 +55,7 @@
       type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: g1_ai, g2_ai
       integer, dimension(ESMF_MAXDIM) :: g1_cells, g2_cells
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
-      type(ESMF_DataMap) :: dm
+      type(ESMF_FieldDataMap) :: dm
       type(ESMF_RelLoc) :: rl
       type(ESMF_DELayout) :: layout0, layout1, layout2
       type(ESMF_VM) :: vm
@@ -190,7 +190,7 @@
 
       !NEX_UTest
       ! Verifing that a Field can be created with a Grid and Array
-      call ESMF_DataMapInit(dm, ESMF_INDEX_IJ)
+      call ESMF_FieldDataMapInit(dm, ESMF_INDEX_IJ)
       f1 = ESMF_FieldCreate(grid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       write(failMsg, *) ""

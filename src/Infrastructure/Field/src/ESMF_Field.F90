@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.143 2004/04/28 23:11:50 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.144 2004/05/10 15:43:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 ! description 
 ! expressed as a set of {\tt ESMF\_Attributes} with a data {\tt ESMF\_Array}, 
 ! {\tt ESMF\_Grid}, and I/O specification, or {\tt ESMF\_IOSpec}.  
-! An {\tt ESMF\_DataMap} describes the 
+! An {\tt ESMF\_FieldDataMap} describes the 
 ! relationship of the {\tt ESMF\_Array} to the {\tt ESMF\_Grid}.  
 !
 ! This type is implemented in Fortran 90 and a corresponding
@@ -46,13 +46,14 @@
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
-      use ESMF_DataMapMod
+      use ESMF_ArrayDataMapMod
       use ESMF_DELayoutMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
       use ESMF_ArrayMod
       use ESMF_ArrayCreateMod
       use ESMF_ArrayCommMod
+      use ESMF_FieldDataMapMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -145,7 +146,7 @@
 #endif
         type (ESMF_Grid) :: grid             ! save to satisfy query routines
         type (ESMF_LocalField) :: localfield ! this differs per DE
-        type (ESMF_DataMap) :: mapping       ! mapping of array indices to grid
+        type (ESMF_FieldDataMap) :: mapping  ! mapping of array indices to grid
         type (ESMF_IOSpec) :: iospec         ! iospec values
         type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
 
@@ -224,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.143 2004/04/28 23:11:50 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.144 2004/05/10 15:43:46 nscollins Exp $'
 
 !==============================================================================
 !
@@ -800,7 +801,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap    
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap    
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -893,7 +894,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap              
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -1116,7 +1117,7 @@
       type(ESMF_Field), intent(in) :: field    
       type(ESMF_Grid), intent(out), optional :: grid     
       type(ESMF_Array), intent(out), optional :: array     
-      type(ESMF_DataMap), intent(out), optional :: datamap     
+      type(ESMF_FieldDataMap), intent(out), optional :: datamap     
       type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       character(len=*), intent(out), optional :: name
@@ -1137,7 +1138,7 @@
 !     \item [{[array]}]
 !           {\tt ESMF\_Array}.
 !     \item [{[datamap]}]
-!           {\tt ESMF\_DataMap}.
+!           {\tt ESMF\_FieldDataMap}.
 !     \item [{[horzRelloc}]]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
@@ -1201,9 +1202,9 @@
             !  print *, "ERROR: No data attached to Field"
             !  return
             !endif
-            call ESMF_DataMapGet(ftype%mapping, horzRelloc=horzRelloc, rc=status)
+            call ESMF_FieldDataMapGet(ftype%mapping, horzRelloc=horzRelloc, rc=status)
             if (status .ne. ESMF_SUCCESS) then
-                print *, "ERROR in getting Horizontal RelLoc in ESMF_DataMapGet"
+                print *, "ERROR in getting Horizontal RelLoc in ESMF_FieldDataMapGet"
                 rc = status
                 return
             endif
@@ -1215,9 +1216,9 @@
             !  print *, "ERROR: No data attached to Field"
             !  return
             !endif
-            call ESMF_DataMapGet(ftype%mapping, vertRelloc=vertRelloc, rc=status)
+            call ESMF_FieldDataMapGet(ftype%mapping, vertRelloc=vertRelloc, rc=status)
             if (status .ne. ESMF_SUCCESS) then
-                print *, "ERROR in getting Vertical RelLoc in ESMF_DataMapGet"
+                print *, "ERROR in getting Vertical RelLoc in ESMF_FieldDataMapGet"
                 rc = status
                 return
             endif
@@ -2180,7 +2181,7 @@
            call ESMF_ArrayPrint(fp%localfield%localdata, "", status)
         endif
 
-        call ESMF_DataMapPrint(fp%mapping, "", status)
+        call ESMF_FieldDataMapPrint(fp%mapping, "", status)
 
         !TODO: add code here to print more info
 
@@ -2447,12 +2448,12 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
-      type(ESMF_DataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(in) :: datamap
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !  Used to set the ordering of an {\tt ESMF\_Field}.  If an initialized 
-!  {\tt ESMF\_DataMap} and associated data are already in the 
+!  {\tt ESMF\_FieldDataMap} and associated data are already in the 
 !  {\tt ESMF\_Field}, the data will be reordered according to the new 
 !  specification.
 !
@@ -2746,7 +2747,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap           
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -2839,7 +2840,7 @@
           hRelLoc = horzRelloc
       else
           if (present(datamap)) then
-              call ESMF_DataMapGet(datamap, horzRelLoc=hRelLoc, rc=status)
+              call ESMF_FieldDataMapGet(datamap, horzRelLoc=hRelLoc, rc=status)
           else
               print *, "ERROR in ESMF_FieldConstructNew: ", & 
                        "no valid RelLoc in either argument list or datamap."
@@ -2854,7 +2855,7 @@
       endif 
 
       ! get information back from datamap
-      call ESMF_DataMapGet(ftype%mapping, dataIorder=dimorder, &
+      call ESMF_FieldDataMapGet(ftype%mapping, dataIndices=dimorder, &
                                                     counts=counts, rc=status)
 
       arraycounts(:) = 1
@@ -2897,7 +2898,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap           
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -2983,7 +2984,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap 
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap 
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3056,19 +3057,19 @@
         ftype%mapping = datamap   ! copy, datamap can be reused by user now
         ! if specified as explicit args to create, they override anything
         ! in the existing datamap
-        call ESMF_DataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
+        call ESMF_FieldDataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
                              vertRelloc=vertRelloc, rc=status)
       else
         if (gridRank .eq. 1) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_I, &
+          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_I, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 2) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
+          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 3) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
+          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         endif
@@ -3113,7 +3114,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap              
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -3184,20 +3185,20 @@
 
         ! take care of override horz and vert rellocs.  if specified both in
         ! the datamap and as explicit args, the arguments take priority.
-        call ESMF_DataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
+        call ESMF_FieldDataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
                              vertRelloc=vertRelloc, rc=status)
       else
         ! create default datamap with 1-for-1 correspondence to grid
         if (gridRank .eq. 1) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_I, &
+          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_I, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 2) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
+          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 3) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
+          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         endif
@@ -3275,7 +3276,7 @@
       ftypep%datastatus = ESMF_STATE_UNINIT
 
       ! Set the mapping as unknown/invalid
-      call ESMF_DataMapSetInvalid(ftypep%mapping, status)
+      call ESMF_FieldDataMapSetInvalid(ftypep%mapping, status)
 
       ftypep%fieldstatus = ESMF_STATE_READY
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.20 2004/04/28 23:11:48 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.21 2004/05/10 15:42:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,9 +44,10 @@
       use ESMF_RHandleMod
       use ESMF_RouteMod
       use ESMF_ArrayCommMod
+      use ESMF_ArrayDataMapMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
-      use ESMF_DataMapMod
+      use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_BundleMod
       use ESMF_RegridMod
@@ -93,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.20 2004/04/28 23:11:48 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.21 2004/05/10 15:42:48 nscollins Exp $'
 
 !==============================================================================
 !
@@ -427,10 +428,10 @@
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(btypep%flist(1)%ftypep%mapping, &
-                           dataIorder=dimorder, rc=status)
+      call ESMF_FieldDataMapGet(btypep%flist(1)%ftypep%mapping, &
+                           dataIndices=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleScatter: DataMapGet returned failure"
+        print *, "ERROR in BundleScatter: FieldDataMapGet returned failure"
         return
       endif 
 !     call ESMF_GridGet(btypep%grid, decomps, rc=status)   !TODO
@@ -670,7 +671,7 @@
 ! !DESCRIPTION:
 !     Perform a {\tt Redistribution} operation over the data
 !     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and leaves 
-!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_DataMap}
+!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_FieldDataMap}
 !     from the destination bundle and updates the array data in the destination.
 !     The {\tt ESMF\_Grid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
@@ -787,7 +788,7 @@
 ! !DESCRIPTION:
 !     Precompute a {\tt Redistribution} operation over the data
 !     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and leaves 
-!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_DataMap}
+!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_FieldDataMap}
 !     from the destination bundle and updates the array data in the destination.
 !     The {\tt ESMF\_Grid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
@@ -891,7 +892,7 @@
 !     Perform a {\tt ESMF\_Regrid} operation over the data
 !     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
-!     {\tt ESMF\_DataMap} information in the destination bundle to
+!     {\tt ESMF\_FieldDataMap} information in the destination bundle to
 !     control the transformation of data.  The array data in the 
 !     destination bundle is overwritten by this call.
 !
@@ -996,7 +997,7 @@
 !     Perform a {\tt ESMF\_Regrid} operation over the data
 !     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
-!     {\tt ESMF\_DataMap} information in the destination bundle to
+!     {\tt ESMF\_FieldDataMap} information in the destination bundle to
 !     control the transformation of data.  The array data in the 
 !     destination bundle is overwritten by this call.
 !

@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldCreateEx.C,v 1.6 2004/04/23 21:54:28 nscollins Exp $
+// $Id: ESMC_FieldCreateEx.C,v 1.7 2004/05/10 15:43:36 nscollins Exp $
 //
 // Example/test code which creates a new field.
 
@@ -25,7 +25,7 @@ main(int argc, char **argv) {
 //   ESMC_Grid *grid;
 //   ESMC_ArraySpec arrayspec;
 //   ESMC_Array *arraya, *arrayb;
-//   ESMC_DataMap *datamap;
+//   ESMC_FieldDataMap *datamap;
 //   ESMC_Relloc relativelocation;
 //   char fieldname[20]
 //   ESMC_IOSpec iospec;
