@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.37 2003/09/12 22:39:05 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.38 2003/09/23 16:27:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.37 2003/09/12 22:39:05 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.38 2003/09/23 16:27:44 jwolfe Exp $'
 
 !==============================================================================
 
@@ -353,16 +353,11 @@
 !
 ! !ARGUMENTS:
 
-      type (ESMF_Array), intent(in) :: &
-         srcarray            ! array to be regridded
-         
-      type (ESMF_RouteHandle), intent(in) :: &
-         routehandle          ! precomputed regrid structure with
-                              !  regridding info
-
-      type (ESMF_Array), intent(out) :: &
-         dstarray            ! resulting regridded array
-
+      type(ESMF_Array), intent(in) :: srcarray    ! array to be regridded
+      type(ESMF_Array), intent(out) :: dstarray   ! resulting regridded array
+      type(ESMF_RouteHandle), intent(in) :: routehandle 
+                                                  ! precomputed regrid structure
+                                                  ! with regridding info
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -371,75 +366,86 @@
 !     grid.  
 !
 !EOP
-    integer :: status
-    logical :: rcpresent
-    type(ESMF_Route) :: rh
-    type(ESMF_Array) :: tempdst 
-    type(ESMF_TransformValues) :: tv
+      integer :: status
+      logical :: rcpresent
+      integer :: n, rank, size
+      integer(ESMF_KIND_I4), dimension(:), pointer :: dstIndex, srcIndex
+      real(ESMF_KIND_R8) :: zero
+      real(ESMF_KIND_R8), dimension(:), pointer :: weights
+      real(ESMF_KIND_R8), dimension(:), pointer :: gatheredData, dstData  ! TODO
+      type(ESMF_DataType) :: type
+      type(ESMF_DataKind) :: kind
+      type(ESMF_Route) :: rh
+      type(ESMF_LocalArray) :: gatheredArray, srcLocalArray
+      type(ESMF_TransformValues) :: tv
 
-    !! TODO:  TEMPORARY CODE TO BYPASS REAL REGRID CODE
-    !!  remove these next 2 lines to finish debugging regrid code.
-!    dstarray = srcarray  
-!    if(present(rc)) rc = ESMF_SUCCESS
-!    return
-    !! END BYPASS
-      
-   ! get the first route from the table and run it to gather the
-   ! data values which overlap this bounding box.
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+     zero = 0.0
+     ! get the first route from the table and run it to gather the
+     ! data values which overlap this bounding box.
  
-   ! call ESMF_RouteHandleGet(routehandle, route1=rh, rc=status)
+     call ESMF_RouteHandleGet(routehandle, route1=rh, rc=status)
 
-   ! from the domain or from someplace, get the counts of how many data points
-   ! we are expecting from other DEs.  we might also need to know what
-   ! data type is coming since this is user data and not coordinates at 
-   ! execution time.  or does the incoming data have to match the type
-   ! of the outgoing array?  so we can get the data type and shape from
-   ! the dstarray argument to this function.  and what about halo widths?
+     ! get the indirect indices and weights from the routehandle
+     call ESMF_RouteHandleGet(routehandle, tdata=tv, rc=status)
 
-   ! tempdst = ESMF_ArrayCreate(rank, type, kind, counts, halo_widths, rc)
-   ! TODO  make into LocalArrays
-   ! call ESMF_RouteRun(rh, srcarray, tempdst, status)
+     ! get a real f90 pointer from all the arrays
+     ! srcIndex, dstIndex and weights TKR can be fixed, but unfortunately the
+     ! gatheredData and dstData can be whatever the user wants - so this code
+     ! might need to move into another file and be macroized heavily for TKR.
+     call ESMF_LocalArrayGetData(tv%srcindex, srcIndex, ESMF_DATA_REF, rc)
+     call ESMF_LocalArrayGetData(tv%dstindex, dstIndex, ESMF_DATA_REF, rc)
+     call ESMF_LocalArrayGetData(tv%weights, weights, ESMF_DATA_REF, rc)
 
-   ! get the indirect indicies and weights from the routehandle
+     ! from the domain or from someplace, get the counts of how many data points
+     ! we are expecting from other DEs.  we might also need to know what
+     ! data type is coming since this is user data and not coordinates at 
+     ! execution time.  or does the incoming data have to match the type
+     ! of the outgoing array?  so we can get the data type and shape from
+     ! the dstarray argument to this function.  and what about halo widths?
+     size = tv%domainlist%total_points
 
-   ! call ESMF_RouteHandleGet(routehandle, transformvalues=tv, rc=status)
-   ! call ESMF_TransformValues(tv, ?=srcindex, ?=dstindex, ?=weights)
+     ! TODO: fix to allow for rank > gridrank
 
-   ! get a real f90 pointer from all the arrays
-   ! i4ptr and r8ptr TKR can be fixed, but unfortunately the dptr can be
-   ! whatever the user wants - so this code might need to move into
-   ! another file and be macroized heavily for TKR.
-   ! call ESMF_ArrayGetData(srcindex, i4ptr, ESMF_DATA_REF, rc)
-   ! call ESMF_ArrayGetData(dstindex, i4ptr, ESMF_DATA_REF, rc)
-   ! call ESMF_ArrayGetData(weights, r8ptr, ESMF_DATA_REF, rc)
+     call ESMF_ArrayGet(srcarray, rank=rank, type=type, kind=kind, rc=status)
+     gatheredArray = ESMF_LocalArrayCreate(rank, type, kind, size, rc)
+     srcLocalArray = srcarray
+     call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, status)
 
-   ! call ESMF_ArrayGetData(tempdst, dptr, ESMF_DATA_REF, rc)
-   ! call ESMF_ArrayGetData(dstaddr, dptr, ESMF_DATA_REF, rc)
 
-   ! TODO: apply the weights from src to destination
-   !  does this need a nested loop and an array of ESMF_Arrays, one
-   !  for each DE which sends data?  i think the answer is not for now
-   !  because all data has been pushed into a single array.  but eventually
-   !  if we want to start supporting vectors or other complicated data 
-   !  shapes, we may have to start preserving the array and datamaps
-   !  from the original locations.
+     call ESMF_LocalArrayGetData(gatheredArray, gatheredData, ESMF_DATA_REF, rc)
+     call ESMF_ArrayGetData(dstarray, dstData, ESMF_DATA_REF, rc)
 
-   !*** initialize dest field to zero
+     ! TODO: apply the weights from src to destination
+     !  does this need a nested loop and an array of ESMF_Arrays, one
+     !  for each DE which sends data?  i think the answer is not for now
+     !  because all data has been pushed into a single array.  but eventually
+     !  if we want to start supporting vectors or other complicated data 
+     !  shapes, we may have to start preserving the array and datamaps
+     !  from the original locations.
+
+     !*** initialize dest field to zero
    
-   ! dstarrayptr = zero
+     dstData = zero
 
-   !*** do the regrid
+     !*** do the regrid
 
-   ! will look something like   
-   ! do n=1,num_links
-   !   dstarrayptr(dstindexptr(n)) = dstarrayptr(dstindexptr(n)) + &
-   !                                 tempdstptr(srcindexptr(n)) * weightptr(n))
-   ! end do
+     do n=1,tv%numlinks
+       dstData(dstIndex(n)) = dstData(dstIndex(n)) &
+                            + (gatheredData(srcIndex(n)) * weights(n))
+     end do
 
-   ! set return codes
-   ! nuke temp array
+     ! set return codes
+     ! nuke temp array
 
-   end subroutine ESMF_RegridRun
+     end subroutine ESMF_RegridRun
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1168,7 +1174,7 @@
           !                        srcmask, dstmask, blocking, rc)
       else
           call ESMF_ArrayRegrid(src_array, dst_array, routehandle, &       
-                                  srcmask, dstmask, blocking, rc)
+                                srcmask, dstmask, blocking, rc)
       endif
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRegrid: RouteRun returned failure"

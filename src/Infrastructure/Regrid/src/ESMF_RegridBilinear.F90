@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.23 2003/09/18 22:58:02 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.24 2003/09/23 16:27:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.23 2003/09/18 22:58:02 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.24 2003/09/23 16:27:58 jwolfe Exp $'
 
 !==============================================================================
 
@@ -128,14 +128,14 @@
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       integer :: start, stop, my_DE, coordSystem
       integer :: srcSizeX, srcSizeY, size
-      integer :: size_xy(2), size_x0(2)
+      integer :: size_xy(2)
       integer :: i, j, num_domains, dstCounts(3), srcCounts(3)
       logical, dimension(:), pointer :: srcMaskUse, dstMaskUse
       logical, dimension(:,:), pointer :: found
       real(ESMF_KIND_R8), dimension(:), pointer :: srcGatheredCoordX, srcGatheredCoordY
       real(ESMF_KIND_R8), dimension(:), pointer :: srcLocalCoordX, srcLocalCoordY
       real(ESMF_KIND_R8), dimension(:), pointer :: dstLocalCoordX, dstLocalCoordY
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: tempCrud
+      real(ESMF_KIND_R8), dimension(:), pointer :: tempCrud
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: dstLocalCoord, srcLocalCoord
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dstMin, dstMax
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: srcMin, srcMax
@@ -151,7 +151,7 @@
       type(ESMF_Route) :: route
       type(ESMF_RouteHandle) :: rh
       type(ESMF_RegridType) :: temp_regrid
-      type(ESMF_TransformValues), pointer :: tv
+      type(ESMF_TransformValues) :: tv
       character (len = ESMF_MAXSTR) :: name
 
       ! Initialize return code
@@ -375,28 +375,23 @@
 
       ! initialize the rest of the tv structure.
       tv%numlinks = 0
-      allocate(tv%countsperdomain(recvDomainList%num_domains), stat=status)
-      ! TODO: check for allocation error here
    
       ! TODO: the *4 is to guarentee the max allocation possible is enough
       !  for bilinear interpolation.  eventually the addlinks routine should
       !  grow the arrays internally.
       size_xy(1) = dstCounts(1)*4
       size_xy(2) = dstCounts(2)*4
-      size = ((dstCounts(1)*dstCounts(2)) + 1) * 4 * 2
-      size_x0(1) = size
-      size_x0(2) = 1
+      size = ((dstCounts(1)*dstCounts(2)) + 1) * 4
+      tv%domainlist = recvDomainList
       tv%srcindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
                                           size, status)
       tv%dstindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
                                           size, status) 
-      allocate(tempCrud(size_x0(1),size_x0(2)))
+      allocate(tempCrud(size))
       tv%weights = ESMF_LocalArrayCreate(tempCrud, ESMF_DATA_REF, status)
    !   tv%weights  = ESMF_LocalArrayCreate(2, ESMF_DATA_REAL, ESMF_R8, &
    !                                       size_x0, status)
  
-      call ESMF_RouteHandleSet(rh, tdata=tv, rc=status)
-
       ! set up mask and logical found arrays for search
       allocate(found(dstCounts(1),dstCounts(2)))
       found = .FALSE.
@@ -430,7 +425,7 @@
         stop  = start + srcSizeX*srcSizeY - 1
         call ESMF_RegridBilinearSearch(tv, recvDomainList%domains(i), found, &
                                        coordSystem, &
-                                       srcSizeX, srcSizeY, start, &
+                                       srcSizeX, srcSizeY, start-1, &
                                        dstCounts(1), dstCounts(2), &
                                        srcGatheredCoordX(start:stop), &
                                        srcGatheredCoordY(start:stop), &
@@ -439,6 +434,8 @@
                                        status)
         start = stop + 1 
       enddo 
+
+      call ESMF_RouteHandleSet(rh, tdata=tv, rc=status)
 
       call ESMF_LocalArrayDestroy(srcLocalCoordXArray, status)
       call ESMF_LocalArrayDestroy(srcLocalCoordYArray, status)
@@ -521,11 +518,11 @@
          jbDst, jeDst,     &! beg, end of exclusive domain in j-dir of dest grid
          ibSrc, ieSrc,     &! beg, end of exclusive domain in i-dir of source grid
          jbSrc, jeSrc,     &! beg, end of exclusive domain in j-dir of source grid
+         dstICount, srcICount, &
          my_DE, srcCount
 
-      integer, dimension(2) :: &
-         srcAdd,        &! address in gathered source grid (i,j)
-         dstAdd          ! address in dest grid (i,j)
+      integer :: srcAdd,   &! address in gathered source grid
+                 dstAdd     ! address in dest grid
          
       real (ESMF_KIND_R8) ::  &
          lon_thresh,    &! threshold for checking longitude crossing
@@ -583,6 +580,9 @@
       ieSrc = domain%ai(1)%max
       jbSrc = domain%ai(2)%min
       jeSrc = domain%ai(2)%max
+
+      dstICount = ieDst - ibDst + 1
+      srcICount = ieSrc - ibSrc + 1
 
       do j=jbDst,jeDst
       do i=ibDst,ieDst
@@ -744,31 +744,23 @@
 
             ! now store this link into address, weight arrays
             if (srcmask(iii,jjj)) then
-              dstAdd(1) = i
-              dstAdd(2) = j
-              srcAdd(1) = iii
-              srcAdd(2) = jjj
+              dstAdd = (j-1)*dstICount + i
+              srcAdd = (jjj-1)*srcICount + iii + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc)
             endif
             if (srcmask(ip1,jjj)) then
-              dstAdd(1) = i
-              dstAdd(2) = j
-              srcAdd(1) = ip1
-              srcAdd(2) = jjj
+              dstAdd = (j-1)*dstICount + i
+              srcAdd = (jjj-1)*srcICount + ip1 + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc)
             endif
             if (srcmask(ip1,jp1)) then
-              dstAdd(1) = i
-              dstAdd(2) = j
-              srcAdd(1) = ip1
-              srcAdd(2) = jp1
+              dstAdd = (j-1)*dstICount + i
+              srcAdd = (jp1-1)*srcICount + ip1 + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(3), rc)
             endif
             if (srcmask(iii,jp1)) then
-              dstAdd(1) = i
-              dstAdd(2) = j
-              srcAdd(1) = iii
-              srcAdd(2) = jp1
+              dstAdd = (j-1)*dstICount + i
+              srcAdd = (jp1-1)*srcICount + iii + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(4), rc)
             endif
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.14 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.15 2003/09/23 16:28:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.14 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.15 2003/09/23 16:28:11 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -180,10 +180,10 @@
 ! !ARGUMENTS:
 
       type(ESMF_TransformValues), intent(inout) :: tv
-      integer, dimension(2), intent(in) :: src_add
-      integer, dimension(2), intent(in) :: dst_add
+      integer, intent(in) :: src_add
+      integer, intent(in) :: dst_add
       real(kind=ESMF_KIND_R8), intent(in) :: weight
-      integer, intent(out) :: rc
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -199,7 +199,7 @@
 !     \item[dst\_add]
 !          Address in destination field array for this link.
 !     \item[weights]
-!          Regrid weight(s) for this link.
+!          Regrid weight for this link.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -207,38 +207,38 @@
 !EOP
 ! !REQUIREMENTS:
 !  TODO
-
-      ! do these need to be 2 separate x and y arrays?
+      logical :: rcpresent
+      integer :: status
       integer, dimension(:), pointer :: src_ptr, dst_ptr
-      real(kind=ESMF_KIND_R8), dimension(:,:), pointer :: wgt_ptr
+      real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgt_ptr
       type (ESMF_ARRAY) :: &! temps for use when re-sizing arrays
          src_add_tmp, dst_add_tmp, weights_tmp
+
+!     Initialize return code
+      status = ESMF_SUCCESS
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
 
       call ESMF_LocalArrayGetData(tv%srcindex, src_ptr, ESMF_DATA_REF, rc)
       call ESMF_LocalArrayGetData(tv%dstindex, dst_ptr, ESMF_DATA_REF, rc)
       call ESMF_LocalArrayGetData(tv%weights, wgt_ptr, ESMF_DATA_REF, rc)
-
       !
-      !  increment number of links for this regrid
+      ! increment number of links for this regrid
       !
-      
       tv%numlinks = tv%numlinks + 1
-      
       !
       !  if new number of links exceeds array sizes, re-size arrays
       !
-      
       ! TODO: resize check
-      
-      
       !
-      ! TODO: Add addresses and weights to regrid arrays
+      ! Add addresses and weights to regrid arrays
       !
-      src_ptr((tv%numlinks * 2) + 0) = src_add(1)
-      src_ptr((tv%numlinks * 2) + 1) = src_add(2)
-      dst_ptr((tv%numlinks * 2) + 0) = dst_add(1)
-      dst_ptr((tv%numlinks * 2) + 1) = dst_add(2)
-      wgt_ptr(tv%numlinks, 1) = weight
+      src_ptr(tv%numlinks) = src_add
+      dst_ptr(tv%numlinks) = dst_add
+      wgt_ptr(tv%numlinks) = weight
 
       rc = ESMF_SUCCESS
 
