@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.27 2003/08/05 21:20:18 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.28 2003/08/15 22:52:21 jwolfe Exp $
 !
 ! System test code #70385
 
@@ -322,6 +322,7 @@
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: clock
+      type(ESMF_Route) :: route
       integer :: rc
 
       ! Local variables
@@ -344,6 +345,8 @@
       ! Call Field method to halo data.  This updates the data in place.
       print *, "about to call Field Halo"
       call ESMF_FieldHalo(field1, rc=rc)
+      !call ESMF_FieldHaloPrecompute(field1, route, rc=rc)
+      !call ESMF_FieldHaloRun(field1, route, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "returned from Field Halo call"
 
