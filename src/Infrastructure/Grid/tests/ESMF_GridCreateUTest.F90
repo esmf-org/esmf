@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.33 2004/12/22 17:16:17 svasquez Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.34 2004/12/22 19:06:22 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.33 2004/12/22 17:16:17 svasquez Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.34 2004/12/22 19:06:22 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -151,14 +151,13 @@
 
       !------------------------------------------------------------------------
       ! Grid Distribute Test
-      ! fails with core dump, bug number 1077988 filed
       !N-E-X_UTest
-      !call ESMF_GridDistribute(grid, delayout=layout, rc=status)
-      !
-      !write(failMsg, *) "Did not returned ESMF_SUCCESS"
-      !write(name, *) "Grid Distribute Test"
-      !call ESMF_Test((status.eq.ESMF_SUCCESS), &
-      !                name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
+      
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Grid Distribute Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest 
@@ -265,22 +264,20 @@
 
       !------------------------------------------------------------------------
       ! Grid Distribute Test.
-      ! fails with core dump, bug number 1077988 filed
       !E-X_UTest
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Grid Distribute Test"
-      !call ESMF_GridDistribute(grid, delayout=layout, countsPerDEDim1=DEDim1, &
-      !				countsPerDEDim2=DEDim2, rc=status)
-      ! call ESMF_Test((status.eq.ESMF_SUCCESS), &
-      !                name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Grid Distribute Test"
+      call ESMF_GridDistribute(grid, delayout=layout, countsPerDEDim1=DEDim1, &
+                               countsPerDEDim2=DEDim2, rc=status)
+       call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       ! Printing a Grid
-      ! This test fails Bug 1089888 opened
-      !call ESMF_GridPrint(grid, "", rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Printing a Grid Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_GridPrint(grid, "", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Printing a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -321,31 +318,28 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! commented out; probably fails because of bug number 1077988
       !E-X_UTest
       ! Validate the Grid test
-      !write(failMsg, *) "Did not returned ESMF_SUCCESS"
-      !write(name, *) "Validate the Grid Test"
-      !call ESMF_GridValidate(grid, rc=rc)
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Validate the Grid Test"
+      call ESMF_GridValidate(grid, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! commented out; probably fails because of bug number 1077988
       !E-X_UTest
       ! Distribute a Grid test
-      !write(failMsg, *) "Did not returned ESMF_SUCCESS"
-      !write(name, *) "Distribute the Grid Test"
-      !call ESMF_GridDistribute(grid, layout, rc=rc)
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Distribute the Grid Test"
+      call ESMF_GridDistribute(grid, layout, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! commented out; probably fails because of bug number 1077988
       !E-X_UTest
       ! Destroy the Grid test
-      !write(failMsg, *) "Did not returned ESMF_SUCCESS"
-      !write(name, *) "Destroy the Grid Test"
-      !call ESMF_GridDestroy(grid, rc=rc)
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Destroy the Grid Test"
+      call ESMF_GridDestroy(grid, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
