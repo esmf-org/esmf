@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.8 2003/05/02 19:26:02 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.9 2003/05/02 21:37:31 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -20,6 +20,7 @@
     use InjectArraysMod
     
     implicit none
+    private
     
     ! Private data block
     type injectdata
@@ -60,11 +61,11 @@
         ! Register the callback routines.
 
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
-                                               injector_init, ESMF_SINGLEPHASE, rc)
+                                          injector_init, ESMF_SINGLEPHASE, rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
-                                                injector_run, ESMF_SINGLEPHASE, rc)
+                                          injector_run, ESMF_SINGLEPHASE, rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
-                                              injector_final, ESMF_SINGLEPHASE, rc)
+                                          injector_final, ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
 
