@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.15 2003/01/10 21:53:12 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.16 2003/01/23 20:27:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,6 +27,7 @@
 
 // for printf
 #include <stdio.h>
+#include <assert.h>
 // associated class definition file
 #include "ESMC_Array.h"
 #include "ESMC_Alloc.h"
@@ -35,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.15 2003/01/10 21:53:12 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.16 2003/01/23 20:27:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -100,6 +101,7 @@
 //   The return from this routine is a pointer to the new Array data.
 //
      ESMC_Array *a = new ESMC_Array;
+     a->ESMC_ArraySetOrigin(ESMC_FROM_CPLUSPLUS);
   
      return a;
 
@@ -150,7 +152,7 @@
     enum ESMC_DataKind dk,     // short/long, etc
     void *base,                // real start of memory 
     int *offsets,              // offset in bytes to start of each dim
-    int *lengths,              // number of items in each dim
+    int *lens,                 // number of items in each dim
     int *strides,              // number of bytes between successive items/dim
     struct c_F90ptr *f90ptr,     // opaque type which fortran understands (dope v)
     int *rc) {                 // return code
@@ -196,11 +198,21 @@
      a->ESMC_ArraySetType(dt);
      a->ESMC_ArraySetKind(dk);
      a->ESMC_ArraySetBaseAddr((void *)0);
-     a->ESMC_ArraySetLengths(lengths[0], lengths[1]);
+     switch(rank) {
+       case 1:
+         a->ESMC_ArraySetLengths(lens[0]); break;
+       case 2:
+         a->ESMC_ArraySetLengths(lens[0], lens[1]); break;
+       case 3:
+         a->ESMC_ArraySetLengths(lens[0], lens[1], lens[2]); break;
+       case 4:
+         a->ESMC_ArraySetLengths(lens[0], lens[1], lens[2], lens[3]); break;
+       default:
+         printf("no len support for rank %d\n", rank); assert(0); break;
+     }
+     a->ESMC_ArraySetOrigin(ESMC_FROM_FORTRAN);
 
      //printf("in ESMC_ArrayCreate_F, a = 0x%08lx\n", (unsigned long)a);
-
-     // (allocfuncaddr)(f90ptr, lengths+0, lengths+1, rc);
 
      *rc = ESMF_SUCCESS;
      return a;
