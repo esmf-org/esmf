@@ -1,4 +1,4 @@
-% $Id: VM_implnotes.tex,v 1.3 2004/05/18 15:12:38 theurich Exp $
+% $Id: VM_implnotes.tex,v 1.3.2.1 2004/07/22 21:08:11 nscollins Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -6,7 +6,7 @@ The VM class provides an additional layer of abstraction on top of the POSIX mac
 
 \begin{enumerate}
 
-\item Encapsulation of hardware and operating system details within the concept of Permanent Execution Threads (PETs).
+\item Encapsulation of hardware and operating system details within the concept of Persistent Execution Threads (PETs).
 
 \item Resource management in terms of PETs with a guard against over-subscription.
 
@@ -35,7 +35,7 @@ The VM class provides an additional layer of abstraction on top of the POSIX mac
 
 \item TOE: A thread of execution (TOE) executes an instruction sequence. TOE's come in two flavors: PET and TET.
 
-\item PET: A permanent execution thread (PET) executes an instruction sequence on an associated set of data. The PET has a lifetime at least as long as the associated data set. In ESMF the PET is the central concept of abstraction provided by the VM class. The PETs of an VM object are labeled from 0 to N-1 where N is the total number of PETs in the VM object.
+\item PET: A persistent execution thread (PET) executes an instruction sequence on an associated set of data. The PET has a lifetime at least as long as the associated data set. In ESMF the PET is the central concept of abstraction provided by the VM class. The PETs of an VM object are labeled from 0 to N-1 where N is the total number of PETs in the VM object.
 
 \item TET: A transient execution thread (TET) executes an instruction sequence on an associated set of data. A TET's lifetime might be shorter than that of the associated data set.
 
@@ -76,3 +76,5 @@ The VM design and implementation is based on the POSIX process and thread model 
 All MPI processes participating in a VM are grouped together by means of an MPI\_Group object and their context is defined via an MPI\_Comm object (MPI intra-communicator). The PET local process id within each virtual machine is equal to the MPI\_Comm\_rank in the local MPI\_Comm context whereas the PET process id is equal to the MPI\_Comm\_rank in MPI\_COMM\_WORLD. The PET process id is used within the VM methods to determine the virtual memory space a PET is operating in. 
 
 In order to provide a migration path for legacy MPI-applications the VM offers accessor functions to its MPI\_Comm object. Once obtained this object may be used in explicit user-code MPI calls within the same context.
+
+
