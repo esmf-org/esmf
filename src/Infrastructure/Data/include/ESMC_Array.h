@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.25 2003/04/15 21:35:37 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.26 2003/04/17 21:30:22 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -223,6 +223,10 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_ArrayHalo(ESMC_DELayout *layout,
                        int decompids[], int size_decomp,
                        ESMC_AxisIndex *AI_exc, ESMC_AxisIndex *AI_tot);
+    int ESMC_ArrayAllGather(ESMC_DELayout *layout,
+                            int decompids[], int size_decomp,
+                            ESMC_AxisIndex *AI_exc, ESMC_AxisIndex *AI_tot,
+                            ESMC_Array *Array_out);
     
  // < declare the rest of the public interface methods here >
   
