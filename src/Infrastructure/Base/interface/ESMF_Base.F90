@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.87 2004/02/24 19:21:00 svasquez Exp $
+! $Id: ESMF_Base.F90,v 1.88 2004/02/25 19:58:54 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 !     !  constants MUST match corresponding values in ../include/ESMC_Macros.h
 !
 !EOPI
-!BOP
+!BOPI
 
 !    !PUBLIC TYPES:
 !    !Global integer parameters
@@ -57,7 +57,7 @@
                             ESMF_MAXDECOMPDIM = 3, &
                             ESMF_MAXGRIDDIM = 3
      
-!EOP
+!EOPI
 
       integer, parameter :: ESMF_MAJOR_VERSION = 1
       integer, parameter :: ESMF_MINOR_VERSION = 0
@@ -273,7 +273,7 @@
      end type
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !PUBLIC TYPES:
 
@@ -312,7 +312,7 @@
       public ESMF_Domain, ESMF_DomainList
       public ESMF_AxisIndex
 
-!EOP
+!EOPI
 !
 ! !DESCRIPTION:
 !     The following routines apply to any type in the system.  
@@ -411,7 +411,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.87 2004/02/24 19:21:00 svasquez Exp $'
+               '$Id: ESMF_Base.F90,v 1.88 2004/02/25 19:58:54 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -698,7 +698,7 @@ end function
       end subroutine ESMF_BaseDestroy
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_AttributeSet - set attribute on an ESMF type
 !
 ! !INTERFACE:
@@ -732,7 +732,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
       integer :: status 
@@ -745,7 +745,7 @@ end function
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_AttributeGet - get attribute from an ESMF type
 !
 ! !INTERFACE:
@@ -779,7 +779,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.5.1, FLD1.5.3
 
       integer :: status 
@@ -792,7 +792,7 @@ end function
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AttributeGetCount - get an ESMF object's number of attributes
 !
@@ -824,14 +824,14 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.7.5
 
       end subroutine ESMF_AttributeGetCount
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AttributeGetbyNumber - get an ESMF object's attribute by number
 !
@@ -876,14 +876,14 @@ end function
 !     \end{description}
 !     
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       end subroutine ESMF_AttributeGetbyNumber
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AttributeGetNameList - get an ESMF object's attribute name list
 !
@@ -917,7 +917,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.7.3
 
       !TODO: when code added here, change (inout) for namelist to just out.
@@ -927,7 +927,7 @@ end function
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AttributeSetList - set an ESMF object's attributes 
 !
@@ -965,14 +965,14 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  (none.  added for completeness)
 
       end subroutine ESMF_AttributeSetList
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AttributeGetList - get an ESMF object's attributes
 !
@@ -1011,14 +1011,14 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.7.4
 
       end subroutine ESMF_AttributeGetList
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AttributeSetObjectList - set an attribute on multiple ESMF objects 
 !
@@ -1053,14 +1053,14 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.5.5 (pri 2)
 
       end subroutine ESMF_AttributeSetObjectList
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 !
 ! !IROUTINE:  ESMF_AttributeGetObjectList - get an attribute from multiple ESMF objects 
@@ -1100,14 +1100,14 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.5.5 (pri 2)
 
       end subroutine ESMF_AttributeGetObjectList
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AttributeCopy - copy an attribute between two objects
 !
@@ -1145,14 +1145,14 @@ end function
 !     \end{description}
 !     
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.5.4
 
       end subroutine ESMF_AttributeCopy
 
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AttributeCopyAll - copy attributes between two objects
 
@@ -1188,14 +1188,14 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.5.4
 
       end subroutine ESMF_AttributeCopyAll
 
 !-------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_SetName - set the name of this object
 !
 ! !INTERFACE:
@@ -1236,7 +1236,7 @@ end function
 ! 
 
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
       logical :: rcpresent                          ! Return code present   
       integer :: status
@@ -1264,7 +1264,7 @@ end function
       end subroutine ESMF_SetName
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_GetName - get the name of this object
 !
 ! !INTERFACE:
@@ -1293,7 +1293,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
       integer :: status
 
@@ -1307,7 +1307,7 @@ end function
 !-------------------------------------------------------------------------
 !  Print routine
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_BasePrint - call into C++ code to print base object
 
@@ -1339,7 +1339,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD1.5.4
       integer :: status
       character(len=ESMF_MAXSTR) :: opts
@@ -1894,7 +1894,7 @@ end function
 !------------------------------------------------------------------------- 
 ! misc print routines
 !------------------------------------------------------------------------- 
-!BOP 
+!BOPI 
 !  !IROUTINE:  ESMF_StatusString - Return status as a string
 !  
 ! !INTERFACE: 
@@ -1925,7 +1925,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       if (status .eq. ESMF_STATE_UNINIT) string = "Uninitialized"
@@ -1940,7 +1940,7 @@ end function
       end subroutine ESMF_StatusString
 
 !------------------------------------------------------------------------- 
-!BOP 
+!BOPI 
 !  !IROUTINE:  ESMF_DataTypeString - Return DataType as a string
 !  
 ! !INTERFACE: 
@@ -1971,7 +1971,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       if (datatype .eq. ESMF_DATA_INTEGER) string = "Integer"
@@ -1984,7 +1984,7 @@ end function
       end subroutine ESMF_DataTypeString
 
 !------------------------------------------------------------------------- 
-!BOP 
+!BOPI 
 !  !IROUTINE:  ESMF_DataKindString - Return DataKind as a string
 !  
 ! !INTERFACE: 
@@ -2014,7 +2014,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       if (datakind .eq. ESMF_I1)  string = "Integer*1"
@@ -2031,7 +2031,7 @@ end function
       end subroutine ESMF_DataKindString
 
 !------------------------------------------------------------------------- 
-!BOP 
+!BOPI 
 !  !IROUTINE:  ESMF_LogicalString - Return Logical as a string
 !  
 ! !INTERFACE: 
@@ -2061,7 +2061,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       if (tf .eq. ESMF_TRUE)  string = "True"
