@@ -1,6 +1,4 @@
 !------------------------------------------------------------------------------
-!BOP
-!
 ! MODULE AppDriver.F90 - generic main program for an ESMF Application
 !
 ! !DESCRIPTION:
@@ -14,15 +12,21 @@
 !  In the text below, {\tt USER\_APP} should be replaced by the specific
 !   module and setservices names.
 !
+!BOP
 !\begin{verbatim}
 
-! The file which defines the user application and config file.
-! This must be edited before building this file.
+!------------------------------------------------------------------------------
+! The ChangeMe.F90 file contains a number of definitions 
+! that are used by the AppDriver, such as the name of the application's
+! main configuration file and the name of the application's SetServices 
+! routine.  
+!------------------------------------------------------------------------------
+
 #include "ChangeMe.F90"
 
-    program ESMF_ApplicationDriver
+    program ESMF_AppDriver
 
-    ! ESMF Framework module, defines all ESMF data types and procedures
+    ! ESMF module, defines all ESMF data types and procedures
     use ESMF_Mod
     
     ! Gridded Component registration routines.  Defined in "ChangeMe.F90"
@@ -61,10 +65,8 @@
     ! Return codes for error checks
     integer :: rc
         
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+!
 !  Initialize the ESMF Framework
-!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
     call ESMF_Initialize(rc=rc)
@@ -229,9 +231,22 @@
 
       call ESMF_Finalize(rc)
 
-      end program ESMF_ApplicationDriver
+      end program ESMF_AppDriver
 
 !\end{verbatim}    
 !EOP
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
