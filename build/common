@@ -1,4 +1,4 @@
-# $Id: common,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: common,v 1.2 2001/11/13 22:33:01 dneckels Exp $ 
 #
 #
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -72,11 +72,11 @@ vpathlib:
 
 # Builds library
 lib: chkalice_dir ${SOURCE}
-	@-if [ "${SOURCEC}" != "" ] ; then \
+	@if [ "${SOURCEC}" != "" ] ; then \
 	   ${OMAKE} -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libc; fi
-	@-if [ "${SOURCEF}" != "" ] ; then \
+	@if [ "${SOURCEF}" != "" ] ; then \
 		${OMAKE} -f ${MAKEFILE}  ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libf; fi
-	@-if [ "${OBJS}" != " " ] ; then \
+	@if [ "${OBJS}" != " " ] ; then \
 		${RANLIB}  ${LIBNAME}; \
 		${RM} -f ${OBJS}; \
 	fi
@@ -375,35 +375,35 @@ manualpages:
 .SUFFIXES: .F ${SUFFIXES} .Alice .C .cc .cpp .r .rm .so
 
 .c.o: 
-	-${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
 .c.a:
-	-${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-	-${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	-${RM} $*.o
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
 .cpp.o .cc.o .C.o: 
-	-${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
 .cpp.a .cc.a .C.a: 
-	-${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-	-${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	-${RM} $*.o
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
 
 .F.o .F90.o:
-	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
 
 .F.tex .F90.tex:
-	-${PROTEX} -bF +f $< > doc/$*.tex
+	${PROTEX} -bF +f $< > doc/$*.tex
 
 .F.a: 
-	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
-	-${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	-${RM} $*.o
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
 
 .f.o .f90.o: 
-	-${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
+	${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
 .f.a: 
-	-${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
-	-${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	-${RM} $*.o
+	${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
 
 #
 #  These rules are for compiling the test examples.
