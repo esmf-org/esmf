@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.20 2004/04/19 20:31:30 jwolfe Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.21 2004/04/27 14:04:34 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -52,14 +52,11 @@
 
     ! Global variables
     type(ESMF_GridComp) :: comp1
-    type(ESMF_newDELayout) :: layout1, deflayout
     type(ESMF_VM) :: vm
-    integer, dimension(32) :: delist
-    integer, dimension(2) :: shape
-    integer :: de_id
+    integer :: pe_id
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
-    integer :: i, j, ndes, rc
+    integer :: rc
 
         
     ! cumulative result: count failures; no failures equals "all pass"
@@ -85,63 +82,12 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_Initialize(rc=rc)
+    ! Initialize the framework and get a copy of the global VM
+    call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-
-    call ESMF_VMGetGlobal(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
-    deflayout = ESMF_newDELayoutCreate(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutGet(deflayout, deCount=ndes, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
-    call ESMF_newDELayoutGet(deflayout, localDe=de_id, rc=rc) 
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    
-!   Create a DELayout for the Component
-    ! assign default DE numbers and only use as many as we get procs
-    !delist = (/ (i, i=0, 31) /)
-    select case (ndes)
-       case (4)
-           shape(1) = 2
-           shape(2) = 2
-       case (6)
-           shape(1) = 3
-           shape(2) = 2
-       case (8)
-           shape(1) = 2
-           shape(2) = 4
-       case (12)
-           shape(1) = 3
-           shape(2) = 4
-       case (16)
-           shape(1) = 4
-           shape(2) = 4
-       case (24)
-           shape(1) = 4
-           shape(2) = 6
-       case (32)
-           shape(1) = 8
-           shape(2) = 4
-       case default
-           shape(1) = ndes
-           shape(2) = 1
-    end select
-    layout1 = ESMF_newDELayoutCreate(vm, shape, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
-    ! print out shape of DELayout
-    print *, ""
-    print *, "DE ID numbers:"
-    do j = shape(2)-1,0,-1
-      write(*,5) (j*shape(1) + i, i=0,shape(1)-1)
- 5   format(25(1x,i2))
-    enddo
-    print *, ""
 
     cname = "System Test FieldHaloPeriodic"
-    comp1 = ESMF_GridCompCreate(name=cname, delayout=layout1, rc=rc)
+    comp1 = ESMF_GridCompCreate(vm, name=cname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Create finished, name = ", trim(cname)
@@ -190,8 +136,6 @@
 !     Destroy section
 ! 
 
-    call ESMF_newDELayoutDestroy(layout1, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompDestroy(comp1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_StateDestroy(import, rc)
@@ -202,7 +146,8 @@
 !-------------------------------------------------------------------------
 10    print *, "System Test FieldHaloPeriodic complete!"
 
-    if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    call ESMF_VMGet(vm, localPet=pe_id, rc=rc)
+    if ((pe_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *) "System Test failure"
       write(testname, *) "System Test FieldHaloPeriodic: Field Halo Test"
 
@@ -273,28 +218,74 @@
 
       ! Local variables
       integer :: i, j
-      type(ESMF_newDELayout) :: layout1 
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_Field) :: field(4)
       type(ESMF_Grid) :: grid(4), thisgrid
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: array1
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
-      integer :: de_id
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      integer :: pe_id
+      type(ESMF_VM) :: vm
+      type(ESMF_newDELayout) :: layout1
+      integer, dimension(2) :: shape
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
+      type(ESMF_GridType) :: horz_gridtype
+      type(ESMF_GridStagger) :: horz_stagger
+      type(ESMF_CoordSystem) :: horz_coord_system
       real(ESMF_KIND_R8) :: min(2), max(2)
       character(len=ESMF_MAXSTR) :: gname, fname
 
       if (verbose) print *, "Entering Initialization routine"
 
       ! Query component for layout
-      call ESMF_GridCompGet(comp, delayout=layout1, rc=rc)
-      if (verbose) print *, "myinit: getting layout, rc = ", rc
+      call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+      if (verbose) print *, "myinit: getting vm, rc = ", rc
       if (rc .ne. ESMF_SUCCESS) goto 30
 
+      call ESMF_VMGet(vm, petCount=npets, localPet=pe_id, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+  
+  !   Create a DELayout for the Component
+      ! assign default DE numbers and only use as many as we get procs
+      select case (ndes)
+         case (4)
+             shape(1) = 2
+             shape(2) = 2
+         case (6)
+             shape(1) = 3
+             shape(2) = 2
+         case (8)
+             shape(1) = 2
+             shape(2) = 4
+         case (12)
+             shape(1) = 3
+             shape(2) = 4
+         case (16)
+             shape(1) = 4
+             shape(2) = 4
+         case (24)
+             shape(1) = 4
+             shape(2) = 6
+         case (32)
+             shape(1) = 8
+             shape(2) = 4
+         case default
+             shape(1) = ndes
+             shape(2) = 1
+      end select
+
+      layout1 = ESMF_newDELayoutCreate(vm, shape, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+  
+      ! print out shape of DELayout
+      print *, ""
+      print *, "DE ID numbers:"
+      do j = shape(2)-1,0,-1
+        write(*,5) (j*shape(1) + i, i=0,shape(1)-1)
+   5   format(25(1x,i2))
+      enddo
+      print *, ""
+  
       ! The user creates a simple horizontal Grid internally by passing all
       ! necessary information through the CreateInternal argument list.
 
@@ -385,7 +376,7 @@
       if (verbose) print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
-      call ESMF_newDELayoutGet(layout1, localDe=de_id, rc=rc)
+      call ESMF_newDELayoutGet(layout1, localDe=pe_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Create an arrayspec for a 2-D array 
@@ -470,7 +461,7 @@
          if (rc .ne. ESMF_SUCCESS) goto 30
           do j=index(2)%min,index(2)%max
             do i=index(1)%min,index(1)%max
-              ldata(i,j) =de_id
+              ldata(i,j) =pe_id
             enddo
           enddo
 
@@ -659,7 +650,7 @@
 
       ! Local variables
       integer :: i, j, ni, nj, xpos, ypos, pos(2), nx, ny, ncount(2)
-      integer :: de_id, target
+      integer :: pe_id, target
       integer :: mismatch
       integer :: pattern(3,3)
       type(ESMF_Logical) :: pflags(2)
@@ -687,8 +678,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 40
       if (verbose) print *, "name back from field"
 
-      ! Get our de_id from layout
-      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
+      ! Get our pe_id from layout
+      call ESMF_newDELayoutGet(layout, localDe=pe_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
 
       ! Get a pointer to the start of the data
@@ -710,7 +701,7 @@
       nx = ncount(1)
       ny = ncount(2)
       if (rc .ne. ESMF_SUCCESS) goto 40
-      call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=rc)
+      call ESMF_newDELayoutGetDE(layout, pe_id, coord=pos, rc=rc)
       xpos = pos(1)
       ypos = pos(2)
       if (rc .ne. ESMF_SUCCESS) goto 40
@@ -726,17 +717,17 @@
 
       ! start by filling in the pattern for an interior de and then
       !  check for boundary de's and overwrite those.
-      pattern(1,1) = de_id - nx - 1
-      pattern(2,1) = de_id - nx
-      pattern(3,1) = de_id - nx + 1
+      pattern(1,1) = pe_id - nx - 1
+      pattern(2,1) = pe_id - nx
+      pattern(3,1) = pe_id - nx + 1
 
-      pattern(1,2) = de_id - 1
-      pattern(2,2) = de_id
-      pattern(3,2) = de_id + 1
+      pattern(1,2) = pe_id - 1
+      pattern(2,2) = pe_id
+      pattern(3,2) = pe_id + 1
 
-      pattern(1,3) = de_id + nx - 1
-      pattern(2,3) = de_id + nx
-      pattern(3,3) = de_id + nx + 1
+      pattern(1,3) = pe_id + nx - 1
+      pattern(2,3) = pe_id + nx
+      pattern(3,3) = pe_id + nx + 1
 
 
       ! now edges minus corners
@@ -764,7 +755,7 @@
       ! left side middle
       if (xpos .eq. 0) then
         if (pflags(1) .eq. ESMF_TRUE) then
-          target = de_id + (nx-1)
+          target = pe_id + (nx-1)
         else
           target = -1
         endif
@@ -774,7 +765,7 @@
       ! right side middle
       if (xpos .eq. nx-1) then
         if (pflags(1) .eq. ESMF_TRUE) then
-          target = de_id - (nx-1)
+          target = pe_id - (nx-1)
         else
           target = -1
         endif
@@ -788,22 +779,22 @@
         if ((pflags(1) .eq. ESMF_TRUE) .and. &
             (pflags(2) .eq. ESMF_TRUE)) then
           target = -1 ! ambiguous
-          !target = de_id + nx - 1  ! ambiguous
-          !target = de_id + (ny-1)*nx - 1 ! ambiguous
+          !target = pe_id + nx - 1  ! ambiguous
+          !target = pe_id + (ny-1)*nx - 1 ! ambiguous
         else
           target = -1
         endif
         pattern(1, 1) = target
       else if (xpos .eq. 0) then
         if (pflags(1) .eq. ESMF_TRUE) then
-          target = de_id - 1
+          target = pe_id - 1
         else
           target = -1
         endif
         pattern(1, 1) = target
       else if (ypos .eq. 0) then
         if (pflags(2) .eq. ESMF_TRUE) then
-          target = de_id + (ny-1)*nx - 1
+          target = pe_id + (ny-1)*nx - 1
         else
           target = -1
         endif
@@ -815,22 +806,22 @@
         if ((pflags(1) .eq. ESMF_TRUE) .and. &
             (pflags(2) .eq. ESMF_TRUE)) then
           target = -1  ! ambiguous
-          !target = de_id - nx + 1  ! ambiguous
-          !target = de_id + (ny-1)*nx + 1  ! ambiguous
+          !target = pe_id - nx + 1  ! ambiguous
+          !target = pe_id + (ny-1)*nx + 1  ! ambiguous
         else
           target = -1
         endif
         pattern(3, 1) = target
       else if (xpos .eq. nx-1) then
         if (pflags(1) .eq. ESMF_TRUE) then
-          target = de_id - 2*nx + 1
+          target = pe_id - 2*nx + 1
         else
           target = -1
         endif
         pattern(3, 1) = target
       else if (ypos .eq. 0) then
         if (pflags(2) .eq. ESMF_TRUE) then
-          target = de_id + (ny-1)*nx + 1
+          target = pe_id + (ny-1)*nx + 1
         else
           target = -1
         endif
@@ -842,7 +833,7 @@
         if ((pflags(1) .eq. ESMF_TRUE) .and. &
             (pflags(2) .eq. ESMF_TRUE)) then
           target = -1 ! ambiguous
-          !target = de_id + nx - 1  ! ambiguous
+          !target = pe_id + nx - 1  ! ambiguous
           !target = xpos + nx - 1 ! ambiguous
         else
           target = -1
@@ -850,7 +841,7 @@
         pattern(1, 3) = target
       else if (xpos .eq. 0) then
         if (pflags(1) .eq. ESMF_TRUE) then
-          target = de_id + 2*nx - 1
+          target = pe_id + 2*nx - 1
         else
           target = -1
         endif
@@ -869,15 +860,15 @@
         if ((pflags(1) .eq. ESMF_TRUE) .and. &
             (pflags(2) .eq. ESMF_TRUE)) then
           target = -1  ! ambiguous
-          !target = de_id - nx + 1  ! ambiguous
-          !target = de_id + 1  ! ambiguous
+          !target = pe_id - nx + 1  ! ambiguous
+          !target = pe_id + 1  ! ambiguous
         else
           target = -1
         endif
         pattern(3, 3) = target
       else if (xpos .eq. nx-1) then
         if (pflags(1) .eq. ESMF_TRUE) then
-          target = de_id + 1
+          target = pe_id + 1
         else
           target = -1
         endif
@@ -997,7 +988,7 @@
       ! Print what the results should look like
       !!
       print *, '------------------------------------------------------'
-      print *, 'DE ID = ', de_id, trim(fname)
+      print *, 'DE ID = ', pe_id, trim(fname)
       print *, 'Pattern should look like:'
       print *, pattern(1, 3), pattern(2, 3), pattern(3, 3)
       print *, pattern(1, 2), pattern(2, 2), pattern(3, 2)
