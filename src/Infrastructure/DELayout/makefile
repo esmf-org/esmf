@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.3 2004/02/18 20:37:22 nscollins Exp $
+# $Id: makefile,v 1.4 2004/03/18 18:34:44 nscollins Exp $
 
-ALL       = build_here
+ALL: build_here
 
 # This needs to be the path of this directory relative to the
 # top level esmf directory.

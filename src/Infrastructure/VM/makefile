@@ -1,4 +1,6 @@
-# $Id: makefile,v 1.2 2004/01/29 17:11:54 nscollins Exp $
+# $Id: makefile,v 1.3 2004/03/18 18:36:01 nscollins Exp $
+
+ALL:  build_here
 
 # This needs to be the path of this directory relative to the
 # top level esmf directory.
@@ -14,7 +16,7 @@ include ${ESMF_DIR}/makefile
 
 # until there are contents in the subdirectories, these cannot
 # be listed here - they break the make system.
-DIRS	  =
+DIRS	  = src interface
 #DIRS	  = src interface
 
 

@@ -1,5 +1,6 @@
-# $Id: makefile,v 1.13 2004/01/26 17:44:41 nscollins Exp $ 
+# $Id: makefile,v 1.14 2004/03/18 18:36:15 nscollins Exp $ 
 
+ALL: build_here
 
 LOCDIR   = src/Superstructure
 

@@ -1,8 +1,7 @@
-# $Id: makefile,v 1.20 2004/03/18 00:13:27 cdeluca Exp $ 
+# $Id: makefile,v 1.21 2004/03/18 18:36:07 nscollins Exp $ 
 
-all: alldoc
+ALL: alldoc
 
-ALL:  lib
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
