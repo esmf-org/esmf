@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2003/02/11 19:13:35 nscollins Exp $ 
+# $Id: base_variables,v 1.2 2003/02/11 22:02:19 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -32,9 +32,9 @@ O_COPTFLAGS	   = -O
 O_FOPTFLAGS	   = -O
 # ########################## C++ compiler ##################################
 #
-CXX_CC		   = ecc -tlocal
-#CXX_CC		   = ecc -mp -tlocal
-CXX_FC		   = efc -mp -tlocal
+CXX_CC		   = ecc 
+#CXX_CC		   = ecc -mp 
+CXX_FC		   = efc -mp 
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = ecc

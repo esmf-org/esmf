@@ -1,4 +1,4 @@
-# $Id: base,v 1.1 2003/02/11 19:13:35 nscollins Exp $ 
+# $Id: base,v 1.2 2003/02/11 22:02:18 nscollins Exp $ 
 #
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
 include ${ESMF_DIR}/build/common
@@ -9,16 +9,16 @@ libf: ${LIBNAME}(${OBJSF})
 #########
 
 .F90.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -cpp -free ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -cpp -FR ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -nocpp -free ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -cpp0 -FR ${ESMC_INCLUDE} $<
 
 .f90.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} -cpp -fixed ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} -cpp -FI ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .f.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} -nocpp -fixed ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} -cpp0 -FI ${ESMC_INCLUDE} $<
 
 .c.o:
 	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
@@ -27,22 +27,22 @@ libf: ${LIBNAME}(${OBJSF})
 	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -cpp -free ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -cpp -FR ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .F.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -nocpp -free ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -cpp0 -FR ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .f90.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} -cpp -fixed ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} -cpp -FI ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .f.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} -nocpp -fixed ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} -cpp0 -FI ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
