@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.34 2003/04/28 17:40:21 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.35 2003/04/30 21:23:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -307,7 +307,7 @@
       public ESMF_StatusString, ESMF_DataTypeString
 
 !  Overloaded = operator functions
-      public operator(.eq.), operator(.ne.)
+      public operator(.eq.), operator(.ne.), assignment(=)
 !
 !
 !EOP
@@ -316,7 +316,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.34 2003/04/28 17:40:21 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.35 2003/04/30 21:23:49 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -340,6 +340,10 @@ interface operator (.ne.)
  module procedure ESMF_tfne
 end interface
 
+interface assignment (=)
+ module procedure ESMF_dtas
+ module procedure ESMF_dkas
+end interface
 
 !------------------------------------------------------------------------------
 
@@ -379,6 +383,13 @@ function ESMF_dtne(dt1, dt2)
  ESMF_dtne = (dt1%dtype .ne. dt2%dtype)
 end function
 
+subroutine ESMF_dtas(intval, dtval)
+ integer, intent(out) :: intval
+ type(ESMF_DataType), intent(in) :: dtval
+
+ intval = dtval%dtype
+end subroutine
+
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_DataKinds to see if they're the same or not
 
@@ -395,6 +406,13 @@ function ESMF_dkne(dk1, dk2)
 
  ESMF_dkne = (dk1%dkind .ne. dk2%dkind)
 end function
+
+subroutine ESMF_dkas(intval, dkval)
+ integer, intent(out) :: intval
+ type(ESMF_DataKind), intent(in) :: dkval
+
+ intval = dkval%dkind
+end subroutine
 
 
 !------------------------------------------------------------------------------
