@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.108 2004/11/04 22:31:45 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.109 2004/11/17 00:57:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.108 2004/11/04 22:31:45 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.109 2004/11/17 00:57:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1622,7 +1622,7 @@
 
       if (present(deltaPerDim) .and. present(maxGlobalCoordPerDim)) then
          do i=1,dimCount
-            recheck = (useMaxes(i) - minGlobalCoordPerDim(i)) / real(counts(i))
+            recheck = (useMaxes(i) - minGlobalCoordPerDim(i)) / float(counts(i))
             if (recheck-useDeltas(i) .gt. 0.00001) then
                 write(msgbuf, *) "Inconsistent set of min, max, deltas, and ", &
                                  "counts specified"
@@ -2141,18 +2141,18 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "coord1", &
                                        ESMF_CONTEXT, rc)) return
         coord1(1) = min(1)
-        delta     = (max(1) - min(1)) / real(counts(1))
+        delta     = (max(1) - min(1)) / float(counts(1))
         do i = 1,counts(1)
-          coord1(i+1) = coord1(i) + delta
+          coord1(i+1) = min(1) + float(i)*delta
         enddo
         if (dimCount.ge.2) then
           allocate(coord2(counts(2)+1), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "coord2", &
                                          ESMF_CONTEXT, rc)) return
           coord2(1) = min(2)
-          delta     = (max(2) - min(2)) / real(counts(2))
+          delta     = (max(2) - min(2)) / float(counts(2))
           do i = 1,counts(2)
-            coord2(i+1) = coord2(i) + delta
+            coord2(i+1) = min(2) + float(i)*delta
           enddo
         endif
       else   ! not uniform
@@ -2903,7 +2903,7 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "coord1", &
                                        ESMF_CONTEXT, rc)) return
         coord1(1) = min(1)
-        delta     = (max(1) - min(1)) / real(counts(1))
+        delta     = (max(1) - min(1)) / float(counts(1))
         do i = 1,counts(1)
           coord1(i+1) = coord1(i) + delta
         enddo
@@ -2912,7 +2912,7 @@
           if (ESMF_LogMsgFoundAllocError(localrc, "coord2", &
                                          ESMF_CONTEXT, rc)) return
           coord2(1) = min(2)
-          delta     = (max(2) - min(2)) / real(counts(2))
+          delta     = (max(2) - min(2)) / float(counts(2))
           do i = 1,counts(2)
             coord2(i+1) = coord2(i) + delta
           enddo
