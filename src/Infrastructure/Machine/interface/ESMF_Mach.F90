@@ -1,4 +1,4 @@
-! $Id: ESMF_Mach.F90,v 1.7 2004/01/28 21:46:48 nscollins Exp $
+! $Id: ESMF_Mach.F90,v 1.8 2004/03/09 23:07:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Mach.F90,v 1.7 2004/01/28 21:46:48 nscollins Exp $'
+      '$Id: ESMF_Mach.F90,v 1.8 2004/03/09 23:07:19 svasquez Exp $'
 
 !==============================================================================
 
@@ -114,13 +114,10 @@
 !
 !  The arguments are:
 !  \begin{description}
-! 
 !   \item[language]
 !    Flag saying what language the main program is.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -181,10 +178,8 @@
 !
 !  The arguments are:
 !  \begin{description}
-! 
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
