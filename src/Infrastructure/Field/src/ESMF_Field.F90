@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.129 2004/03/18 22:52:28 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.130 2004/03/19 23:33:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.129 2004/03/18 22:52:28 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.130 2004/03/19 23:33:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3346,7 +3346,7 @@
         print *, "ERROR in ESMF_ArraySpecGet"
         return
       endif 
-      call ESMF_GridGet(grid, numDims=gridRank, rc=status)
+      call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
       if(status .ne. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGet"
         return
@@ -3569,7 +3569,7 @@
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATE_READY
 
-      call ESMF_GridGet(grid, numDims=gridRank, rc=status)
+      call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be reused by user now
         ! if specified as explicit args to create, they override anything
@@ -3695,7 +3695,7 @@
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATE_READY
 
-      call ESMF_GridGet(grid, numDims=gridRank, rc=status)
+      call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
       if (present(datamap)) then
         ! this does a copy, datamap ok for user to delete now
         ftype%mapping = datamap   
@@ -3948,7 +3948,7 @@
       if (hassrcdata) then
         ! don't ask for our de number if this de isn't part of the layout
         call ESMF_DELayoutGetDEID(srclayout, my_src_DE, status)
-        call ESMF_GridGet(stypep%grid, numDims=gridrank, rc=status)
+        call ESMF_GridGet(stypep%grid, dimCount=gridrank, rc=status)
         call ESMF_FieldGetRelLoc(srcField, horzRelLoc, vertRelLoc, rc)
         call ESMF_GridGetDE(stypep%grid, horzRelLoc=horzRelLoc, &
                             vertRelLoc=vertRelLoc, &
@@ -3982,8 +3982,11 @@
           return
         endif
         ! From the grid get the bounding box on this DE
-        call ESMF_GridGet(srcGrid, minLocalCoordPerDim=src_min, &
-                         maxLocalCoordPerDim=src_max, rc=status)
+        call ESMF_FieldGetRelLoc(srcField, horzRelLoc, vertRelLoc, rc)
+        call ESMF_GridGetDE(srcGrid, &
+                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                            minLocalCoordPerDim=src_min, &
+                            maxLocalCoordPerDim=src_max, rc=status)
         call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, src_min, src_max, &
                                        myAI, sendDomainList, status)
       endif
@@ -3998,8 +4001,11 @@
           return
         endif
         ! From the grid get the bounding box on this DE
-        call ESMF_GridGet(dstGrid, minLocalCoordPerDim=dst_min, &
-                          maxLocalCoordPerDim=dst_max, rc=status)
+        call ESMF_FieldGetRelLoc(dstField, horzRelLoc, vertRelLoc, rc)
+        call ESMF_GridGetDE(dstGrid, &
+                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                            minLocalCoordPerDim=dst_min, &
+                            maxLocalCoordPerDim=dst_max, rc=status)
         call ESMF_GridBoxIntersectRecv(srcGrid, dst_min, dst_max, &
                                        recvDomainList, rc=status)
       endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.16 2004/03/18 22:23:57 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.17 2004/03/19 23:33:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.16 2004/03/18 22:23:57 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.17 2004/03/19 23:33:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -276,7 +276,7 @@
         return
       endif
 
-      call ESMF_GridGet(ftypep%grid, numDims=numDims, rc=status)
+      call ESMF_GridGet(ftypep%grid, dimCount=numDims, rc=status)
       allocate(globalCellCountPerDim(numDims), stat=status)
       allocate(maxLocalCellCountPerDim(numDims), stat=status)
       allocate(local_maxlengths(numDims), stat=status)
@@ -1329,7 +1329,7 @@
         return
       endif 
 
-      call ESMF_GridGet(ftypep%grid, numDims=numDims, rc=status) 
+      call ESMF_GridGet(ftypep%grid, dimCount=numDims, rc=status) 
 
 !     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
 !     if(status .NE. ESMF_SUCCESS) then 
@@ -1470,7 +1470,7 @@
 
       ! Get global starting counts and global counts
       call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
-      call ESMF_GridGet(ftypep%grid, numDims=numDims, rc=status)
+      call ESMF_GridGet(ftypep%grid, dimCount=numDims, rc=status)
       AI_count = nDEs
       allocate(global_count(numDims), stat=status)
       allocate(periodic(numDims), stat=status)
