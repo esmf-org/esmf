@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.31 2003/08/28 16:36:36 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.32 2003/08/29 21:06:13 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.31 2003/08/28 16:36:36 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.32 2003/08/29 21:06:13 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -755,6 +755,9 @@
         print *, "ESMF_DELayoutGetDEPosition error"
         return
       endif
+!     Translate to F90
+      x = x+1
+      y = y+1
 
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
