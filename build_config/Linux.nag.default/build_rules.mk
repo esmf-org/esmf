@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.14 2004/09/20 21:05:31 nscollins Exp $
+#  $Id: build_rules.mk,v 1.15 2004/10/08 19:06:19 nscollins Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -108,7 +108,7 @@ C_F90CXXLD         = ${C_FC}
 C_CXXF90LD         = mpiCC
 else
 C_CC		   = cc
-C_FC		   = f90
+C_FC		   = f95
 C_CLINKER	   = ${C_CC}
 C_FLINKER	   = ${C_FC}
 CXX_CC		   = CC -fPIC
