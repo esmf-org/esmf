@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.12 2004/03/18 20:43:21 nscollins Exp $
+#  $Id: build_rules.mk,v 1.13 2004/05/04 22:30:54 slswift Exp $
 #
 #  AIX.default.default.mk
 #
@@ -124,6 +124,7 @@ CXX_CC			= mpCC_r
 CXX_FC			= mpxlf90_r
 CXX_CLINKER		= mpCC_r -qcheck 
 CXX_FLINKER		= mpxlf90_r -qcheck 
+SL_LIB_LINKER 		= mpCC_r -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 endif
 # end 32 bit section
 
@@ -150,6 +151,7 @@ CXX_CC			= mpCC_r -q64
 CXX_FC			= mpxlf90_r -q64
 CXX_CLINKER		= mpCC_r -q64
 CXX_FLINKER		= mpCC_r -q64
+SL_LIB_LINKER 		= mpCC_r -q64 -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 endif
 # end 64 bit section
 
@@ -200,7 +202,7 @@ OCOMP_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 SL_SUFFIX   = so
 SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
 SL_LINKOPTS = -brtl
-SL_LIB_LINKER = mpCC_r -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
+#SL_LIB_LINKER = mpCC_r -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 #SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
