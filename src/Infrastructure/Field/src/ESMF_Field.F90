@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.160 2004/06/09 17:05:57 slswift Exp $
+! $Id: ESMF_Field.F90,v 1.161 2004/06/09 21:53:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.160 2004/06/09 17:05:57 slswift Exp $'
+      '$Id: ESMF_Field.F90,v 1.161 2004/06/09 21:53:25 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -2734,7 +2734,7 @@
 #define ESMF_METHOD "ESMF_FieldValidate"
 
 !BOP
-! !IROUTINE:  ESMF_FieldValidate - Check the internal consistency of a Field
+! !IROUTINE:  ESMF_FieldValidate - Check validity of a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldValidate(field, options, rc)
@@ -2745,16 +2745,24 @@
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Routine to validate the internal state of an {\tt ESMF\_Field}.
+!      Validates that the {\tt field} is internally consistent.
+!      Currently this method determines if the {\tt field} is uninitialized 
+!      or already destroyed.  The method returns an error code if problems 
+!      are found.  Only the "brief" option described in Section 
+!      \ref{sec:validateoptions} is currently supported.  This is also 
+!      the default option.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           An {\tt ESMF\_Field} object.
+!           {\tt ESMF\_Field} to validate.
 !     \item [options]
-!           Validation option.
+!           Validation options.  See Section \ref{sec:validateoptions} for 
+!           standard option strings.  Please note that only the "brief" option 
+!           is currently supported; other values will be ignored.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt field} 
+!           is valid.
 !     \end{description}
 !
 !EOP

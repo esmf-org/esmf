@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.29 2004/06/08 22:37:18 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.30 2004/06/09 21:53:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.29 2004/06/08 22:37:18 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.30 2004/06/09 21:53:25 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -779,7 +779,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRegrid"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleRegrid - Execute a regrid operation on a Bundle
 
 ! !INTERFACE:
@@ -838,7 +838,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -865,7 +865,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRegridRelease"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleRegridRelease - Release information for this handle
 
 ! !INTERFACE:
@@ -888,7 +888,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       call ESMF_RouteHandleDestroy(routehandle, rc)
@@ -898,7 +898,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRegridStore"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleRegridStore - Precompute regrid operation on a Bundle
 
 ! !INTERFACE:
@@ -942,7 +942,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.14 2004/06/08 13:40:24 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.15 2004/06/09 21:53:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,7 +126,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.14 2004/06/08 13:40:24 nscollins Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.15 2004/06/09 21:53:25 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -401,7 +401,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleDataMapSetInvalid"
 !BOP
-! !IROUTINE:  ESMF_BundleDataMapSetInvalid - set contents of a BundleDataMap to uninitialized value.
+! !IROUTINE:  ESMF_BundleDataMapSetInvalid - Set BundleDataMap to invalid state
 
 ! !INTERFACE:
       subroutine ESMF_BundleDataMapSetInvalid(bundledatamap, rc)
@@ -411,7 +411,7 @@ end function
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!      ESMF routine to set the contents of a {\tt ESMF\_BundleDataMap} type
+!      ESMF routine to set the contents of an {\tt ESMF\_BundleDataMap}
 !      to an uninitialized value.
 !
 !     The arguments are:
@@ -437,7 +437,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleDataMapValidate"
 !BOP
-! !IROUTINE: ESMF_BundleDataMapValidate - Validate internal state of a BundleDataMap type
+! !IROUTINE: ESMF_BundleDataMapValidate - Check validity of a BundleDataMap
 !
 ! !INTERFACE:
       subroutine ESMF_BundleDataMapValidate(bundledatamap, options, rc)
@@ -448,17 +448,25 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Validate the internal state of a {\tt ESMF\_BundleDataMap}.
+!      Validates that the {\tt bundledatamap} is internally consistent.
+!      Currently this method determines if the {\tt bundledatamap} is uninitialized 
+!      or already destroyed.  The method returns an error code if problems 
+!      are found.  Only the "brief" option described in Section 
+!      \ref{sec:validateoptions} is currently supported.  This is also 
+!      the default option.
 !
 !      The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
 !           {\tt ESMF\_BundleDataMap} to validate.
 !     \item [{[options]}]
-!           Validation options.
+!           Validation options.  See Section \ref{sec:validateoptions} for 
+!           standard option strings.  Please note that only the "brief" option 
+!           is currently supported; other values will be ignored.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt bundledatamap}
+!           is valid.
+!     \end{description}
 !
 !EOP
         
@@ -475,7 +483,11 @@ end function
         endif
 
 
-        if (bundledatamap%status .ne. ESMF_STATE_READY) return
+        if (bundledatamap%status .ne. ESMF_STATE_READY) then
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed BundleDataMap", &
+                                 ESMF_CONTEXT, rc)) return
+        endif
             
         ! TODO: add more validation here - for index numbers, etc
  

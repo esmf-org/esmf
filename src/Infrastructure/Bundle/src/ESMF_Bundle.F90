@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.47 2004/06/08 22:12:31 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.48 2004/06/09 21:53:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2523,7 +2523,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundlePrint"
 !BOP
-! !IROUTINE: ESMF_BundlePrint - Print diagnostic information about a Bundle
+! !IROUTINE: ESMF_BundlePrint - Print information about a Bundle
 !
 ! !INTERFACE:
       subroutine ESMF_BundlePrint(bundle, options, rc)
@@ -2534,7 +2534,8 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Print information about an {\tt ESMF\_Bundle}.  The options control the
+!      Print diagnostic information about an {\tt ESMF\_Bundle}
+!      to {\tt stdout}.  The options control the
 !      type of information and level of detail.
 !
 !     The arguments are:
@@ -2551,9 +2552,6 @@ end function
 ! !REQUIREMENTS:  
 
 
-!
-!  TODO: code goes here
-!
       character(len=ESMF_MAXSTR) :: bname, fname
       character(len=ESMF_MAXSTR) :: msgbuf
       type(ESMF_BundleType), pointer :: btype
@@ -2892,28 +2890,35 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleValidate"
 !BOP
-! !IROUTINE: ESMF_BundleValidate - Perform internal consistency checks
+! !IROUTINE: ESMF_BundleValidate - Check validity of a Bundle
 !
 ! !INTERFACE:
       subroutine ESMF_BundleValidate(bundle, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      character (len=*), intent(in), optional :: options
+      character (len=*), intent(in), optional :: options 
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Validates that the {\tt ESMF\_Bundle} is internally consistent.
-!      Returns error code if problems are found.
+!      Validates that the {\tt bundle} is internally consistent.
+!      Currently this method determines if the {\tt bundle} is uninitialized 
+!      or already destroyed.  The method returns an error code if problems 
+!      are found.  Only the "brief" option described in Section 
+!      \ref{sec:validateoptions} is currently supported.  This is also 
+!      the default option.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
+!           {\tt ESMF\_Bundle} to validate.
 !     \item [{[options]}]
-!           The validate options.  See {\ref xx} for standard option strings.
+!           Validation options.  See Section \ref{sec:validateoptions} for 
+!           standard option strings.  Please note that only the "brief" option 
+!           is currently supported; other values will be ignored.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt bundle}
+!           is valid.
 !     \end{description}
 
 !EOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.15 2004/06/08 23:12:48 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.16 2004/06/09 21:53:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.15 2004/06/08 23:12:48 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.16 2004/06/09 21:53:25 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -160,11 +160,11 @@
 ! !IROUTINE: ESMF_FieldDataMapGet - Get values from a FieldDataMap 
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapGet(datamap, dataRank, dataIndexList, counts, &
+      subroutine ESMF_FieldDataMapGet(fielddatamap, dataRank, dataIndexList, counts, &
                                       horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: datamap  
+      type(ESMF_FieldDataMap), intent(in) :: fielddatamap  
       integer, intent(out), optional :: dataRank    
       integer, dimension(:), intent(out), optional :: dataIndexList
       integer, dimension(:), intent(out), optional :: counts 
@@ -177,7 +177,7 @@
 !
 !  The arguments are:
 !  \begin{description}
-!  \item [datamap]
+!  \item [fielddatamap]
 !     An {\tt ESMF\_FieldDataMap}.
 !  \item [{[datarank]}]
 !     The number of dimensions in the data {\tt ESMF\_Array}.
@@ -218,15 +218,15 @@
         endif
 
 
-        ! get any values from the internal array datamap
-        call ESMF_ArrayDataMapGet(datamap%adm, dataRank, dataIndexList, &
+        ! get any values from the internal array fielddatamap
+        call ESMF_ArrayDataMapGet(fielddatamap%adm, dataRank, dataIndexList, &
                                   counts, status)
         if (status .ne. ESMF_SUCCESS) return
 
         ! TODO: need to add rankLength and vector information here
 
-        if (present(horzRelloc)) horzRelloc = datamap%horzRelloc
-        if (present(vertRelloc)) vertRelloc = datamap%vertRelloc
+        if (present(horzRelloc)) horzRelloc = fielddatamap%horzRelloc
+        if (present(vertRelloc)) vertRelloc = fielddatamap%vertRelloc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -240,11 +240,11 @@
 !
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapPrint(datamap, options, rc)
+      subroutine ESMF_FieldDataMapPrint(fielddatamap, options, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(in) :: fielddatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
@@ -253,7 +253,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [fielddatamap]
 !           {\tt ESMF\_FieldDataMap} to print.
 !     \item [{[options]}]
 !           Print options.
@@ -268,28 +268,28 @@
 
         write (msgbuf, *)  "FieldDataMap print:"
         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-        if (datamap%status .ne. ESMF_STATE_READY) then
+        if (fielddatamap%status .ne. ESMF_STATE_READY) then
           write (msgbuf, *)  "Uninitialized or Invalid object"
           if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
           return
         endif
 
         ! individual data item information
-        call ESMF_ArrayDataMapPrint(datamap%adm, options, rc)
+        call ESMF_ArrayDataMapPrint(fielddatamap%adm, options, rc)
 
-        call ESMF_RelLocString(datamap%horzRelloc, str, rc)
+        call ESMF_RelLocString(fielddatamap%horzRelloc, str, rc)
         write (msgbuf, *)  "  Horizontal Relative location = ", trim(str)
         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-        call ESMF_RelLocString(datamap%vertRelloc, str, rc)
+        call ESMF_RelLocString(fielddatamap%vertRelloc, str, rc)
         write (msgbuf, *)  "  Vertical Relative location = ", trim(str)
         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         ! TODO: These are private now, they need a print routine.
-        !call ESMF_InterleaveString(datamap%interleave%il_type, str, rc)
+        !call ESMF_InterleaveString(fielddatamap%interleave%il_type, str, rc)
         !write (msgbuf, *)  "  Interleave type = ", trim(str), &
         !         ".  Interleave Start,end,stride = ",  &
-        !         datamap%interleave%il_start, & 
-        !         datamap%interleave%il_end, & 
-        !         datamap%interleave%il_strides
+        !         fielddatamap%interleave%il_start, & 
+        !         fielddatamap%interleave%il_end, & 
+        !         fielddatamap%interleave%il_strides
       
         end subroutine ESMF_FieldDataMapPrint
 
@@ -300,11 +300,11 @@
 ! !IROUTINE: ESMF_FieldDataMapSet - Set values in a FieldDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapSet(datamap, dataRank, dataIndexList, counts, &
+      subroutine ESMF_FieldDataMapSet(fielddatamap, dataRank, dataIndexList, counts, &
                                       horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(inout) :: datamap  
+      type(ESMF_FieldDataMap), intent(inout) :: fielddatamap  
       integer, intent(in), optional :: dataRank    
       integer, dimension(:), intent(in), optional :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts 
@@ -317,7 +317,7 @@
 !
 ! The arguments are:
 !  \begin{description}
-!  \item [datamap]
+!  \item [fielddatamap]
 !        An {\tt ESMF\_FieldDataMap}.
 !     \item [{[datarank]}]
 !           The number of dimensions in the data {\tt ESMF\_Array}.
@@ -364,14 +364,14 @@
 
 
         ! set the internal array map
-        call ESMF_ArrayDataMapSet(datamap%adm, dataRank, dataIndexList, &
+        call ESMF_ArrayDataMapSet(fielddatamap%adm, dataRank, dataIndexList, &
                                    counts, status)
         if (status .ne. ESMF_SUCCESS) return
 
         ! TODO: add the vector information here
 
-        if (present(horzRelloc)) datamap%horzRelloc = horzRelloc
-        if (present(vertRelloc)) datamap%vertRelloc = vertRelloc
+        if (present(horzRelloc)) fielddatamap%horzRelloc = horzRelloc
+        if (present(vertRelloc)) fielddatamap%vertRelloc = vertRelloc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -385,12 +385,12 @@
 ! !IROUTINE: ESMF_FieldDataMapSetDefault - Set FieldDataMap default values
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapSetDefExplicit(datamap, dataRank, &
+      subroutine ESMF_FieldDataMapSetDefExplicit(fielddatamap, dataRank, &
                                                  dataIndexList, counts, &
                                                  horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap) :: datamap
+      type(ESMF_FieldDataMap) :: fielddatamap
       integer, intent(in) :: dataRank
       integer, dimension(:), intent(in), optional :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts
@@ -404,7 +404,7 @@
 !     not specified here will be overwritten with default values.
 !            
 !     \begin{description}
-!     \item [datamap]
+!     \item [fielddatamap]
 !       An {\tt ESMF\_FieldDataMap}.
 !     \item [datarank]
 !           The number of dimensions in the data {\tt ESMF\_Array}.
@@ -452,22 +452,22 @@
           rcpresent = .FALSE.
         endif
 
-        ! initialize the contents of the internal array datamap
-        call ESMF_ArrayDataMapSetDefault(datamap%adm, dataRank, dataIndexList, &
+        ! initialize the contents of the internal array fielddatamap
+        call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, dataRank, dataIndexList, &
                                          counts, status)
         if (status .ne. ESMF_SUCCESS) return
 
         ! assume scalar data and use the relloc the caller gave
-        datamap%rankLength = 0
+        fielddatamap%rankLength = 0
 
-        datamap%horzRelloc = ESMF_CELL_CENTER
-        if (present(horzRelloc)) datamap%horzRelloc = horzRelloc
+        fielddatamap%horzRelloc = ESMF_CELL_CENTER
+        if (present(horzRelloc)) fielddatamap%horzRelloc = horzRelloc
 
-        datamap%vertRelloc = ESMF_CELL_UNDEFINED
-        if (present(vertRelloc)) datamap%vertRelloc = vertRelloc
+        fielddatamap%vertRelloc = ESMF_CELL_UNDEFINED
+        if (present(vertRelloc)) fielddatamap%vertRelloc = vertRelloc
 
         ! mark object as initialized and ready to be used
-        datamap%status = ESMF_STATE_READY
+        fielddatamap%status = ESMF_STATE_READY
 
         ! if user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -483,11 +483,11 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldDataMapSetDefault()
-      subroutine ESMF_FieldDataMapSetDefIndex(datamap, dataIndexOrder, counts, &
+      subroutine ESMF_FieldDataMapSetDefIndex(fielddatamap, dataIndexOrder, counts, &
                                               horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap) :: datamap
+      type(ESMF_FieldDataMap) :: fielddatamap
       type(ESMF_IndexOrder), intent(in) :: dataIndexOrder
       integer, dimension(:), intent(in), optional :: counts 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
@@ -500,7 +500,7 @@
 !     not specified here will be overwritten with default values.
 !       
 !     \begin{description}
-!     \item [datamap]
+!     \item [fielddatamap]
 !           An {\tt ESMF\_FieldDataMap}.
 !     \item [dataIorder]
 !           An {\tt ESMF\_DataIndexOrder} which specifies one of several
@@ -543,28 +543,28 @@
             rcpresent = .FALSE.
         endif
 
-        ! initialize the contents of the internal array datamap
-        call ESMF_ArrayDataMapSetDefault(datamap%adm, dataIndexOrder, &
+        ! initialize the contents of the internal array fielddatamap
+        call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, dataIndexOrder, &
                                          counts, status)
         if (status .ne. ESMF_SUCCESS) return
 
         ! assume scalar data and use the relloc the caller gave
-        datamap%rankLength = 0
+        fielddatamap%rankLength = 0
 
         if (present(horzRelloc)) then
-          datamap%horzRelloc = horzRelloc
+          fielddatamap%horzRelloc = horzRelloc
         else
-          datamap%horzRelloc = ESMF_CELL_CENTER
+          fielddatamap%horzRelloc = ESMF_CELL_CENTER
         endif
 
         if (present(vertRelloc)) then
-          datamap%vertRelloc = vertRelloc
+          fielddatamap%vertRelloc = vertRelloc
         else
-          datamap%vertRelloc = ESMF_CELL_UNDEFINED
+          fielddatamap%vertRelloc = ESMF_CELL_UNDEFINED
         endif
 
         ! mark object as initialized and ready to be used
-        datamap%status = ESMF_STATE_READY
+        fielddatamap%status = ESMF_STATE_READY
 
         ! if user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -579,10 +579,10 @@
 ! !IROUTINE:  ESMF_FieldDataMapSetInvalid - Set contents of a FieldDataMap to uninitialized value.
 
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapSetInvalid(datamap, rc)
+      subroutine ESMF_FieldDataMapSetInvalid(fielddatamap, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(inout) :: datamap
+      type(ESMF_FieldDataMap), intent(inout) :: fielddatamap
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -591,7 +591,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [fielddatamap]
 !           An {\tt ESMF\_FieldDataMap}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -600,9 +600,9 @@
 !
 !EOP
 
-        call ESMF_ArrayDataMapSetInvalid(datamap%adm, rc)
+        call ESMF_ArrayDataMapSetInvalid(fielddatamap%adm, rc)
 
-        datamap%status = ESMF_STATE_INVALID
+        fielddatamap%status = ESMF_STATE_INVALID
 
         ! If user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -613,25 +613,32 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldDataMapValidate"
 !BOP
-! !IROUTINE: ESMF_FieldDataMapValidate - Validate internal state of a FieldDataMap type
+! !IROUTINE: ESMF_FieldDataMapValidate - Check validity of a FieldDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapValidate(datamap, options, rc)
+      subroutine ESMF_FieldDataMapValidate(fielddatamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(in) :: fielddatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Validate the internal state of a {\tt ESMF\_FieldDataMap}.
+!      Validates that the {\tt fielddatamap} is internally consistent.
+!      Currently this method determines if the {\tt fielddatamap} is uninitialized 
+!      or already destroyed.  The method returns an error code if problems 
+!      are found.  Only the "brief" option described in Section 
+!      \ref{sec:validateoptions} is currently supported.  This is also 
+!      the default option.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [fielddatamap]
 !           {\tt ESMF\_FieldDataMap} to validate.
 !     \item [{[options]}]
-!           Validation options.
+!           Validation options.  See Section \ref{sec:validateoptions} for 
+!           standard option strings.  Please note that only the "brief" option 
+!           is currently supported; other values will be ignored.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -651,9 +658,11 @@
         endif
 
 
-        if (datamap%status .ne. ESMF_STATE_READY) return
-            
-        ! TODO: add more validation here - for index numbers, etc
+        if (fielddatamap%status .ne. ESMF_STATE_READY) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed FieldDataMap", &
+                                 ESMF_CONTEXT, rc)) return
+        endif
  
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -665,10 +674,10 @@
 #define ESMF_METHOD "ESMF_FieldDataMapWriteRestart"
 !BOPI
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapWriteRestart(datamap, iospec, rc)
+      subroutine ESMF_FieldDataMapWriteRestart(fielddatamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(in) :: fielddatamap
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
@@ -680,7 +689,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [fielddatamap]
 !           {\tt ESMF\_FieldDataMap} to save.
 !     \item [{[iospec]}]
 !           File specification.
@@ -755,10 +764,10 @@
 ! !IROUTINE: ESMF_FieldDataMapWrite - Store a FieldDataMap type
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapWrite(datamap, iospec, rc)
+      subroutine ESMF_FieldDataMapWrite(fielddatamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(in) :: fielddatamap
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
@@ -769,7 +778,7 @@
 !
 !      The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [fielddatamap]
 !           {\tt ESMF\_FieldDataMap} to save.
 !     \item [{[iospec]}]
 !           File specification.
