@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.1 2003/10/17 19:34:56 nscollins Exp $"
+"$Id: ESMC_Conf.h,v 1.2 2004/02/25 02:58:31 eschwab Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -58,6 +58,15 @@ Licensed under the GPL.
 #define ESMC_HAVE_SYS_UTSNAME_H
 
 #define ESMF_NO_INITIALIZERS 1
+
+#if 0
+PGI method for marking F90 "not present" optional arguments uses
+address of compiler-generated global array element pghpf_0_[8].
+However, PGI says check against entire array to be safe.
+#endif
+extern char pghpf_0_[];
+#define ESMC_PRESENT(arg) ( ! ( (char*)(arg) >=  pghpf_0_ && \
+                                (char*)(arg) <= &pghpf_0_[12] ) )
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
