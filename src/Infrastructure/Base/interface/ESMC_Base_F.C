@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.26 2004/11/16 16:08:47 theurich Exp $
+// $Id: ESMC_Base_F.C,v 1.27 2004/11/17 18:59:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.26 2004/11/16 16:08:47 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.27 2004/11/17 18:59:25 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -849,7 +849,7 @@ extern "C" {
 // 
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
-      int num,                  // in - attr number
+      int *num,                 // in - attr number
       char *name,               // out - F90, non-null terminated string
       ESMC_DataType *dt,        // out - data type (int, float)
       ESMC_DataKind *dk,        // out - data kind (*4, *8)
@@ -897,7 +897,7 @@ extern "C" {
 
   cname = new char[ESMF_MAXSTR];
 
-  *rc = (*base)->ESMC_AttributeGet(num, cname, dt, dk, count, NULL);
+  *rc = (*base)->ESMC_AttributeGet(*num, cname, dt, dk, count, NULL);
   if (*rc != ESMF_SUCCESS) {
       delete [] cname;
       return;
