@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.18 2003/02/21 14:59:45 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.19 2003/02/21 15:48:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,15 +46,22 @@
  class ESMC_ArrayConfig;
  class ESMC_Array;
 
- // dummy structure which is the right size for an F90 pointer on
+ // dummy structure which is at least as big as an F90 pointer on
  //  each architcture.  ESMF_F90_PTR_xxx are defined in conf.h in
  //  the build directories for each architecture
- // on many platforms this is a variable size based on rank...
+ // THIS IS NO LONGER TRYING TO MATCH THE SIZE EXACTLY BECAUSE IT CAN
+ // BE RANK DEPENDENT ON MANY PLATFORMS.  this is used to reserve space
+ // in our array struct.  it may need to be scrapped and computed on the
+ // fly for each case.
  //  TODO: check if we can simply save the wrapper and save that and not
  //        have to save the full pointer/dopev
+#define MAX_F90_RANK_POSSIBLE 7
 struct c_F90ptr {
    unsigned char basepad[ESMF_F90_PTR_BASE_SIZE];      // one of these
-   unsigned char extrapad[7][ESMF_F90_PTR_PLUS_RANK];  // one per rank 
+#if ESMF_F90_PTR_PLUS_RANK 
+   // extra space needed per rank
+   unsigned char extrapad[MAX_F90_RANK_POSSIBLE*ESMF_F90_PTR_PLUS_RANK];
+#endif
 };
 
 
