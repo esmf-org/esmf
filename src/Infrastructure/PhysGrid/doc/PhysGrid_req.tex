@@ -1,4 +1,4 @@
-% $Id: PhysGrid_req.tex,v 1.2 2002/03/07 02:49:02 cnh Exp $
+% $Id: PhysGrid_req.tex,v 1.3 2002/03/21 22:32:07 rhallberg Exp $
 %===============================================================================
 \req{Physical Locations}
 %-------------------------------------------------------------------------------
@@ -6,7 +6,13 @@
 A mechanism shall be provided for describing physical locations in space in 1
 (vertical), 2 (horizontal) or 3 dimensions, including both specification of
 points and of ranges. 
-
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} System test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \sreq{Horizontal Locations}
 
@@ -15,11 +21,25 @@ points and of ranges.
 Physical domains may use Cartesian or spherical coordinate systems in the
 horizontal directions.  Units for these coordinates are meters and degrees of
 latitude and longitude.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code inspection\\
+{\bf Notes:}
+\end{reqlist}
 
 \ssreq{Horizontal Locations may be points}
 
    Horizontal locations may be specified as a pair of real values in the order
 (X,Y) or (longitude, latitude).
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} 
+\end{reqlist}
 
 
 \ssreq{Horizontal Locations may be polygonal regions}
@@ -28,18 +48,41 @@ latitude and longitude.
 of vertices and the list of the vertex points.  Vertex points must be specified
 either clockwise or counterclockwise around the region.  The vertex points
 may be redundant.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.3 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} Fundamental to allowing conservative interpolation, and for an
+precise description of data locations.
+\end{reqlist}
  
 \ssreq{Horizontal regions may have central points}
 
   Both a central point and a region may be specified in describing a horizontal
 location.  The points may provide a convenient nominal location, even when
 a value actually pertains to a region.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} Many models mix finite difference and finite volume concepts.
+\end{reqlist}
 
 \ssreq{Horizontal Locations may have radii of influence}
 
   A horizontal location may be specified by adding a nominal radius of
 influence to the central point.  This may be the radius of a Gaussian
-distribution of influence.
+distribution of influence. The exact interpretation of this radius is
+the responsibility of user-provided software.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} This is necessary for describing certain observational data streams.
+\end{reqlist}
 
 
 \ssreq{Paths between region vertices may be specified} 
@@ -53,6 +96,13 @@ coordinates and is particularly simple for analytically calculating the areas
 of regions, but may be ill defined near the poles.  The grid associated with a
 component model may require some other specification for optimal numerical
 performance.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} General Req. 8.0.3 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} Necessary for allowing conservative interpolation.
+\end{reqlist}
 
 \sreq{Vertical Locations}
 
@@ -64,20 +114,62 @@ vertically monotonic quantity.  In addition, a user-interpretable vertical
 proxy (such as a satellite measurement channel) may be used.  Units of this
 coordinate must be self-consistent.  (See the CF convention for a full
 discussion of options for vertical coordinates.)
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection\\
+{\bf Notes:} 
+\end{reqlist}
 
 \ssreq{Vertical Locations may be points}
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \ssreq{Vertical Locations may be regions}
 
 Vertical locations may be specified by providing the values of the top and
 bottom bounding points.  Such regions have the same extent regardless of the
 order in which the bounding points are specified.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \ssreq{Vertical regions have central points}
 
   Both a central point and a region may be specified in describing a vertical
 location.  The points may provide a convenient nominal location, even when
 a value actually pertains to a region.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} Many models mix finite difference and finite volume concepts.
+\end{reqlist}
+
+\ssreq{Vertical Locations may have radii of influence}
+
+  A vertical location may be specified by adding a nominal radius of
+influence to the central point.  This may be the radius of a Gaussian
+distribution of influence. The exact interpretation of this radius is
+the responsibility of user-provided software.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} This is necessary for describing certain observational data streams.
+\end{reqlist}
 
 %===============================================================================
 \req{Physical Grids}
@@ -88,40 +180,98 @@ the range of indices in a distributed grid.  Each PhysGrid is associated with a
 single Dist grid.  Physical grids may be purely horizontal, purely vertical, or
 both.  Structured grids assume that adjacent locations in index space share
 boundaries in a predicable way.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} System test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \sreq{Reading grids}
 
 Grids can be read from standard files.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \sreq{Writing grids}
 
-Grids are output to standard files.
+Grids can be output to standard files.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \sreq{PhysGrids may be internally generated}
 
 For an arbitrary number of points in the global domain of the associated
 DistGrid, it shall be possible to specify an algorithm for internally
 determining the PhysGrid.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \sreq{Cell specification}
 
 PhysGrids shall specify both the locations of cell vertices, and the locations
 of cell centers.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} Many models mix finite difference and finite volume concepts.
+\end{reqlist}
 
 \sreq{Interpolation}
 
 A PhysGrid may be interpolated to generate an equivalent PhysGrid on a coarser
 or finer global DistGrid.  Methods should be provided to accomplish such
 interpolation.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 1.5.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} Necessary for runtime configurable resolution.
+\end{reqlist}
 
 \sreq{Horizontal coordinate independent of vertical}
 Horizontal grid locations can be assumed independent of the vertical coordinate.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} Any Objections? \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code inspection\\
+{\bf Notes:} If this assumption can be made, it greatly simplifies implementation.
+No widely used counterexamples are known.
+\end{reqlist}
 
 \sreq{Vertical coordinate potentially dependent on horizontal}
 
-Vertical grid locations may be functions of the horizontal coordinate, or may be
-independent of it.  This is necessary to support, for example, partial cells in
+Vertical grid locations may be functions of the horizontal coordinates, or may be
+independent of them.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} GFDL-MOM4 (required) \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code inspection\\
+{\bf Notes:} This is necessary to support, for example, partial cells in
 Z-coordinate ocean models.
+\end{reqlist}
 
 \sreq{Horizontal physical grids}
 
@@ -130,22 +280,50 @@ Z-coordinate ocean models.
 PhysGrids may be generated from a number of standard map projections,
 including traditional and Mercator grids on a sphere, cubed-sphere, or tripolar
 grids.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:}
+\end{reqlist}
 
 \ssreq{Supported topologies} Supported horizontal grid topologies will include
 logically rectangular grids that are reentrant in 0, 1, or 2 directions,
 northern and southern tripolar (Murray 1996), sphere, icosahedral, and
 unstructured grids.  Unstructured arrays of logically rectangular grids
 (cubed-sphere and arbitrary nesting) will also be supported.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:}
+\end{reqlist}
 
 \ssreq{PhysGrid topology consistency checking}
 
 A mechanism shall be provided to verify that the locations of the points in
 a PhysGrid are consistent with the topology of the underlying DistGrid.  An
 exception shall be generated in case of inconsistency.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:}
+\end{reqlist}
 
 \ssreq{Areas tile sphere}
 Grid areas may be calculated using algorithms that guarantee that the grid
 exactly tiles the sphere (or a portion of it).
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} GFDL (required) \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} Needed to permit exact conservation.
+\end{reqlist}
 
 \ssreq{Available subgrids}
 
@@ -154,22 +332,50 @@ each of the 4 related subgrids.  That is if a t-cell is centered at a tracer
 point,  cells centered on the east face, north face, and northeast corner of
 the t-cell will also be provided in the case of a NorthEast underlying
 distributed grid.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} GFDL (required) \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code inspection\\
+{\bf Notes:} Standard requirement of a staggered grid.
+\end{reqlist}
 
 \sreq{Horizontal Functional Representations}
 
 A spectral horizontal description may be used.  More generally, the horizontal
 structure of information may be given by specifying functional decompositions.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:}
+\end{reqlist}
 
 \ssreq{Horizontal Fourier grids} 
 
 Cartesian Fourier grids will be supported.  Associated with this grid are the
 wavenumbers (in units of $m^{-1}$) of each of the elements on the grid.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:}
+\end{reqlist}
 
 \ssreq{Horizontal spherical harmonics grids} 
 
 Spherical harmonics grids will be supported.  Associated with this grid are the
 wavenumbers (nondimensional m,n) of each of the elements on the grid.  At a
 minimum, rhomboidal and triangular trunctations will be supported.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:}
+\end{reqlist}
 
 \ssreq{Extensible horizontal functional representations}
 
@@ -177,12 +383,13 @@ The PhysGrid design should not preclude the user from using alternative
 functional horizontal representations, such as spectral elements.
 
 \begin{reqlist}
-{\bf Priority:} <Priority 1-3> \\
-{\bf Source:} <JMC Code (required, desired)> \\
-{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
-{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
-{\bf Notes:} <Background, comments on design, implementation, etc.> 
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code inspection \\
+{\bf Notes:} This is basic to the extensibility of ESMF.
 \end{reqlist}
+
 %===============================================================================
 \req{Grid Metrics}
 %-------------------------------------------------------------------------------
@@ -190,24 +397,82 @@ functional horizontal representations, such as spectral elements.
 Grid metrics are all of the lengths (or partial derivatives of distances with
 index number) and related quantities required to do a variety of calculations. 
 All metrics are a function of the grid and must be static with time.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} System test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \sreq{Calculation of metrics}
 All metrics may be calculated from grid locations.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \sreq{Reading metrics}
 All metrics may be read from a standard grid file.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test\\
+{\bf Notes:} 
+\end{reqlist}
 
 \sreq{MKS metric units}
 Metrics have units of m or $m^2$, or other appropriate MKS units.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} Standard MKS requirement? \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code inspection \\
+{\bf Notes:} 
+\end{reqlist}
 
 \sreq{Available Metrics}
 Available metric information includes an extensive list of grid lengths, cell
 areas, and the angle between logical and physical north.  (This list will be
 developed as a part of the requirement.)
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} All? (required) \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code inspection \\
+{\bf Notes:} All models require some subset of this information.
+\end{reqlist}
 
 \sreq{Methods for calculating metrics}
 Metrics may be calculated by either standard or user-provided algorithms. 
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} ? \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} This is basic to the extensibility of ESMF. 
+\end{reqlist}
 
+%===============================================================================
+\req{Grid Masks}
+%-------------------------------------------------------------------------------
+
+Grid masks are logical arrays on a grid that indicates whether the various
+points on the grid are a part of a physically similar subdomain. For example,
+masks are used to indicate which points are a part of the ocean and which are
+land.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} General Req. 8.0.2 \\
+{\bf Status:} Proposed \\
+{\bf Verification:} System test\\
+{\bf Notes:} 
+\end{reqlist}
 
 % 
 % %===============================================================================
