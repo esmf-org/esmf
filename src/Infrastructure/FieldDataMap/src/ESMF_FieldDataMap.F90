@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.22 2004/07/22 15:10:13 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.23 2004/08/16 20:37:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.22 2004/07/22 15:10:13 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.23 2004/08/16 20:37:10 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -390,6 +390,7 @@
 ! !IROUTINE: ESMF_FieldDataMapSetDefault - Set FieldDataMap default values
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_FieldDataMapSetDefault()
       subroutine ESMF_FieldDataMapSetDefExplicit(fielddatamap, dataRank, &
                                                  dataIndexList, counts, &
                                                  horzRelloc, vertRelloc, rc)
