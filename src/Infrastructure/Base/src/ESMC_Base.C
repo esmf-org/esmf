@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.38 2004/06/08 12:12:06 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.39 2004/06/10 22:45:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.38 2004/06/08 12:12:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.39 2004/06/10 22:45:00 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -526,14 +526,17 @@ static int globalCount = 0;
   sprintf(msgbuf,
        "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
            ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  printf(msgbuf);
+    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
 
   sprintf(msgbuf, "  %d Attributes:\n", attrCount);
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  printf(msgbuf);
+    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   for (i=0; i<attrCount; i++) {
       sprintf(msgbuf, " Attr %d: ", i);
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      printf(msgbuf);
+        // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       attrList[i]->ESMC_Print();
   }
                          
