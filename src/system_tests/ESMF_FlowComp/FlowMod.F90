@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.2 2003/10/10 17:02:15 nscollins Exp $
+! $Id: FlowMod.F90,v 1.3 2003/12/09 20:42:00 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@
         g_max(2) = 50.0
         horz_gridtype = ESMF_GridType_XY
         vert_gridtype = ESMF_GridType_Unknown
-        horz_stagger = ESMF_GridStagger_A
+        horz_stagger = ESMF_GridStagger_D
         vert_stagger = ESMF_GridStagger_Unknown
         horz_coord_system = ESMF_CoordSystem_Cartesian
         vert_coord_system = ESMF_CoordSystem_Unknown
