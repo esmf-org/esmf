@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/10/01 22:17:43 nscollins Exp $ 
+# $Id: makefile,v 1.13 2003/10/22 20:09:41 cdeluca Exp $ 
 
 ALL:  tests
 
@@ -17,30 +17,22 @@ LOCDIR	  = src/Superstructure/Component/tests
 TESTS_BUILD   =	$(ESMC_TESTDIR)/ESMF_CompCreate \
 		$(ESMC_TESTDIR)/ESMC_CompCreate \
 		$(ESMC_TESTDIR)/ESMF_CompRun \
-		$(ESMC_TESTDIR)/ESMC_CompRun \
-		$(ESMC_TESTDIR)/ESMF_StateCreate \
-		$(ESMC_TESTDIR)/ESMF_StateUTest
+		$(ESMC_TESTDIR)/ESMC_CompRun 
 
 TESTS_RUN     =	RUN_ESMF_CompCreate \
 		RUN_ESMC_CompCreate \
 		RUN_ESMF_CompRun \
-		RUN_ESMC_CompRun \
-		RUN_ESMF_StateCreate \
-		RUN_ESMF_StateUTest
+		RUN_ESMC_CompRun 
 
 TESTS_RUN_UNI =	RUN_ESMF_CompCreateUNI \
 		RUN_ESMC_CompCreateUNI \
 		RUN_ESMF_CompRunUNI \
-		RUN_ESMC_CompRunUNI \
-		RUN_ESMF_StateCreateUNI \
-		RUN_ESMF_StateUTestUNI
+		RUN_ESMC_CompRunUNI 
 
 TESTS_RM      =	ESMF_CompCreate.rm \
 		ESMC_CompCreate.rm \
 		ESMF_CompRun.rm \
-		ESMC_CompRun.rm \
-		ESMF_StateCreate.rm \
-		ESMF_StateUTest.rm
+		ESMC_CompRun.rm 
 
 include $(ESMF_DIR)/makefile
 
@@ -129,49 +121,4 @@ RUN_ESMC_CompRunUNI:
 
 ESMC_CompRun.rm:
 	echo "ESMC_CompRun.rm target called here."
-
-
-#       
-# State Create
-#
-
-$(ESMC_TESTDIR)/ESMF_StateCreate: ESMF_StateCreate.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StateCreate ESMF_StateCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} -f ESMF_StateCreate.o
-
-RUN_ESMF_StateCreate:
-	-@rm -f testlog stdlog.* logfile.* ESMF_StateCreate.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_StateCreate > $(ESMC_TESTDIR)/ESMF_StateCreate.stdout
-
-RUN_ESMF_StateCreateUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_StateCreate.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_StateCreate > $(ESMC_TESTDIR)/ESMF_StateCreate.stdout
-
-ESMF_StateCreate.rm:
-	echo "ESMF_StateCreate.rm target called here."
-
-
-
-
-#       
-# State Unit Test
-#
-
-$(ESMC_TESTDIR)/ESMF_StateUTest: ESMF_StateUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StateUTest ESMF_StateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} -f ESMF_StateUTest.o
-
-RUN_ESMF_StateUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_StateUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_StateUTest > $(ESMC_TESTDIR)/ESMF_StateUTest.stdout
-
-RUN_ESMF_StateUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_StateUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_StateUTest > $(ESMC_TESTDIR)/ESMF_StateUTest.stdout
-
-ESMF_StateUTest.rm:
-	echo "ESMF_StateUTest.rm target called here."
-
-
-
 

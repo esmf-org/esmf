@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.28 2003/10/22 14:36:36 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.29 2003/10/22 20:09:42 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -72,6 +72,8 @@
 \label{part:Superstructure}
 
 #include "../Superstructure/Component/doc/Component_refdoc.ctex"
+
+#include "../Superstructure/State/doc/State_refdoc.ctex"
 
 %====================================================================================================
 

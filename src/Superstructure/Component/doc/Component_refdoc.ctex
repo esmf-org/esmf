@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.11 2003/05/07 04:34:31 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.12 2003/10/22 20:09:41 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -213,48 +213,6 @@
 %#elif defined(CONSTITUENT)
 %\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
 %#endif
-
-
-
-
-%%%%%%%%%%%%% State Class %%%%%%%%%
-\section{State Class}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{state_desc}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_desc}
-#endif
-
-\subsection{Usage}
-#ifdef STANDALONE
-\input{state_usage}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_usage}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{state_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_rest}
-#endif
-
-%\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{ESMF_StateEx_fapi}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMF_StateEx_fapi}
-%#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_State_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_State_fapi}
-#endif
-
 
 
 %%%%%%%%%%%%% Transform Class %%%%%%%%%

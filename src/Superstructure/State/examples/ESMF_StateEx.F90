@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.5 2003/04/04 15:27:56 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.1 2003/10/22 20:09:41 cdeluca Exp $
 !
 ! Example code for creating States.
 

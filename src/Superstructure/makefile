@@ -1,14 +1,14 @@
-# $Id: makefile,v 1.8 2003/04/03 22:43:57 nscollins Exp $ 
+# $Id: makefile,v 1.9 2003/10/22 20:09:41 cdeluca Exp $ 
 
 
 LOCDIR   = src/Superstructure
 
 include $(ESMF_DIR)/makefile
 
-# the ESMF_Mod file is currently in the Component/src directory,
+# The ESMF_Mod file is currently in the Component/src directory,
 # since this is the last to get built.
 
-DIRS     = Component 
+DIRS     = State Component 
 
 CLEANDIRS   =
 CLEANFILES  =

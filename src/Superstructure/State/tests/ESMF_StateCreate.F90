@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.14 2003/10/20 20:13:58 cdeluca Exp $
+! $Id: ESMF_StateCreate.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $
 !
 ! Test code which creates a new State.
 

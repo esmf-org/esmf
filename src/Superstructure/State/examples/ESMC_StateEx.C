@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.3 2003/02/06 22:18:40 nscollins Exp $
+// $Id: ESMC_StateEx.C,v 1.1 2003/10/22 20:09:41 cdeluca Exp $
 //
 // Example/test code which creates a new State.
 
