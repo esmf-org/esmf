@@ -1,4 +1,4 @@
-% $Id: DistGrid_terms.tex,v 1.7 2002/05/23 20:07:18 jwolfe Exp $
+% $Id: DistGrid_terms.tex,v 1.8 2002/06/26 21:01:08 vbalaji Exp $
 
 \begin{description}
 \item[PElist] a list of processor IDs associated with a component. (We
@@ -31,7 +31,7 @@
 \item[Vector array] vector data (e.g velocity components) on a
   grid. These may be arrays where one of the dimensions represents the
   vector component axis, or there may be separate data arrays for each
-  vector component.
+  vector component. Vector arrays may be 2D or 3D vectors.
 \item[Grid staggering, grid offsets] a descriptor of relative locations
   of scalar and vector data on a structured grid. On different
   staggered grids, vector data may lie at cell faces or vertices,
@@ -57,15 +57,16 @@
 \item[Global domain] the global range of indices of data points.
 \item[Computational domain] the set of points whose data is
   exclusively associated with a PE, and must be updated by it.
+\item[Memory domain] A specification of the index
+  range used to allocated data arrays on a PE.
 \item[Data domain] This includes the computational domain, as well as
   the points with whom the computational points have data
-  dependencies.
+  dependencies. The data domain may be the same as the memory domain,
+  or the memory domain may be padded beyond the data domain.
 \item[Halo] the points in the allocated domain outside the
   computational domain. Halo points are associated with other PEs'
   computational domains, and the halo update operation involves
-  synchronization of halo points with other PEs. The data domain
-  extents typically specify the index range used to allocated data
-  arrays on a PE.
+  synchronization of halo points with other PEs.
 \item[Grid topology] data connectivities on the pelist for scheduling
   data-sharing operations.
 \item[Data transpose] Transfer of data arrays between two distributed
