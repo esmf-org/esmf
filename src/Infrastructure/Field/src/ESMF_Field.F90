@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.189 2004/10/14 22:50:17 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.190 2004/10/15 16:44:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.189 2004/10/14 22:50:17 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.190 2004/10/15 16:44:52 nscollins Exp $'
 
 !==============================================================================
 !
@@ -4352,7 +4352,7 @@
       type(ESMF_FieldDataMap) :: dmap
       integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
       integer, dimension(ESMF_MAXDIM) :: dimorder, counts
-      integer :: hwidth
+      integer :: hwidth, minRank
       integer :: i, j, arrayRank, gridRank
 
       ! Initialize return code   
@@ -4372,10 +4372,16 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      minRank = min(arrayRank, gridRank)
       if (present(datamap)) then
           dmap = datamap
       else
-          call ESMF_FieldDataMapSetDefault(dmap, arrayRank, rc=status)
+          call ESMF_FieldDataMapSetDefault(dmap, minRank, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -4385,11 +4391,6 @@
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       hwidth, dmap, name, &
                                       iospec, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
