@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.100 2004/06/10 21:43:38 jwolfe Exp $
+! $Id: ESMF_Comp.F90,v 1.101 2004/07/22 15:04:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.100 2004/06/10 21:43:38 jwolfe Exp $'
+      '$Id: ESMF_Comp.F90,v 1.101 2004/07/22 15:04:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1470,7 +1470,7 @@ end function
        logical :: rcpresent                    ! did user specify rc?
        character (len=6) :: defaultopts
        character (len=ESMF_MAXSTR) :: cname
-       character (len=ESMF_MAXSTR) :: msgbuf
+       !character (len=ESMF_MAXSTR) :: msgbuf
 
        ! Initialize return code; assume failure until success is certain
        status = ESMF_FAILURE
