@@ -1,4 +1,4 @@
-% $Id: Grid_rest.tex,v 1.7 2004/06/23 16:16:58 jwolfe Exp $
+% $Id: Grid_rest.tex,v 1.8 2004/08/16 22:57:56 jwolfe Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
@@ -9,7 +9,7 @@ Currently the only interfaces supported are for three-dimensional,
 logically rectangular grids. 
 
 \item {\bf Support is limited to 2D grid distributions.} The 
-decomposition of grids is limited to two dimensions.
+decomposition of grids is limited to any two dimensions of a 3D grid.
 
 \item {\bf Future Grid Create methods.}  Currently grids can only
 be created by internal generation.  In the future, the following
@@ -61,16 +61,30 @@ methods:
 \item {\bf Future coordinate system support.}  Support for the following
 coordinate systems will be added:
  \begin{description}
+    \item [ESMF\_COORD\_SYSTEM\_DEPTH]
+          Vertical z coordinate depth (0 at top surface).
     \item [ESMF\_COORD\_SYSTEM\_CYLINDRICAL]
           Cylindrical coordinates
+    \item [ESMF\_COORD\_SYSTEM\_ETA]
+          Vertical eta coordinate.
+    \item [ESMF\_COORD\_SYSTEM\_HYBRID]
+          Hybrid vertical coordinates.
+    \item [ESMF\_COORD\_SYSTEM\_ISOPYCNAL]
+          Vertical density coordinate.
     \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN]
-          Lagrangian coordinates
+          Lagrangian coordinates.
     \item [ESMF\_COORD\_SYSTEM\_LATFOURIER]
-          Mixed latitude/Fourier spectral space
+          Mixed latitude/Fourier spectral space.
+    \item [ESMF\_COORD\_SYSTEM\_PRESSURE]
+          Vertical pressure coordinate.
+    \item [ESMF\_COORD\_SYSTEM\_SIGMA]
+          Vertical sigma coordinate.
     \item [ESMF\_COORD\_SYSTEM\_SPECTRAL]
-          Wavenumber space
+          Wavenumber space.
+    \item [ESMF\_COORD\_SYSTEM\_THETA]
+          Vertical theta coordinate.
     \item [ESMF\_COORD\_SYSTEM\_USER]
-          User-defined coordinate system
+          User-defined coordinate system.
  \end{description}
 
 \item {\bf Future horizontal Grid staggerings.}  Support for the following
