@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.83 2004/02/19 20:06:07 svasquez Exp $
+! $Id: ESMF_Base.F90,v 1.84 2004/02/19 21:02:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -389,7 +389,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.83 2004/02/19 20:06:07 svasquez Exp $'
+               '$Id: ESMF_Base.F90,v 1.84 2004/02/19 21:02:18 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -419,6 +419,7 @@ interface assignment (=)
  module procedure ESMF_dtas
  module procedure ESMF_dkas
  module procedure ESMF_tfas
+ module procedure ESMF_ptas
 end interface
 
 !------------------------------------------------------------------------------
