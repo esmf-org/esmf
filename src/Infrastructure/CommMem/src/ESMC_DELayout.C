@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.1 2003/03/10 03:46:57 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.2 2003/03/10 04:16:23 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,14 +8,14 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
-// ESMC Layout method code (body) file
+// ESMC DELayout method code (body) file
 
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Layout methods declared
-// in the companion file ESMC_Layout.h
+// The code in this file implements the C++ DELayout methods declared
+// in the companion file ESMC_DELayout.h
 //
 // < insert a paragraph or two explaining what you'll find in this file >
 //
@@ -31,31 +31,31 @@
 #include <ESMC.h>
 
  // associated class definition file
- #include <ESMC_Layout.h>
+ #include <ESMC_DELayout.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.1 2003/03/10 03:46:57 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.2 2003/03/10 04:16:23 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes all the Layout routines
+// This section includes all the DELayout routines
 //
 //
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutCreate - Create a new 2D Layout from a simple DE list
+// !IROUTINE:  ESMC_DELayoutCreate - Create a new 2D DELayout from a simple DE list
 //
 // !INTERFACE:
-      ESMC_Layout *ESMC_LayoutCreate(
+      ESMC_DELayout *ESMC_DELayoutCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Layout
+//     pointer to newly allocated ESMC_DELayout
 //
 // !ARGUMENTS:
       int nx,                    // in - number of DE's in the x direction
@@ -66,40 +66,40 @@
       int *rc) {                 // out - return code
 //
 // !DESCRIPTION:
-//      Allocates memory for a new Layout
-//      object and uses the internal routine ESMC\_LayoutContruct to
+//      Allocates memory for a new DELayout
+//      object and uses the internal routine ESMC\_DELayoutContruct to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
 //
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-  ESMC_Layout *layout;
+  ESMC_DELayout *layout;
 
   try {
-    layout = new ESMC_Layout;
-//cout << "ESMC_LayoutCreate() succesful\n";
-    *rc = layout->ESMC_LayoutConstruct(nx, ny, delist, commhint);
+    layout = new ESMC_DELayout;
+//cout << "ESMC_DELayoutCreate() succesful\n";
+    *rc = layout->ESMC_DELayoutConstruct(nx, ny, delist, commhint);
     return(layout);
   }
   catch (...) {
 // TODO:  call ESMF log/err handler
-    cerr << "ESMC_LayoutCreate() memory allocation failed\n";
+    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
     *rc = ESMF_FAILURE;
     return(0);
   }
 
- } // end ESMC_LayoutCreate
+ } // end ESMC_DELayoutCreate
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutCreate - Create a new 3D Layout from a PE List
+// !IROUTINE:  ESMC_DELayoutCreate - Create a new 3D DELayout from a PE List
 //
 // !INTERFACE:
-      ESMC_Layout *ESMC_LayoutCreate(
+      ESMC_DELayout *ESMC_DELayoutCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Layout
+//     pointer to newly allocated ESMC_DELayout
 //
 // !ARGUMENTS:
       int nx,                    // in - number of DE's in the x direction
@@ -110,28 +110,28 @@
       int *rc) {                 // out - return code
 //
 // !DESCRIPTION:
-//      Allocates memory for a new Layout
-//      object and uses the internal routine ESMC\_LayoutContruct to
+//      Allocates memory for a new DELayout
+//      object and uses the internal routine ESMC\_DELayoutContruct to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
 //
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-  ESMC_Layout *layout;
+  ESMC_DELayout *layout;
 
 // TODO: ?? use exception handling when universally supported (pgCC doesn't)
 #if 1
   try {
-    layout = new ESMC_Layout;
-//cout << "ESMC_LayoutCreate() succesful\n";
-    *rc = layout->ESMC_LayoutConstruct(nx, ny, nz, pelist, commhint);
+    layout = new ESMC_DELayout;
+//cout << "ESMC_DELayoutCreate() succesful\n";
+    *rc = layout->ESMC_DELayoutConstruct(nx, ny, nz, pelist, commhint);
     return(layout);
   }
 //  catch (bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
   catch (...) {
 // TODO:  call ESMF log/err handler
-    cerr << "ESMC_LayoutCreate() memory allocation failed\n";
+    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
     *rc = ESMF_FAILURE;
     return(0);
   }
@@ -140,58 +140,58 @@
 #if 0
 // use this section if exception handling not supported
 // TODO:  IBM (blackforest) doesn't support "new (nothrow)"
-  if ((layout = new (nothrow) ESMC_Layout) == 0) {
+  if ((layout = new (nothrow) ESMC_DELayout) == 0) {
 // TODO:  call ESMF log/err handler
-    cerr << "ESMC_LayoutCreate() memory allocation failed\n";
+    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
     *rc = ESMF_FAILURE;
     return(0);
   }
 
-//cout << "ESMC_LayoutCreate() succesful\n";
-  *rc = layout->ESMC_LayoutConstruct(nx, ny, nz, pelist, commhint);
+//cout << "ESMC_DELayoutCreate() succesful\n";
+  *rc = layout->ESMC_DELayoutConstruct(nx, ny, nz, pelist, commhint);
   return(layout);
 #endif
 
- } // end ESMC_LayoutCreate
+ } // end ESMC_DELayoutCreate
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutDestroy - free a Layout created with Create
+// !IROUTINE:  ESMC_DELayoutDestroy - free a DELayout created with Create
 //
 // !INTERFACE:
-      int ESMC_LayoutDestroy(
+      int ESMC_DELayoutDestroy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Layout *layout) {  // in - ESMC_Layout to destroy
+      ESMC_DELayout *layout) {  // in - ESMC_DELayout to destroy
 //
 // !DESCRIPTION:
-//      ESMF routine which destroys a Layout object previously allocated
-//      via an ESMC\_LayoutCreate routine.  Define for deep classes only.
+//      ESMF routine which destroys a DELayout object previously allocated
+//      via an ESMC\_DELayoutCreate routine.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-//cout << "ESMC_LayoutDestroy, layout = " << layout << endl;
+//cout << "ESMC_DELayoutDestroy, layout = " << layout << endl;
   if (layout != 0) {
-    //layout->ESMC_LayoutDestruct(); constructor calls it!
+    //layout->ESMC_DELayoutDestruct(); constructor calls it!
     delete layout;
-//cout << "ESMC_LayoutDestroy() successful\n";
+//cout << "ESMC_DELayoutDestroy() successful\n";
     return(ESMF_SUCCESS);
   } else {
     return(ESMF_FAILURE);
   }
 
- } // end ESMC_LayoutDestroy
+ } // end ESMC_DELayoutDestroy
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutConstruct - Build a 2D DE topology from a DE list
+// !IROUTINE:  ESMC_DELayoutConstruct - Build a 2D DE topology from a DE list
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutConstruct(
+      int ESMC_DELayout::ESMC_DELayoutConstruct(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -204,17 +204,17 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
-//      allocated Layout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_LayoutDestruct
+//      allocated DELayout object.  May need to do additional allocations
+//      as needed.  Must call the corresponding ESMC\_DELayoutDestruct
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_LayoutCreate, which calls
-//      ESMC\_LayoutConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use ESMC\_DELayoutCreate, which calls
+//      ESMC\_DELayoutConstruct.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
   // Initialize comm, PE, DE, Machine
-  ESMC_LayoutInit();
+  ESMC_DELayoutInit();
 
   //
   // construct 2D array of ESMC_DE's
@@ -238,13 +238,13 @@
   }
   catch(...) {
 // TODO:  call ESMF log/err handler
-    cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
     return(ESMF_FAILURE);
   }
 
-  nxLayout = nx;
-  nyLayout = ny;
-  nzLayout = 1;
+  nxDELayout = nx;
+  nyDELayout = ny;
+  nzDELayout = 1;
   //deList = delist;
   commHint = commhint;
 
@@ -262,40 +262,40 @@
   {
     case ESMC_XFAST:
     case ESMC_NOHINT:
-      ni = nyLayout;  y = &i; // 2nd fastest (outer loop)
-      nj = nxLayout;  x = &j; // fastest (inner loop)
+      ni = nyDELayout;  y = &i; // 2nd fastest (outer loop)
+      nj = nxDELayout;  x = &j; // fastest (inner loop)
       break;
     case ESMC_YFAST:
-      ni = nxLayout; x = &i; // 2nd fastest (outer loop)
-      nj = nyLayout; y = &j; // fastest (inner loop)
+      ni = nxDELayout; x = &i; // 2nd fastest (outer loop)
+      nj = nyDELayout; y = &j; // fastest (inner loop)
       break;
     default:
       break;
   }
 
-//cout << "ESMC_LayoutConstruct() ni, nj " << ni << ", " << nj << endl;
+//cout << "ESMC_DELayoutConstruct() ni, nj " << ni << ", " << nj << endl;
 
   int DEix=0;
   for (i=0; i<ni; i++) {
     for(j=0; j<nj; j++) {
         // assign DE in given list to this DE in layout
-//cout << "ESMC_LayoutConstruct(): " << i << ", " << j  << "\n";
-//cout << "ESMC_LayoutConstruct(): " << *x<< ", " << *y << "\n";
+//cout << "ESMC_DELayoutConstruct(): " << i << ", " << j  << "\n";
+//cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y << "\n";
         layout[*x][*y][0].ESMC_DESetESMFID(delist[DEix++]);
     }
   }
 
-//cout << "ESMC_LayoutConstruct() successful\n";
+//cout << "ESMC_DELayoutConstruct() successful\n";
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutConstruct
+ } // end ESMC_DELayoutConstruct
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutConstruct - Build a 3D DE topology from a PE list
+// !IROUTINE:  ESMC_DELayoutConstruct - Build a 3D DE topology from a PE list
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutConstruct(
+      int ESMC_DELayout::ESMC_DELayoutConstruct(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -309,17 +309,17 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
-//      allocated Layout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_LayoutDestruct
+//      allocated DELayout object.  May need to do additional allocations
+//      as needed.  Must call the corresponding ESMC\_DELayoutDestruct
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_LayoutCreate, which calls
-//      ESMC\_LayoutConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use ESMC\_DELayoutCreate, which calls
+//      ESMC\_DELayoutConstruct.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
   // Initialize comm, PE, DE, Machine
-  ESMC_LayoutInit();
+  ESMC_DELayoutInit();
 
   // construct 3D array of ESMC_DE's
 
@@ -343,7 +343,7 @@
 //  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
   catch(...) {
 // TODO:  call ESMF log/err handler
-    cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
     return(ESMF_FAILURE);
   }
 #endif
@@ -354,7 +354,7 @@
   // first, create array of (nx) pointers to ESMC_DE pointers
   if((layout = new (nothrow) ESMC_DE**[nx]) == 0) {
 // TODO:  call ESMF log/err handler
-    cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
     return(ESMF_FAILURE);
   }
 
@@ -362,7 +362,7 @@
   for (int i=0; i<nx; i++) {
     if ((layout[i] = new (nothrow) ESMC_DE*[ny]) == 0) {
   // TODO:  call ESMF log/err handler
-      cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+      cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
       return(ESMF_FAILURE);
     }
 
@@ -370,16 +370,16 @@
     for (int j=0; j<ny; j++) {
       if ((layout[i][j] = new (nothrow) ESMC_DE[nz]) == 0) {
     // TODO:  call ESMF log/err handler
-        cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+        cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
         return(ESMF_FAILURE);
       }
     }
   }
 #endif
 
-  nxLayout = nx;
-  nyLayout = ny;
-  nzLayout = nz;
+  nxDELayout = nx;
+  nyDELayout = ny;
+  nzDELayout = nz;
   peList = pelist;
   commHint = commhint;
 
@@ -393,25 +393,25 @@
   {
     case ESMC_XFAST:
     case ESMC_NOHINT:
-      ni = nzLayout;  z = &i; // 3rd fastest (for outer loop)
-      nj = nyLayout;  y = &j; // 2nd fastest (for middle loop)
-      nk = nxLayout;  x = &k; // fastest (for inner loop)
+      ni = nzDELayout;  z = &i; // 3rd fastest (for outer loop)
+      nj = nyDELayout;  y = &j; // 2nd fastest (for middle loop)
+      nk = nxDELayout;  x = &k; // fastest (for inner loop)
       break;
     case ESMC_YFAST:
-      ni = nzLayout; z = &i;
-      nj = nxLayout; x = &j;
-      nk = nyLayout; y = &k;
+      ni = nzDELayout; z = &i;
+      nj = nxDELayout; x = &j;
+      nk = nyDELayout; y = &k;
       break;
     case ESMC_ZFAST:
-      ni = nyLayout; y = &i;
-      nj = nxLayout; x = &j;
-      nk = nzLayout; z = &k;
+      ni = nyDELayout; y = &i;
+      nj = nxDELayout; x = &j;
+      nk = nzDELayout; z = &k;
       break;
     default:
       break;
   }
 
-//cout << "ESMC_LayoutConstruct() ni, nj, nk: "
+//cout << "ESMC_DELayoutConstruct() ni, nj, nk: "
           //<< ni << ", " << nj << ", " << nk << endl;
 
   int PEix=0;
@@ -424,24 +424,24 @@
         peList->ESMC_PEListGetPE(PEix++, &pe);
 
         // then assign it to this DE
-//cout << "ESMC_LayoutConstruct(): " << i << ", " << j << ", " << k << "\n";
-//cout << "ESMC_LayoutConstruct(): " << *x<< ", " << *y<< ", " << *z<< "\n";
+//cout << "ESMC_DELayoutConstruct(): " << i << ", " << j << ", " << k << "\n";
+//cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y<< ", " << *z<< "\n";
         layout[*x][*y][*z].ESMC_DESetPE(pe);
       }
     }
   }
 
-//cout << "ESMC_LayoutConstruct() successful\n";
+//cout << "ESMC_DELayoutConstruct() successful\n";
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutConstruct
+ } // end ESMC_DELayoutConstruct
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutDestruct - release resources associated w/a Layout
+// !IROUTINE:  ESMC_DELayoutDestruct - release resources associated w/a DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutDestruct(void) {
+      int ESMC_DELayout::ESMC_DELayoutDestruct(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -451,10 +451,10 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      ESMF\_LayoutConstruct, does any additional cleanup before the
-//      original Layout object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC\_LayoutDestroy, which calls
-//      ESMC\_LayoutDestruct.  Define for deep classes only.
+//      ESMF\_DELayoutConstruct, does any additional cleanup before the
+//      original DELayout object is freed.  Intended for internal ESMF
+//      use only; end-users use ESMC\_DELayoutDestroy, which calls
+//      ESMC\_DELayoutDestruct.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -462,11 +462,11 @@
 //
 //  code goes here
 //
-//cout << "ESMC_LayoutDestruct() invoked\n";
+//cout << "ESMC_DELayoutDestruct() invoked\n";
 
   // first delete each array of (ny) ESMC_DE's for each x pointer
-  for (int i=0; i<nxLayout; i++) {
-    for (int j=0; j<nyLayout; j++) {
+  for (int i=0; i<nxDELayout; i++) {
+    for (int j=0; j<nyDELayout; j++) {
       // delete array of ESMC_DE's in z direction
       delete[] layout[i][j];
     }
@@ -478,21 +478,21 @@
 
   layout = 0;
   peList = 0;
-  nxLayout = 0;
-  nyLayout = 0;
-  nzLayout = 0;
+  nxDELayout = 0;
+  nyDELayout = 0;
+  nzDELayout = 0;
   commHint = ESMC_NOHINT;
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutDestruct
+ } // end ESMC_DELayoutDestruct
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutInit - initializes a Layout object
+// !IROUTINE:  ESMC_DELayoutInit - initializes a DELayout object
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutInit(
+      int ESMC_DELayout::ESMC_DELayoutInit(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -501,27 +501,27 @@
       void) {
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes Layout values; it does not
+//      ESMF routine which only initializes DELayout values; it does not
 //      allocate any resources.  Define for shallow classes only,
 //      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC\_LayoutCreate.
+//      Construct/Destruct.  Can be overloaded like ESMC\_DELayoutCreate.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
   // initialize to an empty layout 
   layout = 0;
-  nxLayout = 0;
-  nyLayout = 0;
-  nzLayout = 0;
+  nxDELayout = 0;
+  nyDELayout = 0;
+  nzDELayout = 0;
   peList = 0;
   commHint = ESMC_NOHINT;
 
   //
   // initialize my DE, PE, Comm, and Machine model
   //
-  int argc = 0;    // TODO pass into LayoutCreate ?
-  char **argv = 0; // TODO pass into LayoutCreate ?
+  int argc = 0;    // TODO pass into DELayoutCreate ?
+  char **argv = 0; // TODO pass into DELayoutCreate ?
   int myDEid=0;
 
   myDE.ESMC_DESetType(ESMC_PROCESS); // TODO: auto determine proc or thread,
@@ -543,24 +543,24 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutInit
+ } // end ESMC_DELayoutInit
 
 #if 0
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutGetConfig - get configuration info from a Layout
+// !IROUTINE:  ESMC_DELayoutGetConfig - get configuration info from a DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutGetConfig(
+      int ESMC_DELayout::ESMC_DELayoutGetConfig(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_LayoutConfig *config) const {  // out - resources
+      ESMC_DELayoutConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the Layout object was configured with.
+//    Returns the set of resources the DELayout object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -569,23 +569,23 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //  code goes here
 //
 
- } // end ESMC_LayoutGetConfig
+ } // end ESMC_DELayoutGetConfig
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutSetConfig - set configuration info for a Layout
+// !IROUTINE:  ESMC_DELayoutSetConfig - set configuration info for a DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutSetConfig(
+      int ESMC_DELayout::ESMC_DELayoutSetConfig(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const ESMC_LayoutConfig *config) {     // in - resources
+      const ESMC_DELayoutConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the Layout object with set of resources given.
+//    Configures the DELayout object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -594,14 +594,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //  code goes here
 //
 
- } // end ESMC_LayoutSetConfig
+ } // end ESMC_DELayoutSetConfig
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutGet<Value> - get <Value> for a Layout
+// !IROUTINE:  ESMC_DELayoutGet<Value> - get <Value> for a DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutGet<Value>(
+      int ESMC_DELayout::ESMC_DELayoutGet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -610,7 +610,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       <value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
-//     Returns the value of Layout member <Value>.
+//     Returns the value of DELayout member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -620,14 +620,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //  code goes here
 //
 
- } // end ESMC_LayoutGet<Value>
+ } // end ESMC_DELayoutGet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutSet<Value> - set <Value> for a Layout
+// !IROUTINE:  ESMC_DELayoutSet<Value> - set <Value> for a DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutSet<Value>(
+      int ESMC_DELayout::ESMC_DELayoutSet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -636,7 +636,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       <value type> value) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the Layout member <Value> with the given value.
+//     Sets the DELayout member <Value> with the given value.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -646,15 +646,15 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //  code goes here
 //
 
- } // end ESMC_LayoutSet<Value>
+ } // end ESMC_DELayoutSet<Value>
 #endif
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutGetSize - get (nx,ny) size of 2D Layout
+// !IROUTINE:  ESMC_DELayoutGetSize - get (nx,ny) size of 2D DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutGetSize(
+      int ESMC_DELayout::ESMC_DELayoutGetSize(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -664,24 +664,24 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *ny) const {     // out - number of DE's in y direction
 //
 // !DESCRIPTION:
-//    returns overall x,y dimensions of 2D Layout
+//    returns overall x,y dimensions of 2D DELayout
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-  *nx = nxLayout;
-  *ny = nyLayout;
+  *nx = nxDELayout;
+  *ny = nyDELayout;
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutGetSize
+ } // end ESMC_DELayoutGetSize
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutGetSize - get (nx,ny,nz) size of Layout
+// !IROUTINE:  ESMC_DELayoutGetSize - get (nx,ny,nz) size of DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutGetSize(
+      int ESMC_DELayout::ESMC_DELayoutGetSize(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -692,25 +692,25 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *nz) const {     // out - number of DE's in z direction
 //
 // !DESCRIPTION:
-//    returns overall x,y,z dimensions of Layout
+//    returns overall x,y,z dimensions of DELayout
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-  *nx = nxLayout;
-  *ny = nyLayout;
-  *nz = nzLayout;
+  *nx = nxDELayout;
+  *ny = nyDELayout;
+  *nz = nzDELayout;
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutGetSize
+ } // end ESMC_DELayoutGetSize
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutGetDEPosition - get x,y position of my DE in 2D Layout
+// !IROUTINE:  ESMC_DELayoutGetDEPosition - get x,y position of my DE in 2D DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutGetDEPosition(
+      int ESMC_DELayout::ESMC_DELayoutGetDEPosition(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -726,8 +726,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 // !REQUIREMENTS:  developer's guide for classes
 
   // linear search for DE TODO: compute once on initialization ?
-  for (int i=0; i<nxLayout; i++) {
-    for (int j=0; j<nyLayout; j++) {
+  for (int i=0; i<nxDELayout; i++) {
+    for (int j=0; j<nyDELayout; j++) {
       if (myDE.esmfID == layout[i][j][0].esmfID) {
         // found -- return (x,y) position
         *x = i;
@@ -740,14 +740,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   // not found - return error
   return(ESMF_FAILURE);
 
- } // end ESMC_LayoutGetDEPosition
+ } // end ESMC_DELayoutGetDEPosition
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutGetDEPosition - get (x,y,z) position of DE in Layout
+// !IROUTINE:  ESMC_DELayoutGetDEPosition - get (x,y,z) position of DE in DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutGetDEPosition(
+      int ESMC_DELayout::ESMC_DELayoutGetDEPosition(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -765,9 +765,9 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 // !REQUIREMENTS:  developer's guide for classes
 
   // linear search for DE
-  for (int i=0; i<nxLayout; i++) {
-    for (int j=0; j<nyLayout; j++) {
-      for (int k=0; k<nzLayout; k++) {
+  for (int i=0; i<nxDELayout; i++) {
+    for (int j=0; j<nyDELayout; j++) {
+      for (int k=0; k<nzDELayout; k++) {
         if (de->esmfID == layout[i][j][k].esmfID) {
           // found -- return (x,y,z) position
           *x = i;
@@ -782,14 +782,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   // not found - return error
   return(ESMF_FAILURE);
 
- } // end ESMC_LayoutGetDEPosition
+ } // end ESMC_DELayoutGetDEPosition
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutGetDEid - get id of our DE
+// !IROUTINE:  ESMC_DELayoutGetDEid - get id of our DE
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutGetDEid(
+      int ESMC_DELayout::ESMC_DELayoutGetDEid(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -806,14 +806,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutGetDEid
+ } // end ESMC_DELayoutGetDEid
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutSetAxisIndex - set an axis index from a layout
+// !IROUTINE:  ESMC_DELayoutSetAxisIndex - set an axis index from a layout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutSetAxisIndex(
+      int ESMC_DELayout::ESMC_DELayoutSetAxisIndex(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -841,7 +841,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   }
 
   int x, y;
-  this->ESMC_LayoutGetDEPosition( &x, &y);
+  this->ESMC_DELayoutGetDEPosition( &x, &y);
   // loop to set AxisIndex array
   for (int i=0; i<size_gcount; i++, AIPtr++) {
     AIPtr->decomp = decompids[i];
@@ -856,17 +856,17 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       AIPtr->max = global_counts[i];
       AIPtr->gstart = 0;
     }
-    // if decomp is 1, use nxLayout
+    // if decomp is 1, use nxDELayout
     if (decompids[i] == 1) {
-      int n1 = (global_counts[i]+nxLayout-1)/nxLayout; // round to nearest
+      int n1 = (global_counts[i]+nxDELayout-1)/nxDELayout; // round to nearest
       AIPtr->l = 0;
       AIPtr->r = n1-1;
       AIPtr->max = global_counts[i];
       AIPtr->gstart = x*n1;
     }
-    // if decomp is 2, use nyLayout
+    // if decomp is 2, use nyDELayout
     if (decompids[i] == 2) {
-      int n2 = (global_counts[i]+nyLayout-1)/nyLayout; // round to nearest
+      int n2 = (global_counts[i]+nyDELayout-1)/nyDELayout; // round to nearest
       AIPtr->l = 0;
       AIPtr->r = n2-1;
       AIPtr->max = global_counts[i];
@@ -876,14 +876,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
    
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutSetAxisIndex
+ } // end ESMC_DELayoutSetAxisIndex
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutGatherArrayI - gather a distributed integer array
+// !IROUTINE:  ESMC_DELayoutGatherArrayI - gather a distributed integer array
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutGatherArrayI(
+      int ESMC_DELayout::ESMC_DELayoutGatherArrayI(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -911,7 +911,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   // get layout size
   int nx, ny;
-  this->ESMC_LayoutGetSize(&nx, &ny);
+  this->ESMC_DELayoutGetSize(&nx, &ny);
   int nde = nx*ny;
   int rankx, ranky;
 
@@ -1052,14 +1052,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   rc = ESMF_SUCCESS;
   return rc;
 
- } // end ESMC_LayoutGatherArray
+ } // end ESMC_DELayoutGatherArray
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutValidate - internal consistency check for a Layout
+// !IROUTINE:  ESMC_DELayoutValidate - internal consistency check for a DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutValidate(
+      int ESMC_DELayout::ESMC_DELayoutValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1068,7 +1068,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       void) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a Layout is internally consistent.
+//      Validates that a DELayout is internally consistent.
 //      Returns error code if problems are found.  ESMC\_Base class method.
 //
 //EOP
@@ -1076,15 +1076,15 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutValidate
+ } // end ESMC_DELayoutValidate
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutPrint - print contents of a Layout
+// !IROUTINE:  ESMC_DELayoutPrint - print contents of a DELayout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutPrint(
+      int ESMC_DELayout::ESMC_DELayoutPrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1093,13 +1093,13 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       void) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a Layout.  The options control the
+//      Print information about a DELayout.  The options control the
 //      type of information and level of detail.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  //cout << "nxLayout, nyLayout, nzLayout = " << nxLayout << "," << nyLayout << "," << nzLayout << endl;
+  //cout << "nxDELayout, nyDELayout, nzDELayout = " << nxDELayout << "," << nyDELayout << "," << nzDELayout << endl;
   //cout << "commHint = " << commHint << "\n";
 
   int i,j,k;
@@ -1112,21 +1112,21 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   {
     case ESMC_XFAST:
     case (ESMC_NOHINT):
-      ni = nzLayout; z = &i; // outer loop
-      nj = nyLayout; y = &j; // middle loop
-      nk = nxLayout; x = &k; // inner loop
+      ni = nzDELayout; z = &i; // outer loop
+      nj = nyDELayout; y = &j; // middle loop
+      nk = nxDELayout; x = &k; // inner loop
       //cout << "i=z, j=y, k=x \n";
       break;
     case (ESMC_YFAST):
-      ni = nzLayout; z = &i;
-      nj = nxLayout; x = &j;
-      nk = nyLayout; y = &k;
+      ni = nzDELayout; z = &i;
+      nj = nxDELayout; x = &j;
+      nk = nyDELayout; y = &k;
       //cout << "i=z, j=x, k=y \n";
       break;
     case (ESMC_ZFAST):
-      ni = nyLayout; y = &i;
-      nj = nxLayout; x = &j;
-      nk = nzLayout; z = &k;
+      ni = nyDELayout; y = &i;
+      nj = nxDELayout; x = &j;
+      nk = nzDELayout; z = &k;
       //cout << "i=y, j=x, k=z \n";
       break;
   }
@@ -1143,14 +1143,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_LayoutPrint
+ } // end ESMC_DELayoutPrint
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Layout - native C++ constructor
+// !IROUTINE:  ESMC_DELayout - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_Layout::ESMC_Layout(
+      ESMC_DELayout::ESMC_DELayout(
 //
 // !RETURN VALUE:
 //    none
@@ -1165,19 +1165,19 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//cout << "ESMC_Layout constructor invoked\n";
+//cout << "ESMC_DELayout constructor invoked\n";
 
   // Initialize comm, PE, DE, Machine
-  ESMC_LayoutInit();
+  ESMC_DELayoutInit();
 
- } // end ESMC_Layout
+ } // end ESMC_DELayout
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~ESMC_Layout - native C++ destructor
+// !IROUTINE:  ~ESMC_DELayout - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_Layout::~ESMC_Layout(void) {
+      ESMC_DELayout::~ESMC_DELayout(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1191,17 +1191,17 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//cout << "~ESMC_Layout() invoked\n";
-  ESMC_LayoutDestruct();
+//cout << "~ESMC_DELayout() invoked\n";
+  ESMC_DELayoutDestruct();
 
- } // end ~ESMC_Layout
+ } // end ~ESMC_DELayout
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutAllGatherVI - Perform MPI-like Allgatherv of equally-sized integer data arrays across a layout
+// !IROUTINE:  ESMC_DELayoutAllGatherVI - Perform MPI-like Allgatherv of equally-sized integer data arrays across a layout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutAllGatherVI(
+      int ESMC_DELayout::ESMC_DELayoutAllGatherVI(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1220,27 +1220,27 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-  // TODO: make comm public and invoke directly rather than at Layout level ?
-  //       (does not depend on any Layout knowledge)
+  // TODO: make comm public and invoke directly rather than at DELayout level ?
+  //       (does not depend on any DELayout knowledge)
 
   // perform Allgatherv operation across all DEs in the layout
   int rc;
   rc = comm.ESMC_CommAllGatherV(sndArray, sndLen, rcvArray, rcvLen, rcvDispls,
                                 ESMC_INT);
   if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_LayoutAllGatherVI() error" << endl;
+    cout << "ESMC_DELayoutAllGatherVI() error" << endl;
   }
 
   return(rc);
 
- } // end ESMC_LayoutAllGatherVI
+ } // end ESMC_DELayoutAllGatherVI
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutAllReduce - reduce 1D integer data array across layout
+// !IROUTINE:  ESMC_DELayoutAllReduce - reduce 1D integer data array across layout
 //
 // !INTERFACE:
-      int ESMC_Layout::ESMC_LayoutAllReduce(
+      int ESMC_DELayout::ESMC_DELayoutAllReduce(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1258,8 +1258,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-  // TODO: make comm public and invoke directly rather than at Layout level ?
-  //       (does not depend on any Layout knowledge)
+  // TODO: make comm public and invoke directly rather than at DELayout level ?
+  //       (does not depend on any DELayout knowledge)
 
   // TODO: put this loop logic in ESMC_Comm ?
   // perform reduction operation within our DE (given dataArray)
@@ -1275,15 +1275,15 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
     }
   }
 
-  // cout << "ESMC_LayoutAllReduce localResult = " << localResult << endl;
+  // cout << "ESMC_DELayoutAllReduce localResult = " << localResult << endl;
 
   // perform reduction operation across all DEs in the layout
   int rc;
   rc = comm.ESMC_CommAllReduce(&localResult, result, 1, ESMC_INT, op);
   if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_LayoutAllReduce(1D) error" << endl;
+    cout << "ESMC_DELayoutAllReduce(1D) error" << endl;
   }
 
   return(rc);
 
- } // end ESMC_LayoutAllReduce
+ } // end ESMC_DELayoutAllReduce

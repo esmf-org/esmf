@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.1 2003/03/10 03:46:57 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.2 2003/03/10 04:16:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,12 +10,12 @@
 !
 !==============================================================================
 !
-!     ESMF Layout module
-      module ESMF_LayoutMod
+!     ESMF DELayout module
+      module ESMF_DELayoutMod
 !
 !==============================================================================
 !
-! This file contains the Layout class definition and all Layout
+! This file contains the DELayout class definition and all DELayout
 ! class methods.
 !
 !------------------------------------------------------------------------------
@@ -24,12 +24,12 @@
 #include "ESMF.h"
 !------------------------------------------------------------------------------
 !BOP
-! !MODULE: ESMF_LayoutMod - F90 Interface to C++ ESMC_Layout class
+! !MODULE: ESMF_DELayoutMod - F90 Interface to C++ ESMC_DELayout class
 !
 ! !DESCRIPTION:
 !
 ! The code in this file implements the Fortran interfaces to the
-! {\tt Layout} class and associated functions and subroutines.  
+! {\tt DELayout} class and associated functions and subroutines.  
 !
 !
 !------------------------------------------------------------------------------
@@ -48,12 +48,12 @@
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
-!     ! ESMF_Layout
+!     ! ESMF_DELayout
 !
-!     ! Layout data type.  All information is kept on the C++ side inside
+!     ! DELayout data type.  All information is kept on the C++ side inside
 !     ! the class structure.
 
-      type ESMF_Layout
+      type ESMF_DELayout
       sequence
       private
         type(ESMF_Pointer) :: this       ! opaque pointer to the C++ class data
@@ -61,40 +61,40 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_Layout
+      public ESMF_DELayout
       public ESMF_NOHINT, ESMF_XFAST, ESMF_YFAST, ESMF_ZFAST
       public ESMF_SUM, ESMF_MIN, ESMF_MAX
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_LayoutCreate
-      public ESMF_LayoutDestroy
+      public ESMF_DELayoutCreate
+      public ESMF_DELayoutDestroy
  
-      !public ESMF_LayoutSetData
-      !public ESMF_LayoutGetData
-      !public ESMF_LayoutGet
-      public ESMF_LayoutGetSize
-      public ESMF_LayoutGetDEPosition
-      public ESMF_LayoutGetDEid
-      public ESMF_LayoutSetAxisIndex
-      public ESMF_LayoutGatherArrayI
+      !public ESMF_DELayoutSetData
+      !public ESMF_DELayoutGetData
+      !public ESMF_DELayoutGet
+      public ESMF_DELayoutGetSize
+      public ESMF_DELayoutGetDEPosition
+      public ESMF_DELayoutGetDEid
+      public ESMF_DELayoutSetAxisIndex
+      public ESMF_DELayoutGatherArrayI
  
-      public ESMF_LayoutCheckpoint
-      public ESMF_LayoutRestore
-      public ESMF_LayoutWrite
-      public ESMF_LayoutRead
+      public ESMF_DELayoutCheckpoint
+      public ESMF_DELayoutRestore
+      public ESMF_DELayoutWrite
+      public ESMF_DELayoutRead
  
-      public ESMF_LayoutPrint
+      public ESMF_DELayoutPrint
 
-      public ESMF_LayoutAllReduce
-      public ESMF_LayoutAllGatherVI
+      public ESMF_DELayoutAllReduce
+      public ESMF_DELayoutAllGatherVI
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.1 2003/03/10 03:46:57 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.2 2003/03/10 04:16:23 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -103,19 +103,19 @@
 !==============================================================================
 
 !BOP
-! !IROUTINE: ESMF_LayoutCreate -- Generic interface to create an Layout
+! !IROUTINE: ESMF_DELayoutCreate -- Generic interface to create an DELayout
 
 ! !INTERFACE:
-     interface ESMF_LayoutCreate
+     interface ESMF_DELayoutCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_LayoutCreateIntDE2D
-!        !module procedure ESMF_LayoutCreateNoData
+        module procedure ESMF_DELayoutCreateIntDE2D
+!        !module procedure ESMF_DELayoutCreateNoData
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_LayoutCreate} functions.   
+!  types of {\tt ESMF\_DELayoutCreate} functions.   
 !
 !  \begin{description}
 !  \item[xxx]
@@ -145,26 +145,26 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section includes the Layout Create and Destroy methods.
+! This section includes the DELayout Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LayoutCreateIntDE2D - Create 2D Layout from a integer DE list
+! !IROUTINE: ESMF_DELayoutCreateIntDE2D - Create 2D DELayout from a integer DE list
 
 ! !INTERFACE:
-      function ESMF_LayoutCreateIntDE2D(nx, ny, delist, commhint, rc)
+      function ESMF_DELayoutCreateIntDE2D(nx, ny, delist, commhint, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Layout) :: ESMF_LayoutCreateIntDE2D
+      type(ESMF_DELayout) :: ESMF_DELayoutCreateIntDE2D
 !
 ! !ARGUMENTS:
       integer, intent(in) :: nx, ny, delist(:), commhint
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Layout and set the decomposition characteristics.
+!  Create a new DELayout and set the decomposition characteristics.
 !
-!  The return value is a new Layout.
+!  The return value is a new DELayout.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -184,7 +184,7 @@ end interface
 ! !REQUIREMENTS:
 
 !       local vars
-        type (ESMF_Layout) :: layout        ! opaque pointer to new C++ Layout
+        type (ESMF_DELayout) :: layout        ! opaque pointer to new C++ DELayout
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
@@ -198,33 +198,33 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_LayoutCreate(layout, nx, ny, delist, commhint, status)
+        call c_ESMC_DELayoutCreate(layout, nx, ny, delist, commhint, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Layout creation error"
+          print *, "DELayout creation error"
           return
         endif
 
 !       set return values
-        ESMF_LayoutCreateIntDE2D = layout 
+        ESMF_DELayoutCreateIntDE2D = layout 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_LayoutCreateIntDE2D
+        end function ESMF_DELayoutCreateIntDE2D
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LayoutCreateNoData
+! !IROUTINE: ESMF_DELayoutCreateNoData
 
 ! !INTERFACE:
-      function ESMF_LayoutCreateNoData(rc)
+      function ESMF_DELayoutCreateNoData(rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Layout) :: ESMF_LayoutCreateNoData
+      type(ESMF_DELayout) :: ESMF_DELayoutCreateNoData
 !
 ! !ARGUMENTS:
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!  Create a new empty {\tt Layout} object.
+!  Create a new empty {\tt DELayout} object.
 !
 !  The arguments are:
 !  \begin{description}
@@ -239,7 +239,7 @@ end interface
 
 
 !       ! Local variables
-        type (ESMF_Layout) :: layout        ! new class being created
+        type (ESMF_DELayout) :: layout        ! new class being created
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
@@ -253,35 +253,35 @@ end interface
         endif
 
 !       ! C routine which interfaces to the C++ routine which does actual work
-        !call c_ESMC_LayoutCreateNoData(layout, status)
+        !call c_ESMC_DELayoutCreateNoData(layout, status)
         !if (status .ne. ESMF_SUCCESS) then
-        !  print *, "Layout construction error"
+        !  print *, "DELayout construction error"
         !  return
         !endif
 
 !       set return values
-        ESMF_LayoutCreateNoData = layout
+        ESMF_DELayoutCreateNoData = layout
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_LayoutCreateNoData
+        end function ESMF_DELayoutCreateNoData
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutDestroy(layout, rc)
+      subroutine ESMF_DELayoutDestroy(layout, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt Layout}.
+!     Releases all resources associated with this {\tt DELayout}.
 !
 !     The arguments are:
 !     \begin{description}
 !
 !     \item[layout]
-!       Destroy contents of this {\tt Layout}.
+!       Destroy contents of this {\tt DELayout}.
 !
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -302,30 +302,30 @@ end interface
         endif
 
 !       call Destroy to release resources on the C++ side
-        call c_ESMC_LayoutDestroy(layout, status)
+        call c_ESMC_DELayoutDestroy(layout, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Layout destruction error"
+          print *, "DELayout destruction error"
           return
         endif
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutDestroy
+        end subroutine ESMF_DELayoutDestroy
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutSetData(layout, rc)
+      subroutine ESMF_DELayoutSetData(layout, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Used only with the version of LayoutCreate which creates an empty
-!      Layout and allows the Data to be specified later.
+!      Used only with the version of DELayoutCreate which creates an empty
+!      DELayout and allows the Data to be specified later.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -346,7 +346,7 @@ end interface
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutSetData
+        end subroutine ESMF_DELayoutSetData
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -356,10 +356,10 @@ end interface
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutGet(layout, rc)
+      subroutine ESMF_DELayoutGet(layout, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, intent(out), optional :: rc
 
 !
@@ -387,15 +387,15 @@ end interface
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutGet
+        end subroutine ESMF_DELayoutGet
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutGetSize(layout, nx, ny, rc)
+      subroutine ESMF_DELayoutGetSize(layout, nx, ny, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, intent(out) :: nx, ny             
       integer, intent(out), optional :: rc             
 !
@@ -418,24 +418,24 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ routine.
-        call c_ESMC_LayoutGetSize(layout, nx, ny, status)
+        call c_ESMC_DELayoutGetSize(layout, nx, ny, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_LayoutGetSize error"
+          print *, "ESMF_DELayoutGetSize error"
           return
         endif
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutGetSize
+        end subroutine ESMF_DELayoutGetSize
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutGetDEPosition(layout, x, y, rc)
+      subroutine ESMF_DELayoutGetDEPosition(layout, x, y, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, intent(out) :: x, y             
       integer, intent(out), optional :: rc             
 !
@@ -458,24 +458,24 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ routine.
-        call c_ESMC_LayoutGetDEPosition(layout, x, y, status)
+        call c_ESMC_DELayoutGetDEPosition(layout, x, y, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_LayoutGetDEPosition error"
+          print *, "ESMF_DELayoutGetDEPosition error"
           return
         endif
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutGetDEPosition
+        end subroutine ESMF_DELayoutGetDEPosition
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutGetDEid(layout, id, rc)
+      subroutine ESMF_DELayoutGetDEid(layout, id, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, intent(out) :: id
       integer, intent(out), optional :: rc             
 !
@@ -498,25 +498,25 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ routine.
-        call c_ESMC_LayoutGetDEid(layout, id, status)
+        call c_ESMC_DELayoutGetDEid(layout, id, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_LayoutGetDEid error"
+          print *, "ESMF_DELayoutGetDEid error"
           return
         endif
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutGetDEid
+        end subroutine ESMF_DELayoutGetDEid
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutSetAxisIndex(layout, global_counts, decompids, &
+      subroutine ESMF_DELayoutSetAxisIndex(layout, global_counts, decompids, &
                                          AIPtr, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, dimension(:), intent(in) :: global_counts
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:) :: AIPtr
@@ -545,26 +545,26 @@ end interface
 !       Routine which interfaces to the C++ routine.
         size_gcount = size(global_counts)
         size_decomp = size(decompids)
-        call c_ESMC_LayoutSetAxisIndex(layout, global_counts, size_gcount, &
+        call c_ESMC_DELayoutSetAxisIndex(layout, global_counts, size_gcount, &
                                        decompids, size_decomp, AIPtr, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_LayoutSetAxisIndex error"
+          print *, "ESMF_DELayoutSetAxisIndex error"
           return
         endif
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutSetAxisIndex
+        end subroutine ESMF_DELayoutSetAxisIndex
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutGatherArrayI(layout, DistArray, decompids, &
+      subroutine ESMF_DELayoutGatherArrayI(layout, DistArray, decompids, &
                                          AIPtr, AIPtr2, GlobalArray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, dimension(:), intent(in) :: DistArray
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:) :: AIPtr
@@ -606,11 +606,11 @@ end interface
 
 !       Routine which interfaces to the C++ routine.
         size_decomp = size(decompids)
-        call c_ESMC_LayoutGatherArrayI(layout, DistArray, decompids, &
+        call c_ESMC_DELayoutGatherArrayI(layout, DistArray, decompids, &
                                        size_decomp, AIPtr, AIPtr2, &
                                        GlobalArray, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_LayoutGatherArrayI error"
+          print *, "ESMF_DELayoutGatherArrayI error"
           return
         endif
 
@@ -625,20 +625,20 @@ end interface
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutGatherArrayI
+        end subroutine ESMF_DELayoutGatherArrayI
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section is I/O for Layouts
+! This section is I/O for DELayouts
 !
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutCheckpoint(layout, iospec, rc)
+      subroutine ESMF_DELayoutCheckpoint(layout, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout):: layout 
+      type(ESMF_DELayout):: layout 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc            
 !
@@ -667,16 +667,16 @@ end interface
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutCheckpoint
+        end subroutine ESMF_DELayoutCheckpoint
 
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      function ESMF_LayoutRestore(name, iospec, rc)
+      function ESMF_DELayoutRestore(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Layout) :: ESMF_LayoutRestore
+      type(ESMF_DELayout) :: ESMF_DELayoutRestore
 !
 !
 ! !ARGUMENTS:
@@ -686,7 +686,7 @@ end interface
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a Layout from the last call to Checkpoint.
+!      all data associated with a DELayout from the last call to Checkpoint.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -698,7 +698,7 @@ end interface
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
-        type (ESMF_Layout) :: a 
+        type (ESMF_DELayout) :: a 
 !
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -708,21 +708,21 @@ end interface
 
 !       ! add code here
 
-        ESMF_LayoutRestore = a 
+        ESMF_DELayoutRestore = a 
  
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_LayoutRestore
+        end function ESMF_DELayoutRestore
 
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutWrite(layout, iospec, rc)
+      subroutine ESMF_DELayoutWrite(layout, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc     
 !
@@ -751,16 +751,16 @@ end interface
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LayoutWrite
+        end subroutine ESMF_DELayoutWrite
 
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      function ESMF_LayoutRead(name, iospec, rc)
+      function ESMF_DELayoutRead(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Layout) :: ESMF_LayoutRead
+      type(ESMF_DELayout) :: ESMF_DELayoutRead
 !
 ! !ARGUMENTS:
       character (len = *), intent(in) :: name              ! layout name to read
@@ -781,7 +781,7 @@ end interface
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
-        type (ESMF_Layout) :: a
+        type (ESMF_DELayout) :: a
 
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -791,12 +791,12 @@ end interface
 
 !       ! add code here
 
-        ESMF_LayoutRead = a 
+        ESMF_DELayoutRead = a 
  
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_LayoutRead
+        end function ESMF_DELayoutRead
 
 
 !------------------------------------------------------------------------------
@@ -804,11 +804,11 @@ end interface
 !
 !
 ! !INTERFACE:
-      subroutine ESMF_LayoutPrint(layout, options, rc)
+      subroutine ESMF_DELayoutPrint(layout, options, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
@@ -833,34 +833,34 @@ end interface
 
 !      ! Interface to call the C++ print code
        !if(present(options)) then
-       !    call c_ESMC_LayoutPrint(layout%this, options, status) 
+       !    call c_ESMC_DELayoutPrint(layout%this, options, status) 
        !else
-       !    call c_ESMC_LayoutPrint(layout%this, defaultopts, status) 
+       !    call c_ESMC_DELayoutPrint(layout%this, defaultopts, status) 
        !endif
 
        if (status .ne. ESMF_SUCCESS) then
-         print *, "Layout print error"
+         print *, "DELayout print error"
          return
        endif
 
 !      set return values
        if (rcpresent) rc = ESMF_SUCCESS
 
-       end subroutine ESMF_LayoutPrint
+       end subroutine ESMF_DELayoutPrint
 
 !------------------------------------------------------------------------------
 !BOP
 !
 !
 ! !INTERFACE:
-      subroutine ESMF_LayoutAllReduce(layout, dataArray, result, arrayLen, &
+      subroutine ESMF_DELayoutAllReduce(layout, dataArray, result, arrayLen, &
                                       op, rc)
 
-! TODO: rename to ESMF_LayoutAllReduceI for "integer" version ?
+! TODO: rename to ESMF_DELayoutAllReduceI for "integer" version ?
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, intent(in) :: dataArray(:), arrayLen, op
       integer, intent(out) :: result 
       integer, intent(out), optional :: rc 
@@ -882,28 +882,28 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ routine.
-        call c_ESMC_LayoutAllReduce(layout, dataArray, result, arrayLen, op, &
+        call c_ESMC_DELayoutAllReduce(layout, dataArray, result, arrayLen, op, &
                                     status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_LayoutAllReduce error"
+          print *, "ESMF_DELayoutAllReduce error"
           return
         endif
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
-       end subroutine ESMF_LayoutAllReduce
+       end subroutine ESMF_DELayoutAllReduce
 
 !------------------------------------------------------------------------------
 !BOP
 !
 !
 ! !INTERFACE:
-      subroutine ESMF_LayoutAllGatherVI(layout, sndArray, sndLen, &
+      subroutine ESMF_DELayoutAllGatherVI(layout, sndArray, sndLen, &
                                         rcvArray, rcvLen, rcvDispls, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, intent(in) :: sndArray(:)
       integer, intent(in) :: sndLen
       integer, intent(out) :: rcvArray(:)
@@ -928,16 +928,16 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ routine.
-        call c_ESMC_LayoutAllGatherVI(layout, sndArray, sndLen, &
+        call c_ESMC_DELayoutAllGatherVI(layout, sndArray, sndLen, &
                                       rcvArray, rcvLen, rcvDispls, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_LayoutAllGatherVI error"
+          print *, "ESMF_DELayoutAllGatherVI error"
           return
         endif
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
-       end subroutine ESMF_LayoutAllGatherVI
+       end subroutine ESMF_DELayoutAllGatherVI
 
-       end module ESMF_LayoutMod
+       end module ESMF_DELayoutMod
 

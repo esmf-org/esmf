@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_FEx2.F90,v 1.1 2003/03/10 03:46:57 cdeluca Exp $
+! $Id: ESMF_DELayout_FEx2.F90,v 1.2 2003/03/10 04:16:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,19 +14,19 @@
 !
 ! !DESCRIPTION:
 !
-! Excercises the Layout F90 to C++ interface.
+! Excercises the DELayout F90 to C++ interface.
 ! pre-test for System Test #70384 
 !
 ! on halem, run with
-! bsub -P "hp606" -q general -n 8 prun -m cyclic -n 6 -N 2 ./ESMF_Layout_FEx2
+! bsub -P "hp606" -q general -n 8 prun -m cyclic -n 6 -N 2 ./ESMF_DELayout_FEx2
 ! to run 6 DEs (MPI processes) on two nodes
 !-----------------------------------------------------------------------------
 
-program ESMF_Layout_FEx2
+program ESMF_DELayout_FEx2
 
-  use ESMF_LayoutMod
+  use ESMF_DELayoutMod
 
-  type(ESMF_Layout) :: layout
+  type(ESMF_DELayout) :: layout
   integer, dimension(6) :: delist
   integer :: nx, ny, x, y, id, rc
   integer, dimension(20) :: sArray1, sArray2, sArray3, sArray4, sArray5, sArray6
@@ -47,19 +47,19 @@ program ESMF_Layout_FEx2
   end do
 
   ! create 2x3 layout of DEs in X-direction
-  layout = ESMF_LayoutCreate(2, 3, delist, ESMF_XFAST, rc)
+  layout = ESMF_DELayoutCreate(2, 3, delist, ESMF_XFAST, rc)
 
   ! verify size of layout
-  call ESMF_LayoutGetSize(layout, nx, ny, rc)
-  print *, "ESMF_LayoutGetSize(nx, ny) = ", nx, ny
+  call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+  print *, "ESMF_DELayoutGetSize(nx, ny) = ", nx, ny
 
   ! get our DE's position within the layout
-  call ESMF_LayoutGetDEPosition(layout, x, y, rc)
-  print *, "ESMF_LayoutGetDEPosition(x, y) = ", x, y
+  call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
+  print *, "ESMF_DELayoutGetDEPosition(x, y) = ", x, y
 
   ! get our DE id
-  call ESMF_LayoutGetDEid(layout, id, rc)
-  print *, "ESMF_LayoutGetDEid(id) = ", id
+  call ESMF_DELayoutGetDEid(layout, id, rc)
+  print *, "ESMF_DELayoutGetDEid(id) = ", id
 
   ! each DE populates its send array and sends it 
   if (id .eq. 0) then
@@ -70,7 +70,7 @@ program ESMF_Layout_FEx2
     ! verify
     print *, "sArray1() = ", sArray1
 
-    call ESMF_LayoutAllGatherVI(layout, sArray1, slen, &
+    call ESMF_DELayoutAllGatherVI(layout, sArray1, slen, &
                                         rArray,  rlen, rdispls, rc)
   else if (id .eq. 1) then
     do i=1,slen
@@ -80,7 +80,7 @@ program ESMF_Layout_FEx2
     ! verify
     print *, "sArray2() = ", sArray2
 
-    call ESMF_LayoutAllGatherVI(layout, sArray2, slen, &
+    call ESMF_DELayoutAllGatherVI(layout, sArray2, slen, &
                                         rArray,  rlen, rdispls, rc)
   else if (id .eq. 2) then
     do i=1,slen
@@ -90,7 +90,7 @@ program ESMF_Layout_FEx2
     ! verify
     print *, "sArray3() = ", sArray3
 
-    call ESMF_LayoutAllGatherVI(layout, sArray3, slen, &
+    call ESMF_DELayoutAllGatherVI(layout, sArray3, slen, &
                                         rArray,  rlen, rdispls, rc)
   else if (id .eq. 3) then
     do i=1,slen
@@ -100,7 +100,7 @@ program ESMF_Layout_FEx2
     ! verify
     print *, "sArray4() = ", sArray4
 
-    call ESMF_LayoutAllGatherVI(layout, sArray4, slen, &
+    call ESMF_DELayoutAllGatherVI(layout, sArray4, slen, &
                                         rArray,  rlen, rdispls, rc)
   else if (id .eq. 4) then
     do i=1,slen
@@ -110,7 +110,7 @@ program ESMF_Layout_FEx2
     ! verify
     print *, "sArray5() = ", sArray5
 
-    call ESMF_LayoutAllGatherVI(layout, sArray5, slen, &
+    call ESMF_DELayoutAllGatherVI(layout, sArray5, slen, &
                                         rArray,  rlen, rdispls, rc)
   else if (id .eq. 5) then
     do i=1,slen
@@ -120,13 +120,13 @@ program ESMF_Layout_FEx2
     ! verify
     print *, "sArray6() = ", sArray6
 
-    call ESMF_LayoutAllGatherVI(layout, sArray6, slen, &
+    call ESMF_DELayoutAllGatherVI(layout, sArray6, slen, &
                                         rArray,  rlen, rdispls, rc)
   endif
 
   ! ... and the result is ...
   print *, "DE ", id, " rArray() = ", rArray
 
-  call ESMF_LayoutDestroy(layout, rc)
+  call ESMF_DELayoutDestroy(layout, rc)
 
-end program ESMF_Layout_FEx2
+end program ESMF_DELayout_FEx2

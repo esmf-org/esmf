@@ -32,18 +32,18 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: ESMC\_Layout.C,  Date: Mon Dec  9 19:56:32 MST 2002
+\markboth{Left}{Source File: ESMC\_DELayout.C,  Date: Mon Dec  9 19:56:32 MST 2002
 }
 
  
 %/////////////////////////////////////////////////////////////
-\subsubsection{ESMC\_LayoutCreate - Create a new Layout}
+\subsubsection{ESMC\_DELayoutCreate - Create a new DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       ESMC_Layout *ESMC_LayoutCreate(\end{verbatim}{\em RETURN VALUE:}
-\begin{verbatim}       pointer to newly allocated ESMC_Layout\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       ESMC_DELayout *ESMC_DELayoutCreate(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       pointer to newly allocated ESMC_DELayout\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       int nx,                    // in - number of DE's in the x direction
        int ny,                    // in - number of DE's in the y direction
        int nz,                    // in - number of DE's in the z direction
@@ -53,8 +53,8 @@
 {\sf DESCRIPTION:\\ }
 
 
-        Allocates memory for a new Layout
-        object and uses the internal routine ESMC\_LayoutContruct to
+        Allocates memory for a new DELayout
+        object and uses the internal routine ESMC\_DELayoutContruct to
         initialize it. There can be multiple overloaded methods with the 
         same name, but different argument lists.
    
@@ -62,30 +62,30 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutDestroy - free a Layout created with Create}
+\subsubsection{ESMC\_DELayoutDestroy - free a DELayout created with Create}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_LayoutDestroy(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayoutDestroy(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       ESMC_Layout *layout) {  // in - ESMC_Layout to destroy\end{verbatim}
+\begin{verbatim}       ESMC_DELayout *layout) {  // in - ESMC_DELayout to destroy\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-        ESMF routine which destroys a Layout object previously allocated
-        via an ESMC\_LayoutCreate routine.  Define for deep classes only.
+        ESMF routine which destroys a DELayout object previously allocated
+        via an ESMC\_DELayoutCreate routine.  Define for deep classes only.
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutConstruct - fill in an already allocated Layout}
+\subsubsection{ESMC\_DELayoutConstruct - fill in an already allocated DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutConstruct(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutConstruct(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       int nx,                     // in - number of DE's in the x direction
        int ny,                     // in - number of DE's in the y direction
@@ -96,43 +96,43 @@
 
 
         ESMF routine which fills in the contents of an already
-        allocated Layout object.  May need to do additional allocations
-        as needed.  Must call the corresponding ESMC\_LayoutDestruct
+        allocated DELayout object.  May need to do additional allocations
+        as needed.  Must call the corresponding ESMC\_DELayoutDestruct
         routine to free the additional memory.  Intended for internal
-        ESMF use only; end-users use ESMC\_LayoutCreate, which calls
-        ESMC\_LayoutConstruct.  Define for deep classes only.
+        ESMF use only; end-users use ESMC\_DELayoutCreate, which calls
+        ESMC\_DELayoutConstruct.  Define for deep classes only.
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutDestruct - release resources associated w/a Layout}
+\subsubsection{ESMC\_DELayoutDestruct - release resources associated w/a DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutDestruct(void) {\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutDestruct(void) {\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}      none\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
         ESMF routine which deallocates any space allocated by
-        ESMF\_LayoutConstruct, does any additional cleanup before the
-        original Layout object is freed.  Intended for internal ESMF
-        use only; end-users use ESMC\_LayoutDestroy, which calls
-        ESMC\_LayoutDestruct.  Define for deep classes only.
+        ESMF\_DELayoutConstruct, does any additional cleanup before the
+        original DELayout object is freed.  Intended for internal ESMF
+        use only; end-users use ESMC\_DELayoutDestroy, which calls
+        ESMC\_DELayoutDestruct.  Define for deep classes only.
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutInit - initializes a Layout object}
+\subsubsection{ESMC\_DELayoutInit - initializes a DELayout object}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutInit(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutInit(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       int arg1,            // in
        int arg2,            // in
@@ -140,91 +140,91 @@
 {\sf DESCRIPTION:\\ }
 
 
-        ESMF routine which only initializes Layout values; it does not
+        ESMF routine which only initializes DELayout values; it does not
         allocate any resources.  Define for shallow classes only,
         for deep classes define and use routines Create/Destroy and
-        Construct/Destruct.  Can be overloaded like ESMC\_LayoutCreate.
+        Construct/Destruct.  Can be overloaded like ESMC\_DELayoutCreate.
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutGetConfig - get configuration info from a Layout}
+\subsubsection{ESMC\_DELayoutGetConfig - get configuration info from a DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutGetConfig(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutGetConfig(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       ESMC_LayoutConfig *config) const {  // out - resources\end{verbatim}
+\begin{verbatim}       ESMC_DELayoutConfig *config) const {  // out - resources\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-      Returns the set of resources the Layout object was configured with.
+      Returns the set of resources the DELayout object was configured with.
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutSetConfig - set configuration info for a Layout}
+\subsubsection{ESMC\_DELayoutSetConfig - set configuration info for a DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutSetConfig(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutSetConfig(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       const ESMC_LayoutConfig *config) {     // in - resources\end{verbatim}
+\begin{verbatim}       const ESMC_DELayoutConfig *config) {     // in - resources\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-      Configures the Layout object with set of resources given.
+      Configures the DELayout object with set of resources given.
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutGet<Value> - get <Value> for a Layout}
+\subsubsection{ESMC\_DELayoutGet<Value> - get <Value> for a DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutGet<Value>(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutGet<Value>(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       <value type> *value) const {     // out - value\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-       Returns the value of Layout member <Value>.
+       Returns the value of DELayout member <Value>.
        Can be multiple routines, one per value
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutSet<Value> - set <Value> for a Layout}
+\subsubsection{ESMC\_DELayoutSet<Value> - set <Value> for a DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutSet<Value>(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutSet<Value>(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       <value type> value) {     // in - value\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-       Sets the Layout member <Value> with the given value.
+       Sets the DELayout member <Value> with the given value.
        Can be multiple routines, one per value
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutGetSize - get (nx,ny,nz) size of Layout}
+\subsubsection{ESMC\_DELayoutGetSize - get (nx,ny,nz) size of DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutGetSize(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutGetSize(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       int *nx,             // out - number of DE's in x direction
        int *ny,             // out - number of DE's in y direction
@@ -232,18 +232,18 @@
 {\sf DESCRIPTION:\\ }
 
 
-      returns overall x,y,z dimensions of Layout
+      returns overall x,y,z dimensions of DELayout
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutGetDEPosition - get (x,y,z) position of DE in Layout}
+\subsubsection{ESMC\_DELayoutGetDEPosition - get (x,y,z) position of DE in DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutGetDEPosition(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutGetDEPosition(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       ESMC_DE *de,        // in  - given DE
        int *x,             // out - x position of DE in layout
@@ -258,48 +258,48 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutValidate - internal consistency check for a Layout}
+\subsubsection{ESMC\_DELayoutValidate - internal consistency check for a DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutValidate(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutValidate(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       void) const {    // in - validate options\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-        Validates that a Layout is internally consistent.
+        Validates that a DELayout is internally consistent.
         Returns error code if problems are found.  ESMC\_Base class method.
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_LayoutPrint - print contents of a Layout}
+\subsubsection{ESMC\_DELayoutPrint - print contents of a DELayout}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       int ESMC_Layout::ESMC_LayoutPrint(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       int ESMC_DELayout::ESMC_DELayoutPrint(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       void) const {     //  in - print options\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-        Print information about a Layout.  The options control the
+        Print information about a DELayout.  The options control the
         type of information and level of detail.  ESMC\_Base class method.
    
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMC\_Layout - native C++ constructor}
+\subsubsection{ESMC\_DELayout - native C++ constructor}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       ESMC_Layout::ESMC_Layout(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       ESMC_DELayout::ESMC_DELayout(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       void) {  // in\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -312,12 +312,12 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{~ESMC\_Layout - native C++ destructor}
+\subsubsection{~ESMC\_DELayout - native C++ destructor}
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       ESMC_Layout::~ESMC_Layout(void) {\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       ESMC_DELayout::~ESMC_DELayout(void) {\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}      none\end{verbatim}
 {\sf DESCRIPTION:\\ }
