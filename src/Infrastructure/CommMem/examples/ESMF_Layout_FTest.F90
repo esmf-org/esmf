@@ -1,3 +1,7 @@
+! on halem, run with
+! bsub -P "hp606" -q general -n 4 prun -n 2 -N 1 ./ESMF_Layout_FTest
+! to run 2 DEs (MPI processes) on one node
+
 program ESMF_Layout_FTest
 
   use ESMF_LayoutMod
