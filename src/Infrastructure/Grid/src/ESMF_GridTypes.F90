@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.2 2004/01/07 22:27:04 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.3 2004/01/07 23:01:12 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -311,7 +311,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.2 2004/01/07 22:27:04 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.3 2004/01/07 23:01:12 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -815,15 +815,15 @@
       if(present(numPhysGrids   )) numPhysGrids    = grid%ptr%numPhysGrids
       if(present(numDistGrids   )) numDistGrids    = grid%ptr%numDistGrids
 
-!     Set periodic flags for each dimension
+!     Get periodic flags for each dimension
       if (present(periodic)) then
          do i=1,ESMF_MAXGRIDDIM
             if (i > size(periodic)) exit
-            grid%ptr%periodic(i) = periodic(i)
+            periodic(i) = grid%ptr%periodic(i)
          enddo
       endif
 
-!     Set global domain limits
+!     Get global domain limits
       if (present(globalMinCoord)) then
          if (size(globalMinCoord) > ESMF_MAXGRIDDIM) then
             print *,'ESMF_GridGetAttributes: Error - globalMinCoord too big'
