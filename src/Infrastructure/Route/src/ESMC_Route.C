@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.52 2003/08/05 14:17:09 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.53 2003/08/05 20:17:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.52 2003/08/05 14:17:09 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.53 2003/08/05 20:17:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -434,13 +434,17 @@ static int maxroutes = 10;
     rc = layout->ESMC_DELayoutGetDEID(&mydeid);
     rc = ct->ESMC_CommTableGetCount(&ccount);
 
+    printf("Ready to run Route on DE %d, commtable count = %d:\n",
+               mydeid, ccount);
+    ESMC_RoutePrint("");
+
     // for each destination in the comm table
     for (i=0; i<ccount; i++) {
 
         // find out who the next id is 
         rc = ct->ESMC_CommTableGetPartner(i, &theirdeid, &needed);
         if (!needed) {
-        //    printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
+            printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
 	    continue;
         //} else {
         //   printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
@@ -459,8 +463,8 @@ static int maxroutes = 10;
             if (ixs < xscount) {
                 rc = sendRT->ESMC_RTableGetEntry(theirdeid, ixs, &sendxp);
                 rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length, sstride, srep_count);
-                //printf("RouteRun: sendxp\n");
-                //sendxp->ESMC_XPacketPrint();
+                printf("RouteRun: sendxp\n");
+                sendxp->ESMC_XPacketPrint();
             } else {
                 sendxp = NULL;
                 srank = 0;
@@ -469,15 +473,15 @@ static int maxroutes = 10;
                     srep_count[j]=0;
 		    sstride[j]=0;
                 }
-                //printf("nothing to send\n");
+                printf("nothing to send\n");
             }
 
             //if (xrcount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xrcount);
             if (ixr < xrcount) {
                 rc = recvRT->ESMC_RTableGetEntry(theirdeid, ixr, &recvxp);
                 rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length, rstride, rrep_count);
-                //printf("RouteRun: recvxp\n");
-                //recvxp->ESMC_XPacketPrint();
+                printf("RouteRun: recvxp\n");
+                recvxp->ESMC_XPacketPrint();
             } else {
                 recvxp = NULL;
                 rrank = 0;
@@ -486,7 +490,7 @@ static int maxroutes = 10;
                     rrep_count[j]=0;
                     rstride[j]=0;
                 }
-                //printf("nothing to recv\n");
+                printf("nothing to recv\n");
             }
         
        
@@ -556,6 +560,8 @@ static int maxroutes = 10;
 	}
 
     }
+
+    printf("End of Route run on DE %d\n", mydeid);
 
     return rc;
 
@@ -901,6 +907,8 @@ static int maxroutes = 10;
     rc = ESMC_XPacketFromAxisIndex(my_AI, rank, my_global_start, global_stride,
                                    periodic, &my_XP, &my_XPcount);
 
+    printf("my_DE = %d, my_XPcount = %d\n", my_DE, my_XPcount);
+
     // loop over DE's from receiving layout to calculate send table
     layout->ESMC_DELayoutGetNumDEs(&decount);
     for (k=0; k<decount; k++) {
@@ -917,17 +925,31 @@ static int maxroutes = 10;
                                      global_stride, periodic, &their_XP,
                                      &their_XPcount);
 
+      
+      printf("their_de = %d, their_XPcount = %d\n", their_de, their_XPcount);
       // calculate the intersection
       intersect_XP = new ESMC_XPacket;
       for (j=0; j<my_XPcount; j++) {
         for (i=0; i<their_XPcount; i++) {
 
+          // do not intersect my periodic shadow w/ their shadows...
+          if ((i > 0) && (j > 0)) {
+              printf("skipping over shadowed compares of DEs\n");
+              continue;
+          }
+
+          if ((my_DE == 0) && (their_de == 9)) 
+              printf("should match\n");
+
           // reuse the same XP for the entire loop.
           intersect_XP->ESMC_XPacketIntersect(&my_XP[j], &their_XP[i]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty()) 
+          if (intersect_XP->ESMC_XPacketEmpty()) {
+            printf("empty intersection between %d and %d, continuing\n",
+                         my_DE, their_de);
             continue;
+          }
 
           // translate from global to local data space
           intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
@@ -979,6 +1001,10 @@ static int maxroutes = 10;
       intersect_XP = new ESMC_XPacket;
       for (j=0; j<my_XPcount; j++) {
         for (i=0; i<their_XPcount; i++) {
+
+          // do not intersect my periodic shadow w/ their shadows...
+          if ((i > 0) && (j > 0)) continue;
+
           intersect_XP->ESMC_XPacketIntersect(&my_XP[j], &their_XP[i]);
 
           // if there's no intersection, no need to add an entry here
