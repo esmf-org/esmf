@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/18 23:03:05 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/19 21:32:57 jwolfe Exp $ 
 
 ALL: system_tests
 
@@ -15,7 +15,7 @@ LIBBASE	  =
 LOCDIR	  = src/system_tests/CouplingOnExclDEs
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/CouplingOnExclDEs
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
@@ -39,12 +39,12 @@ CLOBBERDIRS =
 
 
 RUN_CouplingOnExclDEs:
-	-@rm -f testlog stdlog.* logfile.* CouplingOnExclDEs.tmps
-	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/CouplingOnExclDEs >$(ESMC_TESTDIR)/CouplingOnExclDEs.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_CplOnExclDEsSTest.tmps
+	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest >$(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest.stdout
 
 RUN_CouplingOnExclDEsUNI:
-	-@rm -f testlog stdlog.* logfile.* CouplingOnExclDEs.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/CouplingOnExclDEs >$(ESMC_TESTDIR)/CouplingOnExclDEs.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_CplOnExclDEsSTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest >$(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest.stdout
 
 CouplingOnExclDEs.rm:
 	echo "CouplingOnExclDEs.rm target called here."
