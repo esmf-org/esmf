@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2003/03/10 02:41:43 cdeluca Exp $ 
+# $Id: makefile,v 1.17 2003/03/10 03:03:09 cdeluca Exp $ 
 ALL: lib 
 
 
@@ -70,17 +70,17 @@ ${ESMC_DOCDIR}/ESMF_refdoc.pdf: ${ESMC_DOCDIR}/ESMF_refdoc.dvi
 # Html Files
 ${ESMC_DOCDIR}/ESMF_reqdoc: $(REQDOC_FILES)
 	-rm -r $(ESMC_DOCDIR)/ESMF_reqdoc
-	${DOL2H} ESMF req
+	${DO_L2H} ESMF req
 	mv -f ESMF_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_usrdoc: $(USRDOC_FILES)
 	-rm -r $(ESMC_DOCDIR)/ESMF_usrdoc
-	${DOL2H} ESMF usr
+	${DO_L2H} ESMF usr
 	mv -f ESMF_usrdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_refdoc: $(REFDOC_FILES)
 	-rm -r $(ESMC_DOCDIR)/ESMF_refdoc
-	${DOL2H} ESMF ref
+	${DO_L2H} ESMF ref
 	mv -f ESMF_refdoc ${ESMC_DOCDIR}
 
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/02/27 17:54:35 flanigan Exp $ 
+# $Id: makefile,v 1.4 2003/03/10 03:03:04 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -56,13 +56,13 @@ ${ESMC_DOCDIR}/Grid_refdoc.pdf: ${ESMC_DOCDIR}/Grid_refdoc.dvi
 
 # Html Files
 ${ESMC_DOCDIR}/Grid_desdoc: 
-	${DOL2H} Grid des
+	${DO_L2H} Grid des
 	mv -f Grid_desdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/Grid_reqdoc: 
-	${DOL2H} Grid req
+	${DO_L2H} Grid req
 	mv -f Grid_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/Grid_refdoc: 
-	${DOL2H} Grid ref
+	${DO_L2H} Grid ref
 	mv -f Grid_refdoc ${ESMC_DOCDIR}

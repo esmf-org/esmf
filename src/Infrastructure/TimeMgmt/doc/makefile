@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:50 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/03/10 03:03:08 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -56,13 +56,13 @@ ${ESMC_DOCDIR}/TimeMgmt_refdoc.pdf: ${ESMC_DOCDIR}/TimeMgmt_refdoc.dvi
 
 # Html Files
 ${ESMC_DOCDIR}/TimeMgmt_desdoc: 
-	${DOL2H} TimeMgmt des
+	${DO_L2H} TimeMgmt des
 	mv -f TimeMgmt_desdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/TimeMgmt_reqdoc: 
-	${DOL2H} TimeMgmt req
+	${DO_L2H} TimeMgmt req
 	mv -f TimeMgmt_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/TimeMgmt_refdoc: 
-	${DOL2H} TimeMgmt ref
+	${DO_L2H} TimeMgmt ref
 	mv -f TimeMgmt_refdoc ${ESMC_DOCDIR}

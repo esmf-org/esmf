@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:44 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/03/10 03:03:07 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -56,13 +56,13 @@ ${ESMC_DOCDIR}/PhysGrid_refdoc.pdf: ${ESMC_DOCDIR}/PhysGrid_refdoc.dvi
 
 # Html Files
 ${ESMC_DOCDIR}/PhysGrid_desdoc: 
-	${DOL2H} PhysGrid des
+	${DO_L2H} PhysGrid des
 	mv -f PhysGrid_desdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/PhysGrid_reqdoc: 
-	${DOL2H} PhysGrid req
+	${DO_L2H} PhysGrid req
 	mv -f PhysGrid_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/PhysGrid_refdoc: 
-	${DOL2H} PhysGrid ref
+	${DO_L2H} PhysGrid ref
 	mv -f PhysGrid_refdoc ${ESMC_DOCDIR}

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:37 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/03/10 03:03:05 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -39,6 +39,6 @@ ${ESMC_DOCDIR}/IO_reqdoc.pdf: ${ESMC_DOCDIR}/IO_reqdoc.dvi
 # Html Files
 
 ${ESMC_DOCDIR}/IO_reqdoc: 
-	${DOL2H} IO req
+	${DO_L2H} IO req
 	mv -f IO_reqdoc ${ESMC_DOCDIR}
 

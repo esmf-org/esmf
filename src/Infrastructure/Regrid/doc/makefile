@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:48 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/03/10 03:03:08 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -55,13 +55,13 @@ ${ESMC_DOCDIR}/Regrid_refdoc.pdf: ${ESMC_DOCDIR}/Regrid_refdoc.dvi
 
 # Html Files
 ${ESMC_DOCDIR}/Regrid_desdoc: 
-	${DOL2H} Regrid des
+	${DO_L2H} Regrid des
 	mv -f Regrid_desdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/Regrid_reqdoc: 
-	${DOL2H} Regrid req
+	${DO_L2H} Regrid req
 	mv -f Regrid_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/Regrid_refdoc: 
-	${DOL2H} Regrid ref
+	${DO_L2H} Regrid ref
 	mv -f Regrid_refdoc ${ESMC_DOCDIR}

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:40 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/03/10 03:03:06 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -58,13 +58,13 @@ ${ESMC_DOCDIR}/Machine_refdoc.pdf: ${ESMC_DOCDIR}/Machine_refdoc.dvi
 
 # Html Files
 ${ESMC_DOCDIR}/Machine_desdoc: 
-	${DOL2H} Machine des
+	${DO_L2H} Machine des
 	mv -f Machine_desdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/Machine_reqdoc: 
-	${DOL2H} Machine req
+	${DO_L2H} Machine req
 	mv -f Machine_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/Machine_refdoc: 
-	${DOL2H} Machine ref
+	${DO_L2H} Machine ref
 	mv -f Machine_refdoc ${ESMC_DOCDIR}

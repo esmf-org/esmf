@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/02/27 17:54:42 flanigan Exp $ 
+# $Id: makefile,v 1.4 2003/03/10 03:03:07 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -55,13 +55,13 @@ ${ESMC_DOCDIR}/PerfProf_refdoc.pdf: ${ESMC_DOCDIR}/PerfProf_refdoc.dvi
 
 # Html Files
 ${ESMC_DOCDIR}/PerfProf_desdoc: 
-	${DOL2H} PerfProf des
+	${DO_L2H} PerfProf des
 	mv -f PerfProf_desdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/PerfProf_reqdoc: 
-	${DOL2H} PerfProf req
+	${DO_L2H} PerfProf req
 	mv -f PerfProf_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/PerfProf_refdoc: 
-	${DOL2H} PerfProf ref
+	${DO_L2H} PerfProf ref
 	mv -f PerfProf_refdoc ${ESMC_DOCDIR}
