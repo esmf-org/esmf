@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.64 2003/09/04 19:54:47 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.65 2003/09/04 20:05:33 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.64 2003/09/04 19:54:47 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.65 2003/09/04 20:05:33 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -506,7 +506,7 @@ static int maxroutes = 10;
 
     //DEBUG: 
     //printf("Cache search failure: precomputed route not found in %d entries\n",
-                                                          routetable.nroutes);
+    //                                                      routetable.nroutes);
     return ESMF_SUCCESS;
 
  } // end ESMC_RouteGetCached
