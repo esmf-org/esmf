@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.2 2003/07/15 18:07:06 jwolfe Exp $
+// $Id: ESMC_Array.h,v 1.3 2003/07/16 21:28:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,6 @@
 
 //-----------------------------------------------------------------------------
 
-//#include "ESMC_Alloc.h"
 #include <string.h>
 //#include <stdio.h>  // include for debug only
 
