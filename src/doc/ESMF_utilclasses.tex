@@ -3,25 +3,33 @@
 
 \subsection{Introduction}
 
-Methods provided by Utility classes are available for use by  
-all classes in the ESMF library.  Collecting these functions 
-into a base-level utility set helps to avoid circular referencing.  
-Some of these methods will be called directly by user-supplied
-code; others provide support for internal ESMF library routines.
+The previous Infrastructure section described the data handling 
+objects in the ESMF library.
+This section describes the lowest level
+objects in the Infrastructure layer, the Utility classes.
 
-The functions provided by the utility objects vary in scope and
-complexity.  Some are lightweight classes which maintain no
-internal state; others have state and exist for the lifetime of
-the application.  Some run within a single process; others
-exist per processor and may communicate to other instantiations
-of itself on different processors.
+At first glance the Utility classes have very little in common;
+some are lightweight classes which maintain no internal state; 
+others have state and exist for the lifetime of the application.  
+Some run within a single process; others exist per processor and 
+may communicate to other instantiations of itself on different processors.
+The advantage of collecting these functions 
+into a base-level utility set is to help avoid circular referencing.
+In most cases they occupy the lowest level of the object hierarchy.
+
+Methods provided by Utility classes are available for use by  
+all other classes in the ESMF library.  
+Some of these methods will be called directly by user-supplied
+code; others are intended to provide support for internal ESMF 
+library code.
 
 \subsection{Overview}
 
 << by their very nature these utility routines have very little 
-in common.  are these short overview paragraphs useful, or do
-they just duplicate the details which follow in the class
-detail sections?   nsc. >>
+in common.  after reading this section and the following ones,
+i'd like to know if people think these short overview paragraphs 
+are useful, or do they duplicate the details which follow in the 
+class detail sections?   nsc. >>
 
 The Layout object is used by any part of the library which needs
 to decompose a task/problem/dataset into subsets.
@@ -52,8 +60,8 @@ on different hardware platforms.
 The basic functions include methods to send
 and receive data, such as scatter, gather, send, receive,
 reduction methods such as sum, global min/max, and methods
-to synchronize such as barrier.
-<< needs more text here?  nsc. >>
+to synchronize such as barrier.  << does this need more
+detail, or is this level ok for this point in the document??  nsc. >>
 
 The Time Manager provides all general purpose time methods, both
 for computing time instants (dates and times) and time intervals
@@ -238,10 +246,12 @@ file per processor.
 gathering information about how the simulation is behaving.  
 These include both routines for finding program bugs
 as well as understanding execution bottlenecks.
-\item [Function] The Diagnostic class supports methods for specifying
-diagnostic information, enabling and disabling the production of
-that information.  It also contains methods for timing sections of
-code, in both serial and parallel execution models.
+\item [Function] The Diagnostic class consists of two subclasses,
+a Debug class for supporting methods for specifying
+diagnostic information, and enabling and disabling the production of
+that information.  The Performance class provides methods
+for enabling and disabling timing routines in sections of
+code, in both serial and parallel execution modes.
 \end{description}
 
 

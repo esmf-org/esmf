@@ -3,45 +3,49 @@
 
 \subsection{Introduction}
 
-The purpose of field, grid, and related classes are to provide 
-the application
-with uniform access to computational data, regardless of hardware
-platform, memory hierarchy, or data decomposition.
+The Infrastructure layer of the ESMF system contains both lower
+level utility routines and higher level data handling objects.
+This section discusses the data objects and how they relate to
+the rest of the ESMF library and to user-supplied code.  
+See Section~\ref{utilclasses} for a discussion of the utility layer.
 
-It provides methods to query global information about a dataset, 
-get coordinate and topology information, and 
-get a pointer to the start of a data subset for local processing. 
+The data object layer of ESMF is called by user-supplied code
+as in a conventional software library, unlike the framework model
+of the Superstructure layer.
+Some hardware details are discernable at the data object layer, 
+but in general it presents a portable, generalized interface to the
+data objects.
+This helps satisfy the overall ESMF goals of ease of use and
+performance portability.
 
-The major subobjects of a Gridded Component are Bundles,
+Many model components follow a data-parallel model for running
+concurrently on multiprocessor hardware.
+The data layer provides an abstraction which
+minimizes the dependency of the user-supplied code on 
+how the decomposition maps to the underlying hardware
+capabilities.  
+
+
+\subsection{Overview}
+
+The major data objects are Bundles,
 Fields, Physical Grids, Distributed Grids, and Data Arrays.
-The Physical Grid carries global coordinate information,
+The Physical Grid carries global coordinate information and grid type,
 the Distributed Grid manages decomposition information, 
 the Data Array carries the actual
 data values, and Fields and Bundles tie them together.
 
-\subsection{Overview}
-
-Fields are the basic data carrying object in the ESMF library.
-
+The Field level is the highest functional data access level in the ESMF library.
 The Field object connects computational Data objects, the underlying
-physical and distributed Grid objects, and metadata Attribute objects.  
+physical and distributed Grid objects, optional Mask objects and IOspec
+objects, and metadata Attribute objects.  
 It provides methods
 for setting, retrieving, configuring, and querying these subobjects,
 as well as methods for manipulating the relationship between the
 data and the grid, and for doing data I/O. 
-
-The Bundle object collects multiple Field objects which share a
-common or compatible Grid object.  In addition to the basic methods for
-setting, retrieving, and querying the constituent Fields, it provides
-methods for configuring and querying memory layouts for the Data objects
-and some limited collective operations on all Fields in a Bundle.
-
-A Physical Grid object is responsible for
-maintaining information about the global coordinates.
-A Distributed Grid maintains and manages
-the decomposition of the whole problem is spread across multiple
-processing elements.  
-
+% It provides methods to query global information about a dataset, 
+% get coordinate and topology information, and 
+% get a pointer to the start of a data subset for local processing. 
 The Field object uses information from the Grid object to provide
 two different types of views of the field to the calling code.
 One is a unified logical view of the entire Field as a whole,
@@ -50,6 +54,19 @@ running on a single processing element to query and retrieve a pointer
 to the subset of the Field which is local to that processing element,
 and to make requests that result in data being updated among neigboring
 subsets (e.g. Halo updates).
+
+The Bundle object collects multiple Field objects which share a
+common or compatible Grid object.  In addition to methods for
+setting, retrieving, and querying the constituent Fields, it provides
+methods for configuring and querying memory layouts for the Data objects
+and some limited operations on all Fields in a Bundle.
+
+A Physical Grid object is responsible for
+maintaining information about the global coordinates.
+A Distributed Grid maintains and manages
+the decomposition of the whole problem is spread across multiple
+processing elements.  << this needs more details, but how
+much and at what level?  various possible grid types, etc?? nsc. >> 
 
 A Data object is responsible for maintaining
 information about the individual value type (e.g. float, integer), 
