@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.29 2003/06/06 21:05:45 jwolfe Exp $ 
+# $Id: base_variables,v 1.30 2003/06/16 17:37:20 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -10,6 +10,9 @@ OMAKE			= ${MAKE}
 RANLIB			= ranlib
 SHELL			= /bin/sh
 SED			= /bin/sed
+# ######################### C compiler options ######################
+#
+RESTRICTED_POINTERS	= -qkeyword=restrict
 # ######################### Fortran compiler options ######################
 #
 AR32_64			= ar -X 32_64
