@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldDataMap_F.C,v 1.1 2004/11/30 20:57:42 nscollins Exp $
+// $Id: ESMC_FieldDataMap_F.C,v 1.2 2004/12/01 21:15:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_FieldDataMap_F.C,v 1.1 2004/11/30 20:57:42 nscollins Exp $";
+             "$Id: ESMC_FieldDataMap_F.C,v 1.2 2004/12/01 21:15:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -68,7 +68,7 @@ extern "C" {
 #endif
 
 // non-method functions
-void c_esmc_arraydatamapserialize(int *status, int *dataRank,
+void FTN(c_esmc_arraydatamapserialize)(int *status, int *dataRank,
                                   int *dataDimOrder,      /* ESMF_MAXDIM ints */
                                   int *dataNonGridCounts, /* ESMF_MAXDIM ints */
                          void *buffer, int *length, int *offset, int *localrc) {
@@ -93,7 +93,7 @@ void c_esmc_arraydatamapserialize(int *status, int *dataRank,
 } 
 
 
-void c_esmc_arraydatamapdeserialize(int *status, int *dataRank,
+void FTN(c_esmc_arraydatamapdeserialize)(int *status, int *dataRank,
                                   int *dataDimOrder,      /* ESMF_MAXDIM ints */
                                   int *dataNonGridCounts, /* ESMF_MAXDIM ints */
                                   void *buffer, int *offset, int *localrc) {
@@ -117,7 +117,7 @@ void c_esmc_arraydatamapdeserialize(int *status, int *dataRank,
 
 
 // non-method functions
-void c_esmc_fielddatamapserialize(int *status, int *isScalar,
+void FTN(c_esmc_fielddatamapserialize)(int *status, int *isScalar,
                                   int *rankLength,  /* ESMF_MAXDIM ints */
                                   int *interleave,  /* 4 ints */
                                   int *horzRelloc, int *vertRelloc,
@@ -146,7 +146,7 @@ void c_esmc_fielddatamapserialize(int *status, int *isScalar,
 
 
 // non-method functions
-void c_esmc_fielddatamapdeserialize(int *status, int *isScalar,
+void FTN(c_esmc_fielddatamapdeserialize)(int *status, int *isScalar,
                                     int *rankLength,  /* ESMF_MAXDIM ints */
                                     int *interleave,  /* 4 ints */
                                     int *horzRelloc, int *vertRelloc,

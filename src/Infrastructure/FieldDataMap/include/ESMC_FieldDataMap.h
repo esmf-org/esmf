@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldDataMap.h,v 1.2 2004/11/30 21:01:13 nscollins Exp $
+// $Id: ESMC_FieldDataMap.h,v 1.3 2004/12/01 21:15:04 nscollins Exp $
 //
 //-------------------------------------------------------------------------
 //BOP
@@ -28,23 +28,23 @@
 extern "C" {
 
 // non-method functions
-void c_esmc_arraydatamapserialize(int *status, int *dataRank,
+void FTN(c_esmc_arraydatamapserialize)(int *status, int *dataRank,
                                   int *dataDimOrder,      /* ESMF_MAXDIM ints */
                                   int *dataNonGridCounts, /* ESMF_MAXDIM ints */
                          void *buffer, int *length, int *offset, int *localrc);
 
-void c_esmc_arraydatamapdeserialize(int *status, int *dataRank,
+void FTN(c_esmc_arraydatamapdeserialize)(int *status, int *dataRank,
                                   int *dataDimOrder,      /* ESMF_MAXDIM ints */
                                   int *dataNonGridCounts, /* ESMF_MAXDIM ints */
                                   void *buffer, int *offset, int *localrc); 
 
-void c_esmc_fielddatamapserialize(int *status, int *isScalar,
+void FTN(c_esmc_fielddatamapserialize)(int *status, int *isScalar,
                                   int *rankLength,  /* ESMF_MAXDIM ints */
                                   int *interleave,  /* 4 ints */
                                   int *horzRelloc, int *vertRelloc,
                          void *buffer, int *length, int *offset, int *localrc); 
 
-void c_esmc_fielddatamapdeserialize(int *status, int *isScalar,
+void FTN(c_esmc_fielddatamapdeserialize)(int *status, int *isScalar,
                                     int *rankLength,  /* ESMF_MAXDIM ints */
                                     int *interleave,  /* 4 ints */
                                     int *horzRelloc, int *vertRelloc,
