@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.43 2004/12/07 17:15:41 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.44 2004/12/17 20:46:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -150,7 +150,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.43 2004/12/07 17:15:41 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.44 2004/12/17 20:46:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -714,6 +714,7 @@ contains
   end subroutine ESMF_DELayoutGetDELocalInfo
 !------------------------------------------------------------------------------
 
+
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutGetDEMatchDE()"
@@ -791,6 +792,86 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_DELayoutGetDEMatchDE
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGetDEMatchPET()"
+!BOP
+! !IROUTINE: ESMF_DELayoutGetDEMatchPET - Match virtual memory spaces between DELayout and VM
+
+! !INTERFACE:
+  subroutine ESMF_DELayoutGetDEMatchPET(delayout, de, vmMatch, &
+    petMatchCount, petMatchList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),  intent(in)              :: delayout
+    integer,              intent(in)              :: de
+    type(ESMF_VM),        intent(in)              :: vmMatch
+    integer,              intent(out),  optional  :: petMatchCount
+    integer, target,      intent(out),  optional  :: petMatchList(:)
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Match the virtual memory space of the specified DE in a DELayout with that
+!     of the PETs of a VM object. The use of this method is crutial when
+!     dealing with decomposed data structures that were not defined in the
+!     current VM context, i.e. defined in another component.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!        {\tt ESMF\_DELayout} object in which the specified DE is defined.
+!     \item[de]
+!        Specified DE within delayout, for which to find matching DEs in 
+!        delayoutMatch,
+!     \item[vmMatch] 
+!        VM object in which to find PETs that match the virtual memory
+!        space of the specified DE.
+!     \item[{[petMatchCount]}]
+!        Upon return this holds the number of PETs in vmMatch that share
+!        virtual memory space with the specified DE.
+!     \item[{[petMatchList]}]
+!        Upon return this holds the list of PETs in vmMatch that share
+!        virtual memory space with the specified DE.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    integer :: len_petMatchList
+    integer, target :: dummy(0)     ! used to satisfy the C interface...
+    integer, pointer:: opt_petMatchList(:)
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Deal with optional array arguments
+    ! TODO: make sure that this pointer, target stuff is a portable way of 
+    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
+    if (present(petMatchList)) then
+      len_petMatchList = size(petMatchList)
+      opt_petMatchList => petMatchList
+    else
+      len_petMatchList = 0
+      opt_petMatchList => dummy
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DELayoutGetDEMatchPET(delayout, de, vmMatch, &
+      petMatchCount, opt_petMatchList, len_petMatchList, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_DELayoutGetDEMatchPET
 !------------------------------------------------------------------------------
 
 

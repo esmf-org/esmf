@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.23 2004/12/07 17:15:41 nscollins Exp $
+// $Id: ESMC_DELayout_F.C,v 1.24 2004/12/17 20:46:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -119,6 +119,20 @@ extern "C" {
       *DEid, **ptrMatch, 
       ESMC_NOT_PRESENT_FILTER(deMatchCount),
       deMatchList, *len_deMatchList),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_delayoutgetdematchpet)(ESMC_DELayout **ptr,
+    int *DEid, ESMC_VM **ptrMatch, int *petMatchCount, int *petMatchList,
+    int *len_petMatchList, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutgetdematch()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDEMatchPET(
+      *DEid, **ptrMatch, 
+      ESMC_NOT_PRESENT_FILTER(petMatchCount),
+      petMatchList, *len_petMatchList),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
