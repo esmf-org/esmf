@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.3 2002/01/25 20:38:38 dneckels Exp $ 
+# $Id: base_variables,v 1.4 2002/02/12 20:14:22 dneckels Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -15,11 +15,11 @@ SH_LD		   = /opt/SUNWspro/bin/CC
 C_CC		   = /opt/SUNWspro/bin/cc -KPIC -dalign -xtarget=native
 C_FC		   = /opt/SUNWspro/bin/f90 -openmp -xpp=cpp -dalign
 C_FC_MOD           = -M
-C_CLINKER_SLFLAG   = -R
-C_FLINKER_SLFLAG   = -R
+C_CLINKER_SLFLAG   = 
+C_FLINKER_SLFLAG   = 
 # Must use f90 to link C to get omp libs
 C_CLINKER	   = /opt/SUNWspro/bin/f90 -openmp -dalign
-C_FLINKER	   = /opt/SUNWspro/bin/f90 -openmp -dalign
+C_FLINKER	   = /opt/SUNWspro/bin/f90 -openmp -dalign -R .
 C_CCV		   = ${C_CC} --version
 C_FCV              = /opt/SUNWspro/bin/f90 -openmp -dalign
 C_SYS_LIB	   = -L/opt/SUNWspro/SC5.0/lib -lF77 -lM77 -lfsu -lsunmath -lnsl -lsocket -lgen -ldl -lm
@@ -45,6 +45,8 @@ C_F90CXXLD         = /opt/SUNWspro/bin/f90 -openmp
 C_F90CXXLIBS       = -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath -lCrun -lCstd -lCrun -lm -lcx -lc
 C_CXXF90LD         = /opt/SUNWspro/bin/CC
 C_CXXF90LIBS       = -L/opt/SUNWspro/lib -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath -lm -lc
+C_CXXSO            = /opt/SUNWspro/bin/CC -G
+C_CXXSOLIBS        = -Kpic  -lCstd -lCrun -lm -lw -lcx -lc
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g

@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.2 2002/01/25 20:38:38 dneckels Exp $ 
+# $Id: base_variables,v 1.3 2002/02/12 20:14:22 dneckels Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -18,7 +18,7 @@ C_CLINKER_SLFLAG   = -L
 C_FLINKER_SLFLAG   = -L
 C_CLINKER	   = mpcc_r -qsmp=omp -bmaxdata:0x70000000 
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
-C_FLINKER	   = mpxlf90_r -qsmp=omp -bmaxdata:0x70000000
+C_FLINKER	   = mpxlf90_r -qsmp=omp -bmaxdata:0x70000000 -brtl -lC
 C_CCV		   = unknown
 C_FCV		   = unknown
 C_SYS_LIB	   = /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lisode
@@ -38,13 +38,15 @@ CXX_FC		   = mpxlf_r
 CXX_CLINKER_SLFLAG = -L
 CXX_FLINKER_SLFLAG = -L
 CXX_CLINKER	   = mpCC_r
-CXX_FLINKER	   = mpCC_r
+CXX_FLINKER	   = mpCC_r -brtl
 CXX_CCV		   = unknown
 CXX_SYS_LIB	   = /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lcomplex -lisode
 C_CXXF90LD         = ${CXX_CC}
 C_F90CXXLD         = ${CXX_CC}
 C_CXXF90LIBS       = -L/usr/lpp/ppe.poe/lib/threads -L/usr/lpp/ppe.poe/lib -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser -lpthreads -lm_r -lm -lc_r -lc /usr/lpp/ppe.poe/lib/libc.a
 C_F90CXXLIBS       = -L/usr/lpp/ppe.poe/lib/threads -L/usr/lpp/ppe.poe/lib -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser -lpthreads -lm_r -lm -lc_r -lc /usr/lpp/ppe.poe/lib/libc.a
+C_CXXSO            = cc_r -G
+C_CXXSOLIBS        =  -L/usr/lpp/ppe.poe/lib/threads -L/usr/lpp/ppe.poe/lib -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser -lpthreads -lm_r -lm -lc_r -lc -lC
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g  -qfullpath
 GCXX_FOPTFLAGS	   = -g  -qfullpath 
