@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.20 2004/09/20 22:41:19 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.21 2004/12/15 19:00:03 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -115,14 +115,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       ! Set initial values
       !
       rc = ESMF_FAILURE
-      ! TODO: reorder the input namelist so we can read directly into
-      !  the g_min and g_max values.  
-      g_min(1) = x_min
-      g_max(1) = x_max
-      g_min(2) = y_min
-      g_max(2) = y_max
-   
-      !
+
       ! Read in input file
       !
       open(10, status="old", file="coupled_inject_input", action="read", &
@@ -133,6 +126,14 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       read(10, input, end=20)
    20 continue
 
+      ! TODO: reorder the input namelist so we can read directly into
+      !  the g_min and g_max values.  
+      g_min(1) = x_min
+      g_max(1) = x_max
+      g_min(2) = y_min
+      g_max(2) = y_max
+   
+      !
       ! Set peristent values in saved data block
       call ESMF_GridCompGetInternalState(gcomp, wrap, rc)
       datablock => wrap%ptr
