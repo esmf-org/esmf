@@ -119,16 +119,16 @@
 \input{../Infrastructure/TimeMgr/doc/ESMC_BaseTime_ccapi}
 #endif
 
-\section{BaseTime Class C++ Interface}
+%\section{BaseTime Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{BaseTime_ccex}
+%\input{BaseTime_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/BaseTime_ccex}
+%\input{../Infrastructure/TimeMgr/doc/BaseTime_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{BaseTime_ccparam}
 #elif defined(CONSTITUENT)
@@ -137,10 +137,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_BaseTime_chapi}
+%\input{ESMC_BaseTime_chapi}
 %\input{BaseTime_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_BaseTime_chapi}
+%\input{../Infrastructure/TimeMgr/doc/ESMC_BaseTime_chapi}
 %\input{../Infrastructure/TimeMgr/doc/BaseTime_ccapi}
 #endif
 
@@ -198,19 +198,19 @@
 #ifdef STANDALONE
 \input{ESMC_TimeInterval_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_TimeInterval_ccapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_TimeInterval_fapi}
 #endif
 
-\section{Time Interval Class C++ Interface}
+%\section{Time Interval Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{TimeInterval_ccex}
+%\input{TimeInterval_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_ccex}
+%\input{../Infrastructure/TimeMgr/doc/TimeInterval_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{TimeInterval_ccparam}
 #elif defined(CONSTITUENT)
@@ -219,10 +219,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_TimeInterval_chapi}
+%\input{ESMC_TimeInterval_chapi}
 %\input{TimeInterval_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_TimeInterval_chapi}
+%\input{../Infrastructure/TimeMgr/doc/ESMC_TimeInterval_chapi}
 %\input{../Infrastructure/TimeMgr/doc/TimeInterval_ccapi}
 #endif
 
@@ -280,19 +280,19 @@
 #ifdef STANDALONE
 \input{ESMC_Time_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_Time_ccapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Time_fapi}
 #endif
 
-\section{Time Class C++ Interface}
+%\section{Time Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Time_ccex}
+%\input{Time_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_ccex}
+%\input{../Infrastructure/TimeMgr/doc/Time_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{Time_ccparam}
 #elif defined(CONSTITUENT)
@@ -301,10 +301,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_Time_chapi}
+%\input{ESMC_Time_chapi}
 %\input{Time_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_Time_chapi}
+%\input{../Infrastructure/TimeMgr/doc/ESMC_Time_chapi}
 %\input{../Infrastructure/TimeMgr/doc/Time_ccapi}
 #endif
 
@@ -362,31 +362,31 @@
 #ifdef STANDALONE
 \input{ESMC_Calendar_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_Calendar_ccapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Calendar_fapi}
 #endif
 
-\section{Calendar Class C++ Interface}
+%\section{Calendar Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Calendar_ccex}
+%\input{Calendar_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Calendar_ccex}
+%\input{../Infrastructure/TimeMgr/doc/Calendar_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
-\input{Calendar_ccparam}
+%\input{Calendar_ccparam}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Calendar_ccparam}
+%\input{../Infrastructure/TimeMgr/doc/Calendar_ccparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_Calendar_chapi}
+%\input{ESMC_Calendar_chapi}
 %\input{Calendar_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_Calendar_chapi}
+%\input{../Infrastructure/TimeMgr/doc/ESMC_Calendar_chapi}
 %\input{../Infrastructure/TimeMgr/doc/Calendar_ccapi}
 #endif
 
@@ -444,31 +444,31 @@
 #ifdef STANDALONE
 \input{ESMC_Clock_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_Clock_ccapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Clock_fapi}
 #endif
 
-\section{Clock Class C++ Interface}
+%\section{Clock Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Clock_ccex}
+%\input{Clock_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Clock_ccex}
+%\input{../Infrastructure/TimeMgr/doc/Clock_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
-\input{Clock_ccparam}
+%\input{Clock_ccparam}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Clock_ccparam}
+%\input{../Infrastructure/TimeMgr/doc/Clock_ccparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_Clock_chapi}
+%\input{ESMC_Clock_chapi}
 %\input{Clock_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_Clock_chapi}
+%\input{../Infrastructure/TimeMgr/doc/ESMC_Clock_chapi}
 %\input{../Infrastructure/TimeMgr/doc/Clock_ccapi}
 #endif
 
@@ -526,19 +526,19 @@
 #ifdef STANDALONE
 \input{ESMC_Alarm_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_Alarm_ccapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Alarm_fapi}
 #endif
 
-\section{Alarm C++ Interface}
+%\section{Alarm C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Alarm_ccex}
+%\input{Alarm_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Alarm_ccex}
+%\input{../Infrastructure/TimeMgr/doc/Alarm_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{Alarm_ccparam}
 #elif defined(CONSTITUENT)
@@ -547,10 +547,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_Alarm_chapi}
+%\input{ESMC_Alarm_chapi}
 %\input{Alarm_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_Alarm_chapi}
+%\input{../Infrastructure/TimeMgr/doc/ESMC_Alarm_chapi}
 %\input{../Infrastructure/TimeMgr/doc/Alarm_ccapi}
 #endif
 
