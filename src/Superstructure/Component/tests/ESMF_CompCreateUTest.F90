@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateUTest.F90,v 1.4 2004/04/09 19:54:14 eschwab Exp $
+! $Id: ESMF_CompCreateUTest.F90,v 1.5 2004/05/19 17:54:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -68,6 +68,31 @@
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
+!   !  Destroying a component
+
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_EXHAUSTIVE
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    cname = "Atmosphere"
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
+                                             configFile="grid.rc", rc=rc)  
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
 !   !  Test get a Component name
 
     call ESMF_GridCompGet(comp1, name=bname, rc=rc)
@@ -79,7 +104,7 @@
 
 !-------------------------------------------------------------------------
 !   !
-    !NEX_UTest
+    !EX_UTest
 !   !  Verify the name is correct
 
 
@@ -89,7 +114,7 @@
 
 !-------------------------------------------------------------------------
 !   !
-    !NEX_UTest
+    !EX_UTest
 !   !  Test printing a component
 
     call ESMF_GridCompPrint(comp1, rc=rc)
@@ -100,7 +125,7 @@
 
 !-------------------------------------------------------------------------
 !   !
-    !NEX_UTest
+    !EX_UTest
 !   !  Destroying a component
 
     call ESMF_GridCompDestroy(comp1, rc=rc)
@@ -109,6 +134,7 @@
     write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#endif
 
     call ESMF_Finalize(rc)
 
