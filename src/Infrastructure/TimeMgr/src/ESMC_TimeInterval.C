@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.41 2004/01/26 21:29:17 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.42 2004/02/06 00:27:48 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.41 2004/01/26 21:29:17 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.42 2004/02/06 00:27:48 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -136,7 +136,7 @@
 //    }
 
     if (d != ESMC_NULL_POINTER) {
-      this->s = *d * secPerDay;  // >= 32-bit
+      this->s = ((ESMF_KIND_I8) *d) * secPerDay;  // >= 32-bit
     } else if (d_i8 != ESMC_NULL_POINTER) {
       this->s = *d_i8 * secPerDay; // >= 64-bit
     }
