@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.19 2003/04/28 23:17:03 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.20 2003/05/07 16:30:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@
       public ESMF_TimeIntervalSet
       public ESMF_TimeIntervalGetString
       public ESMF_TimeIntervalAbsValue
-      public ESMF_TimeIntervalNegAbsVal
+      public ESMF_TimeIntervalNegAbsValue
 
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.19 2003/04/28 23:17:03 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.20 2003/05/07 16:30:38 eschwab Exp $'
 
 !==============================================================================
 !
@@ -662,13 +662,13 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalNegAbsVal - Get the negative absolute value of a time interval
+! !IROUTINE:  ESMF_TimeIntervalNegAbsValue - Get the negative absolute value of a time interval
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalNegAbsVal(timeinterval)
+      function ESMF_TimeIntervalNegAbsValue(timeinterval)
 
 ! !RETURN VALUE:
-      type(ESMF_TimeInterval) :: ESMF_TimeIntervalNegAbsVal
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalNegAbsValue
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeinterval
@@ -687,10 +687,10 @@
 !     TMG1.5.8
 !EOP
     
-      call c_ESMC_TimeIntervalNegAbsVal(timeinterval, &
-                                        ESMF_TimeIntervalNegAbsVal)
+      call c_ESMC_TimeIntervalNegAbsValue(timeinterval, &
+                                          ESMF_TimeIntervalNegAbsValue)
 
-      end function ESMF_TimeIntervalNegAbsVal
+      end function ESMF_TimeIntervalNegAbsValue
 
 !------------------------------------------------------------------------------
 !
