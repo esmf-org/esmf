@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.11 2003/04/04 18:03:24 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.12 2003/04/04 20:22:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.11 2003/04/04 18:03:24 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.12 2003/04/04 20:22:37 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -304,11 +304,11 @@
       type(ESMF_DELayout) :: ESMF_DELayoutCreateCartFromDEList
 !
 ! !ARGUMENTS:
-      integer, intent(inout) :: delist(:)           ! list of processing elements
-      integer, intent(in) :: ndim                   ! number of dimensions
-      integer, intent(in) :: lengths(:)             ! number of des in each dim
-      integer, intent(in) :: commtypes(:)           ! comm types in each dim
-      integer, intent(out), optional :: rc          ! return code
+      integer, intent(in) :: delist(:)            ! list of processing elements
+      integer, intent(in) :: ndim                 ! number of dimensions
+      integer, intent(in) :: lengths(:)           ! number of des in each dim
+      integer, intent(in) :: commtypes(:)         ! comm types in each dim
+      integer, intent(out), optional :: rc        ! return code
 !
 ! !DESCRIPTION:
 !  Create a new {\tt DELayout} from a list of {\tt DE} indices.  
