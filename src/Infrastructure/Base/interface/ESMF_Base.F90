@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.52 2003/08/22 21:50:45 jwolfe Exp $
+! $Id: ESMF_Base.F90,v 1.53 2003/08/26 22:40:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -187,7 +187,7 @@
       type ESMF_DomainList
       sequence
           integer :: num_domains     ! number of domains stored
-          integer :: current_size    ! current buffer size
+          integer :: current_size    ! size of buffer
           type(ESMF_Domain), dimension(:), pointer :: domains
       end type
 
@@ -352,7 +352,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.52 2003/08/22 21:50:45 jwolfe Exp $'
+               '$Id: ESMF_Base.F90,v 1.53 2003/08/26 22:40:09 jwolfe Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -1004,11 +1004,7 @@ end function
 ! Allocate an amount of memory that will hopefully be sufficient.
       allocate(ESMF_DomainListCreate%domains(num_domains), stat=status)
 
-! Store the size of the current buffer.
-      ESMF_DomainListCreate%current_size = num_domains
-
-! There are currently no domains, so set to zero
-      ESMF_DomainListCreate%num_domains = 0
+      ESMF_DomainListCreate%num_domains = num_domains
 
       end function ESMF_DomainListCreate
 
