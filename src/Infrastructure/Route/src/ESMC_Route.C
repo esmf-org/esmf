@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.18 2003/03/17 21:34:13 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.19 2003/03/17 23:27:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.18 2003/03/17 21:34:13 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.19 2003/03/17 23:27:49 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -138,6 +138,7 @@
     int myde, rc;
     int decount;         // total number of DE/PEs in src + dst layouts
 
+    this->layout = layout;
     rc = layout->ESMC_DELayoutGetNumDEs(&decount);
     rc = layout->ESMC_DELayoutGetDEid(&myde);
     
@@ -460,8 +461,10 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    ESMC_AxisIndex *my_AI, *their_AI;
-    ESMC_XPacket *my_XP, *their_XP, *intersect_XP;
+    ESMC_AxisIndex my_AI[ESMF_MAXDIM], their_AI[ESMF_MAXDIM];
+    ESMC_XPacket *my_XP = new ESMC_XPacket;
+    ESMC_XPacket *their_XP = new ESMC_XPacket;
+    ESMC_XPacket *intersect_XP = new ESMC_XPacket;
     int i, j, k;
     int their_de, their_de_parent, their_decount;
     int nx, ny;
@@ -474,7 +477,7 @@
       // TODO:  this is NOT going to work for data dims which are not
       //  equal the grid dims, e.g. a 2d grid with 4d data.
       for (k=0; k<rank; k++) {
-        my_AI[k] = AI_snd[my_DE_snd + k*ESMF_MAXGRIDDIM];
+        my_AI[k] = AI_snd[my_DE_snd + k*AI_snd_count];
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
@@ -491,7 +494,7 @@
 
           // get "their" AI out of the AI_rcv array
           for (k=0; k<rank; k++) {
-            their_AI[k] = AI_rcv[their_de + k*ESMF_MAXGRIDDIM];
+            their_AI[k] = AI_rcv[their_de + k*AI_rcv_count];
           }
  
           // calculate "their" XPacket in the sense of the global data
@@ -504,6 +507,7 @@
 
           // load the intersecting XPacket into the sending RTable
           sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+          ct->ESMC_CommTableSetPartner(their_de_parent);
         }
     }
 
@@ -514,7 +518,7 @@
  
       // get "my" AI out of the AI_rcv array
       for (k=0; k<rank; k++) {
-        my_AI[k] = AI_rcv[my_DE_rcv + k*ESMF_MAXGRIDDIM];
+        my_AI[k] = AI_rcv[my_DE_rcv + k*AI_rcv_count];
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
@@ -530,7 +534,7 @@
 
           // get "their" AI out of the AI_snd array
           for (k=0; k<rank; k++) {
-            their_AI[k] = AI_snd[their_de + k*ESMF_MAXGRIDDIM];
+            their_AI[k] = AI_snd[their_de + k*AI_snd_count];
           }
  
           // calculate "their" XPacket in the sense of the global data
@@ -543,6 +547,7 @@
 
           // load the intersecting XPacket into the receiving RTable
           recvRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+          ct->ESMC_CommTableSetPartner(their_de_parent);
         }
     }
 
