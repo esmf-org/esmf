@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2003/03/14 23:02:24 nscollins Exp $
+# $Id: makefile,v 1.17 2003/03/17 18:08:49 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -244,7 +244,7 @@ html: chkdir_doc tex
 #
 #  System Test Targets
 #
-system_tests: chkopts chkdir_tests
+system_tests: chkopts build_libs chkdir_tests
 	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
