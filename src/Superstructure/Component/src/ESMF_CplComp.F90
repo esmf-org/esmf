@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.26 2004/04/20 14:59:33 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.27 2004/04/23 13:42:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.26 2004/04/20 14:59:33 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.27 2004/04/23 13:42:02 theurich Exp $'
 
 !==============================================================================
 !
@@ -695,7 +695,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_CplCompGet(cplcomp, name, delayout, clock, &
-                                                       configFile, config, rc)
+                                                   configFile, config, vm, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(in) :: cplcomp
@@ -704,6 +704,7 @@
       type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: configFile
       type(ESMF_Config), intent(out), optional :: config
+      type(ESMF_VM), intent(out), optional :: vm
       integer, intent(out), optional :: rc             
 
 !
@@ -735,7 +736,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompGet(cplcomp%compp, name, delayout, clock=clock, &
+        call ESMF_CompGet(cplcomp%compp, name, delayout, vm=vm, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_CplCompGet
