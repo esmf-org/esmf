@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.18 2004/06/15 07:57:26 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.19 2004/06/15 10:57:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@
       type ESMF_Interleave
       sequence
       private
-          integer :: il_type
+          integer :: il
       end type
 
       type(ESMF_Interleave), parameter ::  &
@@ -211,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.18 2004/06/15 07:57:26 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.19 2004/06/15 10:57:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -288,14 +288,14 @@ function ESMF_ileq(il1, il2)
  logical ESMF_ileq
  type(ESMF_Interleave), intent(in) :: il1, il2
 
- ESMF_ileq = (il1%il_type .eq. il2%il_type)
+ ESMF_ileq = (il1%il .eq. il2%il)
 end function
 
 function ESMF_ilne(il1, il2)
  logical ESMF_ilne
  type(ESMF_Interleave), intent(in) :: il1, il2
 
- ESMF_ilne = (il1%il_type .ne. il2%il_type)
+ ESMF_ilne = (il1%il .ne. il2%il)
 end function
 
 
@@ -1143,10 +1143,10 @@ end function
 ! !IROUTINE:  ESMF_InterleaveTypeString - Return an interleave type as a string
 !
 ! !INTERFACE:
-      subroutine ESMF_InterleaveTypeString(interleave, string, rc)
+      subroutine ESMF_InterleaveTypeString(interleaveType, string, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InterleaveType), intent(in) :: interleave
+      type(ESMF_InterleaveType), intent(in) :: interleaveType
       character (len = *), intent(out) :: string
       integer, intent(out), optional :: rc
 !
@@ -1155,7 +1155,7 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interleave]
+!     \item [interleaveType]
 !           The {\tt ESMF\_InterleaveType} to be turned into a string.
 !     \item [string]
 !          Return string.
@@ -1165,9 +1165,8 @@ end function
 !
 !
 !EOPI
-
-        if (interleave.il_type .eq. ESMF_INTERLEAVE_BY_BLOCK) string = "Block Interleave"
-        if (interleave.il_type .eq. ESMF_INTERLEAVE_BY_ITEM) string = "Item Interleave"
+        if (interleaveType%il_type .eq. ESMF_INTERLEAVE_BY_BLOCK) string = "Block Interleave"
+        if (interleaveType%il_type .eq. ESMF_INTERLEAVE_BY_ITEM) string = "Item Interleave"
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1222,12 +1221,4 @@ end function
 
 
         end module ESMF_ArrayDataMapMod
-
-
-
-
-
-
-
-
 
