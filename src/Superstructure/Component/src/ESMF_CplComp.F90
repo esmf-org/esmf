@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.16 2004/03/01 21:28:54 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.17 2004/03/02 16:52:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.16 2004/03/01 21:28:54 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.17 2004/03/02 16:52:48 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -152,7 +152,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreate(name, layout, config, clock, rc)
+      function ESMF_CplCompCreateNew(name, layout, config, clock, rc)
 !
 ! !RETURN VALUE:
       ! Private name; call using ESMF_CplCompCreate()      
