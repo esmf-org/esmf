@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.19 2004/03/01 21:26:22 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.20 2004/03/02 05:28:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.19 2004/03/01 21:26:22 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.20 2004/03/02 05:28:16 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -320,19 +320,19 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddArrays -- Add Arrays to a State
+! !IROUTINE: ESMF_StateAddArray -- Add Arrays to a State
 
 ! !INTERFACE:
-     interface ESMF_StateAddArrays
+     interface ESMF_StateAddArray
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_StateAddArray
+        module procedure ESMF_StateAddOneArray
         module procedure ESMF_StateAddArrayList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddArrays} functions.   
+!  types of {\tt ESMF\_StateAddArray} functions.   
 !  
 !EOPI 
 end interface
@@ -340,19 +340,19 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddFields -- Add Fields to a State
+! !IROUTINE: ESMF_StateAddField -- Add Fields to a State
 
 ! !INTERFACE:
-     interface ESMF_StateAddData
+     interface ESMF_StateAddField
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_StateAddField
+        module procedure ESMF_StateAddOneField
         module procedure ESMF_StateAddFieldList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddFields} functions.   
+!  types of {\tt ESMF\_StateAddField} functions.   
 !  
 !EOPI 
 end interface
@@ -360,14 +360,14 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddBundles -- Add Bundles to a State
+! !IROUTINE: ESMF_StateAddBundle -- Add Bundles to a State
 
 ! !INTERFACE:
-     interface ESMF_StateAddData
+     interface ESMF_StateAddBundle
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_StateAddBundle
+        module procedure ESMF_StateAddOneBundle
         module procedure ESMF_StateAddBundleList
 
 ! !DESCRIPTION: 
@@ -380,19 +380,19 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddStates -- Add States to a State
+! !IROUTINE: ESMF_StateAddState -- Add States to a State
 
 ! !INTERFACE:
-     interface ESMF_StateAddData
+     interface ESMF_StateAddState
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_StateAddState
+        module procedure ESMF_StateAddOneState
         module procedure ESMF_StateAddStateList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddStates} functions.   
+!  types of {\tt ESMF\_StateAddState} functions.   
 !  
 !EOPI 
 end interface
@@ -400,15 +400,15 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddDataNames -- Add Names to a State
+! !IROUTINE: ESMF_StateAddNameOnly -- Add Names to a State
 
 ! !INTERFACE:
-     interface ESMF_StateAddDataNames
+     interface ESMF_StateAddNameOnly
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_StateAddDataName
-        module procedure ESMF_StateAddDataNameList
+        module procedure ESMF_StateAddOneName
+        module procedure ESMF_StateAddNameList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -609,11 +609,11 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddArrays - Add an Array to a State
+! !IROUTINE: ESMF_StateAddArray - Add an Array to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddArrays()   
-      subroutine ESMF_StateAddArray(state, array, rc)
+      ! Private name; call using ESMF_StateAddArray()   
+      subroutine ESMF_StateAddOneArray(state, array, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
@@ -647,14 +647,14 @@ end function
 
       call ESMF_StateTypeAddArrayList(state%statep, 1, temp_list, rc)      
 
-      end subroutine ESMF_StateAddArray
+      end subroutine ESMF_StateAddOneArray
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddArrays - Add a list of Arrays to a State
+! !IROUTINE: ESMF_StateAddArray - Add a list of Arrays to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddArrays()   
+      ! Private name; call using ESMF_StateAddArray()   
       subroutine ESMF_StateAddArrayList(state, acount, arrays, rc)
 !
 ! !ARGUMENTS:
@@ -692,11 +692,11 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddBundles - Add a Bundle to a State
+! !IROUTINE: ESMF_StateAddBundle - Add a Bundle to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddBundles()   
-      subroutine ESMF_StateAddBundle(state, bundle, rc)
+      ! Private name; call using ESMF_StateAddBundle()   
+      subroutine ESMF_StateAddOneBundle(state, bundle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
@@ -730,14 +730,14 @@ end function
 
       call ESMF_StateTypeAddBundleList(state%statep, 1, temp_list, rc)      
 
-      end subroutine ESMF_StateAddBundle
+      end subroutine ESMF_StateAddOneBundle
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddBundles - Add a list of Bundles to a State
+! !IROUTINE: ESMF_StateAddBundle - Add a list of Bundles to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddBundles()   
+      ! Private name; call using ESMF_StateAddBundle()   
       subroutine ESMF_StateAddBundleList(state, bcount, bundles, rc)
 !
 ! !ARGUMENTS:
@@ -772,100 +772,6 @@ end function
         call ESMF_StateTypeAddBundleList(state%statep, bcount, bundles, rc)
 
         end subroutine ESMF_StateAddBundleList
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddDataNames - Add a name to a State as a placeholder
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddDataNames()   
-      subroutine ESMF_StateAddDataName(state, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      character (len=*), intent(in) :: name
-      integer, intent(out), optional :: rc
-!     
-! !DESCRIPTION:
-!      Add a {\tt name} to an existing {\tt state}.
-!      The {\tt name} must be unique within the {\tt state}
-!      It is available to be marked {\tt needed} by the
-!      consumer of the export {\tt state}. Then the data 
-!      provider can replace the name with the actual {\tt ESMF\_Bundle},
-!      {\tt ESMF\_Field}, or {\tt ESMF\_Array} which carries the needed data.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item[state]
-!       {\tt ESMF\_State} object.
-!
-!     \item[name]
-!       The name to be added.
-!
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      character(len=ESMF_MAXSTR) :: temp_list(1)
-      
-      temp_list(1) = name
-
-      call ESMF_StateAddDataNameList(state, 1, temp_list, rc)      
-
-      end subroutine ESMF_StateAddDataName
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddDataNames - Add a list of names to a State 
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddDataNames()   
-      subroutine ESMF_StateAddDataNameList(state, namecount, namelist, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      integer, intent(in) :: namecount
-      character (len=*), intent(in) :: namelist(:)
-      integer, intent(out), optional :: rc
-!     
-! !DESCRIPTION:
-!      Add a {\tt name} to an existing {\tt State}.
-!      The {\tt name} must be unique within the {\tt State}
-!      It is available to be marked {\tt needed} by the
-!      consumer of the export {\tt State}. Then the data 
-!      provider can replace the name with the actual {\tt Bundle},
-!      {\tt Field}, or {\tt Array} which carries the needed data.
-!      Unneeded data need not be generated.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item[state]
-!       {\tt ESMF\_State} object.
-!
-!     \item[namecount]
-!       The number of names.
-!
-!     \item[namelist]
-!       The list of names
-!
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: 
-
-      call ESMF_StateTypeAddDataNameList(state%statep, namecount, namelist, rc)      
-
-      end subroutine ESMF_StateAddDataNameList
 
 !------------------------------------------------------------------------------
 !BOP
@@ -952,11 +858,105 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddStates - Add a State to a State
+! !IROUTINE: ESMF_StateAddNameOnly - Add a name to a State as a placeholder
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
-      subroutine ESMF_StateAddState(state, nestedstate, rc)
+      ! Private name; call using ESMF_StateAddNameOnly()   
+      subroutine ESMF_StateAddDataName(state, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      character (len=*), intent(in) :: name
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a {\tt name} to an existing {\tt state}.
+!      The {\tt name} must be unique within the {\tt state}
+!      It is available to be marked {\tt needed} by the
+!      consumer of the export {\tt state}. Then the data 
+!      provider can replace the name with the actual {\tt ESMF\_Bundle},
+!      {\tt ESMF\_Field}, or {\tt ESMF\_Array} which carries the needed data.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[state]
+!       {\tt ESMF\_State} object.
+!
+!     \item[name]
+!       The name to be added.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      character(len=ESMF_MAXSTR) :: temp_list(1)
+      
+      temp_list(1) = name
+
+      call ESMF_StateAddDataNameList(state, 1, temp_list, rc)      
+
+      end subroutine ESMF_StateAddDataName
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddNameOnly - Add a list of names to a State 
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddNameOnly()   
+      subroutine ESMF_StateAddDataNameList(state, namecount, namelist, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      integer, intent(in) :: namecount
+      character (len=*), intent(in) :: namelist(:)
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a {\tt name} to an existing {\tt State}.
+!      The {\tt name} must be unique within the {\tt State}
+!      It is available to be marked {\tt needed} by the
+!      consumer of the export {\tt State}. Then the data 
+!      provider can replace the name with the actual {\tt Bundle},
+!      {\tt Field}, or {\tt Array} which carries the needed data.
+!      Unneeded data need not be generated.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[state]
+!       {\tt ESMF\_State} object.
+!
+!     \item[namecount]
+!       The number of names.
+!
+!     \item[namelist]
+!       The list of names
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: 
+
+      call ESMF_StateTypeAddDataNameList(state%statep, namecount, namelist, rc)      
+
+      end subroutine ESMF_StateAddDataNameList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddState - Add a State to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddState()   
+      subroutine ESMF_StateAddOneState(state, nestedstate, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
@@ -990,14 +990,14 @@ end function
 
       call ESMF_StateTypeAddStateList(state%statep, 1, temp_list, rc)      
 
-      end subroutine ESMF_StateAddState
+      end subroutine ESMF_StateAddOneState
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAddStates - Add a list of States to a State
+! !IROUTINE: ESMF_StateAddState - Add a list of States to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddData()   
+      ! Private name; call using ESMF_StateAddState()   
       subroutine ESMF_StateAddStateList(state, scount, nestedstates, rc)
 !
 ! !ARGUMENTS:
@@ -1397,12 +1397,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer list attribute from a {\tt ESMF\_State}.
+!      Returns an integer list attribute from an {\tt ESMF\_State}.
 !
 ! 
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to retrieve.
@@ -1660,7 +1660,7 @@ end function
 ! 
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to retrieve.
@@ -1725,12 +1725,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_State}.
+!      Returns an integer attribute from an {\tt ESMF\_State}.
 !
 ! 
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to retrieve.
@@ -1843,7 +1843,7 @@ end function
 ! 
 !     \begin{description}
 !     \item [state]
-!           A {\tt ESMF\_State} object.
+!           An {\tt ESMF\_State} object.
 !
 !     \item [name]
 !           The name of the Attribute to query.
@@ -1969,7 +1969,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateGetBundle - Retrieve a data Bundle from a State
+! !IROUTINE: ESMF_StateGetBundle - Retrieve a Bundle from a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetBundle(state, bundlename, bundle, statename, rc)
@@ -2072,7 +2072,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateGetField - Retrieve a data Field from a State
+! !IROUTINE: ESMF_StateGetField - Retrieve a Field from a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetField(state, fieldname, field, statename, rc)
@@ -2343,7 +2343,7 @@ end function
 !!  but this has shifted around so many times, i'm not removing this code
 !!  until we're sure...
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetFromList -- Get a State by name from an array of States
 !
 ! !INTERFACE:
@@ -2375,7 +2375,7 @@ end function
 !
 !  \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: status
@@ -5202,4 +5202,27 @@ end function
 
 
        end module ESMF_StateMod
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
