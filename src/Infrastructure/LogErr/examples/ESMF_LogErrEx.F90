@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.12 2004/08/20 15:42:50 nscollins Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.13 2004/09/03 20:18:06 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -124,9 +124,7 @@
     ! Finalize ESMF to close the default log
     call ESMF_Finalize(rc=rc1)
 !EOC
-    if (rc1.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    finalrc = rc1
 
     if (finalrc.EQ.ESMF_SUCCESS) then
         print *, "PASS: ESMF_LogErrEx.F90"

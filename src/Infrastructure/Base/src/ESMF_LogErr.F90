@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.27 2004/09/03 17:24:28 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.28 2004/09/03 20:18:05 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,24 +105,23 @@ end type ESMF_LOGENTRY
 type ESMF_Log
     private
     sequence       
-    !Set fileIO=ESMF_FALSE
+    character(len=32)                           nameLogErrFile   
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY=>Null()
 #else
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
-#endif                                        
+#endif                                         
+    type(ESMF_HaltType)                     ::  halt
+    type(ESMF_LogType)			    ::  logtype
     type(ESMF_Logical)                      ::  FileIsOpen
     type(ESMF_Logical)                      ::  flushImmediately
-    type(ESMF_HaltType)                     ::  halt
+    type(ESMF_Logical)			    ::  flushed     
+    type(ESMF_Logical)                      ::  rootOnly    
+    type(ESMF_Logical)                      ::  verbose  
     integer                                     maxElements
-    character(len=32)                           nameLogErrFile 
-    type(ESMF_Logical)                      ::  rootOnly
-    type(ESMF_LogType)			    ::  logtype
     integer                                     stream 
-    integer                                     unitNumber 
-    type(ESMF_Logical)                      ::  verbose
-    integer                                     fIndex
-    
+    integer                                     unitNumber
+    integer                                     fIndex 
 
 end type ESMF_Log
 !------------------------------------------------------------------------------
@@ -266,14 +265,13 @@ end subroutine ESMF_LogClose
 !EOPI
 	integer::rc2,status
 	if (present(rc)) rc=ESMF_FAILURE
-	deallocate(ESMF_LogDefault%LOG_ENTRY,stat=status)
 	if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
-	        call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)	
+	        if (ESMF_LogDefault%flushed .eq. ESMF_FALSE) call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)	
 		ESMF_LogDefault%FileIsOpen=ESMF_FALSE
-		if (present(rc)) then
-			rc=ESMF_SUCCESS
-		endif
 	endif	
+	if (present(rc)) rc=ESMF_SUCCESS
+	deallocate(ESMF_LogDefault%LOG_ENTRY,stat=status)
+	
 	
 end subroutine ESMF_LogFinalize
 
@@ -499,6 +497,7 @@ end subroutine ESMF_LogGet
     ESMF_LogDefault%nameLogErrFile=filename
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
     ESMF_LogDefault%flushImmediately = ESMF_TRUE
+    ESMF_LogDefault%flushed = ESMF_FALSE
     ESMF_LogDefault%fIndex = 1
     ESMF_LogDefault%maxElements = 1
     allocate(ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%maxElements),stat=status)
@@ -859,7 +858,7 @@ end subroutine ESMF_LogSet
 
     if (present(rc)) rc=ESMF_FAILURE
     
-    if (log%FileIsOpen .eq. ESMF_TRUE) then	
+    if ((log%FileIsOpen .eq. ESMF_TRUE) .AND. (log%flushed .eq. ESMF_FALSE)) then	
     	ok=0
     	do i=1, ESMF_LOG_MAXTRYOPEN
     	    OPEN(UNIT=log%unitnumber, File=log%nameLogErrFile, POSITION="APPEND", &
@@ -911,6 +910,7 @@ end subroutine ESMF_LogSet
    132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a)
    133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a)
    
+   log%flushed = ESMF_TRUE
    rc=ESMF_SUCCESS	
       
 end subroutine ESMF_LogFlush
@@ -1022,7 +1022,7 @@ end subroutine ESMF_LogFlush
         ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1	
     endif	
    
-
+   ESMF_LogDefault%flushed = ESMF_FALSE
    if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
 
