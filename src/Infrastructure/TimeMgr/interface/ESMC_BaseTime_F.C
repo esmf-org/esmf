@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime_F.C,v 1.13 2004/04/23 22:01:40 nscollins Exp $
+// $Id: ESMC_BaseTime_F.C,v 1.14 2004/04/26 18:01:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,6 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMC_Start.h>
 #include <ESMC_BaseTime.h>
 //------------------------------------------------------------------------------
 //BOP
