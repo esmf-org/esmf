@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.1 2003/04/08 16:53:54 pwjones Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.2 2003/05/03 03:58:23 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -54,23 +54,9 @@
       implicit none
 
 !------------------------------------------------------------------------------
-! !PRIVATE TYPES:
-      private
-!------------------------------------------------------------------------------
-!     ! ESMF_RegridConfig
-!
-!     ! Description of ESMF_RegridConfig
-
-      type ESMF_RegridConfig
-      sequence
-      private
-        integer :: dummy
-      end type
-
-!------------------------------------------------------------------------------
 !     !  ESMF_RegridType
 !
-!     ! Description of ESMF_Regrid.
+!     ! Description of ESMF_RegridType.
 
       type ESMF_RegridType
       sequence
@@ -78,90 +64,50 @@
         type (ESMF_Base) :: base
 
         type (ESMF_Bundle), pointer :: & ! if created with bundle pair
-           src_bundle,          &! pointer to source field bundle
-           dst_bundle            ! pointer to destination field bundle
+           src_bundle,   &! pointer to source field bundle
+           dst_bundle     ! pointer to destination field bundle
 
         type (ESMF_Field), pointer :: & ! if created with field pair
-           src_field,          &! pointer to source grid
-           dst_field            ! pointer to destination grid
+           src_field,    &! pointer to source grid
+           dst_field      ! pointer to destination grid
 
-        integer :: &
-           regrid_method       ! method used for this regridding
-
-        type (ESMF_Array), pointer :: &
-           src_address,      &! addresses of source field for regrid operation
-           dst_address       &! addresses of destination field for regrid op
+        integer ::       &
+           method        &! method used for this regridding
+           num_links      ! number of unique links between grids
 
         type (ESMF_Array), pointer :: &
-           weights            ! array of weights for performing the
-                              ! regridding transformation
+           src_add,      &! addresses of source field for regrid operation
+           dst_add       &! addresses of destination field for regrid op
+
+        type (ESMF_Array), pointer :: &
+           weights        ! array of weights for performing the
+                          ! regridding transformation
 
         type (ESMF_Route), pointer :: &
            gather             ! pre-stored communication patterns necessary for
-                              ! doing any data motion required for
-                              ! performing transform
-      end type
-
-!------------------------------------------------------------------------------
-!     !  ESMF_Regrid
-!
-!     !  The Regrid data structure that is passed between languages.
-
-      type ESMF_Regrid
-      sequence
-      private
-        type (ESMF_RegridType), pointer :: ptr     ! pointer to a regrid type
+                              ! doing data motion required for regrid
       end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_RegridConfig
-      public ESMF_Regrid
-
-!------------------------------------------------------------------------------
-! !PUBLIC DATA MEMBERS:
-
-      integer, parameter, public ::       &! supported regrid methods
-         ESMF_RegridMethod_none     =  0, &! no regridding or undefined regridding
-         ESMF_RegridMethod_Bilinear =  1, &! bilinear (logically-rect grids)
-         ESMF_RegridMethod_Bicubic  =  2, &! bicubic  (logically-rect grids)
-         ESMF_RegridMethod_Conserv1 =  3, &! 1st-order conservative
-         ESMF_RegridMethod_Conserv2 =  4, &! 2nd-order conservative
-         ESMF_RegridMethod_Raster   =  5, &! regrid by rasterizing domain
-         ESMF_RegridMethod_NearNbr  =  6, &! nearest-neighbor dist-weighted avg
-         ESMF_RegridMethod_Fourier  =  7, &! Fourier transform
-         ESMF_RegridMethod_Legendre =  8, &! Legendre transform
-         ESMF_RegridMethod_Index    =  9, &! index-space regridding (shift, stencil)
-         ESMF_RegridMethod_Linear   = 10, &! linear for 1-d regridding
-         ESMF_RegridMethod_Spline   = 11, &! cubic spline for 1-d regridding
-         ESMF_RegridMethod_Copy     = 51, &! copy existing regrid
-         ESMF_RegridMethod_Shift    = 52, &! shift addresses of existing regrid
-         ESMF_RegridMethod_Adjoint  = 53, &! create adjoint of existing regrid
-         ESMF_RegridMethod_File     = 89, &! read a regrid from a file
-         ESMF_RegridMethod_User     = 90   ! user-supplied method
+      public ESMF_RegridType
 
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-
-    public ESMF_RegridDestroy     ! deallocate memory associated with a regrid
-    public ESMF_RegridCreateFromRegrid ! Creates Regrid from existing regrid
-
-    public ESMF_RegridGetName     ! Get name of regrid
-    public ESMF_RegridGetField    ! Get fields associated with this regrid
-    public ESMF_RegridGetBundle   ! Get bundles associated with this regrid
-
-    public ESMF_RegridValidate
-    public ESMF_RegridPrint
+    public ESMF_RegridAddLink      ! Adds address pair and weight to regrid
+    public ESMF_RegridTypeGet      ! returns a regrid attribute
+    public ESMF_RegridTypeSet      ! sets    a regrid attribute
+    public ESMF_RegridConstructEmpty  ! creates an empty regrid structure
+    public ESMF_RegridDestruct     ! deallocate memory associated with a regrid
 
 !
 !EOP
-
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.1 2003/04/08 16:53:54 pwjones Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.2 2003/05/03 03:58:23 pwjones Exp $'
 
 !==============================================================================
 !
@@ -175,279 +121,334 @@
 
 !==============================================================================
 !
-! This section includes the Regrid Destroy methods and a single instance
-! of a create method.  All other create methods are implemented in another
+! This section includes utility routines for performing actions on the
+! main Regrid type.  All other create methods are implemented in another
 ! module to facilitate branching based on type of regridding required.
 !
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:
-!     ESMF_RegridCreateFromRegrid - Creates Regrid structure from existing regrid
+!     ESMF_RegridAddLink - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
-      function ESMF_RegridCreateFromRegrid(old_regrid, method, &
-                                           name, index_shift, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Regrid) :: ESMF_RegridCreateFromRegrid
+      subroutine ESMF_RegridAddLink(regrid, src_add, dst_add, weights, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_Regrid), intent(in) :: &
-         old_regrid          ! old regrid object to use in creating new regrid
 
-      integer, intent(in) :: method   ! method to use for regridding
+      type(ESMF_RegridType), intent(inout) :: regrid
 
-      character (len = *), intent(in), optional :: name
+      type(ESMF_Array), intent(in) :: &
+         src_add,                     &! address in source      field array
+         dst_add                       ! address in destination field array
 
-      type (ESMF_Array), intent(in), optional :: &
-         index_shift        ! index shifts if shift method is chosen
+      type(ESMF_Array), intent(in) :: &
+         weights                       ! weight(s) for this link
 
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
+
 !
 ! !DESCRIPTION:
-!     Given an existing regrid structure, this routine allocates memory for a
-!     new {\tt Regrid} object and fills it with new regridding obtained by
-!     simple manipulations of the existing regrid.  Returns a pointer to a new
-!     {\tt Regrid}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[[name]]
-!          {\tt Regrid} name.
-!     \item[old\_regrid]
-!          Existing regrid structure to be manipulated to form new regrid.
-!     \item[method]
-!          Method to use for regridding.
-!     \item[[index\_shift]]
-!          Array indicating shift in each logical direction for creating
-!          a new regrid by index shift of an old regrid.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!   The supported methods for creating a regridding from an existing regrid are:
-!   \begin{description}
-!   \item[ESMF\_RegridMethod\_Copy   ] simple copy of old regrid
-!   \item[ESMF\_RegridMethod\_Shift  ] simple shift of addresses
-!   \item[ESMF\_RegridMethod\_Adjoint] creates adjoint of existing regrid
-!   \end{description}
-!
-! !REQUIREMENTS:  TODO
-!EOP
-
-      type(ESMF_RegridType), pointer :: regrid    ! Pointer to new regrid
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
-
-!     Initialize pointers
-      nullify(regrid)
-      nullify(ESMF_RegridCreateFromRegrid%ptr)
-
-!     Initialize return code
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     No allocation here - construct must perform all necessary allocation
-!     Call construction method to allocate and initialize grid internals.
-
-      if (method == ESMF_RegridMethod_Shift) then
-         call ESMF_RegridConstructFromRegrid(regrid, old_regrid%ptr, method, &
-                                             name=name, index_shift=index_shift, &
-                                             rc=status)
-      else
-         call ESMF_RegridConstructFromRegrid(regrid, old_regrid%ptr, method, &
-                                             name=name, rc=status)
-      endif
-
-      if (status /= ESMF_SUCCESS) then
-        ! Use error function eventually...
-        print *, "ERROR in ESMF_RegridCreateFromRegrid: Regrid construct"
-        return
-      endif
-
-!     Set return values.
-      ESMF_RegridCreateFromRegrid%ptr => regrid
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_RegridCreateFromRegrid
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:
-!     ESMF_RegridDestroy - Free all resources associated with a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridDestroy(regrid, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Destroys a {\tt Regrid} object previously allocated
-!     via an {\tt ESMF_RegridCreate routine}.
+!     Adds an address pair and regrid weight to an existing regrid.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[regrid]
-!          The regrid object to be destroyed.
+!          Regrid type to which the new link is to be added.
+!     \item[src\_add]
+!          Address in source field array for this link.
+!     \item[dst\_add]
+!          Address in destination field array for this link.
+!     \item[weights]
+!          Regrid weight(s) for this link.
+!     \item[rc]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!  TODO
+
+      integer :: new_links
+      type (ESMF_ARRAY) :: &! temps for use when re-sizing arrays
+         src_add_tmp, dst_add_tmp, weights_tmp
+
+      rc = ESMF_FAILURE
+
+      !
+      !  increment number of links for this regrid
+      !
+      
+      new_links = regrid%num_links + 1
+      
+      !
+      !  if new number of links exceeds array sizes, re-size arrays
+      !
+      
+      ! TODO: resize check
+      
+      regrid%num_links = new_links
+      
+      !
+      ! TODO: Add addresses and weights to regrid arrays
+      !
+
+
+      rc = ESMF_SUCCESS      
+
+      end subroutine ESMF_RegridAddLink
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:
+!     ESMF_RegridTypeGet - Get attribute of a Regrid type
+
+! !INTERFACE:
+      subroutine ESMF_RegridTypeGet(regrid, name,            &
+                                    src_bundle, dst_bundle,  &
+                                    src_field,  dst_field,   &
+                                    method, num_links , gather, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_RegridType), intent(in) :: regrid
+
+      character (*),      intent(out), optional :: name
+      type (ESMF_Bundle), intent(out), optional :: src_bundle, dst_bundle
+      type (ESMF_Field),  intent(out), optional :: src_field,  dst_field
+      integer,            intent(out), optional :: method
+      integer,            intent(out), optional :: num_links
+      type (ESMF_Route),  intent(out), optional :: gather
+
+      integer,            intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Returns the value of a Regrid attribute.  The
+!     attribute is specified through optional arguments.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid]
+!          Regrid type to be queried.
+!     \item[[name]]
+!          Name for this regrid.
+!     \item[[src\_bundle]]
+!          If created with bundles, the source bundle associated
+!          with this regrid. 
+!     \item[[dst\_bundle]]
+!          If created with bundles, the destination bundle associated
+!          with this regrid. 
+!     \item[[src\_field]]
+!          If created with fields, the source field associated
+!          with this regrid. 
+!     \item[[dst\_field]]
+!          If created with fields, the destination field associated
+!          with this regrid. 
+!     \item[[method]]
+!          Integer enum of method used in this regrid.
+!     \item[[num_links]]
+!          Number of unique links between grids for this regrid.
+!     \item[[gather]]
+!          Route used to gather non-local information to perform regrid.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS: TODO
 !EOP
+! !REQUIREMENTS:
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      logical :: rcpresent = .FALSE.
+      integer :: stat, status = ESMF_SUCCESS
 
-!     Initialize return code
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
+      if (present(rc)) rcpresent = .TRUE.
+      
+      ! Get name if requested
+      if (present(name)) then
+         call ESMF_GetName(regrid%base, name, stat)
+         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
 
-!     Call destruct method to free up internally-allocated memory
-
-      call ESMF_RegridDestruct(regrid%ptr, status)
-      if (status /= ESMF_SUCCESS) then
-        ! Use error function eventually...
-        print *, "ERROR in ESMF_RegridDestroy: Regrid destruct"
-        return
+      ! Get bundles if requested
+      if (present(src_bundle)) then
+         if (associated(regrid%src_bundle)) then
+            src_bundle = regrid%src_bundle
+         else
+            print *,'ERROR in RegridTypeGet: requested non-existent bundle'
+            status = ESMF_FAILURE
+         endif
+      endif
+      if (present(dst_bundle)) then
+         if (associated(regrid%dst_bundle)) then
+            dst_bundle = regrid%dst_bundle
+         else
+            print *,'ERROR in RegridTypeGet: requested non-existent bundle'
+            status = ESMF_FAILURE
+         endif
       endif
 
-!     Set return values.
-      nullify(regrid%ptr)
-      if (rcpresent) rc = ESMF_SUCCESS
+      ! Get fields if requested
+      if (present(src_field)) then
+         if (associated(regrid%src_field)) then
+            src_field = regrid%src_field
+         else
+            print *,'ERROR in RegridTypeGet: requested non-existent field'
+            status = ESMF_FAILURE
+         endif
+      endif
+      if (present(dst_field)) then
+         if (associated(regrid%dst_field)) then
+            dst_field = regrid%dst_field
+         else
+            print *,'ERROR in RegridTypeGet: requested non-existent field'
+            status = ESMF_FAILURE
+         endif
+      endif
 
-      end subroutine ESMF_RegridDestroy
+      ! get method or number of links
+      if (present(method)) method = regrid%method
+      if (present(num_links)) num_links = regrid%num_links
+      if (present(gather)) gather = regrid%gather
+
+      if (rcpresent) rc = status
+
+      end subroutine ESMF_RegridTypeGet
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:
-!     ESMF_RegridConstructFromRegrid - Constructs Regrid structure from existing Regrid
+!     ESMF_RegridTypeSet - Set attribute of a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridConstructFromRegrid(regrid, src_field, dst_field, &
-                                                method, name, index_shift, rc)
+      subroutine ESMF_RegridTypeSet(regrid, name,            &
+                                    src_bundle, dst_bundle,  &
+                                    src_field,  dst_field,   &
+                                    method, num_links , gather, rc)
 !
 ! !ARGUMENTS:
+      type(ESMF_RegridType), intent(in) :: regrid
 
-      type(ESMF_RegridType), intent(out) :: regrid  ! newly created regrid
+      character (*),      intent(in), optional :: name
+      type (ESMF_Bundle), intent(in), optional :: src_bundle, dst_bundle
+      type (ESMF_Field),  intent(in), optional :: src_field,  dst_field
+      integer,            intent(in), optional :: method
+      integer,            intent(in), optional :: num_links
+      type (ESMF_Route),  intent(in), optional :: gather
 
-      type (ESMF_Field), intent(in) :: &
-         src_field,          &! field to be regridded
-         dst_field            ! destination (incl grid) of resulting regridded field
+      integer,            intent(out), optional :: rc
 
-      integer, intent(in) :: method   ! method to use for regridding
-
-      character (len = *), intent(in), optional :: name
-
-      type (ESMF_Array), intent(in), optional :: &
-         index_shift      ! shifts in each logical direction for shift method
-
-      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Given an existing regrid structure, this routine constructs a
-!     new {\tt Regrid} object and fills it with new info obtained by
-!     simple manipulations of the existing regrid.  Returns a pointer to a new
-!     {\tt Regrid}.
+!     Sets a Regrid attribute with the given value.
+!     The attribute is determined by optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[regrid]
-!          Newly-constructed regrid object to be returned.
-!     \item[old\_regrid]
-!          Existing regrid structure to be manipulated to form new regrid.
-!     \item[method]
-!          Method to use for regridding.
+!          Class to be modified.
 !     \item[[name]]
-!          {\tt Regrid} name.
-!     \item[[index\_shift]]
-!          Array indicating shift in each logical direction for creating
-!          a new regrid by index shift of an old regrid.
+!          Name for this regrid.
+!     \item[[src\_bundle]]
+!          If created with bundles, the source bundle associated
+!          with this regrid. 
+!     \item[[dst\_bundle]]
+!          If created with bundles, the destination bundle associated
+!          with this regrid. 
+!     \item[[src\_field]]
+!          If created with fields, the source field associated
+!          with this regrid. 
+!     \item[[dst\_field]]
+!          If created with fields, the destination field associated
+!          with this regrid. 
+!     \item[[method]]
+!          Integer enum of method used in this regrid.
+!     \item[[num_links]]
+!          Number of unique links between grids for this regrid.
+!     \item[[gather]]
+!          Route used to gather non-local information to perform regrid.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
+!     \end{description}
 !
-!   The supported methods for creating a regridding from an existing regrid are:
-!   \begin{description}
-!   \item[ESMF\_RegridMethod\_Copy   ] simple copy of old regrid
-!   \item[ESMF\_RegridMethod\_Shift  ] simple shift of addresses
-!   \item[ESMF\_RegridMethod\_Adjoint] creates adjoint of existing regrid
-!   \end{description}
-!
-! !REQUIREMENTS:  TODO
 !EOP
+! !REQUIREMENTS:
+!  TODO
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      logical :: rcpresent = .FALSE.
+      integer :: stat, status = ESMF_SUCCESS
 
-!     Initialize pointers
-
-      if (associated(old_regrid%src_bundle)) then
-         regrid%src_bundle => old_regrid%src_bundle
-         regrid%dst_bundle => old_regrid%dst_bundle
-      else
-         nullify(regrid%src_bundle)
-         nullify(regrid%dst_bundle)
-      endif
-
-      if (associated(old_regrid%src_field)) then
-         regrid%src_field => old_regrid%src_field
-         regrid%dst_field => old_regrid%dst_field
-      else
-         nullify(regrid%src_field)
-         nullify(regrid%dst_field)
-      endif
-
-      nullify(regrid%src_address)
-      nullify(regrid%dst_address)
-      nullify(regrid%weights)
-      !nullify(regrid%comm_before)
-      !nullify(regrid%comm_after)
-
-!     Initialize return code
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
+      if (present(rc)) rcpresent = .TRUE.
+      
+      ! Set name if requested
       if (present(name)) then
-         !regrid%name = name
-      else
-         !assign name
+         call ESMF_SetName(regrid%base, name, stat)
+         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
 
-      regrid%method = method
+      ! Set bundles if requested
+      if (present(src_bundle)) regrid%src_bundle => src_bundle
+      if (present(dst_bundle)) regrid%dst_bundle => dst_bundle
+      
+      ! Set fields if requested
+      if (present(src_field)) regrid%src_field => src_field
+      if (present(dst_field)) regrid%dst_field => dst_field
+      
+      ! get method or number of links
+      if (present(method)) regrid%method = method
+      if (present(num_links)) regrid%num_links = num_links
+      if (present(gather)) regrid%gather = gather
 
-      select case (method)
-      case (ESMF_RegridMethod_Copy)
-      case (ESMF_RegridMethod_Shift)
-      case (ESMF_RegridMethod_Adjoint)
-      case default
-      end select
-      !TODO
-      ! calculate the actual regridding here including:
-      !    src_address,      &! addresses of source field for regrid operation
-      !    dst_address       &! addresses of destination field for regrid op
-      !    weights            ! array of weights for performing the
-      !    comm_before,      &! pre-stored communication patterns necessary for
-      !    comm_after         ! doing any data motion required for
+      if (rcpresent) rc = status
 
-      !if (status /= ESMF_SUCCESS) then
-      !  ! Use error function eventually...
-      !  print *, "ERROR in ESMF_RegridCreateFromField: Regrid construct"
-      !  return
-      !endif
+      end subroutine ESMF_RegridTypeSet
 
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:
+!     ESMF_RegridConstructEmpty - Create empty regrid structure
 
-      end subroutine ESMF_RegridConstructFromRegrid
+! !INTERFACE:
+      subroutine ESMF_RegridConstructEmpty(regrid, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RegridType), intent(inout) :: regrid
+      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which creates and initializes a regrid structure.
+!     The structure is later filled with appropriate data using the
+!     set function. Intended for internal ESMF use only; end-users 
+!     use {\tt ESMF\_Create} functions.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[regrid]
+!          The regrid object to be initialized.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        ! nullify pointers
+      
+        nullify(regrid%src_bundle)
+        nullify(regrid%dst_bundle)
+        nullify(regrid%src_field)
+        nullify(regrid%dst_field)
+        nullify(regrid%src_add)
+        nullify(regrid%dst_add)
+        nullify(regrid%weights)
+        nullify(regrid%gather)
+
+        ! initialize scalars
+        
+        regrid%method    = ESMF_RegridMethod_none
+        regrid%num_links = 0
+
+        rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridConstructEmpty
 
 !------------------------------------------------------------------------------
 !BOP
@@ -479,9 +480,6 @@
 !EOP
 ! !REQUIREMENTS:
 
-!       clear name
-        !name = blank character string
-
 !       if created with bundles, nullify bundle pointer
         if (associated(src_bundle)) nullify(src_bundle)
         if (associated(dst_bundle)) nullify(dst_bundle)
@@ -490,226 +488,22 @@
         if (associated(src_field)) nullify(src_field)
         if (associated(dst_field)) nullify(dst_field)
 
-        regrid_method = ESMF_RegridMethod_none
+        regrid%method    = ESMF_RegridMethod_none
+        regrid%num_links = 0
 
 !       deallocate regrid transform
-        deallocate(src_address, dst_address, weights)
+        !TODO
+        !destroy src_add, dst_add, weights ESMF arrays
+        nullify(regrid%src_add)
+        nullify(regrid%dst_add)
+        nullify(regrid%weights)
 
-!       nullify communication structures
-        !if (associated(comm_before)) nullify(comm_before)
-        !if (associated(comm_after )) nullify(comm_after )
+!       destroy communication structures
+        !TODO
+        !destroy route regrid%gather
+        nullify(regrid%gather)
 
       end subroutine ESMF_RegridDestruct
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:
-!     ESMF_RegridGetConfig - Get configuration information from a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridGetConfig(regrid, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
-      integer, intent(out) :: config
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Returns the set of resources the Regrid object was configured with.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be queried.
-!     \item[config]
-!          Configuration information.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridGetConfig
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:
-!     ESMF_RegridSetConfig - Set configuration information for a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridSetConfig(regrid, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
-      integer, intent(in) :: config
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Configures the Regrid object with set of resources given.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be configured.
-!     \item[config]
-!          Configuration information.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridSetConfig
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:
-!     ESMF_RegridGetValue - Get <Value> for a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridGetValue(regrid, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
-      integer, intent(out) :: value
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Returns the value of Regrid attribute <Value>.
-!     May be multiple routines, one per attribute.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be queried.
-!     \item[value]
-!          Value to be retrieved.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridGetValue
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:
-!     ESMF_RegridSetValue - Set <Value> for a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridSetValue(Regrid, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
-      integer, intent(in) :: value
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Set a Regrid attribute with the given value.
-!     May be multiple routines, one per attribute.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be modified.
-!     \item[value]
-!          Value to be set.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridSetValue
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:
-!     ESMF_RegridValidate - Check internal consistency of a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridValidate(regrid, opt, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
-      character (len=*), intent(in), optional :: opt
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Validates that a Regrid is internally consistent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be queried.
-!     \item[[opt]]
-!          Validation options.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  XXXn.n, YYYn.n
-
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridValidate
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:
-!     ESMF_RegridPrint - Print the contents of a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridPrint(regrid, opt, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
-      character (len=*), intent(in) :: opt
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Print information about a Regrid.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be queried.
-!     \item[[opt]]
-!          Print ptions that control the type of information and level of
-!          detail.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridPrint
 
 !------------------------------------------------------------------------------
 
