@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.24 2003/01/16 18:16:03 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.25 2003/01/17 22:21:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -199,7 +199,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.24 2003/01/16 18:16:03 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.25 2003/01/17 22:21:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1487,9 +1487,9 @@
       subroutine ESMF_DistGridGlobalToLocalIndex(distgrid, global, local, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid
-      type(ESMF_Array), intent(in) :: global
-      type(ESMF_Array), intent(out) :: local
+      type(ESMF_DistGridType), intent(in) :: distgrid
+      integer(ESMF_IKIND_I4), dimension(:), intent(in) :: global
+      integer(ESMF_IKIND_I4), dimension(:), intent(out) :: local
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1512,15 +1512,28 @@
 
       integer :: status=ESMF_FAILURE                 ! Error status
       logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: i, base
 
 !     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
-!
-!  code goes here
-!
+
+!     make sure array lengths are the same
+      if(size(local) .NE. size(global)) then
+        print *, "ERROR in ESMF_DistGridGlobalToLocal: array lengths not equal"
+        return
+      endif
+
+!     the following code works only for grid where the global data is
+!     organized (indexed) by DE  !TODO add coding for other cases
+!     TODO: decide where enumerator for grid organization should be
+      base = distgrid%MyDE%gstart
+      do i = 1, size(global)
+        local(i) = global(i) - base
+      enddo
+
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridGlobalToLocalIndex
@@ -1533,9 +1546,9 @@
       subroutine ESMF_DistGridLocalToGlobalIndex(distgrid, local, global, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid
-      type(ESMF_Array), intent(in) :: local
-      type(ESMF_Array), intent(out) :: global
+      type(ESMF_DistGridType), intent(in) :: distgrid
+      integer(ESMF_IKIND_I4), dimension(:), intent(in) :: local
+      integer(ESMF_IKIND_I4), dimension(:), intent(out) :: global
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1558,15 +1571,28 @@
 
       integer :: status=ESMF_FAILURE                 ! Error status
       logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: i, base
 
 !     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
-!
-!  code goes here
-!
+
+!     make sure array lengths are the same
+      if(size(global) .NE. size(local)) then
+        print *, "ERROR in ESMF_DistGridLocalToGlobal: array lengths not equal"
+        return
+      endif
+
+!     the following code works only for grid where the global data is
+!     organized (indexed) by DE  !TODO add coding for other cases
+!     TODO: decide where enumerator for grid organization should be
+      base = distgrid%MyDE%gstart
+      do i = 1, size(local)
+        global(i) = local(i) + base
+      enddo
+
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridLocalToGlobalIndex
