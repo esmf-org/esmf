@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.21 2003/07/30 21:50:52 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.22 2003/08/01 18:00:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.21 2003/07/30 21:50:52 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.22 2003/08/01 18:00:43 nscollins Exp $'
 
 !==============================================================================
 !
@@ -712,7 +712,7 @@
 ! !INTERFACE:
       subroutine ESMF_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
                                           AI_count, global_start, &
-                                          global_stride, layout, rc)
+                                          global_stride, layout, periodic, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -724,6 +724,7 @@
       integer, dimension(:,:), intent(in) :: global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: global_stride
       type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_Logical), intent(in), optional :: periodic(:)
       integer, intent(out), optional :: rc
 
 !
@@ -770,7 +771,7 @@
         ! Call C++  code
         call c_ESMC_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
                                         AI_count, global_start, global_stride, &
-                                        layout, status)
+                                        layout, periodic, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Precompute Halo error"
           ! don't return before adding 1 back to AIs

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.46 2003/07/24 21:54:49 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.47 2003/08/01 18:00:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.46 2003/07/24 21:54:49 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.47 2003/08/01 18:00:43 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -436,12 +436,12 @@ static int maxroutes = 10;
 
         // find out who the next id is 
         rc = ct->ESMC_CommTableGetPartner(i, &theirdeid, &needed);
-        //if (!needed) {
+        if (!needed) {
         //    printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
-	//    continue;
+	    continue;
         //} else {
         //   printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
-        //}
+        }
 
         // look up the corresponding send/recv xpackets in the rtables
         rc = sendRT->ESMC_RTableGetEntry(theirdeid, &xscount, &sendxp);
@@ -823,7 +823,8 @@ static int maxroutes = 10;
                                    //       DE's in the DELayout
       int *global_stride,          // in  - array of global stride information
                                    //       in each dimension
-      ESMC_DELayout *layout) {     // in  - pointer to the DELayout 
+      ESMC_DELayout *layout,       // in  - pointer to the DELayout 
+      ESMC_Logical *periodic) {    // in  - array of flags, one per dim
 //
 // !DESCRIPTION:
 //      Initializes a Route for a Halo with send and receive RouteTables.
@@ -844,7 +845,7 @@ static int maxroutes = 10;
 
     // Calculate the sending table.
  
-    //  modify global_stride to include halo widths  TODO:  pass in AIs as global
+    //  modify global_stride to include halo widths  TODO: pass in AIs as global
     for (k=0; k<rank; k++) {
       global_stride[k] = global_stride[k]
               + AI_exc[my_DE + k*AI_count].min - AI_tot[my_DE + k*AI_count].min

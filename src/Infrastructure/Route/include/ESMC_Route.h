@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.22 2003/07/17 19:51:26 jwolfe Exp $
+// $Id: ESMC_Route.h,v 1.23 2003/08/01 18:00:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
     int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
                                  ESMC_AxisIndex *AI_tot, int AI_count, 
                                  int *global_start, int *global_stride,
-                                 ESMC_DELayout *layout);
+                                 ESMC_DELayout *layout, ESMC_Logical *periodic = NULL);
 
  // execute the communication routines set up in this route object
     int ESMC_RouteRun(void *srcaddr, void *dstaddr);
