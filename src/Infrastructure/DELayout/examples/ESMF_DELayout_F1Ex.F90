@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F1Ex.F90,v 1.6 2004/01/06 17:26:51 svasquez Exp $
+! $Id: ESMF_DELayout_F1Ex.F90,v 1.7 2004/01/07 21:09:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,7 +9,8 @@
 ! Licensed under the GPL.
 
 ! ESMC CommMem application example program
-
+!____________________________________________________________________________
+!EXAMPLE        String used by test script to count examples.
 !-----------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
