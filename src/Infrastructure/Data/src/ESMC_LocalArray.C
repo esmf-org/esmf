@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.51 2003/07/09 22:52:29 jwolfe Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.1 2003/07/10 18:48:19 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
