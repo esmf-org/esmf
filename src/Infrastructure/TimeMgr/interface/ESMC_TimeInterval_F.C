@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.16 2003/06/30 21:30:41 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.17 2003/07/25 19:36:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,18 +129,19 @@ extern "C" {
            *timeIntervalProdR = (*timeInterval * *multiplier);
        }
 
-       void FTN(c_esmc_timeintervalread)(ESMC_TimeInterval *ptr,
-                                         ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                                         ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
-                                         ESMF_IKIND_I8 *D, int *status) {
-           *status = (ptr)->ESMC_TimeIntervalRead(*S, *Sn, *Sd, *YY, *MO, *D);
+       void FTN(c_esmc_timeintervalreadrestart)(ESMC_TimeInterval *ptr,
+                                           ESMF_IKIND_I8 *S, int *Sn, int *Sd,
+                                           ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
+                                           ESMF_IKIND_I8 *D, int *status) {
+           //*status = (ptr)->ESMC_TimeIntervalReadRestart(*S,  *Sn, *Sd,
+           //                                              *YY, *MO, *D);
        }
 
-       void FTN(c_esmc_timeintervalwrite)(ESMC_TimeInterval *ptr,
-                                          ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                                          ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
-                                          ESMF_IKIND_I8 *D, int *status) {
-           *status = (ptr)->ESMC_TimeIntervalWrite(S, Sn, Sd, YY, MO, D);
+       void FTN(c_esmc_timeintervalwriterestart)(ESMC_TimeInterval *ptr,
+                                           ESMF_IKIND_I8 *S, int *Sn, int *Sd,
+                                           ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
+                                           ESMF_IKIND_I8 *D, int *status) {
+           //*status = (ptr)->ESMC_TimeIntervalWriteRestart(S, Sn, Sd, YY, MO, D);
        }
 
        void FTN(c_esmc_timeintervalvalidate)(ESMC_TimeInterval *ptr,

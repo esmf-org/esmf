@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.15 2003/06/07 00:42:00 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.16 2003/07/25 19:36:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -140,16 +140,16 @@ extern "C" {
            *status = (ptr)->ESMC_TimeGetRealTime();      
        }
 
-       void FTN(c_esmc_timeread)(ESMC_Time *ptr, ESMF_IKIND_I8 *S,
-                                 int *Sn, int *Sd, ESMC_Calendar *cal,
-                                 int *timeZone, int *status) {
-           *status = (ptr)->ESMC_TimeRead(*S, *Sn, *Sd, cal, *timeZone);
+       void FTN(c_esmc_timereadrestart)(ESMC_Time *ptr, ESMF_IKIND_I8 *S,
+                                        int *Sn, int *Sd, ESMC_Calendar *cal,
+                                        int *timeZone, int *status) {
+       //    *status = (ptr)->ESMC_TimeReadRestart(*S, *Sn, *Sd, cal, *timeZone);
        }
 
-       void FTN(c_esmc_timewrite)(ESMC_Time *ptr, ESMF_IKIND_I8 *S,
-                                  int *Sn, int *Sd, ESMC_Calendar *cal,
-                                 int *timeZone, int *status) {
-           *status = (ptr)->ESMC_TimeWrite(S, Sn, Sd, cal, timeZone);
+       void FTN(c_esmc_timewriterestart)(ESMC_Time *ptr, ESMF_IKIND_I8 *S,
+                                         int *Sn, int *Sd, ESMC_Calendar *cal,
+                                         int *timeZone, int *status) {
+        //   *status = (ptr)->ESMC_TimeWriteRestart(S, Sn, Sd, cal, timeZone);
        }
 
        void FTN(c_esmc_timevalidate)(ESMC_Time *ptr, const char *opts,

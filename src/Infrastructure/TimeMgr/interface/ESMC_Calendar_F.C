@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.10 2003/07/25 05:17:06 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.11 2003/07/25 19:36:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,28 +66,28 @@ extern "C" {
            //                                         daysPerYearDd);
        }
 
-       void FTN(c_esmc_calendarread)(ESMC_Calendar *ptr,
-                                     ESMC_CalendarType *type,
-                                     int *daysPerMonth, int *secondsPerDay,
-                                     int *daysPerYear,  int *daysPerYearDn,
-                                     int *daysPerYearDd, int *status) {
-           *status = (ptr)->ESMC_CalendarRead(*type, daysPerMonth,
-                                              *secondsPerDay,
-                                              *daysPerYear,
-                                              *daysPerYearDn,
-                                              *daysPerYearDd);
+       void FTN(c_esmc_calendarreadrestart)(ESMC_Calendar *ptr,
+                                          ESMC_CalendarType *type,
+                                          int *daysPerMonth, int *secondsPerDay,
+                                          int *daysPerYear,  int *daysPerYearDn,
+                                          int *daysPerYearDd, int *status) {
+           //*status = (ptr)->ESMC_CalendarReadRestart(*type, daysPerMonth,
+           //                                          *secondsPerDay,
+           //                                          *daysPerYear,
+           //                                          *daysPerYearDn,
+           //                                          *daysPerYearDd);
        }
 
-       void FTN(c_esmc_calendarwrite)(ESMC_Calendar *ptr,
-                                      ESMC_CalendarType *type,
-                                      int *daysPerMonth, int *secondsPerDay,
-                                      int *daysPerYear,  int *daysPerYearDn,
-                                      int *daysPerYearDd, int *status) {
-           *status = (ptr)->ESMC_CalendarWrite(type, daysPerMonth,
-                                               secondsPerDay,
-                                               daysPerYear,
-                                               daysPerYearDn,
-                                               daysPerYearDd);
+       void FTN(c_esmc_calendarwriterestart)(ESMC_Calendar *ptr,
+                                          ESMC_CalendarType *type,
+                                          int *daysPerMonth, int *secondsPerDay,
+                                          int *daysPerYear,  int *daysPerYearDn,
+                                          int *daysPerYearDd, int *status) {
+           //*status = (ptr)->ESMC_CalendarWriteRestart(type, daysPerMonth,
+           //                                           secondsPerDay,
+           //                                           daysPerYear,
+           //                                           daysPerYearDn,
+           //                                           daysPerYearDd);
        }
 
        void FTN(c_esmc_calendarvalidate)(ESMC_Calendar *ptr, const char *opts,
