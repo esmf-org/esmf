@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.17 2004/11/19 17:39:04 nscollins Exp $
+#  $Id: build_rules.mk,v 1.18 2004/11/19 23:49:03 nscollins Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -106,24 +106,30 @@ CXX_CLINKER	   = mpiCC
 CXX_FLINKER	   = mpiCC
 C_F90CXXLD         = ${C_FC}
 C_CXXF90LD         = mpiCC
+C_CCV		   = ${C_CC} -v 2>&1 | head -3
+C_FCV              = ${C_FC} -V 2>&1 | head -2
+CXX_CCV		   = ${CXX_CC} -V 2>&1 | head -3
+EXTRALIBS          =
 else
-C_CC		   = cc
+C_CC		   = gcc
 C_FC		   = f95
 C_CLINKER	   = ${C_CC}
 C_FLINKER	   = ${C_FC}
-CXX_CC		   = CC -fPIC
+CXX_CC		   = g++ -fPIC
 CXX_FC		   = ${C_FC}
-CXX_CLINKER	   = CC
-CXX_FLINKER	   = CC
-C_F90CXXLD         = g++
-C_CXXF90LD         = g++
+CXX_CLINKER	   = ${CXX_CC}
+CXX_FLINKER	   = ${CXX_CC}
+C_F90CXXLD         = ${CXX_CC}
+C_CXXF90LD         = ${CXX_CC}
+C_CCV		   = ${C_CC} -v 
+C_FCV              = ${C_FC} -V 
+CXX_CCV		   = ${CXX_CC} -v 2>&1 | head -2
+EXTRALIBS          = ${F90LIBBASE}/safefit.o
 endif
 # ######################### C and Fortran compiler options ################
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CCV		   = ${C_CC} -v 2>&1 | head -3
-C_FCV              = ${C_FC} -V 2>&1 | head -2
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
@@ -142,14 +148,12 @@ F_FIXNOCPP      = -fixed
 #
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CCV		   = ${CXX_CC} -V 2>&1 | head -3
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 CXXLIBBASE         = /soft/com/packages/intel-7/compiler70/ia32/lib
 F90LIBBASE         = /soft/com/packages/nag-f95-4.2/lib
 C_F90CXXLIBS       = ${MPI_LIB} -L${F90LIBBASE} -lnag -lrt -lf96 \
-                     -L${CXXLIBBASE} -lcxa -lunwind -lcprts
-C_CXXF90LIBS       = -L${F90LIBBASE} -lnag \
-                     ${F90LIBBASE}/safefit.o ${MPI_LIB} -lrt -lf96
+                     -L${CXXLIBBASE} -lcxa -lunwind -lcprts ${EXTRALIBS}
+C_CXXF90LIBS       = L${F90LIBBASE} -lnag ${MPI_LIB} -lrt -lf96 ${EXTRALIBS}
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
