@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.22 2003/02/14 18:08:39 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.23 2003/02/14 18:39:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.22 2003/02/14 18:08:39 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.23 2003/02/14 18:39:45 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -491,17 +491,19 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     int rc = ESMF_FAILURE;
+    int i, j, k, l, m;     // general counter vars
+    float *fp;
+    int *ip;
 
 //  allocate global-sized array on each DE and fill with distributed data
 //  from current Array
     int gsize=1;
     int lsize=1;
-    for (int i=0; i<rank; i++) {
+    for (i=0; i<rank; i++) {
       gsize = gsize * ai[i].max;
       lsize = lsize * (ai[i].r - ai[i].l+1);
     }
-    float *fp;
-    int *ip;
+
     // switch based on datatype
     switch (this->type) {
       case ESMF_DATA_REAL:
@@ -532,7 +534,7 @@
               int rmax[2];
               int rsize[2];
               int rstart[2];
-              for (int i=0; i<size_decomp; i++) {
+              for (i=0; i<size_decomp; i++) {
                 rmax[i] = ai[i].max;
                 rsize[i] = ai[i].r - ai[i].l + 1;
                 rstart[i] = ai[i].l;
@@ -550,7 +552,7 @@
               int sendcount;
               int* recvcounts = new int[nde];
               int* displs = new int[nde];
-              for (int i=0; i<size_decomp; i++) {
+              for (i=0; i<size_decomp; i++) {
                 if (decompids[i] != 1) {
                   for (int j=0; j<rsize[i]; j++) {
                     sendbuf = (int *)ip0[j*rsize[rankx]];
@@ -574,18 +576,18 @@
               int lmax[2];
               int lstart[2];
               gmax[rank_trans[0]] = 1;
-              for (int i=1; i<this->rank; i++) {
+              for (i=1; i<this->rank; i++) {
                 int i_new = rank_trans[i];
                 gmax[i_new] = ai[i-1].max;
               }
-              for (int i=0; i<this->rank; i++) {
+              for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
                 lstart[i] = RedistArray->ai[i].l;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
               for (int j=0; j<lmax[1]; j++) {
-                for (int i=0; i<lmax[0]; i++) {
+                for (i=0; i<lmax[0]; i++) {
                   local  = (lmax[0]*j) + i;
                   global = gmax[1]*(j+lstart[1]) + gmax[0]*(i+lstart[0]) ;
                   ip2[local] = ip[global];
@@ -607,7 +609,7 @@
               int rmax[2];
               int rsize[2];
               int rstart[2];
-              for (int i=0; i<size_decomp; i++) {
+              for (i=0; i<size_decomp; i++) {
                 rmax[i] = ai[i].max;
                 rsize[i] = ai[i].r - ai[i].l + 1;
                 rstart[i] = ai[i].l;
@@ -625,7 +627,7 @@
               int sendcount;
               int* recvcounts = new int[nde];
               int* displs = new int[nde];
-              for (int i=0; i<size_decomp; i++) {
+              for (i=0; i<size_decomp; i++) {
                 if (decompids[i] != 1) {
                   for (int j=0; j<rsize[i]; j++) {
                     sendbuf = (int *)ip0[j*rsize[rankx]];
@@ -649,19 +651,19 @@
               int lmax[3];
               int lstart[3];
               gmax[rank_trans[0]] = 1;
-              for (int i=1; i<this->rank; i++) {
+              for (i=1; i<this->rank; i++) {
                 int i_new = rank_trans[i];
                 gmax[i_new] = ai[i-1].max;
               }
-              for (int i=0; i<this->rank; i++) {
+              for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
                 lstart[i] = RedistArray->ai[i].l;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
-              for (int k=0; k<lmax[2]; k++) {
-                for (int j=0; j<lmax[1]; j++) {
-                  for (int i=0; i<lmax[0]; i++) {
+              for (k=0; k<lmax[2]; k++) {
+                for (j=0; j<lmax[1]; j++) {
+                  for (i=0; i<lmax[0]; i++) {
                     local  = lmax[1]*lmax[0]*k +
                              lmax[0]*j + i;
                     global = gmax[2]*gmax[1]*(k+lstart[2]) + 
@@ -682,20 +684,20 @@
               int lmax[4];
               int lstart[4];
               gmax[rank_trans[0]] = 1;
-              for (int i=1; i<this->rank; i++) {
+              for (i=1; i<this->rank; i++) {
                 int i_new = rank_trans[i];
                 gmax[i_new] = ai[i-1].max;
               }
-              for (int i=0; i<this->rank; i++) {
+              for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
                 lstart[i] = RedistArray->ai[i].l;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
-              for (int l=0; l<lmax[3]; l++) {
-                for (int k=0; k<lmax[2]; k++) {
-                  for (int j=0; j<lmax[1]; j++) {
-                    for (int i=0; i<lmax[0]; i++) {
+              for (l=0; l<lmax[3]; l++) {
+                for (k=0; k<lmax[2]; k++) {
+                  for (j=0; j<lmax[1]; j++) {
+                    for (i=0; i<lmax[0]; i++) {
                       local  = lmax[2]*lmax[1]*lmax[0]*l +
                                lmax[1]*lmax[0]*k + 
                                lmax[0]*j + i;
