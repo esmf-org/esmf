@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.3 2004/12/22 00:16:30 nscollins Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.4 2004/12/28 22:25:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -114,6 +114,7 @@
 !
 !EOE
 
+!BOC
     ! This is where the VM for each component is initialized.
     ! Normally you would call SetEntryPoint inside set services,
     ! but to make this example very short, they are called inline below.
@@ -133,6 +134,7 @@
     call ESMF_GridCompInitialize(comp1, state1, rc=rc)
     print *, "ready to call init for comp 2"
     call ESMF_GridCompInitialize(comp2, state1, rc=rc)
+!EOC
 
     print *, "State Example 2 finished"
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -149,6 +151,7 @@
 ! {\tt ESMF\_State} objects now have a consistent view of the data.
 !EOE
 
+!BOC
     print *, "State before calling StateReconcile()"
     call ESMF_StatePrint(state1, rc=rc)
 
@@ -156,6 +159,7 @@
 
     print *, "State after calling StateReconcile()"
     call ESMF_StatePrint(state1, rc=rc)
+!EOC
 
     print *, "State Example 3 finished"
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -174,7 +178,13 @@
 !BOC
 end program ESMF_StateReconcileEx
 
+!BOE
+!\subsubsection{Initialization and SetServices Routines}
+!  
+! These are the separate subroutines called by the code above.
+!EOE
 
+!BOC
 ! Initialize routine which creates "field1" on PETs 0 and 1
 subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     use ESMF_Mod
@@ -216,7 +226,6 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
     rc = localrc
 
 end subroutine comp2_init
-!EOC
 
 subroutine comp_dummy(gcomp, rc)
    use ESMF_MOd
@@ -225,4 +234,5 @@ subroutine comp_dummy(gcomp, rc)
 
    rc = ESMF_SUCCESS
 end subroutine comp_dummy
+!EOC
     
