@@ -1,13 +1,14 @@
-# $Id: makefile,v 1.30 2003/04/28 21:21:08 nscollins Exp $ 
+# $Id: makefile,v 1.31 2003/04/29 19:51:36 svasquez Exp $ 
 
 LOCDIR   = src/Infrastructure
 
 include $(ESMF_DIR)/makefile
 
 DIRS     = Base IO LogErr TimeMgmt Machine TimeMgr CommMem \
-	   ConfigAttr PerfProf Data Route DistGrid PhysGrid Grid Field \
+	   PerfProf Data Route DistGrid PhysGrid Grid Field \
            mpiuni
 
+	   #ConfigAttr PerfProf Data Route DistGrid PhysGrid Grid Field \
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
