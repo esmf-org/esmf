@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.182 2004/08/24 20:12:08 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.183 2004/08/28 00:12:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.182 2004/08/24 20:12:08 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.183 2004/08/28 00:12:39 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3074,7 +3074,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field 
-      character (len = *), intent(in) :: options 
+      character (len = *), intent(in), optional :: options 
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -3087,7 +3087,7 @@
 !     \begin{description}
 !     \item [field]
 !           {\tt ESMF\_Field} to validate.
-!     \item [options]
+!     \item [{[options]}]
 !           Validation options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt field} 
@@ -3097,25 +3097,20 @@
 !EOP
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       type(ESMF_FieldType), pointer :: ftypep
       type(ESMF_Relloc) :: horzRelloc
-      character(len=ESMF_MAXSTR) :: msgbuf
       integer :: gridcounts(ESMF_MAXGRIDDIM)   ! how big the local grid is
       integer :: arraycounts(ESMF_MAXDIM)      ! how big the local array is
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
       integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
       integer :: gridrank, maprank, arrayrank, halo
-      integer :: i, j
+      !integer :: i, j
+      !character(len=ESMF_MAXSTR) :: msgbuf
     
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       if (.not.associated(field%ftypep)) then 
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -3124,6 +3119,7 @@
       endif 
 
       ftypep => field%ftypep
+
 
       ! make sure the field is ready before trying to look at contents
       if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
@@ -3206,8 +3202,7 @@
 
 #endif
       
-
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldValidate
 
@@ -3329,7 +3324,7 @@
         ! get the date from the timestamp.
         call ESMF_TimeGet(ts, timeString=Date, rc=status)
         Date = Date(1:10)//'_'//Date(12:19)//'.0000'
-        print*, 'Date = ', Date
+        !!print *, 'Date = ', Date
 !!$        Date = '2000-09-18_16:42:01'
 
         ! Collect results on DE 0 and output to a file
