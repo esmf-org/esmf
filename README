@@ -1,4 +1,4 @@
- $Id: README,v 1.34 2003/09/18 17:53:37 cdeluca Exp $
+ $Id: README,v 1.35 2003/09/22 16:20:00 flanigan Exp $
 ================================================================================
                                    README
 
@@ -34,6 +34,8 @@ QuickStart information for the impatient.
     (or 'gmake tests_uni' for non-mpi machines).
  - Type 'gmake system_tests' to make and run the system tests
     (or 'gmake system_tests_uni' for non-mpi machines).
+ - Type 'gmake examples' to make and run the examples applications
+    (or 'gmake examples_uni' for non-mpi machines).
  - Type 'gmake ESMF_COUPLED_FLOW' to compile and run a coupled fluid flow 
    demo program.  It will run in parallel, 4-way, compute 3600 time steps, and
    produce 10 data dumps.
