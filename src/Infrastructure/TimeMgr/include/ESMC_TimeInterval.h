@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.34 2004/04/21 21:39:40 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.35 2004/04/23 00:25:50 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -72,6 +72,9 @@ class ESMC_TimeInterval;
 enum ESMC_ComparisonType {ESMC_EQ, ESMC_NE,
                           ESMC_LT, ESMC_GT,
                           ESMC_LE, ESMC_GE};
+
+enum ESMC_AbsValueType {ESMC_POSITIVE_ABS, ESMC_NEGATIVE_ABS};
+
 // !PUBLIC TYPES:
  class ESMC_TimeInterval;
 
@@ -243,8 +246,10 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // common method for overloaded comparison operators
     bool ESMC_TimeIntervalCompare(const ESMC_TimeInterval &,
-                                  const ESMC_TimeInterval &,
                                   ESMC_ComparisonType) const;
+
+    // common method for positive and negative absolute value
+    ESMC_TimeInterval ESMC_TimeIntervalAbsValue(ESMC_AbsValueType) const;
 
     friend class ESMC_Calendar;
                                                         // (TMG 2.5.5)
