@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.tex,v 1.4 2002/08/19 17:38:15 cdeluca Exp $
+% $Id: ESMF_archdoc.tex,v 1.5 2002/08/19 20:49:28 cdeluca Exp $
 
 %
 \documentclass[]{article}
@@ -62,11 +62,12 @@
 %\section{Terminology}
 \input{ESMF_term}
 
-%\section{Decomposition and Data Arrangement}
-%\input{ESMF_decomp}
-
 %\section{Implementation Language and Language Interoperability Strategy}
 \input{ESMF_language}
+
+%\section{General Design Concepts}
+\input{ESMF_classes}
+\input{ESMF_usage}
 
 \newpage
 \begin{htmlonly}
@@ -78,7 +79,7 @@
 %\subsection{Components and Control}
 
 %\subsection{Coupling}
-\input{ESMF_coupling.tex}
+\input{ESMF_superclasses}
 
 \newpage
 \begin{htmlonly}
@@ -88,7 +89,7 @@
 \label{part:Infrastructure_Fields_and_Grids}
 
 %\section{Fields and Grids}
-\input{ESMF_classes}
+\input{ESMF_fieldclasses}
 
 \newpage
 \begin{htmlonly}
@@ -98,6 +99,7 @@
 \label{part:Infrastructure_Utilities}
 
 %\input{ESMF_utils}
+\input{ESMF_utilclasses}
 
 \section{Review Status}
 

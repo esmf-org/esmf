@@ -94,8 +94,75 @@ In our first set of examples, involving just two components, we'll call
 the instance of the application {\tt app}, the gridded components {\tt atm} 
 and {\tt ocn}, and the coupler {\tt coupler}.
 
+\subsection{Object Model}
 
+The hierarchy of classes in ESMF is shown in the following UML diagrams.  
 
+\subsection{Components}
+
+The top level object in the system is a Component object.
+Types of components are shown in the diagram below:
+
+\scalebox{0.70}{\includegraphics{ESMFTopClassDiagram.eps}}
+
+Detailed descriptions of these objects are:
+
+\subsubsection{Component (ESMF\_Comp)} 
+\begin{description}
+\item [Description] A Component is a functionally related computational entity that represents 
+a large system.  
+% \item [Function]  ...
+\end{description}
+
+\subsubsection{Application (ESMF\_App)}
+\begin{description} 
+\item [Description] We define an Application (ESMF\_App) as a special kind of Component 
+that is itself composed of a set of sub-Components that interact to form a complete scientific
+application.  
+\item [Function] The ESMF\_App class is responsible for managing those functions that relate 
+to an entire scientific application running under ESMF.  The ESMF\_App initialize method 
+must be called at the start of any user application operating under the framework, and
+the ESMF\_App finalize method at its end.  At initialization the Application allocates and 
+configures any resources needed to run the framework.  The Application also specifies whether 
+the system will be brokered using the Registry or not.  The ESMF\_App class can be queried 
+for information such as an experiment name, model name, run type (ESMF\_INIT, 
+ESMF\_BRANCH, etc.), and for an overall Status.  It can also be queried for
+information on any Component that it includes, including its Name, Map, and
+Status.
+\end{description}
+
+\subsubsection{Coupler Component (ESMF\_Coupler)}
+\begin{description}
+\item [Description] A Coupler is a specialized type of Component that encompasses all the 
+functionality needed to communicate data between two or more Components. 
+\item [Function] A Coupler must have methods to register new Components, to negotiate
+which Components need to exchange data, with optional Transformations of data, and to
+mediate the actual data exchange.
+\end{description}
+
+\subsubsection{Gridded Component (ESMF\_GComp)}
+\label{sec:griddedcomponent} 
+\begin{description}
+\item [Description] A Gridded Component is a specialized type of Component that is associated
+with computational data and the grid on which it is located.
+\item [Function] The GComp class is an abstraction to unify the grid and data carrying
+objects in the system: the Grid class, the Field class, and the Bundle class.
+<< what common Methods are at this level?? >>
+\end{description}
+
+\subsubsection{Transform (ESMF\_XForm)} 
+\begin{description}
+\item [Description] A Transform takes one or more physical quantities defined using one set 
+of units or representation and translates them as needed to a different set of units or 
+representation, for example, potential temperature to temperature.  Transform objects 
+are specialized by the application developer.
+\item [Function] The Transform class is an abstraction introduced for the
+purpose of standardizing high-level coupling interfaces.  It may be overloaded
+to take sets of individual Fields or Bundles.  Methods may include a
+separate initialization and run. 
+\item [Note] << this object was in the text here, but doesn't
+exist in the corresponding diagram.  which one needs to be fixed?? >>
+\end{description}
 
 
 

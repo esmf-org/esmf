@@ -1,0 +1,114 @@
+Other stuff for in here: log, error
+
+\subsubsection{Original Layout (ESMF\_Layout)}
+\label{sec:olayout} 
+\begin{description}
+\item [Note] << This is the original description in the doc; i've updated
+it below.  comments?? nsc. >>
+\item [Description] A layout is a description of a computational domain that
+may describe the decomposition of an Application, a Component, a Field Group, a Field, or 
+a Distributed Grid.
+If no Layout is specified for an object, it can inherit its layout from an object
+higher in the data hierarchy.  
+\item [Function] The Layout class ...
+\end{description}
+
+\subsubsection{Layout (ESMF\_Layout)}
+\label{sec:layout} 
+\begin{description}
+\item [Description] A Layout is a description of the decomposition of
+a Distributed Grid across multiple physical processors or processing elements.
+A single Distributed Grid can have multiple Layouts, each describing a different
+logical decomposition for different purposes.
+\item [Function] The Layout class maintains the mapping of 
+subsets of the entire logical grid to processing elements.
+\end{description}
+
+\subsubsection{Processor Element list (ESMF\_PElist)}
+\label{sec:pelist} 
+\begin{description}
+\item [Description] A Processor Element list contains a list of Processing Elements (PEs) 
+available to participate in the computation.  It includes a unique identifier for each PE, 
+information about what memory or communication groupings it belongs to (e.g. subsets 
+of PEs which share the same physical memory), and other identifiers for virtual resources.  
+\item [Function] The PElist class encapsulates information needed to schedule
+jobs in parallel, and is aggregated into the Layout class (see Section~\ref{layout}).
+It provides query methods to the Layout object, and some limited query methods
+may be available at the application level.
+\end{description}
+
+\subsubsection{Machine Model (ESMF\_MachineModel)}
+\label{sec:machinemodel} 
+\begin{description}
+\item [Description] A Machine Model describes the characteristics of memory and
+communication characteristics which influence choices for accomplishing a parallel 
+decomposition of a large problem.  For the most part the application does not
+interact with this class of object, although some query routines are provided.
+\item [Function] The MachineModel class encapsulates all hardware dependent information
+about the memory subsystem (e.g. physical shared memory, distributed shared memory, clustered
+memory), what communication transport mechanisms are available (MPI, OpenMP, etc), 
+whether the processors are homogeneous or heterogeneous, and 
+any other relevant hardware information (e.g. processor speed).
+It is aggregated into the Layout class (see Section~\ref{layout}), and provides
+methods for querying all characteristics needed by the Layout object to do 
+problem decomposition and distribution of work.
+The MachineModel class does expose some limited query methods to the application, 
+to allow for the possibility of making run-time choices of algorithms based on hardware type.
+\end{description}
+
+\subsubsection{Basic Utilities (ESMF\_BasicUtil)} 
+\begin{description}
+\item [Description] Utilities that may be utilitized by any other class in the ESMF.  
+Collecting these functions into a base-level utility set helps to 
+avoid circular referencing.
+\item [Function] 
+\end{description}
+
+\subsubsection{Basic Communications (ESMF\_BasicComm)}
+\begin{description}
+\item [Description] This library is a wrapper for MPI and other vendor-supplied 
+message passing libraries.
+\item [Function] The Basic Communication library provides a generic interface
+and efficient communications for the ESMF.  Methods include scatter, gather, send,
+receive, synchronize. 
+\end{description}
+
+\subsubsection{ (ESMF\_Machine)} 
+\begin{description}
+\item [Note] << is this the same as my MachineModel above??  nsc. >>
+\item [Description] The Machine class provides a representation of 
+key features of computer hardware and system software.  These
+features include memory attributes and configuration, processor type and speed,
+interconnect attributes, and system library availability.
+\item [Function]
+The main purpose of the Machine is to store hardware and system software
+information needed by the framework or application programmer in a general
+form, but with little abstraction.  This information can be used to perform resource 
+allocation, data distribution, and dynamic load balancing.  The Machine can be queried
+for platform type(s), number of processors, number of threads, and number of 
+nodes.  It may optionally provide information on quantities such as bandwidth and 
+latency through active tests.  
+\end{description}
+
+\subsubsection{Time Manager (ESMF\_Date, ESMF\_DT)}
+\begin{description}
+\item [Description] The date and time interval methods in the ESMF provide date
+calculations based on a number of different calendars.
+
+\end{description}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
