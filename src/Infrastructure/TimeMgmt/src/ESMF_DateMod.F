@@ -1,10 +1,11 @@
-! $Id: ESMF_DateMod.f,v 1.1 2002/11/15 21:35:09 jwolfe Exp $
+! $Id: ESMF_DateMod.F,v 1.1 2002/12/11 21:50:52 nscollins Exp $
 	module ESMF_DateMod
 !===============================================================================
 !BOP
 ! !MODULE: ESMF_DateMod
 !
 ! !USES:
+#include "ESMF_Macros.inc"
 	use ESMF_TODMod
 	use ESMF_CalendarMod
 	use ESMF_TimeMod
