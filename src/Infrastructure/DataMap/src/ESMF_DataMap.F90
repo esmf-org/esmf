@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.2 2003/12/05 21:42:16 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.3 2003/12/08 18:52:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -220,7 +220,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.2 2003/12/05 21:42:16 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.3 2003/12/08 18:52:47 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -334,7 +334,7 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      function ESMF_DataMapCreateNew(iorder, relloc, rc)
+      function ESMF_DataMapCreateNew(iorder, relloc, gridrank, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DataMap) :: ESMF_DataMapCreateNew
@@ -343,21 +343,25 @@ end function
 ! !ARGUMENTS:
       type(ESMF_IndexOrder), intent(in) :: iorder
       type(ESMF_RelLoc), intent(in), optional :: relloc
+      integer, intent(in), optional :: gridrank
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Allocates space for and initializes an {\tt ESMF\_DataMap} object.
+!    Allocates space for and initializes an {\tt ESMF\_DataMap} object.
 !
-!      This version assumes the data is scalar and matches the {\tt ESMF\_Grid}
-!      in order of {\tt ESMF\_Grid} index vs. {\tt ESMF\_Array} rank.  This creates a map
-!      suitable for a {\tt ESMF\_Field} and not for a Packed Array associated with
-!      a Bundle.
+!    This version assumes the data is scalar and matches the {\tt ESMF\_Grid}
+!    in order of {\tt ESMF\_Grid} index vs. {\tt ESMF\_Array} rank.  This creates a map
+!    suitable for a {\tt ESMF\_Field} and not for a Packed Array associated with
+!    a Bundle.
 !
 !      \begin{description}
 !      \item[iorder]
 !          One of 8 predefined index orderings.
 !      \item[{[relloc]}]
 !          Relative location of data per cell/vertex.
+!      \item[{[gridrank]}]
+!          Number of dimensions in the Grid.  Default is the same as the 
+!          number of dimensions implied by the iorder input.
 !      \item[{[rc]}] 
 !          Return code equals {\tt ESMF\_SUCCESS} if the method
 !          executes without errors.
@@ -391,7 +395,7 @@ end function
           return
         endif
     
-        call ESMF_DataMapConstructNew(dmp, iorder, relloc, status)
+        call ESMF_DataMapConstructNew(dmp, iorder, relloc, gridrank, status)
         if (status .ne. ESMF_SUCCESS) then
            print *, "DataMap construction error"
            return
@@ -490,12 +494,13 @@ end function
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      subroutine ESMF_DataMapConstructNew(datamap, iorder, relloc, rc)
+      subroutine ESMF_DataMapConstructNew(datamap, iorder, relloc, gridrank, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMapType), pointer :: datamap
       type(ESMF_IndexOrder), intent(in) :: iorder
       type(ESMF_RelLoc), intent(in), optional :: relloc
+      integer, intent(in), optional :: gridrank
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -583,6 +588,9 @@ end function
 !       set the sense to undefined
         datamap%sense = 0
    
+      ! if specified, use the real gridrank
+        if (present(gridrank)) datamap%gridrank = gridrank
+
 !       in this interface assume scalar data and use the relloc the caller gave
         datamap%datarank = 0
         datamap%ranklength = 0
@@ -691,7 +699,7 @@ end function
 !BOP
 ! !INTERFACE:
       subroutine ESMF_DataMapGet(datamap, gridrank, dimlist, &
-                       relloc, rc)
+                                 relloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMap), intent(in) :: datamap  
