@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.9 2004/03/05 16:35:38 svasquez Exp $
+! $Id: ESMF_FieldComm.F90,v 1.10 2004/03/06 00:00:57 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.9 2004/03/05 16:35:38 svasquez Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.10 2004/03/06 00:00:57 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -717,16 +717,15 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStore(srcField, dstField, parentLayout, &
-                                       routehandle, blocking, total, rc)
+                                       routehandle, blocking, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_DELayout), intent(in) :: parentLayout
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_RouteHandle), intent(out) :: routehandle
       type(ESMF_Async), intent(inout), optional :: blocking
-      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -809,7 +808,7 @@
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
                                  parentLayout, &
-                                 routehandle, blocking, total, status)
+                                 routehandle, blocking, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRedistStore: ArrayRedistStore returned failure"
         return
@@ -828,7 +827,7 @@
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStoreNew(srcField, decompIds, dstField, &
                                           parentLayout, routehandle, blocking, &
-                                          total, rc)
+                                          rc)
 !
 !
 ! !ARGUMENTS:
@@ -838,7 +837,6 @@
       type(ESMF_DELayout), intent(in) :: parentLayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Async), intent(inout), optional :: blocking
-      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -924,7 +922,7 @@
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
                                  parentLayout, &
-                                 routehandle, blocking, total, status)
+                                 routehandle, blocking, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRedistStoreNew: ArrayRedistStore returned failure"
         return
