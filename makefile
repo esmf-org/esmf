@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.43 2004/01/30 03:29:09 nscollins Exp $
+# $Id: makefile,v 1.44 2004/04/15 17:36:45 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -8,19 +8,6 @@
 
 
 TOPALL: all
-
-#
-#  New Variables to point to build and top dirs.
-#  DFF Feb 7, 2003
-#ESMF_TOP_DIR   = $(ESMF_DIR)
-#ESMF_BUILD_DIR = $(ESMF_DIR)/build
-
-#Default build option.
-#BOPT = g
-
-#DIRS = src
-
-#include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base
 
 
 #
@@ -43,7 +30,8 @@ DIRS = src
 
 CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_TESTDIR) $(ESMF_EXDIR) doc 
 CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/test \
-              $(ESMF_BUILD)/quick_start $(ESMF_BUILD)/release $(ESMF_BUILD)/examples
+              $(ESMF_BUILD)/quick_start $(ESMF_BUILD)/release \
+	      $(ESMF_BUILD)/examples
 
 
 #-------------------------------------------------------------------------------
@@ -157,17 +145,3 @@ install:
 	fi
 
 
-# Note: the following rules are currently in the build/common.mk 
-#  makefile fragment.
-
-# Clean recursively deletes files that each makefile wants
-# deleted.   Remove the .mod files here manually since the case
-# of mods is not really predictable.
-# clean: 
-# 	@rm -f ${ESMF_MODDIR}/*.mod
-# 	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
-# 	   ACTION=clean_recursive  tree 
-
-# clobber: chkopts clean
-# 	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
-# 	   ACTION=clobber_recursive  tree 
