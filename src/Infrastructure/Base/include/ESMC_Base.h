@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.28 2003/09/04 22:56:04 cdeluca Exp $
+// $Id: ESMC_Base.h,v 1.29 2003/09/05 17:14:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -66,22 +66,6 @@ enum ESMC_DataKind { ESMF_I1=1,
                      ESMF_C8,
                      ESMF_C16 };
 
-// ESMF platform-dependent data types
-#ifdef ESMF_IS_32BIT_MACHINE
-  typedef long long ESMF_KIND_I8;
-  typedef int       ESMF_KIND_I4;
-  typedef short     ESMF_KIND_I2;
-  typedef char      ESMF_KIND_I1;
-  typedef double    ESMF_KIND_R8;
-  typedef float     ESMF_KIND_R4;
-#else // 64-bit or larger machine
-  typedef long      ESMF_KIND_I8;
-  typedef int       ESMF_KIND_I4;
-  typedef short     ESMF_KIND_I2;
-  typedef char      ESMF_KIND_I1;
-  typedef double    ESMF_KIND_R8;
-  typedef float     ESMF_KIND_R4;
-#endif
 
 // general logical value - MUST MATCH F90
 enum ESMC_Logical { ESMF_TRUE=1,
