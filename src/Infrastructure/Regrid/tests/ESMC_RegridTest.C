@@ -1,4 +1,4 @@
-// $Id: ESMC_RegridTest.C,v 1.2 2003/03/11 03:01:02 cdeluca Exp $
+// $Id: ESMC_RegridTest.C,v 1.3 2003/04/01 23:57:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RegridTest.C,v 1.2 2003/03/11 03:01:02 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_RegridTest.C,v 1.3 2003/04/01 23:57:55 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -72,13 +72,6 @@
    ESMC_Test((rc==ESMF_SUCCESS),
               failMsg, &result, ESMF_SRCLINE);
 
-   // test initialization of members of statically allocated ESMC_Regrid
-   //   may want to read back values via Get methods for comparison
-   rc = route_ptr->ESMC_RegridInit(args);
-   sprintf(failMsg, "rc = %d, args = %f", rc, args);
-   ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
-
    // test setting of configuration values
    ESMC_RegridConfig config_set;
    rc = route_ptr->ESMC_RegridSetConfig(config_set);
@@ -95,19 +88,19 @@
               failMsg, &result, ESMF_SRCLINE);
 
    // test setting of ESMC_Regrid members values
-   <value type> value_set;
-   rc = route_ptr->ESMC_RegridSet<Value>(value_set);
-   sprintf(failMsg, "rc = %d, value_set = %f", rc, value_set);
-   ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+   //<value type> value_set;
+   //rc = route_ptr->ESMC_RegridSet<Value>(value_set);
+   //sprintf(failMsg, "rc = %d, value_set = %f", rc, value_set);
+   //ESMC_Test((rc==ESMF_SUCCESS),
+   //           failMsg, &result, ESMF_SRCLINE);
 
    // test getting of ESMC_Regrid members values,
    //   compare to values set previously
-   <value type> value_get;
-   rc = route_ptr->ESMC_RegridGet<Value>(&value_get);
-   sprintf(failMsg, "rc = %d, value_get = %f", rc, value_get);
-   ESMC_Test((rc==ESMF_SUCCESS && value_get == value_set),
-              failMsg, &result, ESMF_SRCLINE);
+   //<value type> value_get;
+   //rc = route_ptr->ESMC_RegridGet<Value>(&value_get);
+   //sprintf(failMsg, "rc = %d, value_get = %f", rc, value_get);
+   //ESMC_Test((rc==ESMF_SUCCESS && value_get == value_set),
+   //           failMsg, &result, ESMF_SRCLINE);
     
    // test validate method via option string
    char validate_options[ESMF_MAXSTR];

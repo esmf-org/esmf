@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTest.F90,v 1.1 2003/03/05 20:35:40 nscollins Exp $
+! $Id: ESMF_RegridTest.F90,v 1.2 2003/04/01 23:57:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridTest.F90,v 1.1 2003/03/05 20:35:40 nscollins Exp $'
+      '$Id: ESMF_RegridTest.F90,v 1.2 2003/04/01 23:57:55 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -63,13 +63,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       failMsg, result, ESMF_SRCLINE)
 
-      ! test initialization of members of statically allocated ESMF_Regrid
-      !   may want to read back values via Get methods for comparison
-      call ESMF_RegridInit(regrid, args, rc)
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
-
       ! test setting of configuration values
       type(ESMF_RegridConfig) config_set
       call ESMF_RegridSetConfig(regrid, config_set, rc)
@@ -86,19 +79,19 @@
                       failMsg, result, ESMF_SRCLINE)
 
       ! test setting of ESMF_Regrid members values
-      <value type> :: value_set
-      call ESMF_RegridSet<Value>(regrid, value_set, rc)
-      write(failMsg, *) "rc =", rc, ", value_set =", value_set
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+      !<value type> :: value_set
+      !call ESMF_RegridSet<Value>(regrid, value_set, rc)
+      !write(failMsg, *) "rc =", rc, ", value_set =", value_set
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      !                failMsg, result, ESMF_SRCLINE)
 
       ! test getting of ESMF_Regrid members values,
       !   compare to values set previously
-      <value type> :: value_get
-      call ESMF_RegridGet<Value>(regrid, value_get, rc)
-      write(failMsg, *) "rc =", rc, ", value_get =", value_get
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
-                      failMsg, result, ESMF_SRCLINE)
+      !<value type> :: value_get
+      !call ESMF_RegridGet<Value>(regrid, value_get, rc)
+      !write(failMsg, *) "rc =", rc, ", value_get =", value_get
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
+      !                failMsg, result, ESMF_SRCLINE)
     
       ! test validate method via option string
       character(ESMF_MAXSTR) :: validate_options
