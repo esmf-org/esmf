@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.2 2003/12/04 21:03:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -262,7 +262,8 @@
  
       public ESMF_StateWriteRestart
       public ESMF_StateReadRestart
- 
+
+      public ESMF_StateWrite
       public ESMF_StatePrint, ESMF_StateValidate
 
       public operator(.eq.), operator(.ne.)
@@ -271,7 +272,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.2 2003/12/04 21:03:21 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -3235,6 +3236,36 @@ end function
         ESMF_StateReadRestart = a 
  
         end function ESMF_StateReadRestart
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateWrite -- Write all or part of a State
+!
+! !INTERFACE:
+      subroutine ESMF_StateWrite(state, iospec, itemname, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State):: state 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      character (len=ESMF_MAXSTR), intent(in), optional :: itemname
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!      Used to write out all or part of a State object.
+!
+!EOP
+        ! FIXME: hardcoded for interopability test
+        type(ESMF_Field) :: fred
+        integer :: status
+
+        if (present(itemname)) then
+            call ESMF_StateGetField(state, name=itemname, field=fred, rc=status)
+            call ESMF_FieldWrite(fred, rc=status) 
+        endif
+  
+
+        end subroutine ESMF_StateWrite
+
 
 !------------------------------------------------------------------------------
 !BOP
