@@ -1,4 +1,4 @@
-/*$Id: mpi.c,v 1.4 2003/04/17 19:00:23 nscollins Exp $*/
+/*$Id: mpi.c,v 1.5 2004/03/17 20:16:09 nscollins Exp $*/
 
 /*
       This provides a few of the MPI-uni functions that cannot be implemented
@@ -331,15 +331,11 @@ int
 	mpi_comm_free_,
 	mpi_type_indexed_,
 	mpi_type_commit_,
-	mpi_type_indexed_,
-	mpi_type_commit_,
-	mpi_comm_dup_,
 	mpi_bcast_,
 	mpi_waitall_,
 	mpi_recv_,
 	mpi_isend_,
 	mpi_alltoall_,
-	mpi_type_free_,
 	mpi_type_free_,
 	mpi_wait_,
 	mpi_irecv_;
