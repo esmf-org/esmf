@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.26 2004/07/27 16:21:24 nscollins Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.27 2004/08/11 22:54:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.26 2004/07/27 16:21:24 nscollins Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.27 2004/08/11 22:54:01 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,6 +64,8 @@
       type(ESMF_GridHorzStagger) :: horz_stagger, Rhorz_stagger
       type(ESMF_GridVertStagger) :: vert_stagger
       integer :: status
+      integer, dimension (1) :: DEDim1
+      integer, dimension (10000) :: DEDim2
       real(ESMF_KIND_R8) :: delta(15), grid_min(3), grid_max(3)
       real(ESMF_KIND_R8) :: coord1(21), coord2(16)
       real(ESMF_KIND_R8) :: Rgrid_min(3), Rgrid_max(3)
@@ -238,16 +240,31 @@
                               maxGlobalCoordPerDim=grid_max, &
                               horzstagger=horz_stagger, &
                               name=gName, rc=status)
-
-      call ESMF_GridAddVertHeight(grid, delta, vertstagger=vert_stagger, &
-                                  rc=status)
-
-      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
-
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a LogRectUniform Grid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Grid Add Vert Height Test.
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Add Grid Vert Height Test"
+      call ESMF_GridAddVertHeight(grid, delta, vertstagger=vert_stagger, &
+                                  rc=status)
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Grid Distribute Test.
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Grid Distribute Test"
+      call ESMF_GridDistribute(grid, delayout=layout, countsPerDEDim1=DEDim1, &
+				countsPerDEDim2=DEDim2, rc=status)
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Printing a Grid
