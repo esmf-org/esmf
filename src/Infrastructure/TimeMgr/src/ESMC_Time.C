@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.26 2003/04/29 05:50:09 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.27 2003/04/29 05:57:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.26 2003/04/29 05:50:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.27 2003/04/29 05:57:35 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -780,6 +780,7 @@
                  ESMC_NULL_POINTER);
 
     // set end of this month (start of next month)
+    // TODO: use calendar interval logic when ready
     DD = 1;
     MM++;
     if (MM > MONTHS_PER_YEAR) {
