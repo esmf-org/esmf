@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.21 2003/06/19 21:00:44 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.22 2003/08/29 22:33:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.21 2003/06/19 21:00:44 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.22 2003/08/29 22:33:28 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -405,7 +405,6 @@
 
 #endif
 
-      !NEX_UTest
       ! Test Creation of an export State with a Field
       compname = "Atmosphere2"
       statename = "Export State"
