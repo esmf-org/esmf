@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.3 2004/10/28 17:10:23 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.4 2004/10/28 19:20:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -399,7 +399,7 @@ void ESMC_VMK::vmk_construct(int mypet, int npets, int *lpid, int *pid,
   for (int i=0; i<npets; i++)
     if (this->tid[i]>0) this->mpionly=0;    // found multi-threading PET
   // need a barrier here before any of the PETs get into user code...
-  vmk_barrier();
+  //vmk_barrier();
 }
 
 
