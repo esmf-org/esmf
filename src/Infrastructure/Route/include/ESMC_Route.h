@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.49 2005/01/18 21:39:39 eschwab Exp $
+// $Id: ESMC_Route.h,v 1.47.2.1 2005/03/02 22:09:20 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,39 +51,21 @@
 // !PUBLIC TYPES:
  class ESMC_Route;
 
+// if you change these, you *must* change the corresponding values
+// in the ESMF_Route.F90 file.
  enum ESMC_RouteOptions {
-	 ESMC_ROUTE_OPTION_NONE  = 0x000,
-	 ESMC_ROUTE_OPTION_ASYNC = 0x001,
-	 ESMC_ROUTE_OPTION_VECTOR= 0x002 
+         ESMC_ROUTE_OPTION_NONE        = 0x000,
+         ESMC_ROUTE_OPTION_ASYNC       = 0x001,
+         ESMC_ROUTE_OPTION_SYNC        = 0x002,
+         ESMC_ROUTE_OPTION_PACK_PET    = 0x004,
+         ESMC_ROUTE_OPTION_PACK_XP     = 0x008,
+         ESMC_ROUTE_OPTION_PACK_NOPACK = 0x010,
+         ESMC_ROUTE_OPTION_PACK_VECTOR = 0x020,
+         ESMC_ROUTE_OPTION_DEFAULT     = 0x009,
  };
 
 // !PRIVATE TYPES:
 
- // structure for matching precomputed routes
- typedef struct {
-    int entrystatus;
-    int rank;
-    ESMC_DELayout *snd_delayout;
-    int snd_DE; 
-    int snd_AI_count; 
-    ESMC_AxisIndex *snd_AI_exc;
-    ESMC_AxisIndex *snd_AI_tot;
-    ESMC_DELayout *rcv_delayout;
-    int rcv_DE; 
-    int rcv_AI_count; 
-    ESMC_AxisIndex *rcv_AI_exc;
-    ESMC_AxisIndex *rcv_AI_tot;
-    ESMC_Logical periodic[ESMF_MAXDIM];
-    int routeid;
-    ESMC_Route *theroute;
- } ESMC_RouteCacheEntry;
-
- // structure for caching them
- typedef struct {
-    int nroutes;
-    int nalloc;
-    ESMC_RouteCacheEntry **rcep;
- } ESMC_RouteCacheTable;
 
  // class declaration type
  class ESMC_Route : public ESMC_Base {    // inherits from ESMC_Base class
@@ -91,6 +73,7 @@
    private:
      // name in base class
      int routeid;           // unique id, used later for cacheing
+     ESMC_RouteOptions options; // sync/async, how to pack when communicating
      ESMC_VM *vm;           // vm on which this route runs
                             // must include VASs of all src + dst de's
      ESMC_RTable *sendRT;   // send route table
@@ -112,6 +95,10 @@
     int ESMC_RouteSetSend(int dst_pet, ESMC_XPacket *xp);
     int ESMC_RouteSetRecv(int src_pet, ESMC_XPacket *xp);
     
+    int ESMC_RouteSetOptions(ESMC_RouteOptions opt) { 
+                                         options = opt; return ESMF_SUCCESS; }
+    int ESMC_RouteGetOptions(void) { return options; };
+
     int ESMC_RouteSetRecvItems(int nitems);
     int ESMC_RouteGetRecvItems(void);
 
@@ -154,21 +141,7 @@
                        ESMC_Logical *hasSrcData, ESMC_Logical *hasDstData);
 
     // execute the communication routines set up in this route object
-    int ESMC_RouteRun(void *srcaddr, void *dstaddr, ESMC_DataKind dk,
-		      ESMC_RouteOptions options=ESMC_ROUTE_OPTION_NONE);
-
-    // add a route to the cache table
-    int ESMC_RouteAddCache(int rank, 
-                       int my_DE_rcv, 
-                       ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
-                       int AI_rcv_count, ESMC_DELayout *delayout_rcv,
-                       int my_DE_snd, 
-                       ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
-                       int AI_snd_count, ESMC_DELayout *delayout_snd,
-                       ESMC_Logical *periodic);
-
-    // drop a route from the cache table
-    int ESMC_RouteDropCache(void);
+    int ESMC_RouteRun(void *srcaddr, void *dstaddr, ESMC_DataKind dk);
 
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RouteValidate(const char *options) const;
@@ -196,14 +169,5 @@
 
  ESMC_Route *ESMC_RouteCreate( ESMC_VM *vm, int *rc);
  int ESMC_RouteDestroy(ESMC_Route *route);
- int ESMC_RouteGetCached(int rank, 
-                       int my_DE_rcv, 
-                       ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
-                       int AI_rcv_count, ESMC_DELayout *delayout_rcv,
-                       int my_DE_snd, 
-                       ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
-                       int AI_snd_count, ESMC_DELayout *delayout_snd,
-                       ESMC_Logical *periodic,
-                       ESMC_Logical *hascachedroute, ESMC_Route **route);
 
  #endif  // ESMC_Route_H

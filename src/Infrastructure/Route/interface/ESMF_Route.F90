@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.63 2004/12/28 07:19:24 theurich Exp $
+! $Id: ESMF_Route.F90,v 1.61.2.1 2005/03/02 22:10:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,15 +64,28 @@
       end type
 
       ! must match C++ code, must increase by powers of 2
-      type(ESMF_RouteOptions), parameter ::  ESMF_ROUTE_OPTION_ASYNC = &
+      type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_ASYNC = &
                                               ESMF_RouteOptions(1)
-      type(ESMF_RouteOptions), parameter ::  ESMF_ROUTE_OPTION_VECTOR = &
+      type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_SYNC = &
                                               ESMF_RouteOptions(2)
+      type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_PACK_PET = &
+                                              ESMF_RouteOptions(4)
+      type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_PACK_XP = &
+                                              ESMF_RouteOptions(8)
+      type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_PACK_NOPACK = &
+                                              ESMF_RouteOptions(16)
+      type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_PACK_VECTOR = &
+                                              ESMF_RouteOptions(32)
+      type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_DEFAULT = &
+                                              ESMF_RouteOptions(1+8)
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_Route, ESMF_RouteOptions
-      public ESMF_ROUTE_OPTION_ASYNC, ESMF_ROUTE_OPTION_VECTOR
+      public ESMF_ROUTE_OPTION_ASYNC,       ESMF_ROUTE_OPTION_SYNC, &
+             ESMF_ROUTE_OPTION_PACK_PET,    ESMF_ROUTE_OPTION_PACK_XP, &
+             ESMF_ROUTE_OPTION_PACK_NOPACK, ESMF_ROUTE_OPTION_PACK_VECTOR, &
+             ESMF_ROUTE_OPTION_DEFAULT
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -81,11 +94,11 @@
       public ESMF_RouteDestroy                ! interface only, deep class
 
       !public ESMF_RouteGet                    ! get and set values
+      public ESMF_RouteSet 
       public ESMF_RouteSetSend
       public ESMF_RouteSetRecv
       public ESMF_RouteSetRecvItems
 
-      public ESMF_RouteGetCached
       public ESMF_RouteGetRecvItems
 
       public ESMF_RoutePrecomputeHalo
@@ -110,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.63 2004/12/28 07:19:24 theurich Exp $'
+      '$Id: ESMF_Route.F90,v 1.61.2.1 2005/03/02 22:10:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -300,180 +313,6 @@
 
         end subroutine ESMF_RouteGet
 
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RouteGetCached"
-!BOPI
-! !IROUTINE: ESMF_RouteGetCached - Search for a precomputed Route
-
-! !INTERFACE:
-      subroutine ESMF_RouteGetCached(rank, &
-                 my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, dstDElayout, &
-                 my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, srcDElayout, &
-                 periodic, hascachedroute, route, rc)
-!
-! !ARGUMENTS:
-      integer, intent(in) :: rank
-      integer, intent(in) :: my_DE_dst
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
-      integer, intent(in) :: AI_dst_count
-      type(ESMF_DELayout), intent(in) :: dstDElayout
-      integer, intent(in) :: my_DE_src
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
-      integer, intent(in) :: AI_src_count
-      type(ESMF_DELayout), intent(in) :: srcDElayout
-      type(ESMF_Logical), dimension(:), intent(in) :: periodic
-      logical, intent(out) :: hascachedroute
-      type(ESMF_Route), intent(out) :: route
-      integer, intent(out), optional :: rc            
-!
-! !DESCRIPTION:
-!     Search for an appropriate precomputed {\tt ESMF\_Route}, trying to 
-!     match the information given in the arguments with cached 
-!     {\tt ESMF\_Route}s.  If an exact match is found, return
-!     with {\tt hascachedroute} true, and return the {\tt ESMF\_Route}
-!     which matched in the {\tt route} argument.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[rank]
-!          Data rank.
-!     \item[my_DE_dst]
-!          The ID of the destination DE.
-!     \item[AI_dst_exc]
-!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
-!          computational region of the data to be moved for each DE.
-!          (Note: is this correct?  If so, then the name is misleading.)
-!     \item[AI_dst_tot]
-!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
-!          total region of the data to be move for each DE.
-!     \item[AI_dst_count]
-!          Integer number of DEs in the destination.
-!     \item[dstDElayout]
-!          {\tt ESMF\_DELayout} for the destination.
-!     \item[my_DE_src]
-!          The ID of the destination DE.
-!     \item[AI_src_exc]
-!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
-!          exclusive region of the data to be moved for each DE.
-!          (Note: is this actually the computational region?)
-!     \item[AI_src_tot]
-!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
-!          total region of the data to be move for each DE.
-!     \item[AI_src_count]
-!          Integer number of DEs in the source.
-!     \item[srcDElayout]
-!          {\tt ESMF\_DELayout} for the source.
-!     \item[periodic]
-!          An array of {\tt ESMF\_Logical} flags indicating whether the 
-!          boundaries in each dimension are to be treated as periodic or not.
-!          This affects the halo and regrid operations in particular.
-!     \item[hascachedroute]
-!          Logical return code for whether an {\tt ESMF\_Route} was found.
-!     \item[route]
-!          If found, the returned {\tt ESMF\_Route}.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-        ! local variables
-        integer :: status                  ! local error status
-        integer :: i,j                     ! counters
-        logical :: rcpresent               ! did user specify rc?
-        type(ESMF_Logical) :: lcache
-        type(ESMF_Route) :: lroute
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-        hascachedroute = .FALSE.
-        route%this = ESMF_NULL_POINTER
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Translate AxisIndices from F90 to C++
-        ! TODO: fix this hack:
-        !  The halo code sends in src=dst, so don't decrement
-        !  twice in that case.  The AI arrays should really have
-        !  an explicit flag saying which indexing scheme they
-        !  are currently in, so we can just say "go to fortran order"
-        !  or "go to C order" and if already there don't increment 
-        !  or decrement too many times.
-        do j=1,rank
-          do i=1,AI_dst_count
-            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min - 1
-            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max - 1
-            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min - 1
-            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max - 1
-          enddo
-          if (.not. associated(AI_src_exc, AI_dst_exc)) then
-            do i=1,AI_src_count
-              AI_src_exc(i,j)%min = AI_src_exc(i,j)%min - 1
-              AI_src_exc(i,j)%max = AI_src_exc(i,j)%max - 1
-            enddo
-          endif
-          if (.not. associated(AI_src_tot, AI_dst_tot)) then
-            do i=1,AI_src_count
-              AI_src_tot(i,j)%min = AI_src_tot(i,j)%min - 1
-              AI_src_tot(i,j)%max = AI_src_tot(i,j)%max - 1
-            enddo
-          endif
-        enddo
-
-        ! Call C++  code
-        call c_ESMC_RouteGetCached(rank, &
-               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, dstDElayout, &
-               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, srcDElayout, &
-               periodic, lcache, lroute, status)
-
-        ! Translate AxisIndices back to  F90 from C++
-        do j=1,rank
-          do i=1,AI_dst_count
-            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min + 1
-            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max + 1
-            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min + 1
-            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max + 1
-          enddo
-          if (.not. associated(AI_src_exc, AI_dst_exc)) then
-            do i=1,AI_src_count
-              AI_src_exc(i,j)%min = AI_src_exc(i,j)%min + 1
-              AI_src_exc(i,j)%max = AI_src_exc(i,j)%max + 1
-            enddo
-          endif
-          if (.not. associated(AI_src_tot, AI_dst_tot)) then
-            do i=1,AI_src_count
-              AI_src_tot(i,j)%min = AI_src_tot(i,j)%min + 1
-              AI_src_tot(i,j)%max = AI_src_tot(i,j)%max + 1
-            enddo
-          endif
-        enddo
-
-        if (status .ne. ESMF_SUCCESS) then  
-          !print *, "Route Get Cached error"
-            hascachedroute = .false.
-            if (rcpresent) rc = ESMF_FAILURE
-          return  
-        endif
-
-
-        ! Set return values
-        if (lcache .eq. ESMF_TRUE) then
-            hascachedroute = .true.
-            route = lroute
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_RouteGetCached
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1266,6 +1105,60 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteSet"
+!BOPI
+! !IROUTINE: ESMF_RouteSet - Set options on Route
+
+! !INTERFACE:
+      subroutine ESMF_RouteSet(route, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      type(ESMF_RouteOptions), intent(in) :: options
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Set the communication options for an {\tt ESMF\_Route}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          {\tt ESMF\_Route} to be modified.
+!     \item[options]
+!          One of the valid paramaters of type {\tt ESMF\_RouteOptions}.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code
+        call c_ESMC_RouteSet(route, options, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RouteSet
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteSetRecvItems"
 !BOPI
 ! !IROUTINE: ESMF_RouteSetRecvItems - Set size of receive buffer
@@ -1507,13 +1400,12 @@
 ! !IROUTINE: ESMF_RouteRun - Execute the communications the Route represents
 
 ! !INTERFACE:
-      subroutine ESMF_RouteRun(route, srcArray, dstArray, options, rc)
+      subroutine ESMF_RouteRun(route, srcArray, dstArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       type(ESMF_LocalArray), intent(in), optional :: srcarray
       type(ESMF_LocalArray), intent(in), optional :: dstarray
-      type(ESMF_RouteOptions), intent(in), optional :: options
       integer, intent(out), optional :: rc            
 
 !
@@ -1528,9 +1420,6 @@
 !          {\tt ESMF\_LocalArray} containing data to be sent.
 !     \item[{[dstarray]}]
 !          {\tt ESMF\_LocalArray} containing data to be received.
-!     \item[{[options]}]
-!          {\tt ESMF\_RouteOptions} contains optional instructions on
-!          what communication strategy to pursue.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1552,12 +1441,7 @@
           rc = ESMF_FAILURE
         endif
 
-        ! Call C++  code
-        if (present(options)) then
-            call c_ESMC_RouteRunLA(route, srcarray, dstarray, options, status)
-        else
-            call c_ESMC_RouteRunLA(route, srcarray, dstarray, 0, status)
-        endif
+        call c_ESMC_RouteRunLA(route, srcarray, dstarray, status)
 
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &

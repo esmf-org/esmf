@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.23 2004/12/22 00:28:08 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.22.2.1 2005/03/02 22:08:45 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_RTable.C,v 1.23 2004/12/22 00:28:08 nscollins Exp $";
+            "$Id: ESMC_RTable.C,v 1.22.2.1 2005/03/02 22:08:45 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //

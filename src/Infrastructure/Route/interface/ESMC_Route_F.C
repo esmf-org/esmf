@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.34 2004/12/22 00:28:08 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.33.2.1 2005/03/02 22:11:00 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,10 +17,15 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+
+#define ESMC_FILENAME "ESMC_Route_F.C"
+
 #include <stdio.h>
 #include <string.h>
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
+#include "ESMC_LogErr.h"
+#include "ESMF_LogMacros.inc"
 #include "ESMC_DELayout.h"
 #include "ESMC_LocalArray.h"
 #include "ESMC_Route.h"
@@ -52,6 +57,11 @@ extern "C" {
        //    *status = (*ptr)->ESMC_RouteGet(&value);
        //}
 
+       void FTN(c_esmc_routeset)(ESMC_Route **ptr, 
+                                 ESMC_RouteOptions *options, int *status) {
+           *status = (*ptr)->ESMC_RouteSetOptions(*options);
+       }
+
        void FTN(c_esmc_routesetsend)(ESMC_Route **ptr, int *dest_pet, 
                                      ESMC_XPacket *xp, int *status) {
 
@@ -77,28 +87,29 @@ extern "C" {
            *status = ESMF_SUCCESS;
        }
 
+#define ESMC_METHOD "c_ESMC_RouteRunLA"
        void FTN(c_esmc_routerunla)(ESMC_Route **ptr, ESMC_LocalArray **src,
-                                   ESMC_LocalArray **dst, ESMC_RouteOptions *options, 
-				   int *status) {
+                                   ESMC_LocalArray **dst, int *status) {
            void *src_base_addr = NULL;
            void *dst_base_addr = NULL;
-           ESMC_DataKind dk;
+           ESMC_DataKind sdk, ddk;
 
 	   if (((long int)*src != 0) && ((long int)*src != -1)) {
                (*src)->ESMC_LocalArrayGetBaseAddr(&src_base_addr);
-               dk = (*src)->ESMC_LocalArrayGetKind();
+               sdk = (*src)->ESMC_LocalArrayGetKind();
            }
 	   if (((long int)*dst != 0) && ((long int)*dst != -1)) {
                (*dst)->ESMC_LocalArrayGetBaseAddr(&dst_base_addr);
-               dk = (*dst)->ESMC_LocalArrayGetKind();
+               ddk = (*dst)->ESMC_LocalArrayGetKind();
            }
-           if (options)
-               *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, 
-			                       dk, *options);
-	   else
-               *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, 
-			                       dk, ESMC_ROUTE_OPTION_NONE);
+           if (sdk != ddk) {
+               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
+                     "; source & destination datatypes not the same", status);
+               return;
+           }
+           *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, sdk);
        }
+#undef ESMC_METHOD
 
        void FTN(c_esmc_routerunna)(ESMC_Route **ptr, void *src,
                                    void *dst, ESMC_DataKind *dk, int *status) {
@@ -192,24 +203,6 @@ extern "C" {
                              *srcDELayout, *dstDELayout,
                              sendDomainList, recvDomainList,
                              hasSrcData, hasDstData);
-       }
-
-       void FTN(c_esmc_routegetcached)(int *rank, 
-                int *my_DE_rcv, 
-                ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot, 
-                int *AI_rcv_count, 
-                ESMC_DELayout **layout_rcv,
-                int *my_DE_snd, 
-                ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot, 
-                int *AI_snd_count, 
-                ESMC_DELayout **layout_snd,
-                ESMC_Logical *periodic, 
-                ESMC_Logical *hascachedroute, ESMC_Route **route, int *status) {
-
-           *status = ESMC_RouteGetCached(*rank, 
-                *my_DE_rcv, AI_rcv_exc, AI_rcv_tot, *AI_rcv_count, *layout_rcv,
-                *my_DE_snd, AI_snd_exc, AI_snd_tot, *AI_snd_count, *layout_snd,
-                periodic, hascachedroute, route);
        }
 
 
