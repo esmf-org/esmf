@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand.F90,v 1.18 2004/03/11 17:22:35 svasquez Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.19 2004/03/11 20:15:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand.F90,v 1.18 2004/03/11 17:22:35 svasquez Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.19 2004/03/11 20:15:59 nscollins Exp $'
 
 !==============================================================================
 !
@@ -426,7 +426,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateBySpec -- Create a new Array from an ArraySpec
 !
 ! !INTERFACE:
-      function ESMF_ArrayCreateBySpec(arrayspec, counts, haloWidth, &
+      function ESMF_ArrayCreateBySpec(arrayspec, counts, halo_width, &
                                       lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
@@ -435,7 +435,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: arrayspec
       integer, intent(in), dimension(:) :: counts
-      integer, intent(in), optional :: haloWidth
+      integer, intent(in), optional :: halo_width
       integer, dimension(:), intent(in), optional :: lbounds
       integer, dimension(:), intent(in), optional :: ubounds
       integer, intent(out), optional :: rc
@@ -451,7 +451,7 @@ end interface
 ! \item[counts]
 ! The number of items in each dimension of the array. This is a 1D
 ! integer array the same length as the rank.
-! \item[{[haloWidth]}]
+! \item[{[halo_width]}]
 ! Set the maximum width of the halo region on all edges. Defaults to 0.
 ! \item[{[lbounds]}]
 ! An integer array of length rank, with the lower index for each dimension.
@@ -487,7 +487,7 @@ end interface
 
         ! Call the list function to make the array
         ESMF_ArrayCreateBySpec = ESMF_ArrayCreateByList(rank, type, kind, &
-                                                       counts, haloWidth, &
+                                                       counts, halo_width, &
                                                        lbounds, ubounds, status)
         if (rcpresent) rc = status
 
@@ -500,7 +500,7 @@ end interface
 !
 ! !INTERFACE:
       function ESMF_ArrayCreateByList(rank, type, kind, counts, &
-                                      haloWidth, lbounds, ubounds, rc)
+                                      halo_width, lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateByList
@@ -510,7 +510,7 @@ end interface
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts
-      integer, intent(in), optional :: haloWidth
+      integer, intent(in), optional :: halo_width
       integer, dimension(:), intent(in), optional :: lbounds
       integer, dimension(:), intent(in), optional :: ubounds
       integer, intent(out), optional :: rc
@@ -534,7 +534,7 @@ end interface
 ! \item[counts]
 ! The number of items in each dimension of the array. This is a 1D
 ! integer array the same length as the rank.
-! \item[{[haloWidth]}]
+! \item[{[halo_width]}]
 ! Set the maximum width of the halo region on all edges. Defaults to 0.
 ! \item[{[lbounds]}]
 ! An integer array of length rank, with the lower index for each dimension.
@@ -566,8 +566,8 @@ end interface
         endif
 
         ! Always supply a halo value, setting it to 0 if not specified.
-        if (present(haloWidth)) then
-          hwidth = haloWidth
+        if (present(halo_width)) then
+          hwidth = halo_width
         else
           hwidth = 0
         endif
@@ -857,7 +857,7 @@ end interface
 ! !REQUIREMENTS:
 
 !
-!	Changed BOP/EOP to BOPI/EOPI until code is added.
+! Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
         rc = ESMF_FAILURE
@@ -871,7 +871,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr1DI2 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -916,8 +916,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -975,7 +974,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr1DI4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1020,8 +1019,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -1079,7 +1077,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr1DI8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1124,8 +1122,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -1183,7 +1180,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr2DI2 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1228,8 +1225,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -1287,7 +1283,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr2DI4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1332,8 +1328,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -1391,7 +1386,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr2DI8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1436,8 +1431,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -1495,7 +1489,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr3DI2 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1540,8 +1534,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -1599,7 +1592,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr3DI4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1644,8 +1637,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -1703,7 +1695,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr3DI8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1748,8 +1740,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -1807,7 +1798,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr4DI2 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1852,8 +1843,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -1911,7 +1901,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr4DI4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -1956,8 +1946,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2015,7 +2004,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr4DI8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2060,8 +2049,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2119,7 +2107,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr5DI2 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2164,8 +2152,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2223,7 +2210,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr5DI4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2268,8 +2255,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2327,7 +2313,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr5DI8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2372,8 +2358,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2431,7 +2416,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr1DR4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2476,8 +2461,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2535,7 +2519,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr1DR8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2580,8 +2564,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2639,7 +2622,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr2DR4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2684,8 +2667,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2743,7 +2725,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr2DR8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2788,8 +2770,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2847,7 +2828,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr3DR4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2892,8 +2873,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -2951,7 +2931,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr3DR8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -2996,8 +2976,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -3055,7 +3034,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr4DR4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -3100,8 +3079,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -3159,7 +3137,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr4DR8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -3204,8 +3182,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -3263,7 +3240,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr5DR4 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -3308,8 +3285,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -3367,7 +3343,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTArr5DR8 - make an ESMF array from an unallocated Fortran array 
  
 ! !INTERFACE: 
@@ -3412,8 +3388,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -3477,7 +3452,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr1DI2 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -3517,8 +3492,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -3595,7 +3569,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr1DI4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -3635,8 +3609,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -3713,7 +3686,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr1DI8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -3753,8 +3726,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -3831,7 +3803,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr2DI2 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -3871,8 +3843,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -3949,7 +3920,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr2DI4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -3989,8 +3960,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -4067,7 +4037,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr2DI8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -4107,8 +4077,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -4185,7 +4154,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr3DI2 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -4225,8 +4194,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -4303,7 +4271,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr3DI4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -4343,8 +4311,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -4421,7 +4388,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr3DI8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -4461,8 +4428,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -4539,7 +4505,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr4DI2 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -4579,8 +4545,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -4657,7 +4622,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr4DI4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -4697,8 +4662,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -4775,7 +4739,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr4DI8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -4815,8 +4779,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -4893,7 +4856,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr5DI2 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -4933,8 +4896,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -5011,7 +4973,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr5DI4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -5051,8 +5013,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -5129,7 +5090,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr5DI8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -5169,8 +5130,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -5247,7 +5207,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr1DR4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -5287,8 +5247,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -5365,7 +5324,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr1DR8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -5405,8 +5364,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -5483,7 +5441,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr2DR4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -5523,8 +5481,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -5601,7 +5558,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr2DR8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -5641,8 +5598,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -5719,7 +5675,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr3DR4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -5759,8 +5715,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -5837,7 +5792,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr3DR8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -5877,8 +5832,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -5955,7 +5909,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr4DR4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -5995,8 +5949,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -6073,7 +6026,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr4DR8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -6113,8 +6066,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -6191,7 +6143,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr5DR4 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -6231,8 +6183,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -6309,7 +6260,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullArr5DR8 - make an ESMF array from an Allocated Fortran array 
  
 ! !INTERFACE: 
@@ -6349,8 +6300,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -6432,7 +6382,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr1DI2 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -6475,8 +6425,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -6531,7 +6480,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr1DI4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -6574,8 +6523,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -6630,7 +6578,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr1DI8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -6673,8 +6621,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -6729,7 +6676,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr2DI2 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -6772,8 +6719,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -6828,7 +6774,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr2DI4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -6871,8 +6817,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -6927,7 +6872,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr2DI8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -6970,8 +6915,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7026,7 +6970,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr3DI2 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7069,8 +7013,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7125,7 +7068,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr3DI4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7168,8 +7111,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7224,7 +7166,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr3DI8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7267,8 +7209,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7323,7 +7264,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr4DI2 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7366,8 +7307,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7422,7 +7362,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr4DI4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7465,8 +7405,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7521,7 +7460,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr4DI8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7564,8 +7503,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7620,7 +7558,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr5DI2 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7663,8 +7601,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7719,7 +7656,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr5DI4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7762,8 +7699,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7818,7 +7754,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr5DI8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7861,8 +7797,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -7917,7 +7852,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr1DR4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -7960,8 +7895,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8016,7 +7950,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr1DR8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8059,8 +7993,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8115,7 +8048,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr2DR4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8158,8 +8091,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8214,7 +8146,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr2DR8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8257,8 +8189,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8313,7 +8244,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr3DR4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8356,8 +8287,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8412,7 +8342,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr3DR8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8455,8 +8385,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8511,7 +8440,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr4DR4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8554,8 +8483,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8610,7 +8538,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr4DR8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8653,8 +8581,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8709,7 +8636,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr5DR4 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8752,8 +8679,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8808,7 +8734,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr5DR8 - make an ESMF array from an unallocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8851,8 +8777,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -8914,7 +8839,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr1DI2 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -8953,8 +8878,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -9028,7 +8952,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr1DI4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -9067,8 +8991,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -9142,7 +9065,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr1DI8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -9181,8 +9104,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -9256,7 +9178,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr2DI2 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -9295,8 +9217,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -9370,7 +9291,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr2DI4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -9409,8 +9330,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -9484,7 +9404,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr2DI8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -9523,8 +9443,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -9598,7 +9517,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr3DI2 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -9637,8 +9556,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -9712,7 +9630,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr3DI4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -9751,8 +9669,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -9826,7 +9743,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr3DI8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -9865,8 +9782,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -9940,7 +9856,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr4DI2 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -9979,8 +9895,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -10054,7 +9969,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr4DI4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -10093,8 +10008,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -10168,7 +10082,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr4DI8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -10207,8 +10121,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -10282,7 +10195,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr5DI2 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -10321,8 +10234,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -10396,7 +10308,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr5DI4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -10435,8 +10347,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -10510,7 +10421,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr5DI8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -10549,8 +10460,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -10624,7 +10534,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr1DR4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -10663,8 +10573,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -10738,7 +10647,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr1DR8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -10777,8 +10686,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -10852,7 +10760,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr2DR4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -10891,8 +10799,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -10966,7 +10873,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr2DR8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -11005,8 +10912,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -11080,7 +10986,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr3DR4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -11119,8 +11025,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -11194,7 +11099,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr3DR8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -11233,8 +11138,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -11308,7 +11212,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr4DR4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -11347,8 +11251,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -11422,7 +11325,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr4DR8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -11461,8 +11364,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -11536,7 +11438,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr5DR4 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -11575,8 +11477,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -11650,7 +11551,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr5DR8 - make an ESMF array from an Allocated Fortran pointer 
  
 ! !INTERFACE: 
@@ -11689,8 +11590,7 @@ end interface
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
@@ -11823,7 +11723,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -11880,10 +11779,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -11978,7 +11880,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12035,10 +11936,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12133,7 +12037,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12190,10 +12093,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12288,7 +12194,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12345,10 +12250,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12443,7 +12351,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12500,10 +12407,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12598,7 +12508,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12655,10 +12564,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12753,7 +12665,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12810,10 +12721,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -12908,7 +12822,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12965,10 +12878,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13063,7 +12979,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13120,10 +13035,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13218,7 +13136,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13275,10 +13192,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13373,7 +13293,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13430,10 +13349,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13528,7 +13450,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13585,10 +13506,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13683,7 +13607,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13740,10 +13663,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13838,7 +13764,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13895,10 +13820,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -13993,7 +13921,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14050,10 +13977,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -14148,7 +14078,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14205,10 +14134,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -14303,7 +14235,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14360,10 +14291,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -14458,7 +14392,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14515,10 +14448,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -14613,7 +14549,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14670,10 +14605,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -14768,7 +14706,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14825,10 +14762,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -14923,7 +14863,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14980,10 +14919,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -15078,7 +15020,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -15135,10 +15076,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -15233,7 +15177,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -15290,10 +15233,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -15388,7 +15334,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -15445,10 +15390,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -15543,7 +15491,6 @@ end interface
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -15600,10 +15547,13 @@ end interface
  endif 
  endif 
  
- if (willalloc) then 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
+ 
+ ! ub is only used during allocation 
+ if (willalloc) then 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
@@ -15650,7 +15600,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData1DI2(array, f90ptr, docopy, rc) 
 ! 
@@ -15664,8 +15614,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15731,7 +15680,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData1DI4(array, f90ptr, docopy, rc) 
 ! 
@@ -15745,8 +15694,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15812,7 +15760,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData1DI8(array, f90ptr, docopy, rc) 
 ! 
@@ -15826,8 +15774,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15893,7 +15840,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData2DI2(array, f90ptr, docopy, rc) 
 ! 
@@ -15907,8 +15854,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15974,7 +15920,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData2DI4(array, f90ptr, docopy, rc) 
 ! 
@@ -15988,8 +15934,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16055,7 +16000,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData2DI8(array, f90ptr, docopy, rc) 
 ! 
@@ -16069,8 +16014,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16136,7 +16080,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData3DI2(array, f90ptr, docopy, rc) 
 ! 
@@ -16150,8 +16094,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16217,7 +16160,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData3DI4(array, f90ptr, docopy, rc) 
 ! 
@@ -16231,8 +16174,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16298,7 +16240,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData3DI8(array, f90ptr, docopy, rc) 
 ! 
@@ -16312,8 +16254,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16379,7 +16320,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData4DI2(array, f90ptr, docopy, rc) 
 ! 
@@ -16393,8 +16334,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16460,7 +16400,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData4DI4(array, f90ptr, docopy, rc) 
 ! 
@@ -16474,8 +16414,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16541,7 +16480,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData4DI8(array, f90ptr, docopy, rc) 
 ! 
@@ -16555,8 +16494,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16622,7 +16560,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData5DI2(array, f90ptr, docopy, rc) 
 ! 
@@ -16636,8 +16574,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16703,7 +16640,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData5DI4(array, f90ptr, docopy, rc) 
 ! 
@@ -16717,8 +16654,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16784,7 +16720,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData5DI8(array, f90ptr, docopy, rc) 
 ! 
@@ -16798,8 +16734,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16865,7 +16800,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData1DR4(array, f90ptr, docopy, rc) 
 ! 
@@ -16879,8 +16814,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16946,7 +16880,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData1DR8(array, f90ptr, docopy, rc) 
 ! 
@@ -16960,8 +16894,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -17027,7 +16960,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData2DR4(array, f90ptr, docopy, rc) 
 ! 
@@ -17041,8 +16974,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -17108,7 +17040,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData2DR8(array, f90ptr, docopy, rc) 
 ! 
@@ -17122,8 +17054,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -17189,7 +17120,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData3DR4(array, f90ptr, docopy, rc) 
 ! 
@@ -17203,8 +17134,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -17270,7 +17200,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData3DR8(array, f90ptr, docopy, rc) 
 ! 
@@ -17284,8 +17214,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -17351,7 +17280,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData4DR4(array, f90ptr, docopy, rc) 
 ! 
@@ -17365,8 +17294,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -17432,7 +17360,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData4DR8(array, f90ptr, docopy, rc) 
 ! 
@@ -17446,8 +17374,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -17513,7 +17440,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData5DR4(array, f90ptr, docopy, rc) 
 ! 
@@ -17527,8 +17454,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -17594,7 +17520,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayGetData5DR8(array, f90ptr, docopy, rc) 
 ! 
@@ -17608,8 +17534,7 @@ end interface
 ! Return a Fortran pointer to the existing data buffer, 
 ! or return a Fortran pointer to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -17680,7 +17605,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate1DI2(array, wrap, rc) 
 ! 
@@ -17694,8 +17619,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17714,7 +17638,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate1DI4(array, wrap, rc) 
 ! 
@@ -17728,8 +17652,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17748,7 +17671,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate1DI8(array, wrap, rc) 
 ! 
@@ -17762,8 +17685,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17782,7 +17704,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate2DI2(array, wrap, rc) 
 ! 
@@ -17796,8 +17718,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17816,7 +17737,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate2DI4(array, wrap, rc) 
 ! 
@@ -17830,8 +17751,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17850,7 +17770,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate2DI8(array, wrap, rc) 
 ! 
@@ -17864,8 +17784,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17884,7 +17803,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate3DI2(array, wrap, rc) 
 ! 
@@ -17898,8 +17817,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17918,7 +17836,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate3DI4(array, wrap, rc) 
 ! 
@@ -17932,8 +17850,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17952,7 +17869,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate3DI8(array, wrap, rc) 
 ! 
@@ -17966,8 +17883,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17986,7 +17902,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate4DI2(array, wrap, rc) 
 ! 
@@ -18000,8 +17916,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18020,7 +17935,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate4DI4(array, wrap, rc) 
 ! 
@@ -18034,8 +17949,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18054,7 +17968,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate4DI8(array, wrap, rc) 
 ! 
@@ -18068,8 +17982,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18088,7 +18001,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate5DI2(array, wrap, rc) 
 ! 
@@ -18102,8 +18015,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18122,7 +18034,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate5DI4(array, wrap, rc) 
 ! 
@@ -18136,8 +18048,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18156,7 +18067,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate5DI8(array, wrap, rc) 
 ! 
@@ -18170,8 +18081,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18190,7 +18100,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate1DR4(array, wrap, rc) 
 ! 
@@ -18204,8 +18114,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18224,7 +18133,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate1DR8(array, wrap, rc) 
 ! 
@@ -18238,8 +18147,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18258,7 +18166,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate2DR4(array, wrap, rc) 
 ! 
@@ -18272,8 +18180,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18292,7 +18199,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate2DR8(array, wrap, rc) 
 ! 
@@ -18306,8 +18213,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18326,7 +18232,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate3DR4(array, wrap, rc) 
 ! 
@@ -18340,8 +18246,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18360,7 +18265,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate3DR8(array, wrap, rc) 
 ! 
@@ -18374,8 +18279,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18394,7 +18298,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate4DR4(array, wrap, rc) 
 ! 
@@ -18408,8 +18312,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18428,7 +18331,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate4DR8(array, wrap, rc) 
 ! 
@@ -18442,8 +18345,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18462,7 +18364,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate5DR4(array, wrap, rc) 
 ! 
@@ -18476,8 +18378,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18496,7 +18397,7 @@ end interface
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !INTERFACE: 
  subroutine ESMF_ArrayDeallocate5DR8(array, wrap, rc) 
 ! 
@@ -18510,8 +18411,7 @@ end interface
 ! !DESCRIPTION: 
 ! Deallocate data contents if Array object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -18547,13 +18447,10 @@ end interface
 !
 ! The arguments are:
 ! \begin{description}
-!
 ! \item[array]
 ! Destroy contents of this {\tt Array}.
-!
 ! \item[[rc]]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 ! \end{description}
 !
 ! To reduce the depth of crossings of the F90/C++ boundary we first
@@ -19428,7 +19325,7 @@ end interface
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayF90Deallocate - Deallocate an F90 pointer
 !
 ! !INTERFACE:
@@ -19442,23 +19339,22 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Deallocate data contents for an array created from the C++ interface.
+! Deallocate data contents for an array created from the C++ interface.
+! The arguments are:
+! \begin{description}
+! \item[array]
+! A partially created {\tt Array} object.
+! \item[rank]
+! The {\tt Array} rank.
+! \item[type]
+! The {\tt Array} type (integer, real/float, etc).
+! \item[kind]
+! The {\tt Array} kind (short/2, long/8, etc).
+! \item[{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
-!      The arguments are:
-!      \begin{description}
-!      \item[array]
-!      A partially created {\tt Array} object.
-!      \item[rank]
-!      The {\tt Array} rank.
-!      \item[type]
-!      The {\tt Array} type (integer, real/float, etc).
-!      \item[kind]
-!      The {\tt Array} kind (short/2, long/8, etc).
-!      \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      \end{description}
-!
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
     integer :: status ! local error status

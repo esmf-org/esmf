@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.15 2004/03/11 16:16:37 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.16 2004/03/11 20:16:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -238,7 +238,7 @@
 #define ArrayCreateByMTArrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_ArrayCreateByMTArr##mrank##D##mtypekind - make an ESMF array from an unallocated Fortran array @\
  @\
 ! !INTERFACE: @\
@@ -283,8 +283,7 @@
 ! @\
  @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         ! Local variables @\
         type (ESMF_Array) :: array          ! new array object @\
@@ -348,7 +347,7 @@
 #define ArrayCreateByFullArrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_ArrayCreateByFullArr##mrank##D##mtypekind - make an ESMF array from an Allocated Fortran array @\
  @\
 ! !INTERFACE: @\
@@ -388,8 +387,7 @@
 ! @\
  @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         ! Local variables @\
         type (ESMF_Array) :: array           ! new array object @\
@@ -472,7 +470,7 @@
 #define ArrayCreateByMTPtrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind - make an ESMF array from an unallocated Fortran pointer @\
  @\
 ! !INTERFACE: @\
@@ -515,8 +513,7 @@
 ! @\
  @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         ! Local variables @\
         type (ESMF_Array) :: array          ! new array object @\
@@ -577,7 +574,7 @@
 #define ArrayCreateByFullPtrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind - make an ESMF array from an Allocated Fortran pointer @\
  @\
 ! !INTERFACE: @\
@@ -616,8 +613,7 @@
 ! @\
  @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         ! Local variables @\
         type (ESMF_Array) :: array          ! new array object @\
@@ -751,7 +747,6 @@
  @\
 ! @\
 !EOPI @\
-! !REQUIREMENTS: @\
  @\
         ! Local variables @\
         integer :: i                        ! temp var @\
@@ -808,10 +803,13 @@
            endif @\
         endif @\
  @\
+        ! lbounds, if given, should be used @\
+        if (present(lbounds)) then @\
+            lb(1:size(lbounds)) = lbounds @\
+        endif @\
+ @\
+        ! ub is only used during allocation @\
         if (willalloc) then @\
-            if (present(lbounds)) then @\
-                lb(1:size(lbounds)) = lbounds @\
-            endif @\
             if (present(ubounds)) then @\
                 ub(1:size(ubounds)) = ubounds @\
             endif @\
@@ -859,7 +857,7 @@
 #define ArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
-!BOP @\
+!BOPI @\
 ! !INTERFACE: @\
       subroutine ESMF_ArrayGetData##mrank##D##mtypekind(array, f90ptr, docopy, rc) @\
 ! @\
@@ -873,8 +871,7 @@
 !      Return a Fortran pointer to the existing data buffer, @\
 !      or return a Fortran pointer to a new copy of the data. @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
@@ -946,7 +943,7 @@
 #define ArrayDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
-!BOP @\
+!BOPI @\
 ! !INTERFACE: @\
       subroutine ESMF_ArrayDeallocate##mrank##D##mtypekind(array, wrap, rc) @\
 ! @\
@@ -960,8 +957,7 @@
 ! !DESCRIPTION: @\
 !      Deallocate data contents if Array object is responsible for cleaning up. @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         integer :: status                               ! local error status @\
  @\

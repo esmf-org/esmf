@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.12 2004/03/11 17:25:26 svasquez Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.13 2004/03/11 20:16:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.12 2004/03/11 17:25:26 svasquez Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.13 2004/03/11 20:16:15 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -612,7 +612,7 @@ end interface
         end subroutine ESMF_ArrayConstructF90Ptr
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArraySetData
 !
 ! !INTERFACE:
@@ -631,10 +631,11 @@ end interface
 ! 
 !  TODO: this needs to be macroized for T/K/R, just like create
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
+!       Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
         rc = ESMF_FAILURE
@@ -1316,7 +1317,7 @@ AllocAllocateMacro(R8, 5, RNG5, LOC5)
  
 
 !------------------------------------------------------------------------------ 
-!BOP 
+!BOPI
 ! !IROUTINE:  ESMF_ArrayF90Deallocate - Deallocate an F90 pointer 
 !
 ! !INTERFACE: 
@@ -1345,7 +1346,7 @@ AllocAllocateMacro(R8, 5, RNG5, LOC5)
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !   \end{description} 
 ! 
-!EOP 
+!EOPI
 ! !REQUIREMENTS: 
  
     integer :: status                               ! local error status 
