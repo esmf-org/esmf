@@ -2,7 +2,6 @@
 
 #include "ESMC_LogErr.h"
 #include "ESMF_LogMacros.inc"
-#include <iostream.h>
 #define ESMC_METHOD "ESMC_LogErrEx"
 
 int main() {
@@ -41,11 +40,11 @@ int main() {
     ESMC_Finalize();
                                            
    if (finalrc == ESMF_SUCCESS) {
-        cout << "PASS: ESMC_LogErrEx.C" << endl;
+        printf("PASS: ESMC_LogErrEx.C\n");
         return(ESMF_SUCCESS);
    }
    else {
-        cout << "FAIL: ESMC_LogErrEx.C" << endl;
+        printf("FAIL: ESMC_LogErrEx.C\n");
         return(ESMF_FAILURE);
    }
 

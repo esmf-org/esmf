@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.C,v 1.1 2004/12/08 17:53:11 nscollins Exp $
+// $Id: ESMC_Test.C,v 1.2 2005/01/10 23:57:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,    
@@ -20,8 +20,8 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
- #include <iostream.h>
  #include <ESMC_Start.h>
+ #include <stdio.h>
 
  // associated class definition file
  #include <ESMC_Test.h>
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Test.C,v 1.1 2004/12/08 17:53:11 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Test.C,v 1.2 2005/01/10 23:57:27 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -69,22 +69,19 @@
 // !REQUIREMENTS:  AAAn.n.n
 
  if (name == 0 || result == 0 || failMsg == 0 || file == 0) {
-   cout << "FAIL " << __FILE__ << ", line " << __LINE__ <<
-           ", null pointer(s) passed in" << endl;
+   printf("FAIL %s, line %d, null pointer(s) passed in\n", __FILE__, __LINE__);
    return(ESMF_FAILURE);
  }
 
  if (condition) {
-   cout << "PASS " << name << ", " << file << ", line " << line << endl;
+   printf("PASS %s, %s, line %d\n", name, file, line);
    if (!only)
-      cerr << "PASS " << name << ", " << file << ", line " << line << endl;
+      fprintf(stderr, "PASS %s, %s, line %d\n", name, file, line);
  }
  else {
-   cout << "FAIL " << name << ", " << file << ", line " << line << 
-           ", " << failMsg << endl;
+   printf("FAIL %s, %s, line %d, %s\n", name, file, line, failMsg);
    if (!only)
-       cerr << "FAIL " << name << ", " << file << ", line " << line << 
-               ", " << failMsg << endl;
+       fprintf(stderr, "FAIL %s, %s, line %d, %s\n", name, file, line, failMsg);
    (*result)++; // count total failures; 0 = all pass
  }
  return(ESMF_SUCCESS);

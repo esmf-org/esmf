@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.16 2004/06/18 20:39:38 eschwab Exp $
+// $Id: ESMC_ClockEx.C,v 1.17 2005/01/10 23:56:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,6 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include <ESMC.h>
- #include <iostream.h>
 
  // associated class definition file
  #include <ESMC_Clock.h>
@@ -28,7 +27,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.16 2004/06/18 20:39:38 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.17 2005/01/10 23:56:31 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -115,7 +114,7 @@
        finalrc = ESMF_FAILURE;
    }
 
-   cout << "The clock was advanced " << advanceCount << " times." << endl;
+   printf("The clock was advanced %d times.\n", advanceCount);
    
    // Test for the correct number of advance counts.
    if (advanceCount != 48) {
@@ -135,11 +134,11 @@
    }
 
    if (finalrc == ESMF_SUCCESS) {
-        cout << "PASS: ESMC_ClockEx.C" << endl;
+        printf("PASS: ESMC_ClockEx.C\n");
         return(ESMF_SUCCESS);
    } 
    else {
-        cout << "FAIL: ESMC_ClockEx.C" << endl;
+        printf("FAIL: ESMC_ClockEx.C\n");
         return(ESMF_FAILURE);
    }
 
