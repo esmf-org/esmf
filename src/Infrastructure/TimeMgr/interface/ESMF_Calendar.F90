@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.58 2004/03/16 23:28:43 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.59 2004/03/18 16:37:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
       use ESMF_BaseTimeMod
 
       ! for ReadRestart()/WriteRestart()
-      use ESMF_IOMod
+      use ESMF_IOSpecMod
 
       implicit none
 !
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.58 2004/03/16 23:28:43 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.59 2004/03/18 16:37:36 nscollins Exp $'
 
 !==============================================================================
 ! 

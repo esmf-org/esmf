@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.8 2004/03/17 21:06:29 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.9 2004/03/18 16:37:36 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -20,7 +20,7 @@
     
 !   ! Other ESMF modules which are needed by Arrays
     use ESMF_BaseMod
-    use ESMF_IOMod
+    use ESMF_IOSpecMod
     use ESMF_ArraySpecMod
     use ESMF_LocalArrayMod
     use ESMF_TestMod     ! test methods

@@ -37,7 +37,7 @@
       use ESMF_BaseMod
 
       ! for ReadRestart()/WriteRestart()
-      use ESMF_IOMod
+      use ESMF_IOSpecMod
 
       ! associated derived types
       use ESMF_CalendarMod
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.48 2004/03/16 23:03:04 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.49 2004/03/18 16:37:36 nscollins Exp $'
 
 !==============================================================================
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.10 2004/02/23 22:05:33 jwolfe Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.11 2004/03/18 16:37:32 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -20,7 +20,6 @@
     program ESMF_ArrayCreateEx
     
 !   ! Other ESMF modules which are needed by Arrays
-    use ESMF_IOMod
     use ESMF_Mod
     implicit none
 

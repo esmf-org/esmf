@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.38 2004/03/17 22:35:02 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.39 2004/03/18 16:37:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
-      use ESMF_IOMod
+      use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
       implicit none
@@ -121,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.38 2004/03/17 22:35:02 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.39 2004/03/18 16:37:32 nscollins Exp $'
 !
 !==============================================================================
 !
