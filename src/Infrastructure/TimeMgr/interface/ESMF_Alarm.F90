@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.26 2003/08/29 05:33:36 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.27 2003/08/29 22:45:20 flanigan Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -160,7 +160,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.26 2003/08/29 05:33:36 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.27 2003/08/29 22:45:20 flanigan Exp $'
 
 !==============================================================================
 !
@@ -695,6 +695,7 @@
 !          Gets the reference time for an alarm.
 !     \item[{[id]}]
 !          Gets the unique identifier for an alarm.
+!     \end{description}
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.1, TMG4.7
@@ -1499,6 +1500,7 @@
 !          Gets the reference time for an alarm.
 !     \item[{[id]}]
 !          Gets the unique identifier for an alarm.
+!     \end{description}
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.1, TMG4.7
