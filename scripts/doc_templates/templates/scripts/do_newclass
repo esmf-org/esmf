@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newclass,v 1.8 2003/03/03 22:35:46 nscollins Exp $
+# $Id: do_newclass,v 1.9 2003/03/04 01:10:08 eschwab Exp $
 #
 #===============================================================================
 # do_newclass
@@ -51,30 +51,35 @@ endif
 # get a copy of the source template file, rename and edit as requested class
   switch ($lang) 
   case f:
+      # F90 implementation file
       if(!(-r ESMF_$class.F90)) then
         cat $DOCT_DIR/ESMF_class.F90 | \
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
         sed 's/<Comp>/'$comp'/g' > ESMF_$class.F90
       endif
 
+      # C++ interface file
       if(!(-r ../interface/ESMC_$class.C)) then
         cat $DOCT_DIR/inter_ESMC_class.C | \
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
         sed 's/<Comp>/'$comp'/g' > ../interface/ESMC_$class.C
       endif
 
-      if(!(-r ../interface/ESMF_${class}_C.F90)) then
-        cat $DOCT_DIR/inter_ESMF_class_C.F90 | \
-        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
-        sed 's/<Comp>/'$comp'/g' > ../interface/ESMF_${class}_C.F90
-      endif
-
+      # C++ interface include file
       if(!(-r ../include/ESMC_$class.h)) then
         cat $DOCT_DIR/inter_ESMC_class.h | \
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
         sed 's/<Comp>/'$comp'/g' > ../include/ESMC_$class.h
       endif
 
+      # C++ to F90 intermediate glue code file (F77)
+      if(!(-r ../interface/ESMF_${class}_C.F90)) then
+        cat $DOCT_DIR/inter_ESMF_class_C.F90 | \
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ../interface/ESMF_${class}_C.F90
+      endif
+
+      # F90 unit test driver
       if(!(-r ../tests/ESMF_${class}Test.F90)) then
         cat $DOCT_DIR/ESMF_classTest.F90 | \
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
@@ -82,29 +87,35 @@ endif
       endif
       breaksw
   case c:
+      # C++ implementation file
       if(!(-r ESMC_$class.C)) then
         cat $DOCT_DIR/ESMC_class.C | \
-        sed 's/<Class>/'$class'/g' > ESMC_$class.C
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ESMC_$class.C
       endif
 
+      # C++ implementation include file
       if(!(-r ../include/ESMC_$class.h)) then
         cat $DOCT_DIR/ESMC_class.h | \
-        sed 's/<Class>/'$class'/g' | sed 's/<Comp>/'$comp'/g' \
-           > ../include/ESMC_$class.h
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ../include/ESMC_$class.h
       endif
 
+      # F90 interface file
       if(!(-r ../interface/ESMF_$class.F90)) then
         cat $DOCT_DIR/inter_ESMF_class.F90 | \
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
         sed 's/<Comp>/'$comp'/g' > ../interface/ESMF_$class.F90
       endif
 
+      # F90 to C++ intermediate glue code file (C)
       if(!(-r ../interface/ESMC_${class}_F.C)) then
         cat $DOCT_DIR/inter_ESMC_class_F.C | \
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
         sed 's/<Comp>/'$comp'/g' > ../interface/ESMC_${class}_F.C
       endif
 
+      # C++ unit test driver
       if(!(-r ../tests/ESMC_${class}Test.C)) then
         cat $DOCT_DIR/ESMC_classTest.C | \
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
