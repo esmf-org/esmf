@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.20 2003/07/18 20:42:44 jwolfe Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.21 2003/07/23 17:05:00 jwolfe Exp $
 !
 ! System test code #70385
 
@@ -203,11 +203,13 @@
       integer :: rc
 
       ! Local variables
-      integer :: i, j, ni, nj
+      integer :: i, j
       type(ESMF_DELayout) :: layout1 
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_Grid) :: grid1
       type(ESMF_Field) :: field1
+      type(ESMF_ArraySpec) :: arrayspec
+      type(ESMF_Array) :: array1
       integer(ESMF_IKIND_I4), dimension(:,:), pointer :: ldata
       integer :: de_id
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
@@ -215,7 +217,6 @@
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
       real :: x_min, x_max, y_min, y_max
-      type(ESMF_Array) :: array1
       character(len=ESMF_MAXSTR) :: gname, fname
 
       print *, "Entering Initialization routine"
@@ -239,10 +240,8 @@
       horz_coord_system = ESMF_CoordSystem_Cartesian
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreate(counts=counts, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
-                             layout=layout1, &
+      grid1 = ESMF_GridCreate(counts=counts, x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, layout=layout1, &
                              horz_gridtype=horz_gridtype, &
                              horz_stagger=horz_stagger, &
                              horz_coord_system=horz_coord_system, &
@@ -255,45 +254,15 @@
       call ESMF_DELayoutGetDEID(layout1, de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      ! Allocate arrays.
-      call ESMF_GridGetDE(grid1, ai_global=index, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      ni = index(1)%max - index(1)%min + 1
-      nj = index(2)%max - index(2)%min + 1
-      print *, "allocating", ni, " by ",nj," cells on DE", de_id
-      allocate(ldata(ni,nj))
+      ! Create an arrayspec for a 2-D array 
+      call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
+                              kind=ESMF_KIND_I4)
 
-      ! Set initial data values over whole array to -1
-      do j=1,nj
-        do i=1,ni
-          ldata(i,j) = -1
-        enddo
-      enddo
-
-      ! Create Array based on an existing, allocated F90 pointer.
-      ! Data is type Integer, 2D.
-      array1 = ESMF_ArrayCreate(ldata, ESMF_DATA_COPY, halo_width=2, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      print *, "Array Create returned"
-
-      ! Set initial data values over computational domain to the de identifier
-      call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      do j=index(2)%min,index(2)%max
-        do i=index(1)%min,index(1)%max
-          ldata(i,j) =de_id
-        enddo
-      enddo
-
-      ! No deallocate() is needed for idata, it will be freed when the
-      ! Array is destroyed. 
-
-      ! Create a Field using the Grid and Arrays created above
+      ! Create a Field using the Grid and ArraySpec created above
       fname = "DE id"
-      field1 = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
-                                                        name=fname, rc=rc)
+      field1 = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
+                                halo_width=2, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-
       call ESMF_FieldPrint(field1, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldValidate(field1, "", rc)
@@ -305,6 +274,28 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_StatePrint(importstate, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! Get pointer to the actual data
+      call ESMF_FieldGetData(field1, array1, rc=rc)
+      call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
+
+      ! Set initial data values over whole array to -1
+      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      do j=index(2)%min,index(2)%max
+        do i=index(1)%min,index(1)%max
+          ldata(i,j) = -1
+        enddo
+      enddo
+
+      ! Set initial data values over computational domain to the de identifier
+      call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      do j=index(2)%min,index(2)%max
+        do i=index(1)%min,index(1)%max
+          ldata(i,j) =de_id
+        enddo
+      enddo
 
       print *, "Exiting Initialization routine"
 
