@@ -3,6 +3,12 @@
 
 \subsection{Introduction}
 
+In this section, we 
+explain the classes involved in ESMF coupled applications, their 
+relationships, and typical action sequences for coupled applications.  
+
+\subsection{Design Goals and Considerations}
+
 One of the primary goals of the ESMF project is to increase interoperability
 across a range of Earth system modeling components.  As described in 
 Section~\ref{sec:scope}, initially these 
@@ -13,9 +19,26 @@ tasks within model components, such as the transformation of data between the
 physics and dynamics in a spectral atmospheric model, or the creation 
 of nested higher resolution regions within a coarser grid.  The ability to 
 couple components at varying scales both flexibly and efficiently requires
-careful design and implementation.  In this section, we 
-explain the classes involved in ESMF coupled applications, their 
-relationships, and typical action sequences for coupled applications.  
+careful design and implementation.  
+
+The important aspects of this design are as follows:
+\begin{itemize}
+\item The coupling specification {\it is entirely external to gridded 
+components involved in the coupling}, which makes it easier for the 
+same gridded component to be reconfigured for a variety of scenarios.
+\item Gridded components can be configured as for SPMD or MPMD and 
+sequential or concurrent execution without changes to the gridded 
+component code.  Changes to coupler or application code may be required. 
+\item The ability to send data when it's ready from within a gridded
+component allows computation to overlap with communication.  
+\item It is not necessary to create return points from 
+within the time iteration loop of a gridded component.  
+\item Data may be sent between components without needing to 
+be sent to a set of coupler DEs as an intermediate step.
+\item The systematized approach to component scheduling will
+enable a layer of tools for application configuration to be added to
+the architecture in the future.
+\end{itemize}
 
 \subsection{Classes and Scoping}
 
@@ -97,7 +120,7 @@ application may itself be composed of other coupled systems.}
 Gridded components have few responsibilities with respect to coupling
 to other components.  They do not need to keep track of the data needed
 by other components or to provide methods for inter-component 
-grid transformations or transfers of data.  They {\bf are} responsible for 
+grid transformations or transfers of data.  They {\it are} responsible for 
 providing a description of all of the fields and data they
 can export to other components, and for similarly providing a description 
 of the data they require in order to run.  These descriptions are
@@ -107,16 +130,17 @@ have an {\tt ESMF\_IMPORT} or {\tt ESMF\_EXPORT} value.  The state class
 includes metadata information as well as actual pointers to data 
 locations.  The ESMF will provide methods that enable a user to add or
 remove fields and data from States.  Gridded components are required to 
-have a method that checks that initial or imported data is valid and 
-complete.  
+have an {\tt ESMF_StateValidate} method that checks that initial or 
+imported data is valid and complete.  
 
 The coupler component produces a specification of the sequence of 
 transforms that are necessary to effect communication between components, 
 both scientific and computational, generic and user-defined.  The coupler 
-returns these transforms to the application in the form of a Transform
-object, which contains the needed methods and data to perform the
-required tranformations along with descriptions of any
-associated restrictions on how the transforms must take place.
+returns these to the application in the form of a 
+transform specification object, which contains a set of transforms 
+along with associated sequencing restrictions.  Each transform has a
+function pointer to a transform operation and may be bundled with 
+associated data.
 
 The application or parent component initiates the coupling and manages 
 its scheduling.  It is responsible for instantiating the gridded components
@@ -129,14 +153,14 @@ example, a data send or coupling transformation can occur while a gridded
 component is executing, without a need for the component to return to the
 application level.  
 To disable or rearrange the coupling sequence, a different set of function
-pointers can be passed in.  
+pointers can be passed in to the component.
 The gridded component call that executes the transform
-is a generic {\tt ESMF\_StateTransform} call, which takes as arguments the
-function pointer and the component's import or export state. The
+is a generic {\tt ESMF\_StateTransform} call, which takes as arguments a
+transform object and the component's import or export state. The
 call {\tt ESMF\_StateValidate} ensures that all required transforms
 have been performed by the data supplier and data is now available
-for use.  For sequencing purposes, a {\tt ESMF\_StateComplete} call
-will return when the state data has been transformed and the data
+for use.  For sequencing purposes, a {\tt ESMF\_StateTransformComplete} call
+will return when the state data has been transformed and data
 buffers are available to be reused.
 
 \subsection{Flow of Data}
@@ -151,7 +175,7 @@ DE sets.  However, if desired, an application can also be configured so that
 data from a source component is sent to a distinct set of coupler 
 DEs for processing before being sent to its destination.
 
-\subsection{Summary of Coupling Strategy}
+\subsection{Implications for ESMF Users}
 
 The above coupling architecture requires the following:
 \begin{itemize}
@@ -167,25 +191,6 @@ structures.
 \item The coupler component must define and return any transforms or 
 sends that gridded components involved in a coupling interaction may 
 perform.
-\end{itemize}
-
-The important aspects of this design are as follows:
-\begin{itemize}
-\item The coupling specification {\it is entirely external to gridded 
-components involved in the coupling}, which makes it easier for the 
-same gridded component to be reconfigured for a variety of scenarios.
-\item Gridded components can be configured as for SPMD or MPMD and 
-sequential or concurrent execution without changes to the gridded 
-component code.  Changes to coupler or application code may be required. 
-\item The ability to send data when it's ready from within a gridded
-component allows computation to overlap with communication.  
-\item It is not necessary to create return points from 
-within the time iteration loop of a gridded component.  
-\item Data may be sent between components without needing to 
-be sent to a set of coupler DEs as an intermediate step.
-\item The systematized approach to component scheduling will
-enable a layer of tools for application configuration to be added to
-the architecture in the future.
 \end{itemize}
 
 \subsection{Examples}
