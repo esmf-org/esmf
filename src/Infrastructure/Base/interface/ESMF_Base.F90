@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.48 2003/07/24 16:51:46 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.49 2003/07/24 17:12:34 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -183,6 +183,14 @@
 
 !------------------------------------------------------------------------------
 !
+      type ESMF_DomainList
+      sequence
+          integer :: num_domains
+          type(ESMF_Domain), dimension(:), pointer :: domains
+      end type
+
+!------------------------------------------------------------------------------
+!
       type ESMF_BasePointer
       sequence
       private
@@ -244,6 +252,7 @@
       public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
       public ESMF_DataValue, ESMF_Attribute
       public ESMF_BasePointer, ESMF_Base
+      public ESMF_Domain, ESMF_DomainList
 
       public ESMF_AxisIndex, ESMF_AxisIndexSet, ESMF_AxisIndexGet
       public ESMF_Logical, ESMF_TF_TRUE, ESMF_TF_FALSE
@@ -290,6 +299,11 @@
       public ESMF_AttributeGetObjectList
       public ESMF_AttributeCopy
       public ESMF_AttributeCopyAll
+
+! DomainList methods
+      public ESMF_DomainListCreate
+      public ESMF_DomainListDestroy
+      public ESMF_DomainListPrint
  
 !  Misc methods
       public ESMF_SetName
@@ -312,7 +326,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.48 2003/07/24 16:51:46 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.49 2003/07/24 17:12:34 dneckels Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -935,6 +949,85 @@ end function
 ! !REQUIREMENTS:  FLD1.5.4
 
       end subroutine ESMF_AttributeCopyAll
+
+!=========================================================================
+! Domain List routines.
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMF_DomainListCreate - create domain list
+
+!
+! !INTERFACE:
+      function ESMF_DomainListCreate(num_domains)
+! !RETURN VALUE:
+      type(ESMF_DomainList) :: ESMF_DomainListCreate
+!
+! !ARGUMENTS:
+      integer :: num_domains      ! A suggestion on the number of
+                                  ! domains the object will hold.
+
+!
+! !DESCRIPTION:
+! Create a domain list.  Initializes the array of domains.  Preallocates
+! some storage, hopefully enough.
+!
+!EOP
+      integer :: status
+
+! Allocate an amount of memory that will hopefully be sufficient.
+      allocate(ESMF_DomainListCreate%domains(num_domains), stat=status)
+
+! There are currently no domains, so set to zero
+      ESMF_DomainListCreate%num_domains = 0
+
+      end function ESMF_DomainListCreate
+
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMF_DomainListDestroy - destroy domain list
+
+!
+! !INTERFACE:
+      subroutine ESMF_DomainListDestroy(domainlist)
+!
+! !ARGUMENTS:
+      type(ESMF_DomainList) :: domainlist
+!
+! !DESCRIPTION:
+! Deallocate memory used by creation routine.
+!
+!EOP
+      integer :: status
+
+      deallocate(domainlist%domains, stat=status)
+
+      end subroutine ESMF_DomainListDestroy
+
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMF_DomainListPrint - print domain list
+
+!
+! !INTERFACE:
+      subroutine ESMF_DomainListPrint(domainlist)
+!
+! !ARGUMENTS:
+      type(ESMF_DomainList) :: domainlist
+!
+! !DESCRIPTION:
+! Dump the contents of a domain list to screen, i.e. for 
+! debugging during development.
+!
+!EOP
+      integer :: status
+
+      print *, "DomainListPrint"
+      print *, "Number domains:", domainlist%num_domains
+
+      end subroutine ESMF_DomainListPrint
 
 !=========================================================================
 ! Misc utility routines, perhaps belongs in a utility file?
