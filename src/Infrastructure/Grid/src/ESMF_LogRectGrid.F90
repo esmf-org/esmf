@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.90 2004/08/16 01:14:32 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.91 2004/08/16 23:07:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.90 2004/08/16 01:14:32 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.91 2004/08/16 23:07:15 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -271,8 +271,7 @@
       ! Private name; call using ESMF_GridCreateHorzlatLon()
       function ESMF_GridCreateHorzLatLonCoord(coord1, coord2, &
                                               horzstagger, dimNames, dimUnits, &
-                                              coordorder, coordindex, periodic, &
-                                              name, rc)
+                                              coordorder, periodic, name, rc)
 
 !
 ! !RETURN VALUE:
@@ -285,7 +284,6 @@
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordorder
-      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -316,9 +314,8 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordindex]}]
-!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
@@ -358,7 +355,6 @@
                                      horzCoordSystem=horzCoordSystem, &
                                      dimNames=dimNames, dimunits=dimUnits, &
                                      coordOrder=coordorder, &
-                                     coordIndex=coordindex, &
                                      periodic=periodic, name=name, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -381,8 +377,7 @@
       function ESMF_GridCreateHorzLatLonDelta(minGlobalCoordPerDim, &
                                               delta1, delta2, horzstagger, &
                                               dimNames, dimUnits, &
-                                              coordorder, coordindex, periodic, &
-                                              name, rc)
+                                              coordorder, periodic, name, rc)
 
 !
 ! !RETURN VALUE:
@@ -396,7 +391,6 @@
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordorder
-      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -430,9 +424,8 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordindex]}]
-!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
@@ -474,7 +467,6 @@
                                      horzCoordSystem=horzCoordSystem, &
                                      dimNames=dimNames, dimunits=dimUnits, &
                                      coordOrder=coordorder, &
-                                     coordIndex=coordindex, &
                                      periodic=periodic, name=name, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -497,8 +489,7 @@
                                             maxGlobalCoordPerDim, &
                                             deltaPerDim, horzstagger, &
                                             dimNames, dimUnits, &
-                                            coordorder, coordindex, periodic, &
-                                            name, rc)
+                                            coordorder, periodic, name, rc)
                                              
 !
 ! !RETURN VALUE:
@@ -515,7 +506,6 @@
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordorder
-      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -558,9 +548,8 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordindex]}]
-!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
@@ -600,8 +589,7 @@
                                        horzGridType, horzstagger, &
                                        horzCoordSystem, &
                                        dimNames, dimUnits, &
-                                       coordorder, coordindex, periodic, &
-                                       name, localrc)
+                                       coordorder, periodic, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -622,8 +610,7 @@
       ! Private name; call using ESMF_GridCreateHorzXY()
       function ESMF_GridCreateHorzXYCoord(coord1, coord2, &
                                           horzstagger, dimNames, dimUnits, &
-                                          coordorder, coordindex, periodic, &
-                                          name, rc)
+                                          coordorder, periodic, name, rc)
 
 !
 ! !RETURN VALUE:
@@ -636,7 +623,6 @@
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordorder
-      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -667,9 +653,8 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordindex]}]
-!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
@@ -709,7 +694,6 @@
                                      horzCoordSystem=horzCoordSystem, &
                                      dimNames=dimNames, dimunits=dimUnits, &
                                      coordOrder=coordOrder, &
-                                     coordIndex=coordIndex, &
                                      periodic=periodic, name=name, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -732,8 +716,7 @@
       function ESMF_GridCreateHorzXYDelta(minGlobalCoordPerDim, &
                                           delta1, delta2, &
                                           horzstagger, dimNames, dimUnits, &
-                                          coordorder, coordindex, periodic, &
-                                          name, rc)
+                                          coordorder, periodic, name, rc)
 
 !
 ! !RETURN VALUE:
@@ -747,7 +730,6 @@
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordorder
-      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -781,9 +763,8 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordindex]}]
-!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
@@ -825,7 +806,6 @@
                                      horzCoordSystem=horzCoordSystem, &
                                      dimNames=dimNames, dimunits=dimUnits, &
                                      coordOrder=coordOrder, &
-                                     coordIndex=coordIndex, &
                                      periodic=periodic, name=name, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -848,8 +828,7 @@
                                         maxGlobalCoordPerDim, &
                                         deltaPerDim, horzstagger, &
                                         dimNames, dimUnits, &
-                                        coordorder, coordindex, periodic, &
-                                        name, rc)
+                                        coordorder, periodic, name, rc)
                                              
 !
 ! !RETURN VALUE:
@@ -866,7 +845,6 @@
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordorder
-      type(ESMF_CoordIndex), intent(in), optional :: coordindex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -909,9 +887,8 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordindex]}]
-!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
@@ -951,8 +928,7 @@
                                        horzGridType, horzStagger, &
                                        horzCoordSystem, &
                                        dimNames, dimUnits, &
-                                       coordOrder, coordIndex, periodic, &
-                                       name, localrc)
+                                       coordOrder, periodic, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1508,8 +1484,7 @@
                                              horzGridType, horzStagger, &
                                              horzCoordSystem, &
                                              dimNames, dimUnits, &
-                                             coordOrder, coordIndex, &
-                                             periodic, name, rc)
+                                             coordOrder, periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
@@ -1526,7 +1501,6 @@
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
-      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -1560,7 +1534,8 @@
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the horizontal grid.
 !     \item[{[coordOrder]}]
-!     \item[{[coordIndex]}]
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
@@ -1606,7 +1581,6 @@
       grid%gridStructure   = ESMF_GRID_STRUCTURE_LOGRECT
       grid%horzStagger     = ESMF_GRID_HORZ_STAGGER_A
       grid%coordOrder      = ESMF_COORD_ORDER_XYZ
-      grid%coordIndex      = ESMF_COORD_INDEX_LOCAL
       if (present(deltaPerDim)) then
          do i=1,dimCount
            useDeltas(i) = deltaPerDim(i)
@@ -1663,7 +1637,6 @@
       if (present(horzStagger    )) grid%horzStagger     = horzStagger
       if (present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
       if (present(coordOrder     )) grid%coordOrder      = coordOrder
-      if (present(coordIndex     )) grid%coordIndex      = coordIndex
 
       ! Set dimension names and units for each dimension
       if (present(dimNames)) then
@@ -1734,8 +1707,7 @@
                                            horzStagger, vertStagger, &
                                            horzCoordSystem, vertCoordSystem, &
                                            dimNames, dimUnits, &
-                                           coordOrder, coordIndex, &
-                                           periodic, name, rc)
+                                           coordOrder, periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
@@ -1757,7 +1729,6 @@
       character (len=*), dimension(:), intent(in), optional :: dimNames
       character (len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
-      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -1847,7 +1818,6 @@
       grid%gridStructure   = ESMF_GRID_STRUCTURE_LOGRECT
       grid%horzStagger     = ESMF_GRID_HORZ_STAGGER_A
       grid%coordOrder      = ESMF_COORD_ORDER_XYZ
-      grid%coordIndex      = ESMF_COORD_INDEX_LOCAL
       allocate(grid%gridSpecific%logRectGrid, stat=localrc) 
       if (ESMF_LogMsgFoundAllocError(localrc, "logRectGrid", &
                                      ESMF_CONTEXT, rc)) return
@@ -1990,7 +1960,6 @@
       if (present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
       if (present(vertCoordSystem)) grid%vertCoordSystem = vertCoordSystem
       if (present(coordOrder     )) grid%coordOrder      = coordOrder
-      if (present(coordIndex     )) grid%coordIndex      = coordIndex
 
       ! Set dimension names and units for each dimension
       if (present(dimNames)) then
@@ -2821,7 +2790,6 @@
       grid%horzCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
       grid%vertCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
       grid%coordOrder      = ESMF_COORD_ORDER_UNKNOWN
-      grid%coordIndex      = ESMF_COORD_INDEX_UNKNOWN
       grid%periodic        = ESMF_FALSE
       grid%numPhysGrids    = 0
       grid%numDistGrids    = 0
@@ -3544,7 +3512,7 @@
 !          Logical flag.  If TRUE, reorder any results using a previously set
 !          CoordOrder before returning.  If FALSE do not reorder.  The default
 !          value is TRUE and users should not need to reset this for most
-!          applications.  This optional argument is available mostly for
+!          applications.  This optional argument is available primarily for
 !          internal use.
 !     \item[{[total]}]
 !          Logical. If TRUE, return the total coordinates including internally
@@ -3821,7 +3789,7 @@
 !          Logical flag.  If TRUE, reorder any results using a previously set
 !          CoordOrder before returning.  If FALSE do not reorder.  The default
 !          value is TRUE and users should not need to reset this for most
-!          applications.  This optional argument is available mostly for
+!          applications.  This optional argument is available primarily for
 !          internal use.
 !     \item[{[total]}]
 !          Logical flag to indicate getting DistGrid information for total cells.
@@ -5679,7 +5647,8 @@
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
 !     \item[{[coordOrder]}]
-!          Integer specifier to denote coordinate ordering.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -5999,7 +5968,8 @@
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
 !     \item[{[coordOrder]}]
-!          Integer specifier to denote coordinate ordering.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
