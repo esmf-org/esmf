@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.24 2004/04/21 19:56:15 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.25 2004/04/22 19:05:36 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ class ESMC_Log {
 
     int max_elements;
 
-    int MaxTryOpen=100000;
+    int MaxTryOpen;
 
     char nameLogErrFile[32];    // name of logfile.
                                 // If multiple files are written out,
@@ -80,7 +80,7 @@ class ESMC_Log {
 // (see ESMC\_LogErr.C for a description of these methods)
     void ESMC_LogOpen(char filename[]);
     void ESMC_LogClose();
-    int ESMC_LogWrite(int logtype, char msg[]);
+    int ESMC_LogWrite(char msg[], int logtype);
     //void ESMC_LogInfo(char* fmt,...);   
     //char charData[],char strData[][32],int intData[], double floatData[]);
     //int ESMC_LogGetUnit()
