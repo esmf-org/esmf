@@ -1,21 +1,12 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.2 2004/07/28 16:11:01 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.3 2004/07/28 17:09:11 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
 # Options:
 #
-#  -d	ESMF_DIR
+#  -d	TEST_DIR
 #  
-#  -b	ESMF_BOPT
-#
-#  -a   ESMF_ARCH
-#
-#  -c	ESMF_COMPILER
-#
-#  -p	ESMF_PREC
-#
-#  -s   ESMF_SITE
 
 use Getopt::Std;
 use File::Find
@@ -29,27 +20,18 @@ use File::Find
 @fail_lines = ();	# stdout file fail lines
 %options = ();		#arguments
 
-getopts("d:b:a:c:p:s:", \%options); 
+getopts("d:", \%options); 
 
 
-	$ESMF_DIR = "$options{d}"; 
+	$TEST_DIR = "$options{d}"; 
 
-	$ESMF_BOPT = "$options{b}"; 
-
-	$ESMF_ARCH = "$options{a}"; 
-
-	$ESMF_COMPILER = "$options{c}"; 
-
-	$ESMF_PREC = "$options{p}"; 
-
-	$ESMF_SITE = "$options{s}"; 
 
 	print "\n";
 	print "The following is the analysis of the unit tests results:\n";
 	print "\n";
 
 	#go to the test directory
-	chdir "$ESMF_DIR/test/test$ESMF_BOPT/$ESMF_ARCH.$ESMF_COMPILER.$ESMF_PREC.$ESMF_SITE/";
+	chdir "$TEST_DIR/";
 
 	find(\&wanted, '.'); 
 	sub wanted {
