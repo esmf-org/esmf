@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.76 2005/01/10 23:19:00 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.77 2005/04/02 00:17:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -68,15 +68,16 @@
 
       type(ESMF_CalendarType), parameter :: &
                                ESMF_CAL_GREGORIAN =  ESMF_CalendarType(1), &
-                               ESMF_CAL_JULIANDAY =  ESMF_CalendarType(2), &
+                               ESMF_CAL_JULIAN =     ESMF_CalendarType(2), &
+                               ESMF_CAL_JULIANDAY =  ESMF_CalendarType(3), &
                            ! like Gregorian, except Feb always has 28 days
-                               ESMF_CAL_NOLEAP =     ESMF_CalendarType(3), & 
+                               ESMF_CAL_NOLEAP =     ESMF_CalendarType(4), & 
                            ! 12 months, 30 days each
-                               ESMF_CAL_360DAY =     ESMF_CalendarType(4), & 
+                               ESMF_CAL_360DAY =     ESMF_CalendarType(5), & 
                            ! user defined
-                               ESMF_CAL_CUSTOM =     ESMF_CalendarType(5), &
+                               ESMF_CAL_CUSTOM =     ESMF_CalendarType(6), &
                            ! track base time seconds only
-                               ESMF_CAL_NOCALENDAR = ESMF_CalendarType(6)
+                               ESMF_CAL_NOCALENDAR = ESMF_CalendarType(7)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Calendar
@@ -96,8 +97,9 @@
 ! !PUBLIC TYPES:
       public MONTHS_PER_YEAR
       public ESMF_CalendarType
-      public ESMF_CAL_GREGORIAN, ESMF_CAL_JULIANDAY,  ESMF_CAL_NOLEAP, &
-             ESMF_CAL_360DAY,    ESMF_CAL_CUSTOM,     ESMF_CAL_NOCALENDAR
+      public ESMF_CAL_GREGORIAN, ESMF_CAL_JULIAN, ESMF_CAL_JULIANDAY, &
+             ESMF_CAL_NOLEAP,    ESMF_CAL_360DAY, ESMF_CAL_CUSTOM, &
+             ESMF_CAL_NOCALENDAR
       public ESMF_Calendar
 !------------------------------------------------------------------------------
 !
@@ -109,6 +111,7 @@
       public ESMF_CalendarFinalize
       public ESMF_CalendarGet
       public ESMF_CalendarInitialize
+      public ESMF_CalendarIsLeapYear
       public ESMF_CalendarPrint
       public ESMF_CalendarReadRestart
       public ESMF_CalendarSet
@@ -129,6 +132,8 @@
       private ESMF_CalendarCreateBuiltIn
       private ESMF_CalendarCreateCopy
       private ESMF_CalendarCreateCustom
+      private ESMF_CalendarIsLeapYearI4
+      private ESMF_CalendarIsLeapYearI8
       private ESMF_CalendarSetBuiltIn
       private ESMF_CalendarSetCustom
       private ESMF_CalendarSetDefaultType
@@ -137,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.76 2005/01/10 23:19:00 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.77 2005/04/02 00:17:16 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -465,6 +470,24 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
+! !IROUTINE: ESMF_ClockIsLeapYear - Determine if given year is a leap year
+!
+! !INTERFACE:
+      interface ESMF_CalendarIsLeapYear
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_CalendarIsLeapYearI4
+      module procedure ESMF_CalendarIsLeapYearI8
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Calendar}
+!     IsLeapYear methods.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_CalendarSet - Set properties of an ESMF Calendar
 !
 ! !INTERFACE:
@@ -535,10 +558,10 @@
 !     \item[calendartype]
 !          The built-in {\tt ESMF\_CalendarType}.  Valid values are:
 !            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GREGORIAN},
-!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOCALENDAR}, and
-!            {\tt ESMF\_CAL\_NOLEAP}.
-!          See the "Time Manager Reference" document for a description of
-!          each calendar type.
+!            {\tt ESMF\_CAL\_JULIAN}, {\tt ESMF\_CAL\_JULIANDAY},
+!            {\tt ESMF\_CAL\_NOCALENDAR}, and {\tt ESMF\_CAL\_NOLEAP}.
+!          See Section ~\ref{subsec:Calendar_options} for a description of each
+!          calendar type.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -792,7 +815,7 @@
 !     \item[{[name]}]
 !          The name of this calendar.
 !     \item[{[calendartype]}]
-!          The {\tt CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIANDAY,
+!          The {\tt CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIAN,
 !          etc.
 !     \item[{[daysPerMonth]}]
 !          Integer array of days per month, for each month of the year.
@@ -904,6 +927,92 @@
       call c_ESMC_CalendarInitialize(calendartype, rc)
     
       end subroutine ESMF_CalendarInitialize
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarIsLeapYear - Determine if given year is a leap year
+
+! !INTERFACE:
+      ! Private name; call using ESMF_CalendarIsLeapYear()
+      function ESMF_CalendarIsLeapYearI4(calendar, yy, rc)
+
+! !RETURN VALUE:
+      logical :: ESMF_CalendarIsLeapYearI4
+
+! !ARGUMENTS:
+      type(ESMF_Calendar),   intent(in)            :: calendar
+      integer(ESMF_KIND_I4), intent(in)            :: yy
+      integer,               intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Returns true if the given year is a leap year within the given calendar,
+!     and false otherwise.  See also {\tt ESMF\_TimeIsLeapYear()}.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarIsLeapYear()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          {\tt ESMF\_Calendar} to determine leap year within.
+!     \item[yy]
+!          Year to check for leap year.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarIsLeapYearI4(calendar, yy, &
+                                       ESMF_CalendarIsLeapYearI4, rc)
+    
+      end function ESMF_CalendarIsLeapYearI4
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarIsLeapYear - Determine if given year is a leap year
+
+! !INTERFACE:
+      ! Private name; call using ESMF_CalendarIsLeapYear()
+      function ESMF_CalendarIsLeapYearI8(calendar, yy_i8, rc)
+
+! !RETURN VALUE:
+      logical :: ESMF_CalendarIsLeapYearI8
+
+! !ARGUMENTS:
+      type(ESMF_Calendar),   intent(in)            :: calendar
+      integer(ESMF_KIND_I8), intent(in)            :: yy_i8
+      integer,               intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Returns true if the given year is a leap year within the given calendar,
+!     and false otherwise.  See also {\tt ESMF\_TimeIsLeapYear()}.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarIsLeapYear()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          {\tt ESMF\_Calendar} to determine leap year within.
+!     \item[yy\_i8]
+!          Year to check for leap year.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarIsLeapYearI8(calendar, yy_i8, &
+                                       ESMF_CalendarIsLeapYearI8, rc)
+    
+      end function ESMF_CalendarIsLeapYearI8
     
 !------------------------------------------------------------------------------
 !BOP
@@ -1025,10 +1134,10 @@
 !     \item[calendartype]
 !          The built-in {\tt CalendarType}.  Valid values are:
 !            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GREGORIAN},
-!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOCALENDAR}, and
-!            {\tt ESMF\_CAL\_NOLEAP}.
-!          See the "Time Manager Reference" document for a description of
-!          each calendar type.
+!            {\tt ESMF\_CAL\_JULIAN}, {\tt ESMF\_CAL\_JULIANDAY},
+!            {\tt ESMF\_CAL\_NOCALENDAR}, and {\tt ESMF\_CAL\_NOLEAP}.
+!          See Section ~\ref{subsec:Calendar_options} for a description of each
+!          calendar type.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
