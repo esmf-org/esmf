@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2003/04/09 23:48:40 flanigan Exp $
+# $Id: makefile,v 1.25 2003/04/18 17:18:32 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -208,55 +208,6 @@ install:
 	cp ${ESMC_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \
 	fi
 
-
-
-#
-#  System Test Targets
-#
-system_tests: chkopts build_libs chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
-	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
-	   if [ -d $(SYSTEM_TEST) ] ; then \
-	       cd $(SYSTEM_TEST); \
-	   fi; \
-        fi; \
-	$(MAKE) BOPT=$(BOPT) ACTION=tree_system_tests tree
-
-system_tests_uni: chkopts chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
-	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
-	   if [ -d $(SYSTEM_TEST) ] ; then \
-	       cd $(SYSTEM_TEST); \
-	   fi; \
-        fi; \
-	$(MAKE) BOPT=$(BOPT) ACTION=tree_system_tests_uni tree
-
-build_system_tests: chkopts chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
-	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
-	   if [ -d $(SYSTEM_TEST) ] ; then \
-	       cd $(SYSTEM_TEST); \
-	   fi; \
-        fi; \
-	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_system_tests tree
-
-run_system_tests:  chkopts chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
-	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
-	   if [ -d $(SYSTEM_TEST) ] ; then \
-	       cd $(SYSTEM_TEST); \
-	   fi; \
-        fi; \
-	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_system_tests tree
-
-run_system_tests_uni:  chkopts chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
-	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
-	   if [ -d $(SYSTEM_TEST) ] ; then \
-	       cd $(SYSTEM_TEST); \
-	   fi; \
-        fi; \
-	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_system_tests_uni tree
 
 
 # Clean recursively deletes files that each makefile wants

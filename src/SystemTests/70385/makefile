@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2003/04/09 23:48:46 flanigan Exp $ 
+# $Id: makefile,v 1.15 2003/04/18 17:18:34 flanigan Exp $ 
 
 ALL:  system_tests
 
@@ -18,6 +18,12 @@ LOCDIR	  = src/SystemTests/70385
 
 SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_SysTest70385
 
+# Object files other than ESMF_SysTest%.o that the
+# system tests executable will depend on.
+# List objects files in the order that they
+# are to be compiled/created.
+SYSTEM_TESTS_OBJ     =
+
 SYSTEM_TESTS_RUN     = RUN_ESMF_SysTest70385  
 
 SYSTEM_TESTS_RUN_UNI = RUN_ESMF_SysTest70385UNI
@@ -32,11 +38,6 @@ CLEANDIRS   =
 CLEANFILES  = *.o *.mod
 CLOBBERDIRS =
 
-
-$(ESMC_TESTDIR)/ESMF_SysTest70385: ESMF_SysTest70385.o  chkopts
-	$(SL_F_LINKER) -o ESMF_SysTest70385 ESMF_SysTest70385.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	mv -f ESMF_SysTest70385 $(ESMC_TESTDIR)
-	${RM} -f *.o *.mod
 
 RUN_ESMF_SysTest70385:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest70385.tmps

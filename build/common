@@ -1,4 +1,4 @@
-# $Id: common,v 1.39 2003/04/10 21:45:50 flanigan Exp $ 
+# $Id: common,v 1.40 2003/04/18 17:18:32 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -159,18 +159,91 @@ buildexamples_11: ${BUILDEXAMPLES_11}
 buildexamples_12: ${BUILDEXAMPLES_12}
 buildexamples_13: ${TESTEXAMPLES_13}
 
-
+########################################
+#
 #System tests
+#
+# system_tests, build and run system tests
+#
+system_tests: chkopts build_libs chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_system_tests tree
+
 tree_system_tests: tree_build_system_tests tree_run_system_tests
+
+#
+# system_tests_uni, build and run uni versions of the system tests
+#
+system_tests_uni: chkopts chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_system_tests_uni tree
+
 
 tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 
+#
+# build_system_tests
+#
+build_system_tests: chkopts chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_system_tests tree
+
 tree_build_system_tests:  $(SYSTEM_TESTS_BUILD) 
+
+$(ESMC_TESTDIR)/ESMF_SysTest% : $(SYSTEM_TESTS_OBJ) ESMF_SysTest%.o 
+	$(SL_F_LINKER) -o $@  $^ -lesmf ${F90CXXLIBS} \
+	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+	$(SL_LINKOPTS)
+	${RM} -f *.o *.mod
+	@echo ""
+	@echo "****************************************"
+	@echo ""
+
+#
+# run_system_tests
+#
+run_system_tests:  chkopts chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_system_tests tree
 
 tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
 
+#
+# run_system_tests_uni
+#
+run_system_tests_uni:  chkopts chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_system_tests_uni tree
+
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
+
+########################################
 #
 #  tests
 #

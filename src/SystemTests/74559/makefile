@@ -1,21 +1,26 @@
-# $Id: makefile,v 1.2 2003/04/17 17:31:23 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/04/18 17:18:34 flanigan Exp $ 
 
 ALL: system_tests
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
-SOURCEF	  = FlowMod.F90 ArraysGlobalMod.F90 ESMF_SysTest74559.F90
-
+SOURCEF	  = 
 SOURCEH	  = 
 OBJSC	  =  
-OBJSF	  =  ArraysGlobalMod.o FlowMod.o user_coupler.o
+OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
 LOCDIR	  = src/SystemTests/74559
 
 
 SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SysTest74559
+
+# Object files other than ESMF_SysTest%.o that the
+# system tests executable will depend on.
+# List objects files in the order that they
+# are to be compiled/created.
+SYSTEM_TESTS_OBJ      = ArraysGlobalMod.o FlowMod.o HeatMod.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_ESMF_SysTest74559  
 
@@ -30,19 +35,6 @@ DIRS =
 CLEANDIRS   =
 CLEANFILES  = *.o *.mod
 CLOBBERDIRS =
-
-
-# user_models (and .mod files) have to be built first
-ESMF_SysTest74559.o: FlowMod.o HeatMod.o user_coupler.o
-FlowMod.o: ArraysGlobalMod.o
-HeatMod.o: ArraysGlobalMod.o
-
-$(ESMC_TESTDIR)/ESMF_SysTest74559: ESMF_SysTest74559.o ${OBJSF} chkopts
-	$(SL_F_LINKER) -o ESMF_SysTest74559 ESMF_SysTest74559.o ${OBJSF} \
-	    -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} \
-            ${PCL_LIB} $(SL_LINKOPTS)
-	mv -f ESMF_SysTest74559 $(ESMC_TESTDIR)
-	${RM} -f *.o *.mod
 
 RUN_ESMF_SysTest74559:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest74559.tmps
