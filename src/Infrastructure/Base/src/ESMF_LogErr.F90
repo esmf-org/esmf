@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.46 2004/12/03 21:53:15 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.47 2004/12/03 22:03:52 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -603,7 +603,7 @@ end subroutine ESMF_LogGet
       subroutine ESMF_LogInitialize(filename, lognone, logtype, rc)
 !
 ! !ARGUMENTS:
-      character(len=32)                          :: filename
+      character(len=*)                          :: filename
       integer, intent(in),optional		:: lognone  
       type(ESMF_LogType), intent(in),optional  :: logtype  
       integer, intent(out),optional	        :: rc
@@ -666,11 +666,16 @@ end subroutine ESMF_LogGet
 	ESMF_LogDefault%LOG_ARRAY(i)%dirty = ESMF_FALSE
 	ESMF_LogDefault%LOG_ARRAY(i)%fIndex = 1
 	if (ESMF_LogDefault%petCount .eq. 1) then
-	    ESMF_LogDefault%LOG_ARRAY(1)%nameLogErrFile=filename
+	    ESMF_LogDefault%LOG_ARRAY(1)%nameLogErrFile=trim(filename)
         else
-	    filename = "pet" // char(i) // "." // filename
+	    filename = "pet" // char(i) // "." // trim(filename)
 	    ESMF_LogDefault%LOG_ARRAY(i)%nameLogErrFile=filename
 	endif
+    if (len(ESMF_LogDefault%LOG_ARRAY(i)%nameLogErrFile) .gt. 32) then
+        print *, "filename exceeded 32 characters"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+    endif
 	ESMF_LogDefault%LOG_ARRAY(i)%unitnumber=un   
         do j=un, ESMF_LOG_UPPER
             inquire(unit=j,iostat=status)
