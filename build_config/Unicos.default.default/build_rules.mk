@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2004/10/28 22:11:31 nscollins Exp $
+# $Id: build_rules.mk,v 1.3 2004/10/28 22:21:22 nscollins Exp $
 # 
 # Unicos.default.default.mk
 #
@@ -154,6 +154,9 @@ SL_LIB_LINKER = $(CXXF90LD)
 # No gcc available, so use cpp.
 CPP = cpp
 
+# back in the common.mk file, make sure to not overwrite these rules
+CPPRULES = defined
+
 # change to not depend upon gcc -E -P behavior, remove -P and add filter to delete #line
 # amend bad cpp ".TRUE.", ". NOT." , "=>' output
 # fix leading space that seems to show up on some lines
@@ -163,3 +166,4 @@ CPP = cpp
 %.o : %.cpp
 	${CPP} -E -I${ESMF_INCDIR} $< | tr "@^" "\n#" | sed -e 's/^ //' -e '/^#line/d' -e 's/ \. /./g' -e 's/\. not\./.not./g' -e 's/= >/=>/g' > $(dir$<)$(notdir $@)
 	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $ (dir $<)$(basename $@) .F90
+
