@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.10 2003/07/30 17:10:56 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.11 2003/07/30 17:16:16 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@ extern "C" {
 class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
 
    private:
-    struct ESMC_DELayout delayout;
+    //struct ESMC_DELayout delayout;   // nsc - would this help us?
     struct ESMC_AxisIndex ai_total[ESMF_MAXDIM]; // limits for whole array
     struct ESMC_AxisIndex ai_comp[ESMF_MAXDIM];  // for computational region
     struct ESMC_AxisIndex ai_excl[ESMF_MAXDIM];  // never is sent or received
