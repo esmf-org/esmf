@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.125 2004/12/18 16:40:56 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.126 2004/12/20 21:16:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.125 2004/12/18 16:40:56 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.126 2004/12/20 21:16:49 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8321,17 +8321,21 @@
 ! !IROUTINE: ESMF_LRGridBoxIntersectRecv - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, &
+      subroutine ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
                                              localMinPerDim, localMaxPerDim, &
-                                             domainList, srcRelloc, dstRelloc, &
+                                             domainList, hasDstData, hasSrcData, &
+                                             srcRelloc, dstRelloc, &
                                              total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: srcGrid
       type(ESMF_Grid) :: dstGrid
+      type(ESMF_VM), intent(in) :: parentVM
       real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
       type(ESMF_DomainList), intent(inout) :: domainList
+      logical, intent(in) :: hasDstData
+      logical, intent(in) :: hasSrcData
       type(ESMF_RelLoc), intent(in), optional :: srcRelloc
       type(ESMF_RelLoc), intent(in), optional :: dstRelloc
       logical, intent(in), optional :: total
@@ -8374,8 +8378,10 @@
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
       integer :: physId, myDE, thisDE
+      integer :: myPET, nPETs, thisPET, srcDEs, srcDE, srcPID
       integer(ESMF_KIND_I4) :: localIndex(2)
-      integer(ESMF_KIND_I4), dimension(:), allocatable :: globalMinIndex, globalMaxIndex
+      integer(ESMF_KIND_I4), dimension(:), allocatable :: globalMinIndex, &
+                                                          globalMaxIndex
       logical :: hasMin, hasMax
       real(ESMF_KIND_R8) :: point(2)
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
@@ -8384,7 +8390,7 @@
       type(ESMF_LocalArray) :: array
       type(ESMF_PhysGrid) :: physgrid
       type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
-      type(ESMF_DELayout) :: delayout
+      type(ESMF_DELayout) :: srcDELayout
       type(ESMF_VM) :: vm
 
       ! Initialize return code; assume failure until success is certain
@@ -8396,154 +8402,183 @@
       if (present(srcRelloc)) srcRellocUse = srcRelloc
       if (present(dstRelloc)) dstRellocUse = dstRelloc
 
-      ! get set of bounding boxes from the source grid
-      call ESMF_GridGetBoundingBoxes(srcGrid%ptr, array, localrc)
+      if (hasDstData) then
 
-      ! get rank and counts from the bounding boxes array
-      call ESMF_LocalArrayGet(array, counts=counts, rc=localrc)
-      nDEs = counts(1)
-      rank = counts(3)
+        ! get set of bounding boxes from the source grid
+        call ESMF_GridGetBoundingBoxes(srcGrid%ptr, array, localrc)
 
-      ! allocate arrays now
-      allocate( gridAI(nDEs,rank), &
-               localAI(nDEs,rank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
-                                     ESMF_CONTEXT, rc)) return
+        ! get rank and counts from the bounding boxes array
+        call ESMF_LocalArrayGet(array, counts=counts, rc=localrc)
+        nDEs = counts(1)
+        rank = counts(3)
 
-      ! get pointer to the actual bounding boxes data
-      call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
+        ! get pointer to the actual bounding boxes data
+        call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
 
-      ! get set of axis indices from source grid
-      call ESMF_LRGridGetAllAxisIndex(srcGrid, gridAI, &
-                                      horzRelLoc=srcRellocUse, total=total, &
-                                      rc=localrc)
+        ! allocate arrays now
+        allocate( gridAI(nDEs,rank), &
+                 localAI(nDEs,rank), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
+                                       ESMF_CONTEXT, rc)) return
 
-      ! translate the AIs from global to local
-      call ESMF_LRGridGlobalToDELocalAI(srcGrid, horzRelLoc=srcRellocUse, &
-                                        globalAI2D=gridAI, &
-                                        localAI2D=localAI, rc=localrc)
+        ! get set of axis indices from source grid
+        call ESMF_LRGridGetAllAxisIndex(srcGrid, gridAI, &
+                                        horzRelLoc=srcRellocUse, total=total, &
+                                        rc=localrc)
 
-      ! loop through bounding boxes, looking for overlap with our "box"
-      ! TODO: a better algorithm
+        ! translate the AIs from global to local
+        call ESMF_LRGridGlobalToDELocalAI(srcGrid, horzRelLoc=srcRellocUse, &
+                                          globalAI2D=gridAI, &
+                                          localAI2D=localAI, rc=localrc)
 
-      ! go through list of DEs to calculate the number of domains
-      numDomains = 0
-      do i = 1,nDEs
-        if ((localMinPerDim(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .OR. &
-            (localMaxPerDim(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .OR. &
-            (localMinPerDim(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .OR. &
-            (localMaxPerDim(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
-        numDomains = numDomains + 1
-      enddo
+        ! loop through bounding boxes, looking for overlap with our "box"
+        ! go through list of DEs to calculate the number of domains
+        numDomains = 0
+        do i = 1,nDEs
+          if ((localMinPerDim(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .OR. &
+              (localMaxPerDim(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .OR. &
+              (localMinPerDim(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .OR. &
+              (localMaxPerDim(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
+          numDomains = numDomains + 1
+        enddo
 
-      domainList = ESMF_DomainListCreate(numDomains)
+        domainList = ESMF_DomainListCreate(numDomains)
 
-      ! now fill in the domain list
-      ! TODO: use David's DomainList routines, but they are untested
-      !  TODO: only one loop instead of two, one that figures the number
-      !        of domains and one that fills it in
-      ! TODO: move some of this code to Base and add a DomainList method?
-      numDomains   = 0
-      totalPoints  = 0
+        ! now fill in the domain list
+        !  TODO: only one loop instead of two, one that figures the number
+        !        of domains and one that fills it in
+        ! TODO: move some of this code to Base and add a DomainList method?
+        numDomains   = 0
+        totalPoints  = 0
+
+      endif
 
       select case(domainOption)
 
       ! whole domain from each overlapping DE
       case(0)
 
-        do j = 1,nDEs
-          if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .OR. &
-              (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .OR. &
-              (localMinPerDim(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .OR. &
-              (localMaxPerDim(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
-          numDomains = numDomains + 1
-          domainList%domains(numDomains)%DE   = j - 1  ! DEs start with 0
-          domainList%domains(numDomains)%rank = rank
-          size = 1
-          do i = 1,rank
-            domainList%domains(numDomains)%ai(i) = localAI(j,i)
-            size = size * (localAI(j,i)%max - localAI(j,i)%min + 1)
+        if (hasDstData) then
+
+          do j = 1,nDEs
+            if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .OR. &
+                (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .OR. &
+                (localMinPerDim(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .OR. &
+                (localMaxPerDim(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
+            numDomains = numDomains + 1
+            domainList%domains(numDomains)%DE   = j - 1  ! DEs start with 0
+            domainList%domains(numDomains)%rank = rank
+            size = 1
+            do i = 1,rank
+              domainList%domains(numDomains)%ai(i) = localAI(j,i)
+              size = size * (localAI(j,i)%max - localAI(j,i)%min + 1)
+            enddo
+            totalPoints = totalPoints + size
           enddo
-          totalPoints = totalPoints + size
-        enddo
-        domainList%total_points = totalPoints
+          domainList%total_points = totalPoints
+
+        endif
 
       !  reduced domain from each overlapping DE
       case(1)
 
-        ! first get the appropriate VM
-        call ESMF_LRGridGet(dstGrid, delayout=delayout, rc=localrc)
-        call ESMF_DELayoutGetVM(delayout, vm, localrc)
-        call ESMF_VMGet(vm, localPet=myDE, rc=localrc)   ! fix this
-        allocate(globalMinIndex(nDEs*2), &
-                 globalMaxIndex(nDEs*2), stat=rc)
+        call ESMF_VMGet(parentVM, localPet=myPET, petCount=nPETs, rc=localrc)
+        allocate(globalMinIndex(nPETs*2), &
+                 globalMaxIndex(nPETs*2), stat=rc)
 
         ! determine the right physgrid to look at in calls below
         call ESMF_GridGetPhysGridId(srcGrid%ptr, srcRellocUse, physId, localrc)
 
-        do j  = 1,nDEs
+        do j  = 1,nPETs
           localIndex = 0
-          thisDE = j - 1
-          if (myDE.eq.thisDE) then
+          thisPET    = j - 1
+          if (myPET.eq.thisPET) then
             point(1) = localMinPerDim(1)
             point(2) = localMinPerDim(2)
           endif
-          call ESMF_VMBroadcast(vm, point, point, 2, thisDE, rc=localrc)
-          call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
-                                             localIndex, point, &
-                                             option='min', total=total, rc=rc)
-          call ESMF_VMGather(vm, localIndex, globalMinIndex, 2, thisDE, rc=localrc)
-          if (myDE.eq.thisDE) then
+          call ESMF_VMBroadcast(parentVM, point, point, 2, thisPET, rc=localrc)
+          if (hasSrcData) then
+            call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
+                                               localIndex, point, &
+                                               option='min', total=total, rc=rc)
+          endif
+          call ESMF_VMGather(parentVM, localIndex, globalMinIndex, 2, thisPET, &
+                             rc=localrc)
+          if (myPET.eq.thisPET) then
             point(1) = localMaxPerDim(1)
             point(2) = localMaxPerDim(2)
           endif
-          call ESMF_VMBroadcast(vm, point, point, 2, thisDE, rc=localrc)
-          call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), & 
-                                             localIndex, point, &
-                                             option='max', total=total, rc=rc)
-          call ESMF_VMGather(vm, localIndex, globalMaxIndex, 2, thisDE, rc=localrc)
-        enddo
-
-        ! unload index array info to AI's
-        size = 0
-        do i = 1,nDEs
-          i1 = (i-1)*2 + 1
-          hasMin = .false.
-          hasMax = .false.
-          if (globalMinIndex(i1  ).le.globalMaxIndex(i1  ) .AND. &
-              globalMinIndex(i1+1).le.globalMaxIndex(i1+1) .AND. &
-              globalMinIndex(i1  ).ne.12345678             .AND. &
-              globalMinIndex(i1+1).ne.12345678) &
-              hasMin = .true.
-          if (globalMaxIndex(i1  ).ge.globalMinIndex(i1  ) .AND. &
-              globalMaxIndex(i1+1).ge.globalMinIndex(i1+1) .AND. &
-              globalMaxIndex(i1  ).ne.0                    .AND. &
-              globalMaxIndex(i1+1).ne.0) &
-              hasMax = .true.
-          if (hasMin .AND. hasMax) then
-            thisAI(1) = localAI(i,1)
-            thisAI(2) = localAI(i,2)
-            thisAI(1)%min = 1
-            thisAI(2)%min = 1
-            thisAI(1)%max = globalMaxIndex(i1  ) - globalMinIndex(i1  ) + 1
-            thisAI(2)%max = globalMaxIndex(i1+1) - globalMinIndex(i1+1) + 1
-            thisAI(1)%stride = thisAI(1)%max
-            thisAI(2)%stride = thisAI(2)%max
-
-            numDomains = numDomains + 1
-            domainList%domains(numDomains)%DE    = i-1  ! DEs start with 0
-            domainList%domains(numDomains)%rank  = rank
-            domainList%domains(numDomains)%ai(1) = thisAI(1)
-            domainList%domains(numDomains)%ai(2) = thisAI(2)
-            size = (thisAI(1)%max - thisAI(1)%min + 1) &
-                 * (thisAI(2)%max - thisAI(2)%min + 1)
-            totalPoints = totalPoints + size
+          call ESMF_VMBroadcast(parentVM, point, point, 2, thisPET, rc=localrc)
+          if (hasSrcData) then
+            call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), & 
+                                               localIndex, point, &
+                                               option='max', total=total, rc=rc)
           endif
+          call ESMF_VMGather(parentVM, localIndex, globalMaxIndex, 2, thisPET, &
+                             rc=localrc)
         enddo
-        domainList%total_points = totalPoints
+
+        if (hasDstData) then
+
+          ! first get the appropriate layout
+          call ESMF_LRGridGet(srcGrid, delayout=srcDELayout, rc=localrc)
+
+          ! unload index array info to AI's
+          size = 0
+          do i = 1,nPETs
+            i1 = (i-1)*2 + 1
+            hasMin = .false.
+            hasMax = .false.
+            if (globalMinIndex(i1  ).le.globalMaxIndex(i1  ) .AND. &
+                globalMinIndex(i1+1).le.globalMaxIndex(i1+1) .AND. &
+                globalMinIndex(i1  ).ne.12345678             .AND. &
+                globalMinIndex(i1+1).ne.12345678) &
+                hasMin = .true.
+            if (globalMaxIndex(i1  ).ge.globalMinIndex(i1  ) .AND. &
+                globalMaxIndex(i1+1).ge.globalMinIndex(i1+1) .AND. &
+                globalMaxIndex(i1  ).ne.0                    .AND. &
+                globalMaxIndex(i1+1).ne.0) &
+                hasMax = .true.
+            if (hasMin .AND. hasMax) then
+
+              ! so this is a domain -- figure out the corresponding DE in
+              ! the source layout
+              do j = 1,srcDEs
+                srcDE = j - 1           ! DE's are 0-based
+                call ESMF_DELayoutGetDELocalInfo(srcDELayout, srcDE, &
+                                                 pid=srcPID, rc=localrc)
+                if (srcPID.eq.i-1) exit   ! TODO: fix once we talk to Gerhard
+              enddo
+
+              thisAI(1) = localAI(j,1)
+              thisAI(2) = localAI(j,2)
+              thisAI(1)%min = 1
+              thisAI(2)%min = 1
+        !      thisAI(1)%min = globalMinIndex(i1  )
+        !      thisAI(2)%min = globalMinIndex(i1+1)
+        !      thisAI(1)%max = globalMaxIndex(i1  )
+        !      thisAI(2)%max = globalMaxIndex(i1+1)
+              thisAI(1)%max = globalMaxIndex(i1  ) - globalMinIndex(i1  ) + 1
+              thisAI(2)%max = globalMaxIndex(i1+1) - globalMinIndex(i1+1) + 1
+              thisAI(1)%stride = thisAI(1)%max
+              thisAI(2)%stride = thisAI(2)%max
+  
+              numDomains = numDomains + 1
+
+              domainList%domains(numDomains)%DE    = srcDE
+              domainList%domains(numDomains)%rank  = rank
+              domainList%domains(numDomains)%ai(1) = thisAI(1)
+              domainList%domains(numDomains)%ai(2) = thisAI(2)
+              size = (thisAI(1)%max - thisAI(1)%min + 1) &
+                   * (thisAI(2)%max - thisAI(2)%min + 1)
+              totalPoints = totalPoints + size
+            endif
+          enddo
+          domainList%total_points = totalPoints
+        endif
+
         deallocate(globalMinIndex, &
                    globalMaxIndex, stat=rc)
-
 
       end select
 
@@ -8587,10 +8622,12 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
-      deallocate( gridAI, &
-                 localAI, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
-                                     ESMF_CONTEXT, rc)) return
+      if (hasDstData) then
+        deallocate( gridAI, &
+                   localAI, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
