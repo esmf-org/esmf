@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.6 2003/05/07 17:37:00 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.7 2003/05/07 21:48:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeEx.F90,v 1.6 2003/05/07 17:37:00 eschwab Exp $'
+      '$Id: ESMF_TimeEx.F90,v 1.7 2003/05/07 21:48:03 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a calendar
@@ -95,6 +95,11 @@
       time3 = time2 - timeInterval1
       print *, "Time2 minus TimeInterval1 = "
       call ESMF_TimePrint(time3, "string", rc)
+
+      ! compare time1 and time2
+      if (time1 .lt. time2) then
+        print *, "time1 is less than time2."
+      end if
 
       call ESMF_TimeGetCalendar(time1, cal, rc)
       print *, "time1 calendar = "
