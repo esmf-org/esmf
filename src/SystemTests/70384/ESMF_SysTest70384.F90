@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.4 2003/02/18 15:05:57 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.5 2003/02/20 23:34:56 nscollins Exp $
 !
 ! System test code #70384
 
@@ -134,14 +134,14 @@
 
     ! Generate global cell numbers, each DE has a contiguous 
     ! chunk of numbers.
-    i_max = indexlist1(1).max
-    j_max = indexlist1(2).max
-    do k=1,indexlist1(3).r-indexlist1(3).l+1
-      kk = k+indexlist1(3).l
-      do j=1,indexlist1(2).r-indexlist1(2).l+1
-        jj = j+indexlist1(2).l
-        do i=1,indexlist1(1).r-indexlist1(1).l+1
-          ii = i+indexlist1(1).l
+    i_max = indexlist1(1)%max
+    j_max = indexlist1(2)%max
+    do k=1,indexlist1(3)%r-indexlist1(3)%l+1
+      kk = k+indexlist1(3)%l
+      do j=1,indexlist1(2)%r-indexlist1(2)%l+1
+        jj = j+indexlist1(2)%l
+        do i=1,indexlist1(1)%r-indexlist1(1)%l+1
+          ii = i+indexlist1(1)%l
           srcdata(i, j, k) = i_max*j_max*(kk-1) + i_max*(jj-1) + ii
         enddo
       enddo
