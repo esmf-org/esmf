@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.28 2003/02/19 18:52:30 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.29 2003/03/04 14:59:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -234,7 +234,9 @@
       !public ESMF_State{Get/Set}Valid  ! has data been validated?
       !public ESMF_State{Get/Set}CompName  ! normally set at create time
 
-      public ESMF_StateTransform
+      public ESMF_StateTransform          ! execute xform on a state
+      !public ESMF_StateTransformComplete ! is export state ok to update?
+      !public ESMF_StateValidate          ! is import state ready to read?
  
       public ESMF_StateCheckpoint
       public ESMF_StateRestore
@@ -247,7 +249,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.28 2003/02/19 18:52:30 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.29 2003/03/04 14:59:08 nscollins Exp $'
 
 !==============================================================================
 ! 
