@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.48 2003/10/03 19:47:37 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.49 2003/10/06 16:26:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.48 2003/10/03 19:47:37 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.49 2003/10/06 16:26:43 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,7 +68,7 @@
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2
       type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime2
-      type(ESMF_Time) :: currentTime, previousTime 
+      type(ESMF_Time) :: currentTime, previousTime, syncTime 
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       integer(ESMF_KIND_I8) :: advanceCounts, year, day2, month, minute, second
       integer(ESMF_KIND_I4) :: day, hour
@@ -1047,6 +1047,107 @@
 #endif
 
 
+     ! ----------------------------------------------------------------------------
+
+
+      !NEX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSyncToRealTime(syncTime, rc)
+      write(name, *) "Time Sync to Real Time Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+     ! ----------------------------------------------------------------------------
+
+      
+      !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Sync Time Print Test"
+      call ESMF_TimePrint(syncTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      
+      !NEX_UTest
+      ! Verify the year is set correctly
+      write(name, *) "Get Sync Time Year Test"
+      call ESMF_TimeGet(syncTime, yr=YR, rc=rc)
+      write(failMsg, *) " Did not return ESMF_SUCCESS and/or Year not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YR.eq.2003), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      print *, " Sync Time year = ", YR
+      print *, " Get Sync Time rc  = ", rc
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(startTime, yr=-100, mm=1, dd=1, &
+                                        calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Start Time initialization with year = -100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_TimePrint(startTime, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(stopTime, yr=100, mm=1, dd=1, &
+                                calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Stop Time initialization with year = 100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_TimePrint(stopTime, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting Time Interval
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Set Time Interval to 73049 days Test"
+      call ESMF_TimeIntervalSet(timeStep, d=73049, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_TimeIntervalPrint(timeStep, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      ! Test Incrementing Time by Time Interval
+      write(failMsg, *) " startTime not equal to stopTime"
+      write(name, *) "Incrementing starttime by 73049 days Test"
+      startTime=startTime+timeStep
+      call ESMF_Test((startTime.eq.stopTime), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_TimePrint(startTime, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(startTime, yr=-100, mm=1, dd=1, &
+                                        calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Start Time initialization with year = -100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_TimePrint(startTime, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      ! Test Decrementing Time by Time Interval
+      write(failMsg, *) " startTime not equal to stopTime"
+      write(name, *) "Decrementing stoptime by 73049 days Test"
+      stopTime=stopTime-timeStep
+      call ESMF_Test((startTime.eq.stopTime), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_TimePrint(stopTime, rc=rc)
+
+      ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
   
