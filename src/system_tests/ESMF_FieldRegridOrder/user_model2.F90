@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2004/03/24 17:45:43 nscollins Exp $
+! $Id: user_model2.F90,v 1.5 2004/03/24 19:08:51 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -285,8 +285,9 @@
                             horzRelloc=ESMF_CELL_CENTER, rc=status)
       call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
                              centerCoord=coordArray, rc=status)
-      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+      ! note: the Grid is JI so the coord arrays have to be switched below
+      call ESMF_ArrayGetData(coordArray(1), coordY, ESMF_DATA_REF, status)
+      call ESMF_ArrayGetData(coordArray(2), coordX, ESMF_DATA_REF, status)
 
       ! update field values here
       call ESMF_FieldGetArray(humidity, array, rc=rc)
