@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.6 2003/04/14 17:31:34 nscollins Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.7 2003/04/15 22:42:19 jwolfe Exp $
 !
 ! System test code #74558
 
@@ -23,7 +23,9 @@
     implicit none
     
     ! Local variables
-    integer :: de_id, ndes, rc, delist(4)
+    integer :: de_id, ndes, delist(4)
+    integer :: status
+
     character(len=ESMF_MAXSTR) :: aname, cname1
     type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_State) :: c1exp
@@ -33,13 +35,16 @@
     ! instantiate a clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
     type(ESMF_Calendar) :: gregorianCalendar
-    type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
     integer(ESMF_IKIND_I8) :: advanceCount
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
+!
+! Set initial values
+!
+    status = ESMF_FAILURE
 
     print *, "System Test #74558:"
 
@@ -52,12 +57,12 @@
 
     ! Create the top level application component.
     aname = "System Test #74558"
-    app = ESMF_AppCompCreate(aname, rc=rc)
-    print *, "Created component ", trim(aname), ",  rc =", rc
+    app = ESMF_AppCompCreate(aname, rc=status)
+    print *, "Created component ", trim(aname), ",  rc =", status
 
     ! Query application for layout.
-    call ESMF_AppCompGet(app, layout=layout1, rc=rc)
-    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    call ESMF_AppCompGet(app, layout=layout1, rc=status)
+    call ESMF_DELayoutGetNumDEs(layout1, ndes, status)
     if (ndes .lt. 4) then
         print *, "This system test needs to run at least 4-way, current np = ", ndes
         goto 10
@@ -67,11 +72,12 @@
     ! Create the model component
     cname1 = "fluid flow"
     delist = (/ 0, 1, 2, 3 /)
-    layout2 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0, 0 ,0 /), rc)
+    layout2 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0, 0 ,0 /), &
+              status)
     ! TODO: add 1D layout support to DELayout and DistGrid
-    !layout2 = ESMF_DELayoutCreate(delist, 1, (/ 1 /), (/ 0 /), rc)
-    comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
-    print *, "Created component ", trim(cname1), "rc =", rc
+    !layout2 = ESMF_DELayoutCreate(delist, 1, (/ 1 /), (/ 0 /), status)
+    comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=status)
+    print *, "Created component ", trim(cname1), "rc =", status 
 
     print *, "Comp Creates finished"
 
@@ -81,8 +87,8 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      call ESMF_GridCompSetServices(comp1, FlowMod_register, rc)
-      print *, "Comp SetServices finished, rc= ", rc
+      call ESMF_GridCompSetServices(comp1, FlowMod_register, status)
+      print *, "Comp SetServices finished, rc= ", status
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -90,21 +96,23 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, &
+                             status)
 
-      ! initialize time interval to 1 hour
-      call ESMF_TimeIntervalInit(timeStep, H=1, rc=rc)
+      ! initialize time interval to 1 second
+      call ESMF_TimeIntervalInit(time_step, s_=1.0D0, rc=status)
 
       ! initialize start time to 3/28/2003
-      call ESMF_TimeInit(startTime, YR=2003, MM=3, DD=28, &
-                         cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeInit(startTime, YR=2003, MM=3, DD=28, H=10, &
+                         M=0, cal=gregorianCalendar, rc=status)
 
       ! initialize stop time to 3/29/2003
-      call ESMF_TimeInit(stopTime, YR=2003, MM=3, DD=29, &
-                         cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeInit(stopTime, YR=2003, MM=3, DD=28, H=10, &
+                         M=1, cal=gregorianCalendar, rc=status)
 
       ! initialize the clock with the above values
-      call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
+      call ESMF_ClockInit(clock, time_step, startTime, stopTime, &
+                          rc=status)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -113,10 +121,11 @@
 !-------------------------------------------------------------------------
  
       c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1)
-      call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, rc=rc)
-      print *, "Comp 1 Initialize finished, rc =", rc
+      call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, &
+                                   rc=status)
+      print *, "Comp 1 Initialize finished, rc =", status
  
-      print *, "Component Initialize finished, rc =", rc
+      print *, "Component Initialize finished, rc =", status
  
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -124,13 +133,14 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-      do while (.not. ESMF_ClockIsStopTime(clock, rc))
+      do while (.not. ESMF_ClockIsStopTime(clock, status))
 
-        call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, rc=rc)
-        print *, "Comp 1 Run returned, rc =", rc
+        call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, &
+                              rc=status)
+        print *, "Comp 1 Run returned, rc =", status
 
-        call ESMF_ClockAdvance(clock, rc=rc)
-        !call ESMF_ClockPrint(clock, rc=rc)
+        call ESMF_ClockAdvance(clock, rc=status)
+        !call ESMF_ClockPrint(clock, rc=status)
 
       enddo
 
@@ -141,11 +151,12 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_GridCompFinalize(comp1, exportstate=c1exp, clock=clock, rc=rc)
-      print *, "Comp 1 Finalize finished, rc =", rc
+      call ESMF_GridCompFinalize(comp1, exportstate=c1exp, clock=clock, &
+                                 rc=status)
+      print *, "Comp 1 Finalize finished, rc =", status
 
       ! Figure out our local processor id for message below.
-      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+      call ESMF_DELayoutGetDEID(layout1, de_id, status)
 
       print *, "-----------------------------------------------------------------"
       print *, "-----------------------------------------------------------------"
@@ -163,11 +174,11 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_StateDestroy(c1exp, rc)
+      call ESMF_StateDestroy(c1exp, status)
 
-      call ESMF_GridCompDestroy(comp1, rc)
+      call ESMF_GridCompDestroy(comp1, status)
 
-      call ESMF_DELayoutDestroy(layout2, rc)
+      call ESMF_DELayoutDestroy(layout2, status)
 
       print *, "All Destroy routines done"
 
