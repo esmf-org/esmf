@@ -406,7 +406,7 @@
       if( present ( unique )) then
          call ESMF_ConfigLoadFile_1proc_( cf, fname, unique, iret )
       else
-         call ESMF_ConfigLoadFile_1proc_( cf, fname, iret )
+         call ESMF_ConfigLoadFile_1proc_( cf, fname, rc = iret )
       endif
       if(iret /= 0) then
 ! SUBSITUTE call perr(myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret)
@@ -434,7 +434,7 @@
 
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigLoadFile_1proc( cf, fname, unique, rc )
+    subroutine ESMF_ConfigLoadFile_1proc_( cf, fname, unique, rc )
 
 
       implicit none
@@ -542,7 +542,7 @@
       if ( present (rc )) rc = iret
 
       return
-    end subroutine ESMF_ConfigLoadFile_1proc
+    end subroutine ESMF_ConfigLoadFile_1proc_
 
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
