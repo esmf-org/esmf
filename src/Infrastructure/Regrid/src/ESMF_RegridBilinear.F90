@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.56 2004/03/24 16:04:34 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.57 2004/03/24 19:09:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.56 2004/03/24 16:04:34 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.57 2004/03/24 19:09:40 jwolfe Exp $'
 
 !==============================================================================
 
@@ -178,7 +178,6 @@
       ! set reordering information
       srcOrder(:) = gridOrder(:,srcGrid%ptr%coordOrder%order,2)
       dstOrder(:) = gridOrder(:,dstGrid%ptr%coordOrder%order,2)
-      write(*,*) 'gridOrder = ', gridOrder
 
       ! get destination grid info
       !TODO: Get grid masks?
