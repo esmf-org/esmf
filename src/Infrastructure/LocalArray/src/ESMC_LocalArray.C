@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.12 2004/12/07 17:20:51 nscollins Exp $
+// $Id: ESMC_LocalArray.C,v 1.13 2004/12/20 02:25:50 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.12 2004/12/07 17:20:51 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.13 2004/12/20 02:25:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -717,7 +717,7 @@
 // !ARGUMENTS:
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
-      int *offset) const {   // inout - original offset, updated to point
+      int *boffset) const {   // inout - original offset, updated to point
                              //  to first free byte after current obj info
 //
 // !DESCRIPTION:
@@ -729,16 +729,16 @@
     int *ip, i;
 
     fixedpart = sizeof(ESMC_LocalArray);
-    if ((*length - *offset) < fixedpart) {
+    if ((*length - *boffset) < fixedpart) {
         buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
         *length += 2 * fixedpart;
     }
 
     // Serialize the Base class first.
-    rc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
+    rc = this->ESMC_Base::ESMC_Serialize(buffer, length, boffset);
 
     // now the stuff specific to LocalArray
-    ip = (int *)(buffer + *offset);
+    ip = (int *)(buffer + *boffset);
     *ip++ = rank;
     *ip++ = (int)type;
     *ip++ = (int)kind;
@@ -765,7 +765,7 @@
     memcpy(cp, base_addr, byte_count);
     cp += byte_count;
 
-    *offset = (cp - buffer);
+    *boffset = (cp - buffer);
 
     return ESMF_SUCCESS;
 
@@ -785,7 +785,7 @@
 //
 // !ARGUMENTS:
       char *buffer,          // in - byte stream to read
-      int *offset) {         // inout - original offset, updated to point
+      int *boffset) {         // inout - original offset, updated to point
                              //  to first free byte after current obj info
 //
 // !DESCRIPTION:
@@ -797,10 +797,10 @@
     ESMC_LocalArray *aptr;
 
     // Deserialize the Base class first.
-    rc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+    rc = ESMC_Base::ESMC_Deserialize(buffer, boffset);
 
     // now the stuff specific to LocalArray
-    ip = (int *)(buffer + *offset);
+    ip = (int *)(buffer + *boffset);
     rank = *ip++;
     type = (ESMC_DataType)*ip++;
     kind = (ESMC_DataKind)*ip++;
@@ -830,7 +830,7 @@
     memcpy(base_addr, cp, byte_count);
     cp += byte_count;
 
-    *offset = (cp - buffer);
+    *boffset = (cp - buffer);
 
     return ESMF_SUCCESS;
 
@@ -851,7 +851,7 @@
 // !ARGUMENTS:
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
-      int *offset) const {   // inout - original offset, updated to point
+      int *boffset) const {   // inout - original offset, updated to point
                              //  to first free byte after current obj info
 //
 // !DESCRIPTION:
@@ -863,16 +863,16 @@
     int *ip, i;
 
     fixedpart = sizeof(ESMC_LocalArray);
-    if ((*length - *offset) < fixedpart) {
+    if ((*length - *boffset) < fixedpart) {
         buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
         *length += 2 * fixedpart;
     }
 
     // SerializeNoData the Base class first.
-    rc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+    rc = ESMC_Base::ESMC_Serialize(buffer, length, boffset);
 
     // now the stuff specific to LocalArray
-    ip = (int *)(buffer + *offset);
+    ip = (int *)(buffer + *boffset);
     *ip++ = rank;
     *ip++ = (int)type;
     *ip++ = (int)kind;
@@ -886,7 +886,7 @@
     // do not serialize the F90 pointer nor data either.
 
     cp = (char *)ip;
-    *offset = (cp - buffer);
+    *boffset = (cp - buffer);
 
     return ESMF_SUCCESS;
 
@@ -906,7 +906,7 @@
 //
 // !ARGUMENTS:
       char *buffer,          // in - byte stream to read
-      int *offset) {         // inout - original offset, updated to point
+      int *boffset) {         // inout - original offset, updated to point
                              //  to first free byte after current obj info
 //
 // !DESCRIPTION:
@@ -917,10 +917,10 @@
     int *ip, i, nbytes, rc;
 
     // DeserializeNoData the Base class first.
-    rc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+    rc = ESMC_Base::ESMC_Deserialize(buffer, boffset);
 
     // now the stuff specific to LocalArray
-    ip = (int *)(buffer + *offset);
+    ip = (int *)(buffer + *boffset);
     rank = *ip++;
     type = (ESMC_DataType)*ip++;
     kind = (ESMC_DataKind)*ip++;
@@ -951,7 +951,7 @@
     // Skip the data, f90 dope vector zero'd out.
 
     cp = (char *)ip;
-    *offset = (cp - buffer);
+    *boffset = (cp - buffer);
 
     return ESMF_SUCCESS;
 
