@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.28 2005/02/23 05:21:51 theurich Exp $
+// $Id: ESMC_Alarm.h,v 1.29 2005/04/02 00:01:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@
  // anything public or esmf-wide should be up higher at the top level
  // include files.
  #include <ESMF_TimeMgr.inc>
- #include "ESMF_Pthread.h"
+ #include <pthread.h>
 
 //-------------------------------------------------------------------------
 //BOP
@@ -183,21 +183,21 @@ class ESMC_Alarm {
 
     int  ESMC_AlarmEnable(void);    // TMG4.5.3
     int  ESMC_AlarmDisable(void);
-    bool ESMC_AlarmIsEnabled(int *rc) const;
+    bool ESMC_AlarmIsEnabled(int *rc=0) const;
 
     int  ESMC_AlarmRingerOn(void);    // TMG4.6: manually turn on/off
     int  ESMC_AlarmRingerOff(void);
-    bool ESMC_AlarmIsRinging(int *rc) const;
+    bool ESMC_AlarmIsRinging(int *rc=0) const;
                                          // TMG 4.4: synchronous query for apps
-    bool ESMC_AlarmWillRingNext(ESMC_TimeInterval *timeStep, int *rc) const;
-    bool ESMC_AlarmWasPrevRinging(int *rc) const;
+    bool ESMC_AlarmWillRingNext(ESMC_TimeInterval *timeStep, int *rc=0) const;
+    bool ESMC_AlarmWasPrevRinging(int *rc=0) const;
 
     int  ESMC_AlarmSticky(void);
     int  ESMC_AlarmNotSticky(ESMC_TimeInterval *ringDuration=0,
                              int *ringTimeStepCount=0);
-    bool ESMC_AlarmIsSticky(int *rc) const;
+    bool ESMC_AlarmIsSticky(int *rc=0) const;
 
-    bool ESMC_AlarmCheckRingTime(int *rc);
+    bool ESMC_AlarmCheckRingTime(int *rc=0);
                          // associated clock should invoke after advance:
                          // TMG4.4, 4.6
                          // Check for crossing ringTime in either positive or
