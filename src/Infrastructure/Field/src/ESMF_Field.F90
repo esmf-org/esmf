@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.1 2003/03/10 21:54:22 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.2 2003/03/11 23:05:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,6 +42,8 @@
       use ESMF_IOMod
       use ESMF_GridMod
       use ESMF_ArrayMod
+      use ESMF_DELayoutMod
+      use ESMF_RouteMod
       use ESMF_DataMapMod
       implicit none
 
@@ -169,6 +171,8 @@
    public ESMF_FieldReduce             ! Global reduction operations
    !public ESMF_FieldTranspose         ! Transpose operation
    public ESMF_FieldHalo               ! Halo updates
+   public ESMF_FieldRegrid             ! Regridding and interpolation
+   public ESMF_FieldRoute              ! Redistribute existing array data
 
    public ESMF_FieldSetAttribute       ! Set and Get Attributes
    public ESMF_FieldGetAttribute       !   interface to Base class
@@ -187,7 +191,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.1 2003/03/10 21:54:22 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.2 2003/03/11 23:05:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2030,6 +2034,178 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldHalo
+
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldRegrid - Data Regrid operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldRegrid(srcfield, dstfield, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field) :: srcfield                 
+      type(ESMF_Field) :: dstfield                 
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Call {\tt Grid} routines to perform a Regrid operation over the data
+!     in a {\tt Field}.  This routine reads the source field and leaves the
+!     data untouched.  It reads the Grid from the destination field and
+!     updates the array data in the destination.
+!
+!     \begin{description}
+!     \item [srcfield] 
+!           Field containing source data.
+!     \item [dstfield] 
+!           Field containing destination grid.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType) :: ftypep              ! field type info
+      integer :: i, gridrank, datarank, thisdim
+      integer :: dimorder(ESMF_MAXDIM)   
+      integer :: dimlengths(ESMF_MAXDIM)   
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      ftypep = srcfield%ftypep
+
+      ! Query the datamap and set info for grid so it knows how to
+      !  match up the array indicies and the grid indicies.
+      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
+                                               dimlist=dimorder, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldRegrid: DataMapGet returned failure"
+        return
+      endif 
+
+      ! And get the Array sizes
+      call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
+                                               lengths=dimlengths, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldRegrid: ArrayGet returned failure"
+        return
+      endif 
+
+      ! TODO: add code here to call Regrid correctly
+
+      ! Call Grid method to perform actual work
+      ! call ESMF_GridRegrid(ftypep%grid, ftypep%localfield%localdata, status)
+      status = ESMF_FAILURE
+
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldRegrid: Grid Regrid returned failure"
+        return
+      endif 
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldRegrid
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldRoute - Data Route operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldRoute(srcfield, dstfield, layout, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field) :: srcfield                 
+      type(ESMF_Field) :: dstfield                 
+      type(ESMF_DELayout) :: layout
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Call routines to perform a Route operation over the data
+!     in a {\tt Field}.  This routine reads the source field and leaves the
+!     data untouched.  It reads the Grid from the destination field and
+!     updates the array data in the destination.
+!
+!     \begin{description}
+!     \item [srcfield] 
+!           Field containing source data.
+!     \item [dstfield] 
+!           Field containing destination grid.
+!     \item [layout] 
+!           Layout which encompasses both Fields.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType) :: stypep, dtypep      ! field type info
+      type(ESMF_Route) :: route
+      integer :: i, gridrank, datarank, thisdim
+      integer :: dimorder(ESMF_MAXDIM)   
+      integer :: dimlengths(ESMF_MAXDIM)   
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      stypep = srcfield%ftypep
+      dtypep = dstfield%ftypep
+
+      ! Query the datamap and set info for grid so it knows how to
+      !  match up the array indicies and the grid indicies.
+      call ESMF_DataMapGet(stypep%mapping, gridrank=gridrank, &
+                                               dimlist=dimorder, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldRoute: DataMapGet returned failure"
+        return
+      endif 
+
+      ! And get the Array sizes
+      call ESMF_ArrayGet(stypep%localfield%localdata, rank=datarank, &
+                                               lengths=dimlengths, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldRoute: ArrayGet returned failure"
+        return
+      endif 
+
+      ! TODO: add code here to call Route correctly
+      route = ESMF_RouteCreate(layout, rc) 
+
+      ! Call Grid method to perform actual work
+      ! call ESMF_GridRoute(ftypep%grid, ftypep%localfield%localdata, status)
+      status = ESMF_FAILURE
+
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldRoute: Grid Route returned failure"
+        return
+      endif 
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldRoute
 
 
 !------------------------------------------------------------------------------
