@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_FEx3.F90,v 1.2 2003/07/18 01:55:06 eschwab Exp $
+! $Id: ESMF_DELayout_FEx3.F90,v 1.3 2003/07/23 02:12:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -70,7 +70,6 @@ program ESMF_DELayout_FEx3
     rArrayI4(i) = 0
   end do
 
-  ! Initialize ESMF
   call ESMF_FrameworkInitialize(rc)
 
   ! create 2x3 layout of DEs in X-direction
@@ -111,7 +110,19 @@ program ESMF_DELayout_FEx3
     print *, "sArrayI4 = ", sArrayI4
   endif
 
-  ! scatter 'em!
+  ! scatter naked F90 arrays
+
+  call ESMF_DELayoutScatter(layout, sArrayR8, rArrayR8, len, srcDEid, rc)
+  print *, "DE ", id, " rArrayR8() = ", rArrayR8
+
+  call ESMF_DELayoutScatter(layout, sArrayR4, rArrayR4, len, srcDEid, rc)
+  print *, "DE ", id, " rArrayR4() = ", rArrayR4
+
+  call ESMF_DELayoutScatter(layout, sArrayI4, rArrayI4, len, srcDEid, rc)
+  print *, "DE ", id, " rArrayI4() = ", rArrayI4
+
+  ! scatter ESMF local arrays
+
   call ESMF_DELayoutScatter(layout, sndArrayR8, rcvArrayR8, len, srcDEid, rc)
   print *, "DE ", id, " rArrayR8() = ", rArrayR8
 
@@ -122,15 +133,14 @@ program ESMF_DELayout_FEx3
   print *, "DE ", id, " rArrayI4() = ", rArrayI4
 
   ! clean up
-  call ESMF_DELayoutDestroy(layout, rc)
   call ESMF_LocalArrayDestroy(sndArrayR8, rc)
   call ESMF_LocalArrayDestroy(rcvArrayR8, rc)
   call ESMF_LocalArrayDestroy(sndArrayR4, rc)
   call ESMF_LocalArrayDestroy(rcvArrayR4, rc)
   call ESMF_LocalArrayDestroy(sndArrayI4, rc)
   call ESMF_LocalArrayDestroy(rcvArrayI4, rc)
+  call ESMF_DELayoutDestroy(layout, rc)
 
-  ! Finalize ESMF
   call ESMF_FrameworkFinalize(rc)
 
 end program ESMF_DELayout_FEx3
