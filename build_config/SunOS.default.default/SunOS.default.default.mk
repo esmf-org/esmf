@@ -1,4 +1,4 @@
-# $Id: SunOS.default.default.mk,v 1.1 2003/10/17 19:34:57 nscollins Exp $
+# $Id: SunOS.default.default.mk,v 1.2 2003/10/17 21:16:10 nscollins Exp $
 #
 # SunOs.default.default.mk
 #
@@ -28,11 +28,19 @@ endif
 
 # Location of MPI (Message Passing Interface) software
 
-ESMC_MPIRUN      = 
+ifeq ($(ESMF_COMM),mpi)
 MPI_HOME       = /opt/SUNWhpc
 MPI_LIB        = -L${MPI_HOME}/lib -R${MPI_HOME}/lib -lmpi
 MPI_INCLUDE    = -I${MPI_HOME}/include
 MPIRUN         =  ${MPI_HOME}/bin/mprun
+endif
+
+ifeq ($(ESMF_COMM),mpiuni)
+MPI_HOME       = ${ESMF_TOP_DIR}/src/Infrastructure/mpiuni
+MPI_LIB        = -lmpiuni
+MPI_INCLUDE    = -I${MPI_HOME}
+MPIRUN         =  ${MPI_HOME}/mpirun
+endif
 
 # Location of the OpenMP library
 MP_LIB         = 
@@ -153,7 +161,7 @@ libf: ${LIBNAME}(${OBJSF})
 
 .C.o:
 	echo big .C to .o rule, remove mpi_include when CFLAGS starts working
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${MPI_INCLUDE} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
 	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -free ${ESMC_INCLUDE} $<
@@ -182,7 +190,7 @@ libf: ${LIBNAME}(${OBJSF})
 
 .C.a:
 	echo big .C to .a rule, remove mpi_include when CFLAGS starts working
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${MPI_INCLUDE} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
