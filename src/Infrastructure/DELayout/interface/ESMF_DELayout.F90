@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.10 2004/03/04 18:14:18 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.11 2004/03/09 21:52:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.10 2004/03/04 18:14:18 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.11 2004/03/09 21:52:05 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -233,10 +233,8 @@
 !    
 !  The arguments are:
 !  \begin{description}
-! 
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -297,32 +295,24 @@
 !    
 !  The arguments are:
 !  \begin{description}
-! 
 !   \item[parent]
 !     Parent {\tt ESMF\_DELayout}.
-! 
 !   \item[ndim]
 !     Dimension of new {\tt ESMF\_DELayout}.
-!     
 !   \item[lengths]
 !     Array of length {\tt ndim} that contains the number of
 !     {\tt DE}s in each dimension.
-!
 !   \item[commtypes]
 !     Array of length {\tt ndim} that contains the communication
 !     type of each dimension.  Valid values are {\tt ESMF\_COMMTYPE\_SHR},
 !     {\tt ESMF\_COMMTYPE\_MP}, and {\tt ESMF\_COMMTYPE\_SHR}+
 !     {\tt ESMF\_COMMTYPE\_MP}.
-!
 !   \item[{[parent\_offsets]}]
 !     Offset in each parent {\tt ESMF\_DELayout} dimension.
-! 
 !   \item[{[de\_indices]}]
 !     Selection of {\tt DE} indices to use.
-!     
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -396,26 +386,20 @@
 !    
 !  The arguments are:
 !  \begin{description}
-! 
 !   \item[delist]
 !     List of {\tt ESMF\_DE} indices.
-! 
 !   \item[ndim]
 !     Dimension of new {\tt ESMF\_DELayout}.
-!     
 !   \item[lengths]
 !     Array of length {\tt ndim} that contains the number of
 !     {\tt ESMF\_DE}s in each dimension.
-!
 !   \item[commtypes]
 !     Array of length {\tt ndim} that contains the communication
 !     type of each dimension.  Valid values are {\tt ESMF\_COMMTYPE\_SHR},
 !     {\tt ESMF\_COMMTYPE\_MP}, and {\tt ESMF\_COMMTYPE\_SHR}+
 !     {\tt ESMF\_COMMTYPE\_MP}.
-!
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -469,10 +453,8 @@
 !
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -522,13 +504,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[layout]
 !       Destroy contents of this {\tt ESMF\_DELayout}.
-!
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
