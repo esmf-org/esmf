@@ -1,4 +1,4 @@
-! $Id: ESMF_Alloc.F90,v 1.5 2002/12/10 22:53:48 nscollins Exp $
+! $Id: ESMF_Alloc.F90,v 1.6 2003/01/09 21:22:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_BaseMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -72,7 +73,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alloc.F90,v 1.5 2002/12/10 22:53:48 nscollins Exp $'
+      '$Id: ESMF_Alloc.F90,v 1.6 2003/01/09 21:22:04 nscollins Exp $'
 
 !==============================================================================
 !
@@ -164,7 +165,7 @@
 !
 !
 ! !ARGUMENTS:
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr
       integer, intent(in) :: ni
       integer, intent(in) :: nj
       integer, intent(out), optional :: rc               
@@ -223,7 +224,7 @@
 !
 !
 ! !ARGUMENTS:
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -279,7 +280,7 @@
       subroutine ESMF_AllocValidate2DR4(f90ptr, opt, rc)
 !
 ! !ARGUMENTS:
-      !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      !real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr
       real*4, dimension(:,:), pointer :: f90ptr
       character (len=*), intent(in), optional :: opt    
       integer, intent(out), optional :: rc            
@@ -314,7 +315,7 @@
       subroutine ESMF_AllocPrint2DR4(f90ptr, opt, rc)
 !
 ! !ARGUMENTS:
-      !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      !real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr
       real*4, dimension(:,:), pointer :: f90ptr
       character (len=*), intent(in) :: opt      
       integer, intent(out), optional :: rc           

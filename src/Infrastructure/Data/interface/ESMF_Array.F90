@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.19 2003/01/09 16:59:48 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.20 2003/01/09 21:22:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,11 +92,11 @@
       sequence
       private
         type(ESMF_Pointer) :: this       ! opaque pointer to the C++ class data
-        integer (selected_int_kind(5)),dimension(:),pointer :: int4ptr1d
-        integer (selected_int_kind(5)),dimension(:,:),pointer :: int4ptr2d
-        integer (selected_int_kind(10)),dimension(:,:),pointer :: int8ptr2d
-        real (selected_real_kind(6,45)),dimension(:),pointer :: real8ptr1d
-        real (selected_real_kind(6,45)),dimension(:,:),pointer :: real8ptr2d
+        integer (ESMF_IKIND_I4),dimension(:),pointer :: int4ptr1d
+        integer (ESMF_IKIND_I4),dimension(:,:),pointer :: int4ptr2d
+        integer (ESMF_IKIND_I8),dimension(:,:),pointer :: int8ptr2d
+        real (ESMF_IKIND_R8),dimension(:),pointer :: real8ptr1d
+        real (ESMF_IKIND_R8),dimension(:,:),pointer :: real8ptr2d
       end type
 
 !------------------------------------------------------------------------------
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.19 2003/01/09 16:59:48 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.20 2003/01/09 21:22:04 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -305,8 +305,9 @@ end function
 !    {\tt ESMF\_DATA\_CHARACTER}.
 !
 !  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_4}
-!     and {\tt ESMF\_KIND\_8}.
+!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
+!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
+!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
 !  \item[counts]
 !    The number of items in each dimension of the array.  This is a 1D
@@ -457,7 +458,7 @@ end function
       type(ESMF_Array) :: ESMF_ArrayCreateByPtr2DR8
 !
 ! !ARGUMENTS:
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr
       type(ESMF_CopyFlag), intent(in), optional :: docopy 
       integer, intent(out), optional :: rc  
 !
@@ -508,7 +509,7 @@ end function
         lengths(1) = size(f90ptr, 1)
         lengths(2) = size(f90ptr, 2)
 
-        call c_ESMC_ArrayCreateByPtr2D(array, ESMF_DATA_REAL, ESMF_KIND_8, &
+        call c_ESMC_ArrayCreateByPtr2D(array, ESMF_DATA_REAL, ESMF_KIND_R8, &
                                              2, lengths, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array initial construction error"
@@ -544,7 +545,7 @@ end function
       type(ESMF_Array) :: ESMF_ArrayCreateByPtr1DI4
 !
 ! !ARGUMENTS:
-      integer (selected_int_kind(5)), dimension(:), pointer :: f90ptr
+      integer (ESMF_IKIND_I4), dimension(:), pointer :: f90ptr
       type(ESMF_CopyFlag), intent(in), optional :: docopy 
       integer, intent(out), optional :: rc  
 !
@@ -594,7 +595,7 @@ end function
 !       !call create routine
         length = size(f90ptr, 1)
 
-        call c_ESMC_ArrayCreateByPtr1D(array, ESMF_DATA_INTEGER, ESMF_KIND_4, &
+        call c_ESMC_ArrayCreateByPtr1D(array, ESMF_DATA_INTEGER, ESMF_KIND_I4, &
                                              1, length, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array initial construction error"
@@ -630,7 +631,7 @@ end function
       type(ESMF_Array) :: ESMF_ArrayCreateMTPtr2DR8
 !
 ! !ARGUMENTS:
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr
       integer, intent(in) :: ni
       integer, intent(in) :: nj
       integer, intent(out), optional :: rc  
@@ -800,7 +801,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array 
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr
       type(ESMF_CopyFlag), intent(in), optional :: docopy 
       integer, intent(out), optional :: rc     
 !
@@ -832,7 +833,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array 
-      integer (selected_int_kind(5)), dimension(:), pointer :: f90ptr
+      integer (ESMF_IKIND_I4), dimension(:), pointer :: f90ptr
       type(ESMF_CopyFlag), intent(in), optional :: docopy 
       integer, intent(out), optional :: rc     
 !
@@ -925,8 +926,9 @@ end function
 !    {\tt ESMF\_DATA\_CHARACTER}.
 !
 !  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_4}
-!     and {\tt ESMF\_KIND\_8}.
+!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
+!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
+!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
 !  \item[counts]
 !    The size of each dimension in the Array.  This is a 1D integer array
@@ -1028,8 +1030,9 @@ end function
 !    {\tt ESMF\_DATA\_CHARACTER}.
 !
 !  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_4}
-!     and {\tt ESMF\_KIND\_8}.
+!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
+!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
+!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
 !  \item[counts]
 !    The size of each dimension in the Array.  This is a 1D integer array
