@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.5 2004/03/15 17:44:41 nscollins Exp $
+#  $Id: build_rules.mk,v 1.6 2004/03/15 18:26:41 nscollins Exp $
 #
 #  Linus.nag.default.mk
 #
@@ -109,7 +109,7 @@ endif
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CCV		   = ${C_CC} --version
+C_CCV		   = ${C_CC} -v
 C_FCV              = ${C_FC} -V
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 # ---------------------------- BOPT - g options ----------------------------
@@ -130,7 +130,7 @@ F_FIXNOCPP      = -fixed
 #
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CCV		   = ${CXX_CC} --version
+CXX_CCV		   = ${CXX_CC} -V
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 CXXLIBBASE         = /soft/com/packages/intel-7/compiler70/ia32/lib
 C_F90CXXLIBS       = ${MPI_LIB} -L${F90LIBBASE} -lf96 -lnag \
