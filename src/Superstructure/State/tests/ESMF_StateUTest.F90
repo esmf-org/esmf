@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.24 2004/06/20 06:05:34 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.25 2004/07/22 21:03:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.24 2004/06/20 06:05:34 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.25 2004/07/22 21:03:50 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -249,7 +249,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test adding an Attribute to a state
-      call  ESMF_StateAddAttribute(state1, name="newAttribute", value=12345, rc=rc)
+      call  ESMF_StateSetAttribute(state1, name="newAttribute", value=12345, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding an attribute to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
