@@ -1,13 +1,63 @@
-% $Id: ESMF_reqdoc.tex,v 1.2 2001/11/15 22:56:38 dneckels Exp $
-\documentclass[]{article}
+\documentclass[english]{article}
 
 \usepackage{epsf}
 \usepackage{html}
 \usepackage[T1]{fontenc}
 
+\usepackage{babel}
+\usepackage{theorem}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{supertabular}
+
+
+
+
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
+
+
+
+%\pagestyle{fancy}
+%\lhead{\abbr Requirements: \docversion }
+
+\chead{}
+
+%\rhead{}
+%\lfoot{\abbr Requirements: \docversion }
+%\cfoot{}
+%\rfoot{\thepage\ of \pageref{LastPage}}
+
+
+\newtheorem{requirement}{\Large REQ}
+\newtheorem{subreq}{REQ}[requirement]
+
+\newenvironment
+{reqlist}
+{\begin{list} {} {} \rm \item[]}
+{\end{list}}
+
+\newcommand{\req}[1]{
+\begin{requirement}
+\addcontentsline{toc}{section}{REQ \arabic{requirement}{\it\bf\ #1}}
+{\Large #1}
+\end{requirement}
+}
+
+\newcommand{\sreq}[1]{
+\begin{subreq}
+\addcontentsline{toc}{section}{REQ \arabic{requirement}.\arabic{subreq}{\it\ #1}}
+{#1}
+\end{subreq}
+}
+%%
+
+
+
+\makeatletter
+\makeatother
+
 
 \begin{document}
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
@@ -16,7 +66,12 @@
 
 \begin{center}
 {\Large  Earth System Modeling Framework} \\
-{\Large {\bf General Requirements}} \\
+{\Large {\bf General Requirements}} \\ 
+\vspace{.2in}
+prepared by \\ 
+\vspace{0.05in}
+{\bf Cecilia DeLuca} \\
+{\bf Leonid Zaslavsky}
 \vspace{.5in}
 \end{center}
 
@@ -37,13 +92,13 @@
 
 \newpage
 %\section{Synopsis}
-\input{ESMF_syn}
+\input{esmf_syn}
 
 %\section{Algorithmic Description}
 %\input{comp_alg}
 
 %\section{Requirements}
-\input{ESMF_req}
+\input{esmf_req}
 
 \section{Review Status}
 
