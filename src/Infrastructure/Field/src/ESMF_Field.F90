@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.11 2003/04/08 23:06:07 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.12 2003/04/14 14:51:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -103,8 +103,8 @@
       private
    
         type (ESMF_Array) :: localdata           ! local data for this DE
-        type (ESMF_Status) :: gridstatus         ! is grid set yet?
-        type (ESMF_Status) :: datastatus         ! is data set yet?
+        !type (ESMF_Status) :: gridstatus         ! is grid set yet?
+        !type (ESMF_Status) :: datastatus         ! is data set yet?
         type (ESMF_Mask) :: mask                 ! may belong in Grid
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
@@ -127,6 +127,7 @@
         type (ESMF_GridType), pointer :: gridp   ! pointer directly to grid
         type (ESMF_Status) :: gridstatus         ! uninit, grid ok, etc
         type (ESMF_LocalField) :: localfield     ! this differs per DE
+        type (ESMF_Status) :: datastatus         ! uninit, array ok, etc
         type (ESMF_DataMap) :: mapping           ! mapping of array indicies to grid
         type (ESMF_IOSpec) :: iospec             ! iospec values
         type (ESMF_Status) :: iostatus           ! if unset, inherit from gcomp
@@ -208,7 +209,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.11 2003/04/08 23:06:07 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.12 2003/04/14 14:51:37 nscollins Exp $'
 
 !==============================================================================
 !
@@ -368,6 +369,21 @@
  
 !EOP
       end interface
+
+!------------------------------------------------------------------------------
+
+interface operator (.eq.)
+ module procedure ESMF_sfeq
+ module procedure ESMF_dteq
+ module procedure ESMF_dkeq
+end interface
+
+interface operator (.ne.)
+ module procedure ESMF_sfne
+ module procedure ESMF_dtne
+ module procedure ESMF_dkne
+end interface
+
 !
 !==============================================================================
 !
@@ -431,35 +447,35 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize pointers
+      ! Initialize pointers
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNew%ftypep)
 
-!     Initialize return code   
+      ! Initialize return code   
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 
       allocate(ftype, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
       if(status .NE. 0) then 
         print *, "ERROR in ESMF_FieldCreateNew: Allocate"
         return
       endif 
 
-!     Call construction method to allocate and initialize field internals.
+      ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstructNew(ftype, grid, arrayspec, allocflag, relloc, &
                                     datamap, name, iospec, status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Field construct"
+        print *, "ERROR in ESMF_FieldCreateNew: Field construct new asp"
         return
       endif 
    
-!     Set return values.
+      ! Set return values.
       ESMF_FieldCreateNew%ftypep => ftype
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -543,7 +559,7 @@
       call ESMF_FieldConstructNewArray(ftype, grid, array, relloc, &
                                        datamap, name, iospec, status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Field construct"
+        print *, "ERROR in ESMF_FieldCreateNew: Field construct NewArray"
         return
       endif 
    
@@ -603,35 +619,35 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
    
-!     Initialize pointers
+      ! Initialize pointers
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNoBuffer%ftypep)
 
-!     Initialize return code   
+      ! Initialize return code   
       if(present(rc)) then
         rcpresent = .TRUE. 
         rc = ESMF_FAILURE
       endif     
 
       allocate(ftype, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
       if(status .NE. 0) then 
         print *, "ERROR in FieldCreateNoBuffer: Allocate"
         return
       endif 
 
-!     Call construction method to build field internals.
+      ! Call construction method to build field internals.
       call ESMF_FieldConstructNoBuffer(ftype, grid, arrayspec, relloc, &
                                        datamap, name, iospec, status) 
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldCreateNoBuffer: Field construct"
+        print *, "ERROR in FieldCreateNoBuffer: Field construct NoBuf"
         return
       endif 
 
-!     Set return values.
+      ! Set return values.
       ESMF_FieldCreateNoBuffer%ftypep => ftype
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -682,27 +698,27 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       
-!     Initialize pointers
+      ! Initialize pointers
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNoArray%ftypep)
 
-!     Initialize return code   
+      ! Initialize return code   
       if(present(rc)) then
         rcpresent = .TRUE. 
         rc = ESMF_FAILURE
       endif     
 
       allocate(ftype, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
       if(status .NE. 0) then 
         print *, "ERROR in FieldCreateNoArray: Allocate"
         return
       endif 
 
-!     Call field construction method
+      ! Call field construction method
       call ESMF_FieldConstructNoArray(ftype, grid, relloc, datamap, &
                                                  name, iospec, status)
       if(status .NE. 0) then 
@@ -710,7 +726,7 @@
         return
       endif 
 
-!     Set return values.
+      ! Set return values.
       ESMF_FieldCreateNoArray%ftypep => ftype
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -753,34 +769,34 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       
-!     Initialize pointers
+      ! Initialize pointers
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNoGridArray%ftypep)
 
-!     Initialize return code   
+      ! Initialize return code   
       if(present(rc)) then
         rcpresent = .TRUE. 
         rc = ESMF_FAILURE
       endif     
 
       allocate(ftype, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
       if(status .NE. 0) then 
         print *, "ERROR in ESMF_FieldCreateNoGridArray: Allocate"
         return
       endif 
 
-!     Call field construction method
+      ! Call field construction method
       call ESMF_FieldConstructNoGridArray(ftype, name, iospec, status)
       if(status .NE. 0) then 
         print *, "ERROR in ESMF_FieldCreateNoGridArray: Construct"
         return
       endif 
 
-!     Set return values.
+      ! Set return values.
       ESMF_FieldCreateNoGridArray%ftypep => ftype
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -818,29 +834,29 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       
-!     Initialize pointers
+      ! Initialize pointers
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateRemap%ftypep)
 
-!     Initialize return code   
+      ! Initialize return code   
       if(present(rc)) then
         rcpresent = .TRUE. 
         rc = ESMF_FAILURE
       endif     
 
       allocate(ftype, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
       if(status .NE. 0) then 
         print *, "ERROR in ESMF_FieldCreateRemap: Allocate"
         return
       endif 
 
-!     TODO: Insert field construction method
+      ! TODO: Insert field construction method
 
-!     Set return values.
+      ! Set return values.
       ESMF_FieldCreateRemap%ftypep => ftype
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -870,10 +886,11 @@
 !
 ! !REQUIREMENTS: FLD1.4
 !EOP
+      ! Local variables
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code   
+      ! Initialize return code   
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -881,19 +898,26 @@
         rc = ESMF_FAILURE
       endif     
 
-!     Destruct all field internals and then free field memory.
+      ! If already destroyed or never created, return ok
+      if (.not. associated(field%ftypep)) then
+        print *, "FieldDestroy called on uninitialized or destroyed Field"
+        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
+        return
+      endif
+
+      ! Destruct all field internals and then free field memory.
       call ESMF_FieldDestruct(field%ftypep, status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then 
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldDestroy from ESMF_FieldDestruct"
         return
       endif 
            
       deallocate(field%ftypep, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
-      if(status .NE. 0) then 
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
+      if(status .ne. 0) then 
         print *, "ERROR in ESMF_FieldDestroy: Deallocate of Field class"
         return
       endif 
@@ -964,7 +988,7 @@
       integer, dimension(ESMF_MAXDIM) :: counts
       integer :: i, rank
 
-!     Initialize return code   
+      ! Initialize return code   
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -975,12 +999,16 @@
       call ESMF_FieldConstructNoArray(ftype, grid, relloc, datamap, & 
                                       name, iospec, status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNew: Field construct"
+        print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA"
         return
       endif 
 
       call ESMF_ArraySpecGet(arrayspec, rank=rank, rc=status)
       call ESMF_GridGetDE(grid, lcelltot_index=index, rc=status)
+      if(status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridGetDE"
+        return
+      endif 
 
       do i=1, rank
         counts(i) = index(i)%r - index(i)%l + 1
@@ -997,7 +1025,9 @@
         print *, "ERROR in ESMF_FieldConstructNew: datamap create"
         return
       endif 
+      
       ftype%localfield%localdata = array
+      ftype%datastatus = ESMF_STATE_READY
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1052,7 +1082,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code   
+      ! Initialize return code   
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1063,7 +1093,7 @@
       call ESMF_FieldConstructNoArray(ftype, grid, relloc, datamap, & 
                                       name, iospec, status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNew: Field construct"
+        print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA 2"
         return
       endif 
 
@@ -1072,8 +1102,15 @@
         print *, "ERROR in ESMF_FieldConstructNew: datamap create"
         return
       endif 
+
+      call ESMF_ArrayValidate(array, "", status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "Error uninitialized or invalid array"
+        return
+      endif
       ftype%localfield%localdata = array
-      ftype%localfield%datastatus = ESMF_STATE_READY
+      !ftype%localfield%datastatus = ESMF_STATE_READY
+      ftype%datastatus = ESMF_STATE_READY
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1128,7 +1165,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code   
+      ! Initialize return code   
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1136,19 +1173,28 @@
         rc = ESMF_FAILURE
       endif     
  
-!     Construct a default name if one is not given
+      ! Construct a default name if one is not given
       call ESMF_SetName(ftype%base, name, "Fields", status)
       if(status .NE. 0) then 
         print *, "ERROR in ESMF_FieldConstructNoBuffer: SetName"
         return
       endif 
 
+      ! TODO: Check to see grid is valid first.
+
+      call ESMF_GridValidate(grid, "", status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "Error uninitialized or invalid grid"
+        return
+      endif
       ftype%grid = grid
+      ftype%gridstatus = ESMF_STATE_READY
+
       ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, relloc, status)
 !     call ESMF_ArrayConstructNoBuffer(ftype%array)
 
-!     If I/O spec is present, copy it into the field object; otherwise just 
-!     initialize the I/O spec in the field object.
+      ! If I/O spec is present, copy it into the field object; otherwise just 
+      ! initialize the I/O spec in the field object.
       if(present(iospec)) then
 !       ESMF_IOSpecCopyInit(ftype%iospec, iospec, status)
         if(status .NE. ESMF_SUCCESS) then 
@@ -1162,6 +1208,8 @@
           return
         endif 
       endif
+
+      ftype%fieldstatus = ESMF_STATE_READY
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1212,7 +1260,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1220,19 +1268,28 @@
         rc = ESMF_FAILURE
       endif
 
-!     Construct a default name if one is not given
+      ! Construct a default name if one is not given
       call ESMF_SetName(ftype%base, name, "Fields", status)
       if(status .NE. 0) then 
         print *, "ERROR in ESMF_FieldConstructNoArray: SetName"
         return
       endif 
 
-!     Attach grid
+      ! Attach grid
+      call ESMF_GridValidate(grid, "", status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "Error uninitialized or invalid grid"
+        return
+      endif
       ftype%grid = grid
+      ftype%gridstatus = ESMF_STATE_READY
+
 !
 ! add more code here
 !
      
+      ftype%fieldstatus = ESMF_STATE_READY
+
       if (rcpresent) rc = ESMF_SUCCESS
       
       end subroutine ESMF_FieldConstructNoArray
@@ -1242,10 +1299,10 @@
 ! !IROUTINE: ESMF_FieldConstructNoGridArray - Construct a Field with no Grid or Array
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNoGridArray(ftype, name, iospec, rc)
+      subroutine ESMF_FieldConstructNoGridArray(ftypep, name, iospec, rc)
 !
 ! !ARGUMENTS:     
-      type(ESMF_FieldType), pointer :: ftype  
+      type(ESMF_FieldType), pointer :: ftypep
       character (len = *), intent(in), optional :: name  
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -1258,10 +1315,11 @@
 ! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOP
 
+      ! Local variables
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1269,19 +1327,20 @@
         rc = ESMF_FAILURE
       endif
 
-!     Construct a default name if one is not given
-      call ESMF_SetName(ftype%base, name, "Fields", status)
+      ! Construct a default name if one is not given
+      call ESMF_SetName(ftypep%base, name, "Fields", status)
       if(status .NE. 0) then 
         print *, "ERROR in ESMF_FieldConstructNoGridArray: SetName"
         return
       endif 
 
-!     Initialize field contents
-      ftype%localfield%gridstatus = ESMF_STATE_UNINIT
-      ftype%localfield%datastatus = ESMF_STATE_UNINIT
-      ftype%gridstatus = ESMF_STATE_UNINIT
+      ! Initialize field contents
+      !ftypep%localfield%gridstatus = ESMF_STATE_UNINIT
+      !ftypep%localfield%datastatus = ESMF_STATE_UNINIT
+      ftypep%gridstatus = ESMF_STATE_UNINIT
+      ftypep%datastatus = ESMF_STATE_UNINIT
 
-      ftype%fieldstatus = ESMF_STATE_READY
+      ftypep%fieldstatus = ESMF_STATE_READY
 
 !
 ! add more code here
@@ -1318,13 +1377,15 @@
 
       logical :: rcpresent                          ! Return code present
 
-!     Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume failure until success is certain
       rcpresent = .FALSE.
       if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
       endif
 
+
+      print *, "Field Destruct called"
 
 !
 ! TODO: more code goes here
@@ -1487,12 +1548,25 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+      endif
+
+      ! Minimal error checking 
+      if (.not.associated(field%ftypep)) then
+        print *, "Invalid or Destroyed Field"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
+
+      if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+        print *, "Field not ready"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
       endif
 
       call ESMF_GetName(field%ftypep%base, name, status)
@@ -1541,7 +1615,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if (present(rc)) then
@@ -1604,7 +1678,28 @@
 ! !REQUIREMENTS: FLD1.6.2
 !EOP
 
+        ! Minimal error checking
+        if (.not.associated(field%ftypep)) then
+          print *, "Invalid or Destroyed Field"
+          if (present(rc)) rc = ESMF_FAILURE
+        endif
+ 
+        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+          print *, "Field not ready"
+          if (present(rc)) rc = ESMF_FAILURE
+          return
+        endif
+
+        if (field%ftypep%gridstatus .ne. ESMF_STATE_READY) then
+          print *, "No grid attached to Field"
+          if (present(rc)) rc = ESMF_FAILURE
+          return
+        endif
+
+        print *, "FieldGetGrid(), gridstatus is ready, returning success"
         grid = field%ftypep%grid
+
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_FieldGetGrid
 
@@ -1691,8 +1786,9 @@
       logical :: rcpresent                        ! Return code present
       logical :: apresent                         ! Array present
       logical :: bpresent                         ! Buffer present
+      character(len=ESMF_MAXSTR) :: str
 
-!     ! Initialize return code   
+      ! Initialize return code   
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       apresent = .FALSE.
@@ -1702,7 +1798,20 @@
         rc = ESMF_FAILURE
       endif
 
-!     ! Set codes depending on what the caller specified
+      ! Minimal error checking 
+      if (.not.associated(field%ftypep)) then
+        print *, "Invalid or Destroyed Field"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
+
+      if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+        print *, "Field not ready"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
+
+      ! Set codes depending on what the caller specified
       if(present(array)) apresent=.TRUE.
       if(present(buffer)) bpresent=.TRUE.
 
@@ -1710,6 +1819,8 @@
           ! TODO: check that an array is associated with the field
           !  if (field%ptr%localfield%datastatus .eq. ...)
 
+          call ESMF_StatusString(field%ftypep%datastatus, str, rc)
+          print *, "getting array data, status = ", trim(str)
           array = field%ftypep%localfield%localdata
       endif 
    
@@ -1721,7 +1832,7 @@
           ! array = field%ptr%localfield%localdata
       endif 
 
-!     Set return values.
+      ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetData
@@ -2421,10 +2532,32 @@
 !
 ! !REQUIREMENTS:  FLD4.1
 !EOP
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
-!
-! TODO: code goes here
-!
+!     Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      if (.not.associated(field%ftypep)) then 
+          print *, "Uninitialized or Destroyed Field"
+          return
+      endif 
+
+      if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+      !if (ESMF_sfne(field%ftypep%fieldstatus, ESMF_STATE_READY)) then
+          print *, "Uninitialized or Destroyed Field"
+          return
+      endif 
+
+      ! TODO: add more code here
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_FieldValidate
 
 !------------------------------------------------------------------------------
@@ -2446,28 +2579,58 @@
 !EOP
 ! !REQUIREMENTS:
 
-        character(len=ESMF_MAXSTR) :: name
+        character(len=ESMF_MAXSTR) :: name, str
+        type(ESMF_FieldType), pointer :: fp 
         integer :: status
 
 
         if (present(rc)) rc = ESMF_FAILURE
 
+        print *, "Field Print:"
         if (.not. associated(field%ftypep)) then
           print *, "Empty or Uninitialized Field"
           if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
 
-        call ESMF_GetName(field%ftypep%base, name, status)
+        fp => field%ftypep
+        call ESMF_StatusString(fp%fieldstatus, str, rc)
+        print *, "Field status = ", trim(str)
+
+        if (fp%fieldstatus .ne. ESMF_STATE_READY) then
+          if (present(rc)) rc = ESMF_FAILURE
+          return
+        endif
+
+        call ESMF_GetName(fp%base, name, status)
         if(status .NE. ESMF_SUCCESS) then 
           print *, "ERROR in ESMF_FieldGetName"
           return
         endif 
+        print *, "  Name = '",  trim(name), "'"
 
-        print *, "Field Print:"
-        print *, "  Name = ",  trim(name)
+        call ESMF_StatusString(fp%gridstatus, str, rc)
+        print *, "Grid status = ", trim(str)
+        if (fp%gridstatus .eq. ESMF_STATE_READY) then 
+           call ESMF_GridPrint(fp%grid, "", rc)
+        endif
 
-        !TODO: add more code here to print more info
+        call ESMF_StatusString(fp%datastatus, str, rc)
+        print *, "Data status = ", trim(str)
+        if (fp%datastatus .eq. ESMF_STATE_READY) then 
+           call ESMF_ArrayPrint(fp%localfield%localdata, "", rc)
+        endif
+
+        call ESMF_DataMapPrint(fp%mapping, "", rc)
+
+        !TODO: add code here to print more info
+
+        ! global field contents
+        !type (ESMF_IOSpec) :: iospec             ! iospec values
+        !type (ESMF_Status) :: iostatus           ! if unset, inherit from gcomp
+
+        ! local field contents
+        !type (ESMF_Mask) :: mask                 ! may belong in Grid
 
         if (present(rc)) rc = ESMF_SUCCESS
 

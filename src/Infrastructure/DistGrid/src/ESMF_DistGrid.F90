@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.38 2003/04/04 17:13:01 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.39 2003/04/14 14:51:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.38 2003/04/04 17:13:01 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.39 2003/04/14 14:51:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -553,7 +553,7 @@
       integer :: gsize
       logical :: cover_domain_dir1
       logical :: cover_domain_dir2
-      integer :: i, nDE_i, nDE_j
+      integer :: i, nDE_i, nDE_j, nDEs
       integer, dimension(ESMF_MAXGRIDDIM) :: gcell_dim
 
 !     Initialize return code
@@ -586,7 +586,8 @@
 
 !     set the distgrid layout to the specified layout
       call ESMF_DELayoutGetSize(layout, nDE_i, nDE_j, status)
-      if(status .NE. ESMF_SUCCESS) then
+      nDEs = nDE_i * nDE_j
+      if((status .NE. ESMF_SUCCESS) .or. (nDEs .le. 0)) then
         print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
         return
       endif
@@ -1365,7 +1366,7 @@
       endif
 
       call ESMF_DELayoutGetDEid(distgrid%layout, DE_id, status)
-      if(status .NE. ESMF_SUCCESS) then
+      if((status .NE. ESMF_SUCCESS) .or. (DE_id .lt. 0)) then
         print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DEid"
         return
       endif

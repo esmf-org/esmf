@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.11 2003/04/04 15:38:33 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.12 2003/04/14 14:51:42 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -23,7 +23,7 @@
 #define P_OUT(string)   print *, "Return  ", string, " (rc=", rc, ")"
 #define P_OUT2(string, val)   print *, "Return  ", string, " (rc=", rc, "), value = ", val
 
-!   ! Other ESMF modules which are needed by States
+!   ! ESMF Framework module
     use ESMF_Mod
     
     implicit none
@@ -36,7 +36,7 @@
     type(ESMF_Array) :: array1
     type(ESMF_Field) :: field1, field2
     type(ESMF_Bundle) :: bundle1, bundle2, bundle3, qbundle
-    type(ESMF_State) :: state1, state2, state3, state4
+    type(ESMF_State) :: state1, state2, state3, state4, state5
         
 !-------------------------------------------------------------------------
 !   ! Test 1:
@@ -46,9 +46,10 @@
     P_START("State Test 1: Empty State")
 
     cname = "Atmosphere"
+    sname = "Atmosphere Import"
     P_IN("ESMF_StateCreate")
-    state1 = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)  
-    P_OUT2("ESMF_StateCreate", trim(cname))
+    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, cname, rc=rc)  
+    P_OUT2("ESMF_StateCreate", trim(sname))
 
     P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state1, rc=rc)
@@ -70,9 +71,10 @@
     P_START("State Test 2: Export State")
 
     cname = "Ocean"
+    sname = "Ocean Export"
     P_IN("ESMF_StateCreate")
-    state2 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)  
-    P_OUT2("ESMF_StateCreate", trim(cname))
+    state2 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)  
+    P_OUT2("ESMF_StateCreate", trim(sname))
 
     bname="Surface pressure"
     P_IN("ESMF_BundleCreate")
@@ -132,9 +134,10 @@
     P_START("State Test 3: Export State with Placeholder")
 
     cname = "Ocean"
+    sname = "Ocean Export"
     P_IN("ESMF_StateCreate")
-    state3 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
-    P_OUT2("ESMF_StateCreate", trim(cname))
+    state3 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)
+    P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Downward wind"
     P_IN("ESMF_StateAddData (Name only)")
@@ -223,9 +226,10 @@
     P_START("State Test 5: State with Multiple Placeholders")
 
     cname = "Sea Ice"
+    sname = "Sea Ice Export"
     P_IN("ESMF_StateCreate")
-    state4 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
-    P_OUT2("ESMF_StateCreate", trim(cname))
+    state4 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)
+    P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Surface pressure"
     P_IN("StateAddData (Name only)")
@@ -312,6 +316,59 @@
 
     P_END("State Test 5 finished")
     P_BLANK()
+
+!-------------------------------------------------------------------------
+!   ! Test 6:
+!   !
+!   !  Quick Test - Create Nested States
+ 
+    P_START("State Test 6: Nested States")
+
+    cname = "Primary Coupler"
+    sname = "Coupler Statelist"
+    P_IN("ESMF_StateCreate")
+    state5 = ESMF_StateCreate(sname, ESMF_STATELIST, cname, rc=rc)  
+    P_OUT2("ESMF_StateCreate", trim(sname))
+
+    cname = "Simple Atmosphere"
+    sname = "Atmosphere Import"
+    P_IN("ESMF_StateCreate")
+    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, cname, rc=rc)  
+    P_OUT2("ESMF_StateCreate", trim(sname))
+
+    P_IN("ESMF_StateAddData (State)")
+    call ESMF_StateAddData(state5, state1, rc=rc)
+    P_OUT("ESMF_StateAddData (State)")
+
+    cname = "Full Ocean"
+    sname = "Ocean Export"
+    P_IN("ESMF_StateCreate")
+    state2 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)  
+    P_OUT2("ESMF_StateCreate", trim(sname))
+
+    P_IN("ESMF_StateAddData (State)")
+    call ESMF_StateAddData(state5, state2, rc=rc)
+    P_OUT("ESMF_StateAddData (State)")
+
+    P_IN("ESMF_StatePrint")
+    call ESMF_StatePrint(state5, rc=rc)
+    P_OUT("ESMF_StatePrint")
+
+    P_IN("ESMF_StateDestroy")
+    call ESMF_StateDestroy(state5, rc=rc)
+    P_OUT("ESMF_StateDestroy")
+
+    P_IN("ESMF_StateDestroy")
+    call ESMF_StateDestroy(state1, rc=rc)
+    P_OUT("ESMF_StateDestroy")
+
+    P_IN("ESMF_StateDestroy")
+    call ESMF_StateDestroy(state2, rc=rc)
+    P_OUT("ESMF_StateDestroy")
+
+    P_END("State Test 6: Nested States")
+    P_BLANK()
+
 
 
     end program ESMF_StateCreateTest

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.20 2003/03/31 20:03:42 cdeluca Exp $
+// $Id: ESMC_Comm.C,v 1.21 2003/04/14 14:51:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.20 2003/03/31 20:03:42 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.21 2003/04/14 14:51:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -163,7 +163,17 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 
     // TODO:  coordinate with other DEs to determine group size ??
     // default to what's given, override later if needed
-    numDEs = nThreadsPerProc * nProcs;
+
+    // TODO: this should be querying the 1 Machine instance to find out how
+    //  many procs there are.  threads are another matter since they are
+    //  more dynamic.  but this is hardcoded so we can't give a reasonable
+    //  error if the framework user calls a create asking for more DEs than
+    //  there are PEs.  eventually we are intending to support virtual DEs
+    //  but for the current code they are *not* supported, but we can't give
+    //  an error to tell them that.   this needs fixing.
+    // for now try this, and comment out old code which does threads * procs
+    Machine.ESMC_MachineGetNumCPUs(&numDEs);
+    //numDEs = nThreadsPerProc * nProcs;
 
     // allocate local message buffer
     if (lbuf == 0) {

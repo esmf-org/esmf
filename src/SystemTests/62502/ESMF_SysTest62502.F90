@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.8 2003/04/08 23:09:57 nscollins Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.9 2003/04/14 14:51:43 nscollins Exp $
 !
 ! System test code #62502
 
@@ -25,10 +25,10 @@
     implicit none
     
     ! Local variables
-    integer :: de_id, rc, delist(4)
+    integer :: de_id, ndes, rc, delist(4)
     character(len=ESMF_MAXSTR) :: aname, cname1, cname2, cplname
     type(ESMF_DELayout) :: layout1, layout2, layout3
-    type(ESMF_State) :: c1exp, c2imp, cplstate(2)
+    type(ESMF_State) :: c1exp, c2imp, cplstate
     type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
@@ -62,6 +62,13 @@
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layout1, rc=rc)
     call ESMF_DELayoutPrint(layout1, rc=rc)
+
+    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    if (ndes .lt. 4) then
+        print *, "This system test needs to run at least 4-way, current np = ", ndes
+        goto 10
+    endif
+
 
 
     ! Create the 2 model components and coupler
@@ -130,17 +137,18 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-      c1exp = ESMF_StateCreate(cname1, ESMF_STATEEXPORT, "comp1 export")
+      c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1)
       call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, rc=rc)
       print *, "Comp 1 Initialize finished, rc =", rc
  
-      c2imp = ESMF_StateCreate(cname2, ESMF_STATEIMPORT, "comp2 import")
+      c2imp = ESMF_StateCreate("comp2 import", ESMF_STATEIMPORT, cname2)
       call ESMF_GridCompInitialize(comp2, importstate=c2imp, clock=clock, rc=rc)
       print *, "Comp 1a Initialize finished, rc =", rc
- 
-      cplstate(1) = c1exp
-      cplstate(2) = c2imp
 
+      cplstate = ESMF_StateCreate("coupler list", ESMF_STATELIST, cplname)
+      call ESMF_StateAddData(cplstate, c1exp, rc=rc)
+      call ESMF_StateAddData(cplstate, c2imp, rc=rc)
+ 
       call ESMF_CplCompInitialize(cpl, statelist=cplstate, clock=clock, rc=rc)
       print *, "Coupler Initialize finished, rc =", rc
  
@@ -162,7 +170,7 @@
         print *, "Comp 2 Run returned, rc =", rc
 
         call ESMF_ClockAdvance(clock, rc=rc)
-        !call ESMF_ClockPrint(clock, rc=rc)
+        call ESMF_ClockPrint(clock, rc=rc)
 
       enddo
  
@@ -205,6 +213,7 @@
 
       call ESMF_StateDestroy(c1exp, rc)
       call ESMF_StateDestroy(c2imp, rc)
+      call ESMF_StateDestroy(cplstate, rc)
 
       call ESMF_GridCompDestroy(comp1, rc)
       call ESMF_GridCompDestroy(comp2, rc)
@@ -218,7 +227,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      print *, "System Test #62502 complete!"
+10    print *, "System Test #62502 complete!"
 
       end program ESMF_SysTest62502
     

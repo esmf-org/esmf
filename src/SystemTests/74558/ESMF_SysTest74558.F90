@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.4 2003/04/09 21:27:14 jwolfe Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.5 2003/04/14 14:51:48 nscollins Exp $
 !
 ! System test code #74558
 
@@ -23,7 +23,7 @@
     implicit none
     
     ! Local variables
-    integer :: de_id, rc, delist(4)
+    integer :: de_id, ndes, rc, delist(4)
     character(len=ESMF_MAXSTR) :: aname, cname1
     type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_State) :: c1exp
@@ -57,6 +57,12 @@
 
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layout1, rc=rc)
+    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    if (ndes .lt. 4) then
+        print *, "This system test needs to run at least 4-way, current np = ", ndes
+        goto 10
+    endif
+
 
     ! Create the model component
     cname1 = "fluid flow"
@@ -106,8 +112,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-      c1exp = ESMF_StateCreate(cname1, ESMF_STATEEXPORT, "comp1 export")
-      write(*,*) 'got here'
+      c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1)
       call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, rc=rc)
       print *, "Comp 1 Initialize finished, rc =", rc
  
@@ -125,7 +130,7 @@
         print *, "Comp 1 Run returned, rc =", rc
 
         call ESMF_ClockAdvance(clock, rc=rc)
-        !call ESMF_ClockPrint(clock, rc=rc)
+        call ESMF_ClockPrint(clock, rc=rc)
 
       enddo
 
@@ -168,7 +173,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      print *, "System Test #74558 complete!"
+10    print *, "System Test #74558 complete!"
 
       end program ESMF_SysTest74558
     

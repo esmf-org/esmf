@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.29 2003/03/11 23:09:42 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.30 2003/04/14 14:51:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
+#include <iostream.h>
 #include "ESMC.h"
 #include "ESMC_Base.h"
 #include "ESMC_Array.h"
@@ -156,7 +157,12 @@ extern "C" {
           *status = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_arrayprint)(ESMC_Array **ptr, char *opts, int *status) {
+     void FTN(c_esmc_arrayprint)(ESMC_Array **ptr, char *opts, int *status, 
+                                                                 int clen) {
+         // TODO: make sure this isn't writing past end of buffer
+         if (opts && (clen > 0))
+             opts[clen] = '\0';
+         cout << "array print called, opts = " << opts << endl;
          *status = (*ptr)->ESMC_ArrayPrint(opts);
      }
 

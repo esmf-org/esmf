@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.3 2003/04/04 15:38:36 nscollins Exp $
+! $Id: ESMF_UserMain.F90,v 1.4 2003/04/14 14:51:43 nscollins Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -42,7 +42,7 @@
     type(ESMF_DELayout) :: alayout
 
     type(ESMF_Grid) :: grid1, grid2
-    type(ESMF_State) :: atmimport, ocnexport, cplstates(2)
+    type(ESMF_State) :: atmimport, ocnexport, cplstates
 
     character(ESMF_MAXSTR) :: aname, gname1, gname2, cname
     character(1024) :: configfile
@@ -125,10 +125,11 @@
     !-------------------------------------------------------------------------
     !  Create the States
 
-    atmimport = ESMF_StateCreate(ESMF_IMPORTSTATE, "atmosphere import")
-    ocnexport = ESMF_StateCreate(ESMF_EXPORTSTATE, "ocean export")
-    cplstates(1) = ocnexport
-    cplstates(2) = atmimport
+    atmimport = ESMF_StateCreate("atmosphere import", ESMF_IMPORTSTATE, rc=rc)
+    ocnexport = ESMF_StateCreate("ocean export", ESMF_EXPORTSTATE, rc=rc)
+    cplstates = ESMF_StateCreate("coupler states", ESMF_STATELIST, rc=rc)
+    call ESMF_StateAddData(cplstates, ocnexport, rc)
+    call ESMF_StateAddData(cplstates, atmimport, rc)
  
     !-------------------------------------------------------------------------
     !  Initialize each component

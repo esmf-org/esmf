@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.C,v 1.10 2003/04/04 21:08:05 nscollins Exp $
+// $Id: ESMC_DE.C,v 1.11 2003/04/14 14:51:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DE.C,v 1.10 2003/04/04 21:08:05 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DE.C,v 1.11 2003/04/14 14:51:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -469,7 +469,7 @@
        << ", thread=" << thread << ", excl=" << exclusive << endl;
 
   cout << "PE=";
-  if (PE != 0) {
+  if (PE != ESMC_NULL_POINTER) {
     PE->ESMC_PEPrint();
   } else {
     cout << "unassigned" << endl;

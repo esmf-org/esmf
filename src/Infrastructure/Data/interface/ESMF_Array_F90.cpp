@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.19 2003/04/04 18:23:10 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.20 2003/04/14 14:51:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,8 +20,6 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-!------------------------------------------------------------------------------
-^include "ESMF.h"
 #include "ESMF_ArrayMacros.h"
 !------------------------------------------------------------------------------
 !BOP
@@ -166,13 +164,14 @@
       public ESMF_ArrayWrite
       public ESMF_ArrayRead
  
+      public ESMF_ArrayValidate
       public ESMF_ArrayPrint
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.19 2003/04/04 18:23:10 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.20 2003/04/14 14:51:33 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -292,9 +291,17 @@ ArrayInterfaceMacro(ArrayDeallocate)
 !------------------------------------------------------------------------------
 interface operator (.eq.)
  module procedure cfeq
+ module procedure ESMF_sfeq
+ module procedure ESMF_dteq
+ module procedure ESMF_dkeq
+ module procedure ESMF_opeq
 end interface
 interface operator (.ne.)
  module procedure cfne
+ module procedure ESMF_sfne
+ module procedure ESMF_dtne
+ module procedure ESMF_dkne
+ module procedure ESMF_opne
 end interface
 
 !==============================================================================
@@ -567,17 +574,51 @@ end function
 
         ! Call proper create routine
         select case (as%rank)
-          !case (1)
+          case (1)
+            select case (as%type%dtype)
+              case (ESMF_DATA_INTEGER%dtype)
+               a = ESMF_ArrayCreateBySpecI41D(counts, rc)
+              case (ESMF_DATA_REAL%dtype)
+               a = ESMF_ArrayCreateBySpecR41D(counts, rc)
+              case default
+               print *, "unsupported type"
+            end select
           case (2)
             select case (as%type%dtype)
+              case (ESMF_DATA_INTEGER%dtype)
+               a = ESMF_ArrayCreateBySpecI42D(counts, rc)
               case (ESMF_DATA_REAL%dtype)
                a = ESMF_ArrayCreateBySpecR42D(counts, rc)
               case default
                print *, "unsupported type"
             end select
-          !case (3)
-          !case (4)
-          !case (5)
+          case (3)
+            select case (as%type%dtype)
+              case (ESMF_DATA_INTEGER%dtype)
+               a = ESMF_ArrayCreateBySpecI43D(counts, rc)
+              case (ESMF_DATA_REAL%dtype)
+               a = ESMF_ArrayCreateBySpecR43D(counts, rc)
+              case default
+               print *, "unsupported type"
+            end select
+          case (4)
+            select case (as%type%dtype)
+              case (ESMF_DATA_INTEGER%dtype)
+               a = ESMF_ArrayCreateBySpecI44D(counts, rc)
+              case (ESMF_DATA_REAL%dtype)
+               a = ESMF_ArrayCreateBySpecR44D(counts, rc)
+              case default
+               print *, "unsupported type"
+            end select
+          case (5)
+            select case (as%type%dtype)
+              case (ESMF_DATA_INTEGER%dtype)
+               a = ESMF_ArrayCreateBySpecI45D(counts, rc)
+              case (ESMF_DATA_REAL%dtype)
+               a = ESMF_ArrayCreateBySpecR45D(counts, rc)
+              case default
+               print *, "unsupported type"
+            end select
           case default
            print *, "unsupported rank"
         end select
@@ -1693,7 +1734,66 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE - ESMF_ArrayValidate - Check validity of Array object
 !
+! !INTERFACE:
+      subroutine ESMF_ArrayValidate(array, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Array) :: array
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about a array.
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+       character (len=6) :: defaultopts      ! default print options 
+       integer :: status                     ! local error status
+       logical :: rcpresent        
+
+       ! Initialize return code; assume failure until success is certain
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
+       if (present(rc)) then
+         rcpresent = .TRUE.
+         rc = ESMF_FAILURE
+       endif
+
+       defaultopts = "brief"
+
+       ! Simple validity checks
+       if (array%this .eq. ESMF_NULL_POINTER) then
+           print *, "Array not initialized or Destroyed"
+           return 
+       endif
+
+       if(present(options)) then
+           !call c_ESMC_ArrayValidate(array, options, status) 
+       else
+           !call c_ESMC_ArrayValidate(array, defaultopts, status) 
+       endif
+
+       !if (status .ne. ESMF_SUCCESS) then
+       !  print *, "Array validate error"
+       !  return
+       !endif
+
+       ! Set return values
+       if (rcpresent) rc = ESMF_SUCCESS
+
+       end subroutine ESMF_ArrayValidate
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayPrint - Print contents of an Array object
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayPrint(array, options, rc)

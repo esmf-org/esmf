@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.7 2003/04/04 22:03:38 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.8 2003/04/14 14:51:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.7 2003/04/04 22:03:38 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.8 2003/04/14 14:51:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -75,7 +75,20 @@
       ! Make a 1x4 and 2x2 layout
       delist = (/ 0, 1, 2, 3 /)
       layout1 = ESMF_DELayoutCreate(delist, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
+      if (rc .eq. ESMF_FAILURE) then
+        print *, "cannot create 1x4 layout"
+        goto 10
+      endif
+      print *, "Layout 1:"
+      call ESMF_DELayoutPrint(layout1, "", rc)
       layout2 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
+      if (rc .eq. ESMF_FAILURE) then
+        print *, "cannot create 2x2 layout"
+        goto 10
+      endif
+      print *, "Layout 2:"
+      call ESMF_DELayoutPrint(layout2, "", rc)
+
       call ESMF_DELayoutGetDEid(layout1, myde, rc)
 
       !------------------------------------------------------------------------
@@ -185,5 +198,7 @@
       call ESMF_GridDestroy(grid2)
       call ESMF_ArrayDestroy(arr1)
       call ESMF_ArrayDestroy(arr2)
+
+10    print *, "end of Field Route test"
 
       end program ESMF_FRouteUTest

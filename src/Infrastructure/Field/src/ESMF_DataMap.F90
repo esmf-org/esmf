@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.2 2003/04/03 23:08:18 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.3 2003/04/14 14:51:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -139,6 +139,8 @@
 !  ! Note that the actual memory layout isn't here - it's encapsulated
 !  ! in the Array class.  
 
+      ! TODO: this should be a shallow type and not a deep class.
+      !  it can be initialized with no allocation or state needed. 
       type ESMF_DataMapType
       sequence
       private
@@ -194,6 +196,9 @@
       public ESMF_DataMapWrite, ESMF_DataMapRead 
       public ESMF_DataMapValidate, ESMF_DataMapPrint
 
+      public ESMF_RelLocString, ESMF_InterleaveString
+
+      public ESMF_rleq, ESMF_rlne, ESMF_ileq, ESMF_ilne
 
 !EOP
  
@@ -202,7 +207,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.2 2003/04/03 23:08:18 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.3 2003/04/14 14:51:36 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -252,6 +257,19 @@
 
        end interface 
 
+!------------------------------------------------------------------------------
+! overload .eq. & .ne. with additional derived types so you can compare
+!  them as if they were simple integers.
+
+interface operator (.eq.)
+ module procedure ESMF_rleq
+ module procedure ESMF_ileq
+end interface
+
+interface operator (.ne.)
+ module procedure ESMF_rlne
+ module procedure ESMF_ilne
+end interface
 
 !------------------------------------------------------------------------------
 ! end of declarations & definitions
@@ -259,6 +277,40 @@
 
 
       contains
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_RelLoc flags to see if they're the same or not
+
+function ESMF_rleq(rl1, rl2)
+ logical ESMF_rleq
+ type(ESMF_RelLoc), intent(in) :: rl1, rl2
+
+ ESMF_rleq = (rl1%relloc .eq. rl2%relloc)
+end function
+
+function ESMF_rlne(rl1, rl2)
+ logical ESMF_rlne
+ type(ESMF_RelLoc), intent(in) :: rl1, rl2
+
+ ESMF_rlne = (rl1%relloc .ne. rl2%relloc)
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_InterleaveType flags 
+
+function ESMF_ileq(il1, il2)
+ logical ESMF_ileq
+ type(ESMF_InterleaveType), intent(in) :: il1, il2
+
+ ESMF_ileq = (il1%il_type .eq. il2%il_type)
+end function
+
+function ESMF_ilne(il1, il2)
+ logical ESMF_ilne
+ type(ESMF_InterleaveType), intent(in) :: il1, il2
+
+ ESMF_ilne = (il1%il_type .ne. il2%il_type)
+end function
 
 
 !------------------------------------------------------------------------------
@@ -293,9 +345,9 @@
 !      \begin{description}
 !      \item[iorder]
 !          One of 8 predefined index orderings.
-!      \item[relloc]
+!      \item[{[relloc]}]
 !          Relative location of data per cell/vertex.
-!      \item[[rc]] 
+!      \item[{[rc]}] 
 !          Return code equals {\tt ESMF\_SUCCESS} if the method
 !          executes without errors.
 !      \end{description}
@@ -328,11 +380,11 @@
           return
         endif
     
-         call ESMF_DataMapConstructNew(dmp, iorder, relloc, status)
-         if (status .ne. ESMF_SUCCESS) then
+        call ESMF_DataMapConstructNew(dmp, iorder, relloc, status)
+        if (status .ne. ESMF_SUCCESS) then
            print *, "DataMap construction error"
            return
-         endif
+        endif
 
         ! Set return values
         ESMF_DataMapCreateNew%dmp => dmp
@@ -951,7 +1003,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_DataMap), intent(in) :: datamap           ! what to print
+      type(ESMF_DataMap), intent(in) :: datamap          ! what to print
       character (len = *), intent(in) :: options         ! select print options
       integer, intent(out), optional :: rc               ! return code
 !
@@ -961,13 +1013,101 @@
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        print *, "DataMap print:"
+        integer :: i 
+        character (len = ESMF_MAXSTR) :: str
+        type(ESMF_DataMapType), pointer :: dmp
 
+        print *, "DataMap print:"
+        if (.not.associated(datamap%dmp)) then
+          print *, "Uninitialized or Destroyed object"
+          if (present(rc)) rc = ESMF_FAILURE
+          return
+        endif
+
+        dmp => datamap%dmp
+        print *, " Grid rank = ", dmp%gridrank
+        print *, " Dim order and sense:"
+        do i=1, ESMF_MAXDIM
+            print *, i, dmp%dim_order(i), dmp%sense(i)
+        enddo
+
+        ! individual data item information
+        print *, " Data rank = ", dmp%datarank
+        if (dmp%datarank .gt. 1) then
+          print *, "  length of each dimension"
+          do i=1, dmp%datarank
+              print *, i, dmp%ranklength(i)
+          enddo
+        endif
+
+        call ESMF_RelLocString(dmp%relloc, str, rc)
+        print *, "  Data relative location = ", trim(str)
+        call ESMF_InterleaveString(dmp%interleave%il_type, str, rc)
+        print *, "  Interleave type = ", trim(str), ".  Start,end,stride = ",  &
+                                         dmp%interleave%il_start, & 
+                                         dmp%interleave%il_end, & 
+                                         dmp%interleave%il_strides
+      
         end subroutine ESMF_DataMapPrint
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_RelLocString - Return a relloc as a string
+!
+! !INTERFACE:
+      subroutine ESMF_RelLocString(relloc, string, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_RelLoc), intent(in) :: relloc           ! turn into string
+      character (len = *), intent(out) :: string        ! where to return it
+      integer, intent(out), optional :: rc              ! return code
+!
+! !DESCRIPTION:
+!      Routine to turn a relloc into a string.
+!
+!EOP
+! !REQUIREMENTS:
+
+        if (relloc .eq. ESMF_CELL_CENTER) string = "Cell Center"
+        if (relloc .eq. ESMF_CELL_NORTH) string = "Cell North"
+        if (relloc .eq. ESMF_CELL_EAST) string = "Cell East"
+        if (relloc .eq. ESMF_CELL_NE) string = "Cell NorthEast"
+        if (relloc .eq. ESMF_CELL_CELL) string = "Full Cell"
+        if (relloc .eq. ESMF_CELL_VERTEX) string = "Cell Vertex"
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RelLocString
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_InterleaveString - Return a indexorder as a string
+!
+! !INTERFACE:
+      subroutine ESMF_InterleaveString(interleave, string, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_InterleaveType), intent(in) :: interleave   ! turn into string
+      character (len = *), intent(out) :: string        ! where to return it
+      integer, intent(out), optional :: rc              ! return code
+!
+! !DESCRIPTION:
+!      Routine to turn an interleave into a string.
+!
+!EOP
+! !REQUIREMENTS:
+
+        if (interleave .eq. ESMF_IL_BLOCK) string = "Block Interleave"
+        if (interleave .eq. ESMF_IL_ITEM) string = "Item Interleave"
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_InterleaveString
+
+!------------------------------------------------------------------------------
 
         end module ESMF_DataMapMod
 

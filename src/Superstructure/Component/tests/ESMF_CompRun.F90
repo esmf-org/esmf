@@ -1,4 +1,4 @@
-! $Id: ESMF_CompRun.F90,v 1.3 2003/04/04 15:38:33 nscollins Exp $
+! $Id: ESMF_CompRun.F90,v 1.4 2003/04/14 14:51:41 nscollins Exp $
 !
 ! Test code which creates a new Component.
 
@@ -15,7 +15,7 @@
 
     program ESMF_GridCompCreateTest
     
-!   ! Other ESMF modules which are needed by Comps
+!   ! ESMF Framework module
     use ESMF_Mod
 
     use UserGridCompMod, only: User_SetServices

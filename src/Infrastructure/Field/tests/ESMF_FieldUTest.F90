@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.11 2003/04/11 00:00:40 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.12 2003/04/14 14:51:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.11 2003/04/11 00:00:40 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.12 2003/04/14 14:51:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -108,12 +108,12 @@
       !------------------------------------------------------------------------
 
        ! verify that querying the name of a destroyed Field is handled properly.
-!      The following code is commented out because it crashes the program.
-!      It will be uncommented when the bug is fixed.
-!      call ESMF_FieldGetName(f1, fname, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Getting name of a destroyed Field Test"
-!      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+       ! The following code is commented out because it crashes the program.
+       ! It will be uncommented when the bug is fixed.
+       call ESMF_FieldGetName(f1, fname, rc=rc)
+       write(failMsg, *) ""
+       write(name, *) "Getting name of a destroyed Field Test"
+       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Verifing that printing a destroyed Field is handled properly.
@@ -236,12 +236,12 @@
       ! specification. In this case a field will allocate its own data. The grid passed 
       ! into the argument list is referenced and not copied.
       ! The following code is commented out because it crashes. Bug 703872
-      ! call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_KIND_R4)
-      ! f2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
-                              ! name="rh", rc=rc)
-      ! write(failMsg, *) "ArraySpec has not been created"
-      ! write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_KIND_R4)
+      f2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                                          name="rh", rc=rc)
+      write(failMsg, *) "ArraySpec has not been created"
+      write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Requirement FLD1.1.2 Creation with external data 
@@ -271,12 +271,12 @@
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
-      ! Verifing that a Field can be created with an uninitialized Grid and Array
+      ! Verifing that a Field cannot` be created with an uninitialized Grid and Array
       f3 = ESMF_FieldCreate(grid2, arr2, ESMF_NO_COPY, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
@@ -394,12 +394,12 @@
       !------------------------------------------------------------------------
 
        ! verify that querying the name of a destroyed Field is handled properly.
-!      The following code is commented out because it crashes the program.
-!      It will be uncommented when the bug is fixed.
-!      call ESMF_FieldGetName(f1, fname, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Getting name of a destroyed Field Test"
-!      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+       ! The following code is commented out because it crashes the program.
+       ! It will be uncommented when the bug is fixed.
+       call ESMF_FieldGetName(f1, fname, rc=rc)
+       write(failMsg, *) ""
+       write(name, *) "Getting name of a destroyed Field Test"
+       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Verifing that printing a destroyed Field is handled properly.
@@ -522,12 +522,12 @@
       ! specification. In this case a field will allocate its own data. The grid passed 
       ! into the argument list is referenced and not copied.
       ! The following code is commented out because it crashes. Bug 703872
-      ! call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_KIND_R4)
-      ! f2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
-                              ! name="rh", rc=rc)
-      ! write(failMsg, *) "ArraySpec has not been created"
-      ! write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_KIND_R4)
+      f2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                              name="rh", rc=rc)
+      write(failMsg, *) "ArraySpec has not been created"
+      write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Requirement FLD1.1.2 Creation with external data 
@@ -557,12 +557,12 @@
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
-      ! Verifing that a Field can be created with an uninitialized Grid and Array
+      ! Verifing that a Field cannot be created with an uninitialized Grid and Array
       f3 = ESMF_FieldCreate(grid2, arr2, ESMF_NO_COPY, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
@@ -591,9 +591,10 @@
       call ESMF_FieldDestroy(f5, rc=rc)
       !------------------------------------------------------------------------
 
-
+     
 
 #endif
 
+      print *, "******  End of FieldUTest  ******"
 
       end program ESMF_FieldUTest

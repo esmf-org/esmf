@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.10 2003/04/08 23:09:58 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.11 2003/04/14 14:51:45 nscollins Exp $
 !
 ! System test code #63029
 
@@ -46,6 +46,11 @@
     ! Create a default 1xN DELayout
     layout1 = ESMF_DELayoutCreate(rc)
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    if (ndes .le. 1) then
+        print *, "Cannot run this test uniprocessor"
+        goto 10
+    endif
+
     mid = ndes/2
 
     ! Create a child DELayout for the Component which is 2 by half the
@@ -75,8 +80,8 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-      imp = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc)
-      exp = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc)
+      imp = ESMF_StateCreate("grid import state", ESMF_STATEIMPORT, rc=rc)
+      exp = ESMF_StateCreate("grid export state", ESMF_STATEEXPORT, rc=rc)
 
       call ESMF_GridCompInitialize(comp1, imp, exp, rc=rc)
       print *, "Comp Initialize finished"
@@ -124,13 +129,16 @@
 !     Clean up
 
       call ESMF_GridCompDestroy(comp1, rc)
+      call ESMF_StateDestroy(imp, rc)
+      call ESMF_StateDestroy(exp, rc)
       call ESMF_DELayoutDestroy(layout2, rc)
       call ESMF_DELayoutDestroy(layout1, rc)
       print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      print *, "System Test #63029 complete!"
+ 
+ 10   print *, "System Test #63029 complete!"
 
       end program ESMF_SysTest63029
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.1 2003/03/10 21:54:21 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.2 2003/04/14 14:51:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -487,10 +487,11 @@ end function
 ! !REQUIREMENTS:  FLD2.4
 !EOP
 
+      ! Local variables
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -498,24 +499,24 @@ end function
         rc = ESMF_FAILURE
       endif    
 
-!     If already destroyed or never created, return ok
+      ! If already destroyed or never created, return ok
       if (.not. associated(bundle%btypep)) then
-        if(rcpresent) rc = ESMF_SUCCESS
+        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
         return
       endif
 
-!     Destruct all bundle internals and then free field memory.
+      ! Destruct all bundle internals and then free field memory.
       call ESMF_BundleDestruct(bundle%btypep, status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_BundleDestroy from ESMF_BundleDestruct"
         return
       endif
 
       deallocate(bundle%btypep, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
       if(status .NE. 0) then
         print *, "ERROR in ESMF_BundleDestroy: Deallocate of Bundle class"
         return
@@ -721,6 +722,8 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
       endif
+
+     btype%bundlestatus = ESMF_STATE_INVALID
 
      !
      ! TODO: code goes here
@@ -1982,9 +1985,9 @@ end function
       subroutine ESMF_BundleValidate(bundle, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle          ! bundle to be checked
-      character (len=*), intent(in) :: options         ! select vaidate options
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_Bundle), intent(in) :: bundle            ! bundle to be checked
+      character (len=*), intent(in), optional :: options ! validate options
+      integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
 !      Validates that the Bundles is internally consistent.
@@ -1993,9 +1996,32 @@ end function
 ! !REQUIREMENTS:  FLD4.1
 !EOP
 
-!
-!  TODO: code goes here
-!
+      ! Local variables
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      if (.not.associated(bundle%btypep)) then 
+          print *, "Uninitialized or Destroyed Bundle"
+          return
+      endif 
+
+      if (bundle%btypep%bundlestatus .ne. ESMF_STATE_READY) then
+          print *, "Uninitialized or Destroyed Bundle"
+          return
+      endif 
+
+      ! TODO: add more code here
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleValidate
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.2 2003/04/01 23:47:56 nscollins Exp $
+// $Id: ESMC_FTable_F.C,v 1.3 2003/04/14 14:51:38 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -179,25 +179,20 @@ extern "C" {
 
      void FTN(c_esmc_ftablesetcplargs)(ESMC_FTable **ptr, char *type,
                                       int *phase, void *comp, 
-                                      void **statelist, void *clock, 
+                                      //void **statelist, void *clock, 
+                                      void *statelist, void *clock, 
                                       int *status, int slen) {
 
          char *fname;
          int acount = 4;
          void *alist[4];
-         void *fred;
 
          newtrim(type, slen, phase, &fname);
          //printf("after newtrim, name = '%s'\n", fname);
 
-         // TODO:   hack!!  memory leak!!  just try this code out
-         // to see if it works, then figure out how to fix it.
-         
-         //fred = (void*)(new char[ESMF_F90_PTR_BASE_SIZE]);
-         //memcpy(fred, statelist, ESMF_F90_PTR_BASE_SIZE);
          alist[0] = (void *)comp;
-         //alist[1] = (void *)fred;
-         alist[1] = (void *)(*statelist);
+         //alist[1] = (void *)(*statelist);
+         alist[1] = (void *)statelist;
          alist[2] = (void *)clock;
          alist[3] = (void *)status;
 

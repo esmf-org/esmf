@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.8 2003/04/08 23:05:28 nscollins Exp $
+// $Id: ESMC_Machine.C,v 1.9 2003/04/14 14:51:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-                 "$Id: ESMC_Machine.C,v 1.8 2003/04/08 23:05:28 nscollins Exp $";
+                 "$Id: ESMC_Machine.C,v 1.9 2003/04/14 14:51:31 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -157,6 +157,8 @@ ESMC_Machine Machine;
   distMemLatency = distmemlat;
   distMemBandwidth = distmemband;
 
+  // TODO: currently the MPI rank is used as the cpu number, and the
+  //  max rank overrides the numCPUs.  
   ESMC_MachineSetCpuID();
   ESMC_MachineSetNodeID();
 
@@ -407,7 +409,10 @@ ESMC_Machine Machine;
     }
 
     // TODO: MPI overrides given nProcs ?
-    MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
+
+    // TODO: this used to call with &numProcs.  for right now since we
+    //  cannot support virtual DEs per PE, set the max to numCPUs.
+    MPI_Comm_size(MPI_COMM_WORLD, &numCPUs);
 
     // get my unique DE process group ID
     MPI_Comm_rank(MPI_COMM_WORLD, &CpuID);  

@@ -1,4 +1,4 @@
-! $Id: ESMF_UserCComp.F90,v 1.3 2003/04/04 15:38:35 nscollins Exp $
+! $Id: ESMF_UserCComp.F90,v 1.4 2003/04/14 14:51:42 nscollins Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -15,7 +15,7 @@
 
     module UserCplCompMod
     
-!   ! Other ESMF modules which are needed by Comps
+!   ! ESMF Framework module
     use ESMF_Mod
     
     implicit none
@@ -56,17 +56,22 @@
 
     subroutine my_init(ccomp, statelist, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      type(ESMF_State) :: statelist(*)
+      !type(ESMF_State) :: statelist(*)
+      type(ESMF_State) :: statelist
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
+      type(ESMF_State) :: state1, state2
+      call ESMF_StateGetData(statelist,  "statename1", state1, rc)
+      call ESMF_StateGetData(statelist,  "statename2", state2, rc)
 
     end subroutine my_init
 
 
     subroutine my_run(ccomp, statelist, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      type(ESMF_State) :: statelist(*)
+      !type(ESMF_State) :: statelist(*)
+      type(ESMF_State) :: statelist
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
@@ -76,7 +81,8 @@
 
     subroutine my_final(ccomp, statelist, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      type(ESMF_State) :: statelist(*)
+      !type(ESMF_State) :: statelist(*)
+      type(ESMF_State) :: statelist
       type(ESMF_Clock) :: externalclock
       integer :: rc
      

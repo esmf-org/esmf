@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.36 2003/04/08 23:07:53 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.37 2003/04/14 14:51:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -166,9 +166,14 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! private global - has framework init routine been run?
+!     ! Private global variables
 
-        logical :: frameworknotinit = .true. 
+      ! Has framework init routine been run?
+      logical :: frameworknotinit = .true. 
+ 
+      ! A 1 x N global layout, currently only for debugging but maybe
+      !  has more uses?
+      type(ESMF_DELayout) :: GlobalLayout
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -208,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.36 2003/04/08 23:07:53 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.37 2003/04/14 14:51:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1186,7 +1191,8 @@
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout), optional :: statelist(:)
+      !type (ESMF_State), intent(inout), optional :: statelist(:)
+      type (ESMF_State), intent(inout), optional :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -1201,7 +1207,9 @@
 !   \item[component]
 !    Component to call Initialization routine for.
 !
-!   \item[{[statelist]}]  List of import and export states for coupling.
+!   %\item[{[statelist]}]  List of import and export states for coupling.
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -1246,7 +1254,8 @@
       type (ESMF_CompType), intent(in) :: ctype
       type (ESMF_State), intent(inout), optional :: importstate
       type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_State), intent(inout), target, optional :: statelist(:)
+      !type (ESMF_State), intent(inout), target, optional :: statelist(:)
+      type (ESMF_State), intent(inout), target, optional :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       type (ESMF_GridComp), optional :: gcomp
@@ -1269,7 +1278,9 @@
 !
 !   \item[{[exportstate]}]  Export data for initialization.
 !
-!   \item[{[statelist]}]  List of import and export states for coupling.
+!   %\item[{[statelist]}]  List of import and export states for coupling.
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -1294,7 +1305,8 @@
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
-        integer :: de_id                        ! the current DE
+        integer :: gde_id                       ! the global DE
+        integer :: lde_id                       ! the DE in the subcomp layout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_SWrap) :: swrap
 
@@ -1308,12 +1320,15 @@
 
         ! See if this is currently running on a DE which is part of the
         ! proper Layout.
-	call ESMF_DELayoutGetDEID(compp%layout, de_id, status)
+	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
+	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
+          print *, "Global DE ", gde_id, " is not present in this layout"
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
+        print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
@@ -1321,19 +1336,19 @@
 
         ! Set up the arguments before the call     
         if (compp%ctype%ctype .eq. ESMF_GRIDCOMPTYPE%ctype) then
-          call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETINIT, phase, gcomp, &
-                                       importstate, exportstate, clock, status)
+          call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETINIT, phase, &
+                               gcomp, importstate, exportstate, clock, status)
         else
-          swrap%ptr => statelist
-          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETINIT, phase, &
-                                                   ccomp, swrap, clock, status)
+          !swrap%ptr => statelist
           !call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETINIT, phase, &
-          !                                    ccomp, statelist, clock, status)
+          !                                         ccomp, swrap, clock, status)
+          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETINIT, phase, &
+                                              ccomp, statelist, clock, status)
         endif
 
         ! Call user-defined init routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, &
-                                                               phase, status)
+                                                                 phase, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
           return
@@ -1407,7 +1422,8 @@
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout), optional :: statelist(:)
+      !type (ESMF_State), intent(inout), optional :: statelist(:)
+      type (ESMF_State), intent(inout), optional :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -1422,7 +1438,9 @@
 !   \item[component]
 !    Component to call Run routine for.
 !
-!   \item[{[statelist]}]  List of import and export states for coupling.
+!   %\item[{[statelist]}]  List of import and export states for coupling.
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -1458,7 +1476,8 @@
       type (ESMF_CompType), intent(in) :: ctype
       type (ESMF_State), intent(inout), optional :: importstate
       type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_State), intent(inout), target, optional :: statelist(:)
+      !type (ESMF_State), intent(inout), target, optional :: statelist(:)
+      type (ESMF_State), intent(inout), target, optional :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       type (ESMF_GridComp), optional :: gcomp
@@ -1481,7 +1500,9 @@
 !
 !   \item[{[exportstate]}]  Export data for run.
 !
-!   \item[{[statelist]}]  List of import and export states for coupling.
+!   %\item[{[statelist]}]  List of import and export states for coupling.
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -1500,7 +1521,8 @@
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
-        integer :: de_id                        ! the current DE
+        integer :: gde_id                       ! the global DE
+        integer :: lde_id                       ! the DE in the subcomp layout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_SWrap) :: swrap
 
@@ -1514,12 +1536,15 @@
 
         ! See if this is currently running on a DE which is part of the
         ! proper Layout.
-	call ESMF_DELayoutGetDEID(compp%layout, de_id, status)
+	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
+	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
+          print *, "Global DE ", gde_id, " is not present in this layout"
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
+        print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
@@ -1530,11 +1555,11 @@
           call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETRUN, phase, gcomp, &
                                        importstate, exportstate, clock, status)
         else
-          swrap%ptr => statelist
-          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETRUN, phase, &
-                                                   ccomp, swrap, clock, status)
+          !swrap%ptr => statelist
           !call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETRUN, phase, &
-          !                                    ccomp, statelist, clock, status)
+          !                                         ccomp, swrap, clock, status)
+          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETRUN, phase, &
+                                              ccomp, statelist, clock, status)
         endif
 
         ! Call user-defined run routine
@@ -1614,7 +1639,8 @@
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout), optional :: statelist(:)
+      !type (ESMF_State), intent(inout), optional :: statelist(:)
+      type (ESMF_State), intent(inout), optional :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -1629,7 +1655,9 @@
 !   \item[component]
 !    Component to call Finalize routine for.
 !
-!   \item[{[statelist]}]  List of import and export states for coupling.
+!   %\item[{[statelist]}]  List of import and export states for coupling.
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -1665,7 +1693,8 @@
       type (ESMF_CompType), intent(in) :: ctype
       type (ESMF_State), intent(inout), optional :: importstate
       type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_State), intent(inout), target, optional :: statelist(:)
+      !type (ESMF_State), intent(inout), target, optional :: statelist(:)
+      type (ESMF_State), intent(inout), target, optional :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       type (ESMF_GridComp), optional :: gcomp
@@ -1688,7 +1717,9 @@
 !
 !   \item[{[exportstate]}]  Export data for finalize.
 !
-!   \item[{[statelist]}]  List of import and export states for coupling.
+!   %\item[{[statelist]}]  List of import and export states for coupling.
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -1707,7 +1738,8 @@
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
-        integer :: de_id                        ! the current DE
+        integer :: gde_id                       ! the global DE
+        integer :: lde_id                       ! the DE in the subcomp layout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_SWrap) :: swrap
 
@@ -1721,12 +1753,15 @@
 
         ! See if this is currently finalizening on a DE which is part of the
         ! proper Layout.
-	call ESMF_DELayoutGetDEID(compp%layout, de_id, status)
+	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
+	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
+          print *, "Global DE ", gde_id, " is not present in this layout"
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
+        print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
@@ -1737,11 +1772,11 @@
           call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETFINAL, phase, gcomp, &
                                        importstate, exportstate, clock, status)
         else
-          swrap%ptr => statelist
-          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETFINAL, phase, &
-                                                   ccomp, swrap, clock, status)
+          !swrap%ptr => statelist
           !call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETFINAL, phase, &
-          !                                    ccomp, statelist, clock, status)
+          !                                        ccomp, swrap, clock, status)
+          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETFINAL, phase, &
+                                              ccomp, statelist, clock, status)
         endif
 
         ! Call user-defined finalize routine
@@ -2517,6 +2552,7 @@
 !EOP
 
       logical :: rcpresent                          ! Return code present   
+      integer :: status
 
 !     !Initialize return code
       rcpresent = .FALSE.
@@ -2528,6 +2564,12 @@
       ! Initialize the machine model, the comms, etc.
       call ESMF_MachineInitialize()
 
+      ! Create a global DELayout
+      GlobalLayout = ESMF_DELayoutCreate(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error creating global layout"
+          return
+      endif
 
       if (rcpresent) rc = ESMF_SUCCESS
 

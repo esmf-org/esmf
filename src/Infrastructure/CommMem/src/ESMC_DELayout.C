@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.22 2003/04/09 15:30:38 flanigan Exp $
+// $Id: ESMC_DELayout.C,v 1.23 2003/04/14 14:51:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.22 2003/04/09 15:30:38 flanigan Exp $";
+           "$Id: ESMC_DELayout.C,v 1.23 2003/04/14 14:51:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -276,11 +276,12 @@ static int verbose = 1;
 //
 //EOP
 
-//cout << "ESMC_DELayoutDestroy, layout = " << layout << endl;
-  if (layout != 0) {
+cout << "ESMC_DELayoutDestroy, layout = " << layout << endl;
+  if (layout != ESMC_NULL_POINTER) {
     //layout->ESMC_DELayoutDestruct(); constructor calls it!
     delete layout;
-//cout << "ESMC_DELayoutDestroy() successful\n";
+    layout = ESMC_NULL_POINTER;
+cout << "ESMC_DELayoutDestroy() successful\n";
     return(ESMF_SUCCESS);
   } else {
     return(ESMF_FAILURE);
@@ -324,13 +325,12 @@ static int verbose = 1;
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
 
-  this->ndim = 1;
-  this->nDEs=1;
+  ndim = 1;
   parent=ESMC_NULL_POINTER;
 
   // get total number of DEs
   comm.ESMC_CommGetNumDEs(&nDEs);
-    //cout << "comm group size = " << nDEs << "\n";
+  cout << "DELayoutCreate(void) comm group size = " << nDEs << endl;
 
   // Construct the sorted PE list object.  When this returns, peList is valid.
   ESMC_DELayoutSetPEList();
@@ -375,6 +375,7 @@ static int verbose = 1;
   // TODO: create true child communicators 
   MPI_Comm_group(MPI_COMM_WORLD, &mpigroup);
   MPI_Comm_create(MPI_COMM_WORLD, mpigroup, &decomm.mpicomm);
+  // we need to call the comm with the child comms, not world
 
   // TODO: revisit this, but for now make the default commtype MPI
   this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
@@ -422,11 +423,27 @@ static int verbose = 1;
 //EOP
 
   int ii, nx, ny, nz;
+  int userwants;
   this->ndim=ndim;
-  this->nDEs=1;
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
+
+  // get total number of DEs
+  comm.ESMC_CommGetNumDEs(&nDEs);
+  cout << "DELayout(parent) comm group size = " << nDEs << endl;
+
+  // do some error checks
+  userwants = 1;
+  for(ii=0; ii<ndim; ii++)  
+    userwants *= lengths[ii];
+   
+  if (userwants > nDEs) {
+    cout << "request needs " << userwants << " DEs, only " 
+         << nDEs << " available " << endl;
+    return ESMF_FAILURE;
+  }
+  cout << "user wants " << userwants << " which is ok." << endl;
 
   this->length = new int[ESMF_MAXDECOMPDIM];
   this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
@@ -588,9 +605,26 @@ static int verbose = 1;
 
   int nx, ny, nz;
   int i, j, k;
+  int userwants;
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
+
+  // get total number of DEs
+  comm.ESMC_CommGetNumDEs(&nDEs);
+  cout << "DELayoutCreate(delist) comm group size = " << nDEs << endl;
+
+  // do some error checks
+  userwants = 1;
+  for(i=0; i<ndim; i++)  
+    userwants *= lengths[i];
+   
+  if (userwants > nDEs) {
+    cout << "request needs " << userwants << " DEs, only " 
+         << nDEs << " available " << endl;
+    return ESMF_FAILURE;
+  }
+  cout << "user wants " << userwants << " which is ok." << endl;
 
   // make space for the lists
   this->length = new int[ESMF_MAXDECOMPDIM];
@@ -742,9 +776,25 @@ static int verbose = 1;
 
   int nx, ny, nz;
   int i;
+  int userwants;
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
+
+  // get total number of DEs
+  comm.ESMC_CommGetNumDEs(&nDEs);
+  cout << "DELayoutCreate(pelist) comm group size = " << nDEs << endl;
+
+  // do some error checks
+  userwants = 1;
+  for(i=0; i<ndim; i++)  
+    userwants *= lengths[i];
+   
+  if (userwants > nDEs) {
+    cout << "request needs " << userwants << " DEs, only " 
+         << nDEs << " available " << endl;
+    return ESMF_FAILURE;
+  }
 
   this->ndim = ndim;
   
@@ -1016,7 +1066,10 @@ static int verbose = 1;
                                      //       or get from config file ?
   comm.ESMC_CommInit(&argc, &argv, &myDE); // computes unique ESMF DE id
 
-  // initialize machine to defaults TODO:
+  // initialize machine to defaults TODO:  This is no longer set here.
+  //  A global Machine object has already been instantiated.  This is backwards
+  //  anyway - it should query the hardware with sysinfo() or similar calls
+  //  and not set them with static (and untrue) values.
   //Mach.ESMC_MachineInit(256, 1024, 4, true, true, true, 1, 200, 2, 100);
   myPE.ESMC_PEInit(&Machine);        // gets cpu, node ids from machine
 
@@ -1507,6 +1560,10 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
         layout[i][j][k].ESMC_DEGetESMFID(&newid);      // DE number, 0 based
         if (newid == srcid) {
+            if (layout[i][j][k].PE == ESMC_NULL_POINTER) {
+                *otherid = -1;
+                return ESMF_FAILURE;
+            }
             layout[i][j][k].PE->ESMC_PEGetEsmfID(&esmfid); // PE number, unique
             // have to break out of 3 loops; this is simplest way.
             // also bypasses the 'not found' code.

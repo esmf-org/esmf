@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.11 2003/04/04 21:10:30 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.12 2003/04/14 14:51:47 nscollins Exp $
 !
 ! System test code #70384
 
@@ -57,11 +57,12 @@
     ndey = 3
     layout1 = ESMF_DELayoutCreate(delist, 2,  (/ ndex, ndey /), (/ 0, 0 /), rc)
     print *, "DELayout Create finished, rc =", rc
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Create the State
     cname = "Atmosphere"
     sname = "Atmosphere Export State"
-    state1 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, sname, rc=rc)
+    state1 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)
     print *, "State Create finished, name = ", trim(sname), " rc =", rc
 
     print *, "Create section finished"
@@ -246,7 +247,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    print *, "System Test #70384 complete!"
+20    print *, "System Test #70384 complete!"
 
     
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.8 2003/04/08 23:09:58 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.9 2003/04/14 14:51:46 nscollins Exp $
 !
 ! System test code #69527
 
@@ -20,7 +20,7 @@
     
     implicit none
     
-!   ! Local variables
+    ! Local variables
     integer :: nx, ny, i, j, ni, nj, rc
     integer, dimension(2) :: delist
     integer :: row_to_reduce
@@ -93,43 +93,41 @@
                              horz_coord_system=horz_coord_system, &
                              name=gname, rc=status)
 
-      print *, "Grid Create returned"
+      print *, "Grid Create returned ", status
 
 
-!   ! figure out our local processor id
+    ! figure out our local processor id
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
 
-!   ! Allocate and set initial data values.  These are different on each DE.
+    ! Allocate and set initial data values.  These are different on each DE.
     call ESMF_GridGetDE(grid1, lcelltot_count=ni, rc=rc)
     print *, "allocating", ni, " cells on DE", de_id
     allocate(idata(ni))
     allocate(ldata(ni))
 
-!   ! Generate global cell numbers.  First set to local number and
-!   ! then translate to global index.
+    ! Generate global cell numbers.  First set to local number and
+    ! then translate to global index.
     do i=1,ni
        ldata(i) = i
     enddo
     call ESMF_GridLocalToGlobalIndex(grid1, ldata, idata, rc) 
 
-!   !  Create Array based on an existing, allocated F90 pointer.
-!   !  Data is type Integer, 1D.
+    !  Create Array based on an existing, allocated F90 pointer.
+    !  Data is type Integer, 1D.
     array1 = ESMF_ArrayCreate(idata, ESMF_NO_COPY, rc)
-    print *, "Array Create returned"
 
-    call ESMF_ArrayPrint(array1, "foo", rc);
-
-!   ! No deallocate() is needed for idata, it will be freed when the
-!   !  Array is destroyed.  TODO:  it seems delete need a 'delete data' 
-!   !  option so the user can choose whether to have esmf delete the space 
-!   !  or continue to use the f90 array after the Array is gone?
+    ! No deallocate() is needed for idata, it will be freed when the
+    !  Array is destroyed.  TODO:  it seems delete need a 'delete data' 
+    !  option so the user can choose whether to have esmf delete the space 
+    !  or continue to use the f90 array after the Array is gone?
 
 
-!   ! Create a Field using the Grid and Arrays created above
+    ! Create a Field using the Grid and Arrays created above
     fname = "relative humidity"
     field1 = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
                                     name=fname, rc=rc)
+    call ESMF_FieldPrint(field1, rc=rc)
 
     print *, "Field Create returned"
 
@@ -150,7 +148,7 @@
 
     ! Get a pointer to the data Array in the Field
     call ESMF_FieldGetData(field1, array2, rc=rc)
-    print *, "data back from field"
+    call ESMF_ArrayValidate(array2, rc=rc)
     call ESMF_ArrayPrint(array2, "foo", rc)
 
     ! Get a pointer to the start of the data

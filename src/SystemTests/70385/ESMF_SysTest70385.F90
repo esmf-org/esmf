@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.10 2003/04/08 23:09:58 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.11 2003/04/14 14:51:47 nscollins Exp $
 !
 ! System test code #70385
 
@@ -26,11 +26,11 @@
     ! Local variables
     type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1
-    type(ESMF_DELayout) :: layout1 
+    type(ESMF_DELayout) :: layout1, deflayout
     integer, dimension(12) :: delist
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
-    integer :: rc
+    integer :: ndes, rc
         
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -47,6 +47,14 @@
 !-------------------------------------------------------------------------
 !
     app = ESMF_AppCompCreate(name="Application #70385", rc=rc)
+    call ESMF_AppCompGet(app, layout=deflayout, rc=rc)
+    call ESMF_DELayoutGetNumDEs(deflayout, ndes, rc)
+    if (ndes .ne. 12) then
+        print *, "This system test needs to run 12-way, current np = ", ndes
+        goto 10
+    endif
+
+    
     
 !   Create a DELayout for the Component
     delist = (/ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 /)
@@ -63,10 +71,10 @@
 !-------------------------------------------------------------------------
 !  Init section
 !
-    import = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc)
+    import = ESMF_StateCreate("gridded comp import", ESMF_STATEIMPORT, rc=rc)
     call ESMF_GridCompInitialize(comp1, importstate=import, rc=rc)
 
-    print *, "Comp Init finished"
+    print *, "Comp Init returned"
 
 !
 !-------------------------------------------------------------------------
@@ -97,7 +105,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    print *, "System Test #70385 complete!"
+10    print *, "System Test #70385 complete!"
 
     end program ESMF_SysTest70385
     
@@ -163,6 +171,7 @@
       character(len=ESMF_MAXSTR) :: gname, fname
       integer :: status
 
+      print *, "Entering Initialization routine"
 
       ! Query component for layout
       call ESMF_GridCompGet(comp, layout=layout1, rc=rc)
@@ -232,11 +241,15 @@
       field1 = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
                                                            name=fname, rc=rc)
 
+      call ESMF_FieldPrint(field1, "", rc)
+      call ESMF_FieldValidate(field1, "", rc)
       print *, "Field Create returned"
 
       ! Add the field to the import state.
       call ESMF_StateAddData(importstate, field1, rc)
       call ESMF_StatePrint(importstate, "", rc)
+
+      print *, "Exiting Initialization routine"
 
     end subroutine myinit
 
@@ -261,13 +274,23 @@
       ! Local variables
       type(ESMF_Field) :: field1
 
+      print *, "Entering Run routine"
+
+      call ESMF_StatePrint(importstate, "", rc)
+
       ! Get the field from the import state
+      print *, "About to get field from import state"
       call ESMF_StateGetData(importstate, "DE id", field1, rc=rc);
+      print *, "Returned from getting field from import state"
+      call ESMF_FieldPrint(field1, "", rc)
 
 
       ! Call Field method to halo data.  This updates the data in place.
+      print *, "about to call Field Halo"
       call ESMF_FieldHalo(field1, rc)
+      print *, "returned from Field Halo call"
 
+      print *, "Exiting Run routine"
 
       end subroutine myrun
 
@@ -304,6 +327,8 @@
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
 
+      print *, "Entering Finalize routine"
+
       ! Get layout from component
       call ESMF_GridCompGet(comp, layout=layout, rc=rc)
       call ESMF_DELayoutGetDEID(layout, de_id, rc=rc)
@@ -333,6 +358,8 @@
       enddo
       print *, "------------------------------------------------------"
     
+      print *, "Exiting Finalize routine"
+
     end subroutine myfinal
 
 !\end{verbatim}
