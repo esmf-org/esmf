@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.25 2004/03/31 23:26:44 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.26 2004/04/02 23:47:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.25 2004/03/31 23:26:44 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.26 2004/04/02 23:47:18 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -178,6 +178,15 @@
       write(name, *) "Creating a Grid  with negative x_max Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Get Coord from a Grid
+      call ESMF_GridGetCoord(grid, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Get Coord from a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !The following code is commented out because it does not compile
       !Bug 927094 has been opened
