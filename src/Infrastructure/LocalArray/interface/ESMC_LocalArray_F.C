@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.7 2004/02/11 19:05:06 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.8 2004/02/11 19:51:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@ char *name = NULL;
          *status = (*ptr)->ESMC_LocalArrayGetLengths(*rank, lengths);
      }
 
-     void FTN(c_esmc_arraygetlbounds)(ESMC_LocalArray **ptr, int *rank, int *lbounds, int *status) {
+     void FTN(c_esmc_localarraygetlbounds)(ESMC_LocalArray **ptr, int *rank, int *lbounds, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
@@ -127,7 +127,7 @@ char *name = NULL;
          *status = (*ptr)->ESMC_LocalArrayGetLbounds(*rank, lbounds);
      }
 
-     void FTN(c_esmc_arraygetubounds)(ESMC_LocalArray **ptr, int *rank, int *ubounds, int *status) {
+     void FTN(c_esmc_localarraygetubounds)(ESMC_LocalArray **ptr, int *rank, int *ubounds, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
