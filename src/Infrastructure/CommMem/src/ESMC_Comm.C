@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.14 2003/03/24 16:28:15 cdeluca Exp $
+// $Id: ESMC_Comm.C,v 1.15 2003/03/24 16:58:38 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.14 2003/03/24 16:28:15 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.15 2003/03/24 16:58:38 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -806,7 +806,8 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 // !ARGUMENTS:
       void *sbuf,
       void *rbuf,
-      int num,
+      int snum,
+      int rnum,
       int sde,
       int rde) {
 //
@@ -818,8 +819,8 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 
 #ifdef MPI
 
-  MPI_SendRecv(sbuf, num, MPI_FLOAT, rrank, ESMF_MPI_TAG,
-               rbuf, num, MPI_FLOAT, srank, MPI_ANY_TAG,
+  MPI_SendRecv(sbuf, snum, MPI_FLOAT, rrank, ESMF_MPI_TAG,
+               rbuf, rnum, MPI_FLOAT, srank, MPI_ANY_TAG,
                MPI_COMM_WORLD);
 #endif
 

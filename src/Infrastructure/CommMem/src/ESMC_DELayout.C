@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.8 2003/03/24 16:28:15 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.9 2003/03/24 16:58:53 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.8 2003/03/24 16:28:15 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.9 2003/03/24 16:58:53 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1563,10 +1563,11 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    int error return code
 //
 // !ARGUMENTS:
-      float *sarray,            // in  - send array
-      float *rarray,            // in  - receive array
-      int arraylen,            // in  - array length
-      int sde,                 // in  - send de
+      void *sarray,            // in  - send array
+      void *rarray,            // in  - receive array
+      int sarraylen,            // in  - send array length
+      int rarraylen,            // in  - receive array length
+      int sde,                  // in  - send de
       int rde) {                // in  - receive de
 
 //
@@ -1577,7 +1578,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   int rc = ESMF_FAILURE;
 
-  rc = comm.ESMC_CommSendRecv(sarray, rarray, arraylen, sde, rde);
+  rc = comm.ESMC_CommSendRecv(sarray, rarray, sarraylen, rarraylen, sde, rde);
   if (rc != ESMF_SUCCESS) {
     cout << "ESMC_DELayoutSendRecv error" << endl;
   }
