@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.175 2004/07/22 22:20:09 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.176 2004/07/27 15:48:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.175 2004/07/22 22:20:09 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.176 2004/07/27 15:48:17 nscollins Exp $'
 
 !==============================================================================
 !
@@ -749,7 +749,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGet(field, grid, array, datamap, horzRelloc, &
-                               vertRelloc, name, rc)
+                               vertRelloc, haloWidth, iospec, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field    
@@ -758,6 +758,8 @@
       type(ESMF_FieldDataMap), intent(out), optional :: datamap     
       type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
+      integer, intent(out), optional :: haloWidth
+      type(ESMF_IOSpec), intent(out), optional :: iospec 
       character(len=*), intent(out), optional :: name
       integer, intent(out), optional :: rc     
 !
@@ -782,6 +784,13 @@
 !           grid.
 !     \item [{[vertRelloc]}]
 !           Relative location of data per grid cell/vertex in the vertical grid.
+!     \item [{[haloWidth]}]
+!           Integer value for the width of the halo (ghost zone) region in the
+!           data array.  This can also be queried directly from the
+!           {\tt ESMF\_Array} object.
+!     \item [{[iospec]}]
+!           {\tt ESMF\_IOSpec} object which contains settings for options
+!           related to I/O. 
 !     \item [{[name]}]
 !           Name of queried item.
 !     \item [{[rc]}]
@@ -857,9 +866,24 @@
             !endif
             call ESMF_FieldDataMapGet(ftype%mapping, vertRelloc=vertRelloc, rc=status)
             if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
         endif
+
+        if (present(haloWidth)) then
+            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                 "Cannot return haloWidth because no data attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
+            endif
+            call ESMF_ArrayGet(ftype%localfield%localdata, &
+                               haloWidth=haloWidth, rc=rc)
+            if (ESMF_LogMsgFoundError(rc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+        endif
+
+        if (present(iospec)) iospec = ftype%iospec
 
         if (present(name)) then
             call c_ESMC_GetName(ftype%base, name, status)
