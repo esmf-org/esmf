@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.8 2003/06/19 15:13:34 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.9 2003/06/19 15:47:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,7 +148,7 @@
        public ESMF_BundlePackData     ! Pack bundle data into a single 
 !                                     !   buffer
 
-!      public ESMF_BundleGetGrid           ! Return reference to Grid
+      public ESMF_BundleGetGrid           ! Return reference to Grid
 !      public ESMF_BundleGetGlobalGridInfo ! Return global grid info
 !      public ESMF_BundleGetLocalGridInfo  ! Return local grid info
 
