@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.40 2003/07/18 20:41:14 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.41 2003/07/22 19:48:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -195,7 +195,7 @@
    public ESMF_FieldGather             ! Construct 1 copy of N data arrays
    public ESMF_FieldScatter            ! Construct N copies of 1 data array
    public ESMF_FieldRegrid             ! Regridding and interpolation
-   public ESMF_FieldRoute              ! Redistribute existing array data
+   public ESMF_FieldRedist             ! Redistribute existing array data
 
    public ESMF_FieldSetAttribute       ! Set and Get Attributes
    public ESMF_FieldGetAttribute       !   interface to Base class
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.40 2003/07/18 20:41:14 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.41 2003/07/22 19:48:20 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2554,10 +2554,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldRoute - Data Route operation on a Field
+! !IROUTINE: ESMF_FieldRedist - Data Redistribution operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRoute(srcfield, dstfield, parentlayout, rc)
+      subroutine ESMF_FieldRedist(srcfield, dstfield, parentlayout, rc)
 !
 !
 ! !ARGUMENTS:
@@ -2567,7 +2567,7 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call routines to perform a {\tt ESMF\_Route} operation over the data
+!     Call routines to perform a {\tt Route} operation over the data
 !     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves the
 !     data untouched.  It reads the {\t ESMF\_Grid} from the destination field and
 !     updates the array data in the destination.
@@ -2580,7 +2580,7 @@
 !     \item [parentlayout] 
 !           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s, most commonly the layout
 !           of the Coupler if the route is inter-component, but could 
-!           also be the individual layout for a component if the {\tt ESMF\_Route} 
+!           also be the individual layout for a component if the {\tt Route} 
 !           is intra-component.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2666,7 +2666,7 @@
           call ESMF_DataMapGet(stypep%mapping, gridrank=gridrank, &
                                                dimlist=dimorder, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in FieldRoute: DataMapGet returned failure"
+            print *, "ERROR in FieldRedist: DataMapGet returned failure"
             return
           endif 
 
@@ -2674,7 +2674,7 @@
           call ESMF_ArrayGet(stypep%localfield%localdata, rank=datarank, &
                                                counts=dimlengths, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in FieldRoute: ArrayGet returned failure"
+             print *, "ERROR in FieldRedist: ArrayGet returned failure"
              return
           endif 
       endif 
@@ -2686,7 +2686,7 @@
           call ESMF_DataMapGet(dtypep%mapping, gridrank=gridrank, &
                                                dimlist=dimorder, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in FieldRoute: DataMapGet returned failure"
+            print *, "ERROR in FieldRedist: DataMapGet returned failure"
             return
           endif 
 
@@ -2694,7 +2694,7 @@
           call ESMF_ArrayGet(dtypep%localfield%localdata, rank=datarank, &
                                                counts=dimlengths, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in FieldRoute: ArrayGet returned failure"
+             print *, "ERROR in FieldRedist: ArrayGet returned failure"
              return
           endif 
       endif
@@ -2754,7 +2754,7 @@
                                     dtypep%localfield%localdata, status)
       endif
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldRoute: RouteRun returned failure"
+        print *, "ERROR in FieldRedist: RouteRun returned failure"
         return
       endif 
 
@@ -2767,7 +2767,7 @@
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldRoute
+      end subroutine ESMF_FieldRedist
 
 
 !------------------------------------------------------------------------------
