@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.84 2004/11/15 18:07:20 nscollins Exp $
+#  $Id: common.mk,v 1.85 2004/12/08 21:36:17 jedwards Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -86,6 +86,11 @@ endif
 FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
 CPPFLAGS       += -DESMF_NO_IOCODE
 export ESMF_NO_IOCODE = true
+
+PTHREAD_STUB_INCLUDE=
+# Uncomment the following line if you do not want to use PTHREADs (may be done in build_rules.mk)
+#PTHREAD_STUB_INCLUDE=-I${ESMF_DIR}/src/Infrastructure/stubs/pthread
+
 
 
 # if PREC not already set, default to 64.  architectures which
@@ -181,7 +186,7 @@ ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  ${LOCAL_INCLUDE} \
 		  -I${ESMF_TOP_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE) \
 		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) $(MPI_INCLUDE) \
-                  ${NETCDF_INCLUDE}
+                  ${NETCDF_INCLUDE} $(PTHREAD_STUB_INCLUDE)
 
 CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'

@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.15 2004/11/19 00:17:01 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.16 2004/12/08 21:36:17 jedwards Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,9 +39,7 @@
 #ifdef __osf__
 #undef _XOPEN_SOURCE_EXTENDED
 #endif
-
 #include <pthread.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,7 +53,7 @@
 #include "ESMC_VMKernel.h"
 
 // macros used within this source file
-#define VERBOSITY             (1)       // 0: off, 10: max
+#define VERBOSITY             (0)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
 #ifdef SIGRTMIN
 #define VM_SIG1               (SIGRTMIN)
@@ -84,7 +82,7 @@ typedef struct{
   volatile int flag;
   pthread_t tid;
   pthread_mutex_t mut0;
-  pthread_cond_t cond0;
+  pthread_cond_t cond0;  
   pthread_mutex_t mut1;
   pthread_cond_t cond1;
   pthread_mutex_t mut_extra1;
@@ -96,6 +94,7 @@ typedef struct{
 
 int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
   vmkt->flag = 0;
+
   pthread_mutex_init(&(vmkt->mut0), NULL);
   pthread_mutex_lock(&(vmkt->mut0));
   pthread_cond_init(&(vmkt->cond0), NULL);
@@ -108,9 +107,13 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
   pthread_mutex_init(&(vmkt->mut_extra2), NULL);
   pthread_mutex_lock(&(vmkt->mut_extra2));
   pthread_cond_init(&(vmkt->cond_extra2), NULL);
+
   int error = pthread_create(&(vmkt->tid), NULL, vmkt_spawn, arg);
+  //  int error = 0; (*vmkt_spawn)(arg);
+
   pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0));
   return error;
+
 }
 
 int vmkt_release(vmkt_t *vmkt, void *arg){
@@ -122,7 +125,9 @@ int vmkt_release(vmkt_t *vmkt, void *arg){
 }
 
 int vmkt_catch(vmkt_t *vmkt){
+
   pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0)); //wait for the child
+
   return 0;
 }
 
@@ -228,10 +233,12 @@ void ESMC_VMK::vmk_init(void){
   default_mpi_c = mpi_c;
   // initialize the shared memory variables
   pth_finish_count = NULL;
+
   pth_mutex = new pthread_mutex_t;
-  pthread_mutex_init(pth_mutex, NULL);
   pth_mutex2 = new pthread_mutex_t;
+  pthread_mutex_init(pth_mutex, NULL);
   pthread_mutex_init(pth_mutex2, NULL);
+
   // set up the communication array
   commarray = new comminfo*[npets];
   for (int i=0; i<npets; i++){
@@ -1436,11 +1443,14 @@ int ESMC_VMK::vmk_pid(int i){
 
 // --- ESMC_VMKPlan methods ---
 
-
 ESMC_VMKPlan::ESMC_VMKPlan(void){
   // native constructor
   // invalidate the arrays
+#ifdef NO_LIBPTHREAD
+  parentVMflag = 1; // pthread library not available
+#else
   parentVMflag = 0; // default is to create a new VM for every child
+#endif
   spawnflag = NULL;
   contribute = NULL;
   cspawnid = NULL;
