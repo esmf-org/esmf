@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.67 2004/04/15 22:46:16 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.68 2004/05/18 21:52:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.67 2004/04/15 22:46:16 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.68 2004/05/18 21:52:40 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -501,6 +501,13 @@
  
       !NEX_UTest
       write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Set Clock Name Test"
+      call ESMF_ClockSet(clock2, name="Clock 2", rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Create Clock copy Test"
       clock1 = ESMF_ClockCreate(clock,  rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -603,6 +610,28 @@
       	call ESMF_ClockPrint(clock, rc=rc)
        end if
 
+      ! ----------------------------------------------------------------------------
+ 
+      !NEX_UTest
+      ! Sync to real time test
+      ! TODO: THis test only will test for rc=ESMF_SUCCESS
+      ! A test must be written that verifies that it works
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Clock Sync to Real Time Test"
+      call ESMF_ClockSyncToRealTime(clock2,rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+ 
+      !NEX_UTest
+      ! Clock Validate
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Clock Validate Test"
+      call ESMF_ClockValidate(clock2,rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
 #ifndef ESMF_EXHAUSTIVE
       call ESMF_ClockDestroy(clock, rc)
 #endif

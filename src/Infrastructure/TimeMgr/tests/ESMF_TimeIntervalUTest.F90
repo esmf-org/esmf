@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.23 2004/05/05 22:56:11 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.24 2004/05/18 21:51:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.23 2004/05/05 22:56:11 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.24 2004/05/18 21:51:55 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -108,6 +108,14 @@
       call ESMF_Test((YY==2004 .and. MM==2 .and. DD==29 .and. &
                       H==12 .and. M==17 .and. S==58 .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing TimeInterval Validation
+      write(name, *) "Time Interval Validate Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeIntervalValidate(timeStep, rc=rc)
+      call ESMF_Test(( rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
