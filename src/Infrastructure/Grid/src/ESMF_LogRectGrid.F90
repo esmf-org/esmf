@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.92 2004/08/19 17:23:37 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.93 2004/08/19 23:49:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.92 2004/08/19 17:23:37 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.93 2004/08/19 23:49:40 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1603,7 +1603,7 @@
          do i=1,dimCount
             recheck = (useMaxes(i) - minGlobalCoordPerDim(i)) / real(counts(i))
             if (recheck-useDeltas(i) .gt. 0.00001) then
-                write(msgbuf, *) "Inconsistent set of min, max, deltas, and ",
+                write(msgbuf, *) "Inconsistent set of min, max, deltas, and ", &
                                  "counts specified"
                 call ESMF_LogWrite(msgbuf, ESMF_LOG_WARNING, ESMF_CONTEXT)
                 write(msgbuf, *) "delta for dimension", i, "reset from", &
