@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.19 2004/02/13 17:48:31 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.20 2004/02/14 00:28:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.19 2004/02/13 17:48:31 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.20 2004/02/14 00:28:07 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1053,7 +1053,7 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       integer :: i
-      type (ESMF_LogRectGrid), target :: lrgrid
+      type (ESMF_LogRectGrid), pointer :: lrgrid
       real :: recheck
       real, dimension(numDims) :: useMaxes, useDeltas
 
@@ -1122,12 +1122,13 @@
       endif
 
 !     Fill in logRectGrid derived type with subroutine arguments
-      call ESMF_LRGridConstructSpecificNew(lrgrid, rc)
+      allocate(grid%gridSpecific%logRectGrid, stat=status)  ! todo: check ec
+      lrgrid => grid%gridSpecific%logRectGrid
+      call ESMF_LRGridConstructSpecificNew(lrgrid, status)
       do i = 1,numDims
         lrgrid%countPerDim(i) = counts(i)
         lrgrid%deltaPerDim(i) = useDeltas(i) 
       enddo
-      grid%gridSpecific%logRectGrid => lrgrid
 
 !     Fill in grid derived type with subroutine arguments
       grid%numDims       = numDims
@@ -1302,8 +1303,8 @@
                                                 maxGlobalCoordPerDimUse
       real(ESMF_KIND_R8), dimension(:), pointer :: coordsUse1, coordsUse2, &
                                                    coordsUse3
-      type(ESMF_LocalArray), dimension(:), allocatable, target :: coords
-      type(ESMF_LogRectGrid), target :: lrgrid
+      type(ESMF_LocalArray), dimension(:), pointer :: coords
+      type(ESMF_LogRectGrid), pointer :: lrgrid
 
 !     Initialize return code
       status = ESMF_SUCCESS
@@ -1329,7 +1330,14 @@
          endif
       endif
 
-      allocate(coords(numDims), stat=status)
+!     Fill in logRectGrid derived type with subroutine arguments
+      ! TODO: check stat return code against 0 (not ESMF_FAILURE)
+      allocate(grid%gridSpecific%logRectGrid, stat=status) 
+      lrgrid => grid%gridSpecific%logRectGrid
+      call ESMF_LRGridConstructSpecificNew(lrgrid, status)
+      allocate(grid%gridSpecific%logRectGrid%coords(numDims), stat=status)
+   
+      coords => grid%gridSpecific%logRectGrid%coords
 
 !     Two ways to make a grid in this method: by coordinates or by minima and deltas
 !     by coordinates:
@@ -1425,13 +1433,10 @@
         return
       endif
 
-!     Fill in logRectGrid derived type with subroutine arguments
-      call ESMF_LRGridConstructSpecificNew(lrgrid, rc)
+      ! either way, we have the counts now
       do i = 1,numDims
         lrgrid%countPerDim(i) = counts(i)
       enddo
-      lrgrid%coords         => coords
-      grid%gridSpecific%logRectGrid => lrgrid
 
 !     Fill in grid derived type with subroutine arguments
       grid%numDims       = numDims
@@ -1568,9 +1573,11 @@
       allocate(dimUnits(numDims))
       allocate(periodic(numDims))
 
+      nullify(coords)
       if (associated(grid%gridSpecific%logRectGrid%coords)) then
         coords => grid%gridSpecific%logRectGrid%coords
       endif
+
       do i = 1,numDims
         counts(i)   = grid%gridSpecific%logRectGrid%countPerDim(i)
         min(i)      = grid%minGlobalCoordPerDim(i)
