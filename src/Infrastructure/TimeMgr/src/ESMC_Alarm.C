@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.37 2004/04/27 21:30:59 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.38 2004/05/14 01:24:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,8 @@
  #include <iostream.h>
  #include <string.h>
  #include <ctype.h>
+ #include <ESMC_LogErr.h>
+ #include <ESMF_LogMacros.inc>
  #include <ESMC_Clock.h>
 
  // associated class definition file
@@ -31,7 +33,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.37 2004/04/27 21:30:59 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.38 2004/05/14 01:24:28 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -76,13 +78,29 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    int returnCode;
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmCreate(new)"
+
     ESMC_Alarm *alarm;
+    int returnCode;
+
+    // default return code
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+
+// ============================================================================
+#if 1
+    ESMC_LogSetFilename("MY_LogFile");
+    ESMC_LogDefault.ESMC_LogWrite("Test message number 1", ESMC_LOG_INFO);
+    ESMC_LogDefault.ESMC_LogWrite("Test message number 2", ESMC_LOG_WARN);
+    char logMsg[ESMF_MAXSTR];
+    sprintf(logMsg, "alarm name %s, Test message number 3", name);
+    ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+#endif
+// ============================================================================
 
     if (ringTime == ESMC_NULL_POINTER && ringInterval == ESMC_NULL_POINTER) {
-      cerr << "ESMC_AlarmCreate(): must specify at least one of ringTime or "
-           << "ringInterval.\n";
-      *rc = ESMF_FAILURE;
+      ESMC_LogDefault.ESMC_LogWrite("Must specify at least one of ringTime or "
+                                    "ringInterval.", ESMC_LOG_ERROR);
       return(ESMC_NULL_POINTER);
     }
  
@@ -90,11 +108,7 @@ int ESMC_Alarm::count=0;
       alarm = new ESMC_Alarm;
     }
     catch (...) {
-      // TODO:  call ESMF log/err handler
-      cerr << "ESMC_AlarmCreate() (new) memory allocation failed\n";
-      if (rc != ESMC_NULL_POINTER) {
-        *rc = ESMF_FAILURE;
-      }
+      // TODO:  ESMC_LogDefault.ESMC_LogAllocErr();
       return(ESMC_NULL_POINTER);
     }
     
@@ -107,11 +121,16 @@ int ESMC_Alarm::count=0;
         strncpy(alarm->name, name, nameLen);
         alarm->name[nameLen] = '\0';  // null terminate
       } else {
-        // TODO: error, delete and return null alarm?
-        if (rc != ESMC_NULL_POINTER) {
-          *rc = ESMF_FAILURE;
-        }
-        return(alarm);
+        // truncate
+        strncpy(alarm->name, name, ESMF_MAXSTR-1);
+        alarm->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "alarm name %s, length >= ESMF_MAXSTR; truncated.", 
+                name);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+        // TODO: return ESMF_WARNING when defined
+        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
     } else {
       // create default name "AlarmNNN"
@@ -172,9 +191,9 @@ int ESMC_Alarm::count=0;
     //        this->ringTime > (passed in) ringTime
 
     returnCode = alarm->ESMC_AlarmValidate();
-    if (rc != ESMC_NULL_POINTER) {
-      *rc = returnCode;
-    }
+    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+                               "ESMC_AlarmValidate() failed.", ESMC_LOG_ERROR);
+    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
     // add this new valid alarm to the given clock
     if (returnCode == ESMF_SUCCESS) {
@@ -205,12 +224,19 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
-    int returnCode;
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockCreate(copy)"
+
     ESMC_Alarm *alarmCopy;
+    int returnCode;
+
+    // default return code
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
 
     // can't copy a non-existent object
     if (alarm == ESMC_NULL_POINTER) {
-      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+      ESMC_LogDefault.ESMC_LogWrite("Can't copy a non-existent alarm",
+                                    ESMC_LOG_ERROR);
       return(ESMC_NULL_POINTER);
     }
 
@@ -219,13 +245,13 @@ int ESMC_Alarm::count=0;
       alarmCopy = new ESMC_Alarm(*alarm);
     }
     catch (...) {
-      // TODO:  call ESMF log/err handler
-      cerr << "ESMC_AlarmCreate() (copy) memory allocation failed\n";
-      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = alarmCopy->ESMC_AlarmValidate();
+    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+                               "ESMC_AlarmValidate() failed.", ESMC_LOG_ERROR);
     if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
     return(alarmCopy);     
@@ -251,10 +277,8 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 
-  if (alarm == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
   // TODO: alarm->ESMC_AlarmDestruct(); constructor calls it!
-  delete *alarm;
+  delete *alarm;   // ok to delete null pointer
   *alarm = ESMC_NULL_POINTER;
   return(ESMF_SUCCESS);
 
@@ -291,6 +315,11 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmSet()"
+
+    int rc = ESMF_SUCCESS;
+ 
     // save current values to restore in case of failure
     ESMC_Alarm saveAlarm = *this;
 
@@ -300,9 +329,16 @@ int ESMC_Alarm::count=0;
         strncpy(this->name, name, nameLen);
         this->name[nameLen] = '\0';  // null terminate
       } else {
-        // error, restore previous state and return ESMF_FAILURE
-        *this = saveAlarm;
-        return(ESMF_FAILURE);
+        // truncate
+        strncpy(this->name, name, ESMF_MAXSTR-1);
+        this->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "alarm name %s, length >= ESMF_MAXSTR; truncated.", 
+                name);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+        // TODO: return ESMF_WARNING when defined
+        // rc = ESMF_WARNING;
       }
     }
 
@@ -345,12 +381,14 @@ int ESMC_Alarm::count=0;
     //        this->ringTime > clock->currTime &&
     //        this->ringTime > (passed in) ringTime
 
-    if (ESMC_AlarmValidate() == ESMF_SUCCESS) return (ESMF_SUCCESS);
-    else {
+    rc = ESMC_AlarmValidate();
+    if (ESMC_LogDefault.ESMC_LogFoundError(rc, "ESMC_AlarmValidate() failed.",
+                                           ESMC_LOG_ERROR)) {
       // restore original alarm values
       *this = saveAlarm;
-      return(ESMF_FAILURE);
     }
+
+    return(rc);
 
  } // end ESMC_AlarmSet
 
@@ -389,6 +427,9 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmGet()"
+
     int rc = ESMF_SUCCESS;
 
     // TODO: use inherited methods from ESMC_Base
@@ -400,7 +441,13 @@ int ESMC_Alarm::count=0;
         // TODO: copy what will fit and return ESMF_FAILURE ?
         strncpy(tempName, this->name, nameLen-1);
         tempName[nameLen] = '\0';  // null terminate
-        rc = ESMF_FAILURE;
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "For alarm name %s, "
+                "length >= given character array; truncated.", this->name);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+        // TODO: return ESMF_WARNING when defined
+        // rc = ESMF_WARNING;
       }
       // report how many characters were copied
       *tempNameLen = strlen(tempName);
@@ -517,7 +564,7 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
-    *rc = ESMF_SUCCESS;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     return(enabled);
 
@@ -543,7 +590,18 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    if(!enabled) return(ESMF_FAILURE);
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmRingerOn()"
+
+    if(!enabled) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "Attempted to turn on ringer of disabled alarm %s.",
+              this->name);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+      // TODO: return ESMF_WARNING when defined
+      // return(ESMF_WARNING);
+      return(ESMF_FAILURE);
+    }
 
     ringing = true;
 
@@ -598,7 +656,7 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
-    *rc = ESMF_SUCCESS;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     return(enabled && ringing);
 
@@ -632,13 +690,19 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmWillRingNext()"
+
+    // default return code
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+
     // must be associated with a clock
     if(clock == ESMC_NULL_POINTER) {
-      *rc = ESMF_FAILURE;
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "alarm %s is not associated with any clock.", name);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
       return(false);
     }
-
-    *rc = ESMF_SUCCESS;
 
     // get clock's next time
     ESMC_Time clockNextTime;
@@ -658,6 +722,8 @@ int ESMC_Alarm::count=0;
                   clockNextTime >= ringTime && clock->currTime < ringTime :
                   clockNextTime <= ringTime && clock->currTime > ringTime;
     }
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     return(willRing);
 
  } // end ESMC_AlarmWillRingNext
@@ -687,7 +753,7 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
-    *rc = ESMF_SUCCESS;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     return(ringingOnPrevTimeStep);
 
@@ -740,13 +806,19 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmNotSticky()"
+
     sticky = false;
 
     // mutually exclusive: can only specify one ring duration type
     if (ringDuration != ESMC_NULL_POINTER &&
         ringTimeStepCount != ESMC_NULL_POINTER) {
-      cout << "ESMC_Alarm::ESMC_AlarmNotSticky(): can only specify " <<
-              "one type of ring duration, not both." << endl;
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, 
+              "Alarm %s: can only specify one type of ring duration, not both.",
+              name);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
       return(ESMF_FAILURE);
     }
 
@@ -780,7 +852,7 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
-    *rc = ESMF_SUCCESS;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     return(sticky);
 
@@ -807,13 +879,19 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  TMG4.4, 4.6
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmCheckRingTime()"
+
+    // default return code
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+
     // must be associated with a clock
     if(clock == ESMC_NULL_POINTER) {
-      *rc = ESMF_FAILURE;
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "alarm %s is not associated with any clock.", name);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
       return(false);
     }
-
-    *rc = ESMF_SUCCESS;
 
     // carry previous flag forward
     ringingOnPrevTimeStep = ringingOnCurrTimeStep;
@@ -841,6 +919,8 @@ int ESMC_Alarm::count=0;
         ringingOnCurrTimeStep = ringing = false;
       }
     }
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     return(ringing && enabled);
 
@@ -973,11 +1053,24 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmValidate()"
+
     // must have a ring time; ringDuration, stopTime, prevRingTime optional
-    if (ringTime.ESMC_TimeValidate() != ESMF_SUCCESS) return(ESMF_FAILURE);
+    if (ringTime.ESMC_TimeValidate() != ESMF_SUCCESS) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "Alarm %s: invalid ringTime.", name);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      return(ESMF_FAILURE);
+    }
 
     // invalid state
-    if (!enabled && ringing) return(ESMF_FAILURE);
+    if (!enabled && ringing) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "Alarm %s: invalid state: disabled and ringing.", name);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      return(ESMF_FAILURE);
+    }
 
     // TODO: validate id ?
 
@@ -1154,6 +1247,9 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Alarm(void) constructor"
+
     name[0] = '\0';
     ringTimeStepCount = 0;
     timeStepRingingCount = 0;
@@ -1166,11 +1262,14 @@ int ESMC_Alarm::count=0;
     // initialize ring interval to zero
     ESMF_KIND_I4 s = 0;
     // TODO: use native C++ method when ready
-    ringInterval.ESMC_TimeIntervalSet(ESMC_NULL_POINTER,
+    int rc = ringInterval.ESMC_TimeIntervalSet(ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, &s);
+
+    ESMC_LogDefault.ESMC_LogFoundError(rc, "ESMC_TimeIntervalSet() failed.",
+                                       ESMC_LOG_ERROR); 
 
  } // end ESMC_Alarm
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.59 2004/05/12 13:51:52 nscollins Exp $
+// $Id: ESMC_Calendar.C,v 1.60 2004/05/14 01:24:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,6 +25,9 @@
  #include <string.h>
  #include <ctype.h>
 
+ #include <ESMC_LogErr.h>
+ #include <ESMF_LogMacros.inc>
+
  #include <ESMC_Time.h>
  #include <ESMC_TimeInterval.h>
 
@@ -34,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.59 2004/05/12 13:51:52 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.60 2004/05/14 01:24:29 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -82,7 +85,13 @@ int ESMC_Calendar::count=0;
 //
 //EOPI
 
-  return(ESMC_CalendarSetDefault(calendarType));
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarInitialize()"
+
+  int rc = ESMC_CalendarSetDefault(calendarType);
+  ESMC_LogDefault.ESMC_LogFoundError(rc, "ESMC_CalendarSetDefault() failed.",
+                                     ESMC_LOG_ERROR);
+  return(rc);
 
  } // end ESMC_CalendarInitialize
 
@@ -136,18 +145,29 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarCreate(built-in)"
+
     int returnCode;
     ESMC_Calendar *calendar;
+
+    // default return code
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+
+    // make sure calendar type is valid
+    if (calendarType < 1 || calendarType > CALENDAR_TYPE_COUNT) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "calendarType %d not in valid range of 1 to %d.",
+              calendarType, CALENDAR_TYPE_COUNT);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      return(ESMC_NULL_POINTER);
+    }
 
     try {
       calendar = new ESMC_Calendar;
     }
     catch (...) {
-      // TODO:  call ESMF log/err handler
-      cerr << "ESMC_CalendarCreate() (new) memory allocation failed\n";
-      if (rc != ESMC_NULL_POINTER) {
-        *rc = ESMF_FAILURE;
-      }
+      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
       return(ESMC_NULL_POINTER);
     }
 
@@ -157,31 +177,36 @@ int ESMC_Calendar::count=0;
         strncpy(calendar->name, name, nameLen);
         calendar->name[nameLen] = '\0';  // null terminate
       } else {
-        // TODO: error, delete and return null calendar?
-        if (rc != ESMC_NULL_POINTER) {
-          *rc = ESMF_FAILURE;
-        }
-        return(calendar);
+        // truncate
+        strncpy(calendar->name, name, ESMF_MAXSTR-1);
+        calendar->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "calendar name %s, length >= ESMF_MAXSTR; truncated.",
+                name);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+        // TODO: return ESMF_WARNING when defined
+        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
     } else {
       // create default name "CalendarNNN"
       sprintf(calendar->name, "Calendar%3.3d\0", calendar->id);
     }
 
-    if((returnCode = calendar->ESMC_CalendarSet(strlen(calendar->name), 
-                                                calendar->name, 
-                                                calendarType))
-                                                         != ESMF_SUCCESS) {
-      if (rc != ESMC_NULL_POINTER) {
-        *rc = returnCode;
-      }
+    returnCode = calendar->ESMC_CalendarSet(strlen(calendar->name), 
+                                            calendar->name, 
+                                            calendarType);
+
+    if (ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+                               "ESMC_CalendarSet() failed.", ESMC_LOG_ERROR)) {
+      if (rc != ESMC_NULL_POINTER) *rc = returnCode;
       return(calendar);
     }
 
     returnCode = calendar->ESMC_CalendarValidate();
-    if (rc != ESMC_NULL_POINTER) {
-      *rc = returnCode;
-    }
+    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+                            "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
+    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
     return(calendar);
 
@@ -206,10 +231,17 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarCreate(internal)"
+
     int returnCode;
 
     // make sure it is valid
     if (calendarType < 1 || calendarType > CALENDAR_TYPE_COUNT) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "calendarType %d not in valid range of 1 to %d.",
+              calendarType, CALENDAR_TYPE_COUNT);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
       return(ESMF_FAILURE);
     }
 
@@ -232,8 +264,7 @@ int ESMC_Calendar::count=0;
       *internalCal = new ESMC_Calendar;
     }
     catch (...) {
-      // TODO:  call ESMF log/err handler
-      cerr << "ESMC_CalendarCreate() (internal) memory allocation failed\n";
+      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
       return(ESMF_FAILURE);
     }
 
@@ -242,14 +273,18 @@ int ESMC_Calendar::count=0;
                                    calendarTypeName[calendarType-1],
                                                     (*internalCal)->id);
 
-    if((returnCode =
-       (*internalCal)->ESMC_CalendarSet(strlen((*internalCal)->name), 
-                                               (*internalCal)->name, 
-                                              calendarType)) != ESMF_SUCCESS) {
+    returnCode = (*internalCal)->ESMC_CalendarSet(strlen((*internalCal)->name), 
+                                                 (*internalCal)->name, 
+                                                 calendarType);
+    if (ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+                               "ESMC_CalendarSet() failed.", ESMC_LOG_ERROR)) {
       return(returnCode);
     }
 
-    return((*internalCal)->ESMC_CalendarValidate());
+    returnCode = (*internalCal)->ESMC_CalendarValidate();
+    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+                            "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
+    return(returnCode);
 
  } // end ESMC_CalendarCreate (internal)
 
@@ -280,18 +315,20 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarCreate(custom)"
+
     int returnCode;
     ESMC_Calendar *calendar;
+
+    // default return code
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
 
     try {
       calendar = new ESMC_Calendar;
     }
     catch (...) {
-      // TODO:  call ESMF log/err handler
-      cerr << "ESMC_CalendarCreate() (custom) memory allocation failed\n";
-      if (rc != ESMC_NULL_POINTER) {
-        *rc = ESMF_FAILURE;
-      }
+      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
       return(ESMC_NULL_POINTER);
     }
 
@@ -301,11 +338,16 @@ int ESMC_Calendar::count=0;
         strncpy(calendar->name, name, nameLen);
         calendar->name[nameLen] = '\0';  // null terminate
       } else {
-        // TODO: error, delete and return null calendar?
-        if (rc != ESMC_NULL_POINTER) {
-          *rc = ESMF_FAILURE;
-        }
-        return(calendar);
+        // truncate
+        strncpy(calendar->name, name, ESMF_MAXSTR-1);
+        calendar->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "calendar name %s, length >= ESMF_MAXSTR; truncated.",
+                name);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+        // TODO: return ESMF_WARNING when defined
+        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
     } else {
       // create default name "CalendarNNN"
@@ -317,17 +359,16 @@ int ESMC_Calendar::count=0;
                                             daysPerMonth, monthsPerYear,
                                             secondsPerDay, daysPerYear,
                                             daysPerYearDn, daysPerYearDd);
-    if (returnCode != ESMF_SUCCESS) {
-      if (rc != ESMC_NULL_POINTER) {
-        *rc = returnCode;
-      }
+    if (ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+                               "ESMC_CalendarSet() failed.", ESMC_LOG_ERROR)) {
+      if (rc != ESMC_NULL_POINTER) *rc = returnCode;
       return(calendar);
     }
 
     returnCode = calendar->ESMC_CalendarValidate();
-    if (rc != ESMC_NULL_POINTER) {
-      *rc = returnCode;
-    }
+    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+                            "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
+    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
     return(calendar);
 
@@ -353,12 +394,19 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarCreate(copy)"
+
     int returnCode;
     ESMC_Calendar *calendarCopy;
 
+    // default return code
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+
     // can't copy a non-existent object
     if (calendar == ESMC_NULL_POINTER) {
-      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+      ESMC_LogDefault.ESMC_LogWrite("Can't copy a non-existent calendar",
+                                    ESMC_LOG_ERROR);
       return(ESMC_NULL_POINTER);
     }
 
@@ -367,13 +415,13 @@ int ESMC_Calendar::count=0;
       calendarCopy = new ESMC_Calendar(*calendar);
     }
     catch (...) {
-      // TODO:  call ESMF log/err handler
-      cerr << "ESMC_CalendarCreate() (copy) memory allocation failed\n";
-      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = calendarCopy->ESMC_CalendarValidate();
+    ESMC_LogDefault.ESMC_LogFoundError(returnCode,
+                            "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
     if (rc != ESMC_NULL_POINTER) *rc = returnCode;
 
     return(calendarCopy);     
@@ -399,10 +447,8 @@ int ESMC_Calendar::count=0;
 //
 //EOP
 
-  if (calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
   // TODO: calendar->ESMC_CalendarDestruct(); constructor calls it!
-  delete *calendar;
+  delete *calendar;    // ok to delete null pointer
   *calendar = ESMC_NULL_POINTER;
   return(ESMF_SUCCESS);
 
@@ -426,12 +472,26 @@ int ESMC_Calendar::count=0;
 //
 //EOP
 
-  int rc;
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarSetDefault(calendar)"
 
   // ensure we have a valid calendar
-  if (calendar  == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-  if (*calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-  if ((rc=(*calendar)->ESMC_CalendarValidate()) != ESMF_SUCCESS) return(rc);
+  if (calendar == ESMC_NULL_POINTER) {
+    ESMC_LogDefault.ESMC_LogWrite("calendar pointer-pointer is NULL.",
+                                  ESMC_LOG_ERROR);
+    return(ESMF_FAILURE);
+  }
+  if (*calendar == ESMC_NULL_POINTER) {
+    ESMC_LogDefault.ESMC_LogWrite("calendar pointer is NULL.",
+                                  ESMC_LOG_ERROR);
+    return(ESMF_FAILURE);
+  }
+
+  int rc = (*calendar)->ESMC_CalendarValidate();
+  if (ESMC_LogDefault.ESMC_LogFoundError(rc,
+                         "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR)) {
+    return(rc);
+  }
 
   // set the default calendar
   ESMC_Calendar::defaultCalendar = *calendar;
@@ -459,13 +519,21 @@ int ESMC_Calendar::count=0;
 //
 //EOP
 
-  int rc;
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarSetDefault(calendarType)"
 
   ESMC_CalendarType calType = (calendarType == ESMC_NULL_POINTER) ?
                                             ESMC_CAL_NOCALENDAR : *calendarType;
 
   // create internal calendar if necessary
-  if ((rc=ESMC_CalendarCreate(calType)) != ESMF_SUCCESS) return (rc);
+  int rc = ESMC_CalendarCreate(calType);
+  if (rc != ESMF_SUCCESS) {
+    char logMsg[ESMF_MAXSTR];
+    sprintf(logMsg, "ESMC_CalendarCreate(%s) failed.",
+            calendarTypeName[calType]);
+    ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+    return (rc);
+  }
 
   // set the default calendar
   ESMC_Calendar::defaultCalendar = 

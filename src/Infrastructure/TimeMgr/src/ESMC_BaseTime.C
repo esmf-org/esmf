@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.30 2004/03/05 00:44:57 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.31 2004/05/14 01:24:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,8 +14,8 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_BaseTime} methods declared
-// in the companion file {\tt ESMC\_BaseTime.h}
+// The code in this file implements the C++ {\tt ESMC\_BaseTime} methods
+// declared in the companion file {\tt ESMC\_BaseTime.h}
 //
 //-------------------------------------------------------------------------
 //
@@ -28,6 +28,8 @@
  using std::cout;
  using std::endl;
  */
+ #include <ESMC_LogErr.h>
+ #include <ESMF_LogMacros.inc>
 
  // associated class definition file
  #include <ESMC_BaseTime.h>
@@ -35,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.30 2004/03/05 00:44:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.31 2004/05/14 01:24:25 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -137,23 +139,31 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_BaseTimeSet()"
+
     // s, sN must be either both positive or both negative;
     //    sD always positive and >= 1
-    if ( ((s >= 0 && sN >= 0) || (s <= 0 && sN <= 0)) && sD >= 1 ) {
-        this->s  = s;
-        this->sN = sN;
-        this->sD = sD;
-
-        // normalize (share logic with += ?? )
-        ESMF_KIND_I4 w;
-        if (labs((w = this->sN/this->sD)) >= 1) {
-          this->s += w;
-          this->sN = this->sN % this->sD;
-        }
-
-        return(ESMF_SUCCESS);
+    if ( !(((s >= 0 && sN >= 0) || (s <= 0 && sN <= 0)) && sD >= 1) ) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "s=%d and sN=%d not both positive or both negative, "
+                      "or sD=%d negative or less than one.", s, sN, sD); 
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      return(ESMF_FAILURE);
     }
-    else return(ESMF_FAILURE);
+
+    this->s  = s;
+    this->sN = sN;
+    this->sD = sD;
+
+    // normalize (TODO: share logic with += ? )
+    ESMF_KIND_I4 w;
+    if (labs((w = this->sN/this->sD)) >= 1) {
+      this->s += w;
+      this->sN = this->sN % this->sD;
+    }
+
+    return(ESMF_SUCCESS);
 
 }  // end ESMC_BaseTimeSet
 
@@ -194,6 +204,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_BaseTimeGet()"
+
     int rc = ESMF_SUCCESS;
 
     // TODO: fractional seconds
@@ -202,19 +215,39 @@
 
     if (h != ESMC_NULL_POINTER) {
       ESMF_KIND_I8 hours = remainingTime / SECONDS_PER_HOUR;
-      if (hours < INT_MIN || hours > INT_MAX) return(ESMF_FAILURE);
+      if (hours < INT_MIN || hours > INT_MAX) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "For s=%ld, hours=%ld out-of-range with respect to "
+                        "machine limits (INT_MIN=%ld to INT_MAX=%ld).",
+                        remainingTime, hours, INT_MIN, INT_MAX);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        return (ESMF_FAILURE);
+      }
       *h = hours;
       remainingTime %= SECONDS_PER_HOUR;  // remove hours
     }
     if (m != ESMC_NULL_POINTER) {
       ESMF_KIND_I8 minutes = remainingTime / SECONDS_PER_MINUTE;
-      if (minutes < INT_MIN || minutes > INT_MAX) return(ESMF_FAILURE);
+      if (minutes < INT_MIN || minutes > INT_MAX) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "For s=%ld, minutes=%ld out-of-range with respect to "
+                        "machine limits (INT_MIN=%ld to INT_MAX=%ld).",
+                        remainingTime, minutes, INT_MIN, INT_MAX);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        return (ESMF_FAILURE);
+      }
       *m = minutes;
       remainingTime %= SECONDS_PER_MINUTE;  // remove minutes
     }
     if (s != ESMC_NULL_POINTER) {
-      if (remainingTime < INT_MIN || remainingTime > INT_MAX)
-                                                     return(ESMF_FAILURE);
+      if (remainingTime < INT_MIN || remainingTime > INT_MAX) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "s=%ld out-of-range with respect to "
+                        "machine limits (INT_MIN=%ld to INT_MAX=%ld).",
+                        remainingTime, INT_MIN, INT_MAX);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        return (ESMF_FAILURE);
+      }
       *s = remainingTime;    // >= 32 bit
     }
     if (s_i8 != ESMC_NULL_POINTER) {
@@ -656,8 +689,16 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_BaseTimeValidate()"
+
     // must have positive denominator
-    if (sD <= 0) return(ESMF_FAILURE);
+    if (sD <= 0) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "sD=%d must be positive.", sD); 
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      return(ESMF_FAILURE);
+    }
 
     return(ESMF_SUCCESS);
 
