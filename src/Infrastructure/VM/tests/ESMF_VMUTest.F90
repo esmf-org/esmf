@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.14 2004/12/08 19:27:54 rfaincht Exp $
+! $Id: ESMF_VMUTest.F90,v 1.15 2004/12/14 19:35:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.14 2004/12/08 19:27:54 rfaincht Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.15 2004/12/14 19:35:16 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -77,21 +77,20 @@
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------- 
-      print *, "Starting job"
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
-      !NEX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "ESMF_Initialize Test"
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
       !------------------------------------------------------------------------
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Global Test"
       call ESMF_VMGetGlobal(vm, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Get Test"
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -157,9 +156,7 @@
       call test_AllReduce_max
 
 #endif
-      call ESMF_Finalize(rc)
-
-      print *, "******  End of VMUTest  ******"
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 
