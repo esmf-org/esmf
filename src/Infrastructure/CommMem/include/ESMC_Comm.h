@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.15 2003/03/31 20:03:38 cdeluca Exp $
+// $Id: ESMC_Comm.h,v 1.16 2003/04/14 21:44:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,6 +27,7 @@
  // include files.
 // #include <ESMC_CommMem.h> 
  #include <pthread.h> 
+ #include <mpi.h>
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -139,8 +140,8 @@
     int ESMC_CommPrint(void) const;
 
 // conversion to MPI types
-    int ESMC_DatatypeToMPI[ESMC_NUM_DATATYPES];
-    int ESMC_OpToMPI[ESMC_OP_TYPES];
+    MPI_Datatype ESMC_DatatypeToMPI[ESMC_NUM_DATATYPES];
+    MPI_Op ESMC_OpToMPI[ESMC_OP_TYPES];
 
  // native C++ constructors/destructors
 	ESMC_Comm(void);

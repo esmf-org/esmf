@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.23 2003/04/14 14:51:30 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.24 2003/04/14 21:44:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.23 2003/04/14 14:51:30 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.24 2003/04/14 21:44:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -404,11 +404,11 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DELayout *parent,         // in/out - parentDELayout
+      ESMC_DELayout *inparent,       // in/out - parentDELayout
       int *parent_offsets,           // in - offsets from start of parent axes
       int *de_indices,               // in - null-ternminated list of parent DE 
                                      //      indices for new delayout
-      int ndim,                      // in - number of dimensions
+      int indim,                     // in - number of dimensions
       int *lengths,                  // in - number of DE's in each dimension
       ESMC_CommType *commtypes) {    // in - communication type
 //
@@ -424,7 +424,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 
   int ii, nx, ny, nz;
   int userwants;
-  this->ndim=ndim;
+  this->ndim=indim;
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
@@ -538,7 +538,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
         //cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y << "\n";
 
         // parent DE cannot be reused by subsequent DELayoutCreate calls
-        rc = parent->ESMC_DELayoutGetDE(de_indices[index], 0, 0, &de);
+        rc = inparent->ESMC_DELayoutGetDE(de_indices[index], 0, 0, &de);
         //cout << "index = " << index << ", ESMC_DELayoutGetDE(" 
         //     << de_indices[index] << ") called, rc = " << rc << endl;
 
@@ -759,7 +759,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 //
 // !ARGUMENTS:
       ESMC_PEList *pelist,        // in - PEList
-      int ndim,                   // in - number of dimensions
+      int indim,                  // in - number of dimensions
       int *lengths,               // in - number of DEs in each dimension
       ESMC_CommType *commtypes) { // in - communication type for each dimension
 //
@@ -787,7 +787,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 
   // do some error checks
   userwants = 1;
-  for(i=0; i<ndim; i++)  
+  for(i=0; i<indim; i++)  
     userwants *= lengths[i];
    
   if (userwants > nDEs) {
@@ -796,7 +796,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
     return ESMF_FAILURE;
   }
 
-  this->ndim = ndim;
+  this->ndim = indim;
   
   this->length = new int[ESMF_MAXDECOMPDIM];
   this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
@@ -1918,7 +1918,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   int rc = ESMF_FAILURE;
   int i, j, k, l, m;     // general counter vars
-  int mpidatatype;
+  MPI_Datatype mpidatatype;
 
   // get layout size
   int nx, ny;
@@ -2091,7 +2091,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 //EOP
 
-  int rc, mpidatatype;
+  int rc;
+  MPI_Datatype mpidatatype;
   MPI_Status status;
 
   mpidatatype = comm.ESMC_DatatypeToMPI[type];
@@ -2152,7 +2153,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 //EOP
 
-  int rc, mpidatatype;
+  int rc;
+  MPI_Datatype mpidatatype;
   MPI_Status status;
 
   mpidatatype = comm.ESMC_DatatypeToMPI[type];
