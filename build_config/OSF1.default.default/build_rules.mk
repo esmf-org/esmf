@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.16 2004/12/17 21:01:40 nscollins Exp $
+#  $Id: build_rules.mk,v 1.17 2005/01/26 22:57:09 theurich Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -121,7 +121,7 @@ CXX_SYS_LIB	   = -lcomplex -lutil -lFutil -lots
 C_F90CXXLIBS       = -L/usr/ccs/lib/cmplrs/cxx -lcxx 
 C_F90CXXLD         = f90
 C_CXXF90LD         = cxx
-C_CXXF90LIBS       = 
+C_CXXF90LIBS       = -L/usr/opt/F55A/usr/shlib -lfor
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS		= -g  -qfullpath
 GCXX_FOPTFLAGS		= -g  -qfullpath 
@@ -141,7 +141,7 @@ PARCH			= alpha
 SL_LIBS_TO_MAKE = libesmf 
 
 SL_SUFFIX   = so
-SL_LIBOPTS  = -shared -rpath .:$(ESMF_LIBDIR)  ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} 
+SL_LIBOPTS  = -shared -rpath .:$(ESMF_LIBDIR)  ${C_F90CXXLIBS} ${C_CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} 
 SL_LINKOPTS = 
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
