@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.38 2003/04/23 21:39:43 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.39 2003/04/29 16:17:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.38 2003/04/23 21:39:43 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.39 2003/04/29 16:17:41 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -699,20 +699,13 @@ end function
         ! Quick sanity check on the values
 
         count = 0
-        print *, "start count = ", count
         if (present(bundles)) count = count + size(bundles)
-        print *, "after bundles count = ", count
         if (present(fields)) count = count + size(fields)
-        print *, "after fields count = ", count
         if (present(arrays)) count = count + size(arrays)
-        print *, "after arrays count = ", count
         if (present(states)) count = count + size(states)
-        print *, "after states count = ", count
         if (present(names)) count = count + size(names)
-        print *, "after names count = ", count
 
         if (present(itemcount)) then
-          print *, "final count = ", count, ", user itemcount = ", itemcount
           if (count .ne. itemcount) then
             print *, "itemcount does not match lists given"
             return
