@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.10 2004/11/08 22:11:24 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.11 2004/12/02 23:25:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,11 +137,11 @@
     ! bug report 986728
 !   !  Test Wait for a component
 
-    !call ESMF_GridCompWait(comp1, rc=rc)
+    call ESMF_GridCompWait(comp1, rc=rc)
 
-    !write(failMsg, *) "Did not return ESMF_SUCCESS"
-    !write(name, *) "Waiting for a Component Test"
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Waiting for a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest

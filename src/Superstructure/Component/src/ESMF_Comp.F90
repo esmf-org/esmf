@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.116 2004/11/23 06:31:35 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.117 2004/12/02 23:25:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -233,7 +233,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.116 2004/11/23 06:31:35 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.117 2004/12/02 23:25:02 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -365,7 +365,7 @@ end function
         logical :: rcpresent                         ! did user specify rc?
         character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirPath
         character(len=ESMF_MAXSTR) :: msgbuf
-				integer, pointer :: petlist_loc(:) 
+        integer, pointer :: petlist_loc(:) 
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -387,7 +387,6 @@ end function
 
         ! initialize base class, including component name
         call ESMF_BaseCreate(compp%base, "Component", name, 0, status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -406,9 +405,9 @@ end function
       
         ! for gridded components, the model type it represents
         if (present(gridcomptype)) then
-	  compp%gridcomptype = gridcomptype
+          compp%gridcomptype = gridcomptype
         else
-	  compp%gridcomptype = ESMF_OTHER
+          compp%gridcomptype = ESMF_OTHER
         endif
 
         ! for config files, store a directory path and subsequent opens can
@@ -443,7 +442,7 @@ end function
               ! TODO: construct a msg string and then call something here.
               ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
               if (status .ne. 0) then
-	        call ESMF_BaseDestroy(compp%base)
+                call ESMF_BaseDestroy(compp%base)
                 write(msgbuf, *) &
                   "ERROR: loading config file, unable to open either", &
                   " name = ", trim(configFile), " or name = ", trim(fullpath)
@@ -479,13 +478,13 @@ end function
         if (present(petlist)) then
           compp%npetlist = size(petlist)
           allocate(petlist_loc(compp%npetlist))
-					compp%petlist => petlist_loc
+          compp%petlist => petlist_loc
           compp%petlist = petlist
         else
           compp%npetlist = 0
           allocate(compp%petlist(0))
         endif
-				
+
         ! instantiate a default VMPlan
         call ESMF_VMPlanConstruct(compp%vmplan, compp%vm_parent, &
                                   compp%npetlist, compp%petlist)
@@ -496,7 +495,6 @@ end function
                                   
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
-        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -569,14 +567,12 @@ end function
 
         ! call C++ to release function and data pointer tables.
         call c_ESMC_FTableDestroy(compp%this, status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         ! Release attributes and other things on base class
         call ESMF_BaseDestroy(compp%base, status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -648,6 +644,7 @@ end function
         integer :: dummy
         logical :: blocking
         integer :: callrc
+        integer :: oldvmid, vmid
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -702,6 +699,17 @@ end function
                                ESMF_LOG_WARNING)
         endif
 
+        ! set the ID of the currently executing component, saving the 
+        ! previous one to be restored afterwards.
+        call c_ESMC_CompGetVMID(oldvmid, status)
+        ! TODO: fix this.   same comment in run and finalize.
+        ! this is wrong - it must be the child vm, not the parent.
+        ! but i cannot find when the vm argument has a valid value...
+        ! it is null in some of my test cases.
+        !call ESMF_VMGet(compp%vm, mpiCommunicator=vmid, rc=status)
+        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
+        call c_ESMC_CompSetVMID(vmid, status)
+
         call ESMF_GetName(compp%base, cname, status)
 
         ! Wrap comp so it's passed to C++ correctly.
@@ -731,7 +739,10 @@ end function
         if (ESMF_LogMsgFoundError(status, &
                                   "Component initialization error", &
                                   ESMF_CONTEXT, rc)) continue
-        ! fall thru intentionally
+        ! fall thru intentionally - we still have cleanup to do
+
+        ! restore previous comp id.
+        call c_ESMC_CompSetVMID(oldvmid, status)
 
         ! if we created dummy states, delete them here.
         if (isdel) call ESMF_StateDestroy(is, rc=dummy)
@@ -1003,6 +1014,7 @@ end function
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
         integer :: callrc
+        integer :: oldvmid, vmid
 
         ! Finalize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -1058,6 +1070,14 @@ end function
                                ESMF_LOG_WARNING)
         endif
 
+        ! set the ID of the currently executing component, saving the 
+        ! previous one to be restored afterwards.
+        call c_ESMC_CompGetVMID(oldvmid, status)
+        ! TODO: see comment in init
+        !call ESMF_VMGet(compp%vm, mpiCommunicator=vmid, rc=status)
+        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
+        call c_ESMC_CompSetVMID(vmid, status)
+
         call ESMF_GetName(compp%base, cname, status)
 
         ! Wrap comp so it's passed to C++ correctly.
@@ -1085,7 +1105,10 @@ end function
         if (ESMF_LogMsgFoundError(status, &
                                   "Component finalize error", &
                                   ESMF_CONTEXT, rc)) continue
-        ! fall thru intentionally
+        ! fall thru intentionally - we have more cleanup to do.
+
+        ! restore previous comp id.
+        call c_ESMC_CompSetVMID(oldvmid, status)
 
         ! if we created dummy states, delete them here.
         if (isdel) call ESMF_StateDestroy(is, rc=dummy)
@@ -1153,6 +1176,7 @@ end function
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
         integer :: callrc
+        integer :: oldvmid, vmid
 
         ! Run return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -1208,6 +1232,14 @@ end function
                                ESMF_LOG_WARNING)
         endif
 
+        ! set the ID of the currently executing component, saving the 
+        ! previous one to be restored afterwards.
+        call c_ESMC_CompGetVMID(oldvmid, status)
+        ! TODO: see comment in init
+        !call ESMF_VMGet(compp%vm, mpiCommunicator=vmid, rc=status)
+        call ESMF_VMGet(compp%vm_parent, mpiCommunicator=vmid, rc=status)
+        call c_ESMC_CompSetVMID(vmid, status)
+
         call ESMF_GetName(compp%base, cname, status)
 
         ! Wrap comp so it's passed to C++ correctly.
@@ -1234,7 +1266,10 @@ end function
         if (ESMF_LogMsgFoundError(status, &
                                   "Component run error", &
                                   ESMF_CONTEXT, rc)) continue
-        ! fall thru intentionally
+        ! fall thru intentionally - we have cleanup to do.
+
+        ! restore previous comp id.
+        call c_ESMC_CompSetVMID(oldvmid, status)
 
         ! if we created dummy states, delete them here.
         if (isdel) call ESMF_StateDestroy(is, rc=dummy)
