@@ -1,4 +1,4 @@
-% $Id: LogErr_reqdoc.ctex,v 1.1 2003/07/27 18:52:01 cdeluca Exp $
+% $Id: LogErr_reqdoc.ctex,v 1.2 2003/07/27 19:30:48 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -63,7 +63,7 @@
 #ifdef STANDALONE
 \input{Log_auth}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Log/doc/Log_auth}
+\input{../Infrastructure/LogErr/doc/LogErr_auth}
 #endif
 
 #ifdef STANDALONE
@@ -75,7 +75,7 @@
 #ifdef STANDALONE
 \input{Log_background}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Log/doc/Log_background}
+\input{../Infrastructure/LogErr/doc/LogErr_background}
 #endif
 
 #ifdef STANDALONE
@@ -90,11 +90,11 @@
 #endif
 
 %\section{\longname Abbreviations}
-#ifdef STANDALONE
-\input{Log_abbr}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Log/doc/Log_abbr}
-#endif
+%#ifdef STANDALONE
+%\input{LogErr_abbr}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LogErr/doc/LogErr_abbr}
+%#endif
 
 \newpage
 
@@ -108,12 +108,12 @@
 #endif
 
 #ifdef STANDALONE
-\input{Log_req}
+\input{LogErr_req}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Log/doc/Log_req}
+\input{../Infrastructure/LogErr/doc/LogErr_req}
 #endif
 
-#ifdef STANDALONE
+%#ifdef STANDALONE
 %\section*{Glossary}
 %\input{Log_glos}
 %\addcontentsline{toc}{section}{Glossary}
@@ -122,7 +122,7 @@
 %\bibliography{comp} 
 %\bibliographystyle{plain}
 %\addcontentsline{toc}{section}{References}
-#endif
+%#endif
 
 #ifdef STANDALONE
 \end{document}
