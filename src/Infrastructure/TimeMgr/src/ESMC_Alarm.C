@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.8 2003/04/02 17:24:56 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.9 2003/04/02 20:15:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.8 2003/04/02 17:24:56 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.9 2003/04/02 20:15:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -68,9 +68,9 @@
     Ringing = false;
     Enabled = true;
     
-    if (ringInterval != 0) RingInterval = *ringInterval;
-    if (ringTime != 0)     RingTime     = *ringTime;
-    if (stopTime != 0)     StopTime     = *stopTime;
+    if (ringInterval != ESMC_NULL_POINTER) RingInterval = *ringInterval;
+    if (ringTime     != ESMC_NULL_POINTER) RingTime     = *ringTime;
+    if (stopTime     != ESMC_NULL_POINTER) StopTime     = *stopTime;
     Enabled = enabled;
 
     return(ESMF_SUCCESS);
@@ -484,8 +484,8 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (ringInterval == 0 || ringTime == 0 || prevRingTime == 0 ||
-        stopTime == 0 ) {
+    if (ringInterval == ESMC_NULL_POINTER || ringTime == ESMC_NULL_POINTER ||
+        prevRingTime == ESMC_NULL_POINTER || stopTime == ESMC_NULL_POINTER ) {
       // TODO: log error
       cout << "ESMC_Alarm::ESMC_Read(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
@@ -529,8 +529,10 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (ringInterval == 0 || ringTime == 0 || prevRingTime == 0 ||
-        stopTime == 0 || ringing == 0 || enabled == 0 || id == 0) {
+    if (ringInterval == ESMC_NULL_POINTER || ringTime == ESMC_NULL_POINTER ||
+        prevRingTime == ESMC_NULL_POINTER || stopTime == ESMC_NULL_POINTER ||
+        ringing      == ESMC_NULL_POINTER || enabled  == ESMC_NULL_POINTER ||
+        id           == ESMC_NULL_POINTER) {
       // TODO: log error
       cout << "ESMC_Alarm::ESMC_Write(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.10 2003/04/02 17:24:57 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.11 2003/04/02 20:15:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.10 2003/04/02 17:24:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.11 2003/04/02 20:15:20 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -66,10 +66,10 @@
     //       called automatically, returning initialized values to garbage.
     NumAlarms = 0;
 
-    if (timeStep  != 0) TimeStep  = *timeStep;
-    if (startTime != 0) StartTime = *startTime;
-    if (stopTime  != 0) StopTime  = *stopTime;
-    if (refTime   != 0) RefTime   = *refTime;
+    if (timeStep  != ESMC_NULL_POINTER) TimeStep  = *timeStep;
+    if (startTime != ESMC_NULL_POINTER) StartTime = *startTime;
+    if (stopTime  != ESMC_NULL_POINTER) StopTime  = *stopTime;
+    if (refTime   != ESMC_NULL_POINTER) RefTime   = *refTime;
     else RefTime = StartTime;
 
     CurrTime = StartTime;
@@ -156,7 +156,7 @@
 //EOP
 // !REQUIREMENTS: TMG 3.5.1
 
-    if (advanceCount != 0) *advanceCount = AdvanceCount;
+    if (advanceCount != ESMC_NULL_POINTER) *advanceCount = AdvanceCount;
 
     return(ESMF_SUCCESS);
 
@@ -191,8 +191,10 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (timeStep == 0 || startTime == 0 || stopTime == 0 || refTime == 0 ||
-        currTime == 0 || prevTime == 0 || alarmList == 0) {
+    if (timeStep  == ESMC_NULL_POINTER || startTime == ESMC_NULL_POINTER ||
+        stopTime  == ESMC_NULL_POINTER || refTime   == ESMC_NULL_POINTER ||
+        currTime  == ESMC_NULL_POINTER || prevTime  == ESMC_NULL_POINTER ||
+        alarmList == ESMC_NULL_POINTER) {
       cout << "ESMC_Clock::ESMC_Read(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }
@@ -242,9 +244,11 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (timeStep == 0 || startTime == 0 || stopTime == 0 || refTime == 0 ||
-        currTime == 0 || prevTime == 0 || advanceCount == 0 || alarmList == 0 ||
-        numAlarms == 0) {
+    if (timeStep     == ESMC_NULL_POINTER || startTime == ESMC_NULL_POINTER ||
+        stopTime     == ESMC_NULL_POINTER || refTime   == ESMC_NULL_POINTER ||
+        currTime     == ESMC_NULL_POINTER || prevTime  == ESMC_NULL_POINTER ||
+        advanceCount == ESMC_NULL_POINTER || alarmList == ESMC_NULL_POINTER ||
+        numAlarms    == ESMC_NULL_POINTER) {
       cout << "ESMC_Clock::ESMC_Write(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }

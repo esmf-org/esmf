@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.5 2003/04/02 17:24:54 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.6 2003/04/02 20:15:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 extern "C" {
 
        void FTN(c_esmc_calendarinit)(ESMC_Calendar *ptr,
-                                     ESMC_CalendarType_e *type, 
+                                     ESMC_CalendarType *type, 
                                      int *status) {
            *status = (ptr)->ESMC_CalendarInit(*type);
        }
@@ -52,7 +52,7 @@ extern "C" {
 #endif
 
        void FTN(c_esmc_calendarread)(ESMC_Calendar *ptr,
-                                     ESMC_CalendarType_e *type,
+                                     ESMC_CalendarType *type,
                                      int *daysPerMonth, int *secondsPerDay,
                                      int *daysPerYear,  int *daysPerYearDn,
                                      int *daysPerYearDd, int *status) {
@@ -64,7 +64,7 @@ extern "C" {
        }
 
        void FTN(c_esmc_calendarwrite)(ESMC_Calendar *ptr,
-                                      ESMC_CalendarType_e *type,
+                                      ESMC_CalendarType *type,
                                       int *daysPerMonth, int *secondsPerDay,
                                       int *daysPerYear,  int *daysPerYearDn,
                                       int *daysPerYearDd, int *status) {

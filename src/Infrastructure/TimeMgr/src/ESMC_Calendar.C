@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.8 2003/04/02 17:24:57 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.9 2003/04/02 20:15:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.8 2003/04/02 17:24:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.9 2003/04/02 20:15:18 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -50,7 +50,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType_e type) {   // in - initialize to be Calendar type
+      ESMC_CalendarType type) {   // in - initialize to be Calendar type
 //
 // !DESCRIPTION:
 //      Initialzes a {\tt Calendar} to be of a specific type
@@ -321,7 +321,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType_e type,  // in
+      ESMC_CalendarType type,    // in
       int *daysPerMonth,         // in
       int secondsPerDay,         // in
       int daysPerYear,           // in
@@ -334,7 +334,7 @@
 //EOP
 // !REQUIREMENTS:
 
-    if (daysPerMonth == 0) {
+    if (daysPerMonth == ESMC_NULL_POINTER) {
       cout << "ESMC_Calendar::ESMC_Read(): null pointer passed in" << endl;
       return(ESMF_FAILURE);
     }
@@ -364,7 +364,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType_e *type,  // out
+      ESMC_CalendarType *type,    // out
       int *daysPerMonth,          // out
       int *secondsPerDay,         // out
       int *daysPerYear,           // out
@@ -377,9 +377,12 @@
 //EOP
 // !REQUIREMENTS:
 
-    if (type == 0 || daysPerMonth == 0 ||
-        secondsPerDay == 0 || daysPerYear == 0 ||
-        daysPerYearDn == 0 || daysPerYearDd == 0) {
+    if (type          == ESMC_NULL_POINTER ||
+        daysPerMonth  == ESMC_NULL_POINTER ||
+        secondsPerDay == ESMC_NULL_POINTER ||
+        daysPerYear   == ESMC_NULL_POINTER ||
+        daysPerYearDn == ESMC_NULL_POINTER ||
+        daysPerYearDd == ESMC_NULL_POINTER) {
       cout << "ESMC_Calendar::ESMC_Write(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }
@@ -496,7 +499,7 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMC_CalendarType_e Type) {  // in
+      ESMC_CalendarType Type) {  // in
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_TimeInstant} to be of a specific type via

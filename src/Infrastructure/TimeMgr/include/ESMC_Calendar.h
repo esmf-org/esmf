@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.6 2003/04/02 17:24:53 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.7 2003/04/02 20:15:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -77,15 +77,14 @@
                                                        (year%100 != 0)) )
 
 // (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
-typedef enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
-                                ESMC_CAL_JULIAN,
-                                ESMC_CAL_NOLEAP,     // like Gregorian, except
-                                                     //   Feb always has 28 days
-                                ESMC_CAL_360DAY,     // 12 months, 30 days each
-                                ESMC_CAL_GENERIC,    // user defined
-                                ESMC_CAL_NOCALENDAR} // track base time seconds
-                                                     //   only
-             ESMC_CalendarType_e;
+enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
+                        ESMC_CAL_JULIAN,
+                        ESMC_CAL_NOLEAP,      // like Gregorian, except
+                                              //   Feb always has 28 days
+                        ESMC_CAL_360DAY,      // 12 months, 30 days each
+                        ESMC_CAL_GENERIC,     // user defined
+                        ESMC_CAL_NOCALENDAR}; // track base time seconds
+                                              //   only
 
 // !PUBLIC TYPES:
  class ESMC_Calendar;
@@ -101,7 +100,7 @@ class ESMC_Calendar {
 
   private:   // corresponds to F90 module 'type ESMF_Calendar' members
 
-    ESMC_CalendarType_e Type;    // Calendar type
+    ESMC_CalendarType Type;    // Calendar type
 
     int DaysPerMonth[MONTHSPERYEAR];
     int SecondsPerDay;
@@ -117,7 +116,7 @@ class ESMC_Calendar {
   public:
 
     // Calendar is a shallow class, so only Init methods are needed
-    int ESMC_CalendarInit(ESMC_CalendarType_e type);
+    int ESMC_CalendarInit(ESMC_CalendarType type);
     int ESMC_CalendarInitGeneric(int *daysPerMonth, int secondsPerDay,
                                  int daysPerYear,   int daysPerYearDn,
                                  int daysPerYearDd);
@@ -135,11 +134,11 @@ class ESMC_Calendar {
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    virtual int ESMC_Read(ESMC_CalendarType_e type,
+    virtual int ESMC_Read(ESMC_CalendarType type,
                           int *daysPerMonth, int secondsPerDay,
                           int daysPerYear,   int daysPerYearDn,
                           int daysPerYearDd);
-    virtual int ESMC_Write(ESMC_CalendarType_e *type,
+    virtual int ESMC_Write(ESMC_CalendarType *type,
                            int *daysPerMonth,  int *secondsPerDay,
                            int *daysPerYear,   int *daysPerYearDn,
                            int *daysPerYearDd) const;
@@ -152,7 +151,7 @@ class ESMC_Calendar {
 
     // native C++ constructors/destructors
     ESMC_Calendar(void);
-    ESMC_Calendar(ESMC_CalendarType_e Type);
+    ESMC_Calendar(ESMC_CalendarType Type);
     ESMC_Calendar(int *daysPerMonth, int secondsPerDay,
                   int daysPerYear,   int daysPerYearDn, int daysPerYearDd);
     ~ESMC_Calendar(void);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.11 2003/04/02 17:24:57 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.12 2003/04/02 20:15:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.11 2003/04/02 17:24:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.12 2003/04/02 20:15:20 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -153,36 +153,39 @@
     // TODO: validate inputs (individual and combos), set basetime values
 
     // set calendar type
-    if (cal != 0) {
+    if (cal != ESMC_NULL_POINTER) {
       Calendar = cal;
     }
     else {
-      Calendar = 0;
+      Calendar = ESMC_NULL_POINTER;
       // TODO: log err
       cout << "ESMC_Time::ESMC_TimeInit(): calendar not set" << endl;
       return (ESMF_FAILURE);
     }
 
     // set timezone
-    Timezone = (tz != 0) ? *tz : 0;
+    Timezone = (tz != ESMC_NULL_POINTER) ? *tz : ESMC_NULL_POINTER;
 
     // convert date to base time according to calendar type
     // TODO: create two calendar conversion method entry points ?
-    if (YR != 0 && MM !=0 && DD != 0) {
-      Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this);
+    if (YR != ESMC_NULL_POINTER && MM !=ESMC_NULL_POINTER &&
+        DD != ESMC_NULL_POINTER) {
+      Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD,
+                                           ESMC_NULL_POINTER, this);
     }
-    if (D != 0) {
-      Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this);
+    if (D != ESMC_NULL_POINTER) {
+      Calendar->ESMC_CalendarConvertToTime(ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, *D, this);
     }
     
-    
-    if (H != 0) {
+    if (H != ESMC_NULL_POINTER) {
       this->S += *H * SECONDS_PER_HOUR;
     }
-    if (M != 0) {
+    if (M != ESMC_NULL_POINTER) {
       this->S += *M * SECONDS_PER_MINUTE;
     }
-    if (S != 0) {
+    if (S != ESMC_NULL_POINTER) {
       this->S += *S;
     }
 
@@ -283,7 +286,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (calendar != 0) {
+    if (calendar != ESMC_NULL_POINTER) {
       Calendar = calendar;
       return(ESMF_SUCCESS);
     }
@@ -314,7 +317,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (Calendar != 0)
+    if (Calendar != ESMC_NULL_POINTER)
     {
       *rc = ESMF_SUCCESS;
       return(this->Calendar->Type == Time->Calendar->Type);
@@ -345,7 +348,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (timezone != 0) {
+    if (timezone != ESMC_NULL_POINTER) {
       *timezone = Timezone;
       return(ESMF_SUCCESS);
     }
@@ -551,7 +554,7 @@
 
     int rc;
 
-    if (cal == 0) {
+    if (cal == ESMC_NULL_POINTER) {
       cout << "ESMC_Time::ESMC_Read(): null pointer passed in" << endl;
       return(ESMF_FAILURE);
     }
@@ -592,7 +595,9 @@
 
     int rc;
 
-    if (S == 0 || Sn == 0 || Sd == 0 || cal == 0 || timezone == 0) {
+    if (S  == ESMC_NULL_POINTER || Sn  == ESMC_NULL_POINTER ||
+        Sd == ESMC_NULL_POINTER || cal == ESMC_NULL_POINTER ||
+        timezone == ESMC_NULL_POINTER) {
       cout << "ESMC_Time::ESMC_Write(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }
@@ -653,9 +658,11 @@
 
     cout << "Time -----------------------------------" << endl;
     ESMC_BaseTime::ESMC_Print(options);
-    if (Calendar != 0) Calendar->ESMC_Calendar::ESMC_Print(options);
-                               //^^^^^^^^^^^^^^^TODO: override virtual function
-                               // mechanism to support F90 interface ?
+    if (Calendar != ESMC_NULL_POINTER) {
+      Calendar->ESMC_Calendar::ESMC_Print(options);
+              //^^^^^^^^^^^^^^^TODO: override virtual function
+              // mechanism to support F90 interface ?
+    }
     cout << "Timezone = " << Timezone << endl;
     cout << "end Time -------------------------------" << endl << endl;
 
@@ -686,7 +693,7 @@
    S  = 0;
    Sn = 0;
    Sd = 0;
-   Calendar = 0;
+   Calendar = ESMC_NULL_POINTER;
    Timezone = 0;
 
  }  // end ESMC_Time

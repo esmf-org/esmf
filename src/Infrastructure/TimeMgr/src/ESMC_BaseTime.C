@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.11 2003/04/02 17:24:57 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.12 2003/04/02 20:15:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.11 2003/04/02 17:24:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.12 2003/04/02 20:15:18 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -120,7 +120,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (D != 0) {
+    if (D != ESMC_NULL_POINTER) {
       *D = S / 86400;
       return(ESMF_SUCCESS);
     } else return(ESMF_FAILURE);
@@ -171,7 +171,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (H != 0) {
+    if (H != ESMC_NULL_POINTER) {
       *H = S / 3600;
       return(ESMF_SUCCESS);
     } else return(ESMF_FAILURE);
@@ -222,7 +222,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-     if (M != 0) {
+     if (M != ESMC_NULL_POINTER) {
        *M = S / 60;
        return(ESMF_SUCCESS);
      } else return(ESMF_FAILURE);
@@ -273,7 +273,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (S != 0) {
+    if (S != ESMC_NULL_POINTER) {
       *S = this->S;
       return(ESMF_SUCCESS);
     }
@@ -325,7 +325,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (MS != 0) {
+    if (MS != ESMC_NULL_POINTER) {
       *MS = S * 1000 + Sn;  // TODO: assume Sd = 1000
       // TODO: convert Sn/Sd fraction
       return(ESMF_SUCCESS);
@@ -380,7 +380,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (US != 0) {
+    if (US != ESMC_NULL_POINTER) {
       *US = S * 1000000 + Sn;  // TODO: assume Sd = 1000000
       // TODO: convert Sn/Sd fraction
       return(ESMF_SUCCESS);
@@ -435,7 +435,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (NS != 0) {
+    if (NS != ESMC_NULL_POINTER) {
       *NS = S * 1000000000 + Sn;  // TODO:  assume Sd = 1000000000
       // TODO: convert Sn/Sd fraction
       return(ESMF_SUCCESS);
@@ -494,7 +494,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (d != 0) {
+    if (d != ESMC_NULL_POINTER) {
       *d = (double) S / 86400.0;
       return(ESMF_SUCCESS);
     } else return(ESMF_FAILURE);
@@ -546,7 +546,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (h != 0) {
+    if (h != ESMC_NULL_POINTER) {
       *h = (double) S / 3600.0;
       return(ESMF_SUCCESS);
     } else return(ESMF_FAILURE);
@@ -598,7 +598,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-     if (m != 0) {
+     if (m != ESMC_NULL_POINTER) {
        *m = (double) S / 60.0;
        return(ESMF_SUCCESS);
      } else return(ESMF_FAILURE);
@@ -650,7 +650,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (s != 0) {
+    if (s != ESMC_NULL_POINTER) {
       *s = (double) S;
       return(ESMF_SUCCESS);
     }
@@ -703,7 +703,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (ms != 0) {
+    if (ms != ESMC_NULL_POINTER) {
       *ms = (double) S * 1000.0 + (double) Sn;  // TODO: assume Sd = 1000
       // TODO: convert Sn/Sd fraction
       return(ESMF_SUCCESS);
@@ -757,7 +757,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (us != 0) {
+    if (us != ESMC_NULL_POINTER) {
       *us = (double) S * 1000000.0 + (double) Sn;  // TODO: assume Sd = 1000000
       // TODO: convert Sn/Sd fraction
       return(ESMF_SUCCESS);
@@ -811,7 +811,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (ns != 0) {
+    if (ns != ESMC_NULL_POINTER) {
       *ns = (double) S * 1000000000.0 + (double) Sn;
                                            // TODO:  assume Sd = 1000000000
       // TODO: convert Sn/Sd fraction
@@ -1208,7 +1208,8 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (S == 0 || Sn == 0 || Sd == 0) {
+    if (S  == ESMC_NULL_POINTER || Sn == ESMC_NULL_POINTER ||
+        Sd == ESMC_NULL_POINTER) {
       cout << "ESMC_BaseTime::ESMC_Write(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.8 2003/04/02 17:24:57 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.9 2003/04/02 20:15:22 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.8 2003/04/02 17:24:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.9 2003/04/02 20:15:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -117,23 +117,23 @@
     this->S  = 0;
     this->Sn = 0;
     this->Sd = 1;
-    Calendar = 0;
+    Calendar = ESMC_NULL_POINTER;
     
     // TODO: validate inputs (individual and combos), set basetime values
 
-    if (cal != 0) {
+    if (cal != ESMC_NULL_POINTER) {
       Calendar = cal;
     }
-    if (D != 0) {
+    if (D != ESMC_NULL_POINTER) {
       this->S += *D * 86400;
     }
-    if (H != 0) {
+    if (H != ESMC_NULL_POINTER) {
       this->S += *H * 3600;
     }
-    if (M != 0) {
+    if (M != ESMC_NULL_POINTER) {
       this->S += *M * 60;
     }
-    if (S != 0) {
+    if (S != ESMC_NULL_POINTER) {
       this->S += *S;
     }
 
@@ -165,7 +165,7 @@
 
     int rc;
 
-    if (cal == 0) {
+    if (cal == ESMC_NULL_POINTER) {
       cout << "ESMC_TimeInterval::ESMC_Read(): null pointer passed in" << endl;
       return(ESMF_FAILURE);
     }
@@ -204,7 +204,8 @@
 
     int rc;
 
-    if (S == 0 || Sn == 0 || Sd == 0 || cal == 0) {
+    if (S  == ESMC_NULL_POINTER || Sn  == ESMC_NULL_POINTER ||
+        Sd == ESMC_NULL_POINTER || cal == ESMC_NULL_POINTER) {
       cout << "ESMC_TimeInterval::ESMC_Write(): null pointer(s) passed in"
            << endl;
       return(ESMF_FAILURE);
@@ -265,9 +266,11 @@
 
     cout << "TimeInterval ---------------------------" << endl;
     ESMC_BaseTime::ESMC_Print(options);
-    if (Calendar != 0) Calendar->ESMC_Calendar::ESMC_Print(options);
-                               //^^^^^^^^^^^^^^^TODO: override virtual function
-                               // mechanism to support F90 interface ?
+    if (Calendar != ESMC_NULL_POINTER) {
+      Calendar->ESMC_Calendar::ESMC_Print(options);
+              //^^^^^^^^^^^^^^^TODO: override virtual function
+              // mechanism to support F90 interface ?
+    }
     cout << "end TimeInterval -----------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
@@ -298,7 +301,7 @@
    S  = 0;
    Sn = 0;
    Sd = 0;
-   Calendar = 0;
+   Calendar = ESMC_NULL_POINTER;
 
 } // end ESMC_TimeInterval
 
