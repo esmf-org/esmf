@@ -1,4 +1,4 @@
-% $Id: ArrayDataMap_refdoc.ctex,v 1.1 2004/05/11 15:21:06 nscollins Exp $
+% $Id: ArrayDataMap_refdoc.ctex,v 1.2 2004/05/11 15:57:56 nscollins Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -47,26 +47,6 @@
 %\input{../Infrastructure/Field/doc/Field_prog}
 %#endif
 
-%
-% Field_obj.tex wants to include the graphics  file
-% fieldclassNH.eps.  In processing in CONSTITUENT
-% mode, this file can not be found.
-%
-%
-%% \section{Object Model}
-%% #ifdef STANDALONE
-%% \input{Field_obj}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/Field_obj}
-%% #endif
-
-% %\section{Global Parameters and Definitions}
-% #ifdef STANDALONE
-% %\input{Field_param}
-% #elif defined(CONSTITUENT)
-% %\input{../Infrastructure/Field/doc/Field_param}
-% #endif
-
 \section{Array DataMap Class}
 
 \subsection{Description}
@@ -92,7 +72,7 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{../../ArrayDataMap/doc/ESMF_ArrayDataMap_fapi}
+\input{ESMF_ArrayDataMap_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/ArrayDataMap/doc/ESMF_ArrayDataMap_fapi}
 #endif
