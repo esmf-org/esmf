@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.7 2003/04/15 22:42:19 jwolfe Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.8 2003/04/22 19:22:29 eschwab Exp $
 !
 ! System test code #74558
 
@@ -37,7 +37,7 @@
     type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
-    integer(ESMF_IKIND_I8) :: advanceCount
+    integer(ESMF_IKIND_I8) :: YR, advanceCount
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -103,11 +103,13 @@
       call ESMF_TimeIntervalInit(time_step, s_=1.0D0, rc=status)
 
       ! initialize start time to 3/28/2003
-      call ESMF_TimeInit(startTime, YR=2003, MM=3, DD=28, H=10, &
+      YR = 2003
+      call ESMF_TimeInit(startTime, YR=YR, MM=3, DD=28, H=10, &
                          M=0, cal=gregorianCalendar, rc=status)
 
       ! initialize stop time to 3/29/2003
-      call ESMF_TimeInit(stopTime, YR=2003, MM=3, DD=28, H=10, &
+      YR = 2003
+      call ESMF_TimeInit(stopTime, YR=YR, MM=3, DD=28, H=10, &
                          M=1, cal=gregorianCalendar, rc=status)
 
       ! initialize the clock with the above values
