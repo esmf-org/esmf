@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.6 2003/03/11 23:02:29 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.7 2003/03/12 18:45:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.6 2003/03/11 23:02:29 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.7 2003/03/12 18:45:00 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -53,11 +53,11 @@
 //     integer return code
 //
 // !ARGUMENTS:
-      int rank,
-      int left,
-      int right,
-      int *strides,
-      int *num) {
+      int nrank,
+      int nleft,
+      int nright,
+      int *nstrides,
+      int *nnum) {
 //
 // !DESCRIPTION:
 //
@@ -67,12 +67,12 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-    this->rank = rank;
-    this->left = left;
-    this->right = right;
+    rank = nrank;
+    left = nleft;
+    right = nright;
     for (int i=0; i<rank; i++) {
-      this->strides[i] = strides[i];
-      this->num[i] = num[i];
+      strides[i] = nstrides[i];
+      num[i] = nnum[i];
     }
 
     return ESMF_SUCCESS;
