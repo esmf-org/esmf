@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.13 2003/04/28 23:07:36 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.14 2003/05/02 01:01:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -139,17 +139,17 @@ class ESMC_BaseTime {
 
     // Get/Set methods (primarily to support F90 interface)
     int ESMC_BaseTimeGet(int secondsPerDay,
-                         int *H, int *M, ESMF_IKIND_I8 *S,
-                         int *MS, int *US, int *NS,
-                         double *h_, double *m_, double *s_,
-                         double *ms_, double *us_, double *ns_,
-                         int *Sn, int *Sd) const;
+                         int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+                         int *MS=0, int *US=0, int *NS=0,
+                         double *h_=0, double *m_=0, double *s_=0,
+                         double *ms_=0, double *us_=0, double *ns_=0,
+                         int *Sn=0, int *Sd=0) const;
 
-    int ESMC_BaseTimeSet(int *H, int *M, ESMF_IKIND_I8 *S,
-                         int *MS, int *US, int *NS,
-                         double *h_, double *m_, double *s_,
-                         double *ms_, double *us_, double *ns_,
-                         int *Sn, int *Sd);
+    int ESMC_BaseTimeSet(int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+                         int *MS=0, int *US=0, int *NS=0,
+                         double *h_=0, double *m_=0, double *s_=0,
+                         double *ms_=0, double *us_=0, double *ns_=0,
+                         int *Sn=0, int *Sd=0);
 
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
