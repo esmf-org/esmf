@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.18 2004/06/14 17:23:50 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.19 2004/06/16 15:11:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.18 2004/06/14 17:23:50 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.19 2004/06/16 15:11:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -325,8 +325,12 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs,
   }
   // TODO: define connectivity between the DEs
   // For now don't connect any of the DEs
+  // however even without real connections the connect_de and connect_w arrays
+  // must be valid in order for the delete method to function correctly!
   for (int i=0; i<ndes; i++){
     des[i].nconnect = 0;
+    des[i].connect_de = new int[1];
+    des[i].connect_w  = new int[1];
   }
   // DE-to-PET mapping
   if (len==ndes){
