@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMemEx.C,v 1.1 2003/09/19 17:00:02 cdeluca Exp $
+// $Id: ESMC_CommMemEx.C,v 1.2 2003/11/04 23:46:56 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,6 +25,7 @@
 // bsub -P "hp606" -q general -n 8 prun -m cyclic -n 2 -N 2 ./ESMC_CommMemEx
 //-----------------------------------------------------------------------------
 
+#include <ESMC_Base.h>
 #include <ESMC_DE.h>
 #include <ESMC_PE.h>
 #include <ESMC_PEList.h>
@@ -126,7 +127,7 @@ cout << "I am tid, detype " << pthread_self() << ", " << detype << endl;
   int nDEs=0, myDEid=0;
   ESMC_Comm comm;
   comm.ESMC_CommInit(&argc, &argv, &de, ESMC_COMM_NTHREADSPERPROC, 
-                     ESMC_COMM_NPROCS, ESMC_COMM_NTHREADSPERPROC*3, ESMC_INT);
+                     ESMC_COMM_NPROCS, ESMC_COMM_NTHREADSPERPROC*3, ESMF_I4);
   comm.ESMC_CommGetNumDEs(&nDEs);
 cout << "comm group size = " << nDEs << "\n";
   de.ESMC_DEGetESMFID(&myDEid);
@@ -156,7 +157,7 @@ cout << "mycpuid, mynodeid = " << mycpuid << ", " << mynodeid << "\n";
   sendbuf[2] = mynodeid;
 
   // gather all PE IDs from all DEs
-  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMC_INT);
+  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMF_I4);
 //cout << "main: exited ESMC_CommAllGather" << endl;
 
   // create PE List from gathered IDs
