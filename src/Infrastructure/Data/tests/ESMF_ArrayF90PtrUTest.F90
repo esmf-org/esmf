@@ -3,7 +3,7 @@
     
     use ESMF_BaseMod
     use ESMF_IOMod
-    use ESMF_ArrayMod
+    use ESMF_LocalArrayMod
     implicit none
 
     type PtrWrap1  
