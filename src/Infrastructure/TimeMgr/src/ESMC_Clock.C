@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.24 2003/06/07 00:42:00 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.25 2003/06/13 17:02:45 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt Clock} methods declared
+// The code in this file implements the C++ {\tt ESMC\_Clock} methods declared
 // in the companion file {\tt ESMC_Clock.h}
 //
 //-------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.24 2003/06/07 00:42:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.25 2003/06/13 17:02:45 rstaufer Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -57,7 +57,7 @@
       ESMC_Time         *refTime) {   // in
 
 // !DESCRIPTION:
-//      Initializes a {\tt Clock} with given values
+//      Initializes a {\tt ESMC\_Clock} with given values
 //
 //EOP
 // !REQUIREMENTS:  
@@ -628,7 +628,7 @@
       int  *rc) const {        // out - error return code
 //
 // !DESCRIPTION:
-//    checks if {\tt Clock}'s stop time has been reached.
+//    checks if {\tt ESMC\_Clock}'s stop time has been reached.
 //
 //EOP
 // !REQUIREMENTS:
@@ -670,7 +670,7 @@
       int                numAlarms ) {         // in 
 //
 // !DESCRIPTION:
-//      Restore information about a {\tt Clock}.  The options control the
+//      Restore information about a {\tt ESMC\_Clock}.  The options control the
 //      type of information and level of detail.  {\tt ESMC\_Base}
 //      class method.
 //
@@ -723,7 +723,7 @@
       int               *numAlarms ) const {   // out 
 //
 // !DESCRIPTION:
-//      Save information about a {\tt Clock}.  The options control the
+//      Save information about a {\tt ESMC\_Clock}.  The options control the
 //      type of information and level of detail.  {\tt ESMC\_Base}
 //      class method.
 //
@@ -769,7 +769,7 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a {\tt Clock} is internally consistent.
+//      Validates that a {\tt ESMC\_Clock} is internally consistent.
 //      Returns error code if problems are found.  {\tt ESMC\_Base}
 //      class method.
 //
@@ -801,7 +801,7 @@
       const char *options) const {    // in - print options
 //
 // !DESCRIPTION:
-//      Prints a {\tt Clock}'s contents for testing/debugging
+//      Prints a {\tt ESMC\_Clock}'s contents for testing/debugging
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
