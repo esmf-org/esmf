@@ -1,0 +1,104 @@
+!  $Id: ESMF_State_C.F90,v 1.1 2003/02/20 16:00:29 nscollins Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+!
+! F77 interface files for C++ layer calling into F90 implementation layer.
+!  This cannot use any F90 syntax, including modules, or allocatable 
+!   arrays, or ...
+!
+!==============================================================================
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+#include "ESMF.h"
+!==============================================================================
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+!      character(*), parameter, private :: version = &
+!      '$Id: ESMF_State_C.F90,v 1.1 2003/02/20 16:00:29 nscollins Exp $'
+!==============================================================================
+
+!------------------------------------------------------------------------------
+!BOP
+!  !DESCRIPTION:
+! 
+! The code in this file implements the interface code between C++ and F90
+!  for the {\tt State} entry points.  When the user calls an
+!  {\tt ESMC_State}XXX method, that code calls these functions, which
+!  in turn call the F90 module code.  C++ cannot call directly into an
+!  F90 module because the module routine names are altered in a similar
+!  fashion as C++ name mangling.
+! 
+!EOP
+!------------------------------------------------------------------------------
+   function f_esmf_statecreate(name, rc)
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+
+       character(*) :: name
+       integer :: rc              
+
+       !f_esmf_statecreate = ESMF_StateCreate(name, rc)
+       f_esmf_statecreate = 0
+    
+   end function f_esmf_statecreate
+
+   subroutine f_esmf_statedestroy(statep, name, func, rc)
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+
+       character(*) :: name
+       integer :: func
+       integer :: rc              
+
+       !call ESMF_StateDestroy(statep, rc)
+    
+   end subroutine f_esmf_statedestroy
+
+   subroutine f_esmf_stateadddata(statep, name, func, rc)
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+
+       character(*) :: name
+       integer :: func
+       integer :: rc              
+
+       !call ESMF_StateAddData(statep, rc)
+    
+   end subroutine f_esmf_stateadddata
+
+   subroutine f_esmf_stategetdata(statep, name, rc)
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+
+       type(ESMF_State), pointer :: statep      
+       character(*) :: name
+       integer :: rc     
+
+       !call ESMF_StateGetData(statep, rc)
+
+   end subroutine f_esmf_stategetdata
+
+   subroutine f_esmf_stategetinfo(statep, name, rc)
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+
+       type(ESMF_State), pointer :: statep      
+       character(*) :: name
+       integer :: rc     
+
+       !call ESMF_StateGetInfo(statep, rc)
+
+   end subroutine f_esmf_stategetinfo
+
+
+   ! TODO: add rest of state entry points
+
