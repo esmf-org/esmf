@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/06/18 09:17:38 nscollins Exp $
+# $Id: makefile,v 1.7 2004/06/18 10:54:27 nscollins Exp $
 
 ALL: build_examples
 
@@ -54,9 +54,7 @@ TEXFILES  =
 # depend on this naming convention being followed.
 #
 
-#EXAMPLES_BUILD   = $(ESMF_EXDIR)/ESMF_RegridEx
-EXAMPLES_BUILD   = 
-                   
+EXAMPLES_BUILD   = $(ESMF_EXDIR)/ESMF_RegridEx
 
 #
 # List the example run targets in EXAMPLES_RUN and
@@ -64,11 +62,9 @@ EXAMPLES_BUILD   =
 # in this makefile.
 #
 
-#EXAMPLES_RUN     = run_ESMF_RegridEx
-EXAMPLES_RUN     =
+EXAMPLES_RUN     = run_ESMF_RegridEx
 
-#EXAMPLES_RUN_UNI = run_ESMF_RegridEx_uni
-EXAMPLES_RUN_UNI =
+EXAMPLES_RUN_UNI = run_ESMF_RegridEx_uni
 
 
 include ${ESMF_DIR}/makefile
@@ -85,9 +81,9 @@ CLOBBERDIRS =
 # ESMF_RegridEx
 #
 run_ESMF_RegridEx:
-        -${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_RegridEx > $(ESMF_EXDIR)/ESMF_RegridEx.stdout
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_RegridEx > $(ESMF_EXDIR)/ESMF_RegridEx.stdout
 
 run_ESMF_RegridEx_uni:
-        -${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_RegridEx > $(ESMF_EXDIR)/ESMF_RegridEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_RegridEx > $(ESMF_EXDIR)/ESMF_RegridEx_uni.stdout
 
 
