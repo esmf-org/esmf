@@ -1,4 +1,4 @@
-// $Id: ESMC_classUTest.C,v 1.1 2003/03/14 22:19:05 eschwab Exp $
+// $Id: ESMC_classUTest.C,v 1.2 2003/03/17 17:40:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_classUTest.C,v 1.1 2003/03/14 22:19:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_classUTest.C,v 1.2 2003/03/17 17:40:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -60,11 +60,14 @@
    //  tests default constructor; add args to test other constructors
    ESMC_<Class> <class>;
 
-#ifdef EXHAUSTIVE
+#ifdef ESMF_EXHAUSTIVE
 
    // perform exhaustive tests here;
    //   see #else below for non-exhaustive tests
    // future release will use run-time switching mechanism
+
+   // for deep classes, keep Create/Construct and remove Init.
+   // for shallow classes, keep Init and remove Create/Construct
 
    // test dynamic allocation of ESMC_<Class>
    //   also tests default constructor
@@ -109,8 +112,9 @@
               name, failMsg, &result, ESMF_SRCLINE);
 
    // test setting of ESMC_<Class> members values
-   <value type> value_set;
-   rc = <class>_ptr->ESMC_<Class>Set<Value>(value_set);
+   // make <value type> below the appropriate type
+   int value_set; //<value type> value_set;
+   //rc = <class>_ptr->ESMC_<Class>Set<Value>(value_set);
    sprintf(name, "ESMC_<Class>Set<Value>"); 
    sprintf(failMsg, "rc = %d, value_set = %f", rc, value_set);
    ESMC_Test((rc==ESMF_SUCCESS),
@@ -118,8 +122,9 @@
 
    // test getting of ESMC_<Class> members values,
    //   compare to values set previously
-   <value type> value_get;
-   rc = <class>_ptr->ESMC_<Class>Get<Value>(&value_get);
+   // make <value type> below the appropriate type
+   int value_set; //<value type> value_get;
+   //rc = <class>_ptr->ESMC_<Class>Get<Value>(&value_get);
    sprintf(name, "ESMC_<Class>Get<Value>"); 
    sprintf(failMsg, "rc = %d, value_get = %f", rc, value_get);
    ESMC_Test((rc==ESMF_SUCCESS && value_get == value_set),
@@ -140,6 +145,9 @@
    sprintf(failMsg, "rc = %d, print_options = %s", rc, print_options);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
+
+   // for shallow classes, remove these next two tests since Destructors
+   // are not needed for them.
 
    // test internal dynamic deallocation within statically allocated 
    //   ESMC_<Class>
