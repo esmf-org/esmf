@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.39 2003/07/31 22:59:44 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.40 2003/08/01 22:47:58 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.39 2003/07/31 22:59:44 jwolfe Exp $";
+           "$Id: ESMC_DELayout.C,v 1.40 2003/08/01 22:47:58 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1820,14 +1820,14 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int n1 = (global_counts[i]+length[0]-1)/length[0]; // round to nearest
       AIPtr->min = 0;
       AIPtr->max = n1-1;
-      AIPtr->stride = global_counts[i];    // jw?
+      AIPtr->stride = n1;    // jw?
     }
     // if decomp is 2, use nyDELayout
     if (decompids[i] == 2) {
       int n2 = (global_counts[i]+length[1]-1)/length[1]; // round to nearest
       AIPtr->min = 0;
       AIPtr->max = n2-1;
-      AIPtr->stride = global_counts[i];   // jw?
+      AIPtr->stride = n2;   // jw?
     }
   }
    
