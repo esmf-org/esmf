@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_F.F90,v 1.1 2003/02/14 22:44:21 nscollins Exp $
+!  $Id: ESMF_Comp_F.F90,v 1.2 2003/02/18 16:02:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,10 +23,21 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_F.F90,v 1.1 2003/02/14 22:44:21 nscollins Exp $'
+!      '$Id: ESMF_Comp_F.F90,v 1.2 2003/02/18 16:02:33 nscollins Exp $'
 !==============================================================================
 
-   subroutine f_esmf_compsetroutine(compp, name, func, rc)
+   function f_esmf_compcreate(name, rc)
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+
+       character(*) :: name
+       integer :: rc              
+
+       f_esmf_compcreate = ESMF_CompCreate(name, rc)
+    
+   end function f_esmf_compcreate
+
+   subroutine f_esmf_compdestroy(compp, name, func, rc)
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
 
@@ -34,11 +45,23 @@
        integer :: func
        integer :: rc              
 
-       ! call ESMF_CompXXX()
+       call ESMF_CompDestroy(compp, rc)
     
-   end subroutine f_esmf_compsetroutine
+   end subroutine f_esmf_compdestroy
 
-   subroutine f_esmf_compcallroutine(compp, name, rc)
+   subroutine f_esmf_compinit(compp, name, func, rc)
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+
+       character(*) :: name
+       integer :: func
+       integer :: rc              
+
+       call ESMF_CompInit(compp, rc)
+    
+   end subroutine f_esmf_compinit
+
+   subroutine f_esmf_comprun(compp, name, rc)
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
 
@@ -46,7 +69,19 @@
        character(*) :: name
        integer :: rc     
 
-       call ESMF_CompDestroy(compp, rc)
+       call ESMF_CompRun(compp, rc)
 
-   end subroutine f_esmf_compcallroutine
+   end subroutine f_esmf_comprun
+
+   subroutine f_esmf_compfinalize(compp, name, rc)
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+
+       type(ESMF_Comp), pointer :: compp      
+       character(*) :: name
+       integer :: rc     
+
+       call ESMF_CompFinalize(compp, rc)
+
+   end subroutine f_esmf_compfinalize
 
