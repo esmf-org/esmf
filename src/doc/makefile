@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/01/27 20:46:55 flanigan Exp $ 
+# $Id: makefile,v 1.7 2003/01/27 23:07:02 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -16,15 +16,14 @@ LOCDIR	  = src/doc
 
 DVIFILES  = \
 		${ESMC_DOCDIR}/ESMF_reqdoc.dvi \
-		${ESMC_DOCDIR}/ESMF_usrdoc.dvi \
-		${ESMC_DOCDIR}/ESMF_buildreqdoc.dvi \
+		${ESMC_DOCDIR}/ESMF_usrdoc.dvi 
+
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
 HTMLFILES = \
 		${ESMC_DOCDIR}/ESMF_reqdoc \
 		${ESMC_DOCDIR}/ESMF_usrdoc \
-                $(ESMC_DOCDIR)/ESMF_buildreqdoc 
 
 USERDOC_FILES = ESMF_usrdoc.tex ESMF_desc.tex ESMF_install.tex ESMF_usage.tex
 
