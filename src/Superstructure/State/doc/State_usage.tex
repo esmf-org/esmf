@@ -1,4 +1,4 @@
-% $Id: State_usage.tex,v 1.2 2003/10/23 13:20:56 cdeluca Exp $
+% $Id: State_usage.tex,v 1.3 2004/06/11 16:41:58 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,20 +10,5 @@
 
 %\subsection{Use and Examples}
 
-A State object encapsulates all data being communicated into and
-out of a Gridded Component.  No private communication
-of data between Components is permitted in order to maintain the
-independence of Components; to enable Components to be replaced
-without rewriting the internal code inside the Component.
-
-States can be create and deleted, have data added or deleted from them,
-and queried for various kinds of information.
-
-Transform methods operate on States, doing regridding, interpolation,
-summation, averaging, transposes, and other operations needed to
-make the export State of one Component suitable for import to another
-Component.
-
-The CF naming convention for data should be followed.
-
+States are not stored inside 
 

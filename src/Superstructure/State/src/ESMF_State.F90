@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.54 2004/06/11 05:40:39 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.55 2004/06/11 16:41:58 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,24 +67,24 @@
                 ESMF_STATE_INVALID  = ESMF_StateImpExpType(4)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateObjectType
+!     ! ESMF_StateItem
 !     !   Each entry in the list of states is either simply a name placeholder
 !     !   or an actual data item - Bundle, Field, Array, or State. 
 !
-      type ESMF_StateObjectType
+      type ESMF_StateItem
       sequence
       private
          integer :: ot
       end type
 
-      type(ESMF_StateObjectType), parameter :: &
-                ESMF_STATEBUNDLE = ESMF_StateObjectType(1), &
-                ESMF_STATEFIELD = ESMF_StateObjectType(2), &
-                ESMF_STATEARRAY = ESMF_StateObjectType(3), &
-                ESMF_STATESTATE = ESMF_StateObjectType(4), &
-                ESMF_STATEDATANAME = ESMF_StateObjectType(5), &
-                ESMF_STATEINDIRECT = ESMF_StateObjectType(6), &
-                ESMF_STATEOBJTYPEUNKNOWN = ESMF_StateObjectType(7)
+      type(ESMF_StateItem), parameter :: &
+                ESMF_STATEITEM_BUNDLE = ESMF_StateItem(1), &
+                ESMF_STATEITEM_FIELD = ESMF_StateItem(2), &
+                ESMF_STATEITEM_ARRAY = ESMF_StateItem(3), &
+                ESMF_STATEITEM_STATE = ESMF_StateItem(4), &
+                ESMF_STATEITEM_NAME = ESMF_StateItem(5), &
+                ESMF_STATEINDIRECT = ESMF_StateItem(6), &
+                ESMF_STATEITEM_UNKNOWN = ESMF_StateItem(7)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateDataNeeded
@@ -177,7 +177,7 @@
       sequence
 #endif
       private
-        type(ESMF_StateObjectType) :: otype
+        type(ESMF_StateItem) :: otype
         character(len=ESMF_MAXSTR) :: namep
         type(ESMF_DataHolder), pointer :: datap
         integer :: indirect_index
@@ -229,9 +229,9 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_State
-      public ESMF_StateObjectType, ESMF_STATEBUNDLE, ESMF_STATEFIELD, &
-                                   ESMF_STATEARRAY, ESMF_STATESTATE, &
-                                   ESMF_STATEDATANAME
+      public ESMF_StateItem, ESMF_STATEITEM_BUNDLE, ESMF_STATEITEM_FIELD, &
+                                   ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_STATE, &
+                                   ESMF_STATEITEM_NAME
       public ESMF_StateImpExpType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
                                    ESMF_STATE_LIST
       public ESMF_StateDataNeeded, ESMF_STATEDATAISNEEDED, &
@@ -291,7 +291,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.54 2004/06/11 05:40:39 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.55 2004/06/11 16:41:58 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -541,14 +541,14 @@ end interface
 
 function ESMF_oteq(s1, s2)
  logical ESMF_oteq
- type(ESMF_StateObjectType), intent(in) :: s1, s2
+ type(ESMF_StateItem), intent(in) :: s1, s2
 
  ESMF_oteq = (s1%ot .eq. s2%ot)
 end function
 
 function ESMF_otne(s1, s2)
  logical ESMF_otne
- type(ESMF_StateObjectType), intent(in) :: s1, s2
+ type(ESMF_StateItem), intent(in) :: s1, s2
 
  ESMF_otne = (s1%ot .ne. s2%ot)
 end function
@@ -1666,7 +1666,7 @@ end function
       type(ESMF_StateImpExpType), intent(out), optional :: stateType
       integer, intent(out), optional :: itemCount
       character (len=*), intent(out), optional :: itemNames(:)
-      type(ESMF_StateObjectType), intent(out), optional :: objTypes(:)
+      type(ESMF_StateItem), intent(out), optional :: objTypes(:)
       integer, intent(out), optional :: rc             
 
 !
@@ -1691,14 +1691,10 @@ end function
 !        including placeholder names.  {\tt itemNames} must be at least
 !        {\tt itemCount} long.
 !      \item[{[objtypes]}]
-!        Array of item object types in {\tt state}, including placeholder 
-!        names. Must be at least {\tt itemCount} long.  
-!        Object types include
-!        {\tt ESMF\_STATEBUNDLE}, {\tt ESMF\_STATEFIELD}, 
-!        {\tt ESMF\_STATEARRAY}, {\tt ESMF\_STATESTATE}, 
-!        {\tt ESMF\_STATEDATANAME}.  {\tt ESMF\_STATEOBJTYPEUNKNOWN} is 
-!        returned if the object type is invalid.
-!       \item[{[rc]}]
+!        Array of possible item object types in {\tt state}, including placeholder 
+!        names. Must be at least {\tt itemCount} long.  Options are
+!        shown in Section~\ref{opt:stateitem}.
+!      \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
 !
@@ -1823,7 +1819,7 @@ end function
               return
           endif
     
-          if (dataitem%otype .ne. ESMF_STATESTATE) then
+          if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               print errmsg, trim(statename), "found but not type State"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
@@ -1848,7 +1844,7 @@ end function
           return
       endif
 
-      if (dataitem%otype .ne. ESMF_STATEARRAY) then
+      if (dataitem%otype .ne. ESMF_STATEITEM_ARRAY) then
           print errmsg, trim(arrayname), "found but not type Array"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                       ESMF_CONTEXT, rc)
@@ -2499,7 +2495,7 @@ end function
               return
           endif
     
-          if (dataitem%otype .ne. ESMF_STATESTATE) then
+          if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               print errmsg, trim(statename), "found but not type State"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
@@ -2524,7 +2520,7 @@ end function
           return
       endif
 
-      if (dataitem%otype .ne. ESMF_STATEBUNDLE) then
+      if (dataitem%otype .ne. ESMF_STATEITEM_BUNDLE) then
           print errmsg, trim(bundlename), "found but not type Bundle"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                       ESMF_CONTEXT, rc)
@@ -2610,7 +2606,7 @@ end function
               return
           endif
     
-          if (dataitem%otype .ne. ESMF_STATESTATE) then
+          if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               print errmsg, trim(statename), "found but not type State"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
@@ -2635,7 +2631,7 @@ end function
           return
       endif
 
-      if (dataitem%otype .ne. ESMF_STATEFIELD) then
+      if (dataitem%otype .ne. ESMF_STATEITEM_FIELD) then
           if (dataitem%otype .eq. ESMF_STATEINDIRECT) then
               ! TODO: how do we return the info that this is inside a bundle?
               dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
@@ -2867,7 +2863,7 @@ end function
           return
       endif
 
-      if (dataitem%otype .ne. ESMF_STATESTATE) then
+      if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
           print errmsg, trim(statename), "found but not type State"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                       ESMF_CONTEXT, rc)
@@ -3032,19 +3028,19 @@ end function
          outbuf = "    Name= " // trim(dp%namep) // ", "
 
          select case (dp%otype%ot)
-           case (ESMF_STATEBUNDLE%ot)
+           case (ESMF_STATEITEM_BUNDLE%ot)
              outbuf = trim(outbuf) //  " type Bundle,"
-           case (ESMF_STATEFIELD%ot)
+           case (ESMF_STATEITEM_FIELD%ot)
              outbuf = trim(outbuf) //  " type Field,"
-           case (ESMF_STATEARRAY%ot)
+           case (ESMF_STATEITEM_ARRAY%ot)
              outbuf = trim(outbuf) //  " type Array,"
-           case (ESMF_STATESTATE%ot)
+           case (ESMF_STATEITEM_STATE%ot)
              outbuf = trim(outbuf) //  " type State,"
-           case (ESMF_STATEDATANAME%ot)
+           case (ESMF_STATEITEM_NAME%ot)
              outbuf = trim(outbuf) //  " placeholder name,"
            case (ESMF_STATEINDIRECT%ot)
              outbuf = trim(outbuf) //  " field inside a bundle,"
-           case (ESMF_STATEOBJTYPEUNKNOWN%ot)
+           case (ESMF_STATEITEM_UNKNOWN%ot)
              outbuf = trim(outbuf) //  " unknown type,"
          end select
 
@@ -3837,7 +3833,7 @@ end function
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
-            if (dataitem%otype .eq. ESMF_STATEDATANAME) then
+            if (dataitem%otype .eq. ESMF_STATEITEM_NAME) then
                 allocate(dataitem%datap, stat=localrc)
                 if (ESMF_LogMsgFoundAllocError(localrc, "adding array over name", &
                                      ESMF_CONTEXT, rc)) then
@@ -3846,7 +3842,7 @@ end function
                 endif
             endif
 
-            dataitem%otype = ESMF_STATEARRAY
+            dataitem%otype = ESMF_STATEITEM_ARRAY
             dataitem%datap%ap = arrays(i)
         
             ! don't update flags on existing entry
@@ -3877,7 +3873,7 @@ end function
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
-            nextitem%otype = ESMF_STATEARRAY
+            nextitem%otype = ESMF_STATEITEM_ARRAY
 
             ! Add name
             call ESMF_ArrayGet(arrays(i), name=nextitem%namep, rc=localrc)
@@ -4028,7 +4024,7 @@ end function
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
-            if (dataitem%otype .eq. ESMF_STATEDATANAME) then
+            if (dataitem%otype .eq. ESMF_STATEITEM_NAME) then
                 allocate(dataitem%datap, stat=localrc)
                 if (ESMF_LogMsgFoundAllocError(localrc, &
                                   "adding fields to a state", &
@@ -4038,7 +4034,7 @@ end function
                 endif
             endif
 
-            dataitem%otype = ESMF_STATEFIELD
+            dataitem%otype = ESMF_STATEITEM_FIELD
             dataitem%datap%fp = fields(i)
         
             ! If we're replacing an existing item, then we shouldn't
@@ -4070,7 +4066,7 @@ end function
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
-            nextitem%otype = ESMF_STATEFIELD
+            nextitem%otype = ESMF_STATEITEM_FIELD
 
             ! Add name
             call ESMF_FieldGet(fields(i), name=nextitem%namep, rc=localrc)
@@ -4231,14 +4227,14 @@ end function
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
-            if (dataitem%otype .eq. ESMF_STATEDATANAME) then
+            if (dataitem%otype .eq. ESMF_STATEITEM_NAME) then
                 allocate(dataitem%datap, stat=localrc)
                 if (ESMF_LogMsgFoundAllocError(localrc, &
                                "adding bundles to a state", &
                                ESMF_CONTEXT, rc)) goto 10
             endif
 
-            dataitem%otype = ESMF_STATEBUNDLE
+            dataitem%otype = ESMF_STATEITEM_BUNDLE
             dataitem%datap%bp = bundles(i)
         
             ! Don't change flags of existing entry
@@ -4285,7 +4281,7 @@ end function
                 ! TODO: decide if we need to verify that this is only a
                 ! placeholder, or if it's ok to silently overwrite an array
                 ! or bundle which had the same name.
-                if (dataitem%otype .ne. ESMF_STATEDATANAME) then
+                if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
                   ! print *, "Warning: overwriting old entry"
                 endif
    
@@ -4344,7 +4340,7 @@ end function
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
-            nextitem%otype = ESMF_STATEBUNDLE
+            nextitem%otype = ESMF_STATEITEM_BUNDLE
 
             ! Add name
             call ESMF_BundleGet(bundles(i), name=nextitem%namep, rc=localrc)
@@ -4569,14 +4565,14 @@ end function
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
-            if (dataitem%otype .eq. ESMF_STATEDATANAME) then
+            if (dataitem%otype .eq. ESMF_STATEITEM_NAME) then
                 allocate(dataitem%datap, stat=status)
                 if (ESMF_LogMsgFoundAllocError(status, &
                                        "Adding States to a State", &
                                        ESMF_CONTEXT, rc)) return
             endif
 
-            dataitem%otype = ESMF_STATESTATE
+            dataitem%otype = ESMF_STATEITEM_STATE
             dataitem%datap%spp => states(i)%statep
         
             ! don't update flags on existing entry
@@ -4607,7 +4603,7 @@ end function
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
-            nextitem%otype = ESMF_STATESTATE
+            nextitem%otype = ESMF_STATEITEM_STATE
 
             ! Add name
             call ESMF_StateGet(states(i), name=nextitem%namep, rc=status)
@@ -4841,7 +4837,7 @@ end function
             !  this is a way to "delete" an entry.  So I am going to implement
             !  it that way.  But we should revisit this and see if it is
             !  how people want this to behave.
-            if (dataitem%otype .ne. ESMF_STATEDATANAME) then
+            if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
               if (associated(dataitem%datap)) then
                 deallocate(dataitem%datap, stat=localrc)
                 if (ESMF_LogMsgFoundAllocError(localrc, &
@@ -4851,7 +4847,7 @@ end function
               endif
             endif
 
-            nextitem%otype = ESMF_STATEDATANAME
+            nextitem%otype = ESMF_STATEITEM_NAME
             ! don't have to add name, we already matched it.
 
             nullify(nextitem%datap)
@@ -4885,7 +4881,7 @@ end function
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
-            nextitem%otype = ESMF_STATEDATANAME
+            nextitem%otype = ESMF_STATEITEM_NAME
 
             ! Add name
             nextitem%namep = namelist(i)

@@ -1,4 +1,4 @@
-% $Id: State_options.tex,v 1.4 2004/06/11 02:12:58 cdeluca Exp $
+% $Id: State_options.tex,v 1.5 2004/06/11 16:41:58 cdeluca Exp $
 
 \subsubsection{ESMF\_StateImpExpType}
 
@@ -16,7 +16,8 @@ Valid values are:
          Does not contain valid data.
 \end{description}
 
-\subsubsection{ESMF\_StateObjectType}
+\subsubsection{ESMF\_StateItem}
+\label{opt:stateitem}
 
 {\sf DESCRIPTION:\\}
 Specifies the type of object being added to or retrieved from an
@@ -24,18 +25,18 @@ Specifies the type of object being added to or retrieved from an
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_STATEBUNDLE] 
+   \item [ESMF\_STATEITEM\_BUNDLE] 
          Refers to an {\tt ESMF\_Bundle} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEFIELD]
+   \item [ESMF\_STATEITEM\_FIELD]
          Refers to an {\tt ESMF\_Field} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEARRAY]
+   \item [ESMF\_STATEITEM\_ARRAY]
          Refers to an {\tt ESMF\_Array} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATESTATE]
+   \item [ESMF\_STATEITEM\_STATE]
          Refers to an {\tt ESMF\_State} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEDATANAME]
+   \item [ESMF\_STATEITEM\_NAME]
          Refers to a data name used as a placeholder within 
          an {\tt ESMF\_State}.
-   \item [ESMF\_STATEOBJTYPEUNKNOWN]
+   \item [ESMF\_STATEITEM\_UNKNOWN]
          Object type within an {\tt ESMF\_State} is unknown.
 \end{description}
 
@@ -47,7 +48,7 @@ particular application configuration.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_STATEDATAISNEEDED] 
+   \item [ESMF\_STATEDATANEEDED] 
          Data is needed.
    \item [ESMF\_STATEDATANOTNEEDED]
          Data is not needed.
