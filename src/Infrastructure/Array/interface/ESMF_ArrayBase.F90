@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.4 2003/07/22 19:36:49 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.5 2003/07/23 17:01:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.4 2003/07/22 19:36:49 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.5 2003/07/23 17:01:17 jwolfe Exp $'
 !
 !==============================================================================
 
@@ -143,13 +143,13 @@
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayGetAxisIndex(array, totalindex, compindex, &
-                                                                exclindex, rc)
+                                        exclindex, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array 
-      type(ESMF_AxisIndex), intent(in), optional :: totalindex(:)
-      type(ESMF_AxisIndex), intent(in), optional :: compindex(:)
-      type(ESMF_AxisIndex), intent(in), optional :: exclindex(:)
+      type(ESMF_AxisIndex), intent(inout), optional :: totalindex(:)
+      type(ESMF_AxisIndex), intent(inout), optional :: compindex(:)
+      type(ESMF_AxisIndex), intent(inout), optional :: exclindex(:)
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -158,17 +158,37 @@
 !EOP
 ! !REQUIREMENTS:
 
-        integer :: status
+        integer :: status, i
 
         ! call c routine to get index
-        if (present(totalindex)) call c_ESMC_ArrayGetAxisIndex(array, &
-                                         ESMF_DOMAIN_TOTAL, totalindex, status)
+        if (present(totalindex)) then
+          call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_TOTAL, totalindex,&
+                                        status)
+          do i=1,size(totalindex)
+            totalindex(i).min = totalindex(i).min + 1
+            totalindex(i).max = totalindex(i).max + 1
+          enddo
+        endif
         if (status .ne. ESMF_SUCCESS) goto 10
-        if (present(compindex)) call c_ESMC_ArrayGetAxisIndex(array, &
-                                  ESMF_DOMAIN_COMPUTATIONAL, compindex, status)
+
+        if (present(compindex)) then
+          call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+                                        compindex, status)
+          do i=1,size(compindex)
+            compindex(i).min = compindex(i).min + 1
+            compindex(i).max = compindex(i).max + 1
+          enddo
+        endif
         if (status .ne. ESMF_SUCCESS) goto 10
-        if (present(exclindex)) call c_ESMC_ArrayGetAxisIndex(array, &
-                                      ESMF_DOMAIN_EXCLUSIVE, exclindex, status)
+
+        if (present(exclindex)) then
+          call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
+                                        exclindex, status)
+          do i=1,size(exclindex)
+            exclindex(i).min = exclindex(i).min + 1
+            exclindex(i).max = exclindex(i).max + 1
+          enddo
+        endif
         if (status .ne. ESMF_SUCCESS) goto 10
 
  10   continue
@@ -182,14 +202,14 @@
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayGetAllAxisIndices(array, grid, totalindex, &
-                                                    compindex, exclindex, rc)
+                                             compindex, exclindex, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array 
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_AxisIndex), intent(in), optional :: totalindex(:)
-      type(ESMF_AxisIndex), intent(in), optional :: compindex(:)
-      type(ESMF_AxisIndex), intent(in), optional :: exclindex(:)
+      type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: totalindex
+      type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: compindex
+      type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: exclindex
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -200,15 +220,54 @@
 !EOP
 ! !REQUIREMENTS:
 
-        integer :: status
+      integer :: status, nDEs, i, j
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: globalindex
+      type(ESMF_DELayout) :: layout
 
-        ! call c routine to get indices
-        call c_ESMC_ArrayGetAllAxisIndices(array, grid, &
-                                    totalindex, compindex, exclindex, status)
- 
-        if (present(rc)) rc = status
+      ! get layout from the grid in order to get the number of DEs
+      call ESMF_GridGetDELayout(grid, layout, status)
+      call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
 
-        end subroutine ESMF_ArrayGetAllAxisIndices
+      ! allocate globalindex array and get all of them from the grid
+      allocate(globalindex(nDEs,ESMF_MAXGRIDDIM), stat=status)
+      call ESMF_GridGetAllAxisIndex(grid, globalindex, status)
+
+      ! call c routine to get indices
+      call c_ESMC_ArrayGetAllAxisIndices(array, globalindex, nDEs, &
+                                         totalindex, &
+                                         compindex, exclindex, status)
+
+      ! translate from C++ to F90
+      if (present(totalindex)) then
+        do j = 1,ESMF_MAXGRIDDIM
+          do i = 1,nDEs
+            totalindex(i,j)%min = totalindex(i,j)%min + 1
+            totalindex(i,j)%max = totalindex(i,j)%max + 1
+          enddo
+        enddo
+      endif
+          
+      if (present(compindex)) then
+        do j = 1,ESMF_MAXGRIDDIM
+          do i = 1,nDEs
+            compindex(i,j)%min = compindex(i,j)%min + 1
+            compindex(i,j)%max = compindex(i,j)%max + 1
+          enddo
+        enddo
+      endif
+          
+      if (present(exclindex)) then
+        do j = 1,ESMF_MAXGRIDDIM
+          do i = 1,nDEs
+            exclindex(i,j)%min = exclindex(i,j)%min + 1
+            exclindex(i,j)%max = exclindex(i,j)%max + 1
+          enddo
+        enddo
+      endif
+          
+      if (present(rc)) rc = status
+
+      end subroutine ESMF_ArrayGetAllAxisIndices
 
 !------------------------------------------------------------------------------
 !BOP
