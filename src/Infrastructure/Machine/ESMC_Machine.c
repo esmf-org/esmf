@@ -8,6 +8,7 @@
 
 #ifdef ESMC_HAVE_PTHREADS
 #include <pthread.h>
+static pthread_t *threadid;
 #endif
 
 #ifdef ESMC_HAVE_OMP_THREADS
