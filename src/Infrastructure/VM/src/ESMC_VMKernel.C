@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.26 2005/02/11 16:19:35 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.27 2005/02/12 00:20:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1631,6 +1631,7 @@ void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist,
   // first do garbage collection on current object
   vmkplan_garbage();
   // now set stuff up...
+  nothreadflag = 0; // this plan will allow ESMF-threading
   npets = vm.npets;
   spawnflag = new int[npets];
   contribute = new int[npets];
@@ -1744,6 +1745,7 @@ void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
   // first do garbage collection on current object
   vmkplan_garbage();
   // now set stuff up...
+  nothreadflag = 0; // this plan will allow ESMF-threading
   npets = vm.npets;
   spawnflag = new int[npets];
   contribute = new int[npets];
@@ -1829,6 +1831,7 @@ void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
   // first do garbage collection on current object
   vmkplan_garbage();
   // now set stuff up...
+  nothreadflag = 0; // this plan will allow ESMF-threading
   npets = vm.npets;
   spawnflag = new int[npets];
   contribute = new int[npets];
