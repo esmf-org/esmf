@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayGetMacros.h,v 1.4 2004/06/07 05:20:52 nscollins Exp $
+! $Id: ESMF_ArrayGetMacros.h,v 1.5 2004/06/23 10:45:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,8 +37,11 @@
 #define ArrayGetDataDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
-!BOPI @\
+!BOP @\
+! !IROUTINE: ESMF_ArrayGetData - Retrieve a Fortran pointer to Array data @\
+! @\
 ! !INTERFACE: @\
+!      ! Private name; call using ESMF_ArrayGetData() @\
 !      subroutine ESMF_ArrayGetData<rank><type><kind>(array, fptr, docopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -48,9 +51,12 @@
 !      integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-!      Given an {\tt ESMF\_Array}, @\
+!      Given an {\tt ESMF\_Array} @\
 !      return a Fortran pointer to the existing data buffer, @\
 !      or return a Fortran pointer to a new copy of the data. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\
@@ -66,7 +72,7 @@
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
  @\
 
 #define ArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \

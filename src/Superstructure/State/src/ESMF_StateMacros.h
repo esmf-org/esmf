@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.7 2004/06/12 17:17:57 cdeluca Exp $
+! $Id: ESMF_StateMacros.h,v 1.8 2004/06/23 10:45:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,8 @@
 ! !IROUTINE: ESMF_StateGetDataPointer - Retrieve Fortran pointer directly from a State @\
 ! @\
 ! !INTERFACE: @\
-!      subroutine ESMF_StateGetDataPointer<rank><type><kind>(state, itemName, @\
+!   ! Private name; call using ESMF_StateGetDataPointer() @\
+!   subroutine ESMF_StateGetDataPointer<rank><type><kind>(state, itemName, @\
 !                                 dataPointer, copyflag, nestedStateName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -46,7 +47,10 @@
 ! @\
 ! !DESCRIPTION: @\
 ! Retrieves data from a state, returning a direct Fortran pointer to @\
-!  the data array.  @\
+! the data array.  @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.3 2004/06/08 18:39:15 cdeluca Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.4 2004/06/23 10:45:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,6 +44,9 @@
 ! @\
 ! !DESCRIPTION: @\
 ! Returns a direct Fortran pointer to the data in an {\tt ESMF\_Field}. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.6 2004/06/12 18:07:22 cdeluca Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.7 2004/06/23 10:45:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 ! @\
 ! !INTERFACE: @\
 !      ! Private name; call using ESMF_FieldSetDataPointer() @\
-!      subroutine ESMF_FieldSetDataPtr<rank><type><kind>(field, & @\
+!      subroutine ESMF_FieldSetDataPointer<rank><type><kind>(field, & @\
 !                                 dataPointer, copyflag, indexflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -46,7 +46,10 @@
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-! Returns a direct Fortran pointer to the data in an {\tt ESMF\_Field}. @\
+! Set data in an {\tt ESMF\_Field} directly from a Fortran pointer. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\

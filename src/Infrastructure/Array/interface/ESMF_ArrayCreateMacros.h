@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayCreateMacros.h,v 1.5 2004/06/07 05:20:52 nscollins Exp $
+! $Id: ESMF_ArrayCreateMacros.h,v 1.6 2004/06/23 10:45:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,6 +64,9 @@
 ! Creates an {\tt ESMF\_Array} based on an unallocated (but allocatable) @\
 ! Fortran array pointer.  This routine allocates memory to the array and @\
 ! saves all necessary information about bounds, data type, kind, etc. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The function return is an {\tt ESMF\_Array} type with space @\
 ! allocated for data. @\
@@ -186,8 +189,11 @@
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} based on an already allocated Fortran array @\
-!   pointer.  This routine can make a copy or reference the existing data @\
-!   and saves all necessary information about bounds, data type, kind, etc. @\
+! pointer.  This routine can make a copy or reference the existing data @\
+! and saves all necessary information about bounds, data type, kind, etc. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The function return is an {\tt ESMF\_Array} type. @\
 ! @\
@@ -327,6 +333,9 @@
 !  calls into the C++ interfaces to set values on the {\tt ESMF\_Array} @\
 !  object. (This is to save on the total number of nested crossings of the @\
 !  Fortran/C++ boundary.) @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 !  Optional args are an existing Fortran pointer which if given is used @\
 !  instead of a new one, and a docopy flag which if set to copy will @\

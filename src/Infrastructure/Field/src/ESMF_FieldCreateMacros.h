@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.4 2004/06/12 15:27:24 cdeluca Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.5 2004/06/23 10:45:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 ! <Created by macro - do not edit directly > @\
 !BOP @\
 ! !IROUTINE: ESMF_FieldCreate - Create a Field using an existing Fortran data pointer @\
- @\
+! @\
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_FieldCreate() @\
 !   function ESMF_FieldCreateDPtr<rank><type><kind>(grid, fptr, copyflag, & @\
@@ -55,6 +55,9 @@
 ! !DESCRIPTION: @\
 !   Create an {\tt ESMF\_Field} and associate the data in the Fortran @\
 !   array with the {\tt ESMF\_Field}. Return a new {\tt ESMF\_Field}. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 !   The arguments are: @\
 !   \begin{description} @\
@@ -200,6 +203,9 @@
 !   Create an {\tt ESMF\_Field}, allocate necessary data space, and return @\
 !   with the Fortran array pointer initialized to point to the data space. @\
 !   Function return value is the new {\tt ESMF\_Field}. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 !  The arguments are: @\
 !  \begin{description} @\

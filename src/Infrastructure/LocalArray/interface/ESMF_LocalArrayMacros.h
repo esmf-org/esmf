@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.19 2004/06/15 07:17:41 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.20 2004/06/23 10:45:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -61,8 +61,11 @@
 ! @\
 ! !DESCRIPTION: @\
 ! Creates an {\tt ESMF\_LocalArray} based on an unassociated Fortran pointer. @\
-!   This routine allocates memory to the array pointer and fills in @\
-!   the array object with all necessary information. @\
+! This routine allocates memory to the array pointer and fills in @\
+! the array object with all necessary information. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The function return is an ESMF\_LocalArray type with space allocated for data. @\
 ! @\
@@ -171,9 +174,12 @@
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-! Creates an {\tt ESMF\_LocalArray} based on an already allocated Fortran array @\
-!   pointer.  This routine can make a copy or reference the existing data @\
-!   and fills in the array object with all necessary information. @\
+! Creates an {\tt ESMF\_LocalArray} based on an already allocated @\
+! Fortran array pointer.  This routine can make a copy or reference the @\
+! existing data and fills in the array object with all necessary information. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The function return is an ESMF\_LocalArray type. @\
 ! @\
@@ -300,6 +306,9 @@
 !  calls into the C++ interfaces to set values on the {\tt ESMF\_LocalArray} @\
 !  object. (This is to save on the total number of nested crossings of the @\
 !  F90/C++ boundary.) @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 !  Optional args are an existing Fortran pointer which if given is used @\
 !  instead of a new one, and a docopy flag which if set to copy will @\
@@ -465,8 +474,11 @@
 !     integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-!     Return a Fortran pointer to the data buffer, or return a Fortran pointer @\
-!     to a new copy of the data. @\
+! Return a Fortran pointer to the data buffer, or return a Fortran pointer @\
+! to a new copy of the data. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\
