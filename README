@@ -1,4 +1,4 @@
- $Id: README,v 1.22 2003/08/20 17:37:25 flanigan Exp $
+ $Id: README,v 1.23 2003/08/20 17:49:02 flanigan Exp $
 ================================================================================
                                    README
 
@@ -102,11 +102,11 @@ an ESMF makefile or build system file.  They can also be set on the
 gmake command line.  Here is an example of setting an environment
 variable in tcsh and csh shells:
 
-        setenv ESMF_ARCH AIX
+        setenv ESMF_PREC 32
 
 In ksh shell environment variables are set this way:
 
-        export ESMF_ARCH=AIX
+        export ESMF_PREC=32
 
 Platform notes:
 
