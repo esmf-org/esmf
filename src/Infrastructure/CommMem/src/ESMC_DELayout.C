@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.25 2003/04/14 21:59:44 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.26 2003/04/23 13:59:37 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.25 2003/04/14 21:59:44 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.26 2003/04/23 13:59:37 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -276,12 +276,12 @@ static int verbose = 1;
 //
 //EOP
 
-cout << "ESMC_DELayoutDestroy, layout = " << layout << endl;
+//cout << "ESMC_DELayoutDestroy, layout = " << layout << endl;
   if (layout != ESMC_NULL_POINTER) {
     //layout->ESMC_DELayoutDestruct(); constructor calls it!
     delete layout;
     layout = ESMC_NULL_POINTER;
-cout << "ESMC_DELayoutDestroy() successful\n";
+//cout << "ESMC_DELayoutDestroy() successful\n";
     return(ESMF_SUCCESS);
   } else {
     return(ESMF_FAILURE);
@@ -330,7 +330,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 
   // get total number of DEs
   comm.ESMC_CommGetNumDEs(&nDEs);
-  cout << "DELayoutCreate(void) comm group size = " << nDEs << endl;
+  //cout << "DELayoutCreate(void) comm group size = " << nDEs << endl;
 
   // Construct the sorted PE list object.  When this returns, peList is valid.
   ESMC_DELayoutSetPEList();
@@ -383,9 +383,9 @@ cout << "ESMC_DELayoutDestroy() successful\n";
       this->commType[i] = ESMC_COMMTYPE_SHR;
 
   if (verbose) {
-    cout << "ESMC_DELayoutConstruct() successful\n";
-    cout << "Create default 1xN Layout:" << endl;
-    ESMC_DELayoutPrint();
+    cout << "ESMC_DELayoutConstruct (default 1xN) successful\n";
+    //cout << "Create default 1xN Layout:" << endl;
+    //ESMC_DELayoutPrint();
   }
 
   return(ESMF_SUCCESS);
@@ -431,7 +431,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 
   // get total number of DEs
   comm.ESMC_CommGetNumDEs(&nDEs);
-  cout << "DELayout(parent) comm group size = " << nDEs << endl;
+  //cout << "DELayout(parent) comm group size = " << nDEs << endl;
 
   // do some error checks
   userwants = 1;
@@ -443,7 +443,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
          << nDEs << " available " << endl;
     return ESMF_FAILURE;
   }
-  cout << "user wants " << userwants << " which is ok." << endl;
+  //cout << "user wants " << userwants << " which is ok." << endl;
 
   this->length = new int[ESMF_MAXDECOMPDIM];
   this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
@@ -568,9 +568,9 @@ cout << "ESMC_DELayoutDestroy() successful\n";
   //peList->ESMC_PEListPrint();
 
   if (verbose) {
-    cout << "ESMC_DELayoutConstruct() successful\n";
-    cout << "Create Layout from Parent:" << endl;
-    ESMC_DELayoutPrint();
+    cout << "ESMC_DELayoutConstruct (from Parent) successful\n";
+    //cout << "Create Layout from Parent:" << endl;
+    //ESMC_DELayoutPrint();
   }
   return(ESMF_SUCCESS);
 
@@ -612,7 +612,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 
   // get total number of DEs
   comm.ESMC_CommGetNumDEs(&nDEs);
-  cout << "DELayoutCreate(delist) comm group size = " << nDEs << endl;
+  //cout << "DELayoutCreate(delist) comm group size = " << nDEs << endl;
 
   // do some error checks
   userwants = 1;
@@ -624,7 +624,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
          << nDEs << " available " << endl;
     return ESMF_FAILURE;
   }
-  cout << "user wants " << userwants << " which is ok." << endl;
+  //cout << "user wants " << userwants << " which is ok." << endl;
 
   // make space for the lists
   this->length = new int[ESMF_MAXDECOMPDIM];
@@ -739,9 +739,9 @@ cout << "ESMC_DELayoutDestroy() successful\n";
   }
 
   if (verbose) {
-    cout << "ESMC_DELayoutConstruct() successful\n";
-    cout << "Create Layout from delist:" << endl;
-    ESMC_DELayoutPrint();
+    cout << "ESMC_DELayoutConstruct (from delist) successful\n";
+    //cout << "Create Layout from delist:" << endl;
+    //ESMC_DELayoutPrint();
   }
   return(ESMF_SUCCESS);
 
@@ -783,7 +783,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 
   // get total number of DEs
   comm.ESMC_CommGetNumDEs(&nDEs);
-  cout << "DELayoutCreate(pelist) comm group size = " << nDEs << endl;
+  //cout << "DELayoutCreate(pelist) comm group size = " << nDEs << endl;
 
   // do some error checks
   userwants = 1;
@@ -890,9 +890,9 @@ cout << "ESMC_DELayoutDestroy() successful\n";
   }
 
   if (verbose) {
-    cout << "ESMC_DELayoutConstruct() successful\n";
-    cout << "Create Layout from pelist:" << endl;
-    ESMC_DELayoutPrint();
+    cout << "ESMC_DELayoutConstruct (from pelist) successful\n";
+    //cout << "Create Layout from pelist:" << endl;
+    //ESMC_DELayoutPrint();
   }
   return(ESMF_SUCCESS);
 
