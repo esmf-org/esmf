@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.135 2005/02/09 00:40:20 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.136 2005/02/09 20:46:52 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.135 2005/02/09 00:40:20 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.136 2005/02/09 20:46:52 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2353,9 +2353,10 @@
       physGridName = 'cell_center'
       relloc = ESMF_CELL_CENTER
       call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, counts, &
-                                       delayout, decompIdsUse(1:2), periodic, &
+                                       delayout, decompIdsUse(1:2), &
                                        countsPerDEDim1=countsPerDE1, &
                                        countsPerDEDim2=countsPerDE2, &
+                                       periodic=periodic, &
                                        distGridName=distGridName, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2388,9 +2389,9 @@
           relloc = ESMF_CELL_NECORNER
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2416,9 +2417,9 @@
           relloc = ESMF_CELL_SWCORNER
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2444,9 +2445,9 @@
           relloc = ESMF_CELL_SECORNER
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2472,9 +2473,9 @@
           relloc = ESMF_CELL_NWCORNER
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2501,9 +2502,9 @@
           relloc = ESMF_CELL_EFACE
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2526,9 +2527,9 @@
           relloc = ESMF_CELL_NFACE
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2555,9 +2556,9 @@
           relloc = ESMF_CELL_WFACE
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2580,9 +2581,9 @@
           relloc = ESMF_CELL_SFACE
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2609,9 +2610,9 @@
           relloc = ESMF_CELL_EFACE
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2634,9 +2635,9 @@
           relloc = ESMF_CELL_SFACE
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2663,9 +2664,9 @@
           relloc = ESMF_CELL_WFACE
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2688,9 +2689,9 @@
           relloc = ESMF_CELL_NFACE
           call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
-                                           periodic, &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
+                                           periodic=periodic, &
                                            distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2718,8 +2719,8 @@
         relloc = ESMF_CELL_CELL    ! TODO: right relloc?
         call ESMF_LRGridAddDistGridBlock(grid, distGridId, 1, counts(3:3), &
                                          delayout, decompIdsUse(3:3), &
-                                         periodic(3:3), &
                                          countsPerDEDim1=countsPerDE3, &
+                                         periodic=periodic(3:3), &
                                          distGridName=distGridName, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2747,8 +2748,8 @@
             relloc = ESMF_CELL_TOPFACE
             call ESMF_LRGridAddDistGridBlock(grid, distGridId, 1, counts(3:3), &
                                              delayout, decompIdsUse(3:3), &
-                                             periodic(3:3), &
                                              countsPerDEDim1=countsPerDE3, &
+                                             periodic=periodic(3:3), &
                                              distGridName=distGridName, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
@@ -3356,7 +3357,7 @@
         relloc = ESMF_CELL_CELL    ! TODO: right relloc?
         call ESMF_LRGridAddDistGridBlock(grid, distGridId, 1, counts(3:3), &
                                          delayout, decompIdsUse(3:3), &
-                                         periodic(3:3), &
+                                         countsPerDEDim1=counts(3:3), &
                                          distGridName=distGridName, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3384,7 +3385,7 @@
             relloc = ESMF_CELL_TOPFACE
             call ESMF_LRGridAddDistGridBlock(grid, distGridId, 1, counts(3:3), &
                                              delayout, decompIdsUse(3:3), &
-                                             periodic(3:3), &
+                                             countsPerDEDim1=counts(3:3), &
                                              distGridName=distGridName, &
                                              rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
@@ -3558,8 +3559,8 @@
 ! !INTERFACE:
       subroutine ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCount, &
                                              counts, delayout, decompIds, &
-                                             periodic, coversDomain, &
                                              countsPerDEDim1, countsPerDEDim2, &
+                                             periodic, coversDomain, &
                                              distGridName, rc)
 !
 ! !ARGUMENTS:
@@ -3568,12 +3569,12 @@
       integer, intent(in) :: dimCount 
       integer, dimension(dimCount), intent(in) :: counts
       type (ESMF_DELayout), intent(in) :: delayout
-      integer, dimension(dimCount), intent(in), optional :: decompIds
+      integer, dimension(dimCount), intent(in) :: decompIds
+      integer, dimension(:), intent(in) :: countsPerDEDim1
+      integer, dimension(:), intent(in), optional :: countsPerDEDim2
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: periodic
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: &
                                                      coversDomain
-      integer, dimension(:), intent(in), optional :: countsPerDEDim1
-      integer, dimension(:), intent(in), optional :: countsPerDEDim2
       character (len=*), intent(in), optional :: distGridName
       integer, intent(out), optional :: rc
 
@@ -3593,7 +3594,7 @@
 !          Array of number of computational cells in each direction.
 !     \item[delayout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[decompIDs]
+!     \item[{[decompIDs]}]
 !          Identifier for which Grid axes are decomposed.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
@@ -3624,12 +3625,12 @@
 
       ! Create the DistGrid
       distGrid = ESMF_DistGridCreate(dimCount=dimCount, counts=counts, &
-                                     delayout=delayout, decompIds=decompIds, &
-                                     periodic=periodic, &
-                                     coversDomain=coversDomain, &
+                                     delayout=delayout, decompIDs=decompIds, &
                                      countsPerDEDim1=countsPerDEDim1, &
                                      countsPerDEDim2=countsPerDEDim2, &
-                                     rc=localrc)
+                                     periodic=periodic, &
+                                     coversDomain=coversDomain, &
+                                     name=distGridName, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
