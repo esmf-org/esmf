@@ -1,4 +1,4 @@
-// $Id: ESMC_DataMap.C,v 1.1 2003/09/18 13:34:38 cdeluca Exp $
+// $Id: ESMC_DataMap.C,v 1.2 2003/09/23 15:26:38 nscollins Exp $
 //
 //-------------------------------------------------------------------------
 //BOP
@@ -6,6 +6,10 @@
 // !CLASS: ESMC_DataMap
 
 // !PUBLIC MEMBER FUNCTIONS:
+
+// TODO: remove this once this file contains real code.  otherwise ranlib
+// moans about no visible symbols in the .o file.  sigh.
+static int fred;
 
 // !INTERFACE:
 //  void ESMC_DataMapValidate(ESMC_DataMap *datamap, int *rc);
