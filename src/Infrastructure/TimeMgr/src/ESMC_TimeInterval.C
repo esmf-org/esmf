@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.52 2004/04/20 20:59:23 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.53 2004/04/20 23:22:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.52 2004/04/20 20:59:23 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.53 2004/04/20 23:22:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1443,6 +1443,168 @@
     return(diff);
 
 }  // end ESMC_TimeInterval::operator-
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(==) - TimeInterval equality comparison
+//
+// !INTERFACE:
+      bool ESMC_TimeInterval::operator==(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to compare
+//
+// !DESCRIPTION:
+//      Compare for equality the current object's (this)
+//      {\tt ESMC\_TimeInterval} with given {\tt ESMC\_TimeInterval},
+//      return result.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(s == timeInterval.s);
+    // TODO: compare equal sN/sD fractions when sD differs
+
+}  // end ESMC_TimeInterval::operator==
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(!=) - TimeInterval inequality comparison
+//
+// !INTERFACE:
+      bool ESMC_TimeInterval::operator!=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to compare
+//
+// !DESCRIPTION:
+//      Compare for inequality the current object's (this)
+//      {\tt ESMC\_TimeInterval} with given {\tt ESMC\_TimeInterval},
+//      return result.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(s != timeInterval.s);
+    // TODO:  compare unequal fractions
+
+}  // end ESMC_TimeInterval::operator!=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(<) - TimeInterval less than comparison
+//
+// !INTERFACE:
+      bool ESMC_TimeInterval::operator<(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to compare
+//
+// !DESCRIPTION:
+//      Compare for less than the current object's (this)
+//      {\tt ESMC\_TimeInterval} with given {\tt ESMC\_TimeInterval},
+//      return result.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(s < timeInterval.s);
+    // TODO:  compare fractions
+
+}  // end ESMC_TimeInterval::operator<
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(>) - TimeInterval greater than comparison
+//
+// !INTERFACE:
+      bool ESMC_TimeInterval::operator>(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to compare
+//
+// !DESCRIPTION:
+//      Compare for greater than the current object's (this)
+//      {\tt ESMC\_TimeInterval} with given {\tt ESMC\_TimeInterval},
+//      return result.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(s > timeInterval.s);
+    // TODO:  compare fractions
+
+}  // end ESMC_TimeInterval::operator>
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(<=) - TimeInterval less or equal than comparison
+//
+// !INTERFACE:
+      bool ESMC_TimeInterval::operator<=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to compare
+//
+// !DESCRIPTION:
+//      Compare for less than or equal the current object's (this)
+//      {\tt ESMC\_TimeInterval} with given {\tt ESMC\_TimeInterval},
+//      return result.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(s <= timeInterval.s);
+    // TODO:  compare fractions
+
+}  // end ESMC_TimeInterval::operator<=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(>=) - TimeInterval greater than or equal comparison
+//
+// !INTERFACE:
+      bool ESMC_TimeInterval::operator>=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to compare
+//
+// !DESCRIPTION:
+//      Compare for greater than or equal the current object's (this)
+//      {\tt ESMC\_TimeInterval} with given {\tt ESMC\_TimeInterval},
+//      return result.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(s >= timeInterval.s);
+    // TODO:  compare fractions
+
+}  // end ESMC_TimeInterval::operator>=
 
 //-------------------------------------------------------------------------
 //BOP

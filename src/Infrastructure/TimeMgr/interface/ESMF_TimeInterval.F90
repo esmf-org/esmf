@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.55 2004/04/14 20:43:16 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.56 2004/04/20 23:22:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.55 2004/04/14 20:43:16 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.56 2004/04/20 23:22:21 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1767,8 +1767,8 @@
 !
 !EOPI
 
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeEQ(timeInterval1, timeInterval2, ESMF_TimeIntervalEQ)
+      call c_ESMC_TimeIntervalEQ(timeInterval1, timeInterval2, &
+                                 ESMF_TimeIntervalEQ)
 
       end function ESMF_TimeIntervalEQ
 
@@ -1792,8 +1792,8 @@
 !
 !EOPI
 
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeNE(timeInterval1, timeInterval2, ESMF_TimeIntervalNE)
+      call c_ESMC_TimeIntervalNE(timeInterval1, timeInterval2, &
+                                 ESMF_TimeIntervalNE)
 
       end function ESMF_TimeIntervalNE
 
@@ -1817,8 +1817,8 @@
 !
 !EOPI
 
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeLT(timeInterval1, timeInterval2, ESMF_TimeIntervalLT)
+      call c_ESMC_TimeIntervalLT(timeInterval1, timeInterval2, &
+                                 ESMF_TimeIntervalLT)
 
       end function ESMF_TimeIntervalLT
 
@@ -1842,8 +1842,8 @@
 !
 !EOPI
 
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeLE(timeInterval1, timeInterval2, ESMF_TimeIntervalLE)
+      call c_ESMC_TimeIntervalLE(timeInterval1, timeInterval2, &
+                                 ESMF_TimeIntervalLE)
 
       end function ESMF_TimeIntervalLE
 
@@ -1867,8 +1867,8 @@
 !
 !EOPI
 
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeGT(timeInterval1, timeInterval2, ESMF_TimeIntervalGT)
+      call c_ESMC_TimeIntervalGT(timeInterval1, timeInterval2, &
+                                 ESMF_TimeIntervalGT)
 
       end function ESMF_TimeIntervalGT
 
@@ -1892,8 +1892,8 @@
 !
 !EOPI
 
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeGE(timeInterval1, timeInterval2, ESMF_TimeIntervalGE)
+      call c_ESMC_TimeIntervalGE(timeInterval1, timeInterval2, &
+                                 ESMF_TimeIntervalGE)
 
       end function ESMF_TimeIntervalGE
 

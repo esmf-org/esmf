@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.30 2004/04/09 20:13:39 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.31 2004/04/20 23:22:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -226,6 +226,48 @@ extern "C" {
                                  ESMC_TimeInterval *esmf_timeIntervalDiff) {
            *esmf_timeIntervalDiff = (*timeInterval1 - *timeInterval2);
        }
+
+
+       //
+       // overloaded comparison operators
+       //
+
+       void FTN(c_esmc_timeintervaleq)(ESMC_TimeInterval *timeInterval1,
+                                       ESMC_TimeInterval *timeInterval2,
+                                       int *esmf_timeIntervalEQ) {
+           *esmf_timeIntervalEQ = (int) (*timeInterval1 == *timeInterval2);
+       }
+
+       void FTN(c_esmc_timeintervalne)(ESMC_TimeInterval *timeInterval1,
+                                       ESMC_TimeInterval *timeInterval2,
+                                       int *esmf_timeIntervalNE) {
+           *esmf_timeIntervalNE = (int) (*timeInterval1 != *timeInterval2);
+       }
+
+       void FTN(c_esmc_timeintervallt)(ESMC_TimeInterval *timeInterval1,
+                                       ESMC_TimeInterval *timeInterval2,
+                                       int *esmf_timeIntervalLT) {
+           *esmf_timeIntervalLT = (int) (*timeInterval1 < *timeInterval2);
+       }
+
+       void FTN(c_esmc_timeintervalgt)(ESMC_TimeInterval *timeInterval1,
+                                       ESMC_TimeInterval *timeInterval2,
+                                       int *esmf_timeIntervalGT) {
+           *esmf_timeIntervalGT = (int) (*timeInterval1 > *timeInterval2);
+       }
+
+       void FTN(c_esmc_timeintervalle)(ESMC_TimeInterval *timeInterval1,
+                                       ESMC_TimeInterval *timeInterval2,
+                                       int *esmf_timeIntervalLE) {
+           *esmf_timeIntervalLE = (int) (*timeInterval1 <= *timeInterval2);
+       }
+
+       void FTN(c_esmc_timeintervalge)(ESMC_TimeInterval *timeInterval1,
+                                       ESMC_TimeInterval *timeInterval2,
+                                       int *esmf_timeIntervalGE) {
+           *esmf_timeIntervalGE = (int) (*timeInterval1 >= *timeInterval2);
+       }
+
 
        void FTN(c_esmc_timeintervalreadrestart)(ESMC_TimeInterval *ptr,
                                                 int *nameLen,
