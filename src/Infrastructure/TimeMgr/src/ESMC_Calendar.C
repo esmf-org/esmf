@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.16 2003/04/16 21:14:24 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.17 2003/04/19 02:02:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.16 2003/04/16 21:14:24 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.17 2003/04/19 02:02:39 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -233,32 +233,36 @@
         // convert Gregorian Date => Time
         case ESMC_CAL_GREGORIAN:
         {
-            int temp;
-            int jdays;
-
             // convert Gregorian date to Julian days
             // Gregorian date (YR, MM, DD) => Julian days (jdays)
-            temp = (MM-14)/12;
-            jdays = (1461 * (YR + 4800 + temp)) / 4 +
-                    (367 * (MM - 2 - 12 * temp ))/12 -
-                    (3 * ( (YR + 4900 + temp)/100))/4 + DD - 32075;
+            int temp = (MM - 14) / 12;
+            int jdays = (1461 * (YR + 4800 + temp)) / 4 +
+                        (367 * (MM - 2 - 12 * temp )) / 12 -
+                        (3 * ((YR + 4900 + temp) / 100)) / 4 + DD - 32075;
 
             // convert Julian days to basetime seconds (>= 64 bit)
             T->S = (ESMF_IKIND_I8) jdays * (ESMF_IKIND_I8) SecondsPerDay;
+
             break;
         }
         // convert No Leap Date => Time
-        // TODO:  assumes time zero = 1/1/0001 00:00:00, make same as
-        //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
         case ESMC_CAL_NOLEAP:
         {
-            T->S = (ESMF_IKIND_I8) (YR-1) * (ESMF_IKIND_I8) SecondsPerYear;
-
+            T->S = (ESMF_IKIND_I8) YR * (ESMF_IKIND_I8) SecondsPerYear;
             for(int month=0; month < MM-1; month++) {
               T->S += DaysPerMonth[month] * SecondsPerDay;
             }
-            T->S += (DD-1) * SecondsPerDay;
-            
+            T->S += (DD-1) * SecondsPerDay + 148600915200;
+                                          // ^ adjust to match Julian time zero
+            break;
+        }
+        // convert 360 Day Date => Time
+        case ESMC_CAL_360DAY:
+        {
+            T->S  = (ESMF_IKIND_I8) YR * (ESMF_IKIND_I8) SecondsPerYear
+                  + (MM-1) * 30 * SecondsPerDay   // each month has 30 days
+                  + (DD-1) * SecondsPerDay + 146565244800;
+                                          // ^ adjust to match Julian time zero
             break;
         }
         // convert Julian Date => Time
@@ -267,17 +271,6 @@
             // convert Julian days to basetime seconds (>= 64 bit)
             T->S = (ESMF_IKIND_I8) D * (ESMF_IKIND_I8) SecondsPerDay;
 
-            break;
-        }
-        // convert 360 Day Date => Time
-        // TODO:  assumes time zero = 1/1/0001 00:00:00, make same as
-        //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
-        case ESMC_CAL_360DAY:
-        {
-            T->S  = (ESMF_IKIND_I8) (YR-1) * (ESMF_IKIND_I8) SecondsPerYear;
-            T->S += (MM-1) * 30 * SecondsPerDay;  // 30 days per month
-            T->S += (DD-1) * SecondsPerDay;
-            
             break;
         }
         default:
@@ -324,49 +317,52 @@
         // convert Time => Gregorian Date
         case ESMC_CAL_GREGORIAN:
         {
-            int tempi, tempj, templ, tempn;
-            int jdays;
-
             // Convert basetime portion of Time into date
             // Julian day (D) => Gregorian date (YR, MM, DD)
             // The calculation below fails for jday >= 536,802,343.
             //    (4*templ = 2^31)
 
             // convert basetime seconds to Julian days
-            jdays = T->S / (ESMF_IKIND_I8) SecondsPerDay;
+            int jdays = T->S / (ESMF_IKIND_I8) SecondsPerDay;
             if (D != ESMC_NULL_POINTER) {
               *D = jdays;
             }
 
             // convert Julian days to Gregorian date
             // Julian days (jdays) => Gregorian date (YR, MM, DD)
-            templ = jdays + 68569;
-            tempn = ( 4 * templ ) / 146097;
-            templ = templ - ( 146097 * tempn + 3 ) / 4;
-            tempi = ( 4000 * ( templ + 1) ) / 1461001;
-            templ = templ - ( 1461 * tempi ) / 4 + 31;
-            tempj = ( 80 * templ ) / 2447;
+            int templ = jdays + 68569;
+            int tempn = (4 * templ) / 146097;
+                templ = templ - (146097 * tempn + 3) / 4;
+            int tempi = (4000 * (templ + 1)) / 1461001;
+                templ = templ - (1461 * tempi) / 4 + 31;
+            int tempj = (80 * templ) / 2447;
             if (DD != ESMC_NULL_POINTER) {
-              *DD = templ - ( 2447 * tempj ) / 80;
+              *DD = templ - (2447 * tempj) / 80;
             }
             templ = tempj / 11;
             if (MM != ESMC_NULL_POINTER) {
-              *MM = tempj + 2 - ( 12 * templ );
+              *MM = tempj + 2 - (12 * templ);
             }
             if (YR != ESMC_NULL_POINTER) {
-              *YR = 100 * ( tempn - 49 ) + tempi + templ;
+              *YR = 100 * (tempn - 49) + tempi + templ;
             }
             break;
         }
         // convert Time => No Leap Date
-        // TODO:  assumes time zero = 1/1/0001 00:00:00, make same as
-        //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
         case ESMC_CAL_NOLEAP:
         {
+            ESMF_IKIND_I8 tmpS = T->S - 148600915200;
+                                     // ^ adjust to match Julian time zero
+
             if (YR != ESMC_NULL_POINTER) {
-              *YR = (T->S / SecondsPerYear) + 1;
+              *YR = tmpS / SecondsPerYear;
+              // adjust for negative time (reverse integer division)
+              if (tmpS % SecondsPerYear < 0) (*YR)--;
             }
-            int day = ((T->S % SecondsPerYear) / SecondsPerDay) + 1;
+
+            int day = (tmpS % SecondsPerYear) / SecondsPerDay + 1;
+            // ensure day range is positive 1-365
+            if (day <= 0) day += DaysPerYear.D;
 
             int month;
             for(month=0; day > DaysPerMonth[month]; month++) {
@@ -386,6 +382,36 @@
 
             break;
         }
+        // convert Time => 360 Day Date
+        case ESMC_CAL_360DAY:
+        {
+            ESMF_IKIND_I8 tmpS = T->S - 146565244800;
+                                     // ^ adjust to match Julian time zero
+
+            if (YR != ESMC_NULL_POINTER) {
+              *YR = tmpS / SecondsPerYear;
+              // adjust for negative time (reverse integer division)
+              if (tmpS % SecondsPerYear < 0) (*YR)--;
+            }
+
+            int dayOfYear = (tmpS % SecondsPerYear) / SecondsPerDay + 1;
+            // ensure day range is positive 1-360
+            if (dayOfYear <= 0) dayOfYear += DaysPerYear.D;  
+
+            if (MM != ESMC_NULL_POINTER) {
+              *MM = dayOfYear / 30 + 1;  // each month has 30 days
+            }
+            if (DD != ESMC_NULL_POINTER) {
+              *DD = dayOfYear % 30;      // each month has 30 days
+            }
+
+            // convert basetime seconds to Julian days
+            if (D != ESMC_NULL_POINTER) {
+              *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
+            }
+
+            break;
+        }
         // convert Time => Julian Date
         case ESMC_CAL_JULIAN:
         {
@@ -393,31 +419,6 @@
             if (D != ESMC_NULL_POINTER) {
               *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
             }
-            break;
-        }
-        // convert Time => 360 Day Date
-        // TODO:  assumes time zero = 1/1/0001 00:00:00, make same as
-        //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
-        case ESMC_CAL_360DAY:
-        {
-            if (YR != ESMC_NULL_POINTER) {
-              *YR = (T->S / SecondsPerYear) + 1;
-            }
-
-            int day_of_year = ((T->S % SecondsPerYear) / SecondsPerDay) + 1;
-
-            if (MM != ESMC_NULL_POINTER) {
-              *MM = (day_of_year / 30) + 1;  // 30 days per month
-            }
-            if (DD != ESMC_NULL_POINTER) {
-              *DD = day_of_year % 30;        // 30 days per month
-            }
-
-            // convert basetime seconds to Julian days
-            if (D != ESMC_NULL_POINTER) {
-              *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
-            }
-
             break;
         }
         default:
