@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.5 2003/03/18 17:37:54 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.6 2003/03/28 00:01:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.5 2003/03/18 17:37:54 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.6 2003/03/28 00:01:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,6 +64,7 @@
       type(ESMF_RelLoc) :: rl
       character (len = 20) :: fname, fname1, fname2, gname3
       type(ESMF_IOSpec) :: ios
+      type(ESMF_Mask) :: mask
       type(ESMF_Field) :: f1, f2, f3, f4, f5
 
       print *, "******************FIELDS UNIT TESTS****************************"
@@ -256,6 +257,13 @@
       write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f3)
+      !------------------------------------------------------------------------
+
+      ! Verifing that destroying a Grid in a Field is not allowe
+      ! call ESMF_GridDestroy(grid, rc=rc)
+      ! write(failMsg, *) ""
+      ! write(name, *) "Destroying a Grid in a Field Test"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Verifing that a Field with a Grid and Array can be destroyed
