@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.57 2004/11/05 08:14:48 theurich Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.58 2004/12/02 00:03:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.57 2004/11/05 08:14:48 theurich Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.58 2004/12/02 00:03:19 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -628,8 +628,10 @@
  
       call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
 
+      ! fortran equivalent of a cast - routerun wants a local array 
+      local_array%this%ptr = array%this%ptr
+
       ! Execute the communications call.
-      local_array = array
       call ESMF_RouteRun(route, local_array, local_array, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &

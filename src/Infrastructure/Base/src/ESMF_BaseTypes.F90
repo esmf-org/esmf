@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.10 2004/11/16 16:08:55 theurich Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.11 2004/12/02 00:04:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -443,6 +443,7 @@ interface assignment (=)
  module procedure ESMF_dkas
  module procedure ESMF_tfas
  module procedure ESMF_ptas
+ module procedure ESMF_ptas2
 end interface
 
 !------------------------------------------------------------------------------
@@ -559,6 +560,13 @@ subroutine ESMF_ptas(ptval, intval)
  integer, intent(in) :: intval
 
  ptval%ptr = intval
+end subroutine
+
+subroutine ESMF_ptas2(ptval2, ptval)
+ type(ESMF_Pointer), intent(out) :: ptval2
+ type(ESMF_Pointer), intent(in) :: ptval
+
+ ptval2%ptr = ptval%ptr
 end subroutine
 
 !------------------------------------------------------------------------------

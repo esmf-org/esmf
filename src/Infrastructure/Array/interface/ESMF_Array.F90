@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.18 2004/08/19 16:52:16 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.19 2004/12/02 00:01:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.18 2004/08/19 16:52:16 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.19 2004/12/02 00:01:54 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -225,7 +225,7 @@ subroutine ESMF_aras(daval, saval)
  type(ESMF_LocalArray), intent(out) :: daval
  type(ESMF_Array), intent(in) :: saval
 
- daval%this = saval%this
+ daval%this%ptr = saval%this%ptr
 end subroutine
 
 
