@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.4 2003/10/23 21:56:17 jwolfe Exp $
+! $Id: FlowSolverMod.F90,v 1.5 2003/11/18 01:03:11 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -24,7 +24,8 @@
 !  system of units assumed by the component -- it is up to the user to
 !  ensure dimensional consistency.
 !
-! {\small Semi-compressible flow equations
+!  The following are the semi-compressible flow equations used in this 
+!  component.
 !
 !$\frac{\partial \rho}{\partial t} + \frac{\partial \rho u}{\partial x}
 !+ \frac{\partial \rho v}{\partial y} = 0 $
