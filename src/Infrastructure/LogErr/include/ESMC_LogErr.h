@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.40 2004/05/14 15:37:37 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.41 2004/05/14 21:35:07 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,36 +78,16 @@ private:
 // (see ESMC\_LogErr.C for a description of these methods)
     void ESMC_LogOpen(char filename[]);
     void ESMC_LogClose();
-    int ESMC_LogWrite(char msg[],int logtype);
-    int ESMC_LogWrite(char msg[],int logtype,int LINE,char FILE[],char method[]);
-    int ESMC_LogFoundError(int rc,char msg[],int logtype);
-    int ESMC_LogFoundError(int rc,char msg[],int logtype,int LINE,char FILE[],char method[]);
-    int ESMC_LogAllocError();
-    int ESMC_LogAllocError(int LINE,char FILE[],char method[]);
-    //void ESMC_LogInfo(char* fmt,...);   
-    //char charData[],char strData[][32],int intData[], double floatData[]);
-    //int ESMC_LogGetUnit()
-    //void ESMC_LogSetFlush();
-    //ESMC_Logical ESMC_LogGetFlush() const;
-    //void ESMC_LogSetNotFlush();
-    //void ESMC_LogSetVerbose();
-    //ESMC_Logical ESMC_LogGetVerbose() const;
-    //void ESMC_LogSetNotVerbose();
-    //void ESMC_LogSetHaltOnErr();
-    //ESMC_Logical ESMC_LogGetHaltOnErr() const;
-    //void ESMC_LogSetNotHaltOnErr();
-    //void ESMC_LogSetHaltOnWarn();
-    //ESMC_Logical ESMC_LogGetHaltOnWarn() const;
-    //void ESMC_LogSetNotHaltOnWarn();
-    //void ESMC_LogWarnMsg_(int errCode, int line, char file[],char dir[], char msg[]);
-    //void ESMC_LogWarn_(int errCode, int line, char file[],char dir[]);
-    
-    //void ESMC_LogWarnFortran(int errCode, int line, char file[],char dir[], char msg[]);
-    //void ESMC_LogErr_(int errCode, int line, char file[], char dir[]);
-    //void ESMC_LogErrMsg_(int errCode, int line, char file[],char dir[], char msg[]);
-    //void ESMC_LogExit();
-    //void ESMC_LogSet(char* option, ESMC_Logical value, ...);
-    //void ESMC_LogGet(char* option, ESMC_Logical & value, ...);
+    bool ESMC_LogWrite(char msg[],int logtype);
+    bool ESMC_LogWrite(char msg[],int logtype,int LINE,char FILE[],char method[]);    
+    bool ESMC_LogFoundError(int status,int rc);
+    bool ESMC_LogFoundError(int status,int LINE,char FILE[],char method[],int rc);
+    bool ESMC_LogMsgFoundError(int status,char msg[],int rc);
+    bool ESMC_LogMsgFoundError(int status,char msg[],int LINE,char FILE[],char method[],int rc);
+    bool ESMC_LogAllocError();
+    bool ESMC_LogAllocError(int LINE,char FILE[],char method[]);
+    bool ESMC_LogMsgAllocError(msg);
+    bool ESMC_LogMsgAllocError(msg,int LINE,char FILE[],char method[]);
     char nameLogErrFile[32];
     FILE *ESMC_LogFile;
     //ESMC_Log();
