@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.3 2003/04/11 21:10:11 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.4 2003/04/11 21:37:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.3 2003/04/11 21:10:11 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.4 2003/04/11 21:37:56 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -74,6 +74,7 @@
       integer :: halo_width
       real :: x_min, x_max, y_min, y_max
       type(ESMF_Grid) :: grid
+      type(ESMF_GridType) :: grid_type
       type(ESMF_DELayout) :: layout
 
 
@@ -222,11 +223,12 @@
       print *, "rc = ", rc
       !------------------------------------------------------------------------
 
+      name = "test grid 1"
 
-      call ESMF_GridAddPhysGrid(grid, i_max=i_max, j_max=j_max, &
+      call ESMF_GridAddPhysGrid(grid_type, i_max=i_max, j_max=j_max, &
 			     physgrid_id=phy_grid_id, &
                              y_min=y_min, y_max=y_max, &
-			     name, rc=status)
+			     physgrid_name=name, rc=status)
 
       write(failMsg, *) ""
       write(name, *) "Adding a Physical Grid Test"
