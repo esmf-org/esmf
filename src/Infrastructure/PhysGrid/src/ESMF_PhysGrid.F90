@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.85 2004/11/18 17:10:23 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.86 2004/11/19 23:51:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -266,6 +266,7 @@
 !   public ESMF_PhysGridSearchBboxSpherical
 !   public ESMF_PhysGridSearchGeneralSpherical
 !   public ESMF_PhysGridSearchBboxCartesian
+      public ESMF_PhysGridSearchMyDERowCol
 
       public ESMF_PhysGridPointInCell
 
@@ -322,7 +323,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.85 2004/11/18 17:10:23 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.86 2004/11/19 23:51:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2074,6 +2075,116 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridSearchMyDECartPt
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSearchMyDERowCol"
+!BOPI
+! !IROUTINE: ESMF_PhysGridSrchMyDERowCol - Search grid on this DE for a row or column
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridSearchMyDERowCol(physgrid, dstAdd, point, option, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_PhysGrid), intent(in) :: physgrid
+      integer, dimension(2) :: dstAdd
+      real(kind=ESMF_KIND_R8), dimension(2), intent(in) :: point
+      character(3), intent(in) :: option
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     This routine searches for the location in the grid of a row and/or column
+!     containing the point given by the input x,y coordinates.  This 
+!     instantiation uses a simple bounding box check to search the
+!     grid and is therefore only applicable to grids where the logical
+!     and physical axes are aligned and logically-rectangular.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid]
+!          {\tt ESMF\_PhysGrid} to search for location.
+!     \item[dstAdd]
+!          Address pair of the corresponding row and/or column bounding
+!          the point.  In the case that the point is coincident with a grid
+!          line, the min/max flag is used to determine which value to return.
+!     \item[point]
+!          Coordinates of search point.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ! local variables
+      integer :: i, ib, ie, j, jb, je
+      real(ESMF_KIND_R8) ::  cellMinX,  cellMaxX,  cellMinY,  cellMaxY
+      real(ESMF_KIND_R8) :: localMinX, localMaxX, localMinY, localMaxY
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: cornerX, cornerY
+
+      ! Initialize return code - assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check validity of "option" argument
+      if (option.ne.'min' .AND. option.ne.'max') then
+      endif
+ 
+      ! initialize destination address to zero
+      dstAdd = 0
+
+      call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(1), cornerX, &
+                             ESMF_DATA_REF, rc)
+      call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(2), cornerY, &
+                             ESMF_DATA_REF, rc)
+
+      ! extract local minima and maxima from the vertex arrays
+      localMinX = minval(cornerX)
+      localMaxX = maxval(cornerX)
+      localMinY = minval(cornerY)
+      localMaxY = maxval(cornerY)
+
+      ! first check the bounding box for myDE
+      if (point(1) < localMinX .OR. &
+          point(1) > localMaxX .OR. &
+          point(2) < localMinY .OR. &
+          point(2) > localMaxY) return ! point not in this DE
+
+      ! point may be somewhere in this DE, loop through the cells on the DE
+
+      ! get jb,je,ib,ie for the grid corners
+      ib = 2
+      ie = size(cornerX,2) - 1
+      jb = 2
+      je = size(cornerY,3) - 1
+
+      do j   = jb,je     !jb,je correspond to exclusive domain on this DE
+        do i = ib,ie     !ib,ie ditto
+
+          ! check bounding box of local grid cell
+          cellMinX = minval(cornerX(:,i,j))
+          cellMaxX = maxval(cornerX(:,i,j))
+          cellMinY = minval(cornerY(:,i,j))
+          cellMinY = maxval(cornerY(:,i,j))
+
+          ! check against i-direction first
+          if (point(1).ge.cellMinX .AND. point(1).le.cellMaxX) then
+            if (option.eq.'min' .AND. i.lt.dstAdd(1)) dstAdd(1) = i
+            if (option.eq.'max' .AND. i.gt.dstAdd(1)) dstAdd(1) = i
+          endif
+          ! and j-direction separately
+          if (point(2).ge.cellMinY .AND. point(2).le.cellMaxY) then
+            if (option.eq.'min' .AND. j.lt.dstAdd(2)) dstAdd(2) = j
+            if (option.eq.'max' .AND. j.gt.dstAdd(2)) dstAdd(2) = j
+          endif
+
+        enddo
+      enddo
+
+      ! set return code
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridSearchMyDERowCol
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
