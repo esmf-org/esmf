@@ -1,16 +1,12 @@
-% $Id: TimeInterval_fex.tex,v 1.5 2003/08/12 14:14:18 cdeluca Exp $
-
-A TimeInterval will typically be used as a time step for a Clock
-or an Alarm interval.  The following brief example shows how to create 
-and initialize one in F90:
+% $Id: TimeInterval_fex.tex,v 1.6 2003/08/14 21:25:46 cdeluca Exp $
 
 \begin{verbatim}
 use ESMF_Mod
 
-! create a TimeInterval
+! Declare a TimeInterval
 type(ESMF_TimeInterval) :: timeStep
 
-! initialize it to 3 days, 5 hours, 15 minutes, 30 seconds
+! Set it to 3 days, 5 hours, 15 minutes, 30 seconds
 call ESMF_TimeIntervalSet(timeStep, d_i4=3, h_i4=5, m_i4=15, s_i4=30)
 
 \end{verbatim}

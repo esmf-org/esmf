@@ -1,5 +1,11 @@
-% $Id: Calendar_usage.tex,v 1.2 2003/08/13 02:39:58 cdeluca Exp $
+% $Id: Calendar_usage.tex,v 1.3 2003/08/14 21:25:46 cdeluca Exp $
 
-Typically, a single Calendar is created at the beginning of
-an application.  
+In most Earth system applications, the timekeeping in each Component 
+must refer to the same standard calendar in order for the Components 
+to properly synchronize.  In the interests of reducing the possibilities
+for conflixt, it makes sense to create as few ESMF Calendars as possible.
+A typical strategy would be to create a single Calendar at the start
+of an application, and use that Calendar in all subsequent calls that
+accept a Calendar, such as {\tt ESMF\_TimeSet}.
 
+The following example shows how to set up an ESMF Calendar in F90.  

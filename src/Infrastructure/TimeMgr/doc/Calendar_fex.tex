@@ -1,17 +1,12 @@
-% $Id: Calendar_fex.tex,v 1.3 2003/07/25 23:11:45 eschwab Exp $
-
-A Calendar will be used as a reference for time instants.
-The following shows how to create and initialize one in F90:
+% $Id: Calendar_fex.tex,v 1.4 2003/08/14 21:25:46 cdeluca Exp $
 
 \begin{verbatim}
 use ESMF_Mod
 
-! create a Calendar
+! Declare a Calendar
 type(ESMF_Calendar) :: gregorian
 
-! initialize it to be a Gregorian calendar
+! Set it to be a Gregorian calendar
 call ESMF_CalendarSet(gregorian, ESMF_GREGORIAN)
 
-! pass it to a time instant
-call ESMF_TimeSet(startTime, ..., gregorian)
 \end{verbatim}

@@ -1,14 +1,16 @@
-% $Id: TimeInterval_usage.tex,v 1.3 2003/08/12 14:02:07 cdeluca Exp $
+% $Id: TimeInterval_usage.tex,v 1.4 2003/08/14 21:25:46 cdeluca Exp $
 
 A typical use for a TimeInterval in a geophysical model 
-based on time-dependent differential equations is representation of 
-the time step by which the model is advanced.  Some models change 
-the size of their time step as the model run progresses; this could
+is representation of the time step by which the model is 
+advanced.  Some models change the size of their time step as 
+the model run progresses; this could
 be done by incrementing or decrementing the original time 
 step by another TimeInterval, or by dividing or multiplying
 the time step by an integer value.  An example of advancing 
 model time using a TimeInterval representation of a time
 step is shown in Section~\ref{sec:ClockEx}.
 
+The following brief example shows how to create and initialize 
+a TimeInterval.
 
 

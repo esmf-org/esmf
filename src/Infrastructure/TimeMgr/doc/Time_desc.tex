@@ -1,4 +1,4 @@
-% $Id: Time_desc.tex,v 1.5 2003/08/14 20:31:43 cdeluca Exp $
+% $Id: Time_desc.tex,v 1.6 2003/08/14 21:25:46 cdeluca Exp $
 \label{sec:Time}
 
 A Time represents a specific point in time.  In order to accommodate
@@ -7,7 +7,7 @@ the ESMF can be specified in many different ways, from years to
 nanoseconds.  The Time interface is designed so that you select one or 
 more options from a list of time units in order to specify a 
 Time. The options for specifying a Time are shown in 
-Figure\ref~{fig:TimeOpts}.  
+Figure~\ref{fig:TimeOpts}.  
 
 There are Time methods defined for setting and getting a
 Time, incrementing and decrementing a Time by a TimeInterval,
@@ -15,23 +15,22 @@ taking the difference between two Times, and comparing Times.
 Special quantities such as the middle of the month and the 
 day of the year associated with a particular Time can be retrieved. 
 There is a method for returning the Time value as a string in 
-the ISO 8601 format YYYY-MM-DDThh:mm:ss.
+the ISO 8601 format YYYY-MM-DDThh:mm:ss \cite{ISO}.
 
 A Time that is specified in hours, minutes, seconds, or subsecond intervals 
 does not need to be associated with a standard calendar; a Time whose
-specification includes larger units must be.  The ESMF representation
+specification includes time units of a day and greater must be.  The 
+ESMF representation
 of a calendar, the Calendar class, is described in Section~\ref{sec:Calendar}.
-The {\tt ESMF_TimeSet} method can be called to associate a Time with a 
-Calendar.  If an operation is requested in which a Calendar is necessary 
-and one has not been set, the ESMF method will return an error.
+The {\tt ESMF\_TimeSet} method is used to associate a Time with a 
+Calendar.  If a Time method is invoked in which a Calendar is 
+necessary and one has not been set, the ESMF method will return an error.
 
-In the ESMF the TimeInterval class used to represent time periods.
+In the ESMF the TimeInterval class is used to represent time periods.
 This class is frequently used in combination with the Time class.
-The Clock class, for example, advances model time by 
+The Clock class, for example, advances model time by incrementing a
+Time with a TimeInterval. 
  
-Times are used by other classes in the ESMF timekeeping system,
- such as Clocks (Section~\ref{sec:Clock}) and Alarms 
-(Section~\ref{sec:Alarm}).
 
 
 
