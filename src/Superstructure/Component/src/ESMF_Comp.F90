@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.67 2004/02/27 17:20:47 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.68 2004/03/04 16:29:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.67 2004/02/27 17:20:47 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.68 2004/03/04 16:29:05 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -620,6 +620,8 @@ end function
         integer :: lde_id                       ! the DE in the subcomp layout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
+        type(ESMF_State) :: is, es
+        logical :: isdel, esdel
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -642,6 +644,30 @@ end function
         !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
 
         ! TODO: handle optional args, do framework setup for this comp.
+        if (present(importstate)) then
+          is = importstate
+          isdel = .FALSE.
+        else
+          ! create an empty state
+          is = ESMF_StateCreate(rc=rc)
+          isdel = .TRUE.
+        endif
+
+        if (present(importstate)) then
+          es = exportstate
+          esdel = .FALSE.
+        else
+          ! create an empty state
+          es = ESMF_StateCreate(rc=rc)
+          esdel = .TRUE.
+        endif
+
+        ! and something for clocks?
+        if (present(clock)) then
+            ! all is well
+        else
+            print *, "Warning: ESMF Component Initialize called without a clock"
+        endif
 
         call ESMF_GetName(compp%base, cname, status)
 
@@ -650,7 +676,7 @@ end function
 
         ! Set up the arguments, then make the call
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETINIT, phase, &
-                               compw, importstate, exportstate, clock, status)
+                                       compw, is, es, clock, status)
           
 #ifdef ESMF_ENABLE_VM
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
@@ -663,9 +689,13 @@ end function
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
-          return
+          ! fall thru intentionally
         endif
 
+        ! if we created dummy states, delete them here.
+        if (isdel) call ESMF_StateDestroy(is, rc=rc)
+        if (esdel) call ESMF_StateDestroy(es, rc=rc)
+      
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
