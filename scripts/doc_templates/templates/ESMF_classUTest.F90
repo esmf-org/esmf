@@ -1,4 +1,4 @@
-! $Id: ESMF_classUTest.F90,v 1.2 2003/03/17 17:40:08 nscollins Exp $
+! $Id: ESMF_classUTest.F90,v 1.3 2003/03/17 18:43:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_classUTest.F90,v 1.2 2003/03/17 17:40:08 nscollins Exp $'
+      '$Id: ESMF_classUTest.F90,v 1.3 2003/03/17 18:43:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -48,7 +48,7 @@
       character(ESMF_MAXSTR) :: name
 
       ! individual test failure messages
-      character(ESMF_MAXSTR) :: failMsg
+      character(ESMF_MAXSTR*2) :: failMsg
 
       ! local variables needed to pass into function/subroutine calls
       character(ESMF_MAXSTR) :: validate_options
@@ -131,14 +131,14 @@
       ! test validate method via option string
       call ESMF_<Class>Validate(<class>, validate_options, rc)
       write(name, *) "ESMF_<Class>Validate"
-      write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
+      write(failMsg, *) "rc =",rc,", validate_options =", trim(validate_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! test print method via option string
       call ESMF_<Class>Print(<class>, print_options, rc)
       write(name, *) "ESMF_<Class>Print"
-      write(failMsg, *) "rc =", rc, ", print_options =", print_options
+      write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
