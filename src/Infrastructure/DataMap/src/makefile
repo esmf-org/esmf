@@ -1,28 +1,27 @@
-# $Id: makefile,v 1.12 2003/09/18 13:34:32 cdeluca Exp $
+# $Id: makefile,v 1.1 2003/09/18 13:34:38 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  =  ESMC_LocalArray.C 
+SOURCEC	  =  
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  
+SOURCEF	  =  ESMF_DataMap.F90
 # if you have .h include files in this dir, list them all on the line below.
-STOREH	  = ESMC_LocalArray.h
+STOREH	  = 
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-
-MANSEC	  = Dataobj
+MANSEC	  = DataMapobj
 LIBBASE	  = libesmf
 
 
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/Data/src
+LOCDIR	  = src/Infrastructure/DataMap/src
 
 include $(ESMF_DIR)/makefile
 
