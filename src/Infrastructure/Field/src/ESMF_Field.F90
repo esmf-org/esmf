@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.3 2003/03/13 15:29:01 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.4 2003/03/13 21:59:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -192,7 +192,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.3 2003/03/13 15:29:01 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.4 2003/03/13 21:59:24 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2125,13 +2125,13 @@
 ! !IROUTINE: ESMF_FieldRoute - Data Route operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRoute(srcfield, dstfield, layout, rc)
+      subroutine ESMF_FieldRoute(srcfield, dstfield, parentlayout, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field) :: srcfield                 
       type(ESMF_Field) :: dstfield                 
-      type(ESMF_DELayout) :: layout
+      type(ESMF_DELayout) :: parentlayout
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -2145,7 +2145,7 @@
 !           Field containing source data.
 !     \item [dstfield] 
 !           Field containing destination grid.
-!     \item [layout] 
+!     \item [parentlayout] 
 !           Layout which encompasses both Fields, most commonly the layout
 !           of the Coupler if the route is inter-component, but could 
 !           also be the individual layout for a component if the Route 
@@ -2164,9 +2164,18 @@
       type(ESMF_Route) :: route
       type(ESMF_XPacket) :: srclxp, dstlxp        ! src/dst localdata xps
       type(ESMF_XPacket) :: srcgxp, dstgxp        ! src/dst global xp
+      type(ESMF_DELayout) :: srclayout, dstlayout
+      logical :: hassrcdata        ! does this DE contain localdata from src?
+      logical :: hasdstdata        ! does this DE contain localdata from dst?
+      logical :: hascachedroute    ! can we reuse an existing route?
       integer :: i, gridrank, datarank, thisdim
+      integer :: nx, ny
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
+      type(ESMF_AxisIndex) :: my_AI(ESMF_MAXDIM)  ! things rte precompute needs
+      type(ESMF_AxisIndex) :: AI(ESMF_MAXDIM)
+      integer :: AI_count
+
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2179,52 +2188,104 @@
       stypep = srcfield%ftypep
       dtypep = dstfield%ftypep
 
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(stypep%mapping, gridrank=gridrank, &
+      ! if srclayout ^ parentlayout == NULL, nothing to send
+      ! call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
+      ! call ESMF_DELayoutThisDEExists(parentlayout, srclayout, hassrcdata)
+      hassrcdata = .true.
+
+      ! if dstlayout ^ parentlayout == NULL, nothing to recv
+      ! call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
+      ! call ESMF_DELayoutThisDEExists(parentlayout, dstlayout, hasdstdata)
+      hasdstdata = .true.
+
+      ! if neither are true this DE cannot be involved in the communication
+      !  and it can just return now.
+      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
+          if (rcpresent) rc = ESMF_SUCCESS
+          return
+      endif
+
+      ! if src field exists on this DE, query it for information
+      if (hassrcdata) then
+          ! Query the datamap and set info for grid so it knows how to
+          !  match up the array indicies and the grid indicies.
+          call ESMF_DataMapGet(stypep%mapping, gridrank=gridrank, &
                                                dimlist=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldRoute: DataMapGet returned failure"
-        return
-      endif 
+          if(status .NE. ESMF_SUCCESS) then 
+            print *, "ERROR in FieldRoute: DataMapGet returned failure"
+            return
+          endif 
 
-      ! And get the Array sizes
-      call ESMF_ArrayGet(stypep%localfield%localdata, rank=datarank, &
+          ! And get the Array sizes
+          call ESMF_ArrayGet(stypep%localfield%localdata, rank=datarank, &
                                                lengths=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldRoute: ArrayGet returned failure"
-        return
+          if(status .NE. ESMF_SUCCESS) then 
+             print *, "ERROR in FieldRoute: ArrayGet returned failure"
+             return
+          endif 
       endif 
 
-      ! Create the route object.  This needs to be the parent layout which
-      ! includes the DEs from both fields.
-      route = ESMF_RouteCreate(layout, rc) 
+      ! if dst field exists on this DE, query it for information
+      if (hasdstdata) then
+          ! Query the datamap and set info for grid so it knows how to
+          !  match up the array indicies and the grid indicies.
+          call ESMF_DataMapGet(dtypep%mapping, gridrank=gridrank, &
+                                               dimlist=dimorder, rc=status)
+          if(status .NE. ESMF_SUCCESS) then 
+            print *, "ERROR in FieldRoute: DataMapGet returned failure"
+            return
+          endif 
 
-      ! Query grid/layout for the local DE num of the localdata of both fields
+          ! And get the Array sizes
+          call ESMF_ArrayGet(dtypep%localfield%localdata, rank=datarank, &
+                                               lengths=dimlengths, rc=status)
+          if(status .NE. ESMF_SUCCESS) then 
+             print *, "ERROR in FieldRoute: ArrayGet returned failure"
+             return
+          endif 
+      endif
 
-      ! somewhere in here is there a loop?
+      ! Does this same route already exist?  If so, then we can drop
+      ! down immediately to RouteRun.
+      call ESMF_RouteGetCached(parentlayout, &! field1, field2, 
+                                  hascachedroute, route, rc=status)
 
-      ! Compute an XPacket for the localdata for both the src array and any
-      !  part of the destination field which is local to this same de.  (this
-      !  won't happen if the layouts are disjoint, but might happen if the
-      !  same layouts are shared in the sequential case.)
-      !call ESMF_ArrayGetAxisIndex(stypep%localfield%localdata, ...)
-      !call ESMF_XPacketInit(srclxp, 2, 0, x, x, x)
-      ! etc.
-     
-      ! Then compute an XPacket for the entire destination grid?
-   
-      ! Intersect the src localdata with the entire destination grid (do
-      !  we have that info?)   For each intersection,  add an entry in the
-      !  route table. 
-      !call ESMF_RouteSetSend(route, dest_de, stypep%localfield%localdata, xp)
-      !call ESMF_RouteSetRecv(route, src_de, dtypep%localfield%localdata, xp)
+      if (.not. hascachedroute) then
+          ! Create the route object.  This needs to be the parent layout which
+          ! includes the DEs from both fields.
+          route = ESMF_RouteCreate(parentlayout, rc) 
 
-      ! keep filling the table as long as there's things to send or recv
-      ! from this de.  each other de is doing the same thing.
+          ! TODO:  get this list mostly from grid
+          do i=1, datarank
+             my_AI(i)%l = 0
+             AI(i)%l = 0
+          enddo
 
-      ! once table is full, execute the communications it represents.
-      call ESMF_RouteRun(route, status)
+          call ESMF_DELayoutGetSize(dstlayout, nx, ny);
+
+          AI_count = nx * ny
+          
+          call ESMF_RoutePrecompute(route, my_AI, AI, AI_count, datarank, &
+                                                 srclayout, dstlayout, status)
+
+      endif
+
+      ! Once table is full, execute the communications it represents.
+
+      ! There are 3 possible cases - src+dst, src only, dst only
+      !  (if both are false then we've already returned.)
+      if ((hassrcdata) .and. (.not. hasdstdata)) then
+          call ESMF_RouteRun(route, srcarray=stypep%localfield%localdata, &
+                                                                     rc=status) 
+
+      else if ((.not. hassrcdata) .and. (hasdstdata)) then
+          call ESMF_RouteRun(route, dstarray=dtypep%localfield%localdata, &
+                                                                     rc=status)
+
+      else
+          call ESMF_RouteRun(route, stypep%localfield%localdata, &
+                                    dtypep%localfield%localdata, status)
+      endif
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRoute: RouteRun returned failure"
         return
