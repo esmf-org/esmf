@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.6 2003/07/28 17:36:54 jwolfe Exp $
+// $Id: ESMC_Array_F.C,v 1.7 2003/07/29 16:31:00 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,22 +121,21 @@ extern "C" {
      }
 
      void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_DELayout **layout,
-                                  ESMC_AxisIndex *ai_global,
+                                  int *global_start, int *global_dimlengths, 
                                   int *rank_trans, int *size_rank_trans, 
                                   int *olddecompids, int *decompids,  int *size_decomp,
                                   ESMC_Array **RedistArray, int *status) {
-          *status = (*ptr)->ESMC_ArrayRedist(*layout, ai_global, rank_trans,
-                                             *size_rank_trans, olddecompids,
-                                             decompids, *size_decomp,
-                                             *RedistArray);
+          *status = (*ptr)->ESMC_ArrayRedist(*layout, global_start, 
+                                  global_dimlengths, rank_trans,
+                                  *size_rank_trans, olddecompids, decompids, 
+                                  *size_decomp, *RedistArray);
      }
 
      void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_DELayout **layout,
-                                ESMC_AxisIndex *ai_global,
-                                int *decompids,  int *size_decomp,
-                                int *status) {
-          *status = (*ptr)->ESMC_ArrayHalo(*layout, ai_global, decompids, 
-                                           *size_decomp);
+                                ESMC_AxisIndex *ai_global, int *global_dimlengths,
+                                int *decompids,  int *size_decomp, int *status) {
+          *status = (*ptr)->ESMC_ArrayHalo(*layout, ai_global, global_dimlengths,
+                                decompids, *size_decomp);
      }
 
      void FTN(c_esmc_arrayallgather)(ESMC_Array **ptr, ESMC_DELayout **layout,
