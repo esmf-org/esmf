@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.1 2004/02/24 20:36:29 theurich Exp $
+// $Id: ESMC_VM.C,v 1.2 2004/02/26 20:41:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -15,11 +15,11 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the methods of two C++ classes 
-// {\tt ESMC_VM} and {\tt ESMC_VMPlan} which are defined in the companion 
+// {\tt ESMC\_VM} and {\tt ESMC\_VMPlan} which are defined in the companion 
 // file {\tt ESMC\_VM.C}.
 //
-// Currently class {\tt ESMC_VM} is derived from base class {\tt vmachine}
-// and class {\tt ESMC_VMPlan} is derived from base class {\tt vmplan}. There
+// Currently class {\tt ESMC\_VM} is derived from base class {\tt vmachine}
+// and class {\tt ESMC\_VMPlan} is derived from base class {\tt vmplan}. There
 // are only very few new features that the derived classes add to their base
 // classes, thus most of the implementing code is located in {vmachine.C}.
 //
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.1 2004/02/24 20:36:29 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.2 2004/02/26 20:41:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
