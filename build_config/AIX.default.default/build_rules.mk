@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.4 2003/11/05 00:06:34 jwolfe Exp $
+#  $Id: build_rules.mk,v 1.5 2003/11/11 19:01:47 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -129,8 +129,8 @@ C_FLINKER_SLFLAG	= -L
 C_CLINKER		= mpcc_r -bmaxdata:0x70000000  -qcheck 
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
 C_FLINKER		= mpxlf90_r -bmaxdata:0x70000000 -lC_r -qcheck 
-C_CCV			= unknown
-C_FCV			= unknown
+C_CCV			= lslpp -l | fgrep xlC
+C_FCV			= lslpp -l | fgrep xlf
 C_SYS_LIB		= /usr/lib/libxlf_r.a /usr/lib/libxlf90_r.a  -lisode
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
@@ -158,7 +158,7 @@ CXX_CLINKER_SLFLAG	= -L
 CXX_FLINKER_SLFLAG	= -L
 CXX_CLINKER		= mpCC_r -qcheck 
 CXX_FLINKER		= mpxlf90_r -qcheck 
-CXX_CCV			= unknown
+CXX_CCV			= lslpp -l | fgrep xlC
 CXX_SYS_LIB		= /usr/lib/libxlf_r.a /usr/lib/libxlf90_r.a  -lcomplex -lisode
 CXX_SYS_LIBS		= -lC_r
 C_CXXF90LD		= ${CXX_CC}
@@ -253,8 +253,8 @@ C_FLINKER_SLFLAG	= -L
 C_CLINKER		= mpcc_r -q64
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
 C_FLINKER		= mpxlf90_r -q64 -lC_r
-C_CCV			= unknown
-C_FCV			= unknown
+C_CCV			= lslpp -l | fgrep xlC
+C_FCV			= lslpp -l | fgrep xlf
 C_SYS_LIB		= /usr/lib/libxlf_r.a /usr/lib/libxlf90_r.a  -lisode
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
@@ -278,7 +278,7 @@ CXX_CLINKER_SLFLAG	= -L
 CXX_FLINKER_SLFLAG	= -L
 CXX_CLINKER		= mpCC_r -q64
 CXX_FLINKER		= mpCC_r -q64
-CXX_CCV			= unknown
+CXX_CCV			= lslpp -l | fgrep xlC
 CXX_SYS_LIB		= /usr/lib/libxlf_r.a /usr/lib/libxlf90_r.a  -lcomplex -lisode
 CXX_SYS_LIBS            = -lC_r
 C_CXXF90LD		= ${CXX_CC}
