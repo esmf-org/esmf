@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.6 2003/04/03 20:05:11 nscollins Exp $
+// $Id: ESMC_LogErr.h,v 1.7 2003/04/14 16:42:45 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ class ESMC_Log {
     void ESMC_LogPrint(int fortIO, int errCode, int line, char file[],
                        char dir[], char msg[]=NULL);
     void ESMC_LogGetErrMsg(int errCode, char msg[]) const;
-    bool ESMC_LogNameValid(char name[]);
+    bool ESMC_LogNameValid(char name[], int FortIO);
 // !PRIVATE TYPES:
 
     int oneLogErrFile;      // if log data written to one log file,
@@ -100,13 +100,13 @@ class ESMC_Log {
     void ESMC_LogInfo(char* fmt,...);   
     void ESMC_LogInfoFortran(char fmt[],
     char charData[],char strData[][32],int intData[], double floatData[]);
-    void ESMC_LogOpenFile(int numLogFile,char name[]);
-    void ESMC_LogOpenFileForWrite(int numLogFile, char name[]);
+    void ESMC_LogOpenCFile(int numLogFile,char name[]);
+    void ESMC_LogOpenFortFile(int numLogFile, char name[]);
     void ESMC_LogInit(int verbosity=ESMF_LOG_TRUE, int flush=ESMF_LOG_FALSE,
 	 int haltOnError=ESMF_LOG_TRUE, int haltOnWarning=ESMF_LOG_FALSE);
     int ESMC_LogWrite();
-    void ESMC_LogCloseFile();
-    void ESMC_LogCloseFileForWrite();
+    void ESMC_LogCloseCFile();
+    void ESMC_LogCloseFortFile();
     void ESMC_LogFlush();
     void ESMC_LogNotFlush();
     void ESMC_LogVerbose();
