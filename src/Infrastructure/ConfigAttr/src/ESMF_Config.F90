@@ -19,7 +19,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF_Macros.inc"
+!!!#include "ESMF_Macros.inc"
 !------------------------------------------------------------------------------
 !
 !BOP
@@ -255,7 +255,10 @@
           module procedure ESMF_ConfigGetFloat_array
        end interface
 
-
+       interface ESMF_ConfigGetInt
+          module procedure ESMF_ConfigGetInt_one
+          module procedure ESMF_ConfigGetInt_array
+       end interface
 
 ! PRIVATE PARAMETER  SETTINGS:
 !------------------------------------------------------------------------------
@@ -879,8 +882,7 @@
 !
 ! !INTERFACE:
 
-!!    integer function ESMF_ConfigGetInt( cf, label, size, default, rc )
-    integer function ESMF_ConfigGetInt( cf, label, default, rc )
+    integer function ESMF_ConfigGetInt_one( cf, label, default, rc )
       implicit none
 
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
@@ -924,11 +926,75 @@
          endif
       endif
 
-      ESMF_ConfigGetInt = n
+      ESMF_ConfigGetInt_one = n
       if( present( rc )) rc = iret
       
       return
-    end function ESMF_ConfigGetInt
+    end function ESMF_ConfigGetInt_one
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetInt - gets a integer number/numbers
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigGetInt_array( cf, array, label, nsize, &
+                                          default, rc )
+      
+      implicit none
+      integer, intent(inout)              :: array(*)    ! real array 
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      character(len=*), intent(in), optional :: label    ! label
+      integer, intent(in)                    :: nsize    ! number of integer 
+                                                         ! numbers
+      integer, intent(in), optional          :: default  ! default value
+
+      integer, intent(out), optional         :: rc       ! Error code
+!
+! !DESCRIPTION: Gets integer point numbers
+!
+! !REVISION HISTORY:
+! 25anp2003  Zaslavsky  initial interface/prolog
+!      25apr2003  Zaslavsky  Coding
+!EOP -------------------------------------------------------------------
+      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetInt_array'
+      integer iret, i 
+      
+      iret = 0
+      
+      if (nsize<=0) then
+         print *,myname_,' invalid SIZE =', nsize
+         iret = -1
+         if(present( rc )) rc = iret
+         return
+      endif
+       
+      do i = 1, nsize
+         
+         if (present( label )) then
+            if(present( default )) then
+              array(i)  =  ESMF_ConfigGetInt_one( cf, label, &
+                    default, iret)
+            else
+               array(i) =  ESMF_ConfigGetInt_one( cf, label, &
+                    rc = iret)
+            endif
+         else
+            if(present( default )) then
+               array(i) =  ESMF_ConfigGetInt_one( cf, &
+                    default = default, rc = iret)
+            else
+               array(i) =  ESMF_ConfigGetInt_one( cf, rc = iret)
+            endif
+         endif
+      enddo
+
+      if(present( rc )) rc = iret
+      return
+    end subroutine ESMF_ConfigGetInt_array
 
 
 
@@ -937,7 +1003,7 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetChar - gets a characer
+! !IROUTINE: ESMF_ConfigGetChar - gets a character
 !
 ! !INTERFACE:
 !
@@ -1212,6 +1278,124 @@
       return
       end function index_
 
+      subroutine ESMF_Config_Trim ( string )
+
+      implicit NONE
+
+!-------------------------------------------------------------------------
+!         NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
+!-------------------------------------------------------------------------
+!BOP
+!
+! !ROUTINE:  ESMF_Config_Trim() - Removes leading blanks from strings.
+!
+! !DESCRIPTION: 
+!
+!    Removes blanks and TABS from begenning of string. 
+!    This is a low level i90 routine.
+! 
+! !CALLING SEQUENCE: 
+!
+!     call ESMF_Config_Trim ( string )
+!
+! !INPUT PARAMETERS: 
+!
+      character*256 string    ! the input string
+!
+! !OUTPUT PARAMETERS:
+!
+!     character*256 string    ! the modified string
+!
+!
+! !REVISION HISTORY: 
+!
+!  19Jun96   da Silva   Original code.
+!
+!EOP
+!-------------------------------------------------------------------------
+
+      integer     ib, i
+
+!     Get rid of leading blanks
+!     -------------------------
+      ib = 1
+      do i = 1, 255
+         if ( string(i:i) .ne. ' ' .and.	&
+	        string(i:i) .ne. TAB ) go to 21
+         ib = ib + 1
+      end do
+ 21   continue
+
+!     String without trailling blanks
+!     -------------------------------
+      string = string(ib:)
+
+      return
+      end subroutine ESMF_Config_trim
+
+
+      subroutine ESMF_Config_pad ( string )
+
+      implicit NONE
+
+!-------------------------------------------------------------------------
+!         NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
+!-------------------------------------------------------------------------
+!BOP
+!
+! !ROUTINE:  ESMF_CONFIG_Pad() --- Pad strings.
+! 
+! !DESCRIPTION: 
+!
+!     Pads from the right with the comment character (\#). It also
+!  replaces TAB's with blanks for convenience. This is a low level
+!  i90 routine.
+!
+! !CALLING SEQUENCE: 
+!
+!      call ESMF_Config_pad ( string )
+!
+! !INPUT PARAMETERS: 
+!
+       character*256 string       ! input string
+
+! !OUTPUT PARAMETERS:            ! modified string
+!
+!      character*256 string
+!
+! !BUGS:  
+!
+!      It alters TAB's even inside strings.
+!
+!
+! !REVISION HISTORY: 
+!
+!  19Jun96   da Silva   Original code.
+!
+!EOP
+!-------------------------------------------------------------------------
+
+      integer i
+
+!     Pad end of string with #
+!     ------------------------
+      do i = 256, 1, -1 
+         if ( string(i:i) .ne. ' ' .and.	&
+	        string(i:i) .ne. '$' ) go to 11
+         string(i:i) = '#'
+      end do
+ 11   continue
+
+!     Replace TAB's with blanks
+!     -------------------------
+      do i = 1, 256
+         if ( string(i:i) .eq. TAB ) string(i:i) = BLK
+         if ( string(i:i) .eq. '#' ) go to 21
+      end do
+ 21   continue
+
+      return
+      end subroutine ESMF_Config_pad
 
     
     end module ESMF_ConfigMod
