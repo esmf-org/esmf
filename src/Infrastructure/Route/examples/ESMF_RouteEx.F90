@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.7 2004/02/10 17:42:00 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.8 2004/02/18 22:17:57 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -9,14 +9,15 @@
 !BOP
 !
 ! !DESCRIPTION:
-! See the following code fragments for examples of how to call Route on 
-! a Field.
+! See the following code fragments for examples of how to call Redist,
+!  Halo, and Regrid on a Field.
 ! Also see the Programming Model section of this document.
 !
 !
 !\begin{verbatim}
 
-!   ! Example program showing various ways to create a Field object
+!   ! Example program showing various ways to call the communications
+!   ! routines on a Field object
     program ESMF_RouteUseEx
 
     ! ESMF Framework module
@@ -25,166 +26,164 @@
     implicit none
     
 !   ! Local variables
-    integer :: x, y, rc, mycell, finalrc
-    type(ESMF_Grid) :: grid
+    integer :: x, y, rc, mycell, finalrc, numdes
+    integer :: i, j
+    type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: arraya, arrayb
     type(ESMF_DataMap) :: datamap
-    type(ESMF_RelLoc) :: relativelocation
+    type(ESMF_DELayout) :: layout1, layout2
+    type(ESMF_RouteHandle) :: halo_rh, redist_rh, regrid_rh
     character (len = ESMF_MAXSTR) :: fname
     type(ESMF_IOSpec) :: iospec
     type(ESMF_Field) :: field1, field2, field3, field4
-    real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
+    real (ESMF_KIND_R8), dimension(2) :: mincoords
+
     finalrc = ESMF_SUCCESS
         
 !-------------------------------------------------------------------------
-!   ! Example 1:
+!   ! Setup:
 !   !
-!   !  The user has already created a Grid and has Field data
-!   !  stored in an Array object.  This version of create simply
-!   !  associates the data with the Grid.  The data is referenced
-!   !  by default.  The DataMap is created with defaults.
+!   !  Create a source and destination grid with data on it, to use
+!   !  in the Halo, Redist, and Regrid calls below.
  
-    grid = ESMF_GridCreate(name="atmgrid", rc=rc)
+    call ESMF_Initialize(rc=rc)
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    allocate(f90ptr1(10,20))
+    layout1 = ESMF_DELayoutCreate(rc=rc)
+    call ESMF_DELayoutGetNumDEs(layout1, numdes, rc)
+    layout2 = ESMF_DELayoutCreate((/ (i,i=0,numdes-1) /), 2, (/ numdes, 1 /), &
+                                  (/ ESMF_COMMTYPE_MP, ESMF_COMMTYPE_MP /), rc)
+
+
+    mincoords = (/ 0.0, 0.0 /)
+    srcgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), mincoords, &
+                                         layout=layout1, name="srcgrid", rc=rc)
+
+    ! same grid coordinates, but different layout
+    dstgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), mincoords, &
+                                         layout=layout2, name="dstgrid", rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! allow for a halo width of 3
+    allocate(f90ptr1(96,186))
+    do j=1, 180
+      do i=1, 90
+        f90ptr1(i+3, j+3) = i*1000 + j
+      enddo
+    enddo
+
     arraya = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_ArrayPrint(arraya, rc=rc)
+    field1 = ESMF_FieldCreate(srcgrid, arraya, horizRelloc=ESMF_CELL_CENTER, &
+                                haloWidth=3, name="src pressure", rc=rc)
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field1 = ESMF_FieldCreate(grid, arraya, &
-                         horizRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
+    call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    field2 = ESMF_FieldCreate(dstgrid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+                                                    name="dst pressure", rc=rc)
 
-    call ESMF_FieldGetName(field1, fname, rc)
+ 
+    ! fields all ready to go
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+!-------------------------------------------------------------------------
+!   ! Example 1:
+!   !
+!   !  Calling Field Halo
 
-    print *, "Field example 1 returned, name = ", trim(fname)
+
+    call ESMF_FieldHalo(field1, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    print *, "Halo example 1 returned"
+
+    ! should transition over to:
+
+    !call ESMF_FieldHaloStore(field1, routehandle=halo_rh, rc=rc)
+
+    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! this should take the route handle and not the layout
+    !call ESMF_FieldHalo(field1, halo_rh, rc=rc)
+
+    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    !call ESMF_FieldHaloRelease(halo_rh, rc=rc)
+
+    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    !print *, "Halo example 1a returned"
 
 !-------------------------------------------------------------------------
 !   ! Example 2:
 !   !
-!   !  The user creates an ArraySpec that describes the data and the
-!   !  Field create call allocates the appropriate memory for it. 
+!   !  Calling Field Redist
 
-!   !   arrayspec = ESMF_ArraySpecCreate()
 
-    field2 = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
-                              name="rh", rc=rc)
+    call ESMF_FieldRedistStore(field1, field2, layout1, &
+                                                routehandle=redist_rh, rc=rc)
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    print *, "Field example 2 returned"
+    ! this should take the route handle and not the layout
+    call ESMF_FieldRedist(field1, field2, layout1, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldRedistRelease(redist_rh, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    print *, "Redist example 2 returned"
 
 !-------------------------------------------------------------------------
 !   ! Example 3:
 !   !
-!   !  The user wishes to associate different data with the Field
-!   !  created in example 1.  The detach data call returns the 
-!   !  pointer to the old data array; the attach call passes in the 
-!   !  pointer to the new array.
+!   !  Calling Field Regrid
 
-    call ESMF_FieldDetachData(field1, array=arraya, rc=rc)
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    !call ESMF_FieldRegridStore(field1, field2, layout1, &
+    !                                            routehandle=regrid_rh, rc=rc)
 
-    allocate(f90ptr2(30,15))
-    arrayb = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    !call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
 
-    call ESMF_FieldAttachData(field1, array=arrayb, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    print *, "Field example 3 returned"
+    !call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    print *, "Regrid example 3 returned"
 
 !-------------------------------------------------------------------------
-!   ! Example 4:
-!   !
-!   !  The user creates an empty Field, and adds the Grid and 
-!   !  data in later calls.
+!    ! Cleanup
 
-     field3 = ESMF_FieldCreateNoData("precip", rc=rc)
+    call ESMF_FieldDestroy(field1, rc=rc)
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-!
-!    ! At some later time, associate a Grid with this Field
-     call ESMF_FieldSetGrid(field3, grid, rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    call ESMF_FieldDestroy(field2, rc=rc)
 
-!    ! ...and associate a data Array.
-!    call ESMF_FieldAttachArray(field3, arraya, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    call ESMF_GridDestroy(srcgrid)
 
-     print *, "Field example 4 returned"
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!-------------------------------------------------------------------------
-!   ! Example 5:
-!   !
-!   ! Query a Field for number of local grid cells.
+    call ESMF_GridDestroy(dstgrid)
 
-     call ESMF_FieldGetLocalGridInfo(field3, ncell=mycell, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-
-     print *, "Field example 5 returned"
-
-     call ESMF_FieldDestroy(field1, rc=rc)
-
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-
-     call ESMF_FieldDestroy(field2, rc=rc)
-
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-
-     call ESMF_FieldDestroy(field3, rc=rc)
-
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-
-     !call ESMF_FieldDestroy(field4, rc=rc)
-
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
 
     if (finalrc.EQ.ESMF_SUCCESS) then
        print *, "PASS: ESMF_RouteEx.F90"
@@ -192,8 +191,9 @@
        print *, "FAIL: ESMF_RouteEx.F90"
     end if
 
+    call ESMF_Finalize(rc=rc)
 
-     end program ESMF_RouteUseEx
+    end program ESMF_RouteUseEx
     
 !\end{verbatim}
     
