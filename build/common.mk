@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.10 2003/09/17 20:42:47 flanigan Exp $
+#  $Id: common.mk,v 1.11 2003/09/18 20:42:34 flanigan Exp $
 #
 #  common.mk
 #
@@ -549,6 +549,21 @@ tree_run_tests_uni: $(TESTS_RUN_UNI)
 #
 #  examples
 #
+#  The example targets depend on variables set in the
+#  makefile in the example source code directory.  The 
+#  variables are:
+#
+#      EXAMPLES_BUILD should list the full path all of the 
+#      example executables to be made.  The example executables
+#      have to be built in $(ESMF_EXDIR).  
+#
+#      EXAMPLES_RUN and EXAMPLES_RUN_UNI list the run targets
+#      of the individual executables.  The run targets are defined
+#      in the source code makefiles.  EXAMPLES_RUN list the targets
+#      that run the examples on multiply processors.  EXAMPLES_RUN_UNI
+#      lists the targets that run the examples on single processors.
+#
+#      
 
 #
 # examples
@@ -563,7 +578,6 @@ tree_examples: tree_build_examples tree_run_examples
 #
 examples_uni: chkopts chkdir_examples  
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples_uni tree
-
 
 tree_examples_uni: tree_build_examples tree_run_examples_uni
 
