@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.1 2003/10/17 19:34:56 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.2 2004/03/24 17:59:30 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@ Licensed under the GPL.
 
 #if 0
 the PGI compiler won't allow initializers.  on the theory that they
-might be causing problems, don't includ them in the intel build either.
+might be causing problems, don't include them in the intel build either.
 the build is currently making the compiler core dump in the bundle code.
 see if this helps.
 #endif
