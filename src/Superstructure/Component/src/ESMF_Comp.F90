@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.92 2004/04/23 17:25:17 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.93 2004/04/30 14:01:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -108,7 +108,6 @@
          type(ESMF_Base) :: base                  ! base class
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
-         type(ESMF_VM) :: vm          ! component VM
          type(ESMF_Clock) :: clock                ! private component clock
          logical :: multiphaseinit                ! multiple init, run, final
          integer :: initphasecount                ! max inits, for error check
@@ -121,6 +120,7 @@
          type(ESMF_Grid) :: grid                  ! default grid, gcomp only
          type(ESMF_GridCompType) :: gridcomptype  ! model type, gcomp only
          type(ESMF_CompClass), pointer :: parent  ! pointer to parent comp
+         type(ESMF_VM)      :: vm                 ! component VM
          type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
          integer            :: npetlist           ! number of PETs in petlist
          integer, pointer   :: petlist(:)         ! list of usble parent PETs 
@@ -215,7 +215,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.92 2004/04/23 17:25:17 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.93 2004/04/30 14:01:16 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -375,7 +375,7 @@ end function
         else
           ! if parent specified, use their vm, else use global.
           if (present(parent)) then
-            compp%vm_parent = parent%vm_parent
+            compp%vm_parent = parent%vm
           else
             call ESMF_VMGetGlobal(compp%vm_parent)
           endif
@@ -446,13 +446,12 @@ end function
         ! petlist
         if (present(petlist)) then
           compp%npetlist = size(petlist)
-          if (size(petlist) > 0) then
-            allocate(compp%petlist(size(petlist)))
-            compp%petlist = petlist
-          endif
-!          print *, 'ESMF_CompConstruct, setting up compp%petlist', size(petlist)
+          allocate(compp%petlist(size(petlist)))
+          compp%petlist = petlist
+!         print *, 'ESMF_CompConstruct, setting up compp%petlist', size(petlist)
         else
           compp%npetlist = 0
+          allocate(compp%petlist(0))
         endif
       
         ! instantiate a default VMPlan
@@ -524,10 +523,8 @@ end function
         endif
         
         ! Deallocate space held for petlist
-        if (compp%npetlist > 0) then
-          deallocate(compp%petlist)
-!          print *, '------------------------- petlist is being deallocated --'
-        endif
+        deallocate(compp%petlist)
+!       print *, '------------------------- petlist is being deallocated --'
 
         ! destruct the VMPlan
         call ESMF_VMPlanDestruct(compp%vmplan)
