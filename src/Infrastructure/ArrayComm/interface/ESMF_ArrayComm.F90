@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.44 2004/05/18 16:13:31 theurich Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.45 2004/06/03 12:18:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_ArrayComm.F90"
 !
 !     ESMF Array Comm module
       module ESMF_ArrayCommMod
@@ -16,36 +17,33 @@
 !==============================================================================
 !
 ! This file contains the Array methods which do communication, and so
-! must be compiled after the comm routines.  These are logically part of
-! the Array class.
+! must be compiled after the comm routines.  These are logically part 
+! of the Array class.
 !
 !------------------------------------------------------------------------------
 #include "ESMF.h"
 
 !------------------------------------------------------------------------------
 !BOPI
-! !MODULE: ESMF_ArrayMod - Manage data arrays uniformly between F90 and C++     
+! !MODULE: ESMF_ArrayCommMod - Data communication routines at the Array level
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt Array} class and 
-!  associated functions and subroutines.  
-!
-! C and C++ arrays are simple pointers to memory.
-! Fortran arrays contain shape and stride definitions and are strongly
-! typed.  To enable interoperability between the languages the C++ code
-! must be able to obtain this information from the Fortran description
-! (which is called the "dope vector" in Fortran), either through a priori
-! knowledge or through query.
+! The code in this file implements the distributed {\tt ESMF\_Array} class 
+! communication routines.  The {\tt ESMF\_Array} class definitions and basic
+! methods are in the Array module.  These routines are broken out into a
+! separate module so that the Route and Grid methods can be compiled 
+! after the basic Array definitions, and before the ArrayComm routines.
 !
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
+      use ESMF_LogErrMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayDataMapMod
       use ESMF_VMMod
-      use ESMF_DELayoutMod    ! ESMF layout class
+      use ESMF_DELayoutMod  
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
       use ESMF_GridTypesMod
@@ -79,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.44 2004/05/18 16:13:31 theurich Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.45 2004/06/03 12:18:32 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -154,14 +152,14 @@
 
 #if 0
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayAllGather - gather a distributed Array
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAllGather
       subroutine ESMF_ArrayAllGatherList(array, delayout, decompids, &
                                          localAxisLengths, globalDimLengths, &
-                                         local_maxlengths, array_out, rc)
+                                         local_maxlengths, gatheredArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
@@ -170,53 +168,45 @@
       integer, dimension(:,:), intent(in) :: localAxisLengths
       integer, dimension(:), intent(in) :: globalDimLengths
       integer, dimension(:), intent(in) :: local_maxlengths
-      type(ESMF_Array), intent(out) :: array_out
+      type(ESMF_Array), intent(out) :: gatheredArray
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Used to gather a distributed Array into a global Array on all DEs.
 !
-!
-!EOP
-! !REQUIREMENTS:
-        integer :: status         ! local error status
-        logical :: rcpresent      ! did user specify rc?
+!EOPI
+
+        integer :: localrc         ! local error status
         integer :: size_decomp, size_axislengths, i
 
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        ! initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_FAILURE
  
-! call c routine to allgather
+        ! call c routine to allgather
         size_decomp = size(decompids)
         size_axislengths = size(localAxisLengths,1) * size(localAxisLengths,2)
         call c_ESMC_ArrayAllGather(array, delayout, decompids, size_decomp, &
                                    localAxisLengths, &
                                    globalDimLengths, local_maxlengths, &
-                                   array_out, status)
+                                   gatheredArray, localrc)
 
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayAllGather returned error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! set return code if user specified it
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayAllGatherList
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGather - Gather a distributed Array
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayGather(array, delayout, decompids, &
                                   global_dimlengths, local_maxlengths, deid, &
-                                  array_out, rc)
+                                  gatheredArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
@@ -225,173 +215,183 @@
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: local_maxlengths
       integer, intent(in) :: deid
-      type(ESMF_Array), intent(out) :: array_out
+      type(ESMF_Array), intent(out) :: gatheredArray
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Used to gather a distributed Array into a global Array on all DEs.
 !
 !
-!EOP
-! !REQUIREMENTS:
-        integer :: status         ! local error status
+!EOPI
+
+        integer :: localrc         ! local error status
         logical :: rcpresent      ! did user specify rc?
         integer :: size_decomp, size_AI
         integer :: i
 
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        ! initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_FAILURE
  
-! call c routine to allgather
+        ! call c routine to allgather
         size_decomp = size(decompids)
         call c_ESMC_ArrayGather(array, delayout, decompids, size_decomp, &
                                 global_dimlengths, local_maxlengths, deid, &
-                                array_out, status)
+                                gatheredArray, localrc)
 
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayGather returned error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! set return code if user specified it
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayGather
 #endif
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGather"
 !BOP
 ! !IROUTINE: ESMF_ArrayGather - gather a distributed Array
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayGather(array, grid, datamap, rootDE, array_out, rc)
+    subroutine ESMF_ArrayGather(array, grid, datamap, rootDE, gatheredArray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_FieldDataMap), intent(in) :: datamap
-      integer, intent(in) :: rootDE
-      type(ESMF_Array), intent(out) :: array_out
-      integer, intent(out), optional :: rc
+    type(ESMF_Array), intent(in) :: array
+    type(ESMF_Grid), intent(in) :: grid
+    type(ESMF_FieldDataMap), intent(in) :: datamap
+    integer, intent(in) :: rootDE
+    type(ESMF_Array), intent(out) :: gatheredArray
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to gather a distributed Array into a single Array on one DE.
+!  Gather a distributed {\tt ESMF\_Array} over multiple DEs into 
+!  a single {\tt ESMF\_Array} on one DE.
 !
+!  The arguments are:
+!     \begin{description}
+!     \item [array]
+!           {\tt ESMF\_Array} containing distributed data to be gathered.
+!     \item [grid]
+!           {\tt ESMF\_Grid} which corresponds to the distributed data.
+!     \item [datamap]
+!           {\tt ESMF\_FieldDataMap} which describes the mapping of the
+!           data onto the cells in the {\tt ESMF\_Grid}.
+!     \item [rootDE]
+!           The DE number on which the resulting gathered {\tt ESMF\_Array}
+!           will be created.  
+!     \item [gatheredArray]
+!           On the {\tt rootDE}, the resulting gathered {\tt ESMF\_Array}.
+!           On all other DEs, an invalid {\tt ESMF\_Array}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
-      integer :: status         ! local error status
-      logical :: rcpresent      ! did user specify rc?
-      integer :: gridrank, datarank
-      integer :: i, j, nDEs
-      type(ESMF_DELayout) :: delayout
-      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
-      integer, dimension(ESMF_MAXDIM) :: decompids
-      integer, dimension(:,:), pointer :: localAxisLengths, tempCCPDEPD
-      integer, dimension(ESMF_MAXDIM) :: dimOrder, dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, size_decomp
-      integer, dimension(ESMF_MAXDIM) :: localMaxDimCount, globalCellDim
-      integer, dimension(:), allocatable :: tempMLCCPD, tempGCCPD
 
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+    integer :: status         ! local error status
+    integer :: gridrank, datarank
+    integer :: i, j, nDEs
+    type(ESMF_DELayout) :: delayout
+    type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+    integer, dimension(ESMF_MAXDIM) :: decompids
+    integer, dimension(:,:), pointer :: localAxisLengths, tempCCPDEPD
+    integer, dimension(ESMF_MAXDIM) :: dimOrder, dimlengths
+    integer, dimension(ESMF_MAXGRIDDIM) :: decomps, size_decomp
+    integer, dimension(ESMF_MAXDIM) :: localMaxDimCount, globalCellDim
+    integer, dimension(:), allocatable :: tempMLCCPD, tempGCCPD
+
+    ! initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_FAILURE
  
-! extract necessary information from the grid
-      call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
-      call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
-      allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
-      allocate( tempMLCCPD(     gridrank), stat=status)
-      allocate(  tempGCCPD(     gridrank), stat=status)
-      allocate(tempCCPDEPD(nDEs,gridrank), stat=status)
+    ! extract necessary information from the grid
+    call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
+    call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
+    allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
+    allocate( tempMLCCPD(     gridrank), stat=status)
+    allocate(  tempGCCPD(     gridrank), stat=status)
+    allocate(tempCCPDEPD(nDEs,gridrank), stat=status)
 
-! Query the datamap and set info for grid so it knows how to match up the
-! array indices and the grid indices.
-      call ESMF_FieldDataMapGet(datamap, dataIndices=dimOrder, &
-                           horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                           rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayAllGatherGrid: FieldDataMapGet returned failure"
-        return
-      endif
+    ! Query the datamap and set info for grid so it knows how to match up the
+    ! array indices and the grid indices.
+    call ESMF_FieldDataMapGet(datamap, dataIndices=dimOrder, &
+                              horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                              rc=status)
+    if(status .NE. ESMF_SUCCESS) then
+      print *, "ERROR in ArrayAllGatherGrid: FieldDataMapGet returned failure"
+      return
+    endif
 
-      call ESMF_GridGet(grid, &
+    call ESMF_GridGet(grid, &
                         horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                         globalCellCountPerDim=tempGCCPD, &
                         cellCountPerDEPerDim=tempCCPDEPD, &
                         maxLocalCellCountPerDim=tempMLCCPD, rc=rc)
-!     call ESMF_GridGet(grid, decomps, rc=status)   !TODO: add decomps
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayAllGatherGrid: GridGet returned failure"
-        return
-      endif
-      size_decomp = size(decompids)
-      decomps(1) = 1    ! TODO: remove this once the grid call is created
-      decomps(2) = 2
+    ! call ESMF_GridGet(grid, decomps, rc=status)   !TODO: add decomps
+    if(status .NE. ESMF_SUCCESS) then
+      print *, "ERROR in ArrayAllGatherGrid: GridGet returned failure"
+      return
+    endif
+    size_decomp = size(decompids)
+    decomps(1) = 1    ! TODO: remove this once the grid call is created
+    decomps(2) = 2
 
-! get the Array sizes
-      call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, &
-                         rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayAllGatherGrid: ArrayGet returned failure"
-        return
-      endif
+    ! get the Array sizes
+    call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
+    if(status .NE. ESMF_SUCCESS) then
+      print *, "ERROR in ArrayAllGatherGrid: ArrayGet returned failure"
+      return
+    endif
 
-! calculate decompids and dimlengths, modified if necessary by dimorders
-      do i=1, datarank
-        decompids(i) = dimorder(i)
-        globalCellDim(i) = dimlengths(i)
-        localMaxDimCount(i) = dimlengths(i)
-        do j=1, nDEs
-          localAxisLengths(j,i) = dimlengths(i)
-        enddo
-        if(dimorder(i).ne.0) then
-          decompids(i) = decomps(dimorder(i))
-          globalCellDim(i) = tempGCCPD(dimorder(i))
-          localMaxDimCount(i) = tempMLCCPD(dimorder(i))
-          do j=1, nDEs
-            localAxisLengths(j,i) = tempCCPDEPD(j,dimorder(i))
-          enddo
-        endif
+    ! calculate decompids and dimlengths, modified if necessary by dimorders
+    do i=1, datarank
+      decompids(i) = dimorder(i)
+      globalCellDim(i) = dimlengths(i)
+      localMaxDimCount(i) = dimlengths(i)
+      do j=1, nDEs
+        localAxisLengths(j,i) = dimlengths(i)
       enddo
+      if(dimorder(i).ne.0) then
+        decompids(i) = decomps(dimorder(i))
+        globalCellDim(i) = tempGCCPD(dimorder(i))
+        localMaxDimCount(i) = tempMLCCPD(dimorder(i))
+        do j=1, nDEs
+          localAxisLengths(j,i) = tempCCPDEPD(j,dimorder(i))
+        enddo
+      endif
+    enddo
 
 
-! call c routine to gather
-        call c_ESMC_ArrayGather(array, delayout, decompids, size_decomp, &
-                                globalCellDim, localMaxDimCount, rootDE, &
-                                array_out, status)
+    ! call c routine to gather
+    call c_ESMC_ArrayGather(array, delayout, decompids, size_decomp, &
+                            globalCellDim, localMaxDimCount, rootDE, &
+                            gatheredArray, status)
 #if 0
         call c_ESMC_ArrayAllGather(array, delayout, decompids, datarank, &
                                    localAxisLengths, globalCellDim, &
-                                   localMaxDimCount, array_out, status)
+                                   localMaxDimCount, gatheredArray, status)
 #endif
 
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayAllGather returned error"
-          return
-        endif
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "c_ESMC_ArrayAllGather returned error"
+      return
+    endif
 
-! Clean up
-        deallocate(localAxisLengths)
-        deallocate(      tempMLCCPD)
-        deallocate(       tempGCCPD)
-        deallocate(     tempCCPDEPD)
+    ! Clean up
+    deallocate(localAxisLengths)
+    deallocate(      tempMLCCPD)
+    deallocate(       tempGCCPD)
+    deallocate(     tempCCPDEPD)
 
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+    ! set return code if user specified it
+    if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayGather
+    end subroutine ESMF_ArrayGather
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetAllAxisIndices"
 !BOPI
 ! !IROUTINE: ESMF_ArrayGetAllAxisIndices - Get all AIs associated with a Grid
 !
@@ -413,8 +413,9 @@
 !    associated with a {\tt ESMF\_Grid}.  This computes the values
 !    instead of broadcasting them.
 !
+! %TODO: add missing description section here
+!
 !EOPI
-! !REQUIREMENTS:
 
       integer :: status, nDEs, i, j, gridrank, datarank
       integer, dimension(:), allocatable :: dimOrder
@@ -511,7 +512,9 @@
       end subroutine ESMF_ArrayGetAllAxisIndices
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayHaloDeprecated"
+!BOPI
 ! !IROUTINE: ESMF_ArrayHalo - Halo an Array
 !
 ! !INTERFACE:
@@ -532,9 +535,11 @@
 ! !DESCRIPTION:
 ! Used to halo an Array.
 !
+!  % OLD interface - replaced by ArrayHaloRun, but may still be used
+!  %  by some code or tests.  Verify (also with users) before removing.
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
+
         integer :: status         ! local error status
         logical :: rcpresent      ! did user specify rc?
         integer :: size_decomp
@@ -562,50 +567,53 @@
         end subroutine ESMF_ArrayHaloDeprecated
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayHaloNew"
 !BOP
 ! !IROUTINE: ESMF_ArrayHalo - Perform a halo operation
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayHalo()
-      subroutine ESMF_ArrayHaloNew(array, routehandle, blocking, commhandle, rc)
+    ! Private name; call using ESMF_ArrayHalo()
+    subroutine ESMF_ArrayHaloNew(array, routehandle, blocking, commhandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
-      type(ESMF_RouteHandle), intent(in) :: routehandle
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      integer, intent(out), optional :: rc
+    type(ESMF_Array), intent(inout) :: array
+    type(ESMF_RouteHandle), intent(in) :: routehandle
+    type(ESMF_BlockingFlag), intent(in), optional :: blocking
+    type(ESMF_CommHandle), intent(inout), optional :: commhandle
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Perform a {\tt Halo} operation over the data in an {\tt ESMF\_Array}.
-!     This routine updates the data inside the {\tt ESMF\_Array} in place.
-!     It uses a precomputed {\tt ESMF\_Route} for the communications
-!     pattern.
+!   Perform a halo operation over the data in an {\tt ESMF\_Array}.
+!   This routine updates the data inside the {\tt ESMF\_Array} in place.
+!   It uses a precomputed {\tt ESMF\_Route} for the communications pattern.
+!   (See {\tt ESMF\_ArrayHaloPrecompute()} for how to precompute and 
+!   associate an {\tt ESMF\_Route} with an {\tt ESMF\_RouteHandle}).
 !
-!     \begin{description}
-!     \item [array]
-!           {\tt ESMF\_Array} containing data to be halo'd.
-!     \item [route]
-!           {\tt ESMF\_RouteHandle} has been precomputed.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
-!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
-!           {\tt ESMF\_NONBLOCKING}.
-!     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!           argument is required.  Information about the pending operation
-!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!           or waited for later.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
+!   \begin{description}
+!   \item [array]
+!         {\tt ESMF\_Array} containing data to be haloed.
+!   \item [routehandle]
+!         {\tt ESMF\_RouteHandle} which was returned from an
+!         {\tt ESMF\_ArrayHaloPrecompute()} call.
+!   \item [{[blocking]}]
+!         Optional argument which specifies whether the operation should
+!         wait until complete before returning or return as soon
+!         as the communication between DEs has been scheduled.
+!         If not present, default is to do synchronous communications.
+!         Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!         {\tt ESMF\_NONBLOCKING}.
+!   \item [{[commhandle]}]
+!         If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!         argument is required.  Information about the pending operation
+!         will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!         or waited for later.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
+
       integer :: status         ! local error status
       logical :: rcpresent      ! did user specify rc?
       type(ESMF_LocalArray) :: local_array
@@ -635,6 +643,8 @@
         end subroutine ESMF_ArrayHaloNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayHaloRelease"
 !BOP
 ! !IROUTINE: ESMF_ArrayHaloRelease - release the information stored about this Halo operation
 !
@@ -646,16 +656,16 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Release the information stored about this Halo operation.
+!     When the precomputed information about a halo operation is no longer
+!     needed, this routine releases the associated resources.
 !
 !     \begin{description}
 !     \item [routehandle]
-!           {\tt ESMF\_RouteHandle} associated with Halo that is no longer
-!           needed.
+!           {\tt ESMF\_RouteHandle} associated with halo operation which
+!           should be released.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!
 !
 !EOP
 
@@ -664,6 +674,8 @@
       end subroutine ESMF_ArrayHaloRelease
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayHaloStore"
 !BOP
 ! !IROUTINE: ESMF_ArrayHaloStore - Store a halo operation
 !
@@ -680,35 +692,35 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Perform a {\tt Halo} operation over the data
-!     in an {\tt ESMF\_Array}.  This routine updates the data
-!     inside the {\tt ESMF\_Array} in place.  It uses the {\tt ESMF\_Grid}
-!     and {\tt ESMF\_FieldDataMap} as a template to understand how this
-!     {\tt ESMF\_Array} relates to {\tt ESMF\_Array}s on other {\tt DE}s.
+!     Precompute the data movements needed to 
+!     perform a halo operation over the data in an {\tt ESMF\_Array}.  
+!     It associates this information with the {\tt routehandle}, which 
+!     should then provided to {\tt ESMF\_ArrayHalo()} at execution time.
+!     The {\tt ESMF\_Grid} and {\tt ESMF\_FieldDataMap} are used as
+!     templates to understand how this {\tt ESMF\_Array} relates 
+!     to {\tt ESMF\_Array}s on other DEs.
 !
 !     \begin{description}
 !     \item [array]
-!           {\tt ESMF\_Array} containing data to be halo'd.
+!           {\tt ESMF\_Array} containing data to be haloed.
 !     \item [grid]
-!           {\tt ESMF\_Grid} which matches how this array was decomposed.
+!           {\tt ESMF\_Grid} which matches how this data was decomposed.
 !     \item [datamap]
-!           {\tt ESMF\_FieldDataMap} which matches how this array relates to the
-!           given grid.
+!           {\tt ESMF\_FieldDataMap} which matches how the data in the
+!           {\tt ESMF\_Array} relates to the given {\tt ESMF\_Grid}.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} is returned to be used during the
-!           execution of the Halo.
+!           execution of the halo operation.
 !     \item [{[halodirection]}]
 !           {\tt ESMF\_HaloDirection} to indicate which of the boundaries
 !           should be updated.  If not specified, all boundaries are updated.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
+
       integer :: status         ! local error status
-      logical :: rcpresent      ! did user specify rc?
       type(ESMF_DELayout) :: delayout
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
@@ -723,12 +735,7 @@
       logical :: hascachedroute    ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
  
       ! TODO: all this code could be moved to the C++ side once Grid has
       !       an interface
@@ -838,12 +845,14 @@
       if (associated( gl_src_AI)) deallocate(gl_src_AI, stat=status)
       if (associated( gl_dst_AI)) deallocate(gl_dst_AI, stat=status)
 
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+      ! set return code if user specified it
+      if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayHaloStore
+      end subroutine ESMF_ArrayHaloStore
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistDeprecated"
 !BOPI
 ! !IROUTINE: ESMF_ArrayRedist - Redistribute an Array
 !
@@ -867,23 +876,19 @@
 ! !DESCRIPTION:
 ! Used to redistribute an Array.
 !
+!  % TODO: verify that all calls to this version have been removed
+!  % and are not being used by user code, and remove this routine.
 !
 !EOPI
-! !REQUIREMENTS:
+
         integer :: status         ! local error status
-        logical :: rcpresent      ! did user specify rc?
         integer :: size_rank_trans
         integer :: size_decomp
 
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        ! initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_FAILURE
 
-! call c routine to query index
+        ! call c routine to query index
         size_rank_trans = size(rank_trans)
         size_decomp = size(decompids)
         call c_ESMC_ArrayRedist(array, delayout, globalStart, global_dimlengths, &
@@ -894,12 +899,14 @@
           return
         endif
 
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! set return code if user specified it
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayRedistDeprecated
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistNew"
 !BOP
 ! !IROUTINE: ESMF_ArrayRedist - Redistribute an Array
 !
@@ -917,7 +924,18 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to redistribute an Array.
+!  Redistribute the data in one set of {\tt ESMF\_Array}s to another
+!  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
+!  so during the {\tt ESMF\_ArrayRedistPrecompute()} call the 
+!  {\tt ESMF\_Grid}s must have identical coordinates.  
+!  The distribution of the {\tt ESMF\_Grid} can be over different
+!  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMaps} can differ.
+!  The {\tt routehandle} argument must be the one which was associated
+!  with the precomputed data movements during the precompute operation, and
+!  if the data movement is identical for different collections of
+!  {\tt ESMF\_Array}s, the same {\tt routehandle} can be supplied during
+!  multiple calls to this execution routine, specifying a different set of
+!  source and destination {\tt ESMF\_Array}s each time.
 !
 !     \begin{description}
 !     \item [srcArray]
@@ -925,7 +943,8 @@
 !     \item [dstArray]
 !           {\tt ESMF\_Array} containing results.
 !     \item [routehandle]
-!           {\tt ESMF\_RouteHandle} has been precomputed.
+!           {\tt ESMF\_RouteHandle} precomputed by 
+!           {\tt ESMF\_ArrayRedistPrecompute()}.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
@@ -940,24 +959,17 @@
 !           or waited for later.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS:
+
       integer :: status         ! local error status
-      logical :: rcpresent      ! did user specify rc?
       type(ESMF_LocalArray) :: dstLocalArray, srcLocalArray
       type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
 
@@ -970,12 +982,14 @@
         return
       endif
 
-! set return code if user specified it
-      if (rcpresent) rc = ESMF_SUCCESS
+      ! set return code if user specified it
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayRedistNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistRelease"
 !BOP
 ! !IROUTINE: ESMF_ArrayRedistRelease - Release the information stored about this Redist operation
 !
@@ -987,17 +1001,17 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Release the information stored about this Redist operation.
+!     When the precomputed information about a 
+!     redistribution operation is no longer
+!     needed, this routine releases the associated resources.
 !
 !     \begin{description}
 !     \item [routehandle]
-!           {\tt ESMF\_RouteHandle} associated with Redist that is no longer
-!           needed.
+!           {\tt ESMF\_RouteHandle} associated with redist operation which
+!           should be released.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!
-!
 !
 !EOP
 
@@ -1006,6 +1020,8 @@
       end subroutine ESMF_ArrayRedistRelease
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistStore"
 !BOP
 ! !IROUTINE: ESMF_ArrayRedistStore - Compute information about a data Redistribution
 !
@@ -1026,7 +1042,16 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!  Compute and store information about this redistribute operation.
+!  Precompute and associate the required data movements to redistribute
+!  data over one set of {\tt ESMF\_Array}s to another
+!  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
+!  so both {\tt ESMF\_Grid}s must have identical coordinates.
+!  The distribution of the {\tt ESMF\_Grid}s can be over different
+!  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMap}s can differ.
+!  The {\tt routehandle} argument is associated with the stored information
+!  and must be supplied to {\tt ESMF\_ArrayRedist()} to execute the
+!  operation.  Call {\tt ESMF\_ArrayRedistRelease()} when this information
+!  is no longer required.
 !
 !  The arguments are:
 !   \begin{description}
@@ -1035,28 +1060,28 @@
 !   \item[srcGrid]
 !    {\tt ESMF\_Grid} describing the grid on which the source data is arranged.
 !   \item[srcDataMap]
-!    {\tt ESMF\_DataMap} describing how the source data maps onto the grid.
+!    {\tt ESMF\_FieldDataMap} describing how the source data maps onto the grid.
 !   \item[dstArray]
 !    {\tt ESMF\_Array} where the destination data will be put.
 !   \item[dstGrid]
-!    {\tt ESMF\_Grid} describing the grid on which the destination data is arranged.
+!    {\tt ESMF\_Grid} describing the grid on which the destination data is 
+!    arranged.
 !   \item[dstDataMap]
-!    {\tt ESMF\_DataMap} describing how the destination data maps onto the grid.
+!    {\tt ESMF\_FieldDataMap} describing how the destination data maps 
+!    onto the grid.
 !   \item[parentDElayout]
-!    {\tt ESMF\_DELayout} object which includes all {\tt DE}s in both the
+!    {\tt ESMF\_DELayout} object which includes all DEs in both the
 !    source and destination grids.
 !   \item [routehandle]
-!    Returned {\tt ESMF\_RouteHandle} which identifies this communication pattern.
+!    Returned {\tt ESMF\_RouteHandle} which identifies this 
+!    communication pattern.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!
-!
 !EOP
-! !REQUIREMENTS:
+
       integer :: status         ! local error status
-      logical :: rcpresent      ! did user specify rc?
       type(ESMF_DELayout) :: dstDElayout, srcDElayout
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI, srcCompAI, &
@@ -1076,12 +1101,7 @@
       logical :: hascachedroute     ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! create the routehandle
       routehandle = ESMF_RouteHandleCreate(status)
@@ -1244,56 +1264,69 @@
       if (associated(       dstTLocalAI)) deallocate(dstTLocalAI)
       if (associated(       srcTLocalAI)) deallocate(srcTLocalAI)
 
-! set return code if user specified it
-      if (rcpresent) rc = ESMF_SUCCESS
+      ! set return code if user specified it
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayRedistStore
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayScatter"
 !BOP
-! !IROUTINE: ESMF_ArrayScatter - Scatter a single Array
+! !IROUTINE: ESMF_ArrayScatter - Scatter a single Array across multiple DEs
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayScatter(array, delayout, decompids, deid, array_out, rc)
+      subroutine ESMF_ArrayScatter(array, delayout, decompids, rootDE, &
+                                   scatteredArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
       type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
-      integer, intent(in) :: deid
-      type(ESMF_Array), intent(out) :: array_out
+      integer, intent(in) :: rootDE
+      type(ESMF_Array), intent(out) :: scatteredArray
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to scatter a single Array into a distributed Array across all DEs.
+!  Scatter a single {\tt ESMF\_Array} on one DE into
+!  a distributed {\tt ESMF\_Array} over multiple DEs.
 !
+!  The arguments are:
+!     \begin{description}
+!     \item [array]
+!           {\tt ESMF\_Array} containing undistributed data to be scattered.
+!     \item [grid]
+!           {\tt ESMF\_Grid} which will correspond to the distributed data.
+!     \item [datamap]
+!           {\tt ESMF\_FieldDataMap} which describes the mapping of the
+!           data onto the cells in the {\tt ESMF\_Grid}.
+!     \item [rootDE]
+!           The DE number on which the source {\tt ESMF\_Array} is located.
+!     \item [scatteredArray]
+!           The resulting distributed {\tt ESMF\_Array} after scattering.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
-        integer :: status         ! local error status
-        logical :: rcpresent      ! did user specify rc?
+
+        integer :: localrc         ! local error status
         integer :: size_decomp
 
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        ! initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_FAILURE
  
-! call c routine to allgather
+        ! call c routine to allgather
         size_decomp = size(decompids)
         call c_ESMC_ArrayScatter(array, delayout, decompids, size_decomp, &
-                                 deid, array_out, status)
+                                 rootDE, scatteredArray, localrc)
 
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayScatter returned error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! set return code if user specified it
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayScatter
 
