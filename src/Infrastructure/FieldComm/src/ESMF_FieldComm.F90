@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.44 2004/06/11 18:10:54 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.45 2004/06/14 22:51:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.44 2004/06/11 18:10:54 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.45 2004/06/14 22:51:32 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -317,6 +317,7 @@
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_HaloDirection), intent(in), optional :: halodirection
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -347,6 +348,12 @@
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
+!     \item [{[halodirection]}]
+!           Optional argument to restrict halo direction to a subset of the
+!           possible halo directions.  If not specified, the halo is executed
+!           along all boundaries.  This option is used only in the situation where
+!           the halo must be precomputed at this time.
+!           (This feature is not yet supported.)
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -356,6 +363,8 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      integer :: htype
+      logical :: allInOne, dummy
       type(ESMF_FieldType) :: ftypep              ! field type info
    
       ! Initialize return code   
@@ -366,7 +375,24 @@
         rc = ESMF_FAILURE
       endif     
 
+      ! Initialize other variables
       ftypep = field%ftypep
+      allInOne = .false.
+
+      ! if the routehandle has not been precomputed, do so now
+      call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
+      if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
+        allInOne = .true.
+        dummy = ESMF_LogWrite("uninitialized routehandle: calling FieldHaloStore", &
+                              ESMF_LOG_WARNING, &
+                              ESMF_CONTEXT)
+        call ESMF_FieldHaloStore(field, routehandle, halodirection, status)
+      elseif (htype .ne. ESMF_HALOHANDLE) then
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                      "routehandle not defined for halo", &
+                                      ESMF_CONTEXT, rc)
+        return
+      endif
 
       call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, &
                              blockingflag, commhandle, rc=status)
@@ -509,7 +535,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedist(srcField, dstField, routehandle, blockingflag, &
-                                  commhandle, rc)
+                                  commhandle, parentDelayout, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
@@ -517,6 +543,7 @@
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_DELayout), intent(in), optional :: parentDelayout
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -555,6 +582,13 @@
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
+!     \item [{[parentDelayout]}]
+!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s,
+!           most commonly the layout of the Coupler if the redistribution is
+!           inter-component, but could also be the individual layout for a
+!           component if the redistribution is intra-component.  This argument
+!           is only used in the situation where the routehandle has not been
+!           precomputed yet.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -564,6 +598,8 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      integer :: htype
+      logical :: allInOne, dummy
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code   
@@ -574,8 +610,32 @@
         rc = ESMF_FAILURE
       endif     
 
+      ! Initialize other variables
       dstFtypep => dstField%ftypep
       srcFtypep => srcField%ftypep
+      allInOne = .false.
+
+      ! if the routehandle has not been precomputed, do so now
+      call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
+      if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
+        allInOne = .true.
+        dummy = ESMF_LogWrite("uninitialized routehandle: calling FieldRedistStore", &
+                              ESMF_LOG_WARNING, &
+                              ESMF_CONTEXT)
+        if (.not. present(parentDelayout)) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                        "parentDelayout needed to precompute redist", &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
+        call ESMF_FieldRedistStore(srcField, dstField, parentDelayout, &
+                                   routehandle, status)
+      elseif (htype .ne. ESMF_REDISTHANDLE) then
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                      "routehandle not defined for redist", &
+                                      ESMF_CONTEXT, rc)
+        return
+      endif
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
@@ -583,6 +643,10 @@
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+      ! if this is a redist call with an uninitialized routehandle, then
+      ! destroy it before returning    TODO:  is this right?
+      if (allInOne) call ESMF_FieldRedistRelease(routehandle, status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -994,13 +1058,13 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      logical :: allInOne
+      logical :: allInOne, dummy
       type(ESMF_DELayout) :: srcDelayout, dstDelayout
       !type(ESMF_DELayout) :: parentDelayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: my_src_DE, my_dst_DE
+      integer :: my_src_DE, my_dst_DE, htype
       !integer :: my_DE
       type(ESMF_Array) :: src_array, dst_array
       type(ESMF_Grid) :: src_grid, dst_grid
@@ -1018,15 +1082,20 @@
       allInOne = .false.
 
       ! if the routehandle has not been precomputed, do so now
-      ! TODO: this is not quite the right way to do this -- add a status
-      !       to routehandle that says it's ready
-      call ESMF_RouteHandleValidate(routehandle, rc=status)
-      if (status .ne. ESMF_SUCCESS) then
+      call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
+      if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
         allInOne = .true.
-        ! TODO:  add error handling, write a message to the log file
+        dummy = ESMF_LogWrite("uninitialized routehandle: calling FieldRegridStore", &
+                              ESMF_LOG_WARNING, &
+                              ESMF_CONTEXT)
         call ESMF_FieldRegridStore(srcField, dstField, parentDelayout, &
                                    routehandle, regridmethod, regridnorm, &
                                    srcMask, dstMask, status)
+      elseif (htype .ne. ESMF_REGRIDHANDLE) then
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                      "routehandle not defined for regrid", &
+                                      ESMF_CONTEXT, rc)
+        return
       endif
 
       ! Our DE number in the parent layout
@@ -1519,8 +1588,8 @@
                         globalStartPerDEPerDim=globalStartPerDEPerDim, &
                         periodic=periodic, rc=status)
       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! set up things we need to find a cached route or precompute one
       call ESMF_ArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%grid, &
@@ -1528,20 +1597,20 @@
                                        compindex=src_AI, rc=status)       
 
       ! translate AI's into global numbering
-      call ESMF_GridLocalToGlobalIndex(ftypep%grid, horzRelLoc=horzRelLoc, &
-                                       vertRelLoc=vertRelLoc, &
-                                       localAI2D=dst_AI, &
-                                       globalAI2D=gl_dst_AI, rc=status)
+      call ESMF_GridLocalToGlobalAI(ftypep%grid, horzRelLoc=horzRelLoc, &
+                                    vertRelLoc=vertRelLoc, &
+                                    localAI2D=dst_AI, &
+                                    globalAI2D=gl_dst_AI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      call ESMF_GridLocalToGlobalIndex(ftypep%grid, horzRelLoc=horzRelLoc, &
-                                       vertRelLoc=vertRelLoc, &
-                                       localAI2D=src_AI, &
-                                       globalAI2D=gl_src_AI, rc=status)
+      call ESMF_GridLocalToGlobalAI(ftypep%grid, horzRelLoc=horzRelLoc, &
+                                    vertRelLoc=vertRelLoc, &
+                                    localAI2D=src_AI, &
+                                    globalAI2D=gl_src_AI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.  Note the confusing ordering of args;
