@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.32 2003/07/01 20:41:34 nscollins Exp $ 
+# $Id: base_variables,v 1.33 2003/07/01 21:16:27 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -32,12 +32,12 @@ F_FREENOCPP             = -qsuffix=f=F
 F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f        
 # ######################### C and Fortran compiler ########################
 #
-C_CC			= mpcc_r -qsmp=omp 
-C_FC			= mpxlf90_r -qsmp=omp
+C_CC			= mpcc_r 
+C_FC			= mpxlf90_r 
 C_FC_MOD		= -I
 C_CLINKER_SLFLAG	= -L
 C_FLINKER_SLFLAG	= -L
-C_CLINKER		= mpcc_r -qsmp=omp -bmaxdata:0x70000000  -qcheck 
+C_CLINKER		= mpcc_r -bmaxdata:0x70000000  -qcheck 
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
 C_FLINKER		= mpxlf90_r -bmaxdata:0x70000000 -lC_r -qcheck 
 C_CCV			= unknown
