@@ -1,39 +1,41 @@
-! $Id: ESMF_SysTest74559.F90,v 1.1 2003/04/17 17:31:22 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.2 2003/04/25 22:11:14 nscollins Exp $
+!
+! ESMF Coupled Flow Demo
 !
 ! System test code #74559
 
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
 !BOP
 !
 ! !DESCRIPTION:
 ! System test number 74559.  
-!   2 components and 1 coupler, one-way coupling.
+!   2 components and 1 coupler, two-way coupling.
 !   Flow application.
 !
 !
 !\begin{verbatim}
 
-    program ESMF_SysTest74559
+    program ESMF_CoupledFlowDemo
 
     ! ESMF Framework module
     use ESMF_Mod
     
-    use HeatMod, only : HeatMod_register
-    use FlowMod, only : FlowMod_register
-    use  CplMod, only : Coupler_register
+    use HeatFlowMod, only : HeatMod_register
+    use     FlowMod, only : FlowMod_register
+    use      CplMod, only : Coupler_register
 
     implicit none
     
     ! Local variables
-    integer :: de_id, ndes, rc, delist(4)
+    integer :: de_id, ndes, rc, delist(8)
     integer :: mid, quart
-    character(len=ESMF_MAXSTR) :: aname, cname1, cname2, cplname
-    type(ESMF_DELayout) :: layout1, layout2, layout3
-    type(ESMF_State) :: c1exp, c2imp, cplstate
+    character(len=ESMF_MAXSTR) :: aname, cnameHI, cnameFS, cplname
+    type(ESMF_DELayout) :: layoutApp, layoutHI, layoutFS
+    type(ESMF_State) :: HIimp, HIexp, FSimp, FSexp, cplstateF2H, cplstateH2F
     type(ESMF_AppComp) :: app
-    type(ESMF_GridComp) :: comp1, comp2
+    type(ESMF_GridComp) :: compHI, compFS
     type(ESMF_CplComp) :: cpl
 
     ! instantiate a clock, a calendar, and timesteps
@@ -45,16 +47,16 @@
     integer(ESMF_IKIND_I8) :: advanceCount
 
         
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
     print *, "System Test #74559:"
 
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !    Create section
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !
 
     ! Create the top level application component.
@@ -63,10 +65,10 @@
     print *, "Created component ", trim(aname), ",  rc =", rc
 
     ! Query application for layout.
-    call ESMF_AppCompGet(app, layout=layout1, rc=rc)
-    call ESMF_DELayoutPrint(layout1, rc=rc)
+    call ESMF_AppCompGet(app, layout=layoutApp, rc=rc)
+    call ESMF_DELayoutPrint(layoutApp, rc=rc)
 
-    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    call ESMF_DELayoutGetNumDEs(layoutApp, ndes, rc)
     if (ndes .lt. 4) then
         print *, "This system test needs to run at least 4-way, current np = ", ndes
         goto 10
@@ -81,47 +83,47 @@
     ! Create the 2 model components and coupler.  The first component will
     !  run on a 2 x N/2 layout, the second will be on a 4 x N/4 layout.
     !  The coupler will run on the original default 1 x N layout.
-    cname1 = "Heat model"
+    cnameHI = "Heat injector model"
     delist = (/ (i=0, ndes-1) /)
-    layout2 = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
-    comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
-    print *, "Created component ", trim(cname1), "rc =", rc
-    call ESMF_DELayoutPrint(layout2, rc=rc)
+    layoutHI = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
+    HIcomp = ESMF_GridCompCreate(cnameHS, layout=layoutHI, rc=rc)
+    print *, "Created component ", trim(cnameHS), "rc =", rc
+    call ESMF_DELayoutPrint(layoutHI, rc=rc)
 
-    cname2 = "Flow model"
-    delist = (/ (i=mid, ndes-1) /)
-    layout3 = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
-    comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
-    print *, "Created component ", trim(cname2), "rc =", rc
-    call ESMF_DELayoutPrint(layout3, rc=rc)
+    cnameFS = "Flow solver model"
+    delist = (/ (i=0, ndes-1) /)
+    layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
+    FScomp = ESMF_GridCompCreate(cnameFS, layout=layoutFS, rc=rc)
+    print *, "Created component ", trim(cnameFS), "rc =", rc
+    call ESMF_DELayoutPrint(layoutFS, rc=rc)
 
-    cplname = "One-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, layout=layout1, rc=rc)
+    cplname = "Two-way coupler"
+    cpl = ESMF_CplCompCreate(cplname, layout=layoutApp, rc=rc)
     print *, "Created component ", trim(cplname), ", rc =", rc
 
 
     print *, "Comp Creates finished"
 
 
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !  Register section
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-      call ESMF_GridCompSetServices(comp1, HeatMod_register, rc)
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+      call ESMF_GridCompSetServices(HIcomp, HeatMod_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
 
-      call ESMF_GridCompSetServices(comp2, FlowMod_register, rc)
+      call ESMF_GridCompSetServices(FScomp, FlowMod_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
 
       call ESMF_CplCompSetServices(cpl, Coupler_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
 
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !  Create and initialize a clock.
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
@@ -141,105 +143,123 @@
 
 
  
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !  Init section
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
  
-      c1exp = ESMF_StateCreate("Heat Source", ESMF_STATEEXPORT, cname1)
-      call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, rc=rc)
+      HIimp = ESMF_StateCreate("Heat Injection Feedback", ESMF_STATEIMPORT, &
+                               cnameHI)
+      HIexp = ESMF_StateCreate("Heat Injection Source", ESMF_STATEEXPORT, &
+                               cnameHI)
+
+      call ESMF_GridCompInitialize(HIcomp, HIimp, HIexp, clock, rc=rc)
       print *, "Heat Model Initialize finished, rc =", rc
  
-      c2imp = ESMF_StateCreate("Heat Injection", ESMF_STATEIMPORT, cname2)
-      call ESMF_GridCompInitialize(comp2, importstate=c2imp, clock=clock, rc=rc)
+      FSimp = ESMF_StateCreate("Flow Solver Input", ESMF_STATEIMPORT, &
+                               cnameFS)
+      FSexp = ESMF_StateCreate("Flow Solver Feedback ", ESMF_STATEEXPORT, &
+                                cnameFS)
+
+      call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, rc=rc)
       print *, "Flow Model Initialize finished, rc =", rc
 
-      cplstate = ESMF_StateCreate("Coupler States", ESMF_STATELIST, cplname)
-      call ESMF_StateAddData(cplstate, c1exp, rc=rc)
-      call ESMF_StateAddData(cplstate, c2imp, rc=rc)
+      cplstateH2F = ESMF_StateCreate("Coupler States Heat to Flow", &
+                                                      ESMF_STATELIST, cplname)
+      call ESMF_StateAddData(cplstate, HIexp, rc=rc)
+      call ESMF_StateAddData(cplstate, FSimp, rc=rc)
  
-      call ESMF_CplCompInitialize(cpl, statelist=cplstate, clock=clock, rc=rc)
+      cplstateF2H = ESMF_StateCreate("Coupler States Flow to Heat", &
+                                                      ESMF_STATELIST, cplname)
+      call ESMF_StateAddData(cplstate, FSimp, rc=rc)
+      call ESMF_StateAddData(cplstate, HIexp, rc=rc)
+ 
+      call ESMF_CplCompInitialize(cpl, cplstateH2F, clock, rc=rc)
       print *, "Coupler Initialize finished, rc =", rc
  
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !     Run section
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-        call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, rc=rc)
+        call ESMF_GridCompRun(HIcomp, HIimp, HIexp, clock, rc=rc)
         print *, "Heat Model Run returned, rc =", rc
   
-        call ESMF_CplCompRun(cpl, statelist=cplstate, clock=clock, rc=rc)
+        call ESMF_CplCompRun(cpl, cplstateH2F, clock, rc=rc)
         print *, "Coupler Run returned, rc =", rc
   
-        call ESMF_GridCompRun(comp2, importstate=c2imp, clock=clock, rc=rc)
+        call ESMF_GridCompRun(FScomp, FSimp, FSexp, clock, rc=rc)
         print *, "Flow Model Run returned, rc =", rc
 
+        call ESMF_CplCompRun(cpl, cplstateF2H, clock, rc=rc)
+        print *, "Coupler Run returned, rc =", rc
+  
         call ESMF_ClockAdvance(clock, rc=rc)
-        call ESMF_ClockPrint(clock, rc=rc)
 
       enddo
  
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !     Finalize section
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_GridCompFinalize(comp1, exportstate=c1exp, clock=clock, rc=rc)
+      call ESMF_GridCompFinalize(HIcomp, HIimp, HIexp, clock, rc=rc)
       print *, "Heat Model Finalize finished, rc =", rc
 
-      call ESMF_GridCompFinalize(comp2, importstate=c2imp, clock=clock, rc=rc)
+      call ESMF_GridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
       print *, "Flow Model Finalize finished, rc =", rc
 
-      call ESMF_CplCompFinalize(cpl, statelist=cplstate, clock=clock, rc=rc)
+      call ESMF_CplCompFinalize(cpl, cplstate, clock, rc=rc)
       print *, "Coupler Finalize finished, rc =", rc
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
-
+      call ESMF_DELayoutGetDEID(layoutApp, de_id, rc)
 
       print *, "------------------------------------------------------------"
       print *, "------------------------------------------------------------"
-      print *, "Test finished, de_id = ", de_id
+      print *, "Test finished, DE id = ", de_id
       print *, "------------------------------------------------------------"
       print *, "------------------------------------------------------------"
 
       print *, "Comp Finalize returned"
 
 !
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !     Destroy section
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_StateDestroy(c1exp, rc)
-      call ESMF_StateDestroy(c2imp, rc)
-      call ESMF_StateDestroy(cplstate, rc)
+      call ESMF_StateDestroy(HIimp, rc)
+      call ESMF_StateDestroy(HIexp, rc)
+      call ESMF_StateDestroy(FSimp, rc)
+      call ESMF_StateDestroy(FSexp, rc)
+      call ESMF_StateDestroy(cplstateH2F, rc)
+      call ESMF_StateDestroy(cplstateF2H, rc)
 
-      call ESMF_GridCompDestroy(comp1, rc)
-      call ESMF_GridCompDestroy(comp2, rc)
+      call ESMF_GridCompDestroy(HIcomp, rc)
+      call ESMF_GridCompDestroy(FScomp, rc)
       call ESMF_CplCompDestroy(cpl, rc)
 
-      call ESMF_DELayoutDestroy(layout2, rc)
-      call ESMF_DELayoutDestroy(layout3, rc)
+      call ESMF_DELayoutDestroy(layoutHI, rc)
+      call ESMF_DELayoutDestroy(layoutFS, rc)
 
       call ESMF_AppCompDestroy(app, rc)
       print *, "All Destroy routines done"
 
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-10    print *, "System Test #74559 complete!"
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+10    print *, "Coupled Flow Demo complete!"
 
-      end program ESMF_SysTest74559
+      end program ESMF_CoupledFlowDemo
     
 !\end{verbatim}
     
