@@ -1,36 +1,46 @@
+\section{Utility Routines}
+
+\subsection{Introduction}
+
+Utilities that may be utilitized by any other class in the ESMF.  
+Collecting these functions into a base-level utility set helps to 
+avoid circular referencing.
+
+These routines are callable by user level code as well.
+
 Other stuff for in here: log, error
 
-\subsubsection{Original Layout (ESMF\_Layout)}
-\label{sec:olayout} 
+More on time manager.
+
+\subsection{Overview}
+
+<< some stuff here >>
+
+\subsection{Class Details}
+
+\subsubsection{Layout (ESMF\_Layout)}
+\label{sec:layout} 
 \begin{description}
-\item [Note] << This is the original description in the doc; i've updated
-it below.  comments?? nsc. >>
 \item [Description] A layout is a description of a computational domain that
 may describe the decomposition of an Application, a Component, a Field Group, a Field, or 
 a Distributed Grid.
 If no Layout is specified for an object, it can inherit its layout from an object
 higher in the data hierarchy.  
-\item [Function] The Layout class ...
-\end{description}
-
-\subsubsection{Layout (ESMF\_Layout)}
-\label{sec:layout} 
-\begin{description}
-\item [Description] A Layout is a description of the decomposition of
-a Distributed Grid across multiple physical processors or processing elements.
-A single Distributed Grid can have multiple Layouts, each describing a different
-logical decomposition for different purposes.
-\item [Function] The Layout class maintains the mapping of 
-subsets of the entire logical grid to processing elements.
+\item [Function] The Layout class maintains an N-dimensional set of decomposition
+elements.  It provides methods for querying the set and requesting different
+types of decompositions.  It maintains the mapping of tasks to decompositions.
 \end{description}
 
 \subsubsection{Processor Element list (ESMF\_PElist)}
 \label{sec:pelist} 
 \begin{description}
-\item [Description] A Processor Element list contains a list of Processing Elements (PEs) 
-available to participate in the computation.  It includes a unique identifier for each PE, 
+\item [Description] A Processor Element list is a list of physical processor IDs
+available to participate in the computation.  
+It includes a unique identifier for each PE which may differ from the
+hardware processor ID, 
 information about what memory or communication groupings it belongs to (e.g. subsets 
-of PEs which share the same physical memory), and other identifiers for virtual resources.  
+of PEs which share the same physical memory), 
+and other identifiers for virtual resources.  
 \item [Function] The PElist class encapsulates information needed to schedule
 jobs in parallel, and is aggregated into the Layout class (see Section~\ref{layout}).
 It provides query methods to the Layout object, and some limited query methods
@@ -56,23 +66,6 @@ The MachineModel class does expose some limited query methods to the application
 to allow for the possibility of making run-time choices of algorithms based on hardware type.
 \end{description}
 
-\subsubsection{Basic Utilities (ESMF\_BasicUtil)} 
-\begin{description}
-\item [Description] Utilities that may be utilitized by any other class in the ESMF.  
-Collecting these functions into a base-level utility set helps to 
-avoid circular referencing.
-\item [Function] 
-\end{description}
-
-\subsubsection{Basic Communications (ESMF\_BasicComm)}
-\begin{description}
-\item [Description] This library is a wrapper for MPI and other vendor-supplied 
-message passing libraries.
-\item [Function] The Basic Communication library provides a generic interface
-and efficient communications for the ESMF.  Methods include scatter, gather, send,
-receive, synchronize. 
-\end{description}
-
 \subsubsection{ (ESMF\_Machine)} 
 \begin{description}
 \item [Note] << is this the same as my MachineModel above??  nsc. >>
@@ -90,22 +83,21 @@ nodes.  It may optionally provide information on quantities such as bandwidth an
 latency through active tests.  
 \end{description}
 
+\subsubsection{Basic Communications (ESMF\_BasicComm)}
+\begin{description}
+\item [Description] This library is a wrapper for MPI and other vendor-supplied 
+message passing libraries.
+\item [Function] The Basic Communication library provides a generic interface
+and efficient communications for the ESMF.  Methods include scatter, gather, send,
+receive, synchronize. 
+\end{description}
+
 \subsubsection{Time Manager (ESMF\_Date, ESMF\_DT)}
 \begin{description}
 \item [Description] The date and time interval methods in the ESMF provide date
 calculations based on a number of different calendars.
 
 \end{description}
-
-
-
-
-
-
-
-
-
-
 
 
 
