@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.9 2005/03/01 15:45:17 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.10 2005/03/04 22:01:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.9 2005/03/01 15:45:17 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.10 2005/03/04 22:01:41 nscollins Exp $'
 
 !==============================================================================
 
@@ -201,18 +201,16 @@
         return
       endif
 
-      ! This seems strange that if we do not have enough processors
-      ! that we print "PASS" - but the nightly scripts need to know that
-      ! we are successfully bypassing this test intentionally, and it was
-      ! not because of a system error, crash, or other actual problem.
-      ! We do return .false. from the function, which is how the caller
-      ! knows not to continue.
+      ! Return neither a PASS or FAIL message, but SKIP.  The nightly
+      ! build scripts are smarter about not looking for output from a
+      ! file which only contains multiproc tags if it is being run uni,
+      ! but this is more for the user to see.
       if (petCount .gt. numPETs) then
-        write(failMsg, *) "This test must run on at least", petCount, "processors."
-        write(msg, *) "PASS ", trim(file), ", line", &
+        write(failMsg, *) "These tests must run on at least", petCount, "processors."
+        write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, msg
-        call ESMF_LogWrite("PASS ", ESMF_LOG_INFO, line, file)
+        call ESMF_LogWrite("SKIP ", ESMF_LOG_INFO, line, file)
         if (present(unit)) write(unit, *) msg
         return
       endif
@@ -276,18 +274,16 @@
         return
       endif
 
-      ! This seems strange that if we have too many processors
-      ! that we print "PASS" - but the nightly scripts need to know that
-      ! we are successfully bypassing this test intentionally, and it was
-      ! not because of a system error, crash, or other actual problem.
-      ! We do return .false. from the function, which is how the caller
-      ! knows not to continue.
+      ! Return neither a PASS or FAIL message, but SKIPPED.  The nightly
+      ! build scripts are smarter about not looking for output from a
+      ! file which only contains multiproc tags if it is being run uni,
+      ! but this is more for the user to see.
       if (petCount .lt. numPETs) then
-        write(failMsg, *) "This test must run not more than", petCount, "processors."
-        write(msg, *) "PASS ", trim(file), ", line", &
+        write(failMsg, *) "These tests must run not more than", petCount, "processors."
+        write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, msg
-        call ESMF_LogWrite("PASS ", ESMF_LOG_INFO, line, file)
+        call ESMF_LogWrite("SKIP ", ESMF_LOG_INFO, line, file)
         if (present(unit)) write(unit, *) msg
         return
       endif
@@ -351,18 +347,16 @@
         return
       endif
 
-      ! This seems strange that if we do not have the right number of processors
-      ! that we print "PASS" - but the nightly scripts need to know that
-      ! we are successfully bypassing this test intentionally, and it was
-      ! not because of a system error, crash, or other actual problem.
-      ! We do return .false. from the function, which is how the caller
-      ! knows not to continue.
+      ! Return neither a PASS or FAIL message, but SKIPPED.  The nightly
+      ! build scripts are smarter about not looking for output from a
+      ! file which only contains multiproc tags if it is being run uni,
+      ! but this is more for the user to see.
       if (petCount .ne. numPETs) then
-        write(failMsg, *) "This test must run on exactly", petCount, "processors."
-        write(msg, *) "PASS ", trim(file), ", line", &
+        write(failMsg, *) "These tests must run on exactly", petCount, "processors."
+        write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, msg
-        call ESMF_LogWrite("PASS ", ESMF_LOG_INFO, line, file)
+        call ESMF_LogWrite("SKIP ", ESMF_LOG_INFO, line, file)
         if (present(unit)) write(unit, *) msg
         return
       endif
