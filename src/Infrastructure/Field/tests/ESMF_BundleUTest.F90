@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.4 2003/03/18 19:00:32 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.5 2003/03/18 20:10:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.4 2003/03/18 19:00:32 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.5 2003/03/18 20:10:18 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -96,7 +96,7 @@
       !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      ! Test Requirement FLD2.1.1 Creation using Flield liist
+      ! Test Requirement FLD2.1.1 Creation using Field liist
       ! It shall be possible to create a bundle with a field list, an optional 
       ! I/O specification, and an identifier that specifies whether the bundle 
       ! is to be packed (contiguous data) or loose (noncontiguous data). 
@@ -104,11 +104,16 @@
       field(1) = ESMF_FieldCreateNoData(name="pressure", rc=rc)
       field(2) = ESMF_FieldCreateNoData(name="temperature", rc=rc)
       field(3) = ESMF_FieldCreateNoData(name="heat flux", rc=rc)
-
-      ! Verify that a Bundle can created with 3 Fields
       bundle1 = ESMF_BundleCreate(3, field, name="atmosphere data", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating Bundle with 3 No Data Fields Test Req. FLD2.1.1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACK_FIELD_DATA option
+      bundle1 = ESMF_BundleCreate(3, field, ESMF_PACK_FIELD_DATA, &
+				name="atmosphere data", rc=rc)
+      write(name, *) "Creating Bundle with ESMF_PACK_FIELD_DATA Req. FLD2.1.1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
