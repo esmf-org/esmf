@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:55:11 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/03/06 17:45:04 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -14,11 +14,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/SystemTests/69527
 
-SYSTEM_TESTS_BUILD  = $(ESMC_TESTDIR)/ESMF_SysTest69527  
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SysTest69527  
 
-SYSTEM_TESTS_RUN    = RUN_ESMF_SysTest69527  
+SYSTEM_TESTS_RUN      = RUN_ESMF_SysTest69527  
 
-SYSTEM_TESTS_RM     = ESMF_SysTest69527.rm 
+SYSTEM_TESTS_RUN_UNI  = RUN_ESMF_SysTest69527UNI
+
+SYSTEM_TESTS_RM       = ESMF_SysTest69527.rm 
 
 
 include $(ESMF_DIR)/makefile

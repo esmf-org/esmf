@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2003/03/06 16:05:51 flanigan Exp $
+# $Id: makefile,v 1.14 2003/03/06 17:45:01 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -244,7 +244,6 @@ html: chkdir_doc tex
 #
 #  System Test Targets
 #
-
 system_tests: chkopts chkdir_tests
 	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
@@ -271,6 +270,15 @@ run_system_tests:  chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_system_tests tree
+
+run_system_tests_uni:  chkopts chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_system_tests_uni tree
 
 
 # Clean recursively deletes files that each makefile wants

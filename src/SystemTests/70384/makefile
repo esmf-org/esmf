@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/06 15:28:44 flanigan Exp $ 
+# $Id: makefile,v 1.5 2003/03/06 17:45:05 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -14,11 +14,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/SystemTests/70384
 
-SYSTEM_TESTS_BUILD = $(ESMC_TESTDIR)/ESMF_SysTest70384
+SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_SysTest70384
 
-SYSTEM_TESTS_RUN   = RUN_ESMF_SysTest70384  
+SYSTEM_TESTS_RUN     = RUN_ESMF_SysTest70384  
 
-SYSTEM_TESTS_RM    = ESMF_SysTest70384.rm
+SYSTEM_TESTS_RUN_UNI = RUN_ESMF_SysTest70384UNI
+
+SYSTEM_TESTS_RM      = ESMF_SysTest70384.rm
 
 include $(ESMF_DIR)/makefile
 
@@ -35,7 +37,7 @@ RUN_ESMF_SysTest70384:
 
 RUN_ESMF_SysTest70384UNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest70384.tmps
-	${MPIRUN} -np 1 ESMF_SysTest70384 > ESMF_SysTest70384.stdout
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SysTest70384 > $(ESMC_TESTDIR)/ESMF_SysTest70384.stdout
 
 ESMF_SysTest70384.rm:
 	echo "ESMF_SysTest70384.rm target called here."

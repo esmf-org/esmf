@@ -1,4 +1,4 @@
-# $Id: common,v 1.17 2003/03/03 16:00:26 flanigan Exp $ 
+# $Id: common,v 1.18 2003/03/06 17:45:02 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -166,6 +166,30 @@ tree_build_system_tests: $(SYSTEM_TESTS_BUILD)
 
 tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
 
+tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
+
+#
+#  tests
+#
+tree_tests: $(TESTS_BUILD) $(TESTS_RUN) 
+
+tree_build_tests: $(TESTS_BUILD) 
+
+tree_run_tests: $(TESTS_RUN) 
+
+tree_run_tests_uni: $(TESTS_RUN_UNI)
+
+tests: chkopts chkdir_tests
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_tests tree
+
+build_tests: chkopts chkdir_tests
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_tests tree
+
+run_tests:  chkopts chkdir_tests
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_tests tree
+
+run_tests_uni:  chkopts chkdir_tests
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_tests_uni tree
 
 # Recursive calls
 tree: ${ACTION}

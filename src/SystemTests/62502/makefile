@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/06 15:28:43 flanigan Exp $ 
+# $Id: makefile,v 1.5 2003/03/06 17:45:03 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -16,11 +16,13 @@ DIRS	  =
 LOCDIR	  = src/SystemTests/62502
 
 
-SYSTEM_TESTS_BUILD = $(ESMC_TESTDIR)/ESMF_SysTest62502
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SysTest62502
 
-SYSTEM_TESTS_RUN   = RUN_ESMF_SysTest62502  
+SYSTEM_TESTS_RUN      = RUN_ESMF_SysTest62502  
 
-SYSTEM_TESTS_RM    = ESMF_SysTest62502.rm
+SYSTEM_TESTS_RUN_UNI  = RUN_ESMF_SysTest62502UNI
+
+SYSTEM_TESTS_RM       = ESMF_SysTest62502.rm
 
 include $(ESMF_DIR)/makefile
 
