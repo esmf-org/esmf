@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.47 2003/09/09 21:08:41 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.48 2003/10/22 16:18:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -271,7 +271,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.47 2003/09/09 21:08:41 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.48 2003/10/22 16:18:00 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1002,8 +1002,9 @@ end function
 !      Add a single {\tt Bundle} reference to an existing {\tt State}.
 !      The {\tt Bundle} name must be unique within the {\tt State}
 !
-! !REQUIREMENTS: 
 !EOP
+! !REQUIREMENTS: 
+
       type(ESMF_Bundle) :: temp_list(1)
 
       temp_list(1) = bundle
@@ -1413,8 +1414,9 @@ end function
 !      Add a single {\tt Field} reference to an existing {\tt State}.
 !      The {\tt Field} name must be unique within the {\tt State}
 !
-! !REQUIREMENTS: 
 !EOP
+! !REQUIREMENTS: 
+
       type(ESMF_Field) :: temp_list(1)
 
       temp_list(1) = field
@@ -1656,8 +1658,9 @@ end function
 !      Add a single {\tt Array} reference to an existing {\tt State}.
 !      The {\tt Array} name must be unique within the {\tt State}
 !
-! !REQUIREMENTS: 
 !EOP
+! !REQUIREMENTS: 
+
       type(ESMF_Array) :: temp_list(1)
 
       temp_list(1) = array
@@ -1898,8 +1901,9 @@ end function
 !      Add a single {\tt State} reference to an existing {\tt State}.
 !      The {\tt State} name must be unique within the {\tt State}
 !
-! !REQUIREMENTS: 
 !EOP
+! !REQUIREMENTS: 
+
       type(ESMF_State) :: temp_list(1)
 
       temp_list(1) = nestedstate
@@ -2121,15 +2125,16 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a {\tt name} to an existing {\tt State}.
-!      The {\tt name} must be unique within the {\tt State}
+!      Add a {\tt name} to an existing {\tt state}.
+!      The {\tt name} must be unique within the {\tt state}
 !      It is available to be marked {\tt needed} by the
-!      consumer of the export {\tt State}. Then the data 
-!      provider can replace the name with the actual {\tt Bundle},
-!      {\tt Field}, or {\tt Array} which carries the needed data.
+!      consumer of the export {\tt state}. Then the data 
+!      provider can replace the name with the actual {\tt ESMF_Bundle},
+!      {\tt ESMF_Field}, or {\tt ESMF_Array} which carries the needed data.
 !
-! !REQUIREMENTS: 
 !EOP
+! !REQUIREMENTS: 
+
       character(len=ESMF_MAXSTR) :: temp_list(1)
       
       temp_list(1) = name
@@ -2160,8 +2165,9 @@ end function
 !      {\tt Field}, or {\tt Array} which carries the needed data.
 !      Unneeded data need not be generated.
 !
-! !REQUIREMENTS: 
 !EOP
+! !REQUIREMENTS: 
+
       call ESMF_StateTypeAddDataNameList(state%statep, namecount, namelist, rc)      
 
       end subroutine ESMF_StateAddDataNameList
@@ -2188,8 +2194,9 @@ end function
 !      {\tt Field}, or {\tt Array} which carries the needed data.
 !      Unneeded data need not be generated.
 !
-! !REQUIREMENTS: 
 !EOPI
+! !REQUIREMENTS: 
+
       integer :: status                   ! local error status
       logical :: rcpresent                ! did user specify rc?
       type(ESMF_StateData), pointer :: nextitem, dataitem
@@ -2350,8 +2357,9 @@ end function
 !      more things in the datalist.  This is an internal-only routine;
 !      {\tt rc} is NOT optional, especially since allocation can fail.
 !
-! !REQUIREMENTS: 
 !EOPI
+! !REQUIREMENTS: 
+
 
       type(ESMF_StateData), dimension(:), pointer :: temp_list
       type(ESMF_StateData), pointer :: nextitem
