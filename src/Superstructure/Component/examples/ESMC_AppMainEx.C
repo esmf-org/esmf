@@ -1,7 +1,7 @@
-// $Id: ESMC_AppMainEx.C,v 1.2 2003/02/04 21:11:17 nscollins Exp $
+// $Id: ESMC_AppMainEx.C,v 1.3 2003/02/04 21:13:18 nscollins Exp $
 //
-// Example code which creates an Application which can also
-// be embedded as a Component in another Application.
+// Example code which creates an Application which is the main program.
+// It cannot be embedded as a Component in another Application.
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
@@ -9,13 +9,14 @@
 //BOP
 //
 // !DESCRIPTION:
-// Example code which creates an Application which can also
-// be embedded as a Component in another Application.
+// Example code which creates an Application which is the main program.
+// It cannot be embedded as a Component in another Application.
 // Also see the Programming Model section of this document.
 //
 //
 //\begin{verbatim}
 
+//   TODO: finish this example
 //   // Example program showing various interfaces to Components.
 //   // See the more specific example programs for details of how
 //   // the interfaces are used under various conditions.
