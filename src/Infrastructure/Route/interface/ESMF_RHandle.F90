@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.6 2003/08/29 20:33:22 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.7 2003/08/29 21:11:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.6 2003/08/29 20:33:22 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.7 2003/08/29 21:11:03 jwolfe Exp $'
 
 !==============================================================================
 
@@ -394,8 +394,8 @@
         endif
 
         ! Get old values and only replace the ones specified.
-        call ESMF_RouteHandleGet(rhandle, oldhtype, oldroute1, oldroute2, &
-                                 oldtdata, oldlabel, status)
+        call c_ESMC_RouteHandleGet(rhandle, oldhtype, oldroute1, oldroute2, &
+                                   oldtdata, oldlabel, status)
         changed = .false.
 
         if (present(htype)) then
