@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.16 2003/08/04 17:19:42 rjacob Exp $
+// $Id: ESMC_RTable.C,v 1.17 2003/08/05 16:17:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.16 2003/08/04 17:19:42 rjacob Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.17 2003/08/05 16:17:58 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -235,7 +235,6 @@
 //
 //EOP
 // !REQUIREMENTS:  
-      ESMC_XPacket *tmpxp=ESMC_NULL_POINTER;
 
 //    if (entry[ndeid].xpcount > 0) {
 //        printf("already an entry for deid %d\n", ndeid);
@@ -252,15 +251,18 @@
 //  If not enough space allocated, allocate more.
 //  If entry[ndeid].xp is NULL, then this will simply allocate
     if(entry[ndeid].alloccount < entry[ndeid].xpcount) {
-      tmpxp = (ESMC_XPacket *)realloc(entry[ndeid].xp, entry[ndeid].xpcount * sizeof(ESMC_XPacket));
-      if(tmpxp == ESMC_NULL_POINTER) {
+      entry[ndeid].alloccount += ALLOCCHUNK;
+      entry[ndeid].xp = (ESMC_XPacket *)realloc(entry[ndeid].xp, 
+                                          entry[ndeid].alloccount * sizeof(ESMC_XPacket));
+      if (entry[ndeid].xp == NULL) {
 	 printf("Not enough memory to add more XPackets!?\n");
 	 return ESMF_FAILURE;
 	 }
-      entry[ndeid].xp = tmpxp;
     }
+
+    // This is a contents copy; when this routine returns
+    // the caller is free to reuse the packet.
     entry[ndeid].xp[ entry[ndeid].xpcount - 1 ] = *xp;
-    entry[ndeid].alloccount++;
 
     return ESMF_SUCCESS;
 

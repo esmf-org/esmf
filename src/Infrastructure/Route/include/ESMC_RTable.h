@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.h,v 1.9 2003/08/04 17:11:34 rjacob Exp $
+// $Id: ESMC_RTable.h,v 1.10 2003/08/05 16:17:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,6 +47,9 @@
 
 // !PUBLIC TYPES:
  class ESMC_RTable;
+
+// grow the rtable entries by more than 1 at a time
+#define ALLOCCHUNK 4
 
 // !PRIVATE TYPES:
 
