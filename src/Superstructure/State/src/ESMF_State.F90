@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.24 2004/03/02 17:31:40 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.25 2004/03/03 00:08:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -284,7 +284,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.24 2004/03/02 17:31:40 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.25 2004/03/03 00:08:22 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -3108,7 +3108,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateSetLogicalListAttr - Set a logical list Attribute
+! !IROUTINE: ESMF_StateSetAttribute - Set a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateSetAttribute()
