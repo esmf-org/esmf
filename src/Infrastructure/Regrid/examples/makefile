@@ -1,16 +1,37 @@
-# $Id: makefile,v 1.3 2003/03/25 00:18:22 flanigan Exp $
+# $Id: makefile,v 1.4 2003/09/18 21:09:09 flanigan Exp $
 
-# makefile template for the examples directory.
+ALL: examples
 
-ALL: 
+#
+#  makefile for examples directory.
+# 
+# All of the makefile targets and rules for building and linking
+# examples are located in the build system makefile fragments.
+# The run targets are located in this makefile.
+#
+# Applications and their standard output files are created in
+# $(ESMF_EXDIR).  $(ESMF_EXDIR) is defined in build/common.mk.
+#
+# Targets:
+#
+#    examples:         Will first build the ESMF library, then will 
+#                      build the example applications and finally 
+#                      will run the examples
+#
+#    examples_uni:     Same as examples target, but runs examples on  
+#                      a single processor.
+#
+#    build_examples:   Builds example applications in $(ESMF_EXDIR)
+#
+#    run_examples:     Runs applications built from source in this
+#                      directory.  Output is saved in file in $(ESMF_EXDIR).
+#
+#    run_examples_uni: Same as run_examples target, but runs examples on 
+#                      only one processor.
+#
 
-# don't set these unless absolutely necessary - they've got to be
-#  architecture and compiler independent and should be inherited
-#  from the upper level makefile if possible.
 CFLAGS    =
 FFLAGS    =
-
-# in general, leave these blank at this point.
 SOURCEC	  = 
 SOURCEF	  = 
 SOURCEH	  = 
@@ -18,41 +39,42 @@ OBJSC     =
 OBJSF     = 
 TEXFILES  = 
 
-# fill in the names of the F90 source files for the tests/examples
-EXAMPLESF =
-# fill in the names of the C++ source files for the tests/examples
-EXAMPLESC =
+#
+# Set EXAMPLES_BUILD to full path of the examples to be
+# built.  The compiling from source code to object code is 
+# handle by the same compile rules used to build the objects 
+# used in the library. The linking of the objects is done with 
+# specific linking rules in build/common.mk.
+#
+# The examples executable files follow this naming convention:
+#
+#      $(ESMF_EXDIR)/ESM?_<Comp>Ex
+#
+# Where the ? is ether F or C.  The example linking rules
+# depend on this naming convention being followed.
+#
+EXAMPLES_BUILD = 
 
-# leave the following lines blank.
-MANSEC	  = 
-LIBBASE	  = 
+#
+# List the example run targets in EXAMPLES_RUN and 
+# EXAMPLES_RUN_UNI.  All of the run targets should be defined
+# in this makefile.
+#
+EXAMPLES_RUN     = 
 
-# fill in the following with the executable names
-TESTEXAMPLES =
+EXAMPLES_RUN_UNI = 
 
-# the following line must be set to the current subdir name relative
-# to the top level esmf directory. 
+
 LOCDIR	  = src/Infrastructure/Regrid/examples
-
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   =
-CLEANFILES  =
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
-
-# if you have dependencies between source files in this dir,
-#   list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
 
 
 
