@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/04/28 15:34:27 slswift Exp $
+# $Id: makefile,v 1.6 2004/04/28 15:58:39 slswift Exp $
 
 ALL: build_here
 
@@ -33,21 +33,21 @@ CLOBBERDIRS =
 
 # ESMF_IO.o:		wrf_io.o field_routines.o
 
-wrf_io.o:		wrf_io.F90 $(CODE)
-			sed -e '1,/BEGINIOFLAGS/d' -e '/ENDIOFLAGS/,$$d' $< > wrf_io_flags.h
-			$(CPP) -x f77-cpp-input -E -P -I./ $< | $(M4)  -Uinclude -Uindex -Ulen - > $(addsuffix .f, $(basename $<))
-			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $(addsuffix .f, $(basename $<))
-
-field_routines.o:	field_routines.F90 wrf_io.F90
-			$(CPP) -x f77-cpp-input -E -P -I./ $< > $(addsuffix .f, $(basename $<))
-			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $(addsuffix .f, $(basename $<))
-
-# wrf_io.f:		wrf_io.F90 $(CODE)
+# wrf_io.o:		wrf_io.F90 $(CODE)
 # 			sed -e '1,/BEGINIOFLAGS/d' -e '/ENDIOFLAGS/,$$d' $< > wrf_io_flags.h
-# 			$(CPP) -x f77-cpp-input -E -P -I./ $< | $(M4)  -Uinclude -Uindex -Ulen - > $@
+# 			$(CPP) -x f77-cpp-input -E -P -I./ $< | $(M4)  -Uinclude -Uindex -Ulen - > $(addsuffix .f, $(basename $<))
+# 			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $(addsuffix .f, $(basename $<))
 
-#field_routines.f:	field_routines.F90 wrf_io.F90
-#			$(CPP) -x f77-cpp-input -E -P -I./ $< > $@
+# field_routines.o:	field_routines.F90 wrf_io.F90
+# 			$(CPP) -x f77-cpp-input -E -P -I./ $< > $(addsuffix .f, $(basename $<))
+# 			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $(addsuffix .f, $(basename $<))
+
+wrf_io.F:		wrf_io.F90 $(CODE)
+			sed -e '1,/BEGINIOFLAGS/d' -e '/ENDIOFLAGS/,$$d' $< > wrf_io_flags.h
+			$(CPP) -x f77-cpp-input -E -P -I./ $< | $(M4)  -Uinclude -Uindex -Ulen - > $@
+
+field_routines.F:	field_routines.F90 wrf_io.F90
+			$(CPP) -x f77-cpp-input -E -P -I./ $< > $@
 
 # .f.o:			
 # 			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $<
