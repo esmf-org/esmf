@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.50 2004/03/24 16:01:08 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.51 2004/03/24 19:10:40 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2922,8 +2922,9 @@
       integer :: aSize, gridRank, index
       integer, dimension(3) :: order
       logical :: reorderUse
+      type(ESMF_Array) :: tempArray
       type(ESMF_Array), dimension(:), pointer :: coord
-      type(ESMF_Array), dimension(:,:), pointer :: coord2
+      type(ESMF_Array), dimension(:,:), pointer :: coord2, tempArray2
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -3007,7 +3008,14 @@
         if (reorderUse) then
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
-            centerCoord(order(i)) = coord(i)
+            ! if i and j are reordered, then the coordinate data arrays need to
+            ! be shuffled as well
+            if (gridOrder(1,grid%ptr%coordOrder%order,2).eq.1) then
+              centerCoord(order(i)) = coord(i)
+            else
+              call ESMF_LRGridReshape(coord(i), tempArray, status)
+              centerCoord(order(i)) = tempArray
+            endif
           enddo
         else
           do i = 1,aSize
@@ -5962,6 +5970,73 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridBoxIntersectSend
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_LRGridReshape - Switch the dimensions of the data of an Array
+
+ !INTERFACE:
+      subroutine ESMF_LRGridReshape(array1, array2, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_Array), intent(in)  :: array1   ! source array
+      type(ESMF_Array), intent(out) :: array2   ! dest array
+      integer, intent(out), optional :: rc  ! return code
+
+! !DESCRIPTION:
+!     This routine takes the data from one {\tt ESMF\_Array} and reorders it,
+!     switching ranks, to create a destination Array.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array1]
+!          Source {\tt ESMF\_Array}.
+!     \item[array2]
+!          Destination {\tt ESMF\_Array}.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: i, i1, j, j1
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: temp1, temp2
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! get data in source array
+      call ESMF_ArrayGetData(array1, temp1, rc=status)
+      i1 = size(temp1,1)
+      j1 = size(temp1,2)
+
+      ! allocate data for destination array
+      allocate(temp2(j1,i1))
+
+      ! transfer data
+      do j = 1,j1
+        do i = 1,i1
+          temp2(j,i) = temp1(i,j)
+        enddo
+      enddo
+ 
+      ! make destination array from data
+      array2 = ESMF_ArrayCreate(temp2, ESMF_DATA_COPY, rc=status)
+
+      deallocate(temp2)
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LRGridReshape
 
 !------------------------------------------------------------------------------
 !!BOPI
