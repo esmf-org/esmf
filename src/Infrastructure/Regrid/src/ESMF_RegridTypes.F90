@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.8 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.9 2003/08/25 22:48:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,11 +46,13 @@
       use ESMF_ArrayBaseMod  ! ESMF array  class
       use ESMF_ArrayExpandMod  ! ESMF array  class
       use ESMF_RouteMod     ! ESMF route  class
-      use ESMF_FieldMod     ! ESMF field  class
-      use ESMF_BundleMod    ! ESMF bundle class
-      use ESMF_GridMod      ! ESMF grid   class
+      use ESMF_RHandleMod   ! ESMF route handle class
       use ESMF_PhysGridMod  ! ESMF physical grid class
       use ESMF_DistGridMod  ! ESMF distributed grid class
+      use ESMF_GridMod      ! ESMF grid   class
+      use ESMF_DataMapMod
+      use ESMF_FieldMod     ! ESMF field  class
+      use ESMF_BundleMod    ! ESMF bundle class
 
       implicit none
 
@@ -64,13 +66,17 @@
       private
         type (ESMF_Base) :: base
 
-        type (ESMF_BundleType), pointer :: & ! if created with bundle pair
-           src_bundlep,   &! pointer to source field bundle
-           dst_bundlep     ! pointer to destination field bundle
+        type (ESMF_Array) :: & 
+           srcarray,   &! source array
+           dstarray     ! destination array
 
-        type (ESMF_FieldType), pointer :: & ! if created with field pair
-           src_fieldp,    &! pointer to source grid
-           dst_fieldp      ! pointer to destination grid
+        type (ESMF_Grid) :: &
+           srcgrid,    &! source grid
+           dstgrid      ! destination grid
+
+        type (ESMF_DataMap) :: &
+           srcdatamap,    &! source datamap
+           dstdatamap      ! destination datamap
 
         integer ::       &
            method,       &! method used for this regridding
@@ -145,7 +151,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.8 2003/07/17 20:02:47 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.9 2003/08/25 22:48:58 nscollins Exp $'
 
 !==============================================================================
 !
@@ -239,9 +245,10 @@
 ! !IROUTINE: ESMF_RegridTypeGet - Get attribute of a Regrid type
 
 ! !INTERFACE:
-      subroutine ESMF_RegridTypeGet(regrid, name,            &
-                                    src_bundle, dst_bundle,  &
-                                    src_field,  dst_field,   &
+      subroutine ESMF_RegridTypeGet(regrid, name,                &
+                                    srcarray, dstarray,        &
+                                    srcgrid,  dstgrid,         &
+                                    srcdatamap,  dstdatamap,   &
                                     method, num_links , gather, rc)
 !
 ! !ARGUMENTS:
@@ -249,8 +256,9 @@
       type(ESMF_RegridType), intent(in) :: regrid
 
       character (*),      intent(out), optional :: name
-      type (ESMF_Bundle), intent(out), optional :: src_bundle, dst_bundle
-      type (ESMF_Field),  intent(out), optional :: src_field,  dst_field
+      type (ESMF_Array),  intent(out), optional :: srcarray, dstarray
+      type (ESMF_Grid),   intent(out), optional :: srcgrid,  dstgrid
+      type (ESMF_DataMap),  intent(out), optional :: srcdatamap,  dstdatamap
       integer,            intent(out), optional :: method
       integer,            intent(out), optional :: num_links
       type (ESMF_Route),  intent(out), optional :: gather
@@ -304,40 +312,28 @@
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
 
-      ! Get bundles if requested
-      if (present(src_bundle)) then
-         if (associated(regrid%src_bundlep)) then
-            src_bundle%btypep => regrid%src_bundlep
-         else
-            print *,'ERROR in RegridTypeGet: requested non-existent bundle'
-            status = ESMF_FAILURE
-         endif
+      ! Get arrays if requested
+      if (present(srcarray)) then
+         srcarray = regrid%srcarray
       endif
-      if (present(dst_bundle)) then
-         if (associated(regrid%dst_bundlep)) then
-            dst_bundle%btypep => regrid%dst_bundlep
-         else
-            print *,'ERROR in RegridTypeGet: requested non-existent bundle'
-            status = ESMF_FAILURE
-         endif
+      if (present(dstarray)) then
+         dstarray = regrid%dstarray
       endif
 
-      ! Get fields if requested
-      if (present(src_field)) then
-         if (associated(regrid%src_fieldp)) then
-            src_field%ftypep => regrid%src_fieldp
-         else
-            print *,'ERROR in RegridTypeGet: requested non-existent field'
-            status = ESMF_FAILURE
-         endif
+      ! Get grids if requested
+      if (present(srcgrid)) then
+         srcgrid = regrid%srcgrid
       endif
-      if (present(dst_field)) then
-         if (associated(regrid%dst_fieldp)) then
-            dst_field%ftypep => regrid%dst_fieldp
-         else
-            print *,'ERROR in RegridTypeGet: requested non-existent field'
-            status = ESMF_FAILURE
-         endif
+      if (present(dstgrid)) then
+         dstgrid = regrid%dstgrid
+      endif
+
+      ! Get datamaps if requested
+      if (present(srcdatamap)) then
+         srcdatamap = regrid%srcdatamap
+      endif
+      if (present(dstdatamap)) then
+         dstdatamap = regrid%dstdatamap
       endif
 
       ! get method or number of links
@@ -354,17 +350,19 @@
 ! !IROUTINE: ESMF_RegridTypeSet - Set attribute of a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridTypeSet(regrid, name,            &
-                                    src_bundle, dst_bundle,  &
-                                    src_field,  dst_field,   &
+      subroutine ESMF_RegridTypeSet(regrid, name,                &
+                                    srcarray, dstarray,        &
+                                    srcgrid,  dstgrid,         &
+                                    srcdatamap,  dstdatamap,   &
                                     method, num_links, gather, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RegridType), intent(inout) :: regrid
 
       character (*),      intent(in), optional :: name
-      type (ESMF_Bundle), intent(in), optional :: src_bundle, dst_bundle
-      type (ESMF_Field),  intent(in), optional :: src_field,  dst_field
+      type (ESMF_Array),  intent(in), optional :: srcarray, dstarray
+      type (ESMF_Grid),   intent(in), optional :: srcgrid,  dstgrid
+      type (ESMF_DataMap), intent(in), optional :: srcdatamap,  dstdatamap
       integer,            intent(in), optional :: method
       integer,            intent(in), optional :: num_links
       type (ESMF_Route),  intent(in), optional :: gather
@@ -419,13 +417,17 @@
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
 
-      ! Set bundles if requested
-      if (present(src_bundle)) regrid%src_bundlep => src_bundle%btypep
-      if (present(dst_bundle)) regrid%dst_bundlep => dst_bundle%btypep
+      ! Set arrays if requested
+      if (present(srcarray)) regrid%srcarray = srcarray
+      if (present(dstarray)) regrid%dstarray = dstarray
       
-      ! Set fields if requested
-      if (present(src_field)) regrid%src_fieldp => src_field%ftypep
-      if (present(dst_field)) regrid%dst_fieldp => dst_field%ftypep
+      ! Set grids if requested
+      if (present(srcgrid)) regrid%srcgrid = srcgrid
+      if (present(dstgrid)) regrid%dstgrid = dstgrid
+      
+      ! Set datamaps if requested
+      if (present(srcdatamap)) regrid%srcdatamap = srcdatamap
+      if (present(dstdatamap)) regrid%dstdatamap = dstdatamap
       
       ! get method or number of links
       if (present(method)) regrid%method = method
@@ -466,10 +468,6 @@
 
         ! nullify pointers
       
-        nullify(regrid%src_bundlep)
-        nullify(regrid%dst_bundlep)
-        nullify(regrid%src_fieldp)
-        nullify(regrid%dst_fieldp)
         nullify(regrid%src_add)
         nullify(regrid%dst_add)
         nullify(regrid%weights)
@@ -513,13 +511,6 @@
 !EOP
 ! !REQUIREMENTS:
 
-!       if created with bundles, nullify bundle pointer
-        if (associated(regrid%src_bundlep)) nullify(regrid%src_bundlep)
-        if (associated(regrid%dst_bundlep)) nullify(regrid%dst_bundlep)
-
-!       if created with fields, nullify field pointers
-        if (associated(regrid%src_fieldp)) nullify(regrid%src_fieldp)
-        if (associated(regrid%dst_fieldp)) nullify(regrid%dst_fieldp)
 
         regrid%method    = ESMF_RegridMethod_none
         regrid%num_links = 0

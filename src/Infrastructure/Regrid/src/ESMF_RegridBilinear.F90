@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.8 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.9 2003/08/25 22:48:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,13 +32,15 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod      ! ESMF base   class
+      use ESMF_DELayoutMod
       use ESMF_ArrayBaseMod ! ESMF array  class
       use ESMF_ArrayExpandMod ! ESMF array  class
-      use ESMF_FieldMod     ! ESMF field  class
-      use ESMF_BundleMod    ! ESMF bundle class
-      use ESMF_GridMod      ! ESMF grid   class
       use ESMF_PhysGridMod  ! ESMF physical grid class
       use ESMF_DistGridMod  ! ESMF distributed grid class
+      use ESMF_DataMapMod
+      use ESMF_GridMod      ! ESMF grid   class
+      use ESMF_FieldMod     ! ESMF field  class
+      use ESMF_BundleMod    ! ESMF bundle class
       use ESMF_RegridTypesMod ! ESMF regrid data structures
       implicit none
 
@@ -56,28 +58,8 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.8 2003/07/17 20:02:47 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.9 2003/08/25 22:48:58 nscollins Exp $'
 
-!==============================================================================
-!
-! INTERFACE BLOCKS
-!
-!==============================================================================
-!BOP
-! !INTERFACE:
-      interface ESMF_RegridConstructBilinear
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_RegridConsByFieldBilinear
-         module procedure ESMF_RegridConsByBundleBilinear
-
-! !DESCRIPTION:
-!     This interface provides a single entry to the Regrid construct methods 
-!     specifically for a bilinear regridding. 
-!
-!EOP
-      end interface
-!
 !==============================================================================
 
       contains
@@ -88,28 +70,27 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridConsByFieldBilinear - Constructs bilinear Regrid structure for a field pair
+! !IROUTINE: ESMF_RegridConstructBilinear - Constructs bilinear Regrid structure 
 
 ! !INTERFACE:
-      function ESMF_RegridConsByFieldBilinear(src_field, dst_field, name, rc, &
-                                              src_mask,  dst_mask)
+      function ESMF_RegridConstructBilinear(srcArray, srcGrid, srcDataMap, &
+                                            dstArray, dstGrid, dstDataMap, &
+                                            srcmask, dstmask, blocking, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_RegridType) :: ESMF_RegridConsByFieldBilinear
+      type(ESMF_RouteHandle) :: ESMF_RegridConstructBilinear
 !
 ! !ARGUMENTS:
-
-      type (ESMF_Field), intent(in) :: &
-         src_field,          &! field to be regridded
-         dst_field            ! destination (incl grid) of resulting regridded field
-
-      type (ESMF_Array), intent(in), optional :: &
-         src_mask,           &! optional masks to specify which points
-         dst_mask             !   take part in regridding
-
-      character (len = *), intent(in) :: name
-
-      integer, intent(out) :: rc
+      type(ESMF_Array), intent(in) :: srcarray
+      type(ESMF_Grid), intent(in) :: srcgrid
+      type(ESMF_DataMap), intent(in) :: srcdatamap
+      type(ESMF_Array), intent(inout) :: dstarray
+      type(ESMF_Grid), intent(in) :: dstgrid
+      type(ESMF_DataMap), intent(in) :: dstdatamap   
+      type(ESMF_Mask), intent(in), optional :: srcmask
+      type(ESMF_Mask), intent(in), optional :: dstmask
+      type(ESMF_Async), intent(inout), optional :: blocking
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
@@ -120,18 +101,19 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[src\_field]
+!     \item[srcArray]
 !          Field to be regridded.
-!     \item[dst\_field]
+!     \item[dstArray]
 !          Resultant field where regridded source field will be stored.
+! \item[TODO:]  make match actual arglist
 !     \item[name]
 !          {\tt Regrid} name.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \item[[src\_mask]]
+!     \item[[srcmask]]
 !          Optional mask to specify or eliminate source points from
 !          regridding.  Default is that all source points participate. 
-!     \item[[dst\_mask]]
+!     \item[[dstmask]]
 !          Optional mask to specify or eliminate destination points from
 !          regridding.  Default is that all destination points participate. 
 !   \end{description}
@@ -191,6 +173,8 @@
       real (ESMF_IKIND_R8), parameter :: &
          converge = 1.e-10  ! convergence criterion
 
+      type(ESMF_RegridType) :: temp_regrid
+      character (len = ESMF_MAXSTR) :: name
 !
 !     Construct an empty regrid structure
 !
@@ -198,16 +182,17 @@
       rc = ESMF_SUCCESS
       status = ESMF_SUCCESS
 
-      call ESMF_RegridConstructEmpty(ESMF_RegridConsByFieldBilinear, status)
-      if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
+      ESMF_RegridConstructBilinear = ESMF_RouteHandleCreate(rc=status)
+      !call ESMF_RegridConstructEmpty(ESMF_RegridConstructBilinear, status)
+      !if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
 
       !
       ! Set name and field pointers
       !
       
-      call ESMF_RegridTypeSet(ESMF_RegridConsByFieldBilinear,                 &
-                              name=name, src_field = src_field,               &
-                                         dst_field = dst_field,               &
+      call ESMF_RegridTypeSet(temp_regrid,                                   &
+                              name=name, srcArray = srcArray,                &
+                                         dstArray = dstArray,                &
                                          method = ESMF_RegridMethod_Bilinear, &
                                          rc=status)
       if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
@@ -363,14 +348,14 @@
 
       !   dst_center_x = get center x coords from appropriate dst phys grid
       !   dst_center_y = ...........y....etc
-      !   dst_mask     = get mask assoc with field from phys grid
+      !   dstmask     = get mask assoc with field from phys grid
 
       !   do j=jb_dst,je_dst
       !   do i=ib_dst,ie_dst
       !      dst_x = dst_center_x(i,j)
       !      dst_y = dst_center_y(i,j)
             
-      !      if (dst_mask(i,j)) then ! only perform interpolation on un-masked points
+      !      if (dstmask(i,j)) then ! only perform interpolation on un-masked points
 
                !
                ! for this destination point, look for the proper
@@ -455,10 +440,10 @@
                   !
                   
        !           src_count = 0
-       !           if (src_mask(iii,jjj)) src_count = src_count + 1
-       !           if (src_mask(ip1,jjj)) src_count = src_count + 1
-       !           if (src_mask(iii,jp1)) src_count = src_count + 1
-       !           if (src_mask(ip1,jp1)) src_count = src_count + 1
+       !           if (srcmask(iii,jjj)) src_count = src_count + 1
+       !           if (srcmask(ip1,jjj)) src_count = src_count + 1
+       !           if (srcmask(iii,jp1)) src_count = src_count + 1
+       !           if (srcmask(ip1,jp1)) src_count = src_count + 1
                   
                   !
                   ! if all four are valid points, compute bilinear
@@ -535,28 +520,28 @@
         !          else if (src_count > 0 .and. src_count < 4) then
 
         !             sum_wts = zero
-        !             if (src_mask(iii,jjj)) then
+        !             if (srcmask(iii,jjj)) then
         !                weights(1) = ESMF_GridComputeDistance( &
         !                                    src_x(1),src_y(1), &
         !                                    dst_x, dst_y,      &
         !                                    src_grid%coord_system, status)
         !                sum_wts = sum_wts + weights(1)
         !             endif
-        !             if (src_mask(ip1,jjj)) then
+        !             if (srcmask(ip1,jjj)) then
         !                weights(2) = ESMF_GridComputeDistance( &
         !                                    src_x(2),src_y(2), &
         !                                    dst_x, dst_y,      &
         !                                    src_grid%coord_system, status)
         !                sum_wts = sum_wts + weights(2)
         !             endif
-        !             if (src_mask(ip1,jp1)) then
+        !             if (srcmask(ip1,jp1)) then
         !                weights(3) = ESMF_GridComputeDistance( &
         !                                    src_x(3),src_y(3), &
         !                                    dst_x, dst_y,      &
         !                                    src_grid%coord_system, status)
         !                sum_wts = sum_wts + weights(3)
         !             endif
-        !             if (src_mask(iii,jp1)) then
+        !             if (srcmask(iii,jp1)) then
         !                src_count = src_count + 1
         !                weights(4) = ESMF_GridComputeDistance( &
         !                                    src_x(4),src_y(4), &
@@ -572,7 +557,7 @@
                   !  now store this link into address, weight arrays
                   !
 
-        !          if (src_mask(iii,jjj)) then
+        !          if (srcmask(iii,jjj)) then
         !             dst_add(1) = i
         !             dst_add(2) = j
         !             dst_add(3) = dst_DEid
@@ -580,10 +565,10 @@
         !             src_add(2) = jjj
         !             src_add(3) = src_DEid
         !             call ESMF_RegridAddLink(                               &
-        !                             ESMF_RegridConsByFieldBilinear, &
+        !                             ESMF_RegridConstructBilinear, &
         !                             src_add, dst_add, weights(1), rc)
         !          endif
-        !          if (src_mask(ip1,jjj)) then
+        !          if (srcmask(ip1,jjj)) then
         !             dst_add(1) = i
         !             dst_add(2) = j
         !             dst_add(3) = dst_DEid
@@ -591,10 +576,10 @@
         !             src_add(2) = jjj
         !             src_add(3) = src_DEid
         !             call ESMF_RegridAddLink(                               &
-        !                             ESMF_RegridConsByFieldBilinear, &
+        !                             ESMF_RegridConstructBilinear, &
         !                             src_add, dst_add, weights(2), rc)
         !          endif
-        !          if (src_mask(ip1,jp1)) then
+        !          if (srcmask(ip1,jp1)) then
         !             dst_add(1) = i
         !             dst_add(2) = j
         !             dst_add(3) = dst_DEid
@@ -602,10 +587,10 @@
         !             src_add(2) = jp1
         !             src_add(3) = src_DEid
         !             call ESMF_RegridAddLink(                               &
-        !                             ESMF_RegridConsByFieldBilinear, &
+        !                             ESMF_RegridConstructBilinear, &
         !                             src_add, dst_add, weights(3), rc)
         !          endif
-        !          if (src_mask(iii,jp1)) then
+        !          if (srcmask(iii,jp1)) then
         !             dst_add(1) = i
         !             dst_add(2) = j
         !             dst_add(3) = dst_DEid
@@ -613,7 +598,7 @@
         !             src_add(2) = jp1
         !             src_add(3) = src_DEid
         !             call ESMF_RegridAddLink(                               &
-        !                             ESMF_RegridConsByFieldBilinear, &
+        !                             ESMF_RegridConstructBilinear, &
         !                             src_add, dst_add, weights(4), rc)
         !          endif
 
@@ -627,63 +612,7 @@
       
       !deallocate(src_center_x, src_center_y)
       
-      end function ESMF_RegridConsByFieldBilinear
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RegridConsByBundleBilinear - Constructs bilinear Regrid structure for a bundle pair
-
-! !INTERFACE:
-      function ESMF_RegridConsByBundleBilinear(src_bundle, dst_bundle, &
-                                               name, rc, src_mask,  dst_mask)
-!
-! !RETURN VALUE:
-      type(ESMF_RegridType) :: ESMF_RegridConsByBundleBilinear
-!
-! !ARGUMENTS:
-
-      type (ESMF_Bundle), intent(in) :: &
-         src_bundle,          &! field bundle to be regridded
-         dst_bundle            ! destination (incl grid) of resulting regridded bundle
-
-      type (ESMF_Array), intent(in), optional :: &
-         src_mask,           &! optional masks to specify which points
-         dst_mask             !   take part in regridding
-
-      character (len = *), intent(in) :: name
-
-      integer, intent(out) :: rc
-!
-! !DESCRIPTION:
-!     Given a source field bundle and destination field bundle (and their attached
-!     grids), this routine constructs a new {\tt Regrid} object
-!     and fills it with information necessary for regridding the source
-!     bundle to the destination bundle using bilinear interpolation.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[src\_bundle]
-!          Field to be regridded.
-!     \item[dst\_bundle]
-!          Resultant field where regridded source field will be stored.
-!     \item[name]
-!          {\tt Regrid} name.
-!     \item[rc]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \item[[src\_mask]]
-!          Optional mask to specify or eliminate source points from
-!          regridding.  Default is that all source points participate. 
-!     \item[[dst\_mask]]
-!          Optional mask to specify or eliminate destination points from
-!          regridding.  Default is that all destination points participate. 
-!   \end{description}
-!
-! !REQUIREMENTS:  TODO
-!EOP
-
-      !TODO: Insert code here
- 
-      end function ESMF_RegridConsByBundleBilinear
+      end function ESMF_RegridConstructBilinear
 
 !------------------------------------------------------------------------------
 
