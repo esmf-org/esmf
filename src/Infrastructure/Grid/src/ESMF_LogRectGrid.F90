@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.126 2004/12/20 21:16:49 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.127 2004/12/21 01:25:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.126 2004/12/20 21:16:49 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.127 2004/12/21 01:25:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8522,6 +8522,7 @@
 
           ! first get the appropriate layout
           call ESMF_LRGridGet(srcGrid, delayout=srcDELayout, rc=localrc)
+          call ESMF_DELayoutGet(srcDELayout, deCount=srcDEs, rc=localrc)
 
           ! unload index array info to AI's
           size = 0
