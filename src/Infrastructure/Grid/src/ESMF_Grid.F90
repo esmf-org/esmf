@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.49 2003/05/07 16:01:02 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.50 2003/05/21 18:34:48 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,6 +137,7 @@
     public ESMF_GridScatter
     public ESMF_GridValidate
     public ESMF_GridPrint
+    public ESMF_GridComputeDistance
     !public ESMF_GridSearch
 
 !------------------------------------------------------------------------------
@@ -207,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.49 2003/05/07 16:01:02 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.50 2003/05/21 18:34:48 pwjones Exp $'
 
 !==============================================================================
 !
@@ -3089,6 +3090,81 @@
       print *, "  (coming soon)"
 
       end subroutine ESMF_GridPrint
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridComputeDistance - Compute distance between points
+!
+! !INTERFACE:
+      function ESMF_GridComputeDistance(x1, y1, x2, y2, coord_system, rc)
+
+! !RETURN VALUE:
+      real () :: ESMF_GridComputeDistance
+
+! !ARGUMENTS:
+
+      real (kind=?), intent(in) :: &
+         x1,y1,      &! x,y coordinates of two points between which 
+         x2,y2        !   the distance is to be computed
+
+      integer :: &
+         coord_system ! coordinate system in which the points are given
+
+      integer, optional :: &
+         rc           ! return code
+
+! !DESCRIPTION:
+!     This routine computes the distance between two points given the
+!     coordinates of the two points.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[x1,y1,x2,y2]
+!          Coordinates of two points between which to compute distance.
+!     \item[coord\_system]
+!          Coordinate system in which the points are given
+!          (e.g. spherical, Cartesian)
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+!
+!     local variables
+!
+
+      integer :: status
+
+!
+!     branch to appropriate PhysGrid routine to compute
+!     distance
+!
+
+      status = ESMF_SUCCESS
+
+      select case (coord_system)
+      case (ESMF_CoordSystem_Spherical)
+         ESMF_GridComputeDistance = &
+         ESMF_PhysGridComputeDistSpherical(x1, y1, x2, y2, status)
+      case (ESMF_CoordSystem_Cartesian)
+         ESMF_GridComputeDistance = &
+         ESMF_PhysGridComputeDistCartesian(x1, y1, x2, y2, status)
+      case default
+         print *,'Distance in coordinate system not yet supported'
+         status = ESMF_FAILURE
+      end select
+
+!
+!     set return code and exit
+!
+
+      if (present(rc)) then
+         rc = status
+      endif
+
+      end subroutine ESMF_GridComputeDistance
 
 !------------------------------------------------------------------------------
 !!BOP
