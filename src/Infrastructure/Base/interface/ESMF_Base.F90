@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.46 2003/07/17 20:35:14 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.47 2003/07/23 22:30:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -312,7 +312,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.46 2003/07/17 20:35:14 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.47 2003/07/23 22:30:35 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -752,7 +752,7 @@ end function
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
       integer, intent(out) :: count                      ! attribute count
-      character (len = *), dimension (:), intent(out) :: namelist   ! attribute names
+      character (len = *), dimension (:), intent(inout) :: namelist   ! attribute names
       integer, intent(out), optional :: rc               ! return code
 
 !
@@ -762,6 +762,9 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.7.3
+
+      !TODO: when code added here, change (inout) for namelist to just out.
+      ! absoft compiler was unhappy.
 
       end subroutine ESMF_AttributeGetNameList
 

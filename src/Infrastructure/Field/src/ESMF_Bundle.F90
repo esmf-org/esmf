@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.14 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.15 2003/07/23 22:29:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1896,7 +1896,8 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle 
-      character (len = *), intent(out) :: namelist(:)
+      character (len = *), intent(inout) :: namelist(:) ! TODO: change to out 
+                                                        ! after adding code
       integer, intent(out), optional :: namecount     
       integer, intent(out), optional :: rc     
 !
