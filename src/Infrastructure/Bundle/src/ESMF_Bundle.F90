@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.19 2004/02/26 23:37:47 svasquez Exp $
+! $Id: ESMF_Bundle.F90,v 1.20 2004/02/27 22:09:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -223,7 +223,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleCreate - Create a new Bundle
 !
 ! !INTERFACE:
@@ -236,7 +236,7 @@
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 !  types of {\tt ESMF\_BundleCreate} functions.
-!EOP
+!EOPI
       end interface
 
 !------------------------------------------------------------------------------
@@ -257,7 +257,7 @@
       end interface
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetFields - Retrieve Fields from a Bundle
 !
 ! !INTERFACE:
@@ -270,11 +270,11 @@
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 !  types of {\tt ESMF\_BundleGetField} functions.
-!EOP
+!EOPI
       end interface
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleAddFields - Add Fields to a Bundle
 !
 ! !INTERFACE:
@@ -287,12 +287,12 @@
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 !  types of {\tt ESMF\_BundleAddField} functions.
-!EOP
+!EOPI
       end interface
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set a Bundle Attribute
 !
 ! !INTERFACE:
@@ -315,7 +315,7 @@
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Get a Bundle Attribute
 !
 ! !INTERFACE:
@@ -334,11 +334,11 @@
 !     This interface provides a single entry point for methods that retrieve
 !     attributes from an {\tt ESMF\_Bundle}.
  
-!EOP
+!EOPI
       end interface
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttributeInfo - Get type, count from a Bundle Attribute
 !
 ! !INTERFACE:
@@ -352,7 +352,7 @@
 !     This interface provides a single entry point for methods that retrieve
 !     information about attributes from an {\tt ESMF\_Bundle}.
  
-!EOP
+!EOPI
       end interface
 
 !------------------------------------------------------------------------------
@@ -398,16 +398,17 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleCreateNew - Create a Bundle from existing Fields
+! !IROUTINE: ESMF_BundleCreate - Create a Bundle from existing Fields
 !
 ! !INTERFACE:
-      function ESMF_BundleCreateNew(fieldcount, fields, packflag, name, iospec, rc)
+      ! Private name; call using ESMF_BundleCreate()
+      function ESMF_BundleCreateNew(fieldCount, fields, packflag, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Bundle) :: ESMF_BundleCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: fieldcount           
+      integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
       character (len = *), intent(in), optional :: name 
@@ -422,16 +423,16 @@ end function
 !     a single contiguous memory buffer.  All {\tt ESMF\_Field}s
 !     must share a common {\tt ESMF\_Grid}.  Return a new {\tt ESMF\_Bundle}.
 !
-!     The arguments are:
+!     \newline The arguments are:
 !     \begin{description}
 !
-!     \item [fieldcount]
+!     \item [fieldCount]
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
 !           {\tt ESMF\_Field}s in the following argument.
 !
 !     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_Fieldcount}
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
 !
 !     \item [{[packflag]}]
@@ -482,7 +483,7 @@ end function
       endif
 
 !     Call construction method to allocate and initialize bundle internals.
-      call ESMF_BundleConstructNew(btypep, fieldcount, fields, &
+      call ESMF_BundleConstructNew(btypep, fieldCount, fields, &
                                               packflag, name, iospec, rc)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_BundleCreateNew: Bundle construct"
@@ -674,12 +675,12 @@ end function
 ! !IROUTINE: ESMF_BundleConstructNew - Construct the internals of a Bundle
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleConstructNew(btype, fieldcount, fields, &
+      subroutine ESMF_BundleConstructNew(btype, fieldCount, fields, &
                                               packflag, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleType), pointer :: btype 
-      integer, intent(in) :: fieldcount           
+      integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
       character (len = *), intent(in), optional :: name 
@@ -700,13 +701,13 @@ end function
 !     \item [btype]
 !           Pointer to a {\tt ESMF\_Bundle} object.
 !
-!     \item [fieldcount]
+!     \item [fieldCount]
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of
 !           {\tt ESMF\_Field}s in the following argument.
 !
 !     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldcount}
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
 !
 !     \item [{[packflag]}]
@@ -752,7 +753,7 @@ end function
       if(present(packflag)) btype%pack_flag = packflag
 
 !     Add the fields in the list, checking for consistency.
-      call ESMF_BundleTypeAddFieldList(btype, fieldcount, fields, status)
+      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
         return
@@ -1189,11 +1190,11 @@ end function
 ! !IROUTINE: ESMF_BundleAddFieldList - Add a list of Fields to a Bundle.
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleAddFieldList(bundle, fieldcount, fields, rc)
+      subroutine ESMF_BundleAddFieldList(bundle, fieldCount, fields, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle        
-      integer, intent(in) :: fieldcount
+      integer, intent(in) :: fieldCount
       type(ESMF_Field), dimension(:), intent(in) :: fields
       integer, intent(out), optional :: rc          
 !
@@ -1210,13 +1211,13 @@ end function
 !     \item [bundle]
 !           {\tt ESMF\_Bundle} to add {\tt ESMF\_Field}s into.
 !
-!     \item [fieldcount]
+!     \item [fieldCount]
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
 !           {\tt ESMF\_Field}s in the following argument.
 !
 !     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldcount}
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
 !
 !     \item [{[rc]}]
@@ -1244,7 +1245,7 @@ end function
         return
       endif
     
-      call ESMF_BundleTypeAddFieldList(btype, fieldcount, fields, rc)
+      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, rc)
       
       end subroutine ESMF_BundleAddFieldList
 
@@ -1255,11 +1256,11 @@ end function
 ! !IROUTINE: ESMF_BundleTypeAddFieldList - Add a list of Fields to a Bundle.
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleTypeAddFieldList(btype, fieldcount, fields, rc)
+      subroutine ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleType), pointer :: btype        
-      integer, intent(in) :: fieldcount
+      integer, intent(in) :: fieldCount
       type(ESMF_Field), dimension(:), intent(in) :: fields
       integer, intent(out), optional :: rc          
 !
@@ -1274,13 +1275,13 @@ end function
 !     \item [btype]
 !           {\tt ESMF\_BundleType} to add {\tt ESMF\_Field}s into.
 !
-!     \item [fieldcount]
+!     \item [fieldCount]
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
 !           {\tt ESMF\_Field}s in the following argument.
 !
 !     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldcount}
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
 !
 !     \item [{[rc]}]
@@ -1309,7 +1310,7 @@ end function
       nullify(temp_flist)
     
       ! early exit.
-      if (fieldcount .le. 0) then
+      if (fieldCount .le. 0) then
           print *, "ERROR in ESMF_BundleAddFields: called with 0 Fields"
           return
       endif
@@ -1321,21 +1322,21 @@ end function
       ! Add the fields in the list, checking for consistency.
       if (btype%field_count .eq. 0) then
         
-          allocate(btype%flist(fieldcount), stat=status)
+          allocate(btype%flist(fieldCount), stat=status)
           if(status .NE. 0) then
             print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
             return
           endif
          
           ! now add the fields to the new list
-          do i=1, fieldcount
+          do i=1, fieldCount
             btype%flist(i) = fields(i)
           enddo
 
-          btype%field_count = fieldcount
+          btype%field_count = fieldCount
       else
           ! make a list the right length
-          allocate(temp_flist(btype%field_count + fieldcount), stat=status)
+          allocate(temp_flist(btype%field_count + fieldCount), stat=status)
           if(status .NE. 0) then
             print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
             return
@@ -1347,7 +1348,7 @@ end function
           enddo
 
           ! and append the new fields to the list
-          do i=1, fieldcount
+          do i=1, fieldCount
             temp_flist(btype%field_count+i) = fields(i)
           enddo
 
@@ -1359,7 +1360,7 @@ end function
 
           ! and now make this the permanent list
           btype%flist => temp_flist
-          btype%field_count = btype%field_count + fieldcount
+          btype%field_count = btype%field_count + fieldCount
 
       endif
 
@@ -1368,7 +1369,7 @@ end function
       !  that don't have associated grids yet, so we have to be able to
       !  deal consistently with that.
       if (btype%gridstatus .eq. ESMF_STATE_UNINIT) then
-          do i=1, fieldcount
+          do i=1, fieldCount
             call ESMF_FieldGetGrid(btype%flist(i), grid, status)
             if (status .ne. ESMF_SUCCESS) cycle
 

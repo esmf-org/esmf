@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.19 2004/02/27 20:57:47 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.20 2004/02/27 22:09:26 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@
 \input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
 #endif
 
-\subsubsection{Restrictions}
+\subsection{Restrictions}
 #ifdef STANDALONE
 \input{gcomp_rest}
 #elif defined(CONSTITUENT)
@@ -106,7 +106,7 @@
 \input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
 #endif
 
-\subsubsection{Restrictions}
+\subsection{Restrictions}
 #ifdef STANDALONE
 \input{cpl_rest}
 #elif defined(CONSTITUENT)

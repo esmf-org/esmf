@@ -1,4 +1,4 @@
-% $Id: AppDriver_refdoc.ctex,v 1.6 2004/02/27 20:58:55 cdeluca Exp $
+% $Id: AppDriver_refdoc.ctex,v 1.7 2004/02/27 22:09:26 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 \newpage
 #endif
 
-\section{Application Driver and Core ESMF Operations}
+\section{Application Driver and Required ESMF Methods}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -70,7 +70,7 @@
 \input{../Superstructure/AppDriver/doc/AppDriver_rest}
 #endif
 
-\subsection{Core ESMF Operations}
+\subsection{Required ESMF Methods}
 #ifdef STANDALONE
 \input{../../Component/doc/ESMF_Comp_fapi}
 #elif defined(CONSTITUENT)
