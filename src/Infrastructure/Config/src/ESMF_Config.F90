@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.10 2004/05/13 12:08:40 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.11 2004/06/07 08:55:25 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -9,10 +9,12 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Config.F90"
 !
 !     ESMF Configuration module
       module ESMF_ConfigMod
 !
+#include "ESMF.h"
 !==============================================================================
 !
 ! This file contains the Config class definition and all Config
@@ -184,7 +186,7 @@
 
       use ESMF_BaseMod
       use ESMF_DELayoutMod
-      !use ESMF_LogErrMod    ! seems unneeded, at least for now.
+      use ESMF_LogErrMod 
 
       implicit none
       private
@@ -290,6 +292,8 @@
 
      contains
 !
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigCreate"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -320,10 +324,12 @@
 ! Initialization
 
       allocate(cf_local%buffer, cf_local%this_line, stat = iret)
-      if(iret /= 0) then
-         ! SUBSITUTE:   call perr(myname_,'allocate(...%..)', iret)
-         print *, myname_,'allocate(...%..)', iret
-      endif
+      if (ESMF_LogMsgFoundAllocError(iret, "Allocating local buffer", &
+                                       ESMF_CONTEXT, rc)) return
+      !if(iret /= 0) then
+      !   ! SUBSITUTE:   call perr(myname_,'allocate(...%..)', iret)
+      !   print *, myname_,'allocate(...%..)', iret
+      !endif
 
       ESMF_ConfigCreate = cf_local
       if (present( rc )) rc = iret
@@ -332,6 +338,8 @@
     end function ESMF_ConfigCreate
     
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigDestroy"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -361,10 +369,12 @@
       iret = 0
 
       deallocate(cf%buffer, cf%this_line, stat = iret)
-      if(iret /= 0) then
-! SUBSTITUTE:  call perr(myname_,'deallocate(...%..)', iret)
-         print *, myname_,'deallocate(...%..)', iret
-      endif
+      if (ESMF_LogMsgFoundAllocError(iret, "Deallocating local buffer", &
+                                       ESMF_CONTEXT, rc)) return
+      !if(iret /= 0) then
+      ! SUBSTITUTE:  call perr(myname_,'deallocate(...%..)', iret)
+      !   print *, myname_,'deallocate(...%..)', iret
+      !endif
 
 
       if (present( rc )) rc = iret
@@ -373,6 +383,8 @@
      end subroutine ESMF_ConfigDestroy
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigFindLabel"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -419,15 +431,21 @@
       i = index_ ( cf%buffer(1:cf%nbuf), EOL//label ) + 1
       if ( i .eq. 1 ) then
          cf%this_line = BLK // EOL
-         iret = -2
-         if ( present (rc )) rc = iret
-         return
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "label not found", &
+                                 ESMF_CONTEXT, rc)) return
+         !iret = -2
+         !if ( present (rc )) rc = iret
+         !return
       elseif(i.le.0) then
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "invalid operation with index", &
+                                 ESMF_CONTEXT, rc)) return
          ! SUBSTITUTE:	   call die(myname_,'invalid index_() return',i)
-         print *, myname_,'invalid index_() return',i
-         iret = -3
-         if ( present (rc )) rc = iret
-         return
+         !print *, myname_,'invalid index_() return',i
+         !iret = -3
+         !if ( present (rc )) rc = iret
+         !return
       end if
 
 !     Extract the line associated with this label
@@ -445,6 +463,8 @@
     end subroutine ESMF_ConfigFindLabel
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetString"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -535,6 +555,8 @@
     
     
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetFloatR4"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -608,6 +630,8 @@
 
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetFloatR8"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -681,6 +705,8 @@
 
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetFloatsR4"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -725,10 +751,13 @@
 
 
       if (nsize.le.0) then
-         print *,myname_,' invalid SIZE =', nsize
-         iret = -1
-         if(present( rc )) rc = iret
-         return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "invalid SIZE", &
+                                 ESMF_CONTEXT, rc)) return
+         !print *,myname_,' invalid SIZE =', nsize
+         !iret = -1
+         !if(present( rc )) rc = iret
+         !return
       endif
        
 ! Default setting
@@ -760,6 +789,8 @@
       return
     end subroutine ESMF_ConfigGetFloatsR4
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetFloatsR8"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -804,10 +835,13 @@
 
 
       if (nsize.le.0) then
-         print *,myname_,' invalid SIZE =', nsize
-         iret = -1
-         if(present( rc )) rc = iret
-         return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "invalid SIZE", &
+                                 ESMF_CONTEXT, rc)) return
+         !print *,myname_,' invalid SIZE =', nsize
+         !iret = -1
+         !if(present( rc )) rc = iret
+         !return
       endif
        
 ! Default setting
@@ -839,6 +873,8 @@
       return
     end subroutine ESMF_ConfigGetFloatsR8
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetIntI4"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -917,6 +953,8 @@
       return
     end subroutine ESMF_ConfigGetIntI4
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetIntI8"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -996,6 +1034,8 @@
     end subroutine ESMF_ConfigGetIntI8
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetIntsI4"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -1038,10 +1078,13 @@
       iret = 0
 
       if (nsize.le.0) then
-         print *,myname_,' invalid SIZE =', nsize
-         iret = -1
-         if(present( rc )) rc = iret
-         return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "invalid SIZE", &
+                                 ESMF_CONTEXT, rc)) return
+         !print *,myname_,' invalid SIZE =', nsize
+         !iret = -1
+         !if(present( rc )) rc = iret
+         !return
       endif
        
  ! Default setting
@@ -1075,6 +1118,8 @@
 
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetIntsI8"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -1117,10 +1162,13 @@
       iret = 0
 
       if (nsize.le.0) then
-         print *,myname_,' invalid SIZE =', nsize
-         iret = -1
-         if(present( rc )) rc = iret
-         return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "invalid SIZE", &
+                                 ESMF_CONTEXT, rc)) return
+         !print *,myname_,' invalid SIZE =', nsize
+         !iret = -1
+         !if(present( rc )) rc = iret
+         !return
       endif
        
  ! Default setting
@@ -1155,6 +1203,8 @@
 
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetChar"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -1217,6 +1267,8 @@
     end subroutine ESMF_ConfigGetChar
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetDim"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -1285,6 +1337,8 @@
 
     end subroutine ESMF_ConfigGetDim
     
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetLen"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -1344,6 +1398,8 @@
     end function ESMF_ConfigGetLen
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigLoadFile"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
@@ -1388,15 +1444,21 @@
          call ESMF_ConfigLoadFile_1proc_( cf, fname, rc = iret )
       endif
       if(iret /= 0) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_FILE_OPEN, &
+                                "unable to load file", &
+                                 ESMF_CONTEXT, rc)) return
+      !if(iret /= 0) then
 ! SUBSITUTE call perr(myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret)
-         print *, myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret
-
-         if (present( rc )) rc = iret
-         return
+      !   print *, myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret
+      !
+      !   if (present( rc )) rc = iret
+      !   return
       endif
 
       if ( present (delayout) ) then
-         print *, myname_, ' DE layout is not used yet '
+         if (ESMF_LogWrite("DELayout not used yet", ESMF_LOG_WARNING, &
+                           ESMF_CONTEXT)) continue 
+         !print *, myname_, ' DE layout is not used yet '
       endif
 
       if (present( rc )) rc = iret
@@ -1406,6 +1468,8 @@
 
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigLoadFile_1proc_"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOPI -------------------------------------------------------------------
@@ -1446,7 +1510,10 @@
       iret = 0
 
       if ( present( unique ) ) then
-         print *, myname_, ' Uniqueness of labels is not checked yet '
+         if (ESMF_LogWrite("uniqueness of labels not checked yet", &
+                           ESMF_LOG_WARNING, &
+                           ESMF_CONTEXT)) continue 
+         !print *, myname_, ' Uniqueness of labels is not checked yet '
       endif
 
 !     Open file
@@ -1522,6 +1589,8 @@
       return
     end subroutine ESMF_ConfigLoadFile_1proc_
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigNextLine"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------

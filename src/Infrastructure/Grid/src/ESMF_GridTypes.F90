@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.29 2004/06/07 05:21:08 nscollins Exp $
+! $Id: ESMF_GridTypes.F90,v 1.30 2004/06/07 08:55:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -493,7 +493,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.29 2004/06/07 05:21:08 nscollins Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.30 2004/06/07 08:55:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -835,8 +835,9 @@
       ! Set global domain limits
       if (present(minGlobalCoordPerDim)) then
          if (size(minGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridAddAttribute: minGlobalCoordPerDim too big'
-            return
+            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "minGlobalCoordPerDim too big", &
+                                 ESMF_CONTEXT, rc)) return
          endif
          do i=1,size(minGlobalCoordPerDim)
             grid%ptr%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
@@ -844,8 +845,9 @@
       endif
       if (present(maxGlobalCoordPerDim)) then
          if (size(maxGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridAddAttribute: maxGlobalCoordPerDim too big'
-            return
+            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "maxGlobalCoordPerDim too big", &
+                                 ESMF_CONTEXT, rc)) return
          endif
          do i=1,size(maxGlobalCoordPerDim)
             grid%ptr%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
@@ -996,8 +998,9 @@
       ! Get global domain limits
       if (present(minGlobalCoordPerDim)) then
          if (size(minGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridGetAttributes: minGlobalCoordPerDim too big'
-            return
+            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "minGlobalCoordPerDim too big", &
+                                 ESMF_CONTEXT, rc)) return
          endif
          do i=1,size(minGlobalCoordPerDim)
             minGlobalCoordPerDim(i) = grid%ptr%minGlobalCoordPerDim(i)
@@ -1005,8 +1008,9 @@
       endif
       if (present(maxGlobalCoordPerDim)) then
          if (size(maxGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridGetAttributes: maxGlobalCoordPerDim too big'
-            return
+            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "maxGlobalCoordPerDim too big", &
+                                 ESMF_CONTEXT, rc)) return
          endif
          do i=1,size(maxGlobalCoordPerDim)
             maxGlobalCoordPerDim(i) = grid%ptr%maxGlobalCoordPerDim(i)
@@ -1136,12 +1140,9 @@
       ! the chunksize is 4 because it is a round number in base 2.
       if (alloccount .eq. 0) then
         allocate(gridp%distGrids(CHUNK), stat=allocrc)
-        if (allocrc .ne. 0) then
-          print *, "cannot allocate DistGrids, first try"
-          print *, "ERROR in ESMF_GridAddDistGrid: DistGrids allocate"
-          rc = ESMF_FAILURE
-          return
-        endif
+        if (ESMF_LogMsgFoundAllocError(allocrc, &
+                                       "Allocating initial Grid list", &
+                                       ESMF_CONTEXT, rc)) return
         gridp%numDistGridsAlloc = CHUNK
         rc = ESMF_SUCCESS
         return
@@ -1157,11 +1158,9 @@
 
      ! make larger temp space
      allocate(temp_dgrids(alloccount), stat=allocrc)
-     if (allocrc .ne. 0) then
-       print *, "cannot allocate temp_dgrids, alloc=", alloccount
-       print *, "ERROR in ESMF_GridAddDistGrid: temp_dgrids allocate"
-       return
-     endif
+     if (ESMF_LogMsgFoundAllocError(allocrc, &
+                                       "Extending internal Grid list", &
+                                       ESMF_CONTEXT, rc)) return
 
      ! copy old contents over (note use of = and not => )
      do i = 1, oldcount
@@ -1170,10 +1169,9 @@
 
      ! deallocate old array
      deallocate(gridp%distGrids, stat=allocrc)
-     if (allocrc .ne. 0) then
-       print *, "ERROR in ESMF_GridAddDistGrid: DistGrids deallocate"
-       return
-     endif
+     if (ESMF_LogMsgFoundAllocError(allocrc, &
+                                    "Deallocating Grid information", &
+                                     ESMF_CONTEXT, rc)) return
 
      ! and set original pointer to the new space
      gridp%DistGrids => temp_dgrids
@@ -1305,19 +1303,15 @@
       ! the chunksize is 4 because it is a round number in base 2.
       if (alloccount .eq. 0) then
         allocate(gridp%physGrids(CHUNK), stat=allocrc)
-        if (allocrc .ne. 0) then
-          print *, "cannot allocate PhysGrids, first try"
-          print *, "ERROR in ESMF_GridAddPhysGrid: PhysGrids allocate"
-          rc = ESMF_FAILURE
-          return
-        endif
+        if (ESMF_LogMsgFoundAllocError(allocrc, &
+                                       "Allocating physGrid information", &
+                                       ESMF_CONTEXT, rc)) return
+
         allocate(gridp%distGridIndex(CHUNK), stat=allocrc)
-        if (allocrc .ne. 0) then
-          print *, "cannot allocate distGridIndex, first try"
-          print *, "ERROR in ESMF_GridAddPhysGrid: distGridIndex allocate"
-          rc = ESMF_FAILURE
-          return
-        endif
+        if (ESMF_LogMsgFoundAllocError(allocrc, &
+                                       "Allocating Grid index information", &
+                                       ESMF_CONTEXT, rc)) return
+
         gridp%numPhysGridsAlloc = CHUNK
         rc = ESMF_SUCCESS
         return
@@ -1333,17 +1327,14 @@
 
      ! make larger temp space
      allocate(temp_pgrids(alloccount), stat=allocrc)
-     if (allocrc .ne. 0) then
-       print *, "cannot allocate temp_pgrids, alloc=", alloccount
-       print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
-       return
-     endif
+     if (ESMF_LogMsgFoundAllocError(allocrc, &
+                                       "Allocating temp Grid information", &
+                                       ESMF_CONTEXT, rc)) return
+
      allocate(temp_dgIndex(alloccount), stat=allocrc)
-     if (allocrc .ne. 0) then
-       print *, "cannot allocate temp_dgIndex, alloc=", alloccount
-       print *, "ERROR in ESMF_GridAddPhysGrid: temp_dgIndex allocate"
-       return
-     endif
+     if (ESMF_LogMsgFoundAllocError(allocrc, &
+                                  "Allocating temp distGrid information", &
+                                  ESMF_CONTEXT, rc)) return
 
      ! copy old contents over (note use of = and not => )
      do i = 1, oldcount
@@ -1353,15 +1344,14 @@
 
      ! deallocate old arrays
      deallocate(gridp%physGrids, stat=allocrc)
-     if (allocrc .ne. 0) then
-       print *, "ERROR in ESMF_GridAddPhysGrid: PhysGrids deallocate"
-       return
-     endif
+     if (ESMF_LogMsgFoundAllocError(allocrc, &
+                                    "Deallocating physGrid information", &
+                                    ESMF_CONTEXT, rc)) return
+
      deallocate(gridp%distGridIndex, stat=allocrc)
-     if (allocrc .ne. 0) then
-       print *, "ERROR in ESMF_GridAddPhysGrid: distGridIndex deallocate"
-       return
-     endif
+     if (ESMF_LogMsgFoundAllocError(allocrc, &
+                                    "Deallocating physGrid index information", &
+                                    ESMF_CONTEXT, rc)) return
 
      ! and set original pointers to the new space
      gridp%physGrids => temp_pgrids
@@ -1443,7 +1433,9 @@
             endif
          end do name_search
          if (.not. found) then
-            print *,'ERROR in ESMF_GridGetPhysGrid: unknown name'
+            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "unknown name", &
+                                 ESMF_CONTEXT, rc)) return
          endif
 
       ! If relloc supplied, search by relloc and return selected PhysGrid
@@ -1461,14 +1453,16 @@
             endif
          end do relloc_search
          if (.not. found) then
-            print *,'ERROR in ESMF_GridGetPhysGrid: unknown relloc'
-            return
+            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "unknown relative location", &
+                                 ESMF_CONTEXT, rc)) return
          endif
       
       ! If neither supplied, return error.
       else
-         print *,'ERROR in GridGetPhysGrid: must supply name or relloc'
-         return
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "must supply a name or relloc", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ! Set return values.
@@ -1603,7 +1597,9 @@
          endif
       end do name_search
       if (.not. found) then
-         print *,'ERROR in ESMF_GridGetDistGrid: unknown name'
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "unknown name", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ! Set return values.
