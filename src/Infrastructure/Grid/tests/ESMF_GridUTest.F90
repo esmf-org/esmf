@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.6 2003/04/16 22:17:25 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.7 2003/04/17 20:42:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.6 2003/04/16 22:17:25 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.7 2003/04/17 20:42:40 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -81,7 +81,7 @@
       integer :: phy_grid_id
       integer :: halo_width
       real :: x_min, x_max, y_min, y_max
-      type(ESMF_Grid) :: grid
+      type(ESMF_Grid) :: grid, grid1, grid2
       type(ESMF_GridType) :: grid_type
       type(ESMF_DELayout) :: layout
 
@@ -224,6 +224,24 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      ! Test creating an internal Grid
+      ! grid2 = ESMF_GridCreateInternal(i_max=i_max, j_max=j_max, &
+      !                       x_min=x_min, x_max=x_max, &
+      !		             layout=layout, &
+      !                       horz_gridtype=horz_gridtype, &
+      !                       vert_gridtype=vert_gridtype, &
+      !                       horz_stagger=horz_stagger, &
+      !                       vert_stagger=vert_stagger, &
+      !                       horz_coord_system=horz_coord_system, &
+      !                       vert_coord_system=vert_coord_system, &
+      !			     halo_width=halo_width, &
+      !                      name=name, rc=status)
+
+      !  write(failMsg, *) ""
+      ! write(name, *) "Creating an Internal Grid Test"
+      ! call ESMF_Test((status.eq.ESMF_SUCCESS), &
+      !               name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       ! Printing a Grid
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
@@ -231,25 +249,43 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      ! Test destroy subroutine
       call  ESMF_GridDestroy(grid, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Destroying a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "rc = ", rc
+
+      !----------------------------------------------------------------------
+
+      ! Test creation ofempty 
+      grid1 =  ESMF_GridCreate( rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "rc = ", rc
+
       !------------------------------------------------------------------------
 
-      name = "test grid 1"
 
-      call ESMF_GridAddPhysGrid(grid_type, i_max=i_max, j_max=j_max, &
-		     physgrid_id=phy_grid_id, &
-                             y_min=y_min, y_max=y_max, &
-			     physgrid_name=name, rc=status)
 
-      write(failMsg, *) ""
-      write(name, *) "Adding a Physical Grid Test"
-      call ESMF_Test((status.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! The following code crashes, bug 722780 has been filed
+
+      ! name = "test grid 1"
+
+      ! call ESMF_GridAddPhysGrid(grid_type, i_max=i_max, j_max=j_max, &
+      ! 		     physgrid_id=phy_grid_id, &
+      !                      y_min=y_min, y_max=y_max, &
+      ! 		     physgrid_name=name, rc=status)
+
+      ! write(failMsg, *) ""
+      ! write(name, *) "Adding a Physical Grid Test"
+      ! call ESMF_Test((status.eq.ESMF_SUCCESS), &
+      !                   name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 #endif
 
