@@ -1,4 +1,4 @@
-% $Id: ESMF_usage.tex,v 1.7 2002/09/09 21:56:36 cdeluca Exp $
+% $Id: ESMF_usage.tex,v 1.8 2002/09/10 17:39:09 cdeluca Exp $
 
 \subsection{Bindings}
 
@@ -8,53 +8,52 @@ for procedures and parameters is {\tt ESMC\_} and the F90 prefix is
 
 \subsection{Object Function Conventions}
 
-A large portion of the library is built using objects.  To standardize
-the creation, use and destruction of these objects the library uses
-certain common function for each object.
+To enhance ease of use in the ESMF, naming conventions are
+used for common methods such as creation and initialization.
 
 \begin{itemize}
-\item{\bf ESM[F/C]\_<Class>New} Allocates a {\it deep} object.  This
+\item{\tt ESM[F/C]\_<Class>New} Allocates a {\it deep} object.  This
   function will allocate space from the heap and may create other
   resources which must be free'd or deallocated.  All items created
   with {\bf New} must be deleted with {\bf Delete} below.  {\tt e.g.
     ESMF\_LogNew}
   
-\item{\bf ESM[F/C]\_<Class>Delete} De-Allocates an object created with
+\item{\tt ESM[F/C]\_<Class>Delete} De-Allocates an object created with
   New.  Any transient resources that were created will be cleaned up.
   {\tt e.g. ESMF\_LogDelete}
   
-\item{\bf ESM[F/C]\_<Class>Init} Initializes a {\it shallow} object.
+\item{\tt ESM[F/C]\_<Class>Init} Initializes a {\it shallow} object.
   This class of objects does not need to be destructed and is
   guaranteed not to allocate any resources that must be cleaned up.
   {\tt e.g. ESMF\_TimeInit}
   
-\item{\bf ESM[F/C]\_<Class>Set<Value>} Sets a given value with the
+\item{\tt ESM[F/C]\_<Class>Set<Value>} Sets a given value with the
   class.  The {\bf Value} parameter is decided by the class.  {\tt
     e.g. ESMF\_LogSetState}
   
-\item{\bf ESM[F/C]\_<Class>Get<Value>} Gets a given value with the
+\item{\tt ESM[F/C]\_<Class>Get<Value>} Gets a given value with the
   class.  The {\bf Value} parameter is decided by the class.  {\tt
     e.g. ESMF\_LogGetState}
   
-\item{\bf ESM[F/C]\_<Class>SetConfig} This function takes a list of
+\item{\tt ESM[F/C]\_<Class>SetConfig} This function takes a list of
   resorces as defined in the resource section the class.  Some class
   may not have resources and this function has no meaning.  The
   function allows a user to set multiple resources with one function
   call.  {\tt e.g. ESMF\_LogSetConfig}
   
-\item{\bf ESM[F/C]\_<Class>GetConfig} This function takes a list of
+\item{\tt ESM[F/C]\_<Class>GetConfig} This function takes a list of
   resorces as defined in the resource section the class.  Some class
   may not have resources and this function has no meaning.  The
   function allows a user to get multiple resources with one function
   call.  {\tt ESMF\_LogGetConfig}
   
-\item{\bf ESM[C]\_<Class>Construct} This function fills initializes an
+\item{\tt ESM[C]\_<Class>Construct} This function fills initializes an
   object with valid data.  This function is called by both the {\bf
     Init} and {\bf New} functions.  Depending on the type of object
   this function may or may not allocate resources that need to be
   freed.
   
-\item{\bf ESM[C]\_<Class>Destruct} This function cleans up any
+\item{\tt ESM[C]\_<Class>Destruct} This function cleans up any
   resources that were created in the {\bf Construct} method.
 
 \end{itemize}
@@ -110,15 +109,6 @@ using the methods:
 
 The intent is to provide an error handling system in which
 users can choose from a variety of handlers or supply their own.
-
-
-\subsection{Attributes}
-
-Attributes are a list of (name, value) pairs associated with any 
-object in the library. The value can be of any data type. 
-There are methods for listing, setting, and querying attribute lists.
-These methods are expected to be implemented in the base class
-and not specialized by higher level objects.
 
 
 

@@ -4,17 +4,6 @@
 The following sections describe design choices that apply across the 
 entire body of ESMF software.
 
-\subsection{ESMF Base Object (ESMF\_Base)}
-\label{sec:esmfbase}
-
-\label{sec:Base} 
-All ESMF objects inherit from an ESMF {\tt Base} class.  
-The {\tt Base} class is an abstraction of the data and behavior common to all
-classes in the framework.  Some methods and data can be
-inherited directly; others are expected to be overloaded by
-higher level objects.  {\tt Base} class methods include setting and querying attributes,
-print, validate, read/write, and restart. 
-
 
 
 

@@ -99,6 +99,43 @@ ID list, or by defining a {\tt Layout}.
 
 \subsection{Class Descriptions}
 
+\subsubsection{Base (ESMF\_Base)}
+\label{sec:Base} 
+All ESMF objects inherit from an ESMF {\tt Base} class.  
+The {\tt Base} class is an abstraction of the data and behavior common to all
+classes in the framework.  Some methods and data can be
+inherited directly; others are expected to be overloaded by
+higher level objects.  {\tt Base} class methods include setting and querying 
+attributes, print, validate, read/write, and restart. 
+
+\subsubsection{Attributes (ESMF\_Attr}
+\label{sec:Attr}
+{\tt Attribute}s are a list of (name, value) pairs associated with any 
+object in the library. The value can be of any data type. 
+There are methods for listing, setting, and querying attribute lists.
+These methods are expected to be implemented in the {\tt Base} class
+and not specialized by higher level objects.
+
+\subsubsection{Machine Model (ESMF\_Machine)} 
+\label{sec:machine} 
+The {\tt Machine Model} provides a general representation of 
+key features of computer hardware and system software.  
+This information is used by the framework to 
+perform resource allocation, data distribution, and dynamic load balancing.  
+The {\tt Machine Model} can be queried for information such as
+platform type(s), number of processors per node, number of nodes, 
+memory attributes and configuration, processor type and speed,
+communication semantics and performance, 
+interconnect attributes, and system library availability.
+It may optionally may provide quantative information 
+on actual bandwidth and latency through active tests.  
+
+\subsubsection{PE List (ESMF\_PEList)}
+\label{sec:pelist} 
+A {\tt PE List} is a list of physical processor IDs.  It includes a 
+unique identifier for each {\tt PE} which may differ from the hardware 
+processor ID.  
+
 \subsubsection{Layout (ESMF\_Layout)}
 \label{sec:layout} 
 A {\tt Layout} describes the topology of a set of {\tt Decomposition 
@@ -109,29 +146,9 @@ The decomposition must allow for mapping certain subsets onto the
 underlying machine model in a preferential way; e.g. keeping
 vertical blocks of a 3D decomposition on processors which share
 a memory pool.
-The {\tt Layout} may interact with both the PE Lists
-and the {\tt Machine} in order to accomplish this preferential
+The {\tt Layout} may interact with both the {\tt PE List}s
+and the {\tt Machine Model} in order to accomplish this preferential
 decomposition.
-
-\subsubsection{PE List (ESMF\_PEList)}
-\label{sec:pelist} 
-A {\tt PE List} is a list of physical processor IDs.  It includes a 
-unique identifier for each {\tt PE} which may differ from the hardware 
-processor ID.  
-
-\subsubsection{Machine (ESMF\_Machine)} 
-\label{sec:machine} 
-The {\tt Machine} class provides a general representation of 
-key features of computer hardware and system software.  
-This information is used by the framework to 
-perform resource allocation, data distribution, and dynamic load balancing.  
-The {\tt Machine} can be queried for information such as
-platform type(s), number of processors per node, number of nodes, 
-memory attributes and configuration, processor type and speed,
-communication semantics and performance, 
-interconnect attributes, and system library availability.
-It may optionally may provide quantative information 
-on actual bandwidth and latency through active tests.  
 
 \subsubsection{Basic Communications (ESMF\_Comm)}
 \label{sec:basiccomm} 
