@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.6 2003/04/03 22:43:57 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.7 2003/04/04 22:03:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.6 2003/04/03 22:43:57 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.7 2003/04/04 22:03:38 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -55,7 +55,8 @@
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
-      type(ESMF_DELayout) :: layout
+      type(ESMF_DELayout) :: layout1, layout2
+      integer :: delist(4)
       character (len = 20) :: fname, fname1, fname2, gname
       type(ESMF_IOSpec) :: ios
       type(ESMF_Field) :: f1, f2, f3, f4, f5
@@ -71,35 +72,37 @@
       print *, "*************FIELD ROUTE UNIT TESTS***************************"
       print *
 
-      ! the default layout
-      layout = ESMF_DELayoutCreate(rc=rc)
-      call ESMF_DELayoutGetDEid(layout, myde, rc)
+      ! Make a 1x4 and 2x2 layout
+      delist = (/ 0, 1, 2, 3 /)
+      layout1 = ESMF_DELayoutCreate(delist, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
+      layout2 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
+      call ESMF_DELayoutGetDEid(layout1, myde, rc)
 
       !------------------------------------------------------------------------
       i_max = 40
       j_max = 20
+      x_min = 0.0
+      x_max = 20.0
+      y_min = 0.0
+      y_max = 5.0
       horz_gridtype = ESMF_GridType_XY
       vert_gridtype = ESMF_GridType_Unknown
       horz_stagger = ESMF_GridStagger_A
       vert_stagger = ESMF_GridStagger_Unknown
       horz_coord_system = ESMF_CoordSystem_Cartesian
       vert_coord_system = ESMF_CoordSystem_Unknown
-      x_min = 0.0
-      x_max = 20.0
-      y_min = 0.0
-      y_max = 5.0
       gname = "test grid 1"
 
       grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                             nDE_i=4, nDE_j=1, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             layout=layout1, &
                              horz_gridtype=horz_gridtype, &
                              vert_gridtype=vert_gridtype, &
                              horz_stagger=horz_stagger, &
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
                              name=gname, rc=status)
 
       write(failMsg, *) ""
@@ -110,15 +113,15 @@
       ! Second grid
       gname = "test grid 2"
       grid2 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                             nDE_i=2, nDE_j=2, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             layout=layout2, &
                              horz_gridtype=horz_gridtype, &
                              vert_gridtype=vert_gridtype, &
                              horz_stagger=horz_stagger, &
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
                              name=gname, rc=status)
 
       write(failMsg, *) ""
@@ -163,7 +166,7 @@
       !------------------------------------------------------------------------
 
       ! route test
-      call ESMF_FieldRoute(f1, f2, layout, rc)
+      call ESMF_FieldRoute(f1, f2, layout1, rc)
       write(failMsg, *) ""
       write(name, *) "Calling Field Route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
