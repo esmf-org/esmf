@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2002/09/20 15:06:09 jwolfe Exp $
+# $Id: makefile,v 1.9 2003/01/13 23:22:54 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -9,6 +9,9 @@
 
 ALL: all
 
+#Default build option.
+BOPT = g
+
 DIRS = src
 CLEANDIRS = lib mod test${BOPT}
 
@@ -16,7 +19,7 @@ include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 build_libs:
 	@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
-	
+
 
 #-------------------------------------------------------------------------------
 # Basic targets to build ESMF libraries.
@@ -216,7 +219,7 @@ pdf: chkdir_doc tex
 	-@echo "========================================="
 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 	   ACTION=buildpdf  tree 
-	
+
 tex: chkdir_doc
 	-@echo "Building .F => .tex files"
 	-@echo "========================================="
