@@ -6,15 +6,30 @@
     use ESMF_ArrayMod
     implicit none
 
-    type PtrWrap  
+    type PtrWrap1  
     sequence
-      integer (KIND=2),dimension(:,:),pointer :: dummy
-    end type PtrWrap 
+      integer (KIND=4),dimension(:),pointer :: dummy
+    end type 
+    
+    type PtrWrap2  
+    sequence
+      integer (KIND=4),dimension(:,:),pointer :: dummy
+    end type 
+    
+    type PtrWrap3  
+    sequence
+      integer (KIND=4),dimension(:,:,:),pointer :: dummy
+    end type 
+    
+    type PtrWrap4  
+    sequence
+      integer (KIND=4),dimension(:,:,:,:,:),pointer :: dummy
+    end type 
     
     type AllocWrap  
     sequence
       integer (KIND=4),dimension(:,:),pointer :: dummy
-    end type AllocWrap 
+    end type 
     
     integer :: i, j, nx, ny, items, arank, rc, status
     type(ESMF_Array) :: array1, array2, array3
@@ -22,9 +37,15 @@
     real (ESMF_IKIND_R8),dimension(:,:),pointer :: realptr, realptr2
     integer (ESMF_IKIND_I4),dimension(:,:),pointer :: intptr, intptr2
 
-    type(PtrWrap) :: sizetest(2)
+    type(PtrWrap1) :: sizetest1(2)
+    type(PtrWrap2) :: sizetest2(2)
+    type(PtrWrap3) :: sizetest3(2)
+    type(PtrWrap4) :: sizetest4(2)
     
-    call c_ESMF_SizePrint(sizetest(1), sizetest(2))
+    call c_ESMF_SizePrint(sizetest1(1), sizetest1(2))
+    call c_ESMF_SizePrint(sizetest2(1), sizetest2(2))
+    call c_ESMF_SizePrint(sizetest3(1), sizetest3(2))
+    call c_ESMF_SizePrint(sizetest4(1), sizetest4(2))
 
     nx = 3
     ny = 5 
