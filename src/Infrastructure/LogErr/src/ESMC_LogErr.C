@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.18 2003/10/16 23:33:54 nscollins Exp $
+// $Id: ESMC_LogErr.C,v 1.19 2003/10/17 19:17:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,12 +42,12 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.18 2003/10/16 23:33:54 nscollins Exp $";
-//----------------------------------------------------------------------------/
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.19 2003/10/17 19:17:06 nscollins Exp $";
+//----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
 //
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //
 //
 //BOP
@@ -119,7 +119,7 @@ void ESMC_Log::ESMC_LogOpenFile(
      
 }   //end ESMC_LogErrOpenFile
 
-//-------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LogOpenFortFile -  opens a Log object
 //
@@ -192,7 +192,7 @@ void ESMC_Log::ESMC_LogOpenFortFile(
   numFortFiles++;
 }
 
-//----------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_LogNameValid - checks to see if a name has been used before
 //
@@ -226,7 +226,7 @@ bool ESMC_Log::ESMC_LogNameValid(
     return true;
   }
 }
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LogInfo - print contents of a Log
 //
@@ -462,7 +462,7 @@ void ESMC_Log::ESMC_LogInfoFortran(
 #endif
 }
 
-//-----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LogGet - get value of verbose, flush, haltOnErr, and/or haltOnWarn
 //
@@ -504,11 +504,12 @@ void ESMC_Log::ESMC_LogInfoFortran(
     }
     option= va_arg(argp, char*);
     if (!(*option)) break;
-    value = va_arg(argp, ESMC_Logical);
+    //value = va_arg(argp, ESMC_Logical);
+    value = (ESMC_Logical)va_arg(argp, int);
   }
 } 
 
-//---------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_LogSet - sets the value of verbose, flush, haltOnWarn and/or haltOnErr
 //
@@ -550,12 +551,13 @@ void ESMC_Log::ESMC_LogInfoFortran(
     }
     option= va_arg(argp, char*);
     if (!(*option)) break;
-    value = va_arg(argp, ESMC_Logical);
+    //value = va_arg(argp, ESMC_Logical);
+    value = (ESMC_Logical)va_arg(argp, int);
   }
 }    
    
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_GetFileHandle - used in conjunction with fprintf to write
 // data to the log file.
@@ -583,7 +585,7 @@ void ESMC_Log::ESMC_LogInfoFortran(
   return logErrCFilePtr[numFilePtr];
 }
 //
-//------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LogGetUnit - used in conjunction with standard Fortran write
 // to write data to log file. 
@@ -697,7 +699,7 @@ void ESMC_Log::ESMC_LogCloseFortFile(
     }
   }
 }
-//-----------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_LogCloseFile - closes log file. 
 //
@@ -741,7 +743,7 @@ void ESMC_Log::ESMC_LogCloseFile(
 
  
 
-//----------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_LogErr - write error message to log file
 //
@@ -780,7 +782,7 @@ void ESMC_Log::ESMC_LogErr_(
  }
 
 
-//----------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_LogErrMsg - write error message to log file
 //
@@ -921,7 +923,7 @@ void ESMC_Log::ESMC_LogExit(
 
 }
 
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 //
 // !IROUTINE: ESMC_LogErrFortran - called by fortran wrapper to write error msg
@@ -1001,7 +1003,7 @@ void ESMC_Log::ESMC_LogWarnFortran(
 
 }
 
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 //
 // !IROUTINE: ESMC_Log() - constructor
@@ -1037,7 +1039,7 @@ void ESMC_Log::ESMC_LogWarnFortran(
 }
 
 
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 //
 // !IROUTINE: ESMC_LogPrint - prints to the log file
@@ -1112,7 +1114,7 @@ void ESMC_Log:: ESMC_LogPrint(
   fprintf(logErrCFilePtr[numFilePtr],"\n");
  }
 }
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LogGetErrMsg -- Return error message for given error code.
 //
@@ -1164,7 +1166,7 @@ void ESMC_Log:: ESMC_LogPrint(
 } // end ESMC_GetErrMsg
 
  
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 //
 // !IROUTINE: ESMC_LogSetFlush() - set the flushSet variable.
@@ -1188,7 +1190,7 @@ inline void ESMC_Log::ESMC_LogSetFlush(
 }
 
 
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP
 //
 // !IROUTINE: ESMC_LogGetFlush() - returns the flush variable 
@@ -1214,7 +1216,7 @@ ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
 
 
 
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //BOP                
 //                   
 // !IROUTINE: ESMC_LogSetNotFlush() - output not flushed
