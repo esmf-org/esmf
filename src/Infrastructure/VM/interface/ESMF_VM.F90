@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.45 2004/12/28 04:46:15 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.46 2004/12/28 06:10:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,7 +118,8 @@ module ESMF_VMMod
 ! !PRIVATE MODULE VARIABLES:
 
   type(ESMF_VM) :: GlobalVM     ! This is a reference to the global VM
-
+  public GlobalVM
+  
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -156,7 +157,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.45 2004/12/28 04:46:15 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.46 2004/12/28 06:10:26 theurich Exp $'
 
 !==============================================================================
 
@@ -4020,3 +4021,16 @@ module ESMF_VMMod
 
 
 end module ESMF_VMMod
+
+
+! - external subroutines used for internal ESMF purposes to circumvent 
+! - circular module dependencies
+
+subroutine f_ESMF_VMGlobalGet(localPet, petCount)
+  use ESMF_VMMod
+  integer, intent(out), optional  :: localPet
+  integer, intent(out), optional  :: petCount
+    
+  call ESMF_VMGet(GlobalVM, localPet=localPet, petCount=petCount)
+  
+end subroutine f_ESMF_VMGlobalGet
