@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.8 2004/12/22 18:16:37 svasquez Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.9 2004/12/22 20:52:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.8 2004/12/22 18:16:37 svasquez Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.9 2004/12/22 20:52:45 jwolfe Exp $'
 !------------------------------------------------------------------------------
       type(ESMF_VM):: vm
 
@@ -225,13 +225,13 @@
 
       !------------------------------------------------------------------------
       ! This unt test fails openned bug 1089931
-      !call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
-                                 !routehandle, &
-                                 !regridmethod=ESMF_REGRID_METHOD_NEAR_NBR, &
-                                 !rc=rc)
-      !write(failMsg, *) "regrid store, bad method rc =", rc
-      !write(name, *) "regrid store, bad method rc =", rc
-      !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
+                                 routehandle, &
+                                 regridmethod=ESMF_REGRID_METHOD_NEAR_NBR, &
+                                 rc=rc)
+      write(failMsg, *) "regrid store, bad method rc =", rc
+      write(name, *) "regrid store, bad method rc =", rc
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
