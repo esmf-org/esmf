@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.6 2003/05/07 04:34:30 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.7 2003/06/12 17:51:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -117,7 +117,7 @@
 
       type ESMF_Bundle
       sequence
-      private
+      !private
         type (ESMF_BundleType), pointer :: btypep    ! pointer to a bundle type
       end type
 
