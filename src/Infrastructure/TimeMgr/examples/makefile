@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/05/23 20:34:31 flanigan Exp $
+# $Id: makefile,v 1.13 2003/09/17 17:33:20 svasquez Exp $
 
 ALL:  examples
 
@@ -80,12 +80,12 @@ $(ESMF_EXDIR)/ESMC_ClockEx: ESMC_ClockEx.o  chkopts
         $(SL_LINKOPTS)
 
 run_ESMC_ClockEx:
-	./ESMC_ClockEx > ESMC_ClockEx.stdout
+	-$(ESMF_EXDIR)/ESMC_ClockEx > ESMC_ClockEx.stdout
 
 #
 # ESMF_ClockAdvEx
 #
 run_ESMF_ClockAdvEx:
-	-./ESMF_ClockAdvEx > ESMF_ClockAdvEx.stdout
+	-$(ESMF_EXDIR)/ESMF_ClockAdvEx > ESMF_ClockAdvEx.stdout
 
 
