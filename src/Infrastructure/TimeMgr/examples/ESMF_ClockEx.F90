@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.13 2003/04/29 23:07:10 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.14 2003/04/30 07:49:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.13 2003/04/29 23:07:10 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.14 2003/04/30 07:49:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -128,5 +128,11 @@
       call ESMF_TimeIntervalGet(time_diff, D=D, S=S, rc=rc)
       print *, "Difference between start and stop times = ", D, " days, ", &
                 S, " seconds."
+
+      ! sync clock to wall clock
+      call ESMF_ClockSyncToWallClock(clock, rc)
+      print *
+      print *, "Clock sync to wall clock = "
+      call ESMF_ClockPrint(clock, "currtime string", rc)
 
       end program ESMF_ClockEx
