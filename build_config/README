@@ -1,4 +1,4 @@
- $Id: README,v 1.14 2003/11/12 17:39:57 svasquez Exp $
+ $Id: README,v 1.15 2003/11/13 21:14:19 svasquez Exp $
 
 ================================================================================
 
@@ -7,8 +7,7 @@
 ================================================================================
 
 The files in this directory are customizable makefile fragments
-for the ESMF build system.  The subdirectory conf contains 
-customizable configuration include files.
+for the ESMF build system.  
 
 
 ESMF Build System Overview
@@ -26,11 +25,11 @@ The first is the file common.mk, located in the build directory.  This file
 defines build rules and variables that are used across all platforms.  Users 
 should have no need to edit it.
 
-The second type of makefile fragment is customizable.  There is a set of
+The second type of makefile fragment is customizable.  There are a set of
 these fragments located in the build_config directory.  The customizable
 fragments specify makefile settings for a particular architecture and in 
 some cases specific compilers and machines.  The common.mk file includes 
-one of these customizable fragments.
+one of these customizable fragments based on environment variable settings.
   
 Customizable makefile fragment directories follow this naming convention:
 
@@ -54,14 +53,14 @@ architecture given by ESMF_ARCH.  If a machine's name is used, then
 that particular machine uses makefile settings other then the default
 settings for its architecture.
 
-Current site files for supported platforms:
+Current build files for supported platforms:
 
       build_config/AIX.default.default
                    IRIX64.default.default
                    OSF1.default.default
                    Linux.intel.default
 
-Current site files for unsupported platforms:
+Current build files for unsupported platforms:
 
       build_config/Linux.lahey.default
                    Linux.pgi.default
@@ -140,6 +139,18 @@ using an environment variable. The appropriate variable(s) to set are
 described in the top-level README file of the ESMF code you are trying to 
 build.  For example, for the ESMF source this variable is ESMF_DIR.
 
+Platform notes:
+________________
+
+Compaq alpha - Before running on the Compaq, you will need to set the
+environment variable ESMF_PROJECT to a valid project number suitable
+for the -P option on bsub. If you do not know what to set this to
+first run with it unset and you should be prompted by the system for
+valid values for your userid.
+
+IBM rs6000 - Before running on rs6000 machines, you will need to set
+an additional environment variable MP_RMPOOL to a valid node
+allocation pool.  Usually this will be a value of 1.
 
 Usage
 -----
