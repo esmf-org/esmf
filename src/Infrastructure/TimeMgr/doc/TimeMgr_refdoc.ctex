@@ -169,10 +169,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{TimeInterval_usage}
-\input{TimeInterval_fex}
+\input{ESMF_TimeIntervalEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/TimeInterval_usage}
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_fex}
+\input{../Infrastructure/TimeMgr/doc/ESMF_TimeIntervalEx_fapi}
 #endif
 
 \subsection{Restrictions}
