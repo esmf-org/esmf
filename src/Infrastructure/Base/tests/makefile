@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2004/02/13 15:34:49 nscollins Exp $ 
+# $Id: makefile,v 1.10 2004/06/18 13:11:36 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -52,19 +52,18 @@ ESMF_BaseUTest.rm:
 
 #
 # Special for strings passed between C++ and F90
+#  this is NOT an MPI program and can just be run from the command line
 #
 UTEST_String_OBJS = ESMC_StringSubr.o
 ESMF_StringUTest.o : ESMC_StringSubr.o
 
 RUN_ESMF_StringUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StringUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
+	$(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
 
 RUN_ESMF_StringUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StringUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
+	$(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
 
-ESMF_StringUTest.rm:
-	echo "ESMF_StringUTest.rm target called here."
 
 
