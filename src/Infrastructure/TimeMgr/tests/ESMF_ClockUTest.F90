@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.87 2004/12/29 22:38:03 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.88 2005/01/03 23:57:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.87 2004/12/29 22:38:03 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.88 2005/01/03 23:57:18 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -77,6 +77,7 @@
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       integer(ESMF_KIND_I8) :: advanceCounts, year, day2, minute, second
       integer(ESMF_KIND_I4) :: day, hour
+      integer :: datetime(8)
 
       ! initialize ESMF framework
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -1215,18 +1216,14 @@
       
       !EX_UTest
        write(failMsg, *) "Should return ESMF_SUCCESS."
+       ! It is possible, but not probable, that a year boundary will be crossed
+       ! between the next two calls, causing the test for year match below to
+       ! fail.  Keep these two calls adjacent to one another to ensure the
+       ! lowest probability of failure.
        call ESMF_TimeSyncToRealTime(syncTime, rc)
+       call date_and_time(values=datetime)
+
        write(name, *) "Time Sync to Real Time Test"
-       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                       name, failMsg, result, ESMF_SRCLINE)
-
-
-     ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-       write(failMsg, *) " Did not return ESMF_SUCCESS"
-       write(name, *) "Sync Time Print Test"
-       call ESMF_TimePrint(syncTime, rc=rc)
        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                        name, failMsg, result, ESMF_SRCLINE)
 
@@ -1237,11 +1234,20 @@
        write(name, *) "Get Sync Time Year Test"
        call ESMF_TimeGet(syncTime, yy=YY, rc=rc)
        write(failMsg, *) " Did not return ESMF_SUCCESS and/or Year not correct value"
-       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2004), &
+       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.datetime(1)), &
                        name, failMsg, result, ESMF_SRCLINE)
       
        print *, " Sync Time year = ", YY
        print *, " Get Sync Time rc  = ", rc
+
+     ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+       write(failMsg, *) " Did not return ESMF_SUCCESS"
+       write(name, *) "Sync Time Print Test"
+       call ESMF_TimePrint(syncTime, rc=rc)
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
