@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.138 2004/04/14 15:21:38 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.139 2004/04/19 22:01:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,6 +89,21 @@
                                ESMF_NO_ALLOCATE = ESMF_AllocFlag(1)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_IndexFlag
+!
+!     ! Interface flag for setting whether Field data has global index bounds
+
+      type ESMF_IndexFlag
+      sequence
+      private
+        integer :: i_type
+      end type
+
+      type(ESMF_IndexFlag), parameter ::  &
+                               ESMF_LOCAL_INDEX  = ESMF_IndexFlag(0), &
+                               ESMF_GLOBAL_INDEX = ESMF_IndexFlag(1)
+
+!------------------------------------------------------------------------------
 !     ! ESMF_LocalField
 !      
 !     ! The LocalField class contains information which is associated with the
@@ -157,12 +172,12 @@
       public ESMF_Field, ESMF_Access
       public ESMF_FieldType, ESMF_LocalField  ! for internal lib use only
       public ESMF_AllocFlag, ESMF_NO_ALLOCATE, ESMF_DO_ALLOCATE
+      public ESMF_IndexFlag, ESMF_LOCAL_INDEX, ESMF_GLOBAL_INDEX
 
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-   public ESMF_FieldCreate             ! Create a new Field with data
 
    public ESMF_FieldCreateNoData       ! Create a new Field without data
    public ESMF_FieldDestroy            ! Destroy a Field
@@ -197,6 +212,8 @@
 
    public ESMF_FieldWrite              ! Write data and grid from a Field
 
+   public ESMF_FieldConstruct          ! Only public for internal use
+
 !  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !  !function ESMF_FieldReadRestart(name, iospec, rc)
 !  !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
@@ -208,33 +225,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.138 2004/04/14 15:21:38 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.139 2004/04/19 22:01:48 nscollins Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOPI
-! !IROUTINE: ESMF_FieldCreate - Create a new Field with data
-!
-! !INTERFACE:
-      interface ESMF_FieldCreate 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldCreateNew
-        module procedure ESMF_FieldCreateFromArray
-        module procedure ESMF_FieldCreateRemap
-
-! !DESCRIPTION:
-!     This interface provides an entry point for methods that create a complete
-!     {\tt ESMF\_Field}.  These method all contain an {\tt ESMF\_Grid} and {\tt ESMF\_Data}.  The variations
-!     allow the user to specify the data using either a Fortran array or 
-!     an {\tt ESMF\_Array}.
-!    
- 
-!EOPI
-      end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
@@ -788,297 +785,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_FieldCreate - Create a new Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateNew(grid, arrayspec, allocflag, horzRelloc, &
-                                   vertRelloc, haloWidth, datamap, name, &
-                                   iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateNew
-!
-! !ARGUMENTS:
-      type(ESMF_Grid) :: grid               
-      type(ESMF_ArraySpec), intent(in) :: arrayspec     
-      type(ESMF_AllocFlag), intent(in), optional :: allocflag
-      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
-      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap          
-      character (len=*), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     An interface function to {\tt ESMF\_FieldCreate()}.
-!     Create an {\tt ESMF\_Field} and allocate space internally for a
-!     gridded {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
-!     \item [arrayspec]
-!           {\tt ESMF\_Data} specification. 
-!     \item [{[allocflag]}]
-!           Whether to allocate space for the array.  Default is
-!           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
-!     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
-!     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
-!     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!     \item [{[name]}] 
-!           {\tt Field} name. 
-!     \item [{[iospec]}] 
-!           I/O specification. 
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.1.1, FLD1.5.1
-
-
-      type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize pointers
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      nullify(ftype)
-      nullify(ESMF_FieldCreateNew%ftypep)
-
-      ! Initialize return code   
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Allocate"
-        return
-      endif 
-
-      ! Call construction method to allocate and initialize field internals.
-      call ESMF_FieldConstructNew(ftype, grid, arrayspec, allocflag, &
-                                  horzRelloc, vertRelloc, haloWidth, &
-                                  datamap, name, iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Field construct new asp"
-        return
-      endif 
-   
-      ! Set return values.
-      ESMF_FieldCreateNew%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_FieldCreateNew
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldCreate - Create a Field from an existing ESMF Array
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateFromArray(grid, array, copyflag, horzRelloc, &
-                                         vertRelloc, haloWidth, datamap, name, &
-                                         iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateFromArray    
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid                
-      type(ESMF_Array), intent(in) :: array              
-      type(ESMF_CopyFlag), intent(in), optional :: copyflag       
-      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
-      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap           
-      character (len = *), intent(in), optional :: name   
-      type(ESMF_IOSpec), intent(in), optional :: iospec   
-      integer, intent(out), optional :: rc                
-!
-! !DESCRIPTION:
-!     An interface function to {\tt ESMF\_FieldCreate()}.
-!     This version of creation assumes the data exists already and is being
-!     passed in through an {\tt ESMF\_Array}.  
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
-!     \item [array]
-!           Includes data specification and allocated memory. 
-!     \item [{[copyflag]}]
-!           Indicates whether to reference the array or make a 
-!           copy of it.  Valid values are {\tt ESMF\_DATA\_COPY} and 
-!           {\tt ESMF\_DATA\_REF}, respectively.
-!     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
-!     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
-!     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!     \item [{[name]}] 
-!           {\tt Field} name. 
-!     \item [{[iospec]}] 
-!           I/O specification. 
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.1.2, FLD1.5.1
-
-
-      type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      
-!     Initialize pointers
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      nullify(ftype)
-      nullify(ESMF_FieldCreateFromArray%ftypep)
-
-!     Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-      allocate(ftype, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateFromArray: Allocate"
-        return
-      endif 
-
-!     Call construction method to allocate and initialize field internals.
-      call ESMF_FieldConstructNewArray(ftype, grid, array, horzRelloc, &
-                                       vertRelloc, haloWidth, datamap, name, &
-                                       iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Field construct NewArray"
-        return
-      endif 
-   
-
-!     Set return values.
-      ESMF_FieldCreateFromArray%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_FieldCreateFromArray
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldCreate - Create a Field by remapping another Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateRemap(srcfield, grid, horzRelloc, vertRelloc, &
-                                     haloWidth, datamap, name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateRemap
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcfield            
-      type(ESMF_Grid), intent(in) :: grid                 
-      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
-      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap              
-      character (len = *), intent(in), optional :: name   
-      type(ESMF_IOSpec), intent(in), optional :: iospec   
-      integer, intent(out), optional :: rc                
-!
-! !DESCRIPTION:
-!
-! An interface function to {\tt ESMF\_FieldCreate()}.
-! Remaps data between an existing {\tt ESMF\_Grid} on a source {\tt ESMF\_Field}
-! and a new {\tt ESMF\_Grid}.  The {\tt ESMF\_Grid} is referenced by the 
-! new {\tt ESMF\_Field}.  Data is copied.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [srcfield]
-!           Source {\tt ESMF\_Field}.
-!     \item [grid]
-!           {\tt ESMF\_Grid} of source {\tt ESMF\_Field}.
-!     \item [horzRelLoc]
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
-!     \item [vertRelLoc]
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[halowidth]}]
-!           Halo width.
-!     \item [{[datamap]}]
-!           {\tt ESMF\_DataMap}
-!     \item [{[name]}]
-!       {\tt ESMF\_Field} name.
-!     \item [{[iospec]}]
-!       {\tt ESMF\_Field} {\tt ESMF\_IOSpec}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.1.5, FLD1.5.1, FLD1.6.1
-
-
-      type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      
-      ! Initialize pointers
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      nullify(ftype)
-      nullify(ESMF_FieldCreateRemap%ftypep)
-
-      ! Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-      allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateRemap: Allocate"
-        return
-      endif 
-
-      ! TODO: Insert field construction method
-
-      ! Set return values.
-      ESMF_FieldCreateRemap%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_FieldCreateRemap
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
 
 ! !INTERFACE:
@@ -1565,7 +1271,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      character(len=ESMF_MAXSTR) :: str
+      !character(len=ESMF_MAXSTR) :: str
       type(ESMF_FieldType), pointer :: ftypep
 
       ! Initialize return code   
@@ -2665,7 +2371,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      character(len=ESMF_MAXSTR) :: str
+      !character(len=ESMF_MAXSTR) :: str
       type(ESMF_FieldType), pointer :: ftypep
 
       ! Initialize return code   
@@ -3006,15 +2712,15 @@
         call ESMF_GridGet(grid, delayout=delayout, rc=status)
         call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=status)
 
-        ! Output to file
-        call ESMF_ArrayAllGather(field%ftypep%localfield%localdata, &
-                                 field%ftypep%grid, field%ftypep%mapping, &
-                                 outarray, rc=status)
+        ! Output to file, from de_id 0 only
+        call ESMF_ArrayGather(field%ftypep%localfield%localdata, &
+                              field%ftypep%grid, field%ftypep%mapping, &
+                              0, outarray, rc=status)
         !call ESMF_FieldAllGather(field, outarray, rc=status)
         if (de_id .eq. 0) then       
             call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+            call ESMF_ArrayDestroy(outarray, status)
         endif
-        call ESMF_ArrayDestroy(outarray, status)
 
         end subroutine ESMF_FieldWrite
 

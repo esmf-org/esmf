@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldMacros.h,v 1.6 2004/03/18 18:38:34 nscollins Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.1 2004/04/19 22:01:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 ! <Created by macro - do not edit directly > @\
 !BOP @\
 ! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve Fortran pointer directly from a Field @\
- @\
+! @\
 ! !INTERFACE: @\
 !      ! Private name; call using ESMF_FieldGetDataPointer() @\
 !      subroutine ESMF_FieldGetDataPointer<rank><type><kind>(field, fptr, copyflag, rc) @\
@@ -85,8 +85,6 @@
         type (ESMF_Array) :: array          ! array object @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
- @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\

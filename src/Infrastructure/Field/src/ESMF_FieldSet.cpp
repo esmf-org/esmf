@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cpp,v 1.4 2004/04/19 22:01:52 nscollins Exp $
+! $Id: ESMF_FieldSet.cpp,v 1.1 2004/04/19 22:01:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,8 +10,8 @@
 !
 !==============================================================================
 !
-!     ESMF FieldGet module
-      module ESMF_FieldGetMod
+!     ESMF FieldSet module
+      module ESMF_FieldSetMod
 !
 !==============================================================================
 !
@@ -23,14 +23,14 @@
 ! INCLUDES
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
-#include "ESMF_FieldGetMacros.h"
+#include "ESMF_FieldSetMacros.h"
 ^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayMod
-      use ESMF_ArrayGetMod
+      use ESMF_ArrayCreateMod
       use ESMF_FieldMod
       implicit none
 
@@ -41,13 +41,13 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_FieldGetDataPointer
+      public ESMF_FieldSetDataPointer
  
 !EOP
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cpp,v 1.4 2004/04/19 22:01:52 nscollins Exp $'
+      '$Id: ESMF_FieldSet.cpp,v 1.1 2004/04/19 22:01:52 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -59,19 +59,19 @@
 !------------------------------------------------------------------------------
 
 !BOP
-! !IROUTINE: ESMF_FieldGetDataPointer -- Get a Fortran pointer to the data contents
+! !IROUTINE: ESMF_FieldSetDataPointer -- Set a Fortran pointer to the data contents
 
 ! !INTERFACE:
-     interface ESMF_FieldGetDataPointer
+     interface ESMF_FieldSetDataPointer
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
-InterfaceMacro(FieldGetDataPointer)
+InterfaceMacro(FieldSetDataPointer)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_FieldGetDataPointer} subroutines.   
+!  types of {\tt ESMF\_FieldSetDataPointer} subroutines.   
 !  
 !EOP 
 end interface
@@ -86,7 +86,7 @@ end interface
 !------------------------------------------------------------------------------
 
       ! < declarations of subroutines for each T/K/R >
-DeclarationMacro(FieldGetDataPointer)
+DeclarationMacro(FieldSetDataPointer)
 
 
-        end module ESMF_FieldGetMod
+        end module ESMF_FieldSetMod
