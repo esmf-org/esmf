@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.10 2004/03/16 18:00:52 nscollins Exp $
+#  $Id: build_rules.mk,v 1.11 2004/03/16 22:03:15 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -205,13 +205,6 @@ SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:lo
 SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_LIBS_TO_MAKE = libesmf
 
-# SL_SUFFIX   =
-# SL_LIBOPTS  =
-# SL_LINKOPTS =
-# SL_F_LINKER = $(F90CXXLD) 
-# SL_C_LINKER = $(CXXF90LD) 
-
-endif
 # end of common settings
 
 #############
