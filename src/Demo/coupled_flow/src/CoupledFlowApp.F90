@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.3 2003/05/07 20:26:25 jwolfe Exp $
+! $Id: CoupledFlowApp.F90,v 1.4 2003/06/19 17:07:37 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -160,29 +160,27 @@
 !     the Demo.  As shown in this example, we first initialize a calendar to
 !     set the type of time scale (in this case, Gregorian):
 !\begin{verbatim}
-      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 !\end{verbatim}
 !     Next we initialize a time interval (timestep) to 2 seconds:
 !\begin{verbatim}
-      call ESMF_TimeIntervalInit(timeStep, S=int(2,kind=ESMF_IKIND_I8), rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, S=2, rc=rc)
 !\end{verbatim}
 !     And then we set the start time and stop time to input values for the month,
 !     day, and hour (assuming the year to be 2003):
 !\begin{verbatim}
-      call ESMF_TimeInit(startTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=s_month, DD=s_day, H=s_hour, M=s_min, &
-                         S=int(0,kind=ESMF_IKIND_I8), &
+      call ESMF_TimeSet(startTime, YR=2003, &
+                         MM=s_month, DD=s_day, H=s_hour, M=s_min, S=0, &
                          cal=gregorianCalendar, rc=rc)
 
-      call ESMF_TimeInit(stopTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=e_month, DD=e_day, H=e_hour, M=e_min, &
-                         S=int(0,kind=ESMF_IKIND_I8), &
+      call ESMF_TimeSet(stopTime, YR=2003, &
+                         MM=e_month, DD=e_day, H=e_hour, M=e_min, S=0, &
                          cal=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !     With the time interval, start time, and stop time set above, the Clock can
 !     now be created:
 !\begin{verbatim}
-      call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
+      call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
 !\end{verbatim}
 !     Subsequent calls to ESMF\_ClockAdvance with this clock will increment the
 !     current time from the start time by the timestep.
