@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.10 2004/04/09 14:39:40 jwolfe Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.11 2004/05/24 23:01:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -139,91 +139,91 @@
 ! !PUBLIC DATA MEMBERS:
 
       ! Supported ESMF Coordinate Systems
-      !   Unknown     = unknown or undefined coord system
-      !   User        = user-defined coordinate system
-      !   Spherical   = spherical coordinates (lon,lat)
-      !   Cartesian   = Cartesian coordinates (x,y)
-      !   Cylindrical = cylindrical coordinates
-      !   LatFourier  = mixed latitude/Fourier spectral space
-      !   Spectral    = wavenumber space
-      !   Depth       = vertical z coord. depth (0 at top surface)
-      !   Height      = vertical z coord. height (0 at bottom)
-      !   Pressure    = vertical pressure coordinate
-      !   Sigma       = vertical sigma coordinate
-      !   Theta       = vertical theta coordinate
-      !   Eta         = vertical eta coordinate
-      !   Isopycnal   = vertical density coordinate
-      !   Hybrid      = hybrid vertical coordinates
-      !   Lagrangian  = Lagrangian coordinates
+      !   UNKNOWN     = unknown or undefined coord system
+      !   USER        = user-defined coordinate system
+      !   SPHERICAL   = spherical coordinates (lon,lat)
+      !   CARTESIAN   = Cartesian coordinates (x,y)
+      !   CYLINDRICAL = cylindrical coordinates
+      !   LATFOURIER  = mixed latitude/Fourier spectral space
+      !   SPECTRAL    = wavenumber space
+      !   DEPTH       = vertical z coord. depth (0 at top surface)
+      !   HEIGHT      = vertical z coord. height (0 at bottom)
+      !   PRESSURE    = vertical pressure coordinate
+      !   SIGMA       = vertical sigma coordinate
+      !   THETA       = vertical theta coordinate
+      !   ETA         = vertical eta coordinate
+      !   ISOPYCNAL   = vertical density coordinate
+      !   HYBRID      = hybrid vertical coordinates
+      !   LAGRANGIAN  = Lagrangian coordinates
 
       type (ESMF_CoordSystem), parameter, public :: &! coord systems
-         ESMF_CoordSystem_Unknown        = ESMF_CoordSystem( 0), &
-         ESMF_CoordSystem_User           = ESMF_CoordSystem( 1), &
-         ESMF_CoordSystem_Spherical      = ESMF_CoordSystem( 2), &
-         ESMF_CoordSystem_Cartesian      = ESMF_CoordSystem( 3), &
-         ESMF_CoordSystem_Cylindrical    = ESMF_CoordSystem( 4), &
-         ESMF_CoordSystem_LatFourier     = ESMF_CoordSystem( 5), &
-         ESMF_CoordSystem_Spectral       = ESMF_CoordSystem( 6), &
-         ESMF_CoordSystem_Depth          = ESMF_CoordSystem( 7), &
-         ESMF_CoordSystem_Height         = ESMF_CoordSystem( 8), &
-         ESMF_CoordSystem_Pressure       = ESMF_CoordSystem( 9), &
-         ESMF_CoordSystem_Sigma          = ESMF_CoordSystem(10), &
-         ESMF_CoordSystem_Theta          = ESMF_CoordSystem(11), &
-         ESMF_CoordSystem_Eta            = ESMF_CoordSystem(12), &
-         ESMF_CoordSystem_Isopycnal      = ESMF_CoordSystem(13), &
-         ESMF_CoordSystem_Hybrid         = ESMF_CoordSystem(14), &
-         ESMF_CoordSystem_Lagrangian     = ESMF_CoordSystem(15)   
+         ESMF_COORD_SYSTEM_UNKNOWN        = ESMF_CoordSystem( 0), &
+         ESMF_COORD_SYSTEM_USER           = ESMF_CoordSystem( 1), &
+         ESMF_COORD_SYSTEM_SPHERICAL      = ESMF_CoordSystem( 2), &
+         ESMF_COORD_SYSTEM_CARTESIAN      = ESMF_CoordSystem( 3), &
+         ESMF_COORD_SYSTEM_CYLINDRICAL    = ESMF_CoordSystem( 4), &
+         ESMF_COORD_SYSTEM_LATFOURIER     = ESMF_CoordSystem( 5), &
+         ESMF_COORD_SYSTEM_SPECTRAL       = ESMF_CoordSystem( 6), &
+         ESMF_COORD_SYSTEM_DEPTH          = ESMF_CoordSystem( 7), &
+         ESMF_COORD_SYSTEM_HEIGHT         = ESMF_CoordSystem( 8), &
+         ESMF_COORD_SYSTEM_PRESSURE       = ESMF_CoordSystem( 9), &
+         ESMF_COORD_SYSTEM_SIGMA          = ESMF_CoordSystem(10), &
+         ESMF_COORD_SYSTEM_THETA          = ESMF_CoordSystem(11), &
+         ESMF_COORD_SYSTEM_ETA            = ESMF_CoordSystem(12), &
+         ESMF_COORD_SYSTEM_ISOPYCNAL      = ESMF_CoordSystem(13), &
+         ESMF_COORD_SYSTEM_HYBRID         = ESMF_CoordSystem(14), &
+         ESMF_COORD_SYSTEM_LAGRANGIAN     = ESMF_CoordSystem(15)   
 
       ! Supported ESMF Coordinate Kinds
-      !   Unknown     = unknown or undefined coord system
-      !   User        = user-defined coordinate system
-      !   Lat         = latitude  (spherical coordinates)
-      !   Lon         = longitude (spherical coordinates)
-      !   Radius      = radius (spherical, cylindrical, polar coords)
+      !   UNKNOWN     = unknown or undefined coord system
+      !   USER        = user-defined coordinate system
+      !   LAT         = latitude  (spherical coordinates)
+      !   LON         = longitude (spherical coordinates)
+      !   RADIUS      = radius (spherical, cylindrical, polar coords)
       !   X           = Cartesian x coordinate
       !   Y           = Cartesian y coordinate
       !   Z           = Cartesian (or cylindrical) z coord
-      !   Fourier     = Fourier wavenumber (for spectral space)
-      !   Legendre    = Legendre wavenumber (for spherical spectral space)
-      !   Azimuth     = Azimuthal angle (for polar, cylindrical, not longitude)
-      !   Depth       = vertical z coord. depth (0 at top surface)
-      !   Height      = vertical z coord. height (0 at bottom)
-      !   Pressure    = vertical pressure coordinate
-      !   Sigma       = vertical sigma coordinate
-      !   Theta       = vertical theta coordinate
-      !   Eta         = vertical eta coordinate
-      !   Isopycnal   = vertical density coordinate
-      !   Hybrid      = hybrid vertical coordinates
-      !   Lagrangian  = Lagrangian coordinates
+      !   FOURIER     = Fourier wavenumber (for spectral space)
+      !   LEGENDRE    = Legendre wavenumber (for spherical spectral space)
+      !   AZIMUTH     = Azimuthal angle (for polar, cylindrical, not longitude)
+      !   DEPTH       = vertical z coord. depth (0 at top surface)
+      !   HEIGHT      = vertical z coord. height (0 at bottom)
+      !   PRESSURE    = vertical pressure coordinate
+      !   SIGMA       = vertical sigma coordinate
+      !   THETA       = vertical theta coordinate
+      !   ETA         = vertical eta coordinate
+      !   ISOPYCNAL   = vertical density coordinate
+      !   HYBRID      = hybrid vertical coordinates
+      !   LAGRANGIAN  = Lagrangian coordinates
 
       type (ESMF_CoordType), parameter, public :: &! coord kinds
-         ESMF_CoordType_Unknown     = ESMF_CoordType( 1), &
-         ESMF_CoordType_User        = ESMF_CoordType( 2), &
-         ESMF_CoordType_Lat         = ESMF_CoordType( 3), &
-         ESMF_CoordType_Lon         = ESMF_CoordType( 4), &
-         ESMF_CoordType_Radius      = ESMF_CoordType( 5), &
-         ESMF_CoordType_X           = ESMF_CoordType( 6), &
-         ESMF_CoordType_Y           = ESMF_CoordType( 7), &
-         ESMF_CoordType_Z           = ESMF_CoordType( 8), &
-         ESMF_CoordType_Fourier     = ESMF_CoordType( 9), &
-         ESMF_CoordType_Legendre    = ESMF_CoordType(10), &
-         ESMF_CoordType_Azimuth     = ESMF_CoordType(11), &
-         ESMF_CoordType_Depth       = ESMF_CoordType(12), &
-         ESMF_CoordType_Height      = ESMF_CoordType(13), &
-         ESMF_CoordType_Pressure    = ESMF_CoordType(14), &
-         ESMF_CoordType_Sigma       = ESMF_CoordType(15), &
-         ESMF_CoordType_Theta       = ESMF_CoordType(16), &
-         ESMF_CoordType_Eta         = ESMF_CoordType(17), &
-         ESMF_CoordType_Isopycnal   = ESMF_CoordType(18), &
-         ESMF_CoordType_Hybrid      = ESMF_CoordType(19), &
-         ESMF_CoordType_Lagrangian  = ESMF_CoordType(20)
+         ESMF_COORD_TYPE_UNKNOWN     = ESMF_CoordType( 1), &
+         ESMF_COORD_TYPE_USER        = ESMF_CoordType( 2), &
+         ESMF_COORD_TYPE_LAT         = ESMF_CoordType( 3), &
+         ESMF_COORD_TYPE_LON         = ESMF_CoordType( 4), &
+         ESMF_COORD_TYPE_RADIUS      = ESMF_CoordType( 5), &
+         ESMF_COORD_TYPE_X           = ESMF_CoordType( 6), &
+         ESMF_COORD_TYPE_Y           = ESMF_CoordType( 7), &
+         ESMF_COORD_TYPE_Z           = ESMF_CoordType( 8), &
+         ESMF_COORD_TYPE_FOURIER     = ESMF_CoordType( 9), &
+         ESMF_COORD_TYPE_LEGENDRE    = ESMF_CoordType(10), &
+         ESMF_COORD_TYPE_AZIMUTH     = ESMF_CoordType(11), &
+         ESMF_COORD_TYPE_DEPTH       = ESMF_CoordType(12), &
+         ESMF_COORD_TYPE_HEIGHT      = ESMF_CoordType(13), &
+         ESMF_COORD_TYPE_PRESSURE    = ESMF_CoordType(14), &
+         ESMF_COORD_TYPE_SIGMA       = ESMF_CoordType(15), &
+         ESMF_COORD_TYPE_THETA       = ESMF_CoordType(16), &
+         ESMF_COORD_TYPE_ETA         = ESMF_CoordType(17), &
+         ESMF_COORD_TYPE_ISOPYCNAL   = ESMF_CoordType(18), &
+         ESMF_COORD_TYPE_HYBRID      = ESMF_CoordType(19), &
+         ESMF_COORD_TYPE_LAGRANGIAN  = ESMF_CoordType(20)
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.10 2004/04/09 14:39:40 jwolfe Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.11 2004/05/24 23:01:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1030,7 +1030,7 @@
             print *,'ERROR in PhysCoordPointInRange: Get coord failed'
          endif
          
-         if (coordType == ESMF_CoordType_Lon) then
+         if (coordType == ESMF_COORD_TYPE_LON) then
 
             minlon = physCoord%ptr%minVal
             maxlon = physCoord%ptr%maxVal

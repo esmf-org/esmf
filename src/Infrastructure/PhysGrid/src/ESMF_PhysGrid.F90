@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.74 2004/05/10 15:46:33 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.75 2004/05/24 23:02:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -275,49 +275,49 @@
 ! !PUBLIC DATA MEMBERS:
 
       ! Supported ESMF PhysGrid Orientation Types
-      !   Unknown     = unknown or undefined orientation
-      !   Horizontal  = PhysGrid is a horizontal grid
-      !   Vertical    = PhysGrid is a vertical grid
+      !   UNKNOWN     = unknown or undefined orientation
+      !   HORIZONTAL  = PhysGrid is a horizontal grid
+      !   VERTICAL    = PhysGrid is a vertical grid
       !   3D          = PhysGrid is a full 3-d description of grid space
       !   XZ          = PhysGrid is a XZ (or zonal     ) slice out of 3-d space 
       !   YZ          = PhysGrid is a YZ (or meridional) slice out of 3-d space
 
       type (ESMF_PhysGridOrientation), parameter, public :: &! grid direction
-         ESMF_PhysGridOrient_Unknown     = ESMF_PhysGridOrientation( 0), &
-         ESMF_PhysGridOrient_Horizontal  = ESMF_PhysGridOrientation( 1), &
-         ESMF_PhysGridOrient_Vertical    = ESMF_PhysGridOrientation( 2), &
-         ESMF_PhysGridOrient_3D          = ESMF_PhysGridOrientation( 3), &
-         ESMF_PhysGridOrient_XZ          = ESMF_PhysGridOrientation( 4), &
-         ESMF_PhysGridOrient_YZ          = ESMF_PhysGridOrientation( 5)
+         ESMF_PHYSGRID_ORIENT_UNKNOWN     = ESMF_PhysGridOrientation( 0), &
+         ESMF_PHYSGRID_ORIENT_HORIZONTAL  = ESMF_PhysGridOrientation( 1), &
+         ESMF_PHYSGRID_ORIENT_VERTICAL    = ESMF_PhysGridOrientation( 2), &
+         ESMF_PHYSGRID_ORIENT_3D          = ESMF_PhysGridOrientation( 3), &
+         ESMF_PHYSGRID_ORIENT_XZ          = ESMF_PhysGridOrientation( 4), &
+         ESMF_PHYSGRID_ORIENT_YZ          = ESMF_PhysGridOrientation( 5)
 
       ! Supported ESMF PhysGrid Region Types
-      !   Unknown     = unknown or undefined region type
-      !   Polygonal   = polygons defined by vertex coordinates
-      !   Elliptical  = ellipse centered on grid point, defined by two params
+      !   UNKNOWN   = unknown or undefined region type
+      !   POLYGON   = polygons defined by vertex coordinates
+      !   ELLIPSE   = ellipse centered on grid point, defined by two params
 
       type (ESMF_RegionType), parameter, public :: &! types of PhysGrid regions
-         ESMF_RegionType_Unknown      = ESMF_RegionType( 0), &
-         ESMF_RegionType_Polygon      = ESMF_RegionType( 1), &
-         ESMF_RegionType_Ellipse      = ESMF_RegionType( 2)
+         ESMF_REGION_TYPE_UNKNOWN      = ESMF_RegionType( 0), &
+         ESMF_REGION_TYPE_POLYGON      = ESMF_RegionType( 1), &
+         ESMF_REGION_TYPE_ELLIPSE      = ESMF_RegionType( 2)
 
       ! Supported ESMF PhysGrid Mask Types
-      !   Unknown   = unknown or undefined mask type
-      !   Logical   = logical mask
-      !   Mult      = multiplicative mask
-      !   RegionID  = integer assigning unique ID to each point
+      !   UNKNOWN   = unknown or undefined mask type
+      !   LOGICAL   = logical mask
+      !   MULT      = multiplicative mask
+      !   REGION_ID = integer assigning unique ID to each point
 
       type (ESMF_GridMaskType), parameter, public :: &! types of grid masks
-         ESMF_GridMaskType_Unknown        = ESMF_GridMaskType( 0), &
-         ESMF_GridMaskType_Logical        = ESMF_GridMaskType( 1), &
-         ESMF_GridMaskType_Mult           = ESMF_GridMaskType( 2), &
-         ESMF_GridMaskType_RegionID       = ESMF_GridMaskType( 3)
+         ESMF_GRID_MASKTYPE_UNKNOWN        = ESMF_GridMaskType( 0), &
+         ESMF_GRID_MASKTYPE_LOGICAL        = ESMF_GridMaskType( 1), &
+         ESMF_GRID_MASKTYPE_MULT           = ESMF_GridMaskType( 2), &
+         ESMF_GRID_MASKTYPE_REGION_ID      = ESMF_GridMaskType( 3)
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.74 2004/05/10 15:46:33 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.75 2004/05/24 23:02:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -531,13 +531,13 @@
       if (present(coordSystem)) then
          physgrid%coordSystem = coordSystem
       else
-         physgrid%coordSystem = ESMF_CoordSystem_Unknown
+         physgrid%coordSystem = ESMF_COORD_SYSTEM_UNKNOWN
       endif
       
       if (present(orientation)) then
          physgrid%orientation = orientation
       else
-         physgrid%orientation = ESMF_PhysGridOrient_Unknown
+         physgrid%orientation = ESMF_PHYSGRID_ORIENT_UNKNOWN
       endif
       
       ! initialize other objects which contains a base
@@ -1177,11 +1177,11 @@
       physgrid%ptr%regions%regionType = regionType
 
       ! set region arrays depending on type of region
-      if (regionType == ESMF_RegionType_Polygon) then
+      if (regionType == ESMF_REGION_TYPE_POLYGON) then
         physgrid%ptr%regions%numVertices = numVertices
         physgrid%ptr%regions%vertices => vertexArray
 
-      else if (regionType == ESMF_RegionType_Ellipse) then
+      else if (regionType == ESMF_REGION_TYPE_ELLIPSE) then
         physgrid%ptr%regions%ellipse = ellipseArray
 
       else
@@ -1191,10 +1191,10 @@
       endif
 
       ! define bounding box for each region to aid in future searches
-      if (regionType == ESMF_RegionType_Polygon) then
+      if (regionType == ESMF_REGION_TYPE_POLYGON) then
          !TODO: create bbox array for polygons
 
-      else if (regionType == ESMF_RegionType_Ellipse) then
+      else if (regionType == ESMF_REGION_TYPE_ELLIPSE) then
          !TODO: define bounding box for elliptical region
 
       else
@@ -1289,7 +1289,7 @@
 
       ! if number of vertices requested, get it
       if (present(numVertices)) then
-         if (physgrid%ptr%regions%regionType == ESMF_RegionType_Polygon) then
+         if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_POLYGON) then
             numVertices = physgrid%ptr%regions%numVertices
          else
             print *, "ERROR in ESMF_PhysGridGetRegions: invalid region type"
@@ -1299,7 +1299,7 @@
 
       ! if vertex coordinates requested, get them
       if (present(vertexArray)) then
-         if (physgrid%ptr%regions%regionType == ESMF_RegionType_Polygon) then
+         if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_POLYGON) then
             !TODO: consistency check for array sizes, shapes
             !TODO: return pointer or copy array?
             vertexArray = physgrid%ptr%regions%vertices
@@ -1311,7 +1311,7 @@
 
       ! if ellipses requested, get them
       if (present(ellipseArray)) then
-         if (physgrid%ptr%regions%regionType == ESMF_RegionType_Ellipse) then
+         if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_ELLIPSE) then
             !TODO: consistency check for array sizes, shapes
             !TODO: return pointer or copy array?
             ellipseArray = physgrid%ptr%regions%ellipse
