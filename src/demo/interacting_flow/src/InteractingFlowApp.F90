@@ -1,4 +1,4 @@
-! $Id: InteractingFlowApp.F90,v 1.1 2004/10/14 17:00:55 nscollins Exp $
+! $Id: InteractingFlowApp.F90,v 1.2 2005/01/12 22:21:18 eschwab Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -39,7 +39,6 @@
 
     ! A clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
-    type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
@@ -128,8 +127,9 @@
 !------------------------------------------------------------------------------
 !
 
-    ! Initialize the ESMF Framework and get the default Global VM
-    call ESMF_Initialize(vm=vm, rc=rc)
+    ! Initialize the ESMF Framework, get the default Global VM, and set
+    ! the default calendar to be Gregorian.
+    call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
 
     ! Create the Gridded component, passing in the default VM.
     compGridded = ESMF_GridCompCreate(vm, "Coupled Flow Demo", rc=rc)
@@ -157,13 +157,9 @@
 ! \subsubsection{Example of Calendar and Clock Creation and Usage:}
 !
 !     The following piece of code provides an example of Clock creation used in
-!     the Demo.  As shown in this example, we first initialize a calendar to
-!     set the type of time scale (in this case, Gregorian):
-!\begin{verbatim}
-      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
-!\end{verbatim}
-!     Next we initialize a time interval (timestep) to 2 seconds:
+!     the Demo.  Note that the Gregorian calendar was set as the default in
+!     the ESMF_Initialize() call above.  As shown in this example, we first
+!     initialize a time interval (timestep) to 2 seconds:
 !\begin{verbatim}
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=rc)
 !\end{verbatim}
@@ -171,12 +167,10 @@
 !     day, and hour (assuming the year to be 2003):
 !\begin{verbatim}
       call ESMF_TimeSet(startTime, yy=2003, mm=s_month, dd=s_day, &
-                        h=s_hour, m=s_min, s=0, &
-                        calendar=gregorianCalendar, rc=rc)
+                        h=s_hour, m=s_min, s=0, rc=rc)
 
       call ESMF_TimeSet(stopTime, yy=2003, mm=e_month, dd=e_day, &
-                        h=e_hour, m=e_min, s=0, &
-                        calendar=gregorianCalendar, rc=rc)
+                        h=e_hour, m=e_min, s=0, rc=rc)
 !\end{verbatim}
 !     With the time interval, start time, and stop time set above, the Clock can
 !     now be created:
@@ -266,8 +260,6 @@
       call ESMF_GridDestroy(grid, rc)
 
       call ESMF_ClockDestroy(clock, rc)
-
-      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
       call ESMF_GridCompDestroy(compGridded, rc)
 
