@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.15 2003/09/29 21:28:49 flanigan Exp $
+#  $Id: common.mk,v 1.16 2003/10/16 17:04:22 flanigan Exp $
 #
 #  common.mk
 #
@@ -445,6 +445,9 @@ system_tests: chkopts build_libs chkdir_tests
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
+           else \
+               echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+               exit; \
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests tree
@@ -459,6 +462,9 @@ system_tests_uni: chkopts chkdir_tests
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
+           else \
+              echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+              exit; \
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests_uni tree
@@ -474,6 +480,9 @@ build_system_tests: chkopts chkdir_tests
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
+           else \
+              echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+              exit; \
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_build_system_tests tree
@@ -500,6 +509,9 @@ run_system_tests:  chkopts chkdir_tests
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
+           else \
+              echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+              exit; \
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests tree
@@ -514,6 +526,9 @@ run_system_tests_uni:  chkopts chkdir_tests
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
+           else \
+              echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+              exit; \
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests_uni tree
