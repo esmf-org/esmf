@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.47 2004/03/19 00:39:16 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.48 2004/03/19 21:11:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.47 2004/03/19 00:39:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.48 2004/03/19 21:11:47 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -330,7 +330,7 @@
         case ESMC_CAL_NOLEAP:
           // use startTime to reduce yy,mm,d to seconds
           if (conversionStartTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
-            ESMC_Time calculatedEndTime = conversionStartTime + *this;
+            calculatedEndTime = conversionStartTime + *this;
             ESMC_TimeInterval baseTimeInterval =
                                        calculatedEndTime - conversionStartTime;
             baseTimeToConvert = baseTimeInterval.s;
@@ -340,7 +340,7 @@
 
           // use endTime to reduce yy,mm,d to seconds
           } else if (conversionEndTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
-            ESMC_Time calculatedStartTime = conversionEndTime - *this;
+            calculatedStartTime = conversionEndTime - *this;
             ESMC_TimeInterval baseTimeInterval =
                                        conversionEndTime - calculatedStartTime;
             baseTimeToConvert = baseTimeInterval.s;
@@ -482,7 +482,7 @@
                 // convert mm for either ESMC_CAL_GREGORIAN or ESMC_CAL_NOLEAP
                 if (mmToConvert != 0) {
                   years = mmToConvert / conversionCalendar->monthsPerYear;
-                  mmToConvert % conversionCalendar->monthsPerYear;
+                  mmToConvert %= conversionCalendar->monthsPerYear;
                 } 
 
                 // convert remaining seconds to years
