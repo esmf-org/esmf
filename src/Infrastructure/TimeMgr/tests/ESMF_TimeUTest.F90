@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.1 2004/04/21 19:55:06 svasquez Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.2 2004/05/18 22:29:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.1 2004/04/21 19:55:06 svasquez Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.2 2004/05/18 22:29:43 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -116,6 +116,15 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Time have the same calendar
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      bool =  ESMF_TimeIsSameCalendar(stopTime, stopTime, rc=rc)
+      write(name, *) "Time Is Same CalendarTest"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
@@ -320,6 +329,26 @@
       
       ! ----------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Test Setting Stop Time 
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
+                                   calendar=julianDayCalendar, rc=rc)
+      write(name, *) "Set End Time Initialization Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+  ! ----------------------------------------------------------------------------
+      
+      !NEX_UTest
+      ! Test Time have the same calendar
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      bool =  ESMF_TimeIsSameCalendar(stopTime, stopTime, rc=rc)
+      write(name, *) "Time Is Same CalendarTest"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+
+      ! ----------------------------------------------------------------------------
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
