@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.5 2002/11/04 06:13:42 cdeluca Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.6 2002/11/07 20:37:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,13 +21,14 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF_PhysGrid.h>
+#include <ESMF_Macros.inc>
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_PhysGridMod - One line general statement about this class
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt Class> class ...
+! The code in this file implements the {\tt PhysGrid> class ...
 !
 ! < Insert a paragraph or two explaining the function of this class. >
 !
@@ -53,16 +54,27 @@
       end type
 
 !------------------------------------------------------------------------------
+!     !  ESMF_PhysGridType
+!
+!     !  Description of ESMF_PhysGrid. 
+
+      type ESMF_PhysGridType
+      sequence
+      private
+        type (ESMF_Base) :: base
+        integer :: dummy
+!       < insert other class members here >
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_PhysGrid
 !
-!     ! Description of ESMF_PhysGrid. 
+!     !  The PhysGrid data structure that is passed between languages.
 
       type ESMF_PhysGrid
       sequence
       private
-!       type (ESMF_Base) :: base
-        integer :: dummy
-!       < insert other class members here >
+        type (ESMF_PhysGridType), pointer :: ptr   ! pointer to a physgrid type
       end type
 
 !------------------------------------------------------------------------------
@@ -82,11 +94,6 @@
 ! the following routines apply to deep classes only
     public ESMF_PhysGridCreate                 ! interface only, deep class
     public ESMF_PhysGridDestroy                ! interface only, deep class
-    public ESMF_PhysGridConstruct              ! internal only, deep class
-    public ESMF_PhysGridDestruct               ! internal only, deep class
-
-! the following routine applies to a shallow class
-    public ESMF_PhysGridInit                   ! shallow class
 
     public ESMF_PhysGridGetConfig
     public ESMF_PhysGridSetConfig
@@ -104,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.5 2002/11/04 06:13:42 cdeluca Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.6 2002/11/07 20:37:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -121,6 +128,21 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for PhysGrid create
 !     methods.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_PhysGridConstruct
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_PhysGridConstructNew
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that construct
+!     a complete {\tt PhysGrid}.
 !
 !EOP
       end interface 
@@ -143,25 +165,26 @@
 !     ESMF_PhysGridCreateNew - Create a new PhysGrid
 
 ! !INTERFACE:
-      function ESMF_PhysGridCreateNew(arg1, arg2, arg3, rc)
+      function ESMF_PhysGridCreateNew(name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_PhysGrid) :: ESMF_PhysGridCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        
-      integer, intent(in) :: arg2                        
-      character (len = *), intent(in), optional :: arg3  
+      character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
+
+!     integer, intent(in) :: arg1                        
+!     integer, intent(in) :: arg2                        
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt PhysGrid} object and constructs its
-!     internals.
+!     internals.  Returns a pointer to a new {\tt PhysGrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[arg1] 
-!          Argument 1.
+!     \item[[name]]
+!          {\tt PhysGrid} name.
 !     \item[arg2]
 !          Argument 2.         
 !     \item[[arg3]] 
@@ -170,12 +193,42 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
+! !REQUIREMENTS:  TODO
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
-!
-!  code goes here
-!
+      type(ESMF_PhysGridType), pointer :: physgrid   ! Pointer to new physgrid
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize pointers
+      nullify(physgrid)
+      nullify(ESMF_PhysGridCreateNew%ptr)
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(physgrid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_PhysGridCreateNew: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_PhysGridConstructNew(physgrid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_PhysGridCreateNew: PhysGrid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_PhysGridCreateNew%ptr => physgrid
+      if(rcpresent) rc = ESMF_SUCCESS
+
       end function ESMF_PhysGridCreateNew
 
 !------------------------------------------------------------------------------
@@ -213,16 +266,15 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
-!     ESMF_PhysGridConstruct - Construct the internals of an allocated PhysGrid
+!     ESMF_PhysGridConstructNew - Construct the internals of an allocated
+!                                 PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridConstruct(physgrid, arg1, arg2, arg3, rc)
+      subroutine ESMF_PhysGridConstructNew(physgrid, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid   ! physgrid to be initialized
-      integer, intent(in) :: arg1                        ! arg1
-      integer, intent(in) :: arg2                        ! arg2
-      character (len = *), intent(in), optional :: arg3  ! arg3
+      type(ESMF_PhysGridType), intent(in) :: physgrid  
+      character (len = *), intent(in), optional :: name  ! name
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
@@ -236,24 +288,37 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid] 
-!          The class to be constructed.
+!          Pointer to a {\tt PhysGrid}.
 !     \item[arg1]
 !          Argument 1.
 !     \item[arg2]
 !          Argument 2.         
-!     \item[[arg3]] 
+!     \item[[name]] 
 !          Argument 3.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+! !REQUIREMENTS:  TODO
 !EOP
-! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
-      end subroutine ESMF_PhysGridConstruct
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_PhysGridConstructNew: PhysGrid construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridConstructNew
 
 !------------------------------------------------------------------------------
 !BOP
@@ -289,50 +354,6 @@
 !  code goes here
 !
       end subroutine ESMF_PhysGridDestruct
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: 
-!     ESMF_PhysGridInit - Initialize a PhysGrid 
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridInit(physgrid, arg1, arg2, arg3, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid   
-      integer, intent(in) :: arg1                       
-      integer, intent(in) :: arg2                       
-      character (len = *), intent(in), optional :: arg3 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     ESMF routine which only initializes {\tt PhysGrid} values; it does not
-!     allocate any resources.  Define for shallow classes only, 
-!     for deep classes define and use routines Create/Destroy and 
-!     Construct/Destruct.  Can be overloaded like ESMF_PhysGridCreate
-!     via interface blocks.
-!
-!  The arguments are:
-!     \begin{description}
-!     \item[physgrid]
-!          Class to be initialized.
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[[arg3]] 
-!          Argument 3.
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_PhysGridInit
 
 !------------------------------------------------------------------------------
 !BOP
