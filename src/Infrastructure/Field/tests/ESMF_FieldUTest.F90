@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.67 2004/08/26 20:36:40 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.68 2004/08/28 14:17:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.67 2004/08/26 20:36:40 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.68 2004/08/28 14:17:04 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -56,7 +56,7 @@
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
-      real, dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3
+      real, dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3, f90ptr4
       real(ESMF_KIND_R8) :: minCoord(2)
       type(ESMF_FieldDataMap) :: dm, dm1
       type(ESMF_RelLoc) :: rl
@@ -270,17 +270,18 @@
 
       !EX_UTest
       ! Test requirement FLD1.5.1. Default name attribute 
-      ! The only default attribute of a field will be a name. A unique name will 
-      ! be generated if not supplied by the user.
+      ! The only default attribute of a field will be a name. A unique 
+      ! name will be generated if not supplied by the user.
       ! Test Requirement FLD1.7.1 Query name
-      ! A field shall be able to easily return its name. If the user does not provide 
-      ! a field name one will be created. Field names must be unique within an address 
+      ! A field shall be able to easily return its name. 
+      ! If the user does not provide a field name one will be created. 
+      ! Field names must be unique within an address 
       ! space and it shall be possible to check this.
       ! Bug 705087 "Default Field names not unique"
       f1 = ESMF_FieldCreateNoData(rc=rc)
       f2 = ESMF_FieldCreateNoData(rc=rc)
-      Call ESMF_FieldGet(f1, name=fname1, rc=rc)
-      Call ESMF_FieldGet(f2, name=fname2, rc=rc)
+      call ESMF_FieldGet(f1, name=fname1, rc=rc)
+      call ESMF_FieldGet(f2, name=fname2, rc=rc)
       write(failMsg, *) "Field names not unique"
       write(name, *) "Unique default Field names Test, FLD1.5.1 & 1.7.1"
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
@@ -367,10 +368,11 @@
 
       !EX_UTest
       ! Test requirement FLD1.1.1
-      ! Fields may be created by specifying attributes, a grid, data array dimensions 
-      ! and descriptors, optional masks (e.g. for active cells), and an optional I/O 
-      ! specification. In this case a field will allocate its own data. The grid passed 
-      ! into the argument list is referenced and not copied.
+      ! Fields may be created by specifying attributes, a grid, data array 
+      ! dimensions and descriptors, optional masks (e.g. for active cells), 
+      ! and an optional I/O specification. In this case a field will 
+      ! allocate its own data. The grid passed into the argument list 
+      ! is referenced and not copied.
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
       write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -397,12 +399,16 @@
       !------------------------------------------------------------------------
 
       ! Verifing the ESMF_FieldSetDataMap
-      ! commenting out - not implemented yet.  nsc 21jun04
-      !call ESMF_FieldDataMapSetDefault(dm1, ESMF_INDEX_JI, rc=rc)
-      !call ESMF_FieldSetDataMap(f3, datamap=dm1, rc=rc)
-      !write(failMsg, *) "Did return ESMF_SUCCESS"
-      !write(name, *) "Setting a Field Data Map Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !  setting a different datamap in an existing field which already has
+      !  data is not implemented yet (it is interpreted as a request to 
+      !  reorder the data).  this will work if the field has no data yet.
+      call ESMF_FieldDataMapSetDefault(dm1, 2, (/ 1, 0 /), rc=rc)
+      f1 = ESMF_FieldCreateNoData(rc=rc) 
+      call ESMF_FieldSetDataMap(f1, datamap=dm1, rc=rc)
+      write(failMsg, *) "Did return ESMF_SUCCESS"
+      write(name, *) "Setting a Field Data Map Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDestroy(f1)
       !------------------------------------------------------------------------
       !EX_UTest
       ! Verifing that destroying a Grid in a Field is not allowed
@@ -454,10 +460,6 @@
       !EX_UTest
       ! Req. 1.6.2 Return grid 
       ! A field shall be able to return a reference to its grid.
-      ! The following code is commented out because there is
-      ! no way to query the name of a Grid.
-      ! It will be uncommented when the query function is written.
-      ! Bug 705196 "Unable to query Grid name"
       gname="oceangrid"
       grid =  ESMF_GridCreateHorzXYUni((/ 10, 20 /), minCoord, &
                                         name=gname, rc=rc)
@@ -510,7 +512,7 @@
 
       !EX_UTest
       ! Setting a data pointer directly in a Field
-      call ESMF_FieldSetDataPointer(f2, f90ptr1, rc=rc)
+      call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an F90 pointer directly in a Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -521,7 +523,7 @@
       ! Getting the data pointer back from a Field
       call ESMF_FieldGetDataPointer(f2, f90ptr3, rc=rc)
       ! This print crashes
-      !print *, "data = ", f90ptr3(1,1)
+      print *, "data = ", f90ptr3(1,1)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an F90 pointer directly back from a Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -529,11 +531,11 @@
       !------------------------------------------------------------------------
       ! Bug 986852 opened
       ! Verify the pointers are equal
-      !call ESMF_FieldGetDataPointer(f2, f90ptr3, rc=rc)
-      !print *, "data = ", f90ptr3(1,1)
-      !write(failMsg, *) "The pointers are not equal"
-      !write(name, *) "Compare F90 pointers Test"
-      !call ESMF_Test((f90ptr3.eq.f90ptr2), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldGetDataPointer(f2, f90ptr4, rc=rc)
+      print *, "data = ", f90ptr4(1,1)
+      write(failMsg, *) "The pointers are not equal"
+      write(name, *) "Compare F90 pointers Test"
+      call ESMF_Test((associated(f90ptr3,f90ptr4)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
