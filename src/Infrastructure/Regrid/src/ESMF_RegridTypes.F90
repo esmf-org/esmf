@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.34 2004/03/19 23:38:46 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.35 2004/03/24 16:03:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.34 2004/03/19 23:38:46 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.35 2004/03/24 16:03:45 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -347,7 +347,8 @@
 ! !INTERFACE:
       function ESMF_RegridRouteConstruct(dimCount, srcGrid, dstGrid, &
                                          recvDomainList, srcDatamap, srcArray, &
-                                         dstDatamap, dstArray, total, rc)
+                                         dstDatamap, dstArray, reorder, total, &
+                                         rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Route) :: ESMF_RegridRouteConstruct
@@ -362,9 +363,9 @@
       type(ESMF_Array), intent(in), optional :: srcArray
       type(ESMF_DataMap), intent(in), optional :: dstDatamap
       type(ESMF_Array), intent(in), optional :: dstArray
+      logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
-
 !
 ! !DESCRIPTION:
 !     Adds an address pair and regrid weight to an existing regrid.
@@ -424,7 +425,8 @@
       allocate (myAI(gridrank))
       call ESMF_DataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
       call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
-                          globalAIPerDim=myAI, total=totalUse, rc=status)
+                          globalAIPerDim=myAI, reorder=reorder, &
+                          total=totalUse, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridRouteConstruct: GridGetDE ", &
                  "returned failure"
@@ -441,11 +443,13 @@
       call ESMF_DataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
       call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
                           minLocalCoordPerDim=srcMin, &
-                          maxLocalCoordPerDim=srcMax, rc=status)
+                          maxLocalCoordPerDim=srcMax, &
+                          reorder=.false., rc=status)
       call ESMF_DataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=status)
       call ESMF_GridGetDE(dstGrid, horzRelLoc=horzRelLoc, &
                           minLocalCoordPerDim=dstMin, &
-                          maxLocalCoordPerDim=dstMax, rc=status)
+                          maxLocalCoordPerDim=dstMax, &
+                          reorder=.false., rc=status)
 
       ! calculate intersections
       call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
