@@ -1,4 +1,4 @@
-% $Id: PhysGrid_terms.tex,v 1.4 2002/04/02 01:28:10 rhallberg Exp $
+% $Id: PhysGrid_terms.tex,v 1.5 2002/04/23 13:38:30 cnh Exp $
 
 \begin{description}
 
@@ -28,12 +28,26 @@ each index is independent of the other indices.
 \item [Metrics] \label{glos:Metrics} Terms relating changes in nondimensional
 index space to physical distances.
 
-\item [Physical location] \label{glos:PhysLoc} The location in 2-dimensional
-(horizontal) or 3-dimensional physical space to which data pertain.  A
-physical location may be a point or region in either the horizontal or the
-vertical.
+\item [Physical location] \label{glos:PhysLoc} The location in physical space 
+to which data pertain.  A physical location may be a point, a two-dimensional 
+area or a three dimensional volume.
 
 \end{description}
 
+\subsection{ESMF physical grid notation}
 
-
+The symbol $G$ is used to refer to a physical grid. A physical grid, $G$, 
+consists of a series of zero or more mappings, $g$, between an index space 
+$i_{G}$ and a physical location space $p_{G}$, so that
+\begin{equation}
+G = g_{1}, g_{2} \ldots g_{n}
+\end{equation}
+\noindent where
+\begin{equation}
+g_{n}: \underline{i} \mapsto \underline{p},~~~
+\begin{cases}
+  \underline{i} \subset i_{G} & \text{and}, \\
+  \underline{p} \subset p_{G} & \text{}
+\end{cases}
+\end{equation}
+The values $\underline{i}$ are 

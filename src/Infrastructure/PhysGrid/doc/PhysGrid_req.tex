@@ -1,5 +1,70 @@
-% $Id: PhysGrid_req.tex,v 1.5 2002/04/15 18:36:02 pwjones Exp $
+% $Id: PhysGrid_req.tex,v 1.6 2002/04/23 13:38:30 cnh Exp $
 %===============================================================================
+\req{Initialization of a Physical Grids}
+\sreq{Initialization of a zero-sized Physical Grid}
+It should be possible to create a zero-sized physical grid.
+\begin{reqlist}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\
+{\bf Notes:} A zero sized physical grid will be used to allow
+a valid (i.e. non-fault generating) physical grid operations on data which 
+does not have a realizable physical grid, for example linear algebra space data values.
+\end{reqlist}
+\sreq{Initialization by Numerical Values}
+In summary numerical initialization of a Physical grid is specified through a combination
+of grid cell locations, grid cell areas and grid cell volumes.
+Mechanisms shall be provided to specify grids numerically i.e.
+using pre-calculated numerical values. The values required will be dependent on 
+both the component application and on the Regridding requirements associted with the component. 
+\ssreq{Initialization of grid cell locations}
+\ssreq{Initialization of grid cell areas with vertex based numerical values}
+\ssreq{Initialization of grid cell areas with area based numerical values}
+\ssreq{Initialization of grid cell volumes with vertex based numerical values}
+\ssreq{Initialization of grid cell volumes with area based numerical values}
+\ssreq{Initialization of grid cell volumes with fractional extent}
+\ssreq{Initialization from Internal Application Numerical Values}
+It should be possible to initialize a physical grid from
+a set of numerical values that are calculated by a component application.
+\ssreq{Initialization from File}
+
+\sreq{Initialization by a Function}
+\ssreq{Spectral Spherical Harmonics Code}
+\ssreq{Spectral FFT Code}
+\ssreq{Grid Point Cartesian Code}
+\ssreq{Grid Point Spherical Polar Code}
+\ssreq{Grid Point User Supplied Function}
+\ssreq{Spectral User Supplied Function}
+
+\sreq{Modification Tracking}
+
+\req{Physical Grid Attributes and Queries}
+\sreq{X-axis index labeling}
+\sreq{Y-axis index labeling}
+\sreq{R-axis index labeling}
+\sreq{Labeling of quantities}
+\ssreq{An associative form}
+\sreq{Quadrilateral curvilinear othogonal A-grid, physical grid values}
+\sreq{Quadrilateral curvilinear othogonal B-grid, physical grid values}
+\sreq{Quadrilateral curvilinear othogonal C-grid, physical grid values}
+\sreq{Quadrilateral curvilinear othogonal D-grid, physical grid values}
+\sreq{Quadrilateral curvilinear othogonal E-grid, physical grid values}
+\sreq{Catchment Grid software-convention}
+\sreq{Ungridded Grid software-convention}
+\sreq{Mapping queries}
+\sreq{Inverse Mapping queries}
+
+\req{Physical Grid Parallelism and Scalability}
+\sreq{Memory Footprint}
+\begin{reqlist}
+{bf Notes:} Interaction With Index Range
+\end{reqlist}
+\sreq{Valid Indexing Range}
+\begin{reqlist}
+\end{reqlist}
+\sreq{Thread Safety}
+\begin{reqlist}
+{bf Notes:} Optional
+\end{reqlist}
+
 \req{Physical locations}
 %-------------------------------------------------------------------------------
 
