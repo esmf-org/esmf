@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.2 2003/10/23 20:22:29 jwolfe Exp $
+# $Id: makefile,v 1.3 2004/02/11 23:22:08 nscollins Exp $
 
 # Leave alone.
-ALL: lib 
+ALL: build_here 
 
 # Don't set these unless absolutely necessary - they've got to be
 # architecture and compiler independent and should be inherited
 # from the upper level makefile if possible.
-CFLAGS    = ${MPI_INCLUDE}
+CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
@@ -16,7 +16,7 @@ SOURCEF	  = ESMF_Xform_C.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List .h files to be copied to higher level common include directory
-STOREH	  = 
+STOREH	  =  ESMC_Xform.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.2 2003/10/23 20:23:05 jwolfe Exp $
+# $Id: makefile,v 1.3 2004/02/11 23:22:08 nscollins Exp $
 
 # Leave alone.
-ALL: lib 
+ALL: build_here 
 
 # Don't set these unless absolutely necessary - they've got to be
 # architecture and compiler independent and should be inherited
@@ -16,7 +16,7 @@ SOURCEF	  = ESMF_Xform.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # If you have public .h files in this dir, list them here
-STOREH    =
+STOREH    = 
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
