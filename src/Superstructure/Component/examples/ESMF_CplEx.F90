@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.7 2003/11/07 21:55:34 nscollins Exp $
+! $Id: ESMF_CplEx.F90,v 1.8 2004/01/08 21:07:11 nscollins Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -55,7 +55,7 @@
     
     subroutine CPL_Init(comp, statelist, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: statelist(*)
+        type(ESMF_State), dimension(:) :: statelist
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -64,6 +64,10 @@
         ! Add whatever code here needed
         ! Precompute any needed values, fill in any inital values
         !  needed in Import States
+
+        call ESMF_StatePrint(statelist(1), rc=rc)
+        call ESMF_StatePrint(statelist(2), rc=rc)
+        call ESMF_StatePrint(statelist(3), rc=rc)
 
         print *, "Coupler Init returning"
    
@@ -76,7 +80,7 @@
  
     subroutine CPL_Run(comp, statelist, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: statelist(*)
+        type(ESMF_State), dimension(:) :: statelist
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -84,6 +88,10 @@
 
         ! Add whatever code needed here to transform Export state data
         !  into Import states for the next timestep.  
+
+        call ESMF_StatePrint(statelist(1), rc=rc)
+        call ESMF_StatePrint(statelist(2), rc=rc)
+        call ESMF_StatePrint(statelist(3), rc=rc)
 
         print *, "Coupler Run returning"
 
@@ -96,7 +104,7 @@
  
     subroutine CPL_Final(comp, statelist, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: statelist(*)
+        type(ESMF_State), dimension(:) :: statelist
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -104,6 +112,10 @@
     
         ! Add whatever code needed here to compute final values and
         !  finish the computation.
+
+        call ESMF_StatePrint(statelist(1), rc=rc)
+        call ESMF_StatePrint(statelist(2), rc=rc)
+        call ESMF_StatePrint(statelist(3), rc=rc)
 
         print *, "Coupler Final returning"
    
