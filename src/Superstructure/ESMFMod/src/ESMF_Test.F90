@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.10 2005/03/04 22:01:41 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.11 2005/03/14 18:16:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.10 2005/03/04 22:01:41 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.11 2005/03/14 18:16:52 nscollins Exp $'
 
 !==============================================================================
 
@@ -206,7 +206,7 @@
       ! file which only contains multiproc tags if it is being run uni,
       ! but this is more for the user to see.
       if (petCount .gt. numPETs) then
-        write(failMsg, *) "These tests must run on at least", petCount, "processors."
+        write(failMsg, *) "These tests must run on at least", petCount, " processors."
         write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, msg
@@ -279,7 +279,7 @@
       ! file which only contains multiproc tags if it is being run uni,
       ! but this is more for the user to see.
       if (petCount .lt. numPETs) then
-        write(failMsg, *) "These tests must run not more than", petCount, "processors."
+        write(failMsg, *) "These tests must run not more than", petCount, " processors."
         write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, msg
@@ -352,7 +352,7 @@
       ! file which only contains multiproc tags if it is being run uni,
       ! but this is more for the user to see.
       if (petCount .ne. numPETs) then
-        write(failMsg, *) "These tests must run on exactly", petCount, "processors."
+        write(failMsg, *) "These tests must run on exactly", petCount, " processors."
         write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, msg
