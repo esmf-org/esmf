@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.19 2003/06/07 00:41:59 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.20 2003/07/07 20:09:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.19 2003/06/07 00:41:59 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.20 2003/07/07 20:09:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -57,6 +57,9 @@
       !
       ! initialization
       !
+
+      ! initialize ESMF framework
+      call ESMF_FrameworkInitialize(rc)
 
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
@@ -122,5 +125,8 @@
       call ESMF_TimeIntervalGet(time_diff, D=D, S=S, rc=rc)
       print *, "Difference between start and stop times = ", D, " days, ", &
                 S, " seconds."
+
+      ! finalize ESMF framework
+      call ESMF_FrameworkFinalize(rc)
 
       end program ESMF_ClockEx

@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.7 2003/06/07 00:41:59 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.8 2003/07/07 20:09:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.7 2003/06/07 00:41:59 eschwab Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.8 2003/07/07 20:09:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -61,6 +61,9 @@
       !
       ! initialization
       !
+
+      ! initialize ESMF framework
+      call ESMF_FrameworkInitialize(rc)
 
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
@@ -228,5 +231,8 @@
       print *
       print *, "Clock sync to wall clock = "
       call ESMF_ClockPrint(clock, "currtime string", rc)
+
+      ! finalize ESMF framework
+      call ESMF_FrameworkFinalize(rc)
 
       end program ESMF_ClockEx

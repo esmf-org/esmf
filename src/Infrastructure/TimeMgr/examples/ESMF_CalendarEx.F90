@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.7 2003/06/07 00:41:59 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.8 2003/07/07 20:09:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarEx.F90,v 1.7 2003/06/07 00:41:59 eschwab Exp $'
+      '$Id: ESMF_CalendarEx.F90,v 1.8 2003/07/07 20:09:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -48,6 +48,9 @@
 
       ! result code
       integer :: rc
+
+      ! initialize ESMF framework
+      call ESMF_FrameworkInitialize(rc)
 
       !
       ! Julian Calendar
@@ -165,5 +168,8 @@
       call ESMF_TimeGet(checkTime, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
       print *, "Check Time1 360 Day = ", &
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
+
+      ! finalize ESMF framework
+      call ESMF_FrameworkFinalize(rc)
 
       end program ESMF_CalendarEx
