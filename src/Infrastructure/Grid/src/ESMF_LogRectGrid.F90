@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.84 2004/06/21 19:38:33 theurich Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.85 2004/06/21 22:17:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.84 2004/06/21 19:38:33 theurich Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.85 2004/06/21 22:17:30 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1857,7 +1857,7 @@
       character(len=ESMF_MAXSTR) :: distGridName, physGridName
       character(len=ESMF_MAXSTR), dimension(:), allocatable :: dimNames, dimUnits
       integer :: distGridId, physGridId, nDEs(0:2)
-      integer :: i, dimCount, dimCountGrid, size, ndim
+      integer :: i, dimCount, dimCountGrid, aSize, ndim
       integer, dimension(:), allocatable :: decompIdsUse, counts
       integer, dimension(:), allocatable :: countsPerDEDecomp1Use, &
                                             countsPerDEDecomp2Use
@@ -1879,6 +1879,8 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+
+      ! do some sanity error checking
       
       ! Extract some information from the Grid
       dimCount = grid%dimCount
@@ -1977,23 +1979,43 @@
       ! or parse the global count
       do i = 1,dimCount
         if (decompIdsUse(i).eq.1) then
-          size = nDEs(1)
-          allocate(countsPerDEDecomp1Use(size), stat=localrc)
+          aSize = nDEs(1)
+          allocate(countsPerDEDecomp1Use(aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDEDecomp1Use", &
                                          ESMF_CONTEXT, rc)) return
           if (present(countsPerDEDecomp1)) then
-            countsPerDEDecomp1Use = countsPerDEDecomp1
+            if (size(countsPerDEDecomp1).lt.aSize) then
+              dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_SIZE, &
+                           "countsPerDEDecomp1 array not large enough", &
+                           ESMF_CONTEXT, rc)
+              return
+            endif
+            if (size(countsPerDEDecomp1).gt.aSize) then
+              dummy = ESMF_LogWrite("countsPerDEDecomp1 array larger than layout", &
+                                    ESMF_LOG_WARNING)
+            endif
+            countsPerDEDecomp1Use(1:aSize) = countsPerDEDecomp1(1:aSize)
           else
             call ESMF_LRGridDecompose(nDEs(1), counts(i), countsPerDEDecomp1Use)
           endif
         endif
         if (decompIdsUse(i).eq.2) then
-          size = nDEs(2)
-          allocate(countsPerDEDecomp2Use(size), stat=localrc)
+          aSize = nDEs(2)
+          allocate(countsPerDEDecomp2Use(aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDEDecomp2Use", &
                                          ESMF_CONTEXT, rc)) return
           if (present(countsPerDEDecomp2)) then
-            countsPerDEDecomp2Use = countsPerDEDecomp2
+            if (size(countsPerDEDecomp2).lt.aSize) then
+              dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_SIZE, &
+                           "countsPerDEDecomp2 array not large enough", &
+                           ESMF_CONTEXT, rc)
+              return
+            endif
+            if (size(countsPerDEDecomp2).gt.aSize) then
+              dummy = ESMF_LogWrite("countsPerDEDecomp2 array larger than layout", &
+                                    ESMF_LOG_WARNING)
+            endif
+            countsPerDEDecomp2Use(1:aSize) = countsPerDEDecomp2(1:aSize)
           else
             call ESMF_LRGridDecompose(nDEs(2), counts(i), countsPerDEDecomp2Use)
           endif
@@ -2001,8 +2023,8 @@
       enddo
 
       ! Determine if the axis are decomposed and load counts arrays
-      size = nDEs(decompIdsUse(1))
-      allocate(countsPerDE1(size), stat=localrc)
+      aSize = nDEs(decompIdsUse(1))
+      allocate(countsPerDE1(aSize), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDE1", &
                                      ESMF_CONTEXT, rc)) return
       if     (decompIdsUse(1).eq.0) then
@@ -2013,8 +2035,8 @@
         countsPerDE1(:) = countsPerDEDecomp2Use(:)
       endif
 
-      size = nDEs(decompIdsUse(2))
-      allocate(countsPerDE2(size), stat=localrc)
+      aSize = nDEs(decompIdsUse(2))
+      allocate(countsPerDE2(aSize), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDE2", &
                                      ESMF_CONTEXT, rc)) return
       if     (decompIdsUse(2).eq.0) then
@@ -2026,8 +2048,8 @@
       endif
 
       if (dimCount.eq.3) then
-        size = nDEs(decompIdsUse(3))
-        allocate(countsPerDE3(size), stat=localrc)
+        aSize = nDEs(decompIdsUse(3))
+        allocate(countsPerDE3(aSize), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDE3", &
                                        ESMF_CONTEXT, rc)) return
         if     (decompIdsUse(3).eq.0) then
