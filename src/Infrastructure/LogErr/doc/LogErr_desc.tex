@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.15 2005/01/10 18:09:51 cpboulder Exp $
+% $Id: LogErr_desc.tex,v 1.16 2005/01/10 21:17:55 cpboulder Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,12 +19,12 @@ handling.
 
 LogErr provides capabilities to write to a file immediately or store entries in
 a buffer for writing either when the buffer is full, or when the user calls an 
-{\tt ESMF\_LogFlush()} command.  Currently the default is set so the Log 
-flushes after every ten entries but can easily be set to other values using the 
-{\tt ESMF\_LogSet()} command and setting the {\tt maxElements} property to 
-another value greater.  The {\tt ESMF\_LogFlush()} command is automatically 
-called when the program exits (either by finishing or by using the {\tt halt} 
-property in the {\tt ESMF\_LogSet()} command or when the Log is closed.)
+{\tt ESMF\_LogFlush()} method.  Currently, the default is for the Log to flush
+after every ten entries.  This can easily be changed by using the 
+{\tt ESMF\_LogSet()} method and setting the {\tt maxElements} property to 
+another value.  The {\tt ESMF\_LogFlush()} method is automatically called when 
+the program exits by any means (program completion, halt on error, or when the
+Log is closed).
 
 The user has the capability to halt the program on an error or on a warning.
 By using the {\tt ESMF\_LogSet()} command and setting the {\tt halt} property 
@@ -34,11 +34,11 @@ By setting the {\tt halt} property to {\tt ESMF\_LOG\_HALTERROR}, the program
 will only halt on errors.  Lastly, the user can choose to never halt by setting
 the {\tt halt} property to {\tt ESMF\_LOG\_HALTNEVER}.
 
-LogErr will automatically put the PET number into the log.  Also, the user can 
+LogErr will automatically put the PET number into the Log.  Also, the user can 
 either specify {\tt ESMF\_LOG\_SINGLE} which writes all the entries to a single 
-log or {\tt ESMF\_LOG\_MULTI} which wites entries to multiple logs according to 
-the PET number.  To distinguish logs from each other when using 
-{\tt ESMF\_LOG\_MULTI}, the PET number (in the format {\tt PETx.} will be 
+Log or {\tt ESMF\_LOG\_MULTI} which wites entries to multiple Logs according to 
+the PET number.  To distinguish Logs from each other when using 
+{\tt ESMF\_LOG\_MULTI}, the PET number (in the format {\tt PETx.}) will be 
 prepended to the file name where x is the PET number.
  
 Other options that are planned for LogErr are to adjust the verbosity of ouput, 

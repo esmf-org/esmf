@@ -1,7 +1,7 @@
-% $Id: LogErr_req.tex,v 1.3 2003/07/28 20:15:04 cdeluca Exp $
+% $Id: LogErr_req.tex,v 1.4 2005/01/10 21:17:56 cpboulder Exp $
 \req{Interface characteristics}
 
-The log shall provide a simple interface with a minimal number of
+The Log shall provide a simple interface with a minimal number of
 steps needed to begin use.  The main messaging interface function shall be as
 close to the fortran {\tt write} statement as possible.
 
@@ -15,7 +15,7 @@ close to the fortran {\tt write} statement as possible.
 
 \sreq{Co-existence with standard filehandles}
 
-The log shall not inhibit the independent use of standard filehandles
+The Log shall not inhibit the independent use of standard filehandles
 (stdin, stdout and stderr) in user code.
 
 \begin{reqlist}
@@ -28,8 +28,8 @@ The log shall not inhibit the independent use of standard filehandles
 
 \sreq{Fortran standard write interface}
 
-The log shall be able to return a unit number so that user code may
-use standard formatted I/O to the logfile.
+The Log shall be able to return a unit number so that user code may use 
+standard formatted I/O to the Log file.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -41,10 +41,9 @@ use standard formatted I/O to the logfile.
 
 \sreq{Fortran write interface}
 
-The log shall provide an interface that supports the fortran {\tt
-  format} notation.  Therefore the log will be able to print out
-characters, reals, integers, complex numbers, arrays, and other
-intrinsic fortran types.
+The Log shall provide an interface that supports the fortran {\tt format} 
+notation.  Therefore the log will be able to print out characters, reals, 
+integers, complex numbers, arrays, and other intrinsic fortran types.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -56,8 +55,8 @@ intrinsic fortran types.
 
 \sreq{C standard write interface}
 
-The log shall be able to return a filehandle so that user code may use
-standard formatted C I/O to the logfile.
+The Log shall be able to return a filehandle so that user code may use standard
+formatted C I/O to the Log file.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -69,7 +68,7 @@ standard formatted C I/O to the logfile.
 
 \sreq{Printf style interface}
 
-The log shall have a printf style interface so built in datatypes may be
+The Log shall have a printf style interface so built in datatypes may be 
 printed using the flexible format of {\tt printf}.
 
 \begin{reqlist}
@@ -81,7 +80,7 @@ printed using the flexible format of {\tt printf}.
 \end{reqlist}
 \req{Log states/levels}
 
-Each log message will have a level attached to it so that setting certain run
+Each Log message will have a level attached to it so that setting certain run
 states will allow turning certain classes of output on and off.
 
 \begin{reqlist}
@@ -93,7 +92,7 @@ states will allow turning certain classes of output on and off.
 \end{reqlist}
 \req{Output medium}
 
-The output from the log shall be to files.
+The output from the Log shall be to files.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
