@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.24 2005/01/28 22:47:12 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.25 2005/02/02 17:55:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -374,10 +374,11 @@
       end subroutine ESMF_Finalize
 
 
+#if 0
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_Abort"
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_Abort - Best attempt to clean up and abort ESMF application
 !
 ! !INTERFACE:
@@ -398,7 +399,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       logical :: rcpresent                        ! Return code present   
       integer :: status
@@ -451,6 +452,6 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_Abort
-
+#endif
 
       end module ESMF_InitMod
