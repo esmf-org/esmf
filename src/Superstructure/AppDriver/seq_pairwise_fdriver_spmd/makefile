@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/11/06 21:05:51 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/11/06 21:06:28 nscollins Exp $ 
 
 ALL:  executable
 
@@ -40,3 +40,6 @@ run:  Application
 rununi: Application
 	-${MPIRUN} -np 1 ./Application
 
+
+clean:
+	${RM} -f Application $(APPOBJS) $(APPMODS)
