@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.2 2003/09/25 17:56:26 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.3 2003/09/26 20:30:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -250,9 +250,9 @@ extern "C" {
              bytes += ESMF_F90_PTR_PLUS_RANK;
 
          if (psize != bytes) {
-            printf("FAIL: summary - rank %d=%d, computed=%d (diff=%d)\n",
+            printf("FAIL: rank %d=%d, computed=%d (diff=%d)\n",
                              *rank, psize, bytes, psize-bytes);
-            printf(" details: \n");
+            printf(" full details: \n");
             printf("  rank %d: actual size is %d bytes, computed size is %d bytes (diff=%d)\n", 
                              *rank, psize, bytes, psize-bytes);
             printf("  in platform specific conf.h file, ESMF_F90_PTR_BASE_SIZE = %d\n",
