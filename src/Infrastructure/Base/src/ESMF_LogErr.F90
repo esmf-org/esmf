@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.7 2004/06/11 17:27:58 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.8 2004/06/11 18:20:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -782,7 +782,7 @@ end subroutine ESMF_LogSet
     		    !lt,"    ","  ",msg
     		endif	
     	    endif
-    	    CLOSE(UNIT=ESMF_LogDefault%stdOutUnitNumber)
+    	    CLOSE(UNIT=ESMF_LogDefault%unitnumber)
     	    ESMF_LogWrite=.TRUE.
     	    ok=1
     	endif	
