@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 2003/10/17 19:30:14 nscollins Exp $
+# $Id: makefile,v 1.37 2003/11/10 22:35:35 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -27,7 +27,10 @@ TOPALL: all
 # Build update 
 # Aug 19, 2003
 #
+
+# name of directory containing the ESMF source
 ESMF_TOP_DIR   = $(ESMF_DIR)
+# name of directory containing the /build makefiles
 ESMF_BUILD_DIR = $(ESMF_DIR)
 
 include $(ESMF_BUILD_DIR)/build/common.mk
@@ -39,7 +42,8 @@ include $(ESMF_BUILD_DIR)/build/common.mk
 DIRS = src
 
 CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_TESTDIR) doc 
-CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/test 
+CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/test \
+              $(ESMF_BUILD)/quick_start $(ESMF_BUILD)/release
 
 
 #-------------------------------------------------------------------------------
@@ -227,7 +231,84 @@ install:
 	cp ${ESMC_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \
 	fi
 
+# ------------------------------------------------------------------
+# Rules for putting example files where they need to be for our
+# binary releases (the pre-built libesmf.so and some simple examples).
+# Creates the directory structure for releases, and copies example
+# files and READMEs into it.
+#
+RELEASE_VERSION = 1_0_0rp2
+RELEASE_SUBDIRS = example lib mod CoupledFlowSrc CoupledFlowExe
+RELEASE_DIR     =  $(ESMF_BUILD)/release/esmf_$(RELEASE_VERSION)_$(ESMF_ARCH)_$(BOPT)_so
 
+chkdir_release:
+	@if [ ! -d $(RELEASE_DIR) ] ; then \
+	   echo Making $(RELEASE_DIR); mkdir -p $(RELEASE_DIR) ; fi
+	@for DIR in $(RELEASE_SUBDIRS) foo ; do \
+	   if [ $$DIR != "foo" ] ; then \
+	      if [ ! -d $(RELEASE_DIR)/$$DIR ] ; then \
+	         echo Making $(RELEASE_DIR)/$$DIR ;\
+	         mkdir $(RELEASE_DIR)/$$DIR ;\
+	      fi ;\
+	   fi ;\
+	done
+
+build_release: chkdir_release build_libs shared
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_release tree
+
+tree_build_release:
+	@for FILES in $(RELEASE_COPYFILES) foo ; do \
+	   if [ $$FILES != "foo" ] ; then \
+	      echo "Copying $$FILES to $(RELEASE_DIR)/$(RELEASE_DESTDIR)" ;\
+	      cp $$FILES $(RELEASE_DIR)/$(RELEASE_DESTDIR) ;\
+	   fi ;\
+	done
+	@for FILES in $(RELEASE_ARCHCOPYFILES) foo ; do \
+	   if [ $$FILES != "foo" ] ; then \
+	      echo "Copying $$FILES.$(ESMF_ARCH) to $(RELEASE_DIR)/$(RELEASE_DESTDIR)/$$FILES" ;\
+	      cp $$FILES.$(ESMF_ARCH) $(RELEASE_DIR)/$(RELEASE_DESTDIR)/$$FILES ;\
+	   fi ;\
+	done
+
+
+
+# ------------------------------------------------------------------
+# Rules for putting quick_start files where they need to be for our
+# public releases. 
+#
+
+QUICKSTART_DIR     =  $(ESMF_BUILD)/quick_start
+
+chkdir_quick_start:
+	@if [ ! -d $(QUICKSTART_DIR) ] ; then \
+	   echo Making $(QUICKSTART_DIR); mkdir -p $(QUICKSTART_DIR) ; fi
+	@for DIR in $(QUICKSTART_SUBDIRS) foo ; do \
+	   if [ $$DIR != "foo" ] ; then \
+	      if [ ! -d $(QUICKSTART_DIR)/$$DIR ] ; then \
+	         echo Making $(QUICKSTART_DIR)/$$DIR ;\
+	         mkdir $(QUICKSTART_DIR)/$$DIR ;\
+	      fi ;\
+	   fi ;\
+	done
+
+build_quick_start: chkdir_quick_start
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_quick_start tree
+
+tree_build_quick_start:
+	@for DIR in $(QUICKSTART_COPYDIRS) foo ; do \
+	   if [ $$DIR != "foo" ] ; then \
+	      echo "Copying $$DIR files to $(QUICKSTART_DIR)" ;\
+	      cp $$DIR/* $(QUICKSTART_DIR) ;\
+	   fi ;\
+	done
+
+
+
+
+
+
+# Note: the following rules are currently in the build/common.mk 
+#  makefile fragment.
 
 # Clean recursively deletes files that each makefile wants
 # deleted.   Remove the .mod files here manually since the case
