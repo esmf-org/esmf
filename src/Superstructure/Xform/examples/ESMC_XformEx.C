@@ -1,4 +1,4 @@
-// $Id: ESMC_XformEx.C,v 1.2 2003/11/26 22:55:39 svasquez Exp $
+// $Id: ESMC_XformEx.C,v 1.3 2004/02/11 23:20:02 nscollins Exp $
 //
 // Example/test code which creates a new Transforms.
 
@@ -30,6 +30,9 @@ main(int argc, char **argv) {
      int rc;
      ESMC_State *state1;
      ESMC_Xform xformlist[2];
+
+     extern void A2OCPLxform(void);
+     extern void O2ACPLxform(void);
         
 
 //-------------------------------------------------------------------------
@@ -41,8 +44,8 @@ main(int argc, char **argv) {
     printf("Xform Example 1n");
 
     // The third arguments here are names of subroutines.
-    rc = ESMF_XformInit(xformlist[0], "AtmToOcn", A2OCPLxform);
-    rc = ESMF_XformInit(xformlist[1], "OcnToAtm", O2ACPLxform);
+    rc = xformlist[0].ESMC_XformInit("AtmToOcn", A2OCPLxform);
+    rc = xformlist[1].ESMC_XformInit("OcnToAtm", O2ACPLxform);
 
     printf("Xform Example 1 finished\n");
 
@@ -54,7 +57,7 @@ main(int argc, char **argv) {
 
     printf("Xform Example 2: Using a Xform from within a Component\n");
 
-    rc = ESMF_StateTransform(state1, "AtmToOcn", xformlist);
+    rc = state1->ESMC_StateTransform(xformlist);
 
     // When this returns, the transform code has been executed.
 

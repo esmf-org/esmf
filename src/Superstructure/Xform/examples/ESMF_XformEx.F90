@@ -1,4 +1,4 @@
-! $Id: ESMF_XformEx.F90,v 1.1 2003/10/22 21:00:54 cdeluca Exp $
+! $Id: ESMF_XformEx.F90,v 1.2 2004/02/11 23:20:02 nscollins Exp $
 !
 ! Example code for creating Xforms.
 
@@ -15,16 +15,9 @@
 
     program ESMF_XformExample
     
-!   ! Some common definitions.  This requires the C preprocessor.
-    #include "ESMF.h"
+    ! ESMF module
 
-!   ! Other ESMF modules which are needed by Xforms
-    use ESMF_IOMod
-    use ESMF_ArrayMod
-    use ESMF_FieldMod
-    use ESMF_BundleMod
-    use ESMF_StateMod
-    use ESMF_XformMod
+    use ESMF_Mod
     
     implicit none
     
@@ -34,6 +27,10 @@
     type(ESMF_State) :: state1, state2
     type(ESMF_Xform) :: xformlist(2)
         
+    ! should be:
+    ! external :: A2OCPLxform, O2ACPLxform
+    integer :: A2OCPLxform, O2ACPLxform
+
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
