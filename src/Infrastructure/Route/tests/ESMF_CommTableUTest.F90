@@ -1,4 +1,4 @@
-! $Id: ESMF_CommTableUTest.F90,v 1.3 2005/02/28 16:28:00 nscollins Exp $
+! $Id: ESMF_CommTableUTest.F90,v 1.4 2005/03/10 15:40:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_CommTableUTest.F90,v 1.3 2005/02/28 16:28:00 nscollins Exp $'
+    '$Id: ESMF_CommTableUTest.F90,v 1.4 2005/03/10 15:40:04 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,9 +58,11 @@
       integer :: myvmid
       integer :: vmcount
 
-      !character(ESMF_MAXSTR) :: validate_options
-      character(ESMF_MAXSTR) :: print_options
+      !character(32) :: validate_options
+      character(32) :: print_options
 
+
+      print_options = ""
 
       !------------------------------------------------------------------------
 
@@ -96,7 +98,7 @@
       ! test print method via option string
       call ESMF_CommTablePrint(rtable, print_options, rc)
       write(name, *) "ESMF_CommTablePrint"
-      write(failMsg, *) "rc =", rc, ", print_options =", print_options
+      write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
