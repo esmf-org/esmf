@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.9 2002/11/22 23:30:39 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.10 2002/12/03 23:23:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.9 2002/11/22 23:30:39 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.10 2002/12/03 23:23:02 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -284,8 +284,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridCreateEmpty - Create a new Grid with no data
+! !IROUTINE: ESMF_GridCreateEmpty - Create a new Grid with no data
 
 ! !INTERFACE:
       function ESMF_GridCreateEmpty(name, rc)
@@ -349,8 +348,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridCreateInternal - Create a new Grid internally
+! !IROUTINE: ESMF_GridCreateInternal - Create a new Grid internally
 
 ! !INTERFACE:
       function ESMF_GridCreateInternal(name, gridtype, coord_system, &
@@ -385,22 +383,22 @@
 !          Integer specifier to denote gridtype:
 !             gridtype=1   lat-lon
 !             TODO:  fill out
-!     \item[[coord_system]]
+!     \item[[coord\_system]]
 !          Integer specifier to denote coordinate system:
-!             coord_system=1   spherical
-!             coord_system=2   Cartesian
-!             coord_system=3   cylindrical
-!     \item[[x_min]]
+!             coord\_system=1   spherical
+!             coord\_system=2   Cartesian
+!             coord\_system=3   cylindrical
+!     \item[[x\_min]]
 !          Minimum physical coordinate in the x-direction.
-!     \item[[x_max]]
+!     \item[[x\_max]]
 !          Maximum physical coordinate in the x-direction.
-!     \item[[y_min]]
+!     \item[[y\_min]]
 !          Minimum physical coordinate in the y-direction.
-!     \item[[y_max]]
+!     \item[[y\_max]]
 !          Maximum physical coordinate in the y-direction.
-!     \item[[i_max]]
+!     \item[[i\_max]]
 !          Number of even-spaced grid increments in the i-direction.
-!     \item[[j_max]]
+!     \item[[j\_max]]
 !          Number of even-spaced grid increments in the j-direction.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -446,8 +444,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridCreateRead - Create a new Grid read in from a file
+! !IROUTINE: ESMF_GridCreateRead - Create a new Grid read in from a file
 
 ! !INTERFACE:
       function ESMF_GridCreateRead(name, iospec, rc)
@@ -515,8 +512,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridCreateCopy - Create a new Grid by copying another Grid
+! !IROUTINE: ESMF_GridCreateCopy - Create a new Grid by copying another Grid
 
 ! !INTERFACE:
       function ESMF_GridCreateCopy(name, grid_in, rc)
@@ -538,7 +534,7 @@
 !     \begin{description}
 !     \item[[name]] 
 !          {\tt Grid} name.
-!     \item[[grid_in]] 
+!     \item[[grid\_in]] 
 !          {\tt Grid} to be copied.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -584,9 +580,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridCreateCutout - Create a new Grid as a subset of an existing
-!                             Grid
+! !IROUTINE: ESMF_GridCreateCutout - Create a new Grid as a subset of an existing Grid
 
 ! !INTERFACE:
       function ESMF_GridCreateCutout(name, grid_in, i_min, i_max, j_min, &
@@ -613,15 +607,15 @@
 !     \begin{description}
 !     \item[[name]] 
 !          {\tt Grid} name.
-!     \item[[grid_in]] 
+!     \item[[grid\_in]] 
 !          {\tt Grid} to be partially copied.
-!     \item[[i_min]] 
+!     \item[[i\_min]] 
 !          Minimum global i-index for the region of the grid to be cutout.
-!     \item[[i_max]] 
+!     \item[[i\_max]] 
 !          Maximum global i-index for the region of the grid to be cutout.
-!     \item[[j_min]] 
+!     \item[[j\_min]] 
 !          Minimum global j-index for the region of the grid to be cutout.
-!     \item[[j_max]] 
+!     \item[[j\_max]] 
 !          Maximum global j-index for the region of the grid to be cutout.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -667,9 +661,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridCreateChangeResolution - Create a new Grid by coarsening or
-!                                       refining an existing Grid.
+! !IROUTINE: ESMF_GridCreateChangeResolution - Create a new Grid by coarsening or refining an existing Grid
 
 ! !INTERFACE:
       function ESMF_GridCreateChangeResolution(name, grid_in, i_resolution, &
@@ -694,17 +686,17 @@
 !     \begin{description}
 !     \item[[name]] 
 !          {\tt Grid} name.
-!     \item[[grid_in]] 
+!     \item[[grid\_in]] 
 !          Source {\tt Grid} to be coarsened or refined.
-!     \item[[i_resolution]] 
+!     \item[[i\_resolution]] 
 !          Integer resolution factor in the i-direction.
-!     \item[[j_resolution]] 
+!     \item[[j\_resolution]] 
 !          Integer resolution factor in the j-direction.
 !          Note:  The above arguments assume refinement by factor if positive
 !          and coarsening by absolute value of the factor if negative.  For 
-!          example, i_resolution=4 indicates the new {\tt Grid} will be four
+!          example, i\_resolution=4 indicates the new {\tt Grid} will be four
 !          times as resolved in the i-direction as the source {\tt Grid},
-!          whereas j_resolution=-3 means the new {\tt Grid} will sample every
+!          whereas j\_resolution=-3 means the new {\tt Grid} will sample every
 !          third point in the j-direction.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -750,9 +742,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridCreateExchange - Create a new Grid from the intersection of
-!                               two existing grids
+! !IROUTINE: ESMF_GridCreateExchange - Create a new Grid from the intersection of two existing grids
 
 ! !INTERFACE:
       function ESMF_GridCreateExchange(name, grid_in1, grid_in2, rc)
@@ -775,9 +765,9 @@
 !     \begin{description}
 !     \item[[name]] 
 !          New {\tt Grid} name.
-!     \item[[grid_in]] 
+!     \item[[grid\_in1]] 
 !          First source {\tt Grid}.
-!     \item[[grid_in]] 
+!     \item[[grid\_in2]] 
 !          Second source {\tt Grid}.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -823,8 +813,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridDestroy - Free all resources associated with a Grid 
+! !IROUTINE: ESMF_GridDestroy - Free all resources associated with a Grid 
 
 ! !INTERFACE:
       subroutine ESMF_GridDestroy(grid, rc)
@@ -835,7 +824,7 @@
 !
 ! !DESCRIPTION:
 !     Destroys a {\tt Grid} object previously allocated
-!     via an {\tt ESMF_GridCreate routine}.
+!     via an {\tt ESMF\_GridCreate routine}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -855,8 +844,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridConstructNew - Construct the internals of an allocated Grid
+! !IROUTINE: ESMF_GridConstructNew - Construct the internals of an allocated Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridConstructNew(grid, name, rc)
@@ -869,7 +857,7 @@
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
 !     allocated {\tt Grid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF_GridDestruct
+!     as needed.  Must call the corresponding ESMF\_GridDestruct
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
 !     {\tt ESMF\_GridConstruct}. 
@@ -911,8 +899,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridDestruct - Free any Grid memory allocated internally
+! !IROUTINE: ESMF_GridDestruct - Free any Grid memory allocated internally
 
 ! !INTERFACE:
       subroutine ESMF_GridDestruct(grid, rc)
@@ -926,7 +913,7 @@
 !    {\tt  ESMF\_GridConstruct}, does any additional cleanup before the
 !     original Grid object is freed.  Intended for internal ESMF
 !     use only; end-users use {\tt ESMF\_GridDestroy}, which calls
-!     {\tt ESMF_GridDestruct}.  
+!     {\tt ESMF\_GridDestruct}.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -946,8 +933,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridGetConfig - Get configuration information from a Grid
+! !IROUTINE: ESMF_GridGetConfig - Get configuration information from a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGetConfig(grid, config, rc)
@@ -980,8 +966,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetConfig - Set configuration information for a Grid
+! !IROUTINE: ESMF_GridSetConfig - Set configuration information for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridSetConfig(grid, config, rc)
@@ -1015,8 +1000,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridGetValue - Get <Value> for a Grid
+! !IROUTINE: ESMF_GridGetValue - Get <Value> for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGetValue(grid, value, rc)
@@ -1051,9 +1035,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetCoordinateFromArray - Set the coordinates of a Grid from
-!                                       an existing ESMF array
+! !IROUTINE: ESMF_GridSetCoordinateFromArray - Set the coordinates of a Grid from an existing ESMF array
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordinateFromArray(Grid, array, id, rc)
@@ -1076,12 +1058,12 @@
 !          ESMF Array of data.         
 !     \item[[id]]
 !          Identifier for which set of coordinates are being set:
-!             1  center_x
-!             2  center_y
-!             3  corner_x
-!             4  corner_y
-!             5  face_x
-!             6  face_y 
+!             1  center\_x
+!             2  center\_y
+!             3  corner\_x
+!             4  corner\_y
+!             5  face\_x
+!             6  face\_y 
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1096,9 +1078,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetCoordinateFromBuffer - Set the coordinates of a Grid from
-!                                        an existing data buffer
+! !IROUTINE: ESMF_GridSetCoordinateFromBuffer - Set the coordinates of a Grid from an existing data buffer
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordinateFromBuffer(Grid, buffer, id, rc)
@@ -1121,12 +1101,12 @@
 !          Raw data buffer.         
 !     \item[[id]]
 !          Identifier for which set of coordinates are being set:
-!             1  center_x
-!             2  center_y
-!             3  corner_x
-!             4  corner_y
-!             5  face_x
-!             6  face_y 
+!             1  center\_x
+!             2  center\_y
+!             3  corner\_x
+!             4  corner\_y
+!             5  face\_x
+!             6  face\_y 
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1141,8 +1121,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetCoordinateCompute - Compute coordinates for a Grid
+! !IROUTINE: ESMF_GridSetCoordinateCompute - Compute coordinates for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordinateCompute(Grid, id, rc)
@@ -1162,12 +1141,12 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[[id]]
 !          Identifier for which set of coordinates are being set:
-!             1  center_x
-!             2  center_y
-!             3  corner_x
-!             4  corner_y
-!             5  face_x
-!             6  face_y 
+!             1  center\_x
+!             2  center\_y
+!             3  corner\_x
+!             4  corner\_y
+!             5  face\_x
+!             6  face\_y 
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1184,8 +1163,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetCoordinateCopy - Copies coordinates from one grid to another.
+! !IROUTINE: ESMF_GridSetCoordinateCopy - Copies coordinates from one grid to another
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordinateCopy(Grid, Grid_in, id, rc)
@@ -1203,16 +1181,16 @@
 !     \begin{description}
 !     \item[grid] 
 !          Pointer to a {\tt Grid} to be modified.
-!     \item[grid_in] 
+!     \item[grid\_in] 
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
 !     \item[[id]]
 !          Identifier for which set of coordinates are being set:
-!             1  center_x
-!             2  center_y
-!             3  corner_x
-!             4  corner_y
-!             5  face_x
-!             6  face_y 
+!             1  center\_x
+!             2  center\_y
+!             3  corner\_x
+!             4  corner\_y
+!             5  face\_x
+!             6  face\_y 
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1227,9 +1205,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetLMaskFromArray - Set a logical mask in a Grid from an
-!                                  existing ESMF array
+! !IROUTINE: ESMF_GridSetLMaskFromArray - Set a logical mask in a Grid from an existing ESMF array
 
 ! !INTERFACE:
       subroutine ESMF_GridSetLMaskFromArray(Grid, array, name, rc)
@@ -1266,9 +1242,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetLMaskFromBuffer - Set a logical mask in a Grid from an
-!                                   existing data buffer
+! !IROUTINE: ESMF_GridSetLMaskFromBuffer - Set a logical mask in a Grid from an existing data buffer
 
 ! !INTERFACE:
       subroutine ESMF_GridSetLMaskFromBuffer(Grid, buffer, name, rc)
@@ -1305,8 +1279,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetLMaskCompute - Compute a logical mask for a Grid
+! !IROUTINE: ESMF_GridSetLMaskCompute - Compute a logical mask for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridSetLMaskCompute(Grid, name, rc)
@@ -1342,9 +1315,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetLMaskCopy - Copies a logical mask from one grid to
-!                             another.
+! !IROUTINE: ESMF_GridSetLMaskCopy - Copies a logical mask from one grid to another.
 
 ! !INTERFACE:
       subroutine ESMF_GridSetLMaskCopy(Grid, name, Grid_in, name_in, rc)
@@ -1365,9 +1336,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt LMask} name to be set.
-!     \item[grid_in] 
+!     \item[grid\_in] 
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
-!     \item [[name_in]]
+!     \item [[name\_in]]
 !           {\tt LMask} name to be copied.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1383,9 +1354,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetMMaskFromArray - Set a multiplicative mask in a Grid from an
-!                                  existing ESMF array
+! !IROUTINE: ESMF_GridSetMMaskFromArray - Set a multiplicative mask in a Grid from an existing ESMF array
 
 ! !INTERFACE:
       subroutine ESMF_GridSetMMaskFromArray(Grid, array, name, rc)
@@ -1422,9 +1391,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetMMaskFromBuffer - Set a multiplicative mask in a Grid from an
-!                                   existing data buffer
+! !IROUTINE: ESMF_GridSetMMaskFromBuffer - Set a multiplicative mask in a Grid from an existing data buffer
 
 ! !INTERFACE:
       subroutine ESMF_GridSetMMaskFromBuffer(Grid, buffer, name, rc)
@@ -1461,8 +1428,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetMMaskCompute - Compute a multiplicative mask for a Grid
+! !IROUTINE: ESMF_GridSetMMaskCompute - Compute a multiplicative mask for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridSetMMaskCompute(Grid, name, rc)
@@ -1498,9 +1464,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetMMaskCopy - Copies a multiplicative mask from one grid to
-!                             another.
+! !IROUTINE: ESMF_GridSetMMaskCopy - Copies a multiplicative mask from one grid to another.
 
 ! !INTERFACE:
       subroutine ESMF_GridSetMMaskCopy(Grid, name, Grid_in, name_in, rc)
@@ -1522,9 +1486,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt MMask} name to be set.
-!     \item[grid_in] 
+!     \item[grid\_in] 
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
-!     \item [[name_in]]
+!     \item [[name\_in]]
 !           {\tt MMask} name to be copied.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1540,9 +1504,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetMetricFromArray - Set a metric for a Grid from an existing 
-!                                   ESMF array
+! !IROUTINE: ESMF_GridSetMetricFromArray - Set a metric for a Grid from an existing ESMF array
 
 ! !INTERFACE:
       subroutine ESMF_GridSetMetricFromArray(Grid, array, name, rc)
@@ -1579,9 +1541,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetMetricFromBuffer - Set a metric for a Grid from an existing
-!                                    data buffer
+! !IROUTINE: ESMF_GridSetMetricFromBuffer - Set a metric for a Grid from an existing data buffer
 
 ! !INTERFACE:
       subroutine ESMF_GridSetMetricFromBuffer(Grid, buffer, name, rc)
@@ -1618,8 +1578,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetMetricCompute - Compute a metric for a Grid
+! !IROUTINE: ESMF_GridSetMetricCompute - Compute a metric for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridSetMetricCompute(Grid, name, id, rc)
@@ -1656,8 +1615,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetMetricCopy - Copies a metric from one grid to another.
+! !IROUTINE: ESMF_GridSetMetricCopy - Copies a metric from one grid to another
 
 ! !INTERFACE:
       subroutine ESMF_GridSetMetricCopy(Grid, name, Grid_in, name_in, rc)
@@ -1678,9 +1636,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt Metric} name to be set.
-!     \item[grid_in] 
+!     \item[grid\_in] 
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
-!     \item [[name_in]]
+!     \item [[name\_in]]
 !           {\tt Metric} name to be copied.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1696,9 +1654,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetRegionIDFromArray - Set a region identifier in a Grid from an
-!                                     existing ESMF array
+! !IROUTINE: ESMF_GridSetRegionIDFromArray - Set a region identifier in a Grid from an existing ESMF array
 
 ! !INTERFACE:
       subroutine ESMF_GridSetRegionIDFromArray(Grid, array, name, rc)
@@ -1735,9 +1691,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetRegionIDFromBuffer - Set a region identifier in a Grid from
-!                                      an existing data buffer
+! !IROUTINE: ESMF_GridSetRegionIDFromBuffer - Set a region identifier in a Grid from an existing data buffer
 
 ! !INTERFACE:
       subroutine ESMF_GridSetRegionIDFromBuffer(Grid, buffer, name, rc)
@@ -1774,8 +1728,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetRegionIDCompute - Compute a region identifier for a Grid
+! !IROUTINE: ESMF_GridSetRegionIDCompute - Compute a region identifier for a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridSetRegionIDCompute(Grid, name, rc)
@@ -1811,9 +1764,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridSetRegionIDCopy - Copies a region identifier from one grid to
-!                                another.
+! !IROUTINE: ESMF_GridSetRegionIDCopy - Copies a region identifier from one grid to another
 
 ! !INTERFACE:
       subroutine ESMF_GridSetRegionIDCopy(Grid, name, Grid_in, name_in, rc)
@@ -1835,9 +1786,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt RegionID} name to be set.
-!     \item[grid_in] 
+!     \item[grid\_in] 
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
-!     \item [[name_in]]
+!     \item [[name\_in]]
 !           {\tt RegionID} name to be copied.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1853,8 +1804,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridValidate - Check internal consistency of a Grid
+! !IROUTINE: ESMF_GridValidate - Check internal consistency of a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridValidate(grid, opt, rc)
@@ -1887,8 +1837,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_GridPrint - Print the contents of a Grid
+! !IROUTINE: ESMF_GridPrint - Print the contents of a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridPrint(grid, opt, rc)
