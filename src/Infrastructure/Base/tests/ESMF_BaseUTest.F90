@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.7 2004/01/28 20:25:23 nscollins Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.8 2004/03/08 16:21:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.7 2004/01/28 20:25:23 nscollins Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.8 2004/03/08 16:21:56 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -105,6 +105,7 @@
 
       !NEX_UTest
       ! test print method via option string
+      print_options = "brief"
       call ESMF_BasePrint(base, print_options, rc)
       write(name, *) "ESMF_BasePrint"
       write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
