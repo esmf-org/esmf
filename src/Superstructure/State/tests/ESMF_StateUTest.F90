@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.25 2004/07/22 21:03:50 jwolfe Exp $
+! $Id: ESMF_StateUTest.F90,v 1.26 2004/08/25 22:25:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,11 +34,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.25 2004/07/22 21:03:50 jwolfe Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.26 2004/08/25 22:25:24 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
-      integer :: x, y, rc, num, number
+      integer :: x, y, rc, num, number, npets
       logical :: IsNeeded
       character(ESMF_MAXSTR) :: statename, bundlename, dataname, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
@@ -48,6 +48,7 @@
       type(ESMF_Array) :: array1, array2(2), array3, array3a, array4
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
+      type(ESMF_VM):: vm
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -73,7 +74,9 @@
 !-------------------------------------------------------------------------------
 
 
-      call ESMF_Initialize(rc=rc)
+      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      print *, "NUMBER_OF_PROCESSORS ", npets
       
       !------------------------------------------------------------------------
       
