@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.23 2003/02/12 21:25:04 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.24 2003/02/12 23:38:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -243,7 +243,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.23 2003/02/12 21:25:04 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.24 2003/02/12 23:38:48 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -512,8 +512,11 @@ end function
 
 !       local vars
         type (ESMF_StateType), pointer :: stypep
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+
+        status = ESMF_FAILURE 
+        rcpresent = .FALSE.
 
 !       Initialize the pointers to null.
         nullify(ESMF_StateCreateNew%statep)
@@ -590,14 +593,16 @@ end function
 
 !       local vars
         type (ESMF_StateType), pointer :: stypep
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
-!       Initialize the pointers to null.
+        ! Initialization
+        status = ESMF_FAILURE 
+        rcpresent = .FALSE.
         nullify(ESMF_StateCreateEmpty%statep)
         nullify(stypep)
 
-!       Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -652,8 +657,12 @@ end function
 ! !REQUIREMENTS:
 
 !       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+
+        status = ESMF_FAILURE 
+        rcpresent = .FALSE.
+
 
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -751,9 +760,13 @@ end function
 
 
         ! local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
         integer :: count
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+
+        status = ESMF_FAILURE 
+        rcpresent = .FALSE.
+
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -876,8 +889,12 @@ end function
 
 
         ! local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+
+        status = ESMF_FAILURE 
+        rcpresent = .FALSE.
+
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -934,10 +951,13 @@ end function
 ! !REQUIREMENTS:
 
 !       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
         type(ESMF_StateData), pointer :: nextitem
         integer :: i
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+
+        status = ESMF_FAILURE 
+        rcpresent = .FALSE.
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -1060,8 +1080,8 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                   ! local error status
+      logical :: rcpresent                ! did user specify rc?
       type(ESMF_StateData), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
       character(len=ESMF_MAXSTR) :: bname, fname
@@ -1069,9 +1089,12 @@ end function
       integer :: bindex, findex 
       integer :: i, j
       integer :: fcount, fruncount, newcount
-      logical :: exists, fneedsdealloc=.FALSE.
+      logical :: exists, fneedsdealloc
 
       ! Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE 
+      rcpresent = .FALSE.
+      fneedsdealloc = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1405,12 +1428,15 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
       type(ESMF_StateData), pointer :: nextitem
       integer :: i, startbase
+      integer :: status                   ! local error status
+      logical :: rcpresent                ! did user specify rc?
 
       ! Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE 
+      rcpresent = .FALSE.
+
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1528,12 +1554,15 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
       type(ESMF_StateData), pointer :: nextitem
       integer :: i, startbase
+      integer :: status                   ! local error status
+      logical :: rcpresent                ! did user specify rc?
 
       ! Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE 
+      rcpresent = .FALSE.
+
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1669,12 +1698,15 @@ end function
 !EOP
 
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
       type(ESMF_StateData), pointer :: nextitem
       integer :: i, startbase
+      integer :: status                   ! local error status
+      logical :: rcpresent                ! did user specify rc?
 
       ! Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE 
+      rcpresent = .FALSE.
+
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1734,15 +1766,16 @@ end function
 ! !REQUIREMENTS: 
 !EOP
 
-      integer :: status=ESMF_FAILURE      ! local error status
       type(ESMF_StateData), dimension(:), pointer :: temp_list
       type(ESMF_StateData), pointer :: nextitem
       integer :: i
       integer :: allocsize 
       integer :: newsize
       integer, parameter :: chunksize = 16         ! extend list by this
+      integer :: status                            ! local error status
  
       ! Assume failure until success assured.
+      status = ESMF_FAILURE
       rc = ESMF_FAILURE
 
       ! An initially empty list. Simply allocate, no data copy needed.
@@ -1879,18 +1912,21 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                   ! local error status
+      logical :: rcpresent                ! did user specify rc?
+      integer :: i, dcount, itemindex
+      logical :: itemfound
       type(ESMF_StateData), pointer :: nextitem
-      integer :: i, dcount
-      logical :: itemfound=.FALSE.
-      integer :: itemindex
 
       ! Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE 
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
+
+      itemfound = .FALSE.
   
       ! For each item in the array, check the name
       dcount = stypep%datacount
@@ -1957,8 +1993,9 @@ end function
 !
       type(ESMF_StateData), pointer :: dataitem
       logical :: exists
-      integer :: status=ESMF_FAILURE
-       
+      integer :: status
+
+      status = ESMF_FAILURE
       ! Assume no unless we find it and it is needed.
       ESMF_StateIsNeeded = .FALSE.
       if (present(rc)) rc=ESMF_FAILURE
@@ -2054,8 +2091,9 @@ end function
 
       type(ESMF_StateData), pointer :: dataitem
       logical :: exists
-      integer :: status=ESMF_FAILURE
-       
+      integer :: status
+
+      status = ESMF_FAILURE
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
 
@@ -2104,7 +2142,9 @@ end function
 
       type(ESMF_StateData), pointer :: dataitem
       logical :: exists
-      integer :: status=ESMF_FAILURE
+      integer :: status
+
+      status = ESMF_FAILURE
        
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
@@ -2159,7 +2199,9 @@ end function
 
       type(ESMF_StateData), pointer :: dataitem
       logical :: exists
-      integer :: status=ESMF_FAILURE
+      integer :: status
+
+      status = ESMF_FAILURE
        
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
@@ -2218,7 +2260,9 @@ end function
 
       type(ESMF_StateData), pointer :: dataitem
       logical :: exists
-      integer :: status=ESMF_FAILURE
+      integer :: status
+
+      status = ESMF_FAILURE
        
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
@@ -2386,15 +2430,18 @@ end function
 !
 ! TODO: code goes here
 !
-       character (len=6) :: defaultopts="brief"
-       integer :: status=ESMF_FAILURE      ! local error status
+       character (len=6) :: defaultopts
        type(ESMF_StateType), pointer :: sp
        type(ESMF_StateData), pointer :: dp
        character (len=1024) :: outbuf
-       logical :: rcpresent=.FALSE.
+       integer :: status                          ! local error status
+       logical :: rcpresent
        integer :: i, nitems
 
+       defaultopts = "brief"
 !      Initialize return code; assume failure until success is certain
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
