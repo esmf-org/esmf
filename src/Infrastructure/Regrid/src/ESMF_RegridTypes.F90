@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.21 2004/01/20 23:15:53 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.22 2004/01/28 20:30:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -156,7 +156,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.21 2004/01/20 23:15:53 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.22 2004/01/28 20:30:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -682,12 +682,15 @@
 !     \begin{description}
 !     \item[regrid]
 !          The regrid object to be initialized.
-!     \item[[rc]]
+!     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
+
+        ! initialize the base object
+        call ESMF_BaseCreate(regrid%base, "Regrid", rc=rc)
 
         ! nullify pointers
       
@@ -760,8 +763,10 @@
       !destroy route regrid%gather
       nullify(regrid%gather)
 
-      ! blithly assume the world is a good place
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! and free anything associated with the base object
+      call ESMF_BaseDestroy(regrid%base, status)
+
+      if(rcpresent) rc = status
 
       end subroutine ESMF_RegridDestruct
 

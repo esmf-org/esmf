@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.60 2004/01/27 18:05:46 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.61 2004/01/28 20:31:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -177,7 +177,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.60 2004/01/27 18:05:46 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.61 2004/01/28 20:31:02 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -339,8 +339,12 @@ end function
         ! component type
         compp%ctype = ctype
 
-        ! component name (stored in base object)
-        call ESMF_SetName(compp%base, name, "Component", status)
+        ! initialize base class, including component name
+        call ESMF_BaseCreate(compp%base, "Component", name, 0, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "CompConstruct: Base create error"
+          return
+        endif
 
         ! either store or create a layout
         if (present(layout)) then
@@ -469,6 +473,13 @@ end function
         call c_ESMC_FTableDestroy(compp%this, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component contents destruction error"
+          return
+        endif
+
+        ! Release attributes and other things on base class
+        call ESMF_BaseDestroy(compp%base, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Base Component contents destruction error"
           return
         endif
 
