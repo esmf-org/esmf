@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.5 2003/05/07 21:42:11 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.6 2003/05/07 22:07:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.5 2003/05/07 21:42:11 eschwab Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.6 2003/05/07 22:07:23 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -50,7 +50,7 @@
       integer :: MM, DD, H, M, yD
       type(ESMF_TimeInterval) :: time_step, time_step_copy
       type(ESMF_TimeInterval) :: time_diff
-      type(ESMF_Time) :: curr_time, curr_time_copy
+      type(ESMF_Time) :: curr_time, curr_time_copy, prev_time
       integer(ESMF_IKIND_I8) :: advanceCount, YR, D, S
       double precision :: d_
       logical alarmRinging
@@ -147,9 +147,30 @@
       print *, "Difference between start and stop times = ", D, " days, ", &
                 S, " seconds."
 
+      ! get clock's start time
+      call ESMF_ClockGetStartTime(clock, startTime, rc)
+      call ESMF_TimeGet(startTime, YR=YR, MM=MM, DD=DD, H=H, rc=rc)
+      print *, "Clock's start time = ", YR, "/", MM, "/", DD, " ", H, " hours."
+
+      ! get clock's stop time
+      call ESMF_ClockGetStopTime(clock, stopTime, rc)
+      call ESMF_TimeGet(stopTime, YR=YR, MM=MM, DD=DD, H=H, rc=rc)
+      print *, "Clock's stop time = ", YR, "/", MM, "/", DD, " ", H, " hours."
+
       ! get clock's reference time
+      call ESMF_ClockGetRefTime(clock, refTime, rc)
       call ESMF_TimeGet(refTime, YR=YR, MM=MM, DD=DD, rc=rc)
       print *, "Clock's reference time = ", YR, "/", MM, "/", DD, " midnight."
+
+      ! get clock's current time
+      call ESMF_ClockGetCurrTime(clock, curr_time, rc)
+      print *, "Clock's current time = "
+      call ESMF_TimePrint(curr_time, "string", rc)
+
+      ! get clock's previous time
+      call ESMF_ClockGetPrevTime(clock, prev_time, rc)
+      print *, "Clock's previous time = "
+      call ESMF_TimePrint(prev_time, "string", rc)
 
       ! get clock's current simulation time
       call ESMF_ClockGetCurrSimTime(clock, currSimTime, rc)
