@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.19 2003/01/09 21:21:45 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.20 2003/01/27 17:24:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -235,7 +235,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.19 2003/01/09 21:21:45 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.20 2003/01/27 17:24:43 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -334,23 +334,68 @@ end function
 ! !IROUTINE:  ESMF_SetName - set the name of this object
 !
 ! !INTERFACE:
-      subroutine ESMF_SetName(anytype, name, rc)
+      subroutine ESMF_SetName(anytype, name, namespace, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base) :: anytype                         ! any ESMF object/type
-      character (len = *), intent(in) :: name            ! object/type name
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base) :: anytype                 
+      character (len = *), intent(in), optional :: name   
+      character (len = *), intent(in), optional :: namespace
+      integer, intent(out), optional :: rc     
 
 !
 ! !DESCRIPTION:
-!     Associate a name with any type in the system.
+!     Associate a name with any object in the system.
+!
+!     \begin{description}
+!     \item [anytype]
+!           In the Fortran interface, this must in fact be a {\tt Base}
+!           derived type object.  It is expected that all specialized 
+!           derived types will include a {\tt Base} object as the first
+!           entry.
+!     \item [[name]]
+!           Object name.  An error will be returned if a duplicate name 
+!           is specified.  If a name is not given a unique name will be
+!           generated and can be queried by the {\tt ESMF_GetName} routine.
+!     \item [[namespace]]
+!           Object namespace (e.g. "Application", "Component", "Grid", etc).
+!           If given, the name will be checked that it is unique within
+!           this namespace.  If not given, the generated name will be 
+!           unique within this namespace.  If namespace is not specified,
+!           a default "global" namespace will be assumed and the same rules
+!           for names will be followed.
+!     \item [[rc]]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+! 
 
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
+      logical :: rcpresent=.FALSE.                ! Return code present   
+      character (len = ESMF_MAXSTR) :: defaultname  ! Name if not given
 
-      anytype%name = name
-      if (present(rc)) rc = ESMF_SUCCESS
+!     !Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     ! TODO: this code should generate a unique name if a name
+!     !   is not given.  If a namespace is given, the name has to
+!     !   be unique within that namespace.  Example namespaces could
+!     !   be: Applications, Components, Fields/Bundles, Grids.
+!      
+!     !Construct a default name if one is not given
+      if(.not. present(name)) then
+          defaultname = "default_name"
+          anytype%name = defaultname
+      else
+          anytype%name = name
+      endif
+
+      if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_SetName
 
