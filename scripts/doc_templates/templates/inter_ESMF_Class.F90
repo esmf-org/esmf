@@ -1,4 +1,4 @@
-! $Id: inter_ESMF_Class.F90,v 1.2 2003/01/09 16:31:49 nscollins Exp $
+! $Id: inter_ESMF_Class.F90,v 1.3 2003/01/10 15:15:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: inter_ESMF_Class.F90,v 1.2 2003/01/09 16:31:49 nscollins Exp $'
+      '$Id: inter_ESMF_Class.F90,v 1.3 2003/01/10 15:15:01 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -166,23 +166,23 @@ end interface
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
-!       Initialize the contents to null.
-        class%this = 0
+!       ! Initialize the contents to Null in case of failure
+        class%this = ESMF_NULL_POINTER
 
-!       Initialize return code; assume failure until success is certain
+!       ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
-!       Routine which interfaces to the C++ creation routine.
+!       ! Routine which interfaces to the C++ creation routine.
         call c_ESMC_<Class>Create(class, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "<Class> construction error"
           return
         endif
 
-!       set return values
+!       ! Set return values
         ESMF_<Class>CreateNew = class 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -222,8 +222,8 @@ end interface
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
-!       ! Initialize pointer
-        class%this = 0
+!       ! Initialize the contents to Null in case of failure
+        class%this = ESMF_NULL_POINTER
 
 !       ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -238,7 +238,7 @@ end interface
           return
         endif
 
-!       set return values
+!       ! Set return values
         ESMF_<Class>CreateNoData = class
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -275,20 +275,20 @@ end interface
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
-!       initialize return code; assume failure until success is certain
+!       ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
-!       call Destroy to release resources on the C++ side
+!       ! Call Destroy to release resources on the C++ side
         call c_ESMC_<Class>Destroy(<class>, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "<Class> contents destruction error"
           return
         endif
 
-!       set return code if user specified it
+!       ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_<Class>Destroy
@@ -511,7 +511,7 @@ end interface
          return
        endif
 
-!      set return values
+!      ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
 
        end subroutine ESMF_<Class>Print
