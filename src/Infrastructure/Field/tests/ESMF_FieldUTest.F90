@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.68 2004/08/28 14:17:04 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.69 2004/08/30 16:33:27 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.68 2004/08/28 14:17:04 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.69 2004/08/30 16:33:27 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -379,6 +379,9 @@
       !EX_UTest
       f2 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                           name="rh", rc=rc)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -398,6 +401,7 @@
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! Verifing the ESMF_FieldSetDataMap
       !  setting a different datamap in an existing field which already has
       !  data is not implemented yet (it is interpreted as a request to 
@@ -410,6 +414,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldDestroy(f1)
       !------------------------------------------------------------------------
+
       !EX_UTest
       ! Verifing that destroying a Grid in a Field is not allowed
        call ESMF_GridDestroy(grid, rc=rc)
@@ -529,6 +534,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+      !EX_UTest
       ! Bug 986852 opened
       ! Verify the pointers are equal
       call ESMF_FieldGetDataPointer(f2, f90ptr4, rc=rc)
