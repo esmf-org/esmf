@@ -1,4 +1,4 @@
-% $Id: CommMem_background.tex,v 1.4 2002/07/18 03:17:44 cnh Exp $
+% $Id: CommMem_background.tex,v 1.5 2002/07/23 18:27:41 vbalaji Exp $
 
 \section{Background}
 
@@ -12,20 +12,18 @@ Two particular areas are addressed by {\bf \shortname}
 
 \paragraph {\bf Basic communication primitives} These are the building blocks for 
 both the data communication between and within components and for any
-control messages that components may need to exchange. Within {\bf \shortname}
-these can bind to different system level libraries
-(for example MPI, IPC, mmap, shmem etc..) and include built-in,
-low-overhead self-profiling capabilities.
-Isolating the basic communication functions of ESMF
-abstracts the communication primitives to allow highly optimized code,
-targeted to specific platforms and to specific framework functions,
-to be easily inserted into ESMF. The {\bf \shortname}
-layer allows specialized forms of performance critical
-primitives to be employed without impacting application
-code or upper layers of ESMF code.
-Channeling communication and ESMF memory allocation through a single
-layer with built-in monitoring
-is also designed to support detailed, application-level monitoring and
+control messages that components may need to exchange. Within {\bf
+  \shortname} these can bind to different system level libraries (for
+example MPI, IPC, mmap, shmem etc..) and include built-in,
+low-overhead self-profiling capabilities.  Isolating the basic
+communication functions of ESMF abstracts the communication primitives
+to allow highly optimized code, targeted to specific platforms and to
+specific framework functions, to be easily inserted into ESMF. The
+{\bf \shortname} layer allows specialized forms of performance
+critical primitives to be employed without impacting application code
+or upper layers of ESMF code.  Channeling communication and ESMF
+memory allocation through a single layer with built-in monitoring is
+also designed to support detailed, application-level monitoring and
 provide for partially or fully automated tuning.
 
 
@@ -41,22 +39,23 @@ capabilities.
 
 The {\bf CMK} set of services is part of the ESMF infrastructure-utilities 
 layer. Many ESMF higher level facilities will use {\bf \shortname} facilities.
-The {\bf \shortname} services will not be directly called from user-level
+The {\bf \shortname} services should rarely be directly called from user-level
 component code.
 
 
 \subsection{Scope}
 
 The {\bf CMK} services will be limited to potentially performance
-critical functions within ESMF and are intended to be used by internal ESMF
-code. In the case of communication this includes messaging associated with the 
-ESMF {\bf Distributed Grid} {\it Halo} and {\it Transpose} 
-operations. In the case of memory resources this includes providing 
-memory for ESMF {\bf Infrastructure - Fields and Grids} {\it field}, {\it field
-bundle}, {\it physical grid} and {\it distributed grid} data structures and objects.
-The {\bf \shortname} facility is not concerned with ESMF {\it partition}
-based parallelism as this does not involve any communication between
-components or among data domains.
+critical functions within ESMF and are intended to be used by internal
+ESMF code. In the case of communication this includes messaging
+associated with the ESMF {\bf Distributed Grid} {\it Halo} and {\it
+  Transpose} operations. In the case of memory resources this includes
+providing memory for ESMF {\bf Infrastructure - Fields and Grids} {\it
+  field}, {\it field bundle}, {\it physical grid} and {\it distributed
+  grid} data structures and objects.  The {\bf \shortname} facility is
+not concerned with ESMF {\it partition} based parallelism as this does
+not involve any communication between components or among data
+domains.
 
 
 \subsection{Related Material}
