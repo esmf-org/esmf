@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.39 2003/04/14 14:51:34 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.40 2003/04/17 20:40:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -147,6 +147,7 @@
     public ESMF_DistGridLocalToGlobalIndex
     public ESMF_DistGridGlobalToLocalIndex
     public ESMF_DistGridHalo
+    public ESMF_DistGridAllGather
     public ESMF_DistGridValidate
     public ESMF_DistGridPrint
  
@@ -155,7 +156,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.39 2003/04/14 14:51:34 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.40 2003/04/17 20:40:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1694,6 +1695,97 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridHalo
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridAllGather - Create N copies of the full Array
+
+! !INTERFACE:
+      subroutine ESMF_DistGridAllGather(distgrid, srcarray, dstarray, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType), intent(in) :: distgrid
+      type(ESMF_Array), intent(inout) :: srcarray
+      type(ESMF_Array), intent(out) :: dstarray
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     AllGather an array.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be used.
+!     \item[{[srcarray]}]
+!          ESMF\_Array to be allgathered.
+!     \item[{[dstarray]}]
+!          ESMF\_Array containing collected data.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  XXXn.n, YYYn.n
+
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
+      integer :: rank, i, j
+      integer, dimension(:), allocatable :: decompids
+      type(ESMF_AxisIndex), dimension(:), allocatable :: AI_exc, AI_tot, AI_array
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Get Array rank to determine size of some local arrays
+      call ESMF_ArrayGet(srcarray, rank=rank, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridAllGather: array get"
+        return
+      endif
+
+!     Allocate local axis index arrays
+      allocate(decompids(rank))
+      allocate(AI_exc(rank))
+      allocate(AI_tot(rank))
+      allocate(AI_array(rank))
+
+!     Get array axis indices
+      call ESMF_ArrayGetAxisIndex(srcarray, AI_array, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridAllGather: array get"
+        return
+      endif
+
+!     Set decompids and local axis indices based on mapping of Array to Grid
+      do i = 1,rank
+        decompids(i) = 0
+        AI_exc(i) = AI_array(i)
+        AI_tot(i) = AI_array(i)
+        do j = 1,ESMF_MAXGRIDDIM
+          if (AI_array(i)%decomp .eq. j) then
+            decompids(i) = j
+            AI_exc(i) = distgrid%MyDE%lcellexc_index(j)
+            AI_tot(i) = distgrid%MyDE%lcelltot_index(j)
+          endif
+        enddo
+      enddo
+
+!     Call Array method with DistGrid AxisIndices
+      call ESMF_ArrayAllGather(srcarray, distgrid%layout, decompids, &
+                                   AI_exc, AI_tot, dstarray, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridAllGather: ArrayAllGather failed"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridAllGather
 
 !------------------------------------------------------------------------------
 !BOP
