@@ -87,10 +87,12 @@ examples:	 Contains examples executables and output.
 System Information
 ------------------
 
-The following platforms are fully supported: Alpha, IRIX64 32-bit and 64-bit
-addressing, IBM 32-bit and 64-bit addressing, and Linux with any of the
-following compilers: Intel 32-bit and 64-bit addressing, NAG, Absoft, Lahey,
-and PGI.  ESMF is built and debugged on other platforms on a regular basis.
+The following platforms are fully supported: Alpha; Altix with the following
+compiler - Intel 64-bit addressing; Cray X1; Darwin (Mac OSX) with the following
+compilers - Absoft and XLF; IBM 32-bit and 64-bit addressing; IRIX64 32-bit and
+64-bit addressing; and Linux with any of the following compilers - Intel 32-bit
+and 64-bit addressing, Absoft, Lahey, NAG, and PGI.  ESMF is built and
+debugged on other platforms on a regular basis.
 Check the build_config directory for more information.
 
 
@@ -100,9 +102,10 @@ Environment Variables
 The only environment variable which must be set on all platforms 
 is ESMF_DIR, which should be set to the path of the top level ESMF directory.
 The ESMF_COMPILER environment variable must be set only on 
-Linux platforms. The possible values are: absoft, intel, lahey, pgi or nag. 
+Linux or Darwin platforms. The possible values on Linux are: absoft, intel,
+lahey, nag, or pgi.  On Darwin the options are: absoft or xlf. 
 The ESMF_COMM environment variable can be set on Linux platforms to
-specify which communications library to use (mpich, lam, or mpiuni).
+specify which communications library to use (lam, mpi, mpich, or mpiuni).
 
 There are several other environment variables which can be set to 
 customize the ESMF make process.  The README file in the directory 
@@ -219,4 +222,4 @@ documentation build procedures outlined above.
 Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
- $Id: README,v 1.53.2.3 2005/03/02 17:49:51 nscollins Exp $
+ $Id: README,v 1.53.2.4 2005/03/10 23:34:33 jwolfe Exp $
