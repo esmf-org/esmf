@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm.C,v 1.17 2004/06/23 16:33:22 nscollins Exp $
+// $Id: ESMC_ArrayComm.C,v 1.18 2004/09/21 18:03:16 jwolfe Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.17 2004/06/23 16:33:22 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.18 2004/09/21 18:03:16 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -344,6 +344,7 @@ static int ESMC_newDELayoutGatherArray(
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
+      int local_axislengths[],   // in
       int global_dimlengths[],   // in  - array of global dimensions
       int local_maxlength[],     // in  - array of maximum counts on any DE per dim
       int deid,                  // in  - the DE to collect the data on
@@ -381,24 +382,19 @@ static int ESMC_newDELayoutGatherArray(
         gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
 
         // call something which will do a receive
-        ESMC_newDELayoutGatherArray(delayout, deid, this->base_addr, global_dimlengths, 
-                                              decompids, size_decomp, 
-                                              // FIXME: localAxisCounts should be an arg
-                                              NULL, local_maxlength,
-                                              //localAxisCounts, local_maxlength,
-                                              ai_comp, ai_total, 
-                                              this->kind, gathered->base_addr);
+        ESMC_newDELayoutGatherArray(delayout, deid, this->base_addr,
+                                    global_dimlengths, decompids, size_decomp, 
+                                    local_axislengths, local_maxlength,
+                                    ai_comp, ai_total, 
+                                    this->kind, gathered->base_addr);
         //gathered->ESMC_ArrayPrint();
     } else {
       //printf("arraygather: I am not root\n");
         // call something which will do a send
-       ESMC_newDELayoutGatherArray(delayout, deid, this->base_addr, global_dimlengths, 
-                                             decompids, size_decomp, 
-                                             // FIXME: localAxisCounts should be an arg
-                                             NULL, local_maxlength,
-                                             //localAxisCounts, local_maxlength,
-                                             ai_comp, ai_total, 
-                                             this->kind, NULL);
+       ESMC_newDELayoutGatherArray(delayout, deid, this->base_addr,
+                                   global_dimlengths, decompids, size_decomp, 
+                                   local_axislengths, local_maxlength,
+                                   ai_comp, ai_total, this->kind, NULL);
     }
 
     if (thisde == deid)
