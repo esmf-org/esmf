@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.13 2003/05/02 01:03:02 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.14 2003/05/02 22:07:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -85,6 +85,9 @@ enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                         ESMC_CAL_GENERIC,     // user defined
                         ESMC_CAL_NOCALENDAR}; // track base time seconds
                                               //   only
+                        // Note: add new calendars between ESMC_CAL_GREGORIAN
+                        // and ESMC_CAL_NOCALENDAR so Validate() doesn't need
+                        // to change
 
 // !PUBLIC TYPES:
  class ESMC_Calendar;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.21 2003/05/02 01:01:07 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.22 2003/05/02 22:07:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -161,7 +161,7 @@
                        ESMC_Calendar *cal, int *timeZone) const;
 
     // internal validation
-    int ESMC_TimeValidate(const char *options=0) const;
+    int ESMC_TimeValidate(const char *options=0) const;  // (TMG 7.1.1)
 
     // for testing/debugging
     int ESMC_TimePrint(const char *options=0) const;
