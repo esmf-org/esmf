@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.81 2004/06/15 22:52:31 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.82 2004/06/16 16:42:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.81 2004/06/15 22:52:31 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.82 2004/06/16 16:42:58 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1815,7 +1815,7 @@
                                        decompIds, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridClass) :: grid
+      type(ESMF_GridClass), target :: grid
       type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
@@ -1867,7 +1867,7 @@
       real(ESMF_KIND_R8), dimension(:), allocatable :: min, max
       real(ESMF_KIND_R8), dimension(:), pointer :: coord1, coord2, coord3
       type(ESMF_Logical):: otoFlag, lrFlag
-      type(ESMF_Logical), dimension(:), allocatable :: periodic
+      type(ESMF_Logical), dimension(:), pointer :: periodic
       type(ESMF_LocalArray), dimension(:), pointer :: coords
       type(ESMF_RelLoc) :: relloc
 
@@ -1886,8 +1886,7 @@
                     min(dimCount), &
                     max(dimCount), &
                dimNames(dimCount), &
-               dimUnits(dimCount), &
-               periodic(dimCount), stat=localrc)
+               dimUnits(dimCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimCount arrays", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -1900,10 +1899,10 @@
         counts(i)   = grid%gridSpecific%logRectGrid%countPerDim(i)
         min(i)      = grid%minGlobalCoordPerDim(i)
         max(i)      = grid%maxGlobalCoordPerDim(i)
-        periodic(i) = grid%periodic(i)
         dimNames(i) = grid%dimNames(i)
         dimUnits(i) = grid%dimUnits(i)
       enddo
+      periodic => grid%periodic
 
       if (grid%horzGridType.eq.ESMF_GRID_TYPE_LATLON_UNI .OR. &
           grid%horzGridType.eq.ESMF_GRID_TYPE_XY_UNI) then ! uniform
@@ -2448,17 +2447,34 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Clean up
-      deallocate(               counts, &
-                                   min, &
-                                   max, &
-                              dimNames, &
-                              dimUnits, &
-                              periodic, &
-                          decompIdsUse, &
-                 countsPerDEDecomp1Use, &
-                 countsPerDEDecomp2Use, &
-                          countsPerDE1, &
-                          countsPerDE2, stat=localrc)
+      deallocate(               counts, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(                   min, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(                   max, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(              dimNames, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(              dimUnits, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(          decompIdsUse, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate( countsPerDEDecomp1Use, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate( countsPerDEDecomp2Use, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(          countsPerDE1, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(          countsPerDE2, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
                                      ESMF_CONTEXT, rc)) return
       if (associated(coord1)) then
@@ -3875,9 +3891,9 @@
 
       if (present(vertRelLoc)) then
         if (gridRank.le.2) then
-          dummy = ESMF_LogWrite("vertical relloc defined on a 2D grid", &
-                                ESMF_LOG_WARNING, &
-                                ESMF_CONTEXT)
+          !dummy = ESMF_LogWrite("vertical relloc defined on a 2D grid", &
+          !                      ESMF_LOG_WARNING, &
+          !                      ESMF_CONTEXT)
         else
           if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
             call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
