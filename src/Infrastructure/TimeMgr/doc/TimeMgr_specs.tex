@@ -26,10 +26,14 @@ Unit & Meaning \\
 \hline
 {\bf O} & Time zone offset in integer number of hours and minutes. \\
 \hline
-{\bf <unit>N} & Numerator where times are of the form {\bf $ {\rm <unit>} + 
-\frac{<unit>N}{<unit>D}$}, where $<unit>$s are integers. For example, 
+{\bf <unit>N} & Numerator for times of the form <unit> {\bf $ + 
+\frac{{\rm <unit>}N}{{\rm <unit>}D}$}, where <unit>s are integers. For example, 
 {\bf s\_i4N} is an integer second numerator.  This format provides 
-a mechanism for supporting exact behavior.
+a mechanism for supporting exact behavior. \\
+\hline
+{\bf <unit>D} & Denominator for times of the form <unit> {\bf $ + 
+\frac{{\rm <unit>}N}{{\rm <unit>}D}$}, where <unit>s are integers. For example, 
+{\bf s\_i4D} is an integer second numerator.
 \\
 \hline
 \end{tabular}
