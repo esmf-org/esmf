@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform.h,v 1.1 2003/10/22 21:00:54 cdeluca Exp $
+// $Id: ESMC_Xform.h,v 1.2 2004/02/11 23:20:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@
 //
 
   public:
-    int ESMC_XformInit(char *name, void *funcp);
+    int ESMC_XformInit(char *name, void (*funcp)(void));
 
  // optional configuration methods
     int ESMC_XformGetConfig(ESMC_XformConfig *config) const;

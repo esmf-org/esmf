@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.2 2003/10/25 12:37:37 cdeluca Exp $
+// $Id: ESMC_State.h,v 1.3 2004/02/11 23:18:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,6 +45,7 @@
 #include "ESMC_Array.h"
 #include "ESMC_Field.h"
 #include "ESMC_Bundle.h"
+#include "ESMC_Xform.h"
 
 
 // !PUBLIC TYPES:
@@ -81,6 +82,8 @@ typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 };
     //int ESMC_StateGet<Value>(<value type> *value) const;
     //int ESMC_StateSet<Value>(<value type>  value);
     
+    int ESMC_StateTransform(ESMC_Xform *list);
+
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_StatePrint(const char *options) const;
 
