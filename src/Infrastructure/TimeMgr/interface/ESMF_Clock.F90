@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.54 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_Clock.F90,v 1.55 2004/06/09 22:04:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.54 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_Clock.F90,v 1.55 2004/06/09 22:04:44 eschwab Exp $'
 
 !==============================================================================
 !
@@ -600,13 +600,6 @@
 !            {\tt ESMF\_ALARMLIST\_ALL} :
 !                Returns the {\tt ESMF\_Clock}'s entire list of alarms.
 !
-!            {\tt ESMF\_ALARMLIST\_RINGING} :
-!                Returns only those {\tt clock} alarms that are currently
-!                ringing.  See also method {\tt ESMF\_ClockAdvance()} for
-!                getting the list of ringing alarms subsequent to a time step.
-!                See also method {\tt ESMF\_AlarmIsRinging()} for checking a
-!                single alarm.
-!
 !            {\tt ESMF\_ALARMLIST\_NEXTRINGING} :
 !                Return only those alarms that will ring upon the next
 !                {\tt clock} time step.  Can optionally specify argument
@@ -618,6 +611,13 @@
 !                Return only those alarms that were ringing on the previous
 !                {\tt ESMF\_Clock} time step.  See also method
 !                {\tt ESMF\_AlarmWasPrevRinging()} for checking a single alarm.
+!
+!            {\tt ESMF\_ALARMLIST\_RINGING} :
+!                Returns only those {\tt clock} alarms that are currently
+!                ringing.  See also method {\tt ESMF\_ClockAdvance()} for
+!                getting the list of ringing alarms subsequent to a time step.
+!                See also method {\tt ESMF\_AlarmIsRinging()} for checking a
+!                single alarm.
 !     \item[alarmList]
 !          The array of returned alarms. 
 !     \item[alarmCount]
