@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.18 2003/07/11 01:00:00 eschwab Exp $
+// $Id: ESMC_DELayout.h,v 1.19 2003/07/18 01:51:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,6 +43,7 @@
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+ #include <ESMC_LocalArray.h>
  #include <ESMC_PE.h>  
  #include <ESMC_PEList.h>  
  #include <ESMC_DE.h>  
@@ -161,8 +162,8 @@ typedef int ESMC_CommType;
   //       Or remove comm from DELayout (standalone) and remove these
   //       entry points from DELayout?
 
-    int ESMC_DELayoutScatter(void *sndArray, void *rcvArray, int len, 
-                             ESMC_Datatype type, int rootDEid); 
+    int ESMC_DELayoutScatter(ESMC_LocalArray *sndArray,
+                             ESMC_LocalArray *rcvArray, int len, int srcDEid); 
     int ESMC_DELayoutAllGatherVI(int *sndArray, int  sndLen, 
 				 int *rcvArray, int *rcvLen, int *rcvDispls);
     int ESMC_DELayoutAllGatherVF(float *sndArray, int  sndLen, 
@@ -170,9 +171,9 @@ typedef int ESMC_CommType;
     int ESMC_DELayoutAllReduce(int *dataArray, int *result, int arrayLen,
 			       ESMC_Op op);
     int ESMC_DELayoutSendRecv(void *sbuf, void *rbuf, int snum, int rnum, 
-			      int sde_index, int rde_index, ESMC_Datatype type);
+			      int sde_index, int rde_index, ESMC_DataKind type);
     int ESMC_DELayoutBcast(void *buf, int num, int rootde_index, 
-			   ESMC_Datatype type);
+			   ESMC_DataKind type);
   
 // !PRIVATE MEMBER FUNCTIONS:
 //

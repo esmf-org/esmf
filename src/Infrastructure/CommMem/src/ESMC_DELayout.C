@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.34 2003/07/11 01:00:00 eschwab Exp $
+// $Id: ESMC_DELayout.C,v 1.35 2003/07/18 01:51:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.34 2003/07/11 01:00:00 eschwab Exp $";
+           "$Id: ESMC_DELayout.C,v 1.35 2003/07/18 01:51:26 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1013,7 +1013,7 @@ static int verbose = 1;
   }
 
   // share/gather all PE IDs from all DEs
-  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMC_INT);
+  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMF_KIND_I4);
   //cout << "DELayoutCreate(): exited ESMC_CommAllGather" << endl;
 
   // create PE List from gathered IDs
@@ -1932,7 +1932,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
           }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, ESMC_INT);
+                                   displs, ESMF_KIND_I4);
         }
         delete [] recvcounts;
         delete [] displs;
@@ -1991,7 +1991,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
             }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, ESMC_INT);
+                                   displs, ESMF_KIND_I4);
           }
         }
         delete [] recvcounts;
@@ -2110,7 +2110,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
           }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, ESMC_FLOAT);
+                                   displs, ESMF_KIND_R4);
         }
         delete [] recvcounts;
         delete [] displs;
@@ -2169,7 +2169,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
             }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, ESMC_FLOAT);
+                                   displs, ESMF_KIND_R4);
           }
         }
         delete [] recvcounts;
@@ -2208,7 +2208,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int rnum,                 // in  - receive array length
       int sde_index,            // in  - send de index
       int rde_index,            // in  - receive de index
-      ESMC_Datatype type) {     // in  - datatype of buffers
+      ESMC_DataKind type) {     // in  - datatype of buffers
 
 //
 // !DESCRIPTION:
@@ -2221,7 +2221,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   MPI_Datatype mpidatatype;
   MPI_Status status;
 
-  mpidatatype = comm.ESMC_DatatypeToMPI[type];
+  mpidatatype = comm.ESMC_DataKindToMPI[type];
 
   // If we're both sending and receiving from our own process,
   // then do a straight memory copy and don't call message passing.
@@ -2270,7 +2270,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       void *buf,                // in  - buffer     
       int num,                  // in  - buffer length
       int rootde_index,         // in  - index of root de
-      ESMC_Datatype type) {     // in  - data type of buffer
+      ESMC_DataKind type) {     // in  - data type of buffer
 
 //
 // !DESCRIPTION:
@@ -2283,7 +2283,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   MPI_Datatype mpidatatype;
   MPI_Status status;
 
-  mpidatatype = comm.ESMC_DatatypeToMPI[type];
+  mpidatatype = comm.ESMC_DataKindToMPI[type];
 
   if (MPI_Bcast(buf, num, mpidatatype, rootde_index, 
                 decomm.mpicomm) == MPI_SUCCESS) {
@@ -2444,7 +2444,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutScatter - Perform MPI-like scatter of data array from one DE to all others in layout
+// !IROUTINE:  ESMC_DELayoutScatter - Perform MPI-like scatter of local array from one DE to all others in layout
 //
 // !INTERFACE:
       int ESMC_DELayout::ESMC_DELayoutScatter(
@@ -2453,14 +2453,13 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    int error return code
 //
 // !ARGUMENTS:
-      void *sndArray,      // in  - send data array
-      void *rcvArray,      // out - received data array
-      int len,             // in  - data array chunk size
-      ESMC_Datatype type,  // in - array data type
-      int rootDEid) {      // in  - root DE performing the scatter
+      ESMC_LocalArray *sndArray,  // in  - send data array
+      ESMC_LocalArray *rcvArray,  // out - received data array
+      int len,                    // in  - data array chunk size
+      int srcDEid) {              // in  - root DE performing the scatter
 //
 // !DESCRIPTION:
-//    Perform MPI-like scatter of a data array from one DE to all others
+//    Perform MPI-like scatter of a local array from one DE to all others
 //    in the layout.
 //
 //EOP
@@ -2469,12 +2468,27 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   // TODO: make comm public and invoke directly rather than at DELayout level ?
   //       (does not depend on any DELayout knowledge)
 
-  ESMC_DE *rootDE;
+  void *sArray, *rArray;
+  ESMC_DataKind type;
+  ESMC_DE *srcDE;
   int rc;
 
+  if (sndArray == ESMC_NULL_POINTER || rcvArray == ESMC_NULL_POINTER) {
+    return(ESMF_FAILURE);
+  }
+
+  // get DE identified by srcDEid
+  rc = ESMC_DELayoutGetDE(srcDEid, &srcDE);
+
+  // get local array types
+  type = sndArray->ESMC_LocalArrayGetKind();
+
+  // get local array base addresses
+  sndArray->ESMC_LocalArrayGetBaseAddr(&sArray);
+  rcvArray->ESMC_LocalArrayGetBaseAddr(&rArray);
+
   // perform scatter operation across all DEs in the layout
-  rc = ESMC_DELayoutGetDE(rootDEid, &rootDE);
-  rc = comm.ESMC_CommScatter(sndArray, rcvArray, len, type, rootDE);
+  rc = comm.ESMC_CommScatter(sArray, rArray, len, type, srcDE);
   if (rc != ESMF_SUCCESS) {
     cout << "ESMC_DELayoutScatter() error" << endl;
   }
@@ -2513,7 +2527,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   // perform Allgatherv operation across all DEs in the layout
   int rc;
   rc = comm.ESMC_CommAllGatherV(sndArray, sndLen, rcvArray, rcvLen, rcvDispls,
-                                ESMC_INT);
+                                ESMF_KIND_I4);
   if (rc != ESMF_SUCCESS) {
     cout << "ESMC_DELayoutAllGatherVI() error" << endl;
   }
@@ -2552,7 +2566,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   // perform Allgatherv operation across all DEs in the layout
   int rc;
   rc = comm.ESMC_CommAllGatherV(sndArray, sndLen, rcvArray, rcvLen, rcvDispls,
-                                ESMC_FLOAT);
+                                ESMF_KIND_R4);
   if (rc != ESMF_SUCCESS) {
     cout << "ESMC_DELayoutAllGatherVF() error" << endl;
   }
@@ -2605,7 +2619,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   // perform reduction operation across all DEs in the layout
   int rc;
-  rc = comm.ESMC_CommAllReduce(&localResult, result, 1, ESMC_INT, op);
+  rc = comm.ESMC_CommAllReduce(&localResult, result, 1, ESMF_KIND_I4, op);
   if (rc != ESMF_SUCCESS) {
     cout << "ESMC_DELayoutAllReduce(1D) error" << endl;
   }

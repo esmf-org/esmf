@@ -1,4 +1,4 @@
-
+// $Id: ESMC_DELayout_F.C,v 1.21 2003/07/18 01:52:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -140,11 +140,11 @@ extern "C" {
        }
 
        void FTN(c_esmc_delayoutscatter)(ESMC_DELayout **ptr,
-                                 void *sndarray, void *rcvarray, int *len,
-                                 ESMC_Datatype *type, int *rootdeid,
-                                 int *status) {
+                                 ESMC_LocalArray *sndarray,
+                                 ESMC_LocalArray *rcvarray, int *len,
+                                 int *srcdeid, int *status) {
            *status = (*ptr)->ESMC_DELayoutScatter(sndarray, rcvarray, *len,
-                                                  *type, *rootdeid);
+                                                  *srcdeid);
        }
 
        void FTN(c_esmc_delayoutallreduce)(ESMC_DELayout **ptr, int *array,
@@ -155,13 +155,13 @@ extern "C" {
 
        void FTN(c_esmc_delayoutsendrecv)(ESMC_DELayout **ptr, void *sbuf,
                                  void *rbuf, int *snum, int *rnum, int *sde_index, 
-				 int *rde_index, ESMC_Datatype *type, int *status) {
+				 int *rde_index, ESMC_DataKind *type, int *status) {
            *status = (*ptr)->ESMC_DELayoutSendRecv(sbuf, rbuf, *snum, *rnum, 
                                  *sde_index, *rde_index, *type);
        }
 
        void FTN(c_esmc_delayoutbcast)(ESMC_DELayout **ptr, void *buf, int *num, 
-                                 int *rootde_index, ESMC_Datatype *type, int *status) {
+                                 int *rootde_index, ESMC_DataKind *type, int *status) {
            *status = (*ptr)->ESMC_DELayoutBcast(buf, *num, *rootde_index, *type);
        }
 
@@ -181,12 +181,3 @@ extern "C" {
                                                     rcvarray,  rlen, rcvdispls);
        }
 };
-
-
-
-
-
-
-
-
-
