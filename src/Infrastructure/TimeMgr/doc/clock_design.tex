@@ -1,0 +1,12 @@
+% $Id: clock_design.tex,v 1.1 2002/08/18 22:43:36 eschwab Exp $
+
+The Clock class contains TimeInstants and a TimeInterval to track and time
+step model time.  For tracking, TimeInstants are instantiated for the
+current time, stop time, start time, reference time, and previous time. For
+time stepping, a single TimeInterval is instantiated.  There is also an
+integer counter for keeping track of the number of timesteps, and an array
+of associated alarms.  Methods are defined for advancing the clock (perform
+a time step), checking if the stop time is reached, synchronizing with a
+real-time clock, and getting values of the class attributes defined above.
+After performing the time step, the advance method will iterate over the
+alarm list and return a list of any active alarms.

@@ -1,0 +1,319 @@
+% $Id: TimeMgr_desdoc.tex,v 1.1 2002/08/18 22:43:36 eschwab Exp $
+
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+
+\begin{document}
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+\begin{titlepage}
+
+\begin{center}
+{\Large Earth System Modeling Framework } \\
+\vspace{.25in}
+{\Large {\bf Time Manager Design}} \\
+\vspace{.25in}
+{\large {\it Earl Schwab}} \\
+\vspace{.25in}
+{August 16, 2002}
+\vspace{.5in}
+\end{center}
+
+\begin{latexonly}
+\vspace{5.5in}
+\begin{tabular}{p{5in}p{.9in}}
+\hrulefill \\
+\noindent {\bf NASA Earth Science Technology Office} \\
+\noindent Computational Technologies Project \\
+\noindent CAN 00-OES-01 \\
+\noindent http://www.esmf.ucar.edu \\
+\end{tabular}
+\end{latexonly}
+
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+\section{Synopsis}
+\input{TimeMgr_syn}
+
+\section{Object Model}
+\input{TimeMgr_obj1}
+\input{TimeMgr_obj2}
+\input{TimeMgr_obj3}
+\input{TimeMgr_obj4}
+\input{TimeMgr_obj5}
+
+\section{Global Parameters and Definitions}
+\input{TimeMgr_param}
+
+% ----------
+% Time Class
+% ----------
+
+\section{Time Class Design}
+
+\subsection{Description}
+\input{time_desc}
+
+\subsection{Design}
+\input{time_design}
+
+\subsubsection{Class Definition}
+\input{time_def}
+
+\subsubsection{Restrictions}
+\input{time_rest}
+
+\section{Time Class F90 Interface}
+
+\subsection{Use and Examples}
+\input{time_fex}
+
+\subsection{Parameters and Definitions}
+%\input{time_fparam}
+
+%\subsection{Class API}
+\input{time_fapi}
+
+\section{Time Class C++ Interface}
+
+\subsection{Use and Examples}
+\input{time_ccex}
+
+\subsection{Parameters and Definitions}
+%\input{time_ccparam}
+
+%\subsection{Class API}
+\input{time_ccapi}
+
+% -------------------
+% Time Interval Class
+% -------------------
+
+\section{Time Interval Class Design}
+
+\subsection{Description}
+\input{time_interval_desc}
+
+\subsection{Design}
+\input{time_interval_design}
+
+\subsubsection{Class Definition}
+\input{time_interval_def}
+
+\subsubsection{Restrictions}
+%\input{time_interval_rest}
+
+\section{Time Interval Class F90 Interface}
+
+\subsection{Use and Examples}
+\input{time_interval_fex}
+
+\subsection{Parameters and Definitions}
+%\input{time_interval_fparam}
+
+%\subsection{Class API}
+\input{time_interval_fapi}
+
+\section{Time Interval Class C++ Interface}
+
+\subsection{Use and Examples}
+%\input{time_interval_ccex}
+
+\subsection{Parameters and Definitions}
+%\input{time_interval_ccparam}
+
+%\subsection{Class API}
+\input{time_interval_ccapi}
+
+% ------------------
+% Time Instant Class
+% ------------------
+
+\section{Time Instant Class Design}
+
+\subsection{Description}
+\input{time_instant_desc}
+
+\subsection{Design}
+\input{time_instant_design}
+
+\subsubsection{Class Definition}
+\input{time_instant_def}
+
+\subsubsection{Restrictions}
+%\input{time_instant_rest}
+
+\section{Time Instant Class F90 Interface}
+
+\subsection{Use and Examples}
+\input{time_instant_fex}
+
+\subsection{Parameters and Definitions}
+%\input{time_instant_fparam}
+
+%\subsection{Class API}
+\input{time_instant_fapi}
+
+\section{Time Instant Class C++ Interface}
+
+\subsection{Use and Examples}
+%\input{time_instant_ccex}
+
+\subsection{Parameters and Definitions}
+%\input{time_instant_ccparam}
+
+%\subsection{Class API}
+\input{time_instant_ccapi}
+
+% --------------
+% Calendar Class
+% --------------
+
+\section{Calendar Class Design}
+
+\subsection{Description}
+\input{calendar_desc}
+
+\subsection{Design}
+\input{calendar_design}
+
+\subsubsection{Class Definition}
+\input{calendar_def}
+
+\subsubsection{Restrictions}
+\input{calendar_rest}
+
+\section{Calendar Class F90 Interface}
+
+\subsection{Use and Examples}
+\input{calendar_fex}
+
+\subsection{Parameters and Definitions}
+\input{calendar_fparam}
+
+%\subsection{Class API}
+\input{calendar_fapi}
+
+\section{Calendar Class C++ Interface}
+
+\subsection{Use and Examples}
+%\input{calendar_ccex}
+
+\subsection{Parameters and Definitions}
+\input{calendar_ccparam}
+
+%\subsection{Class API}
+\input{calendar_ccapi}
+
+% -----------
+% Clock Class
+% -----------
+
+\section{Clock Class Design}
+
+\subsection{Description}
+\input{clock_desc}
+
+\subsection{Design}
+\input{clock_design}
+
+\subsubsection{Class Definition}
+\input{clock_def}
+
+\subsubsection{Restrictions}
+\input{clock_rest}
+
+\section{Clock Class F90 Interface}
+
+\subsection{Use and Examples}
+\input{clock_fex}
+
+\subsection{Parameters and Definitions}
+\input{clock_fparam}
+
+%\subsection{Class API}
+\input{clock_fapi}
+
+\section{Clock Class C++ Interface}
+
+\subsection{Use and Examples}
+%\input{clock_ccex}
+
+\subsection{Parameters and Definitions}
+\input{clock_ccparam}
+
+%\subsection{Class API}
+\input{clock_ccapi}
+
+% -----------
+% Alarm Class
+% -----------
+
+\section{Alarm Class Design}
+
+\subsection{Description}
+\input{alarm_desc}
+
+\subsection{Design}
+\input{alarm_design}
+
+\subsubsection{Class Definition}
+\input{alarm_def}
+
+\subsubsection{Restrictions}
+%\input{alarm_rest}
+
+\section{Alarm Class F90 Interface}
+
+\subsection{Use and Examples}
+\input{alarm_fex}
+
+\subsection{Parameters and Definitions}
+%\input{alarm_fparam}
+
+%\subsection{Class API}
+\input{alarm_fapi}
+
+\section{Alarm C++ Interface}
+
+\subsection{Use and Examples}
+%\input{alarm_ccex}
+
+\subsection{Parameters and Definitions}
+%\input{alarm_ccparam}
+
+%\subsection{Class API}
+\input{alarm_ccapi}
+
+\section{Review Status}
+
+\noindent{\bf Design Review} \\
+
+\begin{tabular}{r p{1.3in} p{2in}}
+{\bf Review Date:} & <Date> \\ \\
+{\bf Reviewers:}   & Reviewer           & <Institution> \\
+                   & Reviewer           & <Institution> \\
+                   & Reviewer           & <Institution>
+\end{tabular}
+
+\section{Glossary}
+\input{TimeMgr_glos}
+
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+
+\end{document}

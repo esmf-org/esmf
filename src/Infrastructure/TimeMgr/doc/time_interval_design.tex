@@ -1,0 +1,12 @@
+% $Id: time_interval_design.tex,v 1.1 2002/08/18 22:43:37 eschwab Exp $
+
+TimeInterval inherits from the base class Time.  As such, it gains the core
+representation of time as well as its associated methods.   TimeInterval
+further specializes Time by adding shortcut methods to set and get a
+TimeInterval in natural way with appropriate unit combinations, as per the
+requirements.  The largest unit of time for a TimeInterval is a day, so a
+TimeInterval is independent of any calendar.  This is in contrast with a
+TimeInstant, which is calendar-dependent, since its largest units of time
+are months and years.  TimeInterval also defines methods for multiplication
+and division of TimeIntervals by integers, reals, fractions and other
+TimeIntervals.  TimeInterval does not add any new attributes to Time.

@@ -1,0 +1,11 @@
+% $Id: time_rest.tex,v 1.1 2002/08/18 22:43:37 eschwab Exp $
+
+The limits on range and resolution of time representation are based on the
+64-bit and 32-bit integer types used.  For seconds, a signed 64-bit integer
+will have a range of +/- 2\^63-1, or +/- 9223372036854775807.  This corresponds
+to a range of +/- (2\^63-1)/(86400 * 365.25) or +/- 292,271,023,045 years, or
+about 6 orders of magnitude greater than the required +/- 200,000 years!
+
+For fractional seconds, a signed 32-bit integer will handle a resolution of
++/- 2\^31-1, or +/- 2,147,483,647 parts of a second, which is about twice
+that of the required nanosecond resolution.
