@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/02/05 19:15:41 cdeluca Exp $ 
+# $Id: makefile,v 1.6 2004/02/10 17:09:22 svasquez Exp $ 
 
 all: alldoc
 
@@ -35,7 +35,7 @@ HTMLFILES =     $(ESMC_DOCDIR)/AppDriver_refdoc
 ##TEXFILES_TO_MAKE  = $(addsuffix SeqPrF_ccapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_cdriver_spmd/*.C))))
 ##TEXFILES_TO_MAKE += $(addsuffix SeqPrF_chapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_cdriver_spmd/*.h))))
 ##TEXFILES_TO_MAKE += $(addsuffix SeqPrF_fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.F))))
-TEXFILES_TO_MAKE += $(addsuffix SeqPrF_fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.F90))))
+TEXFILES_TO_MAKE = $(addsuffix SeqPrF_fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.F90))))
 ##TEXFILES_TO_MAKE += $(addsuffix SeqPrF_fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.f))))
 ##TEXFILES_TO_MAKE += $(addsuffix SeqPrF_fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.f90))))
 
