@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.3 2003/03/17 18:07:25 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.4 2003/03/18 01:40:45 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_FieldTest
+      program ESMF_FieldUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.3 2003/03/17 18:07:25 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.4 2003/03/18 01:40:45 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,10 +58,11 @@
       integer :: x, y
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
+      type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr1
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
-      character (len = 20) :: fname, fname1, fname2
+      character (len = 20) :: fname, fname1, fname2, gname3
       type(ESMF_IOSpec) :: ios
       type(ESMF_Field) :: f1, f2, f3, f4, f5
 
@@ -70,7 +71,7 @@
 
       !------------------------------------------------------------------------
 
-      ! Test Requirement FLD1.1.3
+      ! Test Requirement FLD1.1.3 Creation without data 
       ! Fields may be created as in FLD1.1.1 without allocating data or specifying 
       ! an associated data array. In this case specifying the grid parameters and 
       ! data array dimensions may be deferred until data is attached.
@@ -94,7 +95,7 @@
       call ESMF_Test((fname.eq."default_name"), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      ! Test Requirement FLD1.4
+      ! Test Requirement FLD1.4 Deletion 
       ! Fields may be deleted.
       call ESMF_FieldDestroy(f1, rc=rc)
       write(failMsg, *) ""
@@ -123,25 +124,6 @@
       write(failMsg, *) ""
       write(name, *) "Printing destroyed Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      ! Test requirement FLD1.5.1.
-      ! The only default attribute of a field will be a name. A unique name will 
-      ! be generated if not supplied by the user.
-      ! Create Field f1 and f2 with no data
-      f1 = ESMF_FieldCreateNoData(rc=rc)
-      f2 = ESMF_FieldCreateNoData(rc=rc)
-      Call ESMF_FieldGetName(f1, fname1, rc=rc)
-      Call ESMF_FieldGetName(f2, fname2, rc=rc)
-      write(failMsg, *) "Field names not unique"
-      write(name, *) "Unique default Field names Test, FLD1.5.1"
-      call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
-      print *, "Field (f1) name = ", trim(fname1)
-      print *, "Field (f2) name = ", trim(fname2)
-      call ESMF_FieldPrint(f1)
-      call ESMF_FieldPrint(f2)
-      call ESMF_FieldDestroy(f1)
-      call ESMF_FieldDestroy(f2)
       !------------------------------------------------------------------------
 
       ! Verifing that a Field can be created with a name
@@ -191,6 +173,29 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
      
+      ! Test requirement FLD1.5.1. Default name attribute 
+      ! The only default attribute of a field will be a name. A unique name will 
+      ! be generated if not supplied by the user.
+      ! Test Requirement FLD1.7.1 Query name
+      ! A field shall be able to easily return its name. If the user does not provide 
+      ! a field name one will be created. Field names must be unique within an address 
+      ! space and it shall be possible to check this.
+      ! Bug 705087 "Default Field names not unique"
+      f1 = ESMF_FieldCreateNoData(rc=rc)
+      f2 = ESMF_FieldCreateNoData(rc=rc)
+      Call ESMF_FieldGetName(f1, fname1, rc=rc)
+      Call ESMF_FieldGetName(f2, fname2, rc=rc)
+      write(failMsg, *) "Field names not unique"
+      write(name, *) "Unique default Field names Test, FLD1.5.1 & 1.7.1"
+      call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
+      print *, "Field (f1) name = ", trim(fname1)
+      print *, "Field (f2) name = ", trim(fname2)
+      call ESMF_FieldPrint(f1)
+      call ESMF_FieldPrint(f2)
+      call ESMF_FieldDestroy(f1)
+      call ESMF_FieldDestroy(f2)
+      !------------------------------------------------------------------------
+
       ! Verifing that a Grid can be printed
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
@@ -228,11 +233,27 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+       ! Test requirement FLD1.1.1
+       ! Fields may be created by specifying attributes, a grid, data array dimensions 
+       ! and descriptors, optional masks (e.g. for active cells), and an optional I/O 
+       ! specification. In this case a field will allocate its own data. The grid passed 
+       ! into the argument list is referenced and not copied.
+       ! arrayspec = ESMF_ArraySpecCreate()
+       f2 = ESMF_FieldCreate(grid, arrayspec, ESMF_CELL_CENTER, &
+                              name="rh", rc=rc)
+      write(failMsg, *) "ArraySpec has not been created"
+      write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Requirement FLD1.1.2 Creation with external data 
+      ! Fields may be created as in FLD1.1.1 with a data array passed into 
+      ! the argument list. The data array is referenced and not copied.
       ! Verifing that a Field can be created with a Grid and Array
       f3 = ESMF_FieldCreate(grid, arr, ESMF_NO_COPY, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a Field with a Grid and Array Test"
+      write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
@@ -279,17 +300,36 @@
       call ESMF_FieldDestroy(f5, rc=rc)
       !------------------------------------------------------------------------
 
-      ! Req. 1.6.2
+      ! Req. 1.6.2 Return grid 
       ! A field shall be able to return a reference to its grid.
-      grid =  ESMF_GridCreate("oceangrid", rc=rc)
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arr, ESMF_NO_COPY, ESMF_CELL_CENTER, &
-                                   dm, "Field 0", ios, rc)
-      call ESMF_FieldGetGrid(f3, grid3, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting a Grid from a Field created with no data Test"
-      call ESMF_GridPrint(grid, "", rc=rc)
-      call ESMF_GridPrint(grid3, "", rc=rc)
+      ! The following code is commented out because there is
+      ! no way to query the name of a Grid.
+      ! It will be uncommented when the query function is written.
+      ! Bug 705196 "Unable to query Grid name"
+      !grid =  ESMF_GridCreate("oceangrid", rc=rc)
+      !arr = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      !f3 = ESMF_FieldCreate(grid, arr, ESMF_NO_COPY, ESMF_CELL_CENTER, &
+                                   !dm, "Field 0", ios, rc)
+      !call ESMF_FieldGetGrid(f3, grid3, rc=rc)
+      !write(failMsg, *) ""
+      !write(name, *) "Getting a Grid from a Field created with no data Test"
+      !call ESMF_Getname(grid3, gname3, rc=rc)
+      !print *, "Grid (grid3) name = ", trim(gname3)
+      !call ESMF_GridPrint(grid, "", rc=rc)
+      !call ESMF_Test((grid%name.eq.grid3%name), name, failMsg, result, ESMF_SRCLINE)
+      !call ESMF_GridPrint(grid3, "", rc=rc)
       !------------------------------------------------------------------------
 
-      end program ESMF_FieldTest
+      ! Requirement 1.2 Local memory layout 
+      ! It shall be possible to specify whether the field data is row major or column 
+      ! major at field creation and to rearrange it (assumes local copy).
+      ! Cannot be tested until Bug 705247 "Unable to query Data Map from Field" 
+      ! is fixed.
+
+      ! Requirement 1.3 Index Order
+      ! It shall be possible to specify the index order of field data and also to rearrange it.
+      ! Cannot be tested until Bug 705308 "ESMF_FieldGetLocalDataInfo not implemented"
+      ! is fixed.
+
+
+      end program ESMF_FieldUTest
