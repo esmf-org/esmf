@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.3 2003/07/17 22:24:59 nscollins Exp $
+// $Id: ESMC_Grid.h,v 1.4 2003/07/17 22:37:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,6 +32,8 @@
 #include "ESMC_Base.h"
 
 
+class ESMC_Grid;
+
 // 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -41,10 +43,15 @@
 //
 //
 
-class ESMC_Grid :: public ESMC_Base {
+class ESMC_Grid : public ESMC_Base {
     private:
-     void *this;   // pointer to fortran derived type
-}
+     void *grid;   // pointer to fortran derived type
+
+    public:
+     // Add code here.
+      ESMC_Grid();
+      ~ESMC_Grid();
+};
 
 
 // 
