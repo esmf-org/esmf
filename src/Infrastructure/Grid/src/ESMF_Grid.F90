@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.166 2004/05/24 22:58:45 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.167 2004/05/25 07:18:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.166 2004/05/24 22:58:45 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.167 2004/05/25 07:18:57 nscollins Exp $'
 
 !==============================================================================
 !
@@ -944,18 +944,22 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This routine adds a vertical subGrid to an already allocated {\tt ESMF_Grid}.
+!     This routine adds a vertical subGrid to an already 
+!     allocated {\tt ESMF\_Grid}.
 !     This explicit interface only creates vertical subGrids with coordinate
 !     systems where the zero point is defined at the bottom.
-!     Only one vertical subGrid is allowed for any Grid, so if a vertical subGrid
+!     Only one vertical subGrid is allowed for any Grid, 
+!     so if a vertical subGrid
 !     already exists for the Grid that is passed in, an error is returned.
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
-!        (1). given array of deltas (variable delta) and assumes 0 is the minimum
-!             or starting coordinate;
-!        (2). given array of coordinates (variable coords).
+!     \begin{enumerate}
+!     \item given array of deltas (variable delta) and assumes 0 is 
+!        the minimum or starting coordinate
+!     \item given array of coordinates (variable coords)
+!     \end{enumerate}
 !     If neither of these sets of arguments is present and valid, an error
-!     message is issued and the program is terminated.
+!     message is issued and an error code returned.
 !
 !     The arguments are:
 !     \begin{description}
