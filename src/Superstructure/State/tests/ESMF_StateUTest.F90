@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.35 2005/02/25 03:03:40 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.36 2005/03/23 22:49:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.35 2005/02/25 03:03:40 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.36 2005/03/23 22:49:51 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -46,6 +46,7 @@
       type(ESMF_Bundle) :: bundle1, bundle2(1), bundle5, nobundle
       type(ESMF_State) :: state1, state2, state3, nostate
       type(ESMF_Array) :: array1, array2(2), array3, array3a, noarray
+      type(ESMF_StateItemType) :: stateItemType
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
 
@@ -115,12 +116,35 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test Get Item Info from an empty import State 
+      call ESMF_StateGetItemInfo(state1, name="Bundle1", stateitemtype=stateItemType, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting item info from an empty import State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test Verifying Item Info from an empty import State 
+      write(failMsg, *) "Item info incorrect"
+      write(name, *) "Verifying item info from an empty import State Test"
+      call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_NOTFOUND), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test Destruction of State
       call  ESMF_StateDestroy(state1, rc)
       write(failMsg, *) ""
       write(name, *) "Destruction of a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test Get Item Info from destroyed import State 
+      call ESMF_StateGetItemInfo(state1, name="Bundle1", stateitemtype=stateItemType, rc=rc)
+      write(failMsg, *) "Returned ESMF_SUCCESS"
+      write(name, *) "Getting item info from destroyed State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -142,6 +166,7 @@
       write(name, *) "Creating a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       !EX_UTest
       call ESMF_StateAddBundle(state1, bundle1, rc)
       write(name, *) "Adding a Bundle to a State Test"
@@ -149,6 +174,22 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest 
+      ! Test Get Item Info from State 
+      call ESMF_StateGetItemInfo(state1, name="Temperature", stateitemtype=stateItemType, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Bundle item info from State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test Verifying Item Info from a State 
+      write(failMsg, *) "Item info incorrect"
+      write(name, *) "Verifying Bundle item info from a State Test"
+      call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_BUNDLE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
 
       !EX_UTest
       ! Test adding a second Bundle to a State
@@ -181,6 +222,37 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest 
+      ! Test Get Item Info from State 
+      call ESMF_StateGetItemInfo(state1, name="Humidity", stateitemtype=stateItemType, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Field item info from State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test Verifying Item Info from a State 
+      write(failMsg, *) "Item info incorrect"
+      write(name, *) "Verifying Field item info from a State Test"
+      call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_FIELD), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest 
+      ! Test Get Unknown Item Info from State 
+      call ESMF_StateGetItemInfo(state1, name="Humanity", stateitemtype=stateItemType, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting unknown item info from State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test Verifying Unknown Item Info from a State 
+      write(failMsg, *) "Item info incorrect"
+      write(name, *) "Verifying unknown item info from a State Test"
+      call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_NOTFOUND), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test adding an Array to a State
       allocate(f90ptr1(10,20))
@@ -270,6 +342,23 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding an attribute to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+      
+      !EX_UTest
+      ! Test Get Attribute Item Info from State
+      call ESMF_StateGetItemInfo(state1, name="newAttribute", stateitemtype=stateItemType, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting unknown item info from State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Verifying Attribute Item Info from a State
+      write(failMsg, *) "Item info incorrect"
+      write(name, *) "Verifying attribute item info from a State Test"
+      call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_NOTFOUND), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -372,7 +461,6 @@
       print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
-
       !EX_UTest
       ! Test setting Field as not needed in a State
       call ESMF_StateSetNeeded(state1, "Humidity", ESMF_NOTNEEDED, rc)
@@ -380,6 +468,7 @@
       write(name, *) "Set Field as not needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       !EX_UTest
       IsNeeded = ESMF_StateIsNeeded(state1, "Humidity", rc)
       write(name, *) "Test if Field is not needed in a State Test"
