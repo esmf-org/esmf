@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/06/09 08:36:43 nscollins Exp $
+# $Id: makefile,v 1.2 2004/06/11 18:20:50 svasquez Exp $
 
 # makefile template for the examples directory.
 
@@ -36,8 +36,8 @@ CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 run_ESMF_ArraySpecEx:
-	${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArraySpecEx > $(ESMF_EXDIR)/ESMF_ArraySpecEx.stdout
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArraySpecEx > $(ESMF_EXDIR)/ESMF_ArraySpecEx.stdout
 
 run_ESMF_ArraySpecEx_uni:
-	${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArraySpecEx > $(ESMF_EXDIR)/ESMF_ArraySpecEx.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArraySpecEx > $(ESMF_EXDIR)/ESMF_ArraySpecEx.stdout
 
