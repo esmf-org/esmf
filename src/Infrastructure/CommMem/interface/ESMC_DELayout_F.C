@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout_F.C,v 1.7 2003/02/26 20:14:47 jwolfe Exp $
+// $Id: ESMC_DELayout_F.C,v 1.1 2003/03/10 03:46:57 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
