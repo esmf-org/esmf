@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.72 2004/07/27 15:56:37 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.73 2004/08/14 22:39:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.72 2004/07/27 15:56:37 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.73 2004/08/14 22:39:44 jwolfe Exp $'
 
 !==============================================================================
 
@@ -130,10 +130,10 @@
       integer :: localrc                          ! Error status
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: start, stop, startComp, stopComp, indexMod(2)
+      integer :: start, stop, startComp, stopComp, srcIndexMod(2), dstIndexMod(2)
       integer :: srcSizeX, srcSizeY, srcSizeXComp, srcSizeYComp, size
       integer :: i, numDomains, dstCounts(3), srcCounts(3)
-      integer :: datarank
+      integer :: datarank, haloWidth, lbounds(2)
       integer, dimension(3) :: srcOrder, dstOrder
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:,:), pointer :: found
@@ -259,10 +259,10 @@
 
       call ESMF_ArrayGet(srcArray, rank=datarank, rc=localrc)
       route = ESMF_RegridRouteConstruct(datarank, srcGrid, dstGrid, &
-                                      recvDomainList, parentDELayout, &
-                                      srcArray=srcArray, srcDataMap=srcDataMap, &
-                                      dstArray=dstArray, dstDataMap=dstDataMap, &
-                                      total=.false., rc=localrc)
+                                        recvDomainList, parentDELayout, &
+                                        srcArray=srcArray, srcDataMap=srcDataMap, &
+                                        dstArray=dstArray, dstDataMap=dstDataMap, &
+                                        total=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -366,9 +366,16 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+       call ESMF_ArrayGet(dstArray, haloWidth=haloWidth, lbounds=lbounds, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
       numDomains = recvDomainListTot%num_domains
-      indexMod = -1
+      ! TODO: the following two lines are not general, just a test
+       dstIndexMod(1) = haloWidth + lbounds(1) - 1
+       dstIndexMod(2) = haloWidth + lbounds(2) - 1
+      srcIndexMod    = -1
       start = 1
       startComp = 1
       do i = 1,numDomains
@@ -386,7 +393,8 @@
                                        coordSystem, srcSizeX, srcSizeY, &
                                        startComp-1, srcSizeXComp, &
                                        dstCounts(1), dstCounts(2), &
-                                       indexMod, srcOrder, dstOrder, &
+                                       srcIndexMod, srcOrder, &
+                                       dstIndexMod, dstOrder, &
                                        found, foundCount, &
                                        srcGatheredCoordX(start:stop), &
                                        srcGatheredCoordY(start:stop), &
@@ -434,7 +442,8 @@
                                            srcSizeX, srcSizeY, &
                                            srcStart, srcICount, &
                                            dstSizeX, dstSizeY, &
-                                           indexMod, srcOrder, dstOrder, &
+                                           srcIndexMod, srcOrder, &
+                                           dstIndexMod, dstOrder, &
                                            found, foundCount, &
                                            srcCenterX, srcCenterY, &
                                            dstCenterX, dstCenterY, &
@@ -451,8 +460,9 @@
       integer, intent(in) :: srcICount
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
-      integer, dimension(:), intent(in) :: indexMod
+      integer, dimension(:), intent(in) :: srcIndexMod
       integer, dimension(:), intent(in) :: srcOrder
+      integer, dimension(:), intent(in) :: dstIndexMod
       integer, dimension(:), intent(in) :: dstOrder
       logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
       integer, dimension(dstSizeX,dstSizeY), intent(inout) :: foundCount
@@ -785,34 +795,34 @@
 
             ! now store this link into address, weight arrays
             if (srcUserMask(iii,jjj) .and. (srcGridMask(iii,jjj).eq.0)) then
-              dstAdd(dstOrder(1)) = i
-              dstAdd(dstOrder(2)) = j
-              srcTmp(srcOrder(1)) = iii+indexMod(1)
-              srcTmp(srcOrder(2)) = jjj+indexMod(2)
+              dstAdd(dstOrder(1)) = i   + dstIndexMod(1)
+              dstAdd(dstOrder(2)) = j   + dstIndexMod(2)
+              srcTmp(srcOrder(1)) = iii + srcIndexMod(1)
+              srcTmp(srcOrder(2)) = jjj + srcIndexMod(2)
               srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc=rc)
             endif
             if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).eq.0)) then
-              dstAdd(dstOrder(1)) = i
-              dstAdd(dstOrder(2)) = j
-              srcTmp(srcOrder(1)) = ip1+indexMod(1)
-              srcTmp(srcOrder(2)) = jjj+indexMod(2)
+              dstAdd(dstOrder(1)) = i   + dstIndexMod(1)
+              dstAdd(dstOrder(2)) = j   + dstIndexMod(1)
+              srcTmp(srcOrder(1)) = ip1 + srcIndexMod(1)
+              srcTmp(srcOrder(2)) = jjj + srcIndexMod(2)
               srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc=rc)
             endif
             if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).eq.0)) then
-              dstAdd(dstOrder(1)) = i
-              dstAdd(dstOrder(2)) = j
-              srcTmp(srcOrder(1)) = ip1+indexMod(1)
-              srcTmp(srcOrder(2)) = jp1+indexMod(2)
+              dstAdd(dstOrder(1)) = i   + dstIndexMod(1)
+              dstAdd(dstOrder(2)) = j   + dstIndexMod(1)
+              srcTmp(srcOrder(1)) = ip1 + srcIndexMod(1)
+              srcTmp(srcOrder(2)) = jp1 + srcIndexMod(2)
               srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(3), rc=rc)
             endif
             if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).eq.0)) then
-              dstAdd(dstOrder(1)) = i
-              dstAdd(dstOrder(2)) = j
-              srcTmp(srcOrder(1)) = iii+indexMod(1)
-              srcTmp(srcOrder(2)) = jp1+indexMod(2)
+              dstAdd(dstOrder(1)) = i   + dstIndexMod(1)
+              dstAdd(dstOrder(2)) = j   + dstIndexMod(1)
+              srcTmp(srcOrder(1)) = iii + srcIndexMod(1)
+              srcTmp(srcOrder(2)) = jp1 + srcIndexMod(2)
               srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(4), rc=rc)
             endif
