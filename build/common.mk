@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.85 2004/12/08 21:36:17 jedwards Exp $
+#  $Id: common.mk,v 1.86 2004/12/10 18:17:08 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -502,6 +502,20 @@ tree_clean:
 	done
 	rm -f $(CLEANFILES)
 
+# target which does a light cleaning - remove files only under the src dir 
+#  (logfiles, doc files, test output files, files made by preprocessing, etc)
+#  leaves the libs, executables, etc alone.
+dust:
+	@cd $(ESMF_BUILD)/src ;\
+	$(MAKE) ACTION=tree_dust tree
+
+tree_dust:
+	@for DIR in $(DUSTDIRS) foo ; do \
+	   if [ $$DIR != "foo" ] ; then \
+	      cd $$DIR; $(MAKE) ACTION=tree_clean tree ;\
+	   fi ;\
+	done
+	
 #-------------------------------------------------------------------------------
 # Targets for building and running system tests.
 #-------------------------------------------------------------------------------
