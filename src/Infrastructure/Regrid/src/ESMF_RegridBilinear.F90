@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.74 2004/08/19 17:23:57 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.75 2004/08/21 21:50:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.74 2004/08/19 17:23:57 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.75 2004/08/21 21:50:38 jwolfe Exp $'
 
 !==============================================================================
 
@@ -133,8 +133,9 @@
       integer :: start, stop, startComp, stopComp, srcIndexMod(2), dstIndexMod(2)
       integer :: srcSizeX, srcSizeY, srcSizeXComp, srcSizeYComp, size
       integer :: i, numDomains, dstCounts(3), srcCounts(3)
-      integer :: datarank, haloWidth, lbounds(2)
+      integer :: dataRank, haloWidth
       integer, dimension(3) :: srcOrder, dstOrder
+      integer, dimension(:), allocatable :: dataOrder, lbounds
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:,:), pointer :: found
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: foundCount, srcLocalMask
@@ -177,13 +178,21 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! get dataRank and allocate rank-sized arrays
+      call ESMF_ArrayGet(srcArray, rank=dataRank, rc=localrc)
+      allocate(dataOrder(dataRank), &
+                 lbounds(dataRank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dataRank arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
       ! set reordering information
       srcOrder(:) = gridOrder(:,srcGrid%ptr%coordOrder%order,2)
       dstOrder(:) = gridOrder(:,dstGrid%ptr%coordOrder%order,2)
 
       ! get destination grid info
       !TODO: Get grid masks?
-      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=localrc)
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, &
+                                dataIndexList=dataOrder, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -257,8 +266,7 @@
    !              is used internal to this routine to get coordinate 
    !              information locally to calculate the regrid weights
 
-      call ESMF_ArrayGet(srcArray, rank=datarank, rc=localrc)
-      route = ESMF_RegridRouteConstruct(datarank, srcGrid, dstGrid, &
+      route = ESMF_RegridRouteConstruct(dataRank, srcGrid, dstGrid, &
                                         recvDomainList, parentDELayout, &
                                         srcArray=srcArray, srcDataMap=srcDataMap, &
                                         dstArray=dstArray, dstDataMap=dstDataMap, &
@@ -366,15 +374,15 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-       call ESMF_ArrayGet(dstArray, haloWidth=haloWidth, lbounds=lbounds, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-
+      call ESMF_ArrayGet(dstArray, haloWidth=haloWidth, lbounds=lbounds, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      do i = 1,dataRank
+        if (dataOrder(i).eq.1) dstIndexMod(1) = haloWidth + lbounds(i) - 1
+        if (dataOrder(i).eq.2) dstIndexMod(2) = haloWidth + lbounds(i) - 1
+      enddo
       numDomains = recvDomainListTot%num_domains
-      ! TODO: the following two lines are not general, just a test
-       dstIndexMod(1) = haloWidth + lbounds(1) - 1
-       dstIndexMod(2) = haloWidth + lbounds(2) - 1
       srcIndexMod    = -1
       start = 1
       startComp = 1
@@ -420,6 +428,8 @@
                  srcLocalCoordArray, &
                               found, &
                          foundCount, &
+                          dataOrder, &
+                            lbounds, &
                         dstUserMask, &
                         srcUserMask, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
