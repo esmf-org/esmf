@@ -1,4 +1,4 @@
-/* $Id: ESMC.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
+/* $Id: ESMC.h,v 1.3 2002/07/23 17:46:12 dneckels Exp $ */
 
 /* General header for ESMF */
 
@@ -17,7 +17,6 @@
 #include "ESMC_TimeMgmtUtil.h"
 #include "ESMC_BasicUtil.h"
 #include "ESMC_Log.h"
-#include "ESMC_Timer.h"
 
 #endif
 
