@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.8 2003/03/26 01:08:39 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.9 2003/03/27 01:53:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.8 2003/03/26 01:08:39 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.9 2003/03/27 01:53:45 eschwab Exp $'
 
 !==============================================================================
 
@@ -120,13 +120,13 @@
 ! !IROUTINE: ESMF_TimeInit - Initialize via user-specified unit set
 
 ! !INTERFACE:
-      subroutine ESMF_TimeInit(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
+      subroutine ESMF_TimeInit(time, YR, MM, DD, D, H, M, S, MS, US, NS, &
                                d_, h_, m_, s_, ms_, us_, ns_, &
                                Sn, Sd, cal, tz, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      integer, intent(in), optional :: YY
+      integer, intent(in), optional :: YR
       integer, intent(in), optional :: MM
       integer, intent(in), optional :: DD
       integer, intent(in), optional :: D
@@ -157,8 +157,8 @@
 !     \begin{description}
 !     \item[time]
 !          The object instance to initialize
-!     \item[{[YY]}]
-!          Integer year CCYY
+!     \item[{[YR]}]
+!          Integer year CCYR
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
@@ -208,9 +208,9 @@
 !EOP
 
       ! use optional args for any subset
-!      call c_ESMC_TimeInit(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
-!                           d_, h_, m_, s_, ms_, us_, ns_, &
-!                           Sn, Sd, cal, tz, rc)
+      call c_ESMC_TimeInit(time, YR, MM, DD, D, H, M, S, MS, US, NS, &
+                           d_, h_, m_, s_, ms_, us_, ns_, &
+                           Sn, Sd, cal, tz, rc)
 
       end subroutine ESMF_TimeInit
 
@@ -227,12 +227,12 @@
 ! !IROUTINE: ESMF_TimeGet - Get value in user-specified units
 
 ! !INTERFACE:
-      subroutine ESMF_TimeGet(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
+      subroutine ESMF_TimeGet(time, YR, MM, DD, D, H, M, S, MS, US, NS, &
                               d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      integer, intent(out), optional :: YY
+      integer, intent(out), optional :: YR
       integer, intent(out), optional :: MM
       integer, intent(out), optional :: DD
       integer, intent(out), optional :: D
@@ -261,8 +261,8 @@
 !     \begin{description}
 !     \item[time]
 !          The object instance to query
-!     \item[{[YY]}]
-!          Integer year CCYY
+!     \item[{[YR]}]
+!          Integer year CCYR
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
@@ -308,7 +308,7 @@
 !EOP
 
       ! use optional args for any subset
-!      call c_ESMC_TimeGet(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
+!      call c_ESMC_TimeGet(time, YR, MM, DD, D, H, M, S, MS, US, NS, &
 !                          d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
     
       end subroutine ESMF_TimeGet
@@ -318,12 +318,12 @@
 ! !IROUTINE: ESMF_TimeSet - Set value in user-specified units
 
 ! !INTERFACE:
-      subroutine ESMF_TimeSet(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
+      subroutine ESMF_TimeSet(time, YR, MM, DD, D, H, M, S, MS, US, NS, &
                               d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      integer, intent(in), optional :: YY
+      integer, intent(in), optional :: YR
       integer, intent(in), optional :: MM
       integer, intent(in), optional :: DD
       integer, intent(in), optional :: D
@@ -352,8 +352,8 @@
 !     \begin{description}
 !     \item[time]
 !          The object instance to query
-!     \item[{[YY]}]
-!          Integer year CCYY
+!     \item[{[YR]}]
+!          Integer year CCYR
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
@@ -399,7 +399,7 @@
 !EOP
     
       ! use optional args for any subset
-!       call c_ESMC_TimeSet(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
+!       call c_ESMC_TimeSet(time, YR, MM, DD, D, H, M, S, MS, US, NS, &
 !                           d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
     
       end subroutine ESMF_TimeSet
@@ -1187,7 +1187,7 @@
 !     TMGn.n.n
 !EOP
    
-      call c_ESMC_BaseValidate(time, opt, rc)
+!      call c_ESMC_BaseValidate(time, opt, rc)
 
       end subroutine ESMF_BaseValidate
 
@@ -1221,7 +1221,7 @@
 !     TMGn.n.n
 !EOP
    
-      call c_ESMC_BasePrint(time, opt, rc)
+!      call c_ESMC_BasePrint(time, opt, rc)
 
       end subroutine ESMF_BasePrint
 
