@@ -1,8 +1,7 @@
 
 DESTEX =  \
       Regrid_alg.tex Regrid_desc.tex Regrid_desrev.tex \
-      Regrid_fapi.tex Regrid_glos.tex Regrid_req.tex \
-      Regrid_syn.tex Regrid_desdoc.ctex
+      Regrid_glos.tex Regrid_req.tex Regrid_syn.tex Regrid_desdoc.ctex
 
 # DESEPS = fieldclass.eps bundleclass.eps 
 
