@@ -1,4 +1,4 @@
-// $Id: inter_ESMC_class_F.C,v 1.2 2003/03/11 22:50:45 nscollins Exp $
+// $Id: inter_ESMC_class_F.C,v 1.3 2003/03/21 22:49:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -63,12 +63,12 @@ extern "C" {
        }
 
        void FTN(c_esmc_<class>get)(ESMC_<Class> **ptr, 
-                                         <value> *value, int *status} {
+                                         <value> *value, int *status) {
            *status = (*ptr)->ESMC_<Class>Get(&value);
        }
 
        void FTN(c_esmc_<class>set)(ESMC_<Class> **ptr, 
-                                         <value> *value, int *status} {
+                                         <value> *value, int *status) {
            *status = (*ptr)->ESMC_<Class>Set(value);
        }
 
