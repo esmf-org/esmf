@@ -1,4 +1,4 @@
-% $Id: ESMF.cbib,v 1.2 2004/08/02 17:58:43 nscollins Exp $
+% $Id: ESMF.cbib,v 1.3 2004/08/03 14:34:46 nscollins Exp $
 
 % abbreviations
 @String{BAMS = {Bull. Amer. Met. Soc.}}
@@ -31,9 +31,9 @@
         publisher = "NASA/CT Internal Document",
         year = "2002"}
 
-%================================================================================
+%==============================================================================
 % Topic-specific references
-%================================================================================
+%==============================================================================
 #include "ESMF_SE.bib"
 #include "ESMF_apps.bib"
 #include "ESMF_packages.bib"
