@@ -1,4 +1,4 @@
-// $Id: ESMC_class.h,v 1.1 2002/10/07 16:28:55 eschwab Exp $
+// $Id: ESMC_class.h,v 1.2 2002/10/09 21:37:38 eschwab Exp $
 //
 // ESMF <Class> definition include file
 //
@@ -26,61 +26,74 @@
 //  the automated document processing.)
 //
 //-------------------------------------------------------------------------
-//
 
 // put any constants or macros which apply to the whole component in this file
 #include <ESMC_<Comp>.h> 
 
-#include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
-
-//-------------------------------------------------------------------------
-// class configuration type
-struct ESMC_<Class>Config
-{
-   private:
-//   < insert resource items here >
-};
-
-//-------------------------------------------------------------------------
-// class definition
-
-class ESMC_<Class> : public ESMC_Base    // inherits from ESMC_Base class
-{
-
 //-------------------------------------------------------------------------
 //BOP
 // !CLASS: ESMC_<Class>
-//
+
+// this include section corresponds to the USES: section in F90 modules
+#include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+//#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
+                        // composites, associates, friends)
+// ! PUBLIC TYPES:
+
+// class configuration type
+struct ESMC_<Class>Config
+{
+  private:
+//   < insert resource items here >
+};
+
+// class definition type
+class ESMC_<Class> : public ESMC_Base    // inherits from ESMC_Base class
+{
+  private:
+//  < insert class members here >  corresponds to type ESMF_<Class> members
+//                                 in F90 modules
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
+// pick one or the other of the init/create sections depending on
+//  whether this is a deep class (the class/derived type has pointers to
+//  other memory which must be allocated/deallocated) or a shallow class
+//  (the class/derived type is self-contained) and needs no destroy methods
+//  other than deleting the memory for the object/derived type itself.
+
   public:
-    ESMC_<Class> *ESMC_<Class>Create(); // interface only, deep class
-    int ESMC_<Class>Destroy(void);      // interface only, deep class
-    int ESMC_<Class>Construct(void);    // internal only, deep class
-    int ESMC_<Class>Destruct(void);     // internal only, deep class
+// the following methods apply to deep classes only
+    ESMC_<Class> *ESMC_<Class>Create(args, int rc);// interface only, deep class
+    int ESMC_<Class>Destroy(void);            // interface only, deep class
+    int ESMC_<Class>Construct(args);          // internal only, deep class
+    int ESMC_<Class>Destruct(void);           // internal only, deep class
+
 // or
-    int ESMC_<Class>Init();         // shallow class only
+// the following method applies to a shallow class
+    int ESMC_<Class>Init(args);         // shallow class only
 
+// optional configuration methods
     int ESMC_<Class>GetConfig(ESMC_<Class>Config *config);
-    int ESMC_<Class>SetConfig(ESMC_<Class>Config *config);
+    int ESMC_<Class>SetConfig(const ESMC_<Class>Config *config);
 
+// accessor methods for class members
     int ESMC_<Class>Get<Value>(<value type> *value);
-    int ESMC_<Class>Set<Value>(<value type> *value);
+    int ESMC_<Class>Set<Value>(<value type>  value);
     
-//  int ESMC_<Class>Validate(char *options);	// from ESMC_Base
-//  int ESMC_<Class>Print(char *options);	    // from ESMC_Base
+// required methods inherited and overridden from the ESMC_Base class
+    int ESMC_<Class>Validate(const char *options);
+    int ESMC_<Class>Print(const char *options);
   
-// < list the rest of the public interfaces here >
-  
+// < list the rest of the public interface methods here >
   
 //EOP
 
   private: 
 //
-// < list the rest of the private/internal vars and interfaces here >
+// < list private interface methods here >
 //
 
-};   // end of class definition
+};   // end class ESMC_<Class>
 
 #endif  // ESMC_<Class>_h
