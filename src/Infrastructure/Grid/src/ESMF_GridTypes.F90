@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.36 2004/08/16 22:59:24 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.37 2004/08/28 00:11:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -492,7 +492,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.36 2004/08/16 22:59:24 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.37 2004/08/28 00:11:24 nscollins Exp $'
 
 !==============================================================================
 !
@@ -504,6 +504,7 @@
       interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridPointerEqual
          module procedure ESMF_GridStatusEqual
          module procedure ESMF_GridStructureEqual
          module procedure ESMF_GridTypeEqual
@@ -527,6 +528,7 @@
       interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridPointerNotEqual
          module procedure ESMF_GridStatusNotEqual
          module procedure ESMF_GridStructureNotEqual
          module procedure ESMF_GridTypeNotEqual
@@ -1281,6 +1283,44 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridPointerEqual"
+!BOPI
+! !IROUTINE: ESMF_GridPointerEqual - equality of Grids
+!
+! !INTERFACE:
+      function ESMF_GridPointerEqual(Grid1, Grid2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridPointerEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_Grid), intent(in) :: &
+         Grid1,      &! Two grids to compare for
+         Grid2        ! equality (identity)
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Grids to see if
+!     they have equivalent pointers to the same internal ESMF_GridClass.
+!     This will return false if the pointers are different, even if
+!     the grids describe exactly the same physical dimensions.  It is a
+!     quick and dirty check.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[Grid1, Grid2]
+!          Two grids to compare for equality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_GridPointerEqual = Associated(Grid1%ptr, Grid2%ptr)
+
+      end function ESMF_GridPointerEqual
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridStatusEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridStatusEqual - equality of Grid statuses
@@ -1566,6 +1606,44 @@
                               CoordIndex2%index)
 
       end function ESMF_CoordIndexEqual
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridPointerNotEqual"
+!BOPI
+! !IROUTINE: ESMF_GridPointerNotEqual - equality of Grids
+!
+! !INTERFACE:
+      function ESMF_GridPointerNotEqual(Grid1, Grid2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridPointerNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_Grid), intent(in) :: &
+         Grid1,      &! Two grids to compare for
+         Grid2        ! inequality (not identical)
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Grids to see if
+!     they have pointers to different internal ESMF_GridClasses.
+!     This will return true if the pointers are different, even if
+!     the grids describe exactly the same physical dimensions.  It is a
+!     quick and dirty check.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[Grid1, Grid2]
+!          Two grids to compare for inequality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_GridPointerNotEqual = .not.Associated(Grid1%ptr, Grid2%ptr)
+
+      end function ESMF_GridPointerNotEqual
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
