@@ -1,0 +1,63 @@
+% $Id: ESMF_usage.tex,v 1.1 2001/11/13 18:35:47 dneckels Exp $
+
+\section{Basic Usage and Conventions}
+
+\subsection{Bindings}
+
+The library includes both C/C++ and F90 bindings.  The C/C++ prefix for
+procedures and parameters is {\tt ESMC\_} and the F90 prefix is {\tt ESMF\_}.
+
+\subsection{Constraints}
+
+The library design imposes some constraints on the user:
+
+\begin{itemize}
+\item {\it No direct access of Fortran derived types.}  Attributes
+of Fortran derived types are private.
+
+\item{\it All types should be initialized.} In order to provide consistent
+argument checking and to increase the overall robustness of the library,
+a user should call one of the {\tt ``Init''} routines before using the
+library's Fortran derived types, or a {\tt ``Construct''} routine before 
+using its C/C++ classes.
+
+\end{itemize}
+
+\subsection{Error Handling}
+
+All C/C++ procedures return an integer error code.  All F90 procedures have 
+an optional integer return code argument.  Return codes are translated 
+into error descriptions using the methods: 
+
+\begin{verbatim}
+    void ESMC_ErrPrint(int rc)
+
+    subroutine ESMF_ErrPrint(rc)  
+    integer, intent(in) :: rc
+\end{verbatim}
+
+A return code of {\tt ESM[F/C]\_SUCCESS} indicates that an 
+operation executed without errors.
+
+The user can currently choose from two different error handlers.
+{\tt ESM[F/C]\_ERR\_RETURN} will simply return from a routine in which an error 
+is identified, without printing an error description.
+{\tt ESM[F/C]\_ERR\_EXIT} will print a detailed error description including
+file, function name, and line number, and will then terminate execution
+(this is a simple exit, not an {\tt MPI\_ABORT}).  These handlers are set 
+using the methods: 
+\begin{verbatim}
+    void _ErrHandlerSetType(ESM[F/C]_ErrHandlerType type)
+
+    subroutine ESM[F/C]_ErrHandlerSetType(type)
+    integer, intent(in) :: type
+\end{verbatim}
+
+The intent is to provide an error handling system in which
+users can choose from a variety of handlers or supply their own.
+
+
+
+
+
+

@@ -1,0 +1,55 @@
+\documentclass[]{article}
+\usepackage{html}
+\usepackage[T1]{fontenc}
+
+\begin{document}
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+\begin{titlepage}
+
+\begin{latexonly}
+\noindent {\bf Community Climate System Model} \\
+\noindent National Center for Atmospheric Research, Boulder, CO \\
+\vspace{2in}
+\end{latexonly}
+
+\begin{center}
+{\Large\bf Machine Library Reference} \\
+{\it David Neckels}
+\end{center}
+
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+%\section{Synopsis}
+\input{Machine_syn}
+
+%\section{Architecture}
+%\input{Log_arch}
+
+\section{Machine Class}
+
+%\subsection{Description}
+\input{Machine_desc}
+
+%\subsection{Use and Examples}
+%\input{../examples/F90/ESMF_MachineEx.F}
+
+%\section{Glossary}
+\input{Machine_glos}
+
+%\section{Bibliography}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+
+\setcounter{section}{1}
+
+\section*{Appendix A:  Fortran Interface}
+\addcontentsline{toc}{section}{Appendix:  Fortran Interface}
+
+\input{ESMF_MachineMod}
+
+\end{document}

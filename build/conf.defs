@@ -1,0 +1,69 @@
+
+   This file contains a complete list of the variables that are defined
+in build/${ESMF_ARCH}/conf.h
+
+ESMC_HAVE_BROKEN_RECURSIVE_MACRO
+CPP processes recursive use of macros incorrectly
+
+ESMC_HAVE_BROKEN_REQUEST_FREE
+MPI_Request_free() either generates an error or messes up later MPI
+calls. Known to be a problem with IBM MPI and at least earlier MPICH
+
+ESMC_HAVE_DOUBLE_ALIGN
+double variables ARE always double aligned on this system
+
+ESMC_HAVE_DOUBLE_ALIGN_MALLOC
+malloc always returns memory that is double aligned
+
+ESMC_HAVE_FAST_MPI_WTIME
+the MPI_WTIME is accurate and fast on this machine, so we use this for
+all Alice timings rather than a system timer
+
+ESMC_HAVE_MEMALIGN
+the system routine memalign() exists and is used to ensure that all
+Scalars are allocated with the correct alignment
+
+ESMC_HAVE_MISSING_DGESVD
+the Lapack routine DGESVD is missing from the vendor provided math
+libraries. This is true on the Cray T3D/T3E
+
+ESMC_HAVE_SLOW_NRM2
+BLAS nrm2() routine is so slow it is better to replace with code.
+True if using the Netlib version of the BLAS.
+
+ESMC_HAVE_VPRINTF_CHAR
+final argument to vprintf() is a char *, rather than the usual void *
+true under freebsd #if (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+
+ESMC_SIZEOF_VOIDP
+used in handling passing pointers to Alice objects between C and
+Fortran. When this is 8 (bytes) then we use integer*8 as
+AliceFortranAddr and AliceOffset.
+
+ESMC_SIZEOF_INT
+used when reading/writing binary files. We always save using 32 bits
+for portability, so when this is on, the integers are first compressed
+to 32 bits before being written
+
+ESMC_HAVE_RESTRICT
+indicates that the compiler supports the keyword _Restrict (currently
+only support be Solaris compilers). ADIC cannot handle the restrict
+keyword hence this is currently turned off.
+
+
+ESMC_HAVE_CRAY90_POINTER
+indicates the Cray vector machine pointer arithmetic. This is needed cause
+one cannot do error checking like 
+  if ((unsigned long)h & (unsigned long)3) {                        \
+    SETERRQ(ESMC_ERR_ARG_CORRUPT,0,"Invalid Pointer to Object");   \
+  }                                                                 \
+
+ESMC_HAVE_STD_COMPLEX
+indicates that the C++ compiler implements complex as a Standard
+template library, with <complex> as the include file, and using
+std::complex name space
+
+ESMC_HAVE_FREE_RETURN_INT
+indicated that the function free() has the prototype
+extern int free(void *);
+The default prototype is:

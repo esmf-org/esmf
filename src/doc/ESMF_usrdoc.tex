@@ -1,0 +1,78 @@
+% $Id: ESMF_usrdoc.tex,v 1.1 2001/11/13 18:35:47 dneckels Exp $
+
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage[T1]{fontenc}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+
+\begin{document}
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+\begin{titlepage}
+
+\begin{center}
+{\Large Earth System Modeling Framework } \\
+\vspace{.25in}
+{\Large {\bf Earth System Modeling Framework User's Guide}} \\
+\vspace{.25in}
+{\large {\it David Neckels, Cecelia DeLuca, others}}
+\vspace{.5in}
+\end{center}
+
+\begin{latexonly}
+\vspace{5.5in}
+\begin{tabular}{p{5in}p{.9in}}
+\hrulefill \\
+\noindent {\bf NASA High Performance Computing and Communications Program} \\
+\noindent Earth and Space Sciences Project \\
+\noindent CAN 00-OES-01 \\
+\noindent http://www.esmf.ucar.edu \\
+\end{tabular}
+\end{latexonly}
+
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+This Guide to the Earth System Modeling Framework (ESMF) is intended 
+for a new user.  It outlines the scope, structure, and function of the 
+ESMF software in order to help the user understand what benefits the ESMF 
+can provide.  It also describes how to install the ESMF software and how 
+to incorporate it into applications.
+
+The ESMF Software Developer's Guide contains detailed information on how 
+to extend the ESMF system.  Reference manuals are available for individual 
+libraries within ESMF; see these for additional information on interfaces 
+and usage.
+
+%\section{Description}
+\input{esmf_desc}
+
+%\section{Installation}
+\input{esmf_install}
+
+%\section{Basic Usage and Conventions}
+\input{esmf_usage}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+

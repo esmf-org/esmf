@@ -1,0 +1,564 @@
+# $Id: common,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+#
+#
+# Checks that ESMF_DIR variable is set and creates library directory
+# if it does not exist
+chkalice_dir:
+	@if [ ${BOPT}foo = foo ] ; then \
+	  echo "You must use the make variable BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
+	  echo "For example, use: make BOPT=g ex1"; \
+          echo "Remove all .o files and rerun make with appropriate BOPT"; false; fi
+	-@if [ ! -d ${PDIR} ]; then \
+	  echo Making directory ${PDIR} for library; mkdir -p ${PDIR} ; fi
+	-@if [ ! -d ${ESMC_MODDIR} ]; then \
+	  echo Making directory ${ESMC_MODDIR} for *.mod files; mkdir -p ${ESMC_MODDIR} ; fi
+	-@if [ ! -d ${ESMC_TESTDIR} ]; then \
+	  echo Making directory ${ESMC_TESTDIR} for test output; mkdir -p ${ESMC_TESTDIR} ; fi
+	-@if [ ! -d ${ESMC_DOCDIR} ]; then \
+	  echo Making directory ${ESMC_DOCDIR} for documents; mkdir -p ${ESMC_DOCDIR} ; fi
+
+# 1. Checks that user has set BOPT variable
+# 2. Check if the ${LDIR} exists
+chkopts_basic: 
+	@if [ ${BOPT}foo = foo ] ; then \
+	  echo "You must set the variable BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
+	  echo "For example, use: make BOPT=g ex1"; \
+          echo "Remove all .o files and rerun make with appropriate BOPT"; false; fi
+	@if [ ! -d ${LDIR} ]; then \
+	  echo Libraries not built for this BOPT: ${BOPT}; false ; fi
+
+# 3. Check if the shared libs are out of date
+chkopts: chkopts_basic
+	@for LIBNAME in  ${SHLIBS} ; do  \
+	if [ -f ${LDIR}/$$LIBNAME.a ];	then \
+	if [ -f ${LDIR}/$$LIBNAME.${SLSUFFIX} ]; then \
+	flag=`find ${LDIR} -type f -name $$LIBNAME.a -newer ${LDIR}/$$LIBNAME.${SLSUFFIX} -print` ;\
+	if [ "$$flag" != "" ]; then \
+	echo "Shared libs in ${LDIR} are out of date, attempting to rebuild." ;\
+	if [ -w ${LDIR} ]; then \
+	${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} shared ;\
+	else \
+	echo "Unable to rebuild shared libraries; you do not have write permission." ;\
+	user=`ls -l ${LDIR}/$$LIBNAME.${SLSUFFIX}  | tr -s ' ' | cut -d ' ' -f 3` ;\
+	echo "Libraries were built by user $$user; please contact him/her to have them rebuilt." ;\
+	false ;\
+	fi ;\
+	fi ;\
+	fi ;\
+	fi ;\
+	done
+
+# Does nothing; needed for some rules that require actions.
+foo:
+
+VPATH = ${ESMF_DIR}/${LOCDIR}
+
+libc:${LIBNAME}(${OBJSC})
+libf:${LIBNAME}(${OBJSF})
+
+
+buildtex: ${TEXFILES}
+
+builddvi: ${DVIFILES}
+
+buildpdf: ${PDFFILES}
+
+buildhtml: ${HTMLFILES}
+
+
+# Builds library
+vpathlib:
+	dir=`pwd`; cd ${ESMC_OBJDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile lib
+
+# Builds library
+lib: chkalice_dir ${SOURCE}
+	@-if [ "${SOURCEC}" != "" ] ; then \
+	   ${OMAKE} -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libc; fi
+	@-if [ "${SOURCEF}" != "" ] ; then \
+		${OMAKE} -f ${MAKEFILE}  ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libf; fi
+	@-if [ "${OBJS}" != " " ] ; then \
+		${RANLIB}  ${LIBNAME}; \
+		${RM} -f ${OBJS}; \
+	fi
+#
+#  Does not work for some machines with .F fortran files.
+#
+# Builds library - fast version
+libfast: chkalice_dir ${SOURCEC} ${SOURCEF}
+	@-if [ "${SOURCEC}" != "" ] ; then \
+	     ${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${SOURCEC} ${SSOURCE} ;\
+	  ${AR} ${AR_FLAGS} ${LIBNAME} ${OBJSC} ${SOBJS}; \
+	  ${RM} -f ${OBJSC} ${SOBJS}; \
+	fi
+
+# Removes garbage files
+clean::
+	@-${RM} -f *.o *~ ex[0-9] ex[0-9][0-9] ex[0-9]f ex[0-9][0-9]f \
+	       ${CLEANFILES} ${TESTS} ex[0-9]f90 ex[0-9][0-9]f90 \
+	       PI* *.ln l.outa* mputil.mp_* core core.* *.tmp *.map gmon.out \
+	       trashz \#*\# *.mex* *.stolen *.trace Log.* joe jeff *.stolen \
+	       output/*~ .mpirtmp mon.out *.aus *.mon.* __* p4pg ins10*.c \
+	       ex[0-9].exe ex[0-9][0-9].exe ex[0-9]f.exe ex[0-9][0-9]f.exe \
+	       *.ad.c *.ad.h ad_deriv.h .adic* *.cp_ *.cp__ *.c*.c \
+               .adic* *.dep *.proj ctoatmp AliceArena* *.L *.anl main
+
+cleanstolen:
+	@-${RM} -f *.stolen
+
+cleanadic:
+	@-${RM} -f *.ad.*
+#
+#  testexamples_X - Runs various Alice test suites
+#    1 - basic C suite used in installation tests
+#    2 - additional C suite including graphics
+#    3 - basic Fortran .F suite
+#    4 - uniprocessor version of 1 and 2
+#    5 - C examples that require complex numbers
+#    6 - C examples that don't work with complex numbers 
+#    7 - C examples that require BlockSolve
+#    8 - Fortran .F examples that don't work with complex numbers
+#    9 - uniprocessor version of 3
+#   10 - Fortran examples that require complex
+#   11 - uniprocessor version of 5
+#   12 - basic f90 examples
+#   13 - Examples that should only be compiled.
+#   14 - Matlab socket interface test - in src/dm/da/examples/tests
+#   15 - AMS (Alice Memory Snooper) tests - src/snes/examples/tutuorials
+#   16 - Requires ParMetis
+#   17 - requires PYTHON (uses urlget.py) and popen()
+#
+testexamples_1: ${TESTEXAMPLES_1}
+testexamples_2: ${TESTEXAMPLES_2}
+testexamples_3: ${TESTEXAMPLES_3}
+vtestexamples_3:
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
+testexamples_4: ${TESTEXAMPLES_4}
+testexamples_5: ${TESTEXAMPLES_5}
+testexamples_6: ${TESTEXAMPLES_6}
+testexamples_7: ${TESTEXAMPLES_7}
+testexamples_8: ${TESTEXAMPLES_8}
+testexamples_9: ${TESTEXAMPLES_9}
+vtestexamples_9:
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_9
+testexamples_10: ${TESTEXAMPLES_10}
+testexamples_11: ${TESTEXAMPLES_11}
+testexamples_12: ${TESTEXAMPLES_12}
+testexamples_13: ${TESTEXAMPLES_13}
+testexamples_14: ${TESTEXAMPLES_14}
+testexamples_15: ${TESTEXAMPLES_15}
+testexamples_16: ${TESTEXAMPLES_16}
+testexamples_17: ${TESTEXAMPLES_17}
+
+buildexamples_1: ${BUILDEXAMPLES_1}
+buildexamples_2: ${BUILDEXAMPLES_2}
+buildexamples_3: ${BUILDEXAMPLES_3}
+buildexamples_4: ${BUILDEXAMPLES_4}
+buildexamples_5: ${BUILDEXAMPLES_5}
+buildexamples_6: ${BUILDEXAMPLES_6}
+buildexamples_7: ${BUILDEXAMPLES_7}
+buildexamples_8: ${BUILDEXAMPLES_8}
+buildexamples_9: ${BUILDEXAMPLES_9}
+buildexamples_10: ${BUILDEXAMPLES_10}
+buildexamples_11: ${BUILDEXAMPLES_11}
+buildexamples_12: ${BUILDEXAMPLES_12}
+buildexamples_13: ${TESTEXAMPLES_13}
+buildexamples_14: ${BUILDEXAMPLES_14}
+buildexamples_15: ${BUILDEXAMPLES_15}
+
+#  Checks if directory requires particular package or language
+# The makefile may contain
+#    #requirespackage '-DESMC_HAVE_XXX' 
+#    #requireslanguage CONLY (or CPP)
+#    #requiresscalar   real (or complex)
+
+tree: ${ACTION}
+	-@if [ "${DIRS}" != "" ]; then \
+	  for dir in ${DIRS} foo ; do \
+            if [ -d $$dir ]; then \
+	      r=`egrep requirespackage $$dir/makefile`; \
+              if [ "$$?" = 0 ]; then \
+                f=0; \
+                for l in ${PCONF} foo ; do \
+                  echo $$r | egrep "'$$l'" > /dev/null; \
+                  if [ "$$?" = 0 ]; then \
+	            f=1; \
+                    break; \
+                  fi; \
+                done ; \
+                if [ "$$f" = 0 ]; then \
+                  continue; \
+                fi; \
+              fi; \
+              r=`egrep requireslanguage $$dir/makefile`; \
+              if [ "$$?" = 0 ]; then \
+                echo $$r | egrep ${ESMC_LANGUAGE} > /dev/null; \
+                if [ "$$?" = 1 ]; then \
+                  continue; \
+                fi; \
+              fi; \
+              r=`egrep requiresscalar $$dir/makefile`; \
+              if [ "$$?" = 0 ]; then \
+                echo $$r |  egrep ${ESMC_SCALAR} > /dev/null; \
+                if [ "$$?" = 1 ]; then \
+                  continue; \
+                fi; \
+              fi; \
+            else \
+              continue; \
+            fi; \
+            (cd $$dir ; \
+            echo ${ACTION} in: `pwd`; \
+            ${OMAKE} -f makefile tree ACTION=${ACTION} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH});\
+	  done ; \
+        fi
+
+# Performs the specified action throughout the directory tree
+ttree: ${ACTION}
+	@-if [ "${DIRS}" != "" ]; then \
+	for dir in ${DIRS} foo ; do if [ -d $$dir ]; then \
+	(cd $$dir ; echo ${ACTION} in: `pwd`; \
+	${OMAKE} -f makefile ttree ACTION=${ACTION} BOPT=${BOPT} \
+	ESMF_ARCH=${ESMF_ARCH}  ) ;fi; \
+	done ; fi
+
+#This target goes through all the dirs that contains a makefile
+alltree_makefile: ${ACTION}
+	-@DIRS=`ls`; \
+	for dir in $$DIRS foo ; do if [ -f $$dir/makefile ]; then \
+	(cd $$dir ; echo ${ACTION} in: `pwd`; \
+	${OMAKE} -f makefile alltree_makefile ACTION=${ACTION} BOPT=${BOPT} \
+	ESMF_ARCH=${ESMF_ARCH}  ) ;fi; \
+	done
+# This target goes through all dirs specified by DIRS,EDIRS, and 
+# excludes dirs specified by $XDIRS
+alltree: ${ACTION}
+	@-if [ "${DIRS} ${EDIRS}" != " " ]; then \
+	NDIRS="${DIRS} ${EDIRS}" ;\
+	if [ "${XDIRS}" != "" ]; then \
+	for XDIR in ${XDIRS} qwertyuiop ; do \
+	NDIRS=`echo $$NDIRS | sed s/$$XDIR//g`; \
+	done; fi ; \
+	for dir in $$NDIRS foo ; do if [ -d $$dir ]; then \
+	(cd $$dir ; echo ${ACTION} in: `pwd`; \
+	${OMAKE} -f makefile alltree ACTION=${ACTION} BOPT=${BOPT} \
+	ESMF_ARCH=${ESMF_ARCH}  ) ;fi; \
+	done ; fi
+
+etags_sourcec:
+	-@if [ "${SOURCEC}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${SOURCEC} ; fi
+etags_sourceh:
+	-@if [ "${SOURCEH}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${SOURCEH}; fi
+etags_sourcef:
+	-@if [ "${SOURCEF}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${SOURCEF}; fi
+etags_docs:
+	-@if [ "${DOCS}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${DOCS}; fi
+etags_buildfiles:
+	-@if [ "${buildFILES}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${buildFILES}; fi
+etags_examplesc:
+	-@if [ "${EXAMPLESC}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${EXAMPLESC}; fi
+etags_examplesch:
+	-@if [ "${EXAMPLESCH}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${EXAMPLESCH}; fi
+etags_examplesf:
+	-@if [ "${EXAMPLESF}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${EXAMPLESF}; fi
+etags_examplesfh:
+	-@if [ "${EXAMPLESFH}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${EXAMPLESFH}; fi
+etags_makefile:
+	-@etags -a -f ${TAGSFILE} makefile
+etags_scripts:
+	-@if [ "${SCRIPTS}" != "" ]; then \
+		etags -a -f ${TAGSFILE} ${SCRIPTS}; fi
+
+# --------------------------------------------------------------------
+#
+# All remaining actions are intended for Alice developers only.
+# Alice users should not generally need to use these commands.
+#
+chkalice_path:
+	@alice_path=`pwd`; \
+	mod_path=`echo $$alice_path | sed 's+/mcs-homes07/bsmith+/alice/+g'`; \
+	if [ $${mod_path} = $${alice_path} ] ; then \
+	  echo 'Error! Wrong Alice Dir! Please use /home/bsmith/alice'; \
+	   false; \
+	fi
+
+# RCS file check-in
+ci: chkalice_path
+	@-/usr/local/bin/ci -u -q -mAutoCheckin ${SOURCEH} ${DOCS} ${SOURCE} \
+	  ${EXAMPLESC} ${EXAMPLESF} ${EXAMPLESCH} ${EXAMPLESFH} \
+	  ${TESTSC} ${TESTSF} ${SCRIPTS} ${buildFILES} makefile
+
+# RCS file check-out
+co: chkalice_path
+	@-/usr/local/bin/co -l -q ${SOURCEH} ${DOCS} ${SOURCE} \
+	  ${EXAMPLESC} ${EXAMPLESF} ${EXAMPLESCH} ${EXAMPLESFH} \
+	  ${TESTSC} ${TESTSF} ${SCRIPTS} ${buildFILES} makefile
+
+# Add another person to RCS access
+add: chkalice_path
+	@-rcs -a${NEW_RCS_USER} -q ${SOURCEH} ${DOCS} ${SOURCE} \
+	  ${EXAMPLESC} ${EXAMPLESF} ${EXAMPLESCH} ${EXAMPLESFH} \
+	  ${TESTSC} ${TESTSF} ${SCRIPTS} ${buildFILES} makefile
+
+# Remove person from RCS access
+remove: chkalice_path
+	@-rcs -e${NEW_RCS_USER} -q ${SOURCEH} ${DOCS} ${SOURCE} \
+	  ${EXAMPLESC} ${EXAMPLESF} ${EXAMPLESCH} ${EXAMPLESFH} \
+	  ${TESTSC} ${TESTSF} ${SCRIPTS} ${buildFILES} makefile
+
+# Builds Fortran-77 wrappers 
+# Source of bfort is in ~gropp/sowing/src/bfort
+fortranstubs:
+	@-/home/alice/bin/solaris/bfort -dir /home/bsmith/alice/src/fortran/auto \
+	  -mnative -ansi -nomsgs -anyname -mapptr -mpi -ferr -ptrprefix Alice\
+	  -ptr64 ESMC_USE_POINTER_CONVERSION  -fcaps ESMC_HAVE_FORTRAN_CAPS \
+          -fuscore ESMC_HAVE_FORTRAN_UNDERSCORE ${SOURCEC}
+fixfortran:
+	@echo "Fixing pointers in src/fortran/auto"
+	-@for FILENAME in ${SOURCEC} ; do \
+	  if [ ! -f $$FILENAME ]; then \
+	    echo "Error: file $$FILENAME specified in SOURCEC does not exist."; \
+	  else \
+	    cat $$FILENAME | \
+	    sed "s/^void /void ESMC_STDCALL /" | \
+	    sed "s/AliceToPointer(int)/AliceToPointer(void *)/" | \
+	    sed "s/AliceRmPointer(int)/AliceRmPointer(void *)/" | \
+	    sed "s/AliceToPointer(a) (a)/AliceToPointer(a) (*(long *)(a))/" | \
+	    sed "s/AliceFromPointer(a) (int)(a)/AliceFromPointer(a) (long)(a)/" | \
+	    sed "s/AliceToPointer( \*(int\*)/AliceToPointer( /" >_$$FILENAME; \
+	    /bin/mv _$$FILENAME $$FILENAME ;\
+	  fi; \
+	done
+
+
+
+# Builds man pages (LaTeX version)
+latexpages:
+	@-if [ "${MANSEC}" != "" ] ; then \
+	/home/gropp/bin/solaris/doc2lt	\
+	  ${SOURCEC} ${SOURCEH} >> \
+		    ${ESMF_DIR}/docs/tex/rsum/rsum${MANSEC}.tex ; fi 
+
+# Builds man pages (HTML version) in two stages
+# See rule for allwwwpages in ${ESMF_DIR}/makefile 
+#   1.) wwwpages_buildcite: builds the file manualpages.cit for hyperlinks
+#   2.) wwwpages: builds the html pages, complete with hyperlinks
+manualpages_buildcite:
+	@-if [ "${MANSEC}" != "" ] ; then \
+	  DOCTEXT_PATH=/home/bsmith/alice/docs/tex/doctext; \
+          /home/gropp/bin/solaris/doctext -html -indexdir ../${MANSEC} \
+		-index ${ESMF_DIR}/docs/manualpages/manualpages.cit \
+		-mpath ${ESMF_DIR}/docs/manualpages/${MANSEC} ${SOURCEC} ${SOURCEH}; \
+#
+#   DOCTEXT_PATH env variable is used by doctext
+#
+manualpages:
+	@-if [ "${MANSEC}" != "" ] ; then \
+	  DOCTEXT_PATH=/home/bsmith/alice/docs/tex/doctext; \
+	  /home/gropp/bin/solaris/doctext -html \
+		-mpath ${ESMF_DIR}/docs/manualpages/${MANSEC} -heading Alice \
+		-defn /home/bsmith/alice/docs/tex/doctext/html.def \
+		-locdir ${LOCDIR} -mapref ${ESMF_DIR}/docs/manualpages/manualpages.cit \
+		-defn ${ESMF_DIR}/docs/manualpages/sec/eop.${MANSEC} \
+		${SOURCEC} ${SOURCEH}; \
+
+
+#.PRECIOUS: ${PRECIOUS} ${LIBNAME}
+.SUFFIXES: .F ${SUFFIXES} .Alice .C .cc .cpp .r .rm .so
+
+.c.o: 
+	-${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+.c.a:
+	-${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+	-${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	-${RM} $*.o
+.cpp.o .cc.o .C.o: 
+	-${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+.cpp.a .cc.a .C.a: 
+	-${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+	-${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	-${RM} $*.o
+
+.F.o .F90.o:
+	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
+
+.F.tex .F90.tex:
+	-${PROTEX} -bF +f $< > doc/$*.tex
+
+.F.a: 
+	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
+	-${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	-${RM} $*.o
+
+.f.o .f90.o: 
+	-${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
+.f.a: 
+	-${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
+	-${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	-${RM} $*.o
+
+#
+#  These rules are for compiling the test examples.
+#
+.cpp.rm .cc.rm .C.rm .F.rm .f.rm .c.rm:
+	-@${RM} -f $* *.o $*.mon.* gmon.out mon.out
+.c.Alice:
+	-@${OMAKE} -f makefile ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} $* > trashz 2>&1
+	-@grep -v clog trashz | grep -v "information sections" | \
+          grep -v "WARNING: TOC" | \
+          grep -v "Extra instructions" | \
+          grep -v "Unused external reference" | \
+          grep -v "f90 continuing despite warning messages" | \
+          grep -v "symbol if the" | \
+          grep -v "ignoring symbol version info" | \
+          grep -v "preempts that definition" | \
+          grep -v "is an array from" | \
+          grep -v "Cannot cast" | \
+          grep -v "WARNING 134: weak definition of" | \
+          grep -v "Warning(s) detected" | \
+          grep -v "consider using mkstemp"  |\
+          grep -v EXTERNAL  |\
+          grep -v volatile  |\
+          grep -v -i inconsistent | grep -v Anachronism | \
+	  egrep -i '(Error|warning|Can|Unresolved)' >> /dev/null;\
+	  if [ "$$?" != 1 ]; then \
+	  cat trashz ; fi; ${RM} trashz
+.F.Alice:
+	-@${OMAKE} -f makefile ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} $* > trashz 2>&1
+	-@grep -v EXTERNAL trashz | grep -v Wall | \
+          grep -v "Unused external reference" | \
+          grep -v "WARNING: TOC overflow." | \
+          grep -v "Extra instructions are being" | \
+          grep -v "symbol if the symbol" | \
+          grep -v -i inconsistent | \
+          grep -v -i "unused dummy" | \
+	  grep -v "WARNING:  -cpp is ignored" | \
+          grep -v "ignoring symbol version info" | \
+	  grep -v "Inconsistent structure" | \
+	  grep -v "ex20.F:30:" | \
+	  grep -v "f90 continuing despite warning messages" | \
+          grep -v "is an array from" | \
+          grep -v "consider using mkstemp"  |\
+	  grep -v "Unused external reference" | \
+          grep -v "WARNING 134: weak definition of" | \
+          grep -v 'continuing despite warning messages' | \
+	  grep -v "Unused dummy argument" | \
+	  egrep -i '(Error|warning|Can|Unresolved)'  >> /dev/null ; \
+	  if [ "$$?" != 1 ]; then \
+	  cat trashz ; fi; ${RM} trashz;
+# -------------------------------------------------------------------------------
+#
+#   Rule for generating ADIC derivatives from Alice .c and .hfiles
+#
+adic:
+	@-if [ "${NOADIC}" != "true" ]; then if [ "${SOURCEC}" != "" ]; then \
+          for i in ${SOURCEC} foo; do if [ -f $$i ]; then \
+          ${ADIC_CC} -s -h -f 1 ${CFLAGS} ${CCPPFLAGS} $$i ; \
+          fi; done ; \
+        fi; fi
+	@-if [ "${NOADIC}" != "true" ]; then if [ "${SOURCEH}" != "" ]; then \
+          for i in ${SOURCEH} foo; do if [ -f $$i ]; then \
+          ${ADIC_CC} -s -h -f 1 ${CFLAGS} ${CCPPFLAGS} $$i ; \
+          fi; done ; \
+        fi; fi
+
+adic2:
+	-if [ "${NOADIC}" != "true" ]; then if [ "${SOURCEC}" != "" ]; then \
+          for i in ${SOURCEC} foo; do if [ -f $$i ]; then \
+          ${ADIC_CC} -h -f 1 ${CFLAGS} ${CCPPFLAGS} $$i ; \
+          fi; done ; \
+        fi; fi
+	-if [ "${NOADIC}" != "true" ]; then if [ "${SOURCEH}" != "" ]; then \
+          for i in ${SOURCEH} foo; do if [ -f $$i ]; then \
+          ${ADIC_CC} -h -f 1 ${CFLAGS} ${CCPPFLAGS} $$i ; \
+          fi; done ; \
+        fi; fi
+
+adiclib:
+	-@if [ "${NOADIC}" != "true" ]; then if [ "${SOURCEC}" != "" ]; then \
+          ${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ADIC_INCLUDE} *.ad.c ; \
+        fi; fi
+	-@if [ "${NOADIC}" != "true" ]; then if [ "${SOURCEC}" != "" ]; then \
+          ${AR} ${AR_FLAGS} ${PDIR}/${LIBBASE}.a *.ad.o ; \
+        fi; fi
+	-@${RM} -f *.ad.o
+
+adiclib2:
+	-if [ "${NOADIC}" != "true" ]; then if [ "${SOURCEC}" != "" ]; then \
+          ${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ADIC_INCLUDE} *.ad.c ; \
+        fi; fi
+	-if [ "${NOADIC}" != "true" ]; then if [ "${SOURCEC}" != "" ]; then \
+          ${AR} ${AR_FLAGS} ${PDIR}/${LIBBASE}.a *.ad.o ; \
+        fi; fi
+	-@${RM} -f *.ad.o
+#
+#
+countfunctions: chkalice_dir
+	-@if [ ! -f ${PDIR}/countfunctions ]; then \
+	  echo "AliceDummyFunction" > ${PDIR}/countfunctions ; fi
+	@-if [ "${SOURCEC}" != "" ]; then \
+          for i in ${SOURCEC} foo; do if [ -f $$i ]; then \
+           grep "define __FUNC__" $$i | cut -f2 -d\" >> ${PDIR}/countfunctions ; \
+          fi; done ; \
+        fi
+
+checkbadAliceFunctionBegin:
+	-@if [ "${SOURCEC}" != "" ] ; then \
+	${OMAKE} -f makefile ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} \
+	checkbadAliceFunctionBegin_private ; fi
+
+checkbadAliceFunctionBegin_private:
+	-@for filename in ${SOURCEC} ; do \
+	a=`grep '#define __FUNC__' $$filename | wc -l`; \
+	b=`grep 'AliceFunctionBegin' $$filename | wc -l`; \
+	if [ $$a -ne $$b ] ; then \
+	echo "$$filename: __FUNC__ = $$a; AliceFunctionBegin = $$b" ; \
+	fi; \
+	done
+
+checkbadFileHeader:
+	-@for filename in ${SOURCEC} makefile ${SOURCEH} ${SOURCEF} ${EXAMPLESC} ${EXAMPLESF}; do \
+	a=`grep 'Id:' $$filename | wc -l`; \
+	if [ $$a -ne 1 ] ; then \
+	echo "$$filename: missing RCS file header" ; \
+	fi; \
+	done
+
+checkbadSource:
+	-@for filename in ${SOURCEC} makefile ${SOURCEH} ${SOURCEF} ${EXAMPLESC} ${EXAMPLESF}; do \
+       a=`grep '( ' $$filename | wc -l`; \
+       if [ $$a -ge 1 ] ; then \
+       echo "$$filename: extra blank after (" ; \
+       fi; \
+       a=`grep ' )' $$filename | wc -l`; \
+       if [ $$a -ge 1 ] ; then \
+       echo "$$filename: extra blank before )" ; \
+       fi; \
+         a=`grep 'register int' $$filename | wc -l`; \
+       if [ $$a -ge 1 ] ; then \
+       echo "$$filename: do not use register keywork in Alice" ; \
+       fi; \
+         a=`grep 'register double' $$filename | wc -l`; \
+       if [ $$a -ge 1 ] ; then \
+       echo "$$filename: do not use register keywork in Alice" ; \
+       fi; \
+         a=`grep '; CHK' $$filename | wc -l`; \
+       if [ $$a -ge 1 ] ; then \
+       echo "$$filename: space before CHKERRx() or CHKPTRx()" ; \
+       fi; \
+         done
+
+# -------------------------------------------------------------------------------
+deleteshared: chkopts_basic
+	${RM} ${LDIR}/*.${SLSUFFIX} ${LDIR}/so_locations
+
+noshared:
+

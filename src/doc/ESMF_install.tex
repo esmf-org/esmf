@@ -1,0 +1,80 @@
+% $Id: ESMF_install.tex,v 1.1 2001/11/13 18:35:47 dneckels Exp $
+
+\section{Installation}
+
+Currently the following environment variables need to be set:
+\begin{verbatim}
+  ESMF_DIR      top-level ESMF directory
+  ESMF_ARCH     platform and compiler configuration
+\end{verbatim}
+
+\noindent The following configurations are supported:
+
+\begin{tabular}{lll}
+{\tt ESMF\_ARCH}  & {\tt alpha}      &  OSF1, Native compilers. \\
+                  & {\tt IRIX64}     &  IRIX64, MIPSpro/mpt 64 bit compilers. \\
+                  & {\tt IRIX}       &  IRIX64, MIPSpro/mpt n32 abi compilers. \\
+                  & {\tt rs6000\_sp}  &  AIX, mpxlf90\_r, mpcc\_r, and mpCC\_r.  \\
+                  & {\tt linux\_gnupgf90} & Linux, pgf90, gcc and g++.  \\
+                  & {\tt linux\_pgi}  &  Linux, pgf90, pgcc, pgCC. \\
+                  & {\tt linux\_lf95} &  Linux, lf95, gcc, g++. \\
+                  & {\tt sun}        &  SunOs, SUNWhpc compilers. \\
+\end{tabular}
+
+\smallskip
+
+The library requires {\tt gmake} to build.  Simultaneous multiple architecture builds are supported, with
+one restriction; the test cases may only be run on one platform at a time. 
+
+\smallskip
+
+\noindent Build the library with the command:
+\begin{verbatim}
+  gmake BOPT=g  
+\end{verbatim}
+  for a debug version or
+\begin{verbatim}
+  gmake BOPT=O  
+\end{verbatim}
+  for an optimized version.
+
+\noindent To build and run C tests:
+\begin{verbatim}
+  gmake BOPT=g test_c
+\end{verbatim}
+
+\noindent To build and run F90 tests:
+\begin{verbatim}
+  gmake BOPT=g test_f90
+\end{verbatim}
+
+Output files from the test examples will be directed to files 
+in {\tt */examples/output} directories. \\
+
+\noindent To build documentation:
+\begin{verbatim}
+  gmake doc
+\end{verbatim}
+
+Please note that in order to run the tests the standard
+environment variables for the platform must be set by the user; 
+e.g., {\tt MP\_NODES, MP\_TASKS\_PER\_NODE} for an IBM SP.  It's suggested
+that the user run the tests as a single task, since output from
+multiple tasks running the same test suite currently spills into a single 
+file.
+
+To use the library from C/C++, link with the library executable and include
+the {\tt ``ESMC.h''} file.
+
+To use the library from Fortran, link with the library executable and
+create links to the library modules {\tt esmf\_timemgmtmod.mod}
+and {\tt esmf\_timemgmttypesmod.mod} in your build directory.  These are
+in the top level {\tt mod} directory under the appropriate architecture.
+To include the library in application modules, {\tt USE} the
+module {\tt ESMF\_TimeMgmtMod}.  
+
+
+
+
+
+

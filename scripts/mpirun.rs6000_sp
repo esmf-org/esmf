@@ -1,0 +1,28 @@
+#!/bin/ksh
+# This script provides an interface such that the simple command
+# mpirun -np # runs # copies of the program in parallel.
+# The IBM poe command does not fit this paradigm.
+
+
+
+if [ "$1" != "-np" ] 
+then
+	echo "Usage: mpirun -np #"
+	exit 1
+fi
+
+num_procs=$2
+
+shift 2
+
+prog=$*
+
+echo "prog is<$prog>"
+
+MP_NODES=1
+MP_TASKS_PER_NODE=$num_procs
+
+export MP_NODES MP_TASKS_PER_NODE
+
+echo "about to exec< exec poe -procs $num_procs $prog>"
+exec poe $prog

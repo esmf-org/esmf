@@ -1,0 +1,144 @@
+\section{Requirements}
+
+The Earth System Modeling Framework (ESMF) will consist of an interface
+specification and a reference implementation.  The ESMF is intended to 
+facilitate coupling of model components and to support lower-level
+non-scientific tasks on high performance computer platforms.
+
+The ESMF will support predictive models of the atmosphere, ocean, land and
+sea ice and data assimilation systems.
+
+More detailed functional requirements will be prepared as the project 
+proceeds.
+
+\subsection{Functional Requirements}
+
+\subsubsection{Coupling Superstructure}
+
+The ESMF will provide a coupling mechanism that performs regridding,
+interpolation and communication of gridded, distributed data.  The 
+data may represent multiple fields or a single field, may be in the
+same or different executables, may be in code segments executing 
+synchronously or asynchronously, and may be distributed among nodes
+and/or partitioned among multiple threads.
+
+\subsubsection{Parallel Support Layer}
+
+The ESMF will provide the software necessary to support the data
+decomposition and communication requirements of the individual components
+and will do so in a way that is consistent with the superstructure.
+This layer will include
+tools for describing a wide variety of grids and decompositions,
+and for performing high-level collective manipulations of fields defined
+on those grids.  The software for specifying decompositions should support
+default decompositions and dynamic load balancing.
+
+\subsubsection{Utility Infrastructure}
+
+The ESMF will include general purpose utility routines for use by both 
+the coupling mechanism and application codes.  These include
+performance profiling, time management and error handling.
+
+The ESMF will support I/O of self-describing data in netCDF, HDF, 
+binary, GRIB and BUFR data formmats.  Others such as the EOS HDF and ODF 
+data formats are desired but not required.  The I/O utilities will 
+have generic interfaces for ease of use, and will be high-performance.
+
+\subsubsection{Evaluation Suite}
+
+The ESMF will be distributed with a suite of representative components
+that will demonstrate its usage.
+
+\subsection{General Computational Requirements}
+
+\subsubsection{Performance Portability}
+
+Portability and computational efficiency over a wide range of platforms
+is essential.  ESMF must be supported on the following platforms:
+\begin{itemize}
+\item Cray T3E (initial ESS testbed)
+\item IBM SP
+\item SGI Origin 2000
+\item Compaq ES40
+\item PC Linux platforms (including cluster)
+\end{itemize}
+
+Optimized performance on scalar architectures with moderate numbers of 
+processors (100-1000) is the highest priority. 
+
+Because many of the platforms listed above support multiple 
+layers of parallelism (e.g. MPI, OpenMP),  the framework
+must support message-based and thread-based parallelism and
+hybrid combinations of the two approaches.
+
+The framework will not increase the execution time of an existing code
+written without the framework by more than 10\%.
+
+The framework must include performance measurement tools. 
+
+\subsubsection{Language}
+
+ESMF utility and coupling software must have both Fortran 90 and
+C/C++ bindings.
+
+\subsubsection{Grids}
+
+ESMF must support the coupling of components that are discretized on:
+\begin{itemize}
+\item logically rectangular grids
+\item reduced (cut-out) and regional grids
+\item unstructured grids (e.g., land grids, observations)
+\item phase space grids (e.g., spectral, Fourier)
+\item nested and adaptive grids
+\item cubed sphere and icosahedral grids
+\end{itemize}
+
+In addition we require support for describing masked regions and
+halo regions.
+
+\subsubsection{Runtime Configurability}
+
+ESMF must allow domain decomposition and the number of processors and/or
+nodes to be configurable at runtime.  Other types of runtime configurability
+may be permitted if acceptable performance is sustained.
+
+\subsubsection{Fault Tolerance}
+
+Error reporting must be handled consistently and with ample information
+relayed to the user.  In situations where the components fail,
+the ESMF will have a mechanism to detect the failure and shut down the
+entire application.
+
+\subsection{Design, Implementation and Maintenance Requirements}
+
+\subsubsection{Flexibility and Extensibility}
+
+Layers of the framework will be designed to survive restructuring of
+other parts of the framework and user-supplied components.  For example,
+the coupling layers should be able to adapt to different implementations
+and data structures of component models.
+
+\subsubsection{Ease of Adoption}
+
+It must be straightforward to integrate ESMF into an application that
+is reasonably modular.  We adopt as a goal that such applications should
+need to modify no more than 2\% of their source code to utilize the coupling
+features of ESMF.
+
+\subsubsection{Ongoing Support}
+
+The ESMF must be maintained as a long-term commitment by at least one
+institution.  This maintenance must extend beyond adaptation to the 
+computational environment, and must include an ongoing research component
+dedicated to increasing the performance, flexibility and functionality of
+the software.
+
+
+
+
+
+
+
+
+
+

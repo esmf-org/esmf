@@ -1,0 +1,3 @@
+ESMC_LANGUAGE = C
+ESMC_SCALAR   = l
+

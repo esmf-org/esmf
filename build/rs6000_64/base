@@ -1,0 +1,31 @@
+# $Id: base,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+#
+include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
+include ${ESMF_DIR}/build/common
+
+#########
+
+# This F.f rule ensures that the old *.f files are removed.
+
+.F.f:
+	-${RM} $*.f __$*.c
+	-cp $*.F __$*.c
+	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
+	-${RM} __$*.c
+
+.F.o:
+	-${RM} $*.f __$*.c
+	-cp $< __$*.c
+	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
+	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
+	-${RM} $*.f __$*.c
+
+.F.a:
+	-${RM} $*.f __$*.c
+	-cp $< __$*.c
+	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
+	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
+	-${AR} cr ${LIBNAME} $*.o
+	-${RM} $*.f __$*.c
+
+shared:

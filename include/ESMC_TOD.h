@@ -1,0 +1,61 @@
+/* ESMC_TOD.h */
+
+#ifndef ESMC_TOD_H
+#define ESMC_TOD_H
+
+#include "ESMC_BasicUtil.h"
+
+enum TODType{ ESMC_TOD_TYPE_UNDEFINED,   /* Abbreviations */
+	      ESMC_TOD_INT_SEC,          /* IS = integer seconds */
+	      ESMC_TOD_INT_MSEC};        /* MS = integer milliseconds */
+
+typedef enum TODType ESMC_TODType;
+
+struct TODClass{
+  ESMC_TODType type;
+  int sec;
+  int msec;
+};
+
+typedef struct TODClass *ESMC_TOD;
+
+typedef struct TODClass ESMC_TODClass;
+
+/*============================================================================*
+ * Public methods
+ *============================================================================*/
+
+extern int ESMC_TODConstructIS(ESMC_TOD this, int seconds);
+
+extern int ESMC_TODConstructUndefined(ESMC_TOD this);
+
+extern int ESMC_TODIncrement(ESMC_TOD this, ESMC_TOD inc, ESMC_TOD resultTOD, 
+			    int *resultDays);
+
+extern int ESMC_TODDecrement(ESMC_TOD this, ESMC_TOD dec, ESMC_TOD resultTOD, 
+			    int *resultDays);
+
+extern int ESMC_TODIsLater(ESMC_TOD earlyTOD, ESMC_TOD lateTOD, ESMC_Bool *isLater);
+
+extern int ESMC_TODPrint(ESMC_TOD this);
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
