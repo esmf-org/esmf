@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.23 2003/07/17 20:19:37 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.24 2003/07/29 22:52:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.23 2003/07/17 20:19:37 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.24 2003/07/29 22:52:58 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -129,6 +129,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+     !EX_UTest
      ! Verifing that printing an uninitialized Field is handled properly.
      ! This code is commented out until bug 747699 is fixed.
      call ESMF_FieldPrint(f2, rc=rc)
@@ -372,6 +373,7 @@
       call ESMF_FieldDestroy(f5, rc=rc)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! Req. 1.6.2 Return grid 
       ! A field shall be able to return a reference to its grid.
       ! The following code is commented out because there is
