@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/18 22:58:26 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/19 22:47:16 svasquez Exp $ 
 
 ALL: system_tests
 
@@ -39,11 +39,11 @@ CLOBBERDIRS =
 
 RUN_FlowWithCoupling:
 	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/FlowWithCoupling >$(ESMC_TESTDIR)/FlowWithCoupling.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/FlowWithCoupling >$(ESMC_TESTDIR)/FlowWithCouplingSTest.stdout
 
 RUN_FlowWithCouplingUNI:
 	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/FlowWithCoupling >$(ESMC_TESTDIR)/FlowWithCoupling.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/FlowWithCoupling >$(ESMC_TESTDIR)/FlowWithCouplingSTest.stdout
 
 FlowWithCoupling.rm:
 	echo "FlowWithCoupling.rm target called here."
