@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.1 2003/04/09 23:48:44 flanigan Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.2 2003/12/03 23:16:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,14 +28,15 @@
 !
 !-----------------------------------------------------------------------------
 ! !USES:
-      use ESMF_TestMod     ! test methods
+      use ESMF_Mod
+      use ESMF_TestMod    ! test methods
       use ESMF_RegridMod  ! the class to test
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.1 2003/04/09 23:48:44 flanigan Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.2 2003/12/03 23:16:20 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -49,6 +50,10 @@
 
       ! instantiate a Regrid 
       type(ESMF_Regrid) :: regrid
+      type(ESMF_RegridConfig) config_set
+      type(ESMF_RegridConfig) :: config_get
+      character(ESMF_MAXSTR) :: validate_options
+      character(ESMF_MAXSTR) :: print_options
 
       ! test dynamic allocation of ESMF_Regrid
       regrid = ESMF_RegridCreate(args, rc)
@@ -64,7 +69,6 @@
                       failMsg, result, ESMF_SRCLINE)
 
       ! test setting of configuration values
-      type(ESMF_RegridConfig) config_set
       call ESMF_RegridSetConfig(regrid, config_set, rc)
       write(failMsg, *) "rc =", rc, ", config_set =", config_set
       call ESMF_Test((rc.eq.ESMF_SUCCESS),  &
@@ -72,7 +76,6 @@
 
       ! test getting of configuration values,
       !  compare to values set previously
-      type(ESMF_RegridConfig) :: config_get
       call ESMF_RegridGetConfig(regrid, config_get, rc)
       write(failMsg, *) "rc =", rc, ", config_get =", config_get
       call ESMF_Test((rc.eq.ESMF_SUCCESS .and. config_get .eq. config_set), &
@@ -94,14 +97,12 @@
       !                failMsg, result, ESMF_SRCLINE)
     
       ! test validate method via option string
-      character(ESMF_MAXSTR) :: validate_options
       call ESMF_RegridValidate(regrid, validate_options, rc)
       write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       failMsg, result, ESMF_SRCLINE)
 
       ! test print method via option string
-      character(ESMF_MAXSTR) :: print_options
       call ESMF_RegridPrint(regrid, print_options, rc)
       write(failMsg, *) "rc =", rc, ", print_options =", print_options
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
