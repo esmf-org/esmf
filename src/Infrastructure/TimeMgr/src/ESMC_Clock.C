@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.70 2005/01/12 06:03:46 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.71 2005/02/07 23:35:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.70 2005/01/12 06:03:46 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.71 2005/02/07 23:35:43 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -121,14 +121,16 @@ int ESMC_Clock::count=0;
     if (startTime != ESMC_NULL_POINTER) clock->startTime = *startTime;
     if (stopTime  != ESMC_NULL_POINTER) {
       clock->stopTime  = *stopTime;
-      clock->stopTimeSet = true;
+      clock->stopTimeEnabled = true;
     }
 
     if (runDuration != ESMC_NULL_POINTER) {
       clock->stopTime = clock->startTime + *runDuration;
+      clock->stopTimeEnabled = true;
     }
     if (runTimeStepCount != ESMC_NULL_POINTER) {
       clock->stopTime = clock->startTime + (*runTimeStepCount * *timeStep);
+      clock->stopTimeEnabled = true;
     }
 
     if (refTime != ESMC_NULL_POINTER) clock->refTime = *refTime;
@@ -293,13 +295,18 @@ int ESMC_Clock::count=0;
 
     if (timeStep  != ESMC_NULL_POINTER) this->timeStep  = *timeStep;
     if (startTime != ESMC_NULL_POINTER) this->startTime = *startTime;
-    if (stopTime  != ESMC_NULL_POINTER) this->stopTime  = *stopTime;
+    if (stopTime  != ESMC_NULL_POINTER) {
+      this->stopTime  = *stopTime;
+      this->stopTimeEnabled = true;
+    }
 
     if (runDuration != ESMC_NULL_POINTER) {
       this->stopTime = this->startTime + *runDuration;
+      this->stopTimeEnabled = true;
     }
     if (runTimeStepCount != ESMC_NULL_POINTER) {
       this->stopTime = this->startTime + (*runTimeStepCount * *timeStep);
+      this->stopTimeEnabled = true;
     }
 
     if (refTime   != ESMC_NULL_POINTER) this->refTime   = *refTime;
@@ -614,7 +621,7 @@ int ESMC_Clock::count=0;
       return(false);
     }
 
-    // TODO:  first check if stopTime has been specified; if not, return false.
+    if (!stopTimeEnabled) return(false);
 
     // positive time step ?
     if (stopTime > startTime) {
@@ -628,6 +635,117 @@ int ESMC_Clock::count=0;
     } else return(currTime == stopTime);
 
  } // end ESMC_ClockIsStopTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockStopTimeEnable - enables a Clock's stopTime to function
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockStopTimeEnable(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time *stopTime) {              // in  - optional new stop time
+//
+// !DESCRIPTION:
+//      ESMF routine which enables a {\tt ESMC\_Clock}'s stopTime to function.
+//
+//EOP
+// !REQUIREMENTS:  WRF
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockStopTimeEnable()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+    if (stopTime != ESMC_NULL_POINTER) {
+      this->stopTime = *stopTime;
+    }
+
+    stopTimeEnabled = true;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_ClockStopTimeEnable
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockStopTimeDisable - disables a Clock's stopTime from functioning
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockStopTimeDisable(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      ESMF routine which disables a {\tt ESMC\_Clock}'s stopTime from
+//      functioning.
+//
+//EOP
+// !REQUIREMENTS:  WRF
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockStopTimeDisable()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+    stopTimeEnabled = false;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_ClockStopTimeDisable
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockIsStopTimeEnabled - check if Clock's stop time is enabled
+//
+// !INTERFACE:
+      bool ESMC_Clock::ESMC_ClockIsStopTimeEnabled(
+//
+// !RETURN VALUE:
+//    bool is stop time enabled or not
+//
+// !ARGUMENTS:
+      int  *rc) const {        // out - error return code
+//
+// !DESCRIPTION:
+//    checks if {\tt ESMC\_Clock}'s stop time is enabled.
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockIsStopTimeEnabled()"
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", rc);
+      return(false);
+    }
+
+    return(stopTimeEnabled);
+
+ } // end ESMC_ClockIsStopTimeEnabled
 
 //-------------------------------------------------------------------------
 //BOP
@@ -1069,7 +1187,7 @@ int ESMC_Clock::count=0;
       currTime     = clock.currTime;
       prevTime     = clock.prevTime;
       advanceCount = clock.advanceCount;
-      stopTimeSet  = clock.stopTimeSet;
+      stopTimeEnabled  = clock.stopTimeEnabled;
       id           = clock.id;
 
       // copy = true;   // TODO: Unique copy ? (id = ++count) (review operator==
@@ -1268,7 +1386,7 @@ int ESMC_Clock::count=0;
     }
 
     // validate optional stopTime property if set
-    if (stopTimeSet) {
+    if (stopTimeEnabled) {
       if(ESMC_LogDefault.ESMC_LogMsgFoundError(stopTime.ESMC_TimeValidate(),
                                      "stopTime.ESMC_TimeValidate() failed",
                                      &rc)) return(rc);
@@ -1375,7 +1493,7 @@ int ESMC_Clock::count=0;
       //        change direction with a variable time step.  Also, prevTime
       //        is exclusively maintained internally.
 
-    } // endif stopTimeSet
+    } // endif stopTimeEnabled
 
 
     return(ESMF_SUCCESS);
@@ -1456,6 +1574,9 @@ int ESMC_Clock::count=0;
           stopTime.ESMC_TimePrint();
         }
       }
+      else if (strncmp(opts, "stoptimeenabled", 15) == 0) {
+        printf("stopTimeEnabled = %s\n", stopTimeEnabled ? "true" : "false");
+      }
       else if (strncmp(opts, "reftime", 7) == 0) {
         printf("refTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
@@ -1497,17 +1618,11 @@ int ESMC_Clock::count=0;
     } else {
       // default:  print out all properties
 
-      printf("timeStep = \n");
-      printf("startTime = \n");
-      printf("stopTime = \n");
-      printf("refTime = \n");
-      printf("currTime = \n");
-      printf("prevTime = \n");
-
       printf("name = %s\n", name);
       printf("timeStep = \n");  timeStep.ESMC_TimeIntervalPrint(options);
       printf("startTime = \n"); startTime.ESMC_TimePrint(options);
       printf("stopTime = \n");  stopTime.ESMC_TimePrint(options);
+      printf("stopTimeEnabled = %s\n", stopTimeEnabled ? "true" : "false");
       printf("refTime = \n");   refTime.ESMC_TimePrint(options);
       printf("currTime = \n");  currTime.ESMC_TimePrint(options);
       printf("prevTime = \n");  prevTime.ESMC_TimePrint(options);
@@ -1561,7 +1676,7 @@ int ESMC_Clock::count=0;
 
     name[0] = '\0';
     advanceCount = 0;
-    stopTimeSet = false;
+    stopTimeEnabled = false;
     id = ++count;  // TODO: inherit from ESMC_Base class
     // copy = false;  // TODO: see notes in constructors and destructor below
 

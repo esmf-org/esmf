@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.38 2004/12/04 01:42:48 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.39 2005/02/07 23:35:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
                                                 //  necessary
     ESMC_Alarm      **alarmList;                // associated alarm array
 
-    bool              stopTimeSet;  // true if optional property set
+    bool              stopTimeEnabled;  // true if optional property set
 
     int               id;         // unique identifier. used for equality
                                   //    checks and to generate unique default
@@ -161,7 +161,10 @@
     // TMG3.4.1  after increment, for each alarm,
     //           calls ESMC_Alarm::CheckActive()
 
-    bool ESMC_ClockIsStopTime(int *rc) const;    // TMG3.5.6
+    bool ESMC_ClockIsStopTime(int *rc) const;             // TMG3.5.6
+    int  ESMC_ClockStopTimeEnable(ESMC_Time *stopTime=0); // WRF
+    int  ESMC_ClockStopTimeDisable(void);                 // WRF
+    bool ESMC_ClockIsStopTimeEnabled(int *rc) const;      // WRF
 
     int ESMC_ClockGetNextTime(ESMC_Time         *nextTime,
                               ESMC_TimeInterval *timeStep=0);

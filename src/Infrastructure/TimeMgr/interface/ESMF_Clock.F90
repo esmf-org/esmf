@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.60 2004/07/21 19:07:42 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.61 2005/02/07 23:35:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -77,9 +77,12 @@
       public ESMF_ClockGetAlarmList
       public ESMF_ClockGetNextTime
       public ESMF_ClockIsStopTime
+      public ESMF_ClockIsStopTimeEnabled
       public ESMF_ClockPrint
       public ESMF_ClockReadRestart
-      public ESMF_ClockSet     
+      public ESMF_ClockSet
+      public ESMF_ClockStopTimeDisable     
+      public ESMF_ClockStopTimeEnable     
       public ESMF_ClockSyncToRealTime
       public ESMF_ClockValidate
       public ESMF_ClockWriteRestart
@@ -94,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.60 2004/07/21 19:07:42 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.61 2005/02/07 23:35:58 eschwab Exp $'
 
 !==============================================================================
 !
@@ -733,6 +736,40 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ClockIsStopTimeEnabled - Test if the Clock's stop time is enabled
+
+! !INTERFACE:
+      function ESMF_ClockIsStopTimeEnabled(clock, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_ClockIsStopTimeEnabled
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in)            :: clock
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Returns true if the {\tt clock}'s stop time is set and enabled,
+!     and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to check.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMGx.x, WRF
+
+!     invoke C to C++ entry point
+      call c_ESMC_ClockIsStopTimeEnabled(clock, ESMF_ClockIsStopTimeEnabled, rc)
+    
+      end function ESMF_ClockIsStopTimeEnabled
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE:  ESMF_ClockPrint - Print the contents of a Clock
 
 ! !INTERFACE:
@@ -904,6 +941,71 @@
                            refTime, currTime, advanceCount, rc)
     
       end subroutine ESMF_ClockSet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockStopTimeDisable - Disable a Clock's stop time
+
+! !INTERFACE:
+      subroutine ESMF_ClockStopTimeDisable(clock, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(inout)         :: clock
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Disables a {\tt ESMF\_Clock}'s stop time; {\tt ESMF\_ClockIsStopTime()}
+!     will always return false, allowing a clock to run past its stopTime.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance whose stop time to disable.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMGx.x, WRF
+    
+!     invoke C to C++ entry point
+      call c_ESMC_ClockStopTimeDisable(clock, rc)
+
+      end subroutine ESMF_ClockStopTimeDisable
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockStopTimeEnable - Enable an Clock's stop time
+
+! !INTERFACE:
+      subroutine ESMF_ClockStopTimeEnable(clock, stopTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(inout)         :: clock
+      type(ESMF_Time),  intent(in),  optional :: stopTime
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Enables a {\tt ESMF\_Clock}'s stop time, allowing
+!     {\tt ESMF\_ClockIsStopTime()} to respect the stopTime.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance whose stop time to enable.
+!     \item[{[stopTime]}]
+!          The stop time to set or reset.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMGx.x, WRF
+
+!     invoke C to C++ entry point
+      call c_ESMC_ClockStopTimeEnable(clock, stopTime, rc)
+
+      end subroutine ESMF_ClockStopTimeEnable
 
 !------------------------------------------------------------------------------
 !BOP

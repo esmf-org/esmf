@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.35 2004/07/02 20:27:26 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.36 2005/02/07 23:35:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -202,6 +202,28 @@ extern "C" {
                                       int *esmf_clockIsStopTime, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_clockIsStopTime = (int) (*ptr)->ESMC_ClockIsStopTime(
+                                             ESMC_NOT_PRESENT_FILTER(status) );
+       }
+
+       void FTN(c_esmc_clockstoptimeenable)(ESMC_Clock **ptr,
+                                            ESMC_Time *stopTime, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          int rc = (*ptr)->ESMC_ClockStopTimeEnable(
+                                         ESMC_NOT_PRESENT_FILTER(stopTime) );
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_clockstoptimedisable)(ESMC_Clock **ptr, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          int rc = (*ptr)->ESMC_ClockStopTimeDisable();
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_clockisstoptimeenabled)(ESMC_Clock **ptr, 
+                               int *esmf_clockIsStopTimeEnabled, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          *esmf_clockIsStopTimeEnabled =
+                         (int) (*ptr)->ESMC_ClockIsStopTimeEnabled(
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 

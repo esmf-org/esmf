@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.92 2005/02/01 00:25:16 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.93 2005/02/07 23:35:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.92 2005/02/01 00:25:16 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.93 2005/02/07 23:35:58 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,9 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
-      logical :: bool, clocksEqual, clocksNotEqual, testPass
+      logical :: bool, clocksEqual, clocksNotEqual, testPass, clockStopped
+      logical :: stopTimeEnabled
+
       ! instantiate a clock 
       type(ESMF_Clock) :: clock, clock1, clock2, clock_gregorian, &
                           clock_no_leap, clock_360day, topClock
@@ -1912,7 +1914,7 @@
       call ESMF_ClockPrint(clock, "timestep string", rc=rc)
       call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
       write(failMsg, *) "1/3 second clock advanced ", advanceCounts, &
-                        ", not 4 or not ESMF_SUCCESS."
+                        ", not 4 times, or not ESMF_SUCCESS."
       call ESMF_Test((advanceCounts.eq.4.and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock, rc)
@@ -1947,10 +1949,10 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-
-      ! This checks Tom Henderson's WRF request that a clock be valid at
-      ! the end of a timestep loop when currTime == stopTime
       !EX_UTest
+      ! This checks Tom Henderson's WRF request that a clock be valid at
+      ! the end of a timestep loop when currTime == stopTime.
+      ! Bug #1101839, Support #1099854
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Clock Valid at end of Advance Loop Test"
       call ESMF_ClockValidate(topClock, rc=rc)
@@ -1958,6 +1960,85 @@
                      name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_ClockDestroy(topClock, rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test fix for Support #1099584, Bug #1101904 "Disable stopTime to make
+      ! clock run forever" requested by Tom Henderson/WRF
+      write(name, *) "Clock stopTime disabled test"
+
+      call ESMF_TimeSet(startTime, yy=2005, mm=2, dd=3, rc=rc)
+      call ESMF_TimeSet(stopTime,  yy=2005, mm=2, dd=4, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, h=1, rc=rc)
+      clock = ESMF_ClockCreate("Hourly Clock", &
+                               timeStep, startTime, stopTime, rc=rc)
+
+      testPass = .false.
+      clockStopped = .false.
+
+      if (rc.eq.ESMF_SUCCESS) then
+        ! set clock to run "forever"
+        call ESMF_ClockStopTimeDisable(clock, rc)
+        stopTimeEnabled = ESMF_ClockIsStopTimeEnabled(clock, rc)
+
+        ! time step from start time to one step beyond stop time
+        do while (.not.clockStopped)
+          call ESMF_ClockAdvance(clock, rc=rc)
+          clockStopped = ESMF_ClockIsStopTime(clock, rc)
+          call ESMF_ClockGet(clock, currTime=currentTime, rc=rc)
+          if (currentTime == (stopTime + timeStep)) then
+            testPass = .true.
+            clockStopped = .true.
+          end if
+        end do
+      end if
+
+      call ESMF_ClockPrint(clock, "currtime string", rc=rc)
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      print *, "Hourly clock advanced ", advanceCounts, " times."
+      write(failMsg, *) "Disabled hourly clock advanced ", advanceCounts, &
+                        ", not 25 times, or not disabled, or not ESMF_SUCCESS."
+      call ESMF_Test((testPass .and. .not.stopTimeEnabled .and. &
+                      advanceCounts.eq.25 .and. rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test fix for Support #1099584, Bug #1101904 "Disable stopTime to make
+      ! clock run forever" requested by Tom Henderson/WRF
+      write(name, *) "Clock stopTime re-enabled test"
+
+      testPass = .true.
+      clockStopped = .false.
+
+      ! re-enable and reset clock stopTime to the next day
+      call ESMF_TimeSet(stopTime, yy=2005, mm=2, dd=5, rc=rc)
+      call ESMF_ClockStopTimeEnable(clock, stopTime=stopTime, rc=rc)
+      stopTimeEnabled = ESMF_ClockIsStopTimeEnabled(clock, rc)
+
+      ! time step from current time to stop time
+      do while (.not.clockStopped)
+        call ESMF_ClockAdvance(clock, rc=rc)
+        clockStopped = ESMF_ClockIsStopTime(clock, rc)
+        call ESMF_ClockGet(clock, currTime=currentTime, rc=rc)
+        if (currentTime > stopTime) then
+          testPass = .false.
+          clockStopped = .true.
+        end if
+      end do
+
+      call ESMF_ClockPrint(clock, "currtime string", rc=rc)
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      print *, "Hourly clock advanced ", advanceCounts, " times."
+      write(failMsg, *) "Re-enabled hourly clock advanced ", advanceCounts, &
+                        ", not 48 times, or not enabled, or not ESMF_SUCCESS."
+      call ESMF_Test((testPass .and. stopTimeEnabled .and. &
+                      advanceCounts.eq.48 .and. rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_ClockDestroy(clock, rc)
 
       ! ----------------------------------------------------------------------------
 #endif
