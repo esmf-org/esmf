@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.3 2004/03/22 16:10:59 cdeluca Exp $
+! $Id: ESMF_IOSpec.F90,v 1.4 2004/03/22 20:29:06 cdeluca Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -48,7 +48,8 @@
       type(ESMF_IOFileFormat), parameter :: &
                           ESMF_IO_FILEFORMAT_UNSPECIFIED=ESMF_IOFileFormat(0), &
                           ESMF_IO_FILEFORMAT_NETCDF=ESMF_IOFileFormat(1), &
-                          ESMF_IO_FILEFORMAT_HDF=ESMF_IOFileFormat(2)
+                          ESMF_IO_FILEFORMAT_HDF=ESMF_IOFileFormat(2), &
+                          ESMF_IO_FILEFORMAT_BINARY_ESMF_IOFileFormat(3)
 
       ! What type of I/O - Read only, write only, R/W, append with truncation
       type ESMF_IORWType
@@ -99,11 +100,11 @@
 ! !PUBLIC MEMBER TYPES:
       public ESMF_IOSpec, ESMF_IOState
       public ESMF_IOFileFormat, ESMF_IO_FILEFORMAT_UNSPECIFIED
-      public     ESMF_IO_FILEFORMAT_NETCDF, ESMF_IO_FILEFORMAT_HDF
+      public ESMF_IO_FILEFORMAT_NETCDF, ESMF_IO_FILEFORMAT_HDF
       public ESMF_IORWType, ESMF_IO_RWTYPE_UNSPECIFIED
-      public     ESMF_IO_RWTYPE_READONLY, ESMF_IO_RWTYPE_WRITEONLY
-      public     ESMF_IO_RWTYPE_READWRITE, ESMF_IO_RWTYPE_APPEND
-      public     ESMF_IO_RWTYPE_TRUNCATE
+      public ESMF_IO_RWTYPE_READONLY, ESMF_IO_RWTYPE_WRITEONLY
+      public ESMF_IO_RWTYPE_READWRITE, ESMF_IO_RWTYPE_APPEND
+      public ESMF_IO_RWTYPE_TRUNCATE
 
 
 ! !PUBLIC MEMBER FUNCTIONS:

@@ -1,0 +1,138 @@
+% $Id: Grid_options.tex,v 1.1 2004/03/22 20:29:06 cdeluca Exp $
+
+\subsection{Types and Options}
+
+\subsubsection{ESMF\_GridType}
+
+{\sf DESCRIPTION:\\}
+Grid types supported by ESMF.
+
+Valid values are:
+\begin{description}
+   \item[ESMF\_GridType\_LatLon] 
+        Equally-spaced lat/lon grid.
+   \item[ESMF\_GridType\_Unknown] 
+        Unknown or undefined grid.
+
+%   \item[ESMF\_GridType\_Mercator] Mercator lat/lon grid
+%   \item[ESMF\_GridType\_Dipole] Displaced-pole dipole grid
+%   \item[ESMF\_GridType\_Tripole] Tripolar grids
+%   \item[ESMF\_GridType\_XY] Cartesian equally-space x-y grid
+%   \item[ESMF\_GridType\_DataStream] Data stream
+%   \item[ESMF\_GridType\_PhysFourier] Mixed Fourier Space/Phys Space grid
+%   \item[ESMF\_GridType\_LatLonGauss] lat/lon grid with Gaussian latitudes
+%   \item[ESMF\_GridType\_Reduced] reduced grid
+%   \item[ESMF\_GridType\_SphericalSpectral] spectral space for spherical harmonics
+%   \item[ESMF\_GridType\_Geodesic] spherical geodesic grid
+%   \item[ESMF\_GridType\_CubedSphere] cubed sphere grid
+\end{description}
+
+\subsubsection{ESMF\_GridStagger}
+
+{\sf DESCRIPTION:\\}
+Grid staggerings supported by ESMF.
+
+Valid values are:
+\begin{description}
+   \item[ESMF\_GridStagger\_A] 
+        Arakawa A (centered velocity).
+   \item[ESMF\_GridStagger\_B] 
+        Arakawa B (velocities at grid corner).
+   \item[ESMF\_GridStagger\_C] 
+        Arakawa C (velocities at cell faces).
+   \item[ESMF\_GridStagger\_D] 
+        Arakawa D.
+   \item[ESMF\_GridStagger\_E] 
+        Arakawa E.
+   \item[ESMF\_GridStagger\_Z] 
+        C grid equivalent for geodesic grid.
+   \item[ESMF\_GridStagger\_VertCenter] 
+        Vertical velocity at vertical midpoints.
+   \item[ESMF\_GridStagger\_VertFace] 
+        Vertical velocity/Pgrad at top(bottom)face.
+   \item[ESMF\_GridStagger\_Unknown] 
+        Unknown or undefined staggering.
+
+\end{description}
+
+\subsubsection{ESMF\_CoordOrder}
+
+{\sf DESCRIPTION:\\}
+The Grid class can be set to different default ordering of coordinates, for
+example KIJ.  This parameter describes ordering options supported by ESMF.
+
+Valid values are:
+\begin{description}
+   \item[ESMF\_CoordOrder\_XYZ] 
+        IJK maps to XYZ.
+   \item[ESMF\_CoordOrder\_XZY] 
+        IJK maps to XZY.
+   \item[ESMF\_CoordOrder\_YXZ] 
+        IJK maps to YXZ.
+   \item[ESMF\_CoordOrder\_YZX] 
+        IJK maps to YZX.
+   \item[ESMF\_CoordOrder\_ZXY] 
+        IJK maps to ZXY.
+   \item[ESMF\_CoordOrder\_ZYX] 
+        IJK maps to ZYX.
+   \item[ESMF\_CoordOrder\_Unknown] 
+        Unknown or undefined coordinate ordering.
+\end{description}
+
+\subsubsection{ESMF\_CoordSystem}
+
+{\sf DESCRIPTION:\\}
+Supported coordinate systems.
+
+Valid values are:
+\begin{description}
+   \item[ESMF\_CoordSystem\_User] 
+        User-defined coordinate system.
+   \item[ESMF\_CoordSystem\_Spherical] 
+        Spherical coordinates (lon,lat).
+   \item[ESMF\_CoordSystem\_Cartesian] 
+        Cartesian coordinates (x,y).
+   \item[ESMF\_CoordSystem\_Cylindrical] 
+        Cylindrical coordinates.
+   \item[ESMF\_CoordSystem\_LatFourier] 
+        Mixed latitude/Fourier spectral space.
+   \item[ESMF\_CoordSystem\_Spectral] 
+        Wavenumber space.
+   \item[ESMF\_CoordSystem\_Depth] 
+      Vertical z coordinate depth (0 at top surface).
+   \item[ESMF\_CoordSystem\_Height] 
+        Vertical z coordinate height (0 at bottom).
+   \item[ESMF\_CoordSystem\_Pressure] 
+        Vertical pressure coordinate.
+   \item[ESMF\_CoordSystem\_Sigma] 
+        Vertical sigma coordinate.
+   \item[ESMF\_CoordSystem\_Theta] 
+        Vertical theta coordinate.
+   \item[ESMF\_CoordSystem\_Eta] 
+        Vertical eta coordinate.
+   \item[ESMF\_CoordSystem\_Isopycnal] 
+        Vertical density coordinate.
+   \item[ESMF\_CoordSystem\_Hybrid] 
+        Hybrid vertical coordinates.
+   \item[ESMF\_CoordSystem\_Lagrangian] 
+        Lagrangian coordinates.
+   \item[ESMF\_CoordSystem\_Unknown] 
+        Unknown or undefined coordinate system.
+\end{description}
+
+\subsubsection{ESMF\_GridMaskKind}
+
+{\sf DESCRIPTION:\\}
+Supported types of grid masks.
+
+Valid values are:
+\begin{description}
+   \item[ESMF\_GridMaskKind\_Logical] 
+        Logical mask.
+   \item[ESMF\_GridMaskKind\_Mult] 
+        Multiplicative mask.
+   \item[ESMF\_GridMaskKind\_RegionID] 
+        Integer assigning unique ID to each point.
+   \item[ESMF\_GridMaskKind\_Unknown] 
+        Unknown or undefined mask type.
+\end{description}
