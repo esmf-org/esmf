@@ -1,4 +1,4 @@
-% $Id: PhysGrid_desc.tex,v 1.1 2003/01/16 16:56:41 jwolfe Exp $
+% $Id: PhysGrid_desc.tex,v 1.2 2003/11/13 00:12:36 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,5 +9,74 @@
 % Licensed under the GPL.
 
 %\subsection{Description}
+
+The PhysGrid class is itself internal and is aggregated by the Grid
+class.  It is designed to contain all information describing physical
+properties of the Grid, as well as methods to initialize them and to
+calculate user-requested metrics.
+
+\subsection{PhysGrid Classes}
+\begin{itemize}
+\item {\bf GridMask} Data type describing masks for a PhysGrid.  Masks
+are named and can be of different types, including logical masks,
+multiplicative masks, and integer region IDs.  The defined types include:
+   ESMF_GridMaskKind_Unknown
+   ESMF_GridMaskKind_Logical
+   ESMF_GridMaskKind_Mult
+   ESMF_GridMaskKind_RegionID
+\item {\bf PhysCoord} A physical coordinate carries information describing
+coordinate attributes like names and flags for special properties of a
+coordinate axis.  This information is used by PhysGrid and Grid to help
+describe the complete physical properties of a grid.  Coordinate system
+types include:
+   ESMF_CoordSystem_Unknown       - unknown or undefined coord system
+   ESMF_CoordSystem_User          - user-defined coordinate system
+   ESMF_CoordSystem_Spherical     - spherical coordinates (lon,lat)
+   ESMF_CoordSystem_Cartesian     - Cartesian coordinates (x,y)
+   ESMF_CoordSystem_Cylindrical   - cylindrical coordinates
+   ESMF_CoordSystem_LatFourier    - mixed latitude/Fourier spectral space
+   ESMF_CoordSystem_Spectral      - wavenumber space
+   ESMF_CoordSystem_Depth         - vertical z coord. depth (0 at top surface)
+   ESMF_CoordSystem_Height        - vertical z coord. height (0 at bottom)
+   ESMF_CoordSystem_Pressure      - vertical pressure coordinate
+   ESMF_CoordSystem_Sigma         - vertical sigma coordinate
+   ESMF_CoordSystem_Theta         - vertical theta coordinate
+   ESMF_CoordSystem_Eta           - vertical eta coordinate
+   ESMF_CoordSystem_Isopycnal     - vertical density coordinate
+   ESMF_CoordSystem_Hybrid        - hybrid vertical coordinates
+   ESMF_CoordSystem_Lagrangian    - Lagrangian coordinates
+\item {\bf PhysLocation} Physical locations for a set of points defining the grid.
+\item {\bf PhysRegion} Physical locations for a set of points defining regions of
+the grid (e.g. cell vertices or domains of influence).  Region types include:
+   ESMF_RegionKind_Unknown
+   ESMF_RegionKind_Polygon
+   ESMF_RegionKind_Ellipse
+\end{itemize}
+
+
+
+
+
+
+There is a correspondence between the DistGrid class and the PhysGrid
+class.  The PhysGrid class maintains all the local data necessary to
+represent the Grid, while the DistGrid class describes the local extents
+of that data and its relationship to the global decomposition.
+Together, a PhysGrid and related DistGrid define a representation of
+a Grid.  There is a correspondence between the PhysGrid class and the Field
+class as well:  the PhysGrid data on a DE describes the physical location
+of the corresponding Field data.
+
+The PhysGrid class maintains a local physical representation of a Grid,
+including all necessary data and masks.  PhysGrids can represent subGrids
+of a single Grid and be aggregated by the same Grid object. The PhysGrid
+class must have methods that can internally generate a variety of
+computational grids in a distributed environment from relatively simple
+input.  The PhysGrid data has to be accessible to the ESMF user in a
+variety of specified ways or metrics, and it must have the capability to
+attach a number of masks or identifiers.  Please note that the PhysGrid class
+is designed to be an internal class; all access to its contents are via
+Grid methods.
+
 
 The PhysGrid class is aggregated by the Grid class.

@@ -1,15 +1,15 @@
-% $Id: DistGrid_design.tex,v 1.4 2003/05/07 18:50:16 jwolfe Exp $
+% $Id: DistGrid_design.tex,v 1.5 2003/11/13 00:11:50 jwolfe Exp $
 
 %\subsection{Design}
 
 % <Describe strategy for overall class design.>
 
 
-The DistGrid class is itself internal and aggregates one internal
-subclass: a MyDE class.  This separation allows the code to clearly
-differentiate between functions which operate internal to a single DE
-on a local decomposition of data, and those which must be aware of the
-global state of the distribution.
+The DistGrid class is itself internal and aggregates two internal
+subclasses: a DistGridLocal class and a DistGridGlobal class.  This
+separation allows the code to clearly differentiate between functions which
+operate internal to a single DE on a local decomposition of data, and those
+which must be aware of the global state of the distribution.
 
 There is a correspondence between the DistGrid class and the PhysGrid
 class.  The DistGrid class describes the local extents of data and
@@ -22,9 +22,6 @@ represent the same Grid but have different mappings (staggerings) and can
 be aggregated by the same Grid object. The DistGrid class maintains the
 mapping between the global Grid and the local data distribution;  it has
 methods to aid in the collection and communication of global data.  
-DistGrids also contain information about how the data on different DEs
-overlap, which is necessary to synchronize values between the boundaries
-of distributed data for Halo methods.
 
 Some methods which have a DistGrid interface will actually be
 implemented at the underlying DELayout or Array level; they

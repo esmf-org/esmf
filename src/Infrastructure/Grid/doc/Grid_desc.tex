@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.3 2003/10/08 21:05:40 jwolfe Exp $
+% $Id: Grid_desc.tex,v 1.4 2003/11/13 00:12:13 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,5 +10,32 @@
 
 % <Describe class function and relation to other classes.>
 
-The Grid class aggregates the DistGrid class and PhysGrid class.  It is 
-aggregated into the Field class and/or Gridded Component class.
+The ESMF Grid class represents the computational domain and its
+decomposition in a parallel-processing environment.  The ESFM Grid class
+is aggregated into the Field class and/or the Gridded Component class
+and provides communication capabilities to those classes like halo and
+redistribution.  It has methods to internally generate a variety of
+simple grids or read in more complicated grids provided by a user.  The
+ESMF Grid class supports multi-component coupling by providing a common
+structure necessary for Regridding.
+
+\subsection{Grid Classes}
+The Grid class aggregates two internal classes: the DistGrid (Distributed
+Grid) class and the PhysGrid (Physical Grid) class.  The separation into two
+classes allows the code to differentiate between functions which define the
+local decomposition of data and the local representation of the grid.  The Grid
+class itself maintains general information about the global grid (e.g. the
+grid type, staggering, and coordinate system).  The Grid class is relatively
+thin and otherwise presents a unified interface for DistGrid and PhysGrid
+functions.  Each Grid contains at least one DistGrid and one PhysGrid:
+\begin{itemize}
+\item {\bf DistGrid} The DistGrid class maintains the relationship of how
+a DELayout maps onto a Grid representation and how that Grid is distributed.
+DistGrids can represent the same Grid but have different mappings (staggerings)
+and can be aggregated by the same Grid object. The DistGrid class maintains the
+mapping between the global Grid and the local data distribution;  it has
+methods to aid in the collection and communication of global data.
+\item {\bf PhysGrid} The PhysGrid class maintains a local physical
+representation of a Grid, including all necessary data and masks.  PhysGrids
+can represent subGrids, like vertical Grids, of a single Grid and be
+aggregated by the same Grid object. 
