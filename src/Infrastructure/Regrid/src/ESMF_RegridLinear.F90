@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.19 2004/05/24 23:03:40 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.20 2004/05/25 20:13:59 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.19 2004/05/24 23:03:40 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.20 2004/05/25 20:13:59 jwolfe Exp $'
 
 !==============================================================================
 
@@ -157,6 +157,8 @@
 
       ! Construct an empty regrid structure
       rh = ESMF_RouteHandleCreate(rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      tempRegrid = ESMF_RegridCreate(rc=localrc)
  !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       ! Set name and field pointers
