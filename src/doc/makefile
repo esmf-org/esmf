@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/02/04 17:29:16 flanigan Exp $ 
+# $Id: makefile,v 1.10 2003/02/04 20:52:28 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -28,6 +28,9 @@ HTMLFILES = \
                 $(ESMC_DOCDIR)/ESMF_archdoc
 
 USERDOC_FILES = ESMF_usrdoc.tex ESMF_desc.tex ESMF_install.tex 
+ARCHDOC_FILES = ESMF_archdoc.ctex ESMF_archintro.tex ESMF_shortscope.tex ESMF_strategies.tex ESMF_conventions.tex \
+                ESMF_superclasses.tex ESMF_fieldclasses.tex ESMF_utilclasses.tex ESMF_implications.tex ESMF_terms.tex \
+                ESMF_archauth.tex
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
@@ -40,7 +43,7 @@ ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USERDOC_FILES)
 	${DO_LATEX} ESMF usr
 	mv -f ESMF_usrdoc.dvi ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/ESMF_archdoc.dvi: ESMF_archdoc.ctex
+${ESMC_DOCDIR}/ESMF_archdoc.dvi: $(ARCHDOC_FILES)
 	${DO_LATEX} ESMF arch
 	mv -f ESMF_archdoc.dvi ${ESMC_DOCDIR}
 
@@ -66,7 +69,7 @@ ${ESMC_DOCDIR}/ESMF_usrdoc: $(USERDOC_FILES)
 	${DOL2H} ESMF usr
 	mv -f ESMF_usrdoc ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/ESMF_archdoc: 
+${ESMC_DOCDIR}/ESMF_archdoc: $(ARCHDOC_FILES)
 	${DOL2H} ESMF arch
 	mv -f ESMF_archdoc ${ESMC_DOCDIR}
 
