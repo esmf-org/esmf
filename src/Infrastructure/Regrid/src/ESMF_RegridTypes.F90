@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.35 2004/03/24 16:03:45 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.36 2004/04/08 15:45:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -154,14 +154,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.35 2004/03/24 16:03:45 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.36 2004/04/08 15:45:45 nscollins Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_RegridAddLink
 
@@ -173,7 +173,7 @@
 !     This interface provides a single entry point for {\tt ESMF\_Regrid} add
 !     link methods.
 
-!EOP
+!EOPI
       end interface
 !==============================================================================
 
@@ -186,7 +186,7 @@
 ! module to facilitate branching based on type of regridding required.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridAddLink1D - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
@@ -219,7 +219,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !  TODO
       logical :: rcpresent
@@ -263,7 +263,7 @@
       end subroutine ESMF_RegridAddLink1D
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridAddLink2D - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
@@ -296,7 +296,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !  TODO
       logical :: rcpresent
@@ -341,7 +341,7 @@
       end subroutine ESMF_RegridAddLink2D
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridRouteConstruct - Constructs a Route used to gather data
 
 ! !INTERFACE:
@@ -377,7 +377,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 !TODO: Leave here or move to Route?
       logical :: rcpresent
       integer :: status
@@ -681,7 +681,7 @@
       end subroutine ESMF_RegridTypeGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridTypeSet - Set attribute of a Regrid
 
 ! !INTERFACE:
@@ -732,7 +732,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !  TODO
 
@@ -774,7 +774,7 @@
       end subroutine ESMF_RegridTypeSet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridConstructEmpty - Create empty regrid structure
 
 ! !INTERFACE:
@@ -798,7 +798,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
         ! initialize the base object
