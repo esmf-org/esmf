@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime_F.C,v 1.10 2003/04/27 19:30:30 eschwab Exp $
+// $Id: ESMC_BaseTime_F.C,v 1.11 2003/04/28 23:13:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,21 +31,6 @@
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
-
-       void FTN(c_esmc_basetimeinit)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *s,
-                                     int *sn, int *sd, int *status) {
-           *status = (ptr)->ESMC_BaseTimeInit(*s, *sn, *sd);
-       }
-
-       void FTN(c_esmc_basetimeget)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *s,
-                                    int *sn, int *sd, int *status) {
-           *status = (ptr)->ESMC_BaseTimeGet(s, sn, sd);
-       }
-
-       void FTN(c_esmc_basetimeset)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *s,
-                                    int *sn, int *sd, int *status) {
-           *status = (ptr)->ESMC_BaseTimeSet(*s, *sn, *sd);
-       }
 
        //
        // overloaded comparison operators
@@ -101,29 +86,5 @@ extern "C" {
                                      ESMC_BaseTime *baseTime2,
                                      ESMC_BaseTime *esmf_baseTimeDiff) {
            *esmf_baseTimeDiff = (*baseTime1 - *baseTime2);
-       }
-
-       //
-       // read, write, validate and print
-       //
-
-       void FTN(c_esmc_basetimeread)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *S,
-                                     int *Sn, int *Sd, int *status) {
-           *status = (ptr)->ESMC_BaseTimeRead(*S, *Sn, *Sd);
-       }
-
-       void FTN(c_esmc_basetimewrite)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *S,
-                                      int *Sn, int *Sd, int *status) {
-           *status = (ptr)->ESMC_BaseTimeWrite(S, Sn, Sd);
-       }
-
-       void FTN(c_esmc_basetimevalidate)(ESMC_BaseTime *ptr, const char *opts,
-                                         int *status) {
-           *status = (ptr)->ESMC_BaseTimeValidate(opts);
-       }
-
-       void FTN(c_esmc_basetimeprint)(ESMC_BaseTime *ptr, const char *opts,
-                                      int *status) {
-           *status = (ptr)->ESMC_BaseTimePrint(opts);
        }
 };
