@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.20 2003/04/23 21:39:35 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.21 2003/04/24 05:15:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -133,7 +133,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.20 2003/04/23 21:39:35 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.21 2003/04/24 05:15:41 eschwab Exp $'
 
 !==============================================================================
 !
@@ -595,6 +595,9 @@
 
       call c_ESMC_TimeGetCalendar(time, cal, rc)
     
+      ! TODO: create overloaded ESMF_TimeGetCalendar() which gets calendar
+      !       pointer rather than copy
+
       end subroutine ESMF_TimeGetCalendar
 
 !------------------------------------------------------------------------------
