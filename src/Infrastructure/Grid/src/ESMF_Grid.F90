@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.188 2004/08/16 00:10:50 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.189 2004/08/16 23:10:12 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.188 2004/08/16 00:10:50 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.189 2004/08/16 23:10:12 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1182,7 +1182,10 @@
 !          of grid dimensions.  The default is that the first grid axis is
 !          distributed by the first decompostion axis, the second grid axis is
 !          distributed by the second decomposition axis, and the third grid axis
-!          (if applicable) is not distributed.
+!          (if applicable) is not distributed.  The relationship between data
+!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and {\tt grid}
+!          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
+!          {\tt ESMF\_ArrayDataMap} interfaces.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -1310,7 +1313,8 @@
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[dimCount]}]
 !          Number of dimensions represented by this {\tt grid}.
 !     \item[{[minGlobalCoordPerDim]}]
@@ -1502,7 +1506,8 @@
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[dimCount]}]
 !          Number of dimensions represented by this {\tt grid}.
 !     \item[{[minGlobalCoordPerDim]}]
@@ -2744,7 +2749,7 @@
 !          Logical flag.  If TRUE, reorder any results using a previously set 
 !          CoordOrder before returning.  If FALSE do not reorder.  The default
 !          value is TRUE and users should not need to reset this for most
-!          applications.  This optional argument is available mostly for
+!          applications.  This optional argument is available primarily for
 !          internal use.
 !     \item[{[total]}]
 !          Logical flag to indicate getting DistGrid information for total cells.
@@ -3202,7 +3207,8 @@
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
+!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -5012,7 +5018,7 @@
 !          Logical flag.  If TRUE, reorder any results using a previously set
 !          CoordOrder before returning.  If FALSE do not reorder.  The default
 !          value is TRUE and users should not need to reset this for most
-!          applications.  This optional argument is available mostly for
+!          applications.  This optional argument is available primarily for
 !          internal use.
 !     \item[{[total]}]
 !          Logical flag to indicate getting DistGrid information for total cells.
