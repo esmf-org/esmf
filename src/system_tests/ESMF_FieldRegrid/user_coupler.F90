@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.9 2004/04/28 23:12:14 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.10 2004/05/24 23:06:46 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -91,7 +91,7 @@
 
       call ESMF_FieldRegridStore(humidity1, humidity2, cplDElayout, &
                                  routehandle, &
-                                 regridtype=ESMF_RegridMethod_Bilinear, &
+                                 regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=rc)
 
 
