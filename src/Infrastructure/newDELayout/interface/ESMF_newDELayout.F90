@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.8 2004/03/19 16:11:05 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.9 2004/03/23 16:36:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 !BOP
 ! !MODULE: ESMF_newDELayout - The newDELayout
 !
-! !DESCRIPTION:
+
 !   F90 API wrapper of C++ implemenation of newDELayout
 !
 !------------------------------------------------------------------------------
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.8 2004/03/19 16:11:05 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.9 2004/03/23 16:36:16 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -226,7 +226,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item[vm] 
-!          ESMF_VM object
+!          ESMF\_VM object
 !     \item[{[nDEs]}] 
 !          Array of number of DEs in each dimension
 !     \item[{[DEtoPET]}] 
@@ -1015,7 +1015,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item[array] 
-!          ESMF_I4_AP array
+!          ESMF\_I4\_AP array
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1089,7 +1089,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item[array] 
-!          ESMF_I4_AP array
+!          ESMF\_I4\_AP array
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1163,7 +1163,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item[array] 
-!          ESMF_I4_AP array
+!          ESMF\_I4\_AP array
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1235,7 +1235,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item[mydata] 
-!          ESMF_DELayoutData object
+!          ESMF\_DELayoutData object
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
