@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_latex,v 1.12 2004/03/05 01:47:52 eschwab Exp $
+# $Id: do_latex,v 1.13 2004/08/03 22:15:50 nscollins Exp $
 #
 #===============================================================================
 # do_latex
@@ -36,6 +36,12 @@ if ($#argv != 2) then
   exit
 endif
 
+if ( $?TEXINPUTS) then 
+ echo "in do_latex, TEXINPUTS =", $TEXINPUTS
+else
+ echo "in do_latex, TEXINPUTS unset" 
+endif
+
 # if needed, pre-process as top-level constituent or standalone document
 if (-e $1_$2doc.ctex) then
 
@@ -46,34 +52,27 @@ if (-e $1_$2doc.ctex) then
 
   # perform pre-processing
   if($1 == "ESMF") then
-echo "here1"
     cpp -C -P -DCONSTITUENT $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
     cpp -C -P $1.cbib | grep -v "^#pragma" > $1.bib
   else
     cpp -C -P -DSTANDALONE $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
-echo "here2"
   endif
 
 endif
 
-if ($1 == "ESMF") then
-echo "here3"
-  cp $1.bib $1_$2doc.bib
-  latex $1_$2doc.tex
-  latex $1_$2doc.tex
-  bibtex $1_$2doc
-  latex $1_$2doc.tex
-  bibtex $1_$2doc
-  latex $1_$2doc.tex
-  rm -f $1_$2doc.bib
-else 
-echo "here4"
-  cp $1.bib $1_$2doc.bib
-  latex $1_$2doc.tex
-  latex $1_$2doc.tex
-  bibtex $1_$2doc
-  latex $1_$2doc.tex
-  bibtex $1_$2doc
-  latex $1_$2doc.tex
-  rm -f $1_$2doc.bib
-endif
+# there used to be a test if $1 was ESMF, but the 2 sets of
+# commands it did based on that test was identical, so i removed
+# the test.  nsc 29jul04
+
+rm -f $1_$2doc.bib
+cp $1.bib $1_$2doc.bib
+
+latex $1_$2doc
+
+bibtex $1_$2doc
+latex $1_$2doc
+
+bibtex $1_$2doc
+latex $1_$2doc
+
+rm -f $1_$2doc.bib
