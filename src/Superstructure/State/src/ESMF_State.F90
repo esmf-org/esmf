@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.70 2004/10/07 20:56:51 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.71 2004/10/19 17:29:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -292,7 +292,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.70 2004/10/07 20:56:51 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.71 2004/10/19 17:29:58 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2976,25 +2976,139 @@ end function
 !     \end{description}
 !
 !EOPI
-        integer :: pets, mypet, i
+    integer :: pets, mypet, i, j, k, localrc
+    integer(ESMF_KIND_I4), allocatable, dimension(:) :: idsend, idrecv
+    integer(ESMF_KIND_I4) :: sendcount(1), recvcount(1)
+    type(ESMF_StateItem), pointer :: stateitem
 
-        ! if the state container contains a hash, broadcast the hash
-        ! and wait for a hash from each PET.
+    ! each PET broadcasts the object ID lists and compares them to what
+    ! they get back.   eventually, hash the ID lists so we can send a
+    ! single number instead of having to scan the list each time.
+     
+    ! TODO: for now, broadcast the object counts
+    sendcount(1) = state%statep%datacount 
+    if (sendcount(1) .gt. 0) then
+        allocate(idsend(sendcount(1)), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                   "Allocating buffer for local ID list", &
+                                       ESMF_CONTEXT, rc)) return
+    endif
+    do i=1, state%statep%datacount
+        stateitem => state%statep%datalist(i)
+        select case (stateitem%otype%ot)
+           case (ESMF_STATEITEM_BUNDLE%ot)
+             call c_ESMC_GetID(stateitem%datap%bp, idsend(i), localrc)
+           case (ESMF_STATEITEM_FIELD%ot)
+             call c_ESMC_GetID(stateitem%datap%fp, idsend(i), localrc)
+           case (ESMF_STATEITEM_ARRAY%ot)
+             call c_ESMC_GetID(stateitem%datap%ap, idsend(i), localrc)
+           case (ESMF_STATEITEM_STATE%ot)
+             call c_ESMC_GetID(stateitem%datap%spp, idsend(i), localrc)
+           case (ESMF_STATEITEM_NAME%ot)
+             print *, "placeholder name"
+             idsend(i) = -1
+             localrc = ESMF_SUCCESS
+           case (ESMF_STATEITEM_INDIRECT%ot)
+             print *, "field inside a bundle"
+             idsend(i) = -2
+             localrc = ESMF_SUCCESS
+           case (ESMF_STATEITEM_UNKNOWN%ot)
+             print *, "unknown type"
+             idsend(i) = -3
+             localrc = ESMF_SUCCESS
+        end select
+        if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+    enddo
        
-        ! get total num pets.
-        call ESMF_VMGet(vm, localPet=mypet, petCount=pets, rc=rc)
+    ! get total num pets.
+    call ESMF_VMGet(vm, localPet=mypet, petCount=pets, rc=rc)
 
-        ! for i=0, npets-1, except us, send id to each 
-        do i = 0, pets-1
-           print *, "i am", mypet, "and i need to send to", i
-        enddo
+    ! for i=0, npets-1, except us, send object count to each
+    do j = 0, pets-1
+       ! each takes turns sending to all, everyone else receives
+       if (mypet .eq. j) then
+           print *, j, "sends to everyone else"
+           do i = 0, pets-1
+               if (i .eq. j) cycle
+               print *, "calling send to", i
+               call ESMF_VMSend(vm, sendcount, 1, i, rc=localrc)
+               if (ESMF_LogMsgFoundError(localrc, &
+                                         ESMF_ERR_PASSTHRU, &
+                                         ESMF_CONTEXT, rc)) return
+               call ESMF_VMRecv(vm, recvcount, 1, i, rc=localrc)
+               if (ESMF_LogMsgFoundError(localrc, &
+                                         ESMF_ERR_PASSTHRU, &
+                                         ESMF_CONTEXT, rc)) return
+               if (recvcount(1) .ne. sendcount(1)) then
+                   print *, "object counts not same; more needed", &
+                          sendcount(1), " .ne. ", recvcount(1)
 
-        ! if hash doesn't match, go thru each object and ??
+                   if (sendcount(1) .gt. 0) then
+                       call ESMF_VMSend(vm, idsend, sendcount(1), i, rc=localrc)
+                       if (ESMF_LogMsgFoundError(localrc, &
+                                                 ESMF_ERR_PASSTHRU, &
+                                                 ESMF_CONTEXT, rc)) return
 
-        if (present(rc)) rc = ESMF_SUCCESS
+                   endif
+               endif
+           enddo
+       else
+           print *, mypet, "receives from", j
+           call ESMF_VMRecv(vm, recvcount, 1, j, rc=localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+           call ESMF_VMSend(vm, sendcount, 1, j, rc=localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+           if (recvcount(1) .ne. sendcount(1)) then
+               print *, "object counts not same; more needed", &
+                          sendcount(1), " .ne. ", recvcount(1)
+
+               if (recvcount(1) .gt. 0) then
+                   allocate(idrecv(recvcount(1)), stat=localrc)
+                   if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "Allocating buffer for local ID list", &
+                                       ESMF_CONTEXT, rc)) return
+     
+                   call ESMF_VMRecv(vm, idrecv, recvcount(1), j, rc=localrc)
+                   if (ESMF_LogMsgFoundError(localrc, &
+                                             ESMF_ERR_PASSTHRU, &
+                                             ESMF_CONTEXT, rc)) return
+
+               endif
+               do k=1, sendcount(1)
+                 print *, "i am", mypet, " and my send ids are:", k, idsend(k)
+               enddo
+               do k=1, recvcount(1)
+                 print *, "i am", mypet, " and my recv ids are:", k, idrecv(k)
+               enddo
+
+               if (recvcount(1) .gt. 0) then
+                   deallocate(idrecv, stat=localrc)
+                   if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "Deallocating buffer for local ID list", &
+                                   ESMF_CONTEXT, rc)) return
+               endif
+           endif
+       endif
+    enddo
+
+    if (sendcount(1) .gt. 0) then
+        deallocate(idsend, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                 "Deallocating buffer for local ID list", &
+                                       ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(rc)) rc = ESMF_SUCCESS
 
  
-        end subroutine ESMF_StateReconcile
+    end subroutine ESMF_StateReconcile
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
