@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.13 2004/06/08 12:11:40 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.14 2004/06/08 13:40:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,7 +126,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.13 2004/06/08 12:11:40 nscollins Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.14 2004/06/08 13:40:24 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -263,18 +263,18 @@ end function
         character(len=ESMF_MAXSTR) :: msgbuf
         character (len = ESMF_MAXSTR) :: str
 
-        print msgbuf, "BundleDataMap print:"
+        write (msgbuf, *)  "BundleDataMap print:"
         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
 
         if (bundledatamap%status .ne. ESMF_STATE_READY) then
-          print msgbuf, "Uninitialized or Invalid object"
+          write (msgbuf, *)  "Uninitialized or Invalid object"
           if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
           return
         endif
 
         ! TODO: add print code here
         call ESMF_BundleInterleaveString(bundledatamap%bil, str, rc)
-        print msgbuf, " Data: ", str
+        write (msgbuf, *)  " Data: ", str
         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
   
         if (present(rc)) rc = ESMF_SUCCESS

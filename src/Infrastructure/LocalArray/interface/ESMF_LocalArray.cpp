@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.10 2004/06/08 13:14:06 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.11 2004/06/08 13:40:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -175,7 +175,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.10 2004/06/08 13:14:06 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.11 2004/06/08 13:40:32 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2182,9 +2182,9 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
        endif
 
        if (array%this .eq. ESMF_NULL_POINTER) then
-         print msgbuf, "LocalArray Print:"
+         write(msgbuf,*)  "LocalArray Print:"
          if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-         print msgbuf, " Empty or Uninitialized Array"
+         write(msgbuf,*)  " Empty or Uninitialized Array"
          if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
          if (present(rc)) rc = ESMF_SUCCESS
          return
