@@ -1,4 +1,4 @@
-% $Id: ESMF_examples.tex,v 1.5 2004/06/22 14:17:44 nscollins Exp $
+% $Id: ESMF_examples.tex,v 1.6 2004/07/01 20:13:24 svasquez Exp $
 
 \subsection{Running ESMF Examples}
 \label{examples}
@@ -46,3 +46,136 @@ and output files are created in this directory:
 The name of an output file will begin with the name of the example
 that created it followed by .stdout.
 
+At the end of examples execution a script runs to analyze the results.
+The script, which is written in ksh, will not run on platforms that do not support
+ksh. Those platforms print out a 'Command not found' message.
+
+The script output indicates whether there are any system test failures.
+The following is a sample from the script output:
+
+\begin{verbatim}
+The following is the analysis of the run examples results:
+
+Executable examples found:
+-rwxr-xr-x   1 svasquez ncar          40059 Jul 01 13:38 ESMC_AppMainEx
+-rwxr-xr-x   1 svasquez ncar          37761 Jul 01 13:38 ESMC_CplEx
+-rwxr-xr-x   1 svasquez ncar          37184 Jul 01 13:35 ESMC_FieldCreateEx
+-rwxr-xr-x   1 svasquez ncar          37761 Jul 01 13:38 ESMC_GCompEx
+-rwxr-xr-x   1 svasquez ncar          37945 Jul 01 13:34 ESMC_RouteEx
+-rwxr-xr-x   1 svasquez ncar          50065 Jul 01 13:29 ESMF_AlarmEx
+-rwxr-xr-x   1 svasquez ncar          65842 Jul 01 13:38 ESMF_AppMainEx
+-rwxr-xr-x   1 svasquez ncar          46810 Jul 01 13:35 ESMF_ArrayCommEx
+-rwxr-xr-x   1 svasquez ncar          47233 Jul 01 13:33 ESMF_ArrayCreateEx
+-rwxr-xr-x   1 svasquez ncar          44725 Jul 01 13:31 ESMF_ArrayDataMapEx
+-rwxr-xr-x   1 svasquez ncar          47227 Jul 01 13:33 ESMF_ArrayGetEx
+-rwxr-xr-x   1 svasquez ncar          41291 Jul 01 13:30 ESMF_ArraySpecEx
+-rwxr-xr-x   1 svasquez ncar          52829 Jul 01 13:36 ESMF_BundleCreateEx
+-rwxr-xr-x   1 svasquez ncar          43091 Jul 01 13:36 ESMF_BundleDataMapEx
+-rwxr-xr-x   1 svasquez ncar          44084 Jul 01 13:29 ESMF_CalendarEx
+-rwxr-xr-x   1 svasquez ncar          46960 Jul 01 13:29 ESMF_ClockEx
+-rwxr-xr-x   1 svasquez ncar          55286 Jul 01 13:38 ESMF_CplEx
+-rwxr-xr-x   1 svasquez ncar          43151 Jul 01 13:33 ESMF_DELayoutEx
+-rwxr-xr-x   1 svasquez ncar          57465 Jul 01 13:37 ESMF_FieldCommEx
+-rwxr-xr-x   1 svasquez ncar          51113 Jul 01 13:35 ESMF_FieldCreateEx
+-rwxr-xr-x   1 svasquez ncar          45436 Jul 01 13:34 ESMF_FieldDataMapEx
+-rwxr-xr-x   1 svasquez ncar          50319 Jul 01 13:35 ESMF_FieldWriteEx
+-rwxr-xr-x   1 svasquez ncar          55643 Jul 01 13:38 ESMF_GCompEx
+-rwxr-xr-x   1 svasquez ncar          46331 Jul 01 13:33 ESMF_GridCreateEx
+-rwxr-xr-x   1 svasquez ncar          42787 Jul 01 13:28 ESMF_LogErrEx
+-rwxr-xr-x   1 svasquez ncar          53913 Jul 01 13:37 ESMF_RegridEx
+-rwxr-xr-x   1 svasquez ncar          57428 Jul 01 13:34 ESMF_RouteEx
+-rwxr-xr-x   1 svasquez ncar          54225 Jul 01 13:38 ESMF_StateEx
+-rwxr-xr-x   1 svasquez ncar          45652 Jul 01 13:29 ESMF_TimeEx
+-rwxr-xr-x   1 svasquez ncar          47977 Jul 01 13:29 ESMF_TimeIntervalEx
+-rwxr-xr-x   1 svasquez ncar          42537 Jul 01 13:31 ESMF_VMAllFullReduceEx
+-rwxr-xr-x   1 svasquez ncar          47314 Jul 01 13:31 ESMF_VMComponentEx
+-rwxr-xr-x   1 svasquez ncar          42502 Jul 01 13:31 ESMF_VMDefaultBasicsEx
+-rwxr-xr-x   1 svasquez ncar          40901 Jul 01 13:31 ESMF_VMGetMPICommunicatorEx
+-rwxr-xr-x   1 svasquez ncar          44418 Jul 01 13:31 ESMF_VMScatterVMGatherEx
+-rwxr-xr-x   1 svasquez ncar          42668 Jul 01 13:31 ESMF_VMSendVMRecvEx
+-rwxr-xr-x   1 svasquez ncar          40765 Jul 01 13:37 ESMF_XformEx
+
+All of the executable examples should have a corresponding stdout file.
+If not, it's an indication that the examples ere not executed, or that it failed to execute.
+
+Examples stdout files found: 
+-rw-rw-r--   1 svasquez ncar            620 Jul 01 13:38 ESMC_AppMainEx.stdout
+-rw-rw-r--   1 svasquez ncar            488 Jul 01 13:38 ESMC_CplEx.stdout
+-rw-rw-r--   1 svasquez ncar            332 Jul 01 13:35 ESMC_FieldCreateEx.stdout
+-rw-rw-r--   1 svasquez ncar            490 Jul 01 13:39 ESMC_GCompEx.stdout
+-rw-rw-r--   1 svasquez ncar            590 Jul 01 13:34 ESMC_RouteEx.stdout
+-rw-rw-r--   1 svasquez ncar           6233 Jul 01 13:30 ESMF_AlarmEx.stdout
+-rw-rw-r--   1 svasquez ncar           3460 Jul 01 13:39 ESMF_AppMainEx.stdout
+-rw-rw-r--   1 svasquez ncar            342 Jul 01 13:35 ESMF_ArrayCommEx.stdout
+-rw-rw-r--   1 svasquez ncar           6632 Jul 01 13:33 ESMF_ArrayCreateEx.stdout
+-rw-rw-r--   1 svasquez ncar           2837 Jul 01 13:31 ESMF_ArrayDataMapEx.stdout
+-rw-rw-r--   1 svasquez ncar           6617 Jul 01 13:33 ESMF_ArrayGetEx.stdout
+-rw-rw-r--   1 svasquez ncar            514 Jul 01 13:30 ESMF_ArraySpecEx.stdout
+-rw-rw-r--   1 svasquez ncar           1189 Jul 01 13:36 ESMF_BundleCreateEx.stdout
+-rw-rw-r--   1 svasquez ncar           2106 Jul 01 13:36 ESMF_BundleDataMapEx.stdout
+-rw-rw-r--   1 svasquez ncar            378 Jul 01 13:30 ESMF_CalendarEx.stdout
+-rw-rw-r--   1 svasquez ncar           1536 Jul 01 13:30 ESMF_ClockEx.stdout
+-rw-rw-r--   1 svasquez ncar           2228 Jul 01 13:39 ESMF_CplEx.stdout
+-rw-rw-r--   1 svasquez ncar           7019 Jul 01 13:33 ESMF_DELayoutEx.stdout
+-rw-rw-r--   1 svasquez ncar            658 Jul 01 13:37 ESMF_FieldCommEx.stdout
+-rw-rw-r--   1 svasquez ncar           2768 Jul 01 13:36 ESMF_FieldCreateEx.stdout
+-rw-rw-r--   1 svasquez ncar           4997 Jul 01 13:35 ESMF_FieldDataMapEx.stdout
+-rw-rw-r--   1 svasquez ncar            923 Jul 01 13:36 ESMF_FieldWriteEx.stdout
+-rw-rw-r--   1 svasquez ncar           2518 Jul 01 13:39 ESMF_GCompEx.stdout
+-rw-rw-r--   1 svasquez ncar            755 Jul 01 13:34 ESMF_GridCreateEx.stdout
+-rw-rw-r--   1 svasquez ncar            327 Jul 01 13:29 ESMF_LogErrEx.stdout
+-rw-rw-r--   1 svasquez ncar            435 Jul 01 13:37 ESMF_RegridEx.stdout
+-rw-rw-r--   1 svasquez ncar            638 Jul 01 13:34 ESMF_RouteEx.stdout
+-rw-rw-r--   1 svasquez ncar           3474 Jul 01 13:38 ESMF_StateEx.stdout
+-rw-rw-r--   1 svasquez ncar            563 Jul 01 13:29 ESMF_TimeEx.stdout
+-rw-rw-r--   1 svasquez ncar            778 Jul 01 13:29 ESMF_TimeIntervalEx.stdout
+-rw-rw-r--   1 svasquez ncar            684 Jul 01 13:32 ESMF_VMAllFullReduceEx.stdout
+-rw-rw-r--   1 svasquez ncar           7476 Jul 01 13:32 ESMF_VMComponentEx.stdout
+-rw-rw-r--   1 svasquez ncar           3116 Jul 01 13:31 ESMF_VMDefaultBasicsEx.stdout
+-rw-rw-r--   1 svasquez ncar            397 Jul 01 13:31 ESMF_VMGetMPICommunicatorEx.stdout
+-rw-rw-r--   1 svasquez ncar           1806 Jul 01 13:32 ESMF_VMScatterVMGatherEx.stdout
+-rw-rw-r--   1 svasquez ncar           1479 Jul 01 13:32 ESMF_VMSendVMRecvEx.stdout
+-rw-rw-r--   1 svasquez ncar            822 Jul 01 13:37 ESMF_XformEx.stdout
+
+Example stdout files of zero length indicate that the example
+did not run because it failed to compile or it failed to execute. 
+
+The following examples passed: 
+ESMF_AlarmEx.stdout
+ESMF_AppMainEx.stdout
+ESMF_ArrayCommEx.stdout
+ESMF_ArrayCreateEx.stdout
+ESMF_ArrayDataMapEx.stdout
+ESMF_ArrayGetEx.stdout
+ESMF_ArraySpecEx.stdout
+ESMF_BundleCreateEx.stdout
+ESMF_BundleDataMapEx.stdout
+ESMF_CalendarEx.stdout
+ESMF_ClockEx.stdout
+ESMF_CplEx.stdout
+ESMF_DELayoutEx.stdout
+ESMF_FieldCommEx.stdout
+ESMF_FieldCreateEx.stdout
+ESMF_FieldDataMapEx.stdout
+ESMF_FieldWriteEx.stdout
+ESMF_GCompEx.stdout
+ESMF_GridCreateEx.stdout
+ESMF_LogErrEx.stdout
+ESMF_RegridEx.stdout
+ESMF_RouteEx.stdout
+ESMF_StateEx.stdout
+ESMF_TimeEx.stdout
+ESMF_TimeIntervalEx.stdout
+ESMF_VMAllFullReduceEx.stdout
+ESMF_VMComponentEx.stdout
+ESMF_VMDefaultBasicsEx.stdout
+ESMF_VMGetMPICommunicatorEx.stdout
+ESMF_VMScatterVMGatherEx.stdout
+ESMF_VMSendVMRecvEx.stdout
+ESMF_XformEx.stdout
+
+
+No examples Failed.
+
+
+\end{verbatim}

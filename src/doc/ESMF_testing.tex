@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.17 2004/06/22 14:17:44 nscollins Exp $
+% $Id: ESMF_testing.tex,v 1.18 2004/07/01 20:14:02 svasquez Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -84,6 +84,8 @@ The results of the unit tests will be in:
 \end{verbatim}
 
 At the end of unit test execution a script runs to analyze the results.
+The script, which is written in ksh, will not run on platforms that do not support
+ksh. Those platforms print out a 'Command not found' message.
 
 The script output indicates whether there are any unit test failures.
 The following is a sample from the script output:
@@ -184,15 +186,66 @@ The results will be in:
 ~/esmf/test/testO/OSF1.default.64.default/ESMF_SimpleCouplingSTest.stdout
 \end{verbatim}
 
-\subsubsection{Running the ESMF VAlidation (EVA) Suite}
-\label{EVATestDescription}
+At the end of system test execution a script runs to analyze the results.
+The script, which is written in ksh, will not run on platforms that do not support
+ksh. Those platforms print out a 'Command not found' message.
 
-The ESMF VAlidation(EVA) Suite is a collection of seven codes
-representative of those used in climate, weather, and data
-assimulation. These codes are currently used for ESMF prototyping.
-They will eventually provide the basis for ESMF tutorial examples.
+The script output indicates whether there are any system test failures.
+The following is a sample from the script output:
 
-The {\it EVA Suite User's Guide} and source code can be downloaded from the {\bf
-User Links and Downloads} link on the ESMF website, 
-\htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.
+\begin{verbatim}
+The following is the analysis of the run system tests results:
+
+Executable System Tests found:
+-rwxrwxr-x   1 svasquez ncar          65283 Jul 01 10:17 ESMF_CompCreateSTest
+-rwxrwxr-x   1 svasquez ncar          89959 Jul 01 10:36 ESMF_FieldHaloPerSTest
+-rwxrwxr-x   1 svasquez ncar          76960 Jul 01 10:22 ESMF_FieldHaloSTest
+-rwxrwxr-x   1 svasquez ncar          65768 Jul 01 10:39 ESMF_FieldRedistSTest
+-rwxrwxr-x   1 svasquez ncar         108616 Jul 01 10:47 ESMF_FieldRegridConsrvSTest
+-rwxrwxr-x   1 svasquez ncar         111276 Jul 01 10:41 ESMF_FieldRegridMultiSTest
+-rwxrwxr-x   1 svasquez ncar         110447 Jul 01 10:44 ESMF_FieldRegridOrderSTest
+-rwxrwxr-x   1 svasquez ncar         108411 Jul 01 10:33 ESMF_FieldRegridSTest
+-rwxrwxr-x   1 svasquez ncar         112839 Jul 01 10:25 ESMF_FlowCompSTest
+-rwxrwxr-x   1 svasquez ncar         162127 Jul 01 10:28 ESMF_FlowWithCouplingSTest
+-rwxrwxr-x   1 svasquez ncar          62157 Jul 01 10:20 ESMF_RowReduceSTest
+-rwxrwxr-x   1 svasquez ncar          95323 Jul 01 10:14 ESMF_SimpleCouplingSTest
+
+All of the executable system tests should have a corresponding stdout file.
+If not, it's an indication that the examples ere not executed, or that it failed to execute.
+
+System Tests stdout files found: 
+-rw-rw-r--   1 svasquez ncar          16359 Jul 01 12:43 ESMF_CompCreateSTest.stdout
+-rw-rw-r--   1 svasquez ncar          50339 Jul 01 12:44 ESMF_FieldHaloPerSTest.stdout
+-rw-rw-r--   1 svasquez ncar          23746 Jul 01 12:44 ESMF_FieldHaloSTest.stdout
+-rw-rw-r--   1 svasquez ncar          12463 Jul 01 12:43 ESMF_FieldRedistSTest.stdout
+-rw-rw-r--   1 svasquez ncar          19348 Jul 01 12:45 ESMF_FieldRegridConsrvSTest.stdout
+-rw-rw-r--   1 svasquez ncar          15117 Jul 01 12:45 ESMF_FieldRegridMultiSTest.stdout
+-rw-rw-r--   1 svasquez ncar          19321 Jul 01 12:45 ESMF_FieldRegridOrderSTest.stdout
+-rw-rw-r--   1 svasquez ncar          19143 Jul 01 12:44 ESMF_FieldRegridSTest.stdout
+-rw-rw-r--   1 svasquez ncar          10670 Jul 01 12:46 ESMF_FlowCompSTest.stdout
+-rw-rw-r--   1 svasquez ncar           5174 Jul 01 12:48 ESMF_FlowWithCouplingSTest.stdout
+-rw-rw-r--   1 svasquez ncar          12277 Jul 01 12:43 ESMF_RowReduceSTest.stdout
+-rw-rw-r--   1 svasquez ncar         223944 Jul 01 12:45 ESMF_SimpleCouplingSTest.stdout
+
+System Tests stdout files of zero length indicate that the test
+did not run because it failed to compile or it failed to execute. 
+
+The following tests passed: 
+ESMF_CompCreateSTest.stdout
+ESMF_FieldHaloPerSTest.stdout
+ESMF_FieldHaloSTest.stdout
+ESMF_FieldRedistSTest.stdout
+ESMF_FieldRegridConsrvSTest.stdout
+ESMF_FieldRegridMultiSTest.stdout
+ESMF_FieldRegridOrderSTest.stdout
+ESMF_FieldRegridSTest.stdout
+ESMF_FlowCompSTest.stdout
+ESMF_FlowWithCouplingSTest.stdout
+ESMF_RowReduceSTest.stdout
+ESMF_SimpleCouplingSTest.stdout
+
+
+No system tests Failed.
+
+\end{verbatim}
 
