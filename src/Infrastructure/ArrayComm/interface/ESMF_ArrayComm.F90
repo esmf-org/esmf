@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.38 2004/04/14 20:41:08 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.39 2004/04/19 21:54:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,7 +67,8 @@
       public ESMF_ArrayRedistStore, ESMF_ArrayRedist, ESMF_ArrayRedistRelease
       ! Regrid methods are in ESMF_Regrid.F90
 
-      public ESMF_ArrayAllGather, ESMF_ArrayGather, ESMF_ArrayScatter
+      public ESMF_ArrayGather, ESMF_ArrayScatter
+      !!public ESMF_ArrayAllGather
       !!public ESMF_ArrayReduce, ESMF_ArrayAllReduce
       !!public ESMF_ArrayBroadcast, ESMF_ArrayAlltoAll
 
@@ -76,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.38 2004/04/14 20:41:08 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.39 2004/04/19 21:54:39 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -120,6 +121,7 @@
 !EOPI
       end interface
 
+#if 0
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_ArrayAllGather - gather a distributed array to all DEs
@@ -138,6 +140,7 @@
 
 !EOPI
       end interface
+#endif
 
 !==============================================================================
 
@@ -146,126 +149,8 @@
 !==============================================================================
 
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayAllGatherGrid - gather a distributed Array
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayAllGatherGrid(array, grid, datamap, array_out, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_DataMap), intent(in) :: datamap
-      type(ESMF_Array), intent(out) :: array_out
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DEs.
-!
-!
-!EOP
-! !REQUIREMENTS:
-      integer :: status         ! local error status
-      logical :: rcpresent      ! did user specify rc?
-      integer :: gridrank, datarank
-      integer :: i, j, nDEs
-      type(ESMF_newDElayout) :: delayout
-      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
-      integer, dimension(ESMF_MAXDIM) :: decompids
-      integer, dimension(:,:), pointer :: localAxisLengths, tempCCPDEPD
-      integer, dimension(ESMF_MAXDIM) :: dimOrder, dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps
-      integer, dimension(ESMF_MAXDIM) :: localMaxDimCount, globalCellDim
-      integer, dimension(:), allocatable :: tempMLCCPD, tempGCCPD
 
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
- 
-! extract necessary information from the grid
-      call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
-      call ESMF_newDELayoutGet(delayout, deCount=nDEs, rc=status)
-      allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
-      allocate( tempMLCCPD(     gridrank), stat=status)
-      allocate(  tempGCCPD(     gridrank), stat=status)
-      allocate(tempCCPDEPD(nDEs,gridrank), stat=status)
-
-! Query the datamap and set info for grid so it knows how to match up the
-! array indices and the grid indices.
-      call ESMF_DataMapGet(datamap, dataIorder=dimOrder, &
-                           horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                           rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayAllGatherGrid: DataMapGet returned failure"
-        return
-      endif
-
-      call ESMF_GridGet(grid, &
-                        horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                        globalCellCountPerDim=tempGCCPD, &
-                        cellCountPerDEPerDim=tempCCPDEPD, &
-                        maxLocalCellCountPerDim=tempMLCCPD, rc=rc)
-!     call ESMF_GridGet(grid, decomps, rc=status)   !TODO: add decomps
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayAllGatherGrid: GridGet returned failure"
-        return
-      endif
-      decomps(1) = 1    ! TODO: remove this once the grid call is created
-      decomps(2) = 2
-
-! get the Array sizes
-      call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, &
-                         rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayAllGatherGrid: ArrayGet returned failure"
-        return
-      endif
-
-! calculate decompids and dimlengths, modified if necessary by dimorders
-      do i=1, datarank
-        decompids(i) = dimorder(i)
-        globalCellDim(i) = dimlengths(i)
-        localMaxDimCount(i) = dimlengths(i)
-        do j=1, nDEs
-          localAxisLengths(j,i) = dimlengths(i)
-        enddo
-        if(dimorder(i).ne.0) then
-          decompids(i) = decomps(dimorder(i))
-          globalCellDim(i) = tempGCCPD(dimorder(i))
-          localMaxDimCount(i) = tempMLCCPD(dimorder(i))
-          do j=1, nDEs
-            localAxisLengths(j,i) = tempCCPDEPD(j,dimorder(i))
-          enddo
-        endif
-      enddo
-
-
-! call c routine to allgather
-        call c_ESMC_ArrayAllGather(array, delayout, decompids, datarank, &
-                                   localAxisLengths, globalCellDim, &
-                                   localMaxDimCount, array_out, status)
-
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayAllGather returned error"
-          return
-        endif
-
-! Clean up
-        deallocate(localAxisLengths)
-        deallocate(      tempMLCCPD)
-        deallocate(       tempGCCPD)
-        deallocate(     tempCCPDEPD)
-
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayAllGatherGrid
-
+#if 0
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ArrayAllGatherList - gather a distributed Array
@@ -369,6 +254,134 @@
           print *, "c_ESMC_ArrayGather returned error"
           return
         endif
+
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayGather
+#endif
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayGather - gather a distributed Array
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayGather(array, grid, datamap, rootDE, array_out, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: array
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_DataMap), intent(in) :: datamap
+      integer, intent(in) :: rootDE
+      type(ESMF_Array), intent(out) :: array_out
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Used to gather a distributed Array into a single Array on one DE.
+!
+!
+!EOP
+! !REQUIREMENTS:
+      integer :: status         ! local error status
+      logical :: rcpresent      ! did user specify rc?
+      integer :: gridrank, datarank
+      integer :: i, j, nDEs
+      type(ESMF_newDElayout) :: delayout
+      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+      integer, dimension(ESMF_MAXDIM) :: decompids
+      integer, dimension(:,:), pointer :: localAxisLengths, tempCCPDEPD
+      integer, dimension(ESMF_MAXDIM) :: dimOrder, dimlengths
+      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, size_decomp
+      integer, dimension(ESMF_MAXDIM) :: localMaxDimCount, globalCellDim
+      integer, dimension(:), allocatable :: tempMLCCPD, tempGCCPD
+
+! initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+ 
+! extract necessary information from the grid
+      call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
+      call ESMF_newDELayoutGet(delayout, deCount=nDEs, rc=status)
+      allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
+      allocate( tempMLCCPD(     gridrank), stat=status)
+      allocate(  tempGCCPD(     gridrank), stat=status)
+      allocate(tempCCPDEPD(nDEs,gridrank), stat=status)
+
+! Query the datamap and set info for grid so it knows how to match up the
+! array indices and the grid indices.
+      call ESMF_DataMapGet(datamap, dataIorder=dimOrder, &
+                           horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                           rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayAllGatherGrid: DataMapGet returned failure"
+        return
+      endif
+
+      call ESMF_GridGet(grid, &
+                        horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                        globalCellCountPerDim=tempGCCPD, &
+                        cellCountPerDEPerDim=tempCCPDEPD, &
+                        maxLocalCellCountPerDim=tempMLCCPD, rc=rc)
+!     call ESMF_GridGet(grid, decomps, rc=status)   !TODO: add decomps
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayAllGatherGrid: GridGet returned failure"
+        return
+      endif
+      size_decomp = size(decompids)
+      decomps(1) = 1    ! TODO: remove this once the grid call is created
+      decomps(2) = 2
+
+! get the Array sizes
+      call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, &
+                         rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayAllGatherGrid: ArrayGet returned failure"
+        return
+      endif
+
+! calculate decompids and dimlengths, modified if necessary by dimorders
+      do i=1, datarank
+        decompids(i) = dimorder(i)
+        globalCellDim(i) = dimlengths(i)
+        localMaxDimCount(i) = dimlengths(i)
+        do j=1, nDEs
+          localAxisLengths(j,i) = dimlengths(i)
+        enddo
+        if(dimorder(i).ne.0) then
+          decompids(i) = decomps(dimorder(i))
+          globalCellDim(i) = tempGCCPD(dimorder(i))
+          localMaxDimCount(i) = tempMLCCPD(dimorder(i))
+          do j=1, nDEs
+            localAxisLengths(j,i) = tempCCPDEPD(j,dimorder(i))
+          enddo
+        endif
+      enddo
+
+
+! call c routine to gather
+        call c_ESMC_ArrayGather(array, delayout, decompids, size_decomp, &
+                                globalCellDim, localMaxDimCount, rootDE, &
+                                array_out, status)
+#if 0
+        call c_ESMC_ArrayAllGather(array, delayout, decompids, datarank, &
+                                   localAxisLengths, globalCellDim, &
+                                   localMaxDimCount, array_out, status)
+#endif
+
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "c_ESMC_ArrayAllGather returned error"
+          return
+        endif
+
+! Clean up
+        deallocate(localAxisLengths)
+        deallocate(      tempMLCCPD)
+        deallocate(       tempGCCPD)
+        deallocate(     tempCCPDEPD)
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS

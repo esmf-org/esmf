@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.18 2004/04/14 20:45:00 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.19 2004/04/19 21:55:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@
    public ESMF_BundleRegridStore, ESMF_BundleRegrid, ESMF_BundleRegridRelease 
 
    public ESMF_BundleGather   ! Combine 1 decomposed bundle into 1 on 1 DE
-   public ESMF_BundleAllGather! Combine 1 decomposed bundle into N copies on N DEs
+   !public ESMF_BundleAllGather! Combine 1 decomposed bundle into N copies on N DEs
 
    public ESMF_BundleScatter  ! Split 1 bundle into a decomposed one over N DEs
    !public ESMF_BundleBroadcast! Send 1 bundle to all DEs, none decomposed
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.18 2004/04/14 20:45:00 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.19 2004/04/19 21:55:32 nscollins Exp $'
 
 !==============================================================================
 !
@@ -116,6 +116,7 @@
 !   These include Reduction operations, Halo, and Transpose.
 !
 !------------------------------------------------------------------------------
+#if 0
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_BundleAllGather - Data AllGather operation on a Bundle
@@ -182,7 +183,7 @@
       call ESMF_ArrayAllGather(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
                                btypep%flist(1)%ftypep%mapping, array, status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleAllGather: Array AllGather returned failure"
+        print *, "ERROR in BundleGather: Array Gather returned failure"
         return
       endif 
 
@@ -190,6 +191,7 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleAllGather
+#endif
 
 
 !------------------------------------------------------------------------------
@@ -249,14 +251,6 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType), pointer :: btypep    ! bundle type info
-      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_newDELayout) :: delayout          ! layout
-      integer :: i, datarank, thisdim, thislength, numDims
-      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
-                                         global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, globalCellCountPerDim
-      integer, dimension(ESMF_MAXGRIDDIM) :: maxLocalCellCountPerDim, local_maxlengths
-      integer, dimension(:), pointer :: decompids
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -268,69 +262,10 @@
 
       btypep => bundle%btypep
 
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(btypep%flist(1)%ftypep%mapping, &
-                           dataIorder=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: DataMapGet returned failure"
-        return
-      endif 
-      call ESMF_GridGet(btypep%grid, dimCount=numDims, &
-                        globalCellCountPerDim=globalCellCountPerDim, &
-                        maxLocalCellCountPerDim=maxLocalCellCountPerDim, &
-                        rc=status)
-!     call ESMF_GridGet(btypep%grid, decomps, rc=status)   !TODO: add decomps
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: GridGet returned failure"
-        return
-      endif 
-      decomps(1) = 1    ! TODO: remove this once the grid call is created
-      decomps(2) = 2
-
-      ! And get the Array sizes
-      call ESMF_ArrayGet(btypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
-                         counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: ArrayGet returned failure"
-        return
-      endif 
-
-      allocate(decompids(datarank), stat=status)
-      do i=1, datarank
-        decompids(i) = dimorder(i)
-        global_dimlengths(i) = dimlengths(i)
-        if(dimorder(i).ne.0) then
-          decompids(i) = decomps(dimorder(i))
-          global_dimlengths(i) = globalCellCountPerDim(dimorder(i))
-          local_maxlengths(i) = maxLocalCellCountPerDim(dimorder(i))
-        endif
-      enddo
-
-      ! Set the axis info on the array to pass thru to DistGrid
-      do i=1, numDims
-          thisdim = dimorder(i)
-          if (thisdim .eq. 0) cycle
-
-          thislength = dimlengths(thisdim)
-     
-          call ESMF_AxisIndexSet(axis(i), 1, thislength, thislength, rc=status)
-     
-      enddo
-
-      ! Attach this info to the array
-      call ESMF_ArraySetAxisIndex(btypep%flist(1)%ftypep%localfield%localdata, &
-                                       compindex=axis, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: ArraySetAxisIndex returned failure"
-        return
-      endif 
-
       ! Call Array method to perform actual work
-      call ESMF_GridGet(btypep%grid, delayout=delayout, rc=status)
       call ESMF_ArrayGather(btypep%flist(1)%ftypep%localfield%localdata, &
-                            delayout, decompids, global_dimlengths, &
-                            local_maxlengths, destinationDE, array, status)
+                            btypep%grid, btypep%flist(1)%ftypep%mapping, &
+                            destinationDE, array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleGather: Array Gather returned failure"
         return
