@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:49:44 eschwab Exp $
+// $Id: ESMC_TimeInstant.C,v 1.4 2002/10/14 16:19:40 eschwab Exp $
 //
 // ESMC TimeInstant method code (body) file
 //
@@ -16,16 +16,16 @@
 //
 //-------------------------------------------------------------------------
 
-// higher level or system includes
-#include<ESMC_Util.h>
+ // higher level or system includes
+ #include<ESMC_Util.h>
 
-// associated class definition file
-#include <ESMC_TimeInstant.h>
+ // associated class definition file
+ #include <ESMC_TimeInstant.h>
 
 //-------------------------------------------------------------------------
-// leave the following line as-is; it will insert the cvs ident string
-// into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:49:44 eschwab Exp $";
+ // leave the following line as-is; it will insert the cvs ident string
+ // into the object file for tracking purposes.
+ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.4 2002/10/14 16:19:40 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -43,13 +43,14 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 // !INTERFACE:
       int ESMC_TimeInstant::ESMC_TimeInstInit(
 //
-// !RETURN VALUE:  int error return code
+// !RETURN VALUE:
+//    int error return code
 //
 // !ARGUMENTS:
       int64 S,              // in - integer seconds
       int32 Sn,             // in - fractional seconds, numerator
       int32 Sd,             // in - fractional seconds, denominator
-	  ESMC_Calendar *Cal,   // in - associated calendar
+      ESMC_Calendar *Cal,   // in - associated calendar
       int Tz) {             // in - timezone
 //
 // !DESCRIPTION:
@@ -58,17 +59,17 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 //EOP
 // !REQUIREMENTS:  
 
-	// use base class Init()
-	if (ESMC_Time::Init(S, Sn, Sd) == ESMC_SUCCESS)
-	{
-		this->Calendar = Cal;
-		this->Timezone = Tz;
+    // use base class Init()
+    if (ESMC_Time::Init(S, Sn, Sd) == ESMC_SUCCESS)
+    {
+        this->Calendar = Cal;
+        this->Timezone = Tz;
 
-		return(ESMC_SUCCESS);
-	}
-	else return(ESMC_FAILURE);
+        return(ESMC_SUCCESS);
+    }
+    else return(ESMC_FAILURE);
 
-}  // end ESMC_TimeInstInit
+ }  // end ESMC_TimeInstInit
 
 //-------------------------------------------------------------------------
 //BOP
@@ -77,7 +78,8 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 // !INTERFACE:
       int ESMC_TimeInstant::ESMC_TimeInstPrint(
 //
-// !RETURN VALUE:  int error return code
+// !RETURN VALUE:
+//    int error return code
 //
 // !ARGUMENTS:
       int64 *S,              // out - integer seconds
@@ -90,10 +92,10 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 //EOP
 // !REQUIREMENTS:  
 
-	// use base class Print() first
-	return(ESMC_Time::ESMC_TimePrint(S, Sn, Sd));
+    // use base class Print() first
+    return(ESMC_Time::ESMC_TimePrint(S, Sn, Sd));
 
-}  // end ESMC_TimeInstPrint
+ }  // end ESMC_TimeInstPrint
 
 //-------------------------------------------------------------------------
 //BOP
@@ -102,9 +104,11 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 // !INTERFACE:
       int ESMC_TimeInstant::ESMC_TimeInstPrint(void) const {
 //
-// !RETURN VALUE:  int error return code
+// !RETURN VALUE:
+//    int error return code
 //
-// !ARGUMENTS:  none
+// !ARGUMENTS:
+//    none
 //
 // !DESCRIPTION:
 //      print TimeInstant state for testing/debugging
@@ -112,12 +116,12 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 //EOP
 // !REQUIREMENTS:  
 
-	// use base class Print
-	ESMC_Time::ESMC_TimePrint();
+    // use base class Print
+    ESMC_Time::ESMC_TimePrint();
 
-	return(ESMC_SUCCESS);
+    return(ESMC_SUCCESS);
 
-}  // end ESMC_TimeInstPrint
+ }  // end ESMC_TimeInstPrint
 
 //-------------------------------------------------------------------------
 //BOP
@@ -126,9 +130,11 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 // !INTERFACE:
       ESMC_TimeInstant::ESMC_TimeInstant(void) {
 //
-// !RETURN VALUE:  none
+// !RETURN VALUE:
+//    none
 //
-// !ARGUMENTS: none
+// !ARGUMENTS:
+//    none
 //
 // !DESCRIPTION:
 //      Initializes a ESMC_TimeInstant with defaults via ESMC_TimeInstInit
@@ -138,7 +144,7 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 
    ESMC_TimeInstInit(0, 0, 1, NULL, 0);
 
-}  // end ESMC_TimeInstant
+ }  // end ESMC_TimeInstant
 
 //-------------------------------------------------------------------------
 //BOP
@@ -147,13 +153,14 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 // !INTERFACE:
       ESMC_TimeInstant::ESMC_TimeInstant(
 //
-// !RETURN VALUE:  none
+// !RETURN VALUE:
+//    none
 //
 // !ARGUMENTS:
       int64 S,              // in - integer seconds
       int32 Sn,             // in - fractional seconds, numerator
       int32 Sd,             // in - fractional seconds, denominator
-	  ESMC_Calendar *Cal,   // in - associated calendar
+      ESMC_Calendar *Cal,   // in - associated calendar
       int Tz) {             // in - timezone
 //
 // !DESCRIPTION:
@@ -162,9 +169,9 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 //EOP
 // !REQUIREMENTS:  
 
-	ESMC_TimeInstInit(S, Sn, Sd, Cal, Tz);
+    ESMC_TimeInstInit(S, Sn, Sd, Cal, Tz);
 
-}  // end ESMC_TimeInstant
+ }  // end ESMC_TimeInstant
 
 //-------------------------------------------------------------------------
 //BOP
@@ -173,9 +180,11 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 // !INTERFACE:
       ESMC_TimeInstant::~ESMC_TimeInstant(void) {
 //
-// !RETURN VALUE:  none
+// !RETURN VALUE:
+      none
 //
-// !ARGUMENTS:  none
+// !ARGUMENTS:
+//    none
 //
 // !DESCRIPTION:
 //      Default ESMC_TimeInstant destructor
@@ -183,4 +192,4 @@ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.3 2002/10/11 01:
 //EOP
 // !REQUIREMENTS:  
 
-}  // end ~ESMC_TimeInstant
+ }  // end ~ESMC_TimeInstant

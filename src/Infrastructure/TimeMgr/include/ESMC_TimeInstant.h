@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInstant.h,v 1.3 2002/10/11 01:50:13 eschwab Exp $
+// $Id: ESMC_TimeInstant.h,v 1.4 2002/10/14 16:18:59 eschwab Exp $
 //
 // ESMF TimeInstant C++ definition include file
 //
@@ -10,19 +10,19 @@
 //  the automated document processing.)
 //-------------------------------------------------------------------------
 //
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
+ // these lines prevent this file from being read more than once if it
+ // ends up being included multiple times
 
-#ifndef ESMC_TIME_INSTANT_H
-#define ESMC_TIME_INSTANT_H
+ #ifndef ESMC_TIME_INSTANT_H
+ #define ESMC_TIME_INSTANT_H
 
 //-------------------------------------------------------------------------
 
-// put any constants or macros which apply to the whole component in this file.
-// anything public or esmf-wide should be up higher at the top level
-// include files.
-#include <ESMC_TimeMgr.h>
-#include <ESMC_Types.h>
+ // put any constants or macros which apply to the whole component in this file.
+ // anything public or esmf-wide should be up higher at the top level
+ // include files.
+ #include <ESMC_TimeMgr.h>
+ #include <ESMC_Types.h>
 
 //-------------------------------------------------------------------------
 //BOP
@@ -54,18 +54,18 @@
 // between Julian and Gregorian calendars.
 //
 // !USES:
-#include <ESMC_Time.h>           // inherited Time class
-#include <ESMC_Calendar.h>       // associated Calendar class
+ #include <ESMC_Time.h>           // inherited Time class
+ #include <ESMC_Calendar.h>       // associated Calendar class
 
 // !PUBLIC TYPES:
-class ESMC_TimeInstant;
+ class ESMC_TimeInstant;
 
 // !PRIVATE TYPES:
-// class configuration type:  not needed for TimeInstant
+ // class configuration type:  not needed for TimeInstant
 
-// class definition type
-class ESMC_TimeInstant : public ESMC_Time  // inherits ESMC_Time & Base classes
-{
+ // class definition type
+ class ESMC_TimeInstant : public ESMC_Time  // inherits ESMC_Time & Base classes
+ {
 	friend class ESMC_Calendar;
 
   private:   // corresponds to F90 module 'type ESMF_TimeInstant' members 
@@ -145,16 +145,16 @@ class ESMC_TimeInstant : public ESMC_Time  // inherits ESMC_Time & Base classes
 					 int Timezone);
     ~ESMC_TimeInstant(void);
 
-// < list the rest of the public interface methods here >
+ // < list the rest of the public interface methods here >
 
 //EOP
 //-------------------------------------------------------------------------
 
   private:
 //
-// < list private interface methods here >
+ // < list private interface methods here >
 //
 
-};   // end class ESMC_TimeInstant
+ };   // end class ESMC_TimeInstant
 
-#endif // ESMC_TIME_INSTANT_H
+ #endif // ESMC_TIME_INSTANT_H
