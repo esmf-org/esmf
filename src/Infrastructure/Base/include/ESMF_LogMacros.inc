@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.1 2004/05/20 11:40:30 nscollins Exp $
+ $Id: ESMF_LogMacros.inc,v 1.2 2004/05/21 09:23:42 nscollins Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,25 +21,28 @@
 #ifndef ESMF_LOGMACROS_INC
 #define ESMF_LOGMACROS_INC
 
-#define ESMF_CONTEXT  __LINE__,__FILE__,ESMF_METHOD
+#define ESMF_CONTEXT  __LINE__,ESMF_FILENAME,ESMF_METHOD
 
-#undef __FILE__
-#define __FILE__ "tmp"
+
+#ifndef ESMF_FILENAME
+#define ESMF_FILENAME __FILE__
+#endif
 
 #define EM_LogFoundAllocError(status,rc) \
-ESMF_LogFoundAllocError(status,__LINE__,__FILE__,ESMF_METHOD,rc)
+ESMF_LogFoundAllocError(status,__LINE__,ESMF_FILENAME_,ESMF_METHOD,rc)
 
 #define EM_LogFoundError(status,rc) \
-ESMF_LogFoundError(status,__LINE__,__FILE__,ESMF_METHOD,rc)
+ESMF_LogFoundError(status,__LINE__,ESMF_FILENAME_,ESMF_METHOD,rc)
 
 #define EM_LogMsgFoundAllocError(status,msg,rc) \
-ESMF_LogMsgFoundAllocError(status,msg,__LINE__,__FILE__,ESMF_METHOD,rc)
+ESMF_LogMsgFoundAllocError(status,msg,__LINE__,ESMF_FILENAME_,ESMF_METHOD,rc)
 
 #define EM_LogMsgFoundError(status,msg,rc) \
-ESMF_LogMsgFoundError(status,msg,__LINE__,__FILE__,ESMF_METHOD,rc)
+ESMF_LogMsgFoundError(status,msg,__LINE__,ESMF_FILENAME_,ESMF_METHOD,rc)
 
 #define EM_LogWrite(msg,logtype) \
-ESMF_LogWrite(msg,logtype,__LINE__,__FILE__,ESMF_METHOD)
+ESMF_LogWrite(msg,logtype,__LINE__,ESMF_FILENAME_,ESMF_METHOD)
+
 
 
 #define ESMC_LogAllocError(rc) \
