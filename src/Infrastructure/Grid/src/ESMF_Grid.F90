@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.20 2003/01/09 22:52:06 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.21 2003/01/10 18:51:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,6 +123,7 @@
     public ESMF_GridSetConfig
     !public ESMF_GridGetCoord
     public ESMF_GridSetCoord
+    public ESMF_GridGetDE    ! temporary to access DistGrid from above
     !public ESMF_GridGetInfo
     public ESMF_GridSetInfo
     !public ESMF_GridGetLMask
@@ -195,7 +196,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.20 2003/01/09 22:52:06 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.21 2003/01/10 18:51:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1458,6 +1459,99 @@
 !  code goes here
 !
       end subroutine ESMF_GridSetCoordFromArray
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:
+!     ESMF_GridGetDE - Get DE information for a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_GridGetDE(grid, MyDE, MyDEx, MyDEy, &
+                                DE_E, DE_W, DE_N, DE_S, &
+                                DE_NE, DE_NW, DE_SE, DE_SW, &
+                                lsize, gstart, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType) :: grid
+      integer, intent(inout), optional :: MyDE
+      integer, intent(inout), optional :: MyDEx
+      integer, intent(inout), optional :: MyDEy
+      integer, intent(inout), optional :: DE_E
+      integer, intent(inout), optional :: DE_W
+      integer, intent(inout), optional :: DE_N
+      integer, intent(inout), optional :: DE_S
+      integer, intent(inout), optional :: DE_NE
+      integer, intent(inout), optional :: DE_NW
+      integer, intent(inout), optional :: DE_SE
+      integer, intent(inout), optional :: DE_SW
+      integer, intent(inout), optional :: lsize
+      integer, intent(inout), optional :: gstart
+! TODO: figure out format for getting deeper derived type info, N_DIR1 N_DIR2
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get a DistGrid attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be queried.
+!     \item[[MyDE]]
+!
+!     \item[[MyDEx]]
+!
+!     \item[[MyDEy]]
+!
+!     \item[[DE_E]]
+!
+!     \item[[DE_W]]
+!
+!     \item[[DE_N]]
+!
+!     \item[[DE_S]]
+!
+!     \item[[DE_NE]]
+!
+!     \item[[DE_NW]]
+!
+!     \item[[DE_SE]]
+!
+!     \item[[DE_SW]]
+!
+!     \item[[lsize]]
+!
+!     \item[[gstart]]
+!
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     call DistGrid method to retrieve information otherwise not available
+!     to the application level
+      call ESMF_DistGridGetDE(grid%distgrid%ptr, MyDE, MyDEx, MyDEy, &
+                              DE_E, DE_W, DE_N, DE_S, &
+                              DE_NE, DE_NW, DE_SE, DE_SW, &
+                              lsize, gstart, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridGetDE: distgrid get de"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetDE
 
 !------------------------------------------------------------------------------
 !BOP
