@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.32 2004/03/08 22:47:54 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.33 2004/03/09 22:44:12 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.32 2004/03/08 22:47:54 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.33 2004/03/09 22:44:12 svasquez Exp $'
 
 !==============================================================================
 !
@@ -5087,7 +5087,6 @@
 !     described by an array of min/max's.  This routine is for the case of
 !     a DE that is part of a destination Grid determining which DEs it will
 !     receive data from.
-
 !
 !     The arguments are:
 !     \begin{description}
