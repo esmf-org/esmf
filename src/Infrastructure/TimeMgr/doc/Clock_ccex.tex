@@ -1,4 +1,4 @@
-% $Id: Clock_ccex.tex,v 1.1 2002/10/08 18:13:10 eschwab Exp $
+% $Id: Clock_ccex.tex,v 1.2 2003/02/11 18:58:55 eschwab Exp $
 
 A Clock is the centerpiece of the Time Manager library, used to track time
 in an ESM component.  The following shows how to create and initialize one
@@ -17,7 +17,7 @@ Gregorian.Init(GREGORIAN);
 
 // create and initialize clock time intervals and instants
 ESMC_TimeInterval TimeStep;
-ESMC_TimeInstant  StartTime, StopTime, RefTime;
+ESMC_Time StartTime, StopTime, RefTime;
 
 TimeStep.Init(...);
 StartTime.Init(..., Gregorian);

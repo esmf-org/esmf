@@ -1,8 +1,10 @@
-% $Id: TimeInterval_def.tex,v 1.1 2002/10/08 18:13:10 eschwab Exp $
+% $Id: TimeInterval_def.tex,v 1.2 2003/02/11 18:58:55 eschwab Exp $
 \begin{verbatim}
-        type ESMF_TimeInterval 
-            private
-            sequence
-                type(ESMF_Time) :: time
-        end type
+      type ESMF_TimeInterval
+      sequence                           ! match C++ storage order
+      private                            !   (members opaque on F90 side)
+        type(ESMF_BaseTime) :: basetime  ! inherit base class
+        type(ESMF_Calendar) :: calendar  ! optional calendar for calendar
+                                         !   intervals
+      end type
 \end{verbatim}

@@ -1,26 +1,48 @@
-% $Id: TimeMgr_param.tex,v 1.2 2002/09/20 18:24:06 eschwab Exp $
+% $Id: TimeMgr_param.tex,v 1.3 2003/02/11 18:58:56 eschwab Exp $
 
-Platform-independent specification of 64-bit and 32-bit integers are done via
-compile-time constants in F90 and C++ as follows:
+Platform-independent specification of 64-bit integers are done via
+compile-time constants in the F90 and C++ {\tt ESMF\_Base} classes as follows:
 
 F90:
 \begin{verbatim}
-    module ESMF_TypesMod
-        integer, parameter :: int64 = selected_int_kind(18) ! 18 decimal digits
-        integer, parameter :: int32 = selected_int_kind(9)  ! 9  decimal digits
-    end module ESMF_TypesMod
+from ESMF_Base.F90:
+
+    module ESMF_BaseMod
+        .
+        .
+        .
+        integer, parameter :: &
+                     ESMF_IKIND_I8 = selected_int_kind(18), ! 18 decimal digits
+        .
+        .
+        .
+    end module ESMF_BaseMod
 \end{verbatim}
 
 C++:
 \begin{verbatim}
-#ifdef LINUX
-#define int64  long long	! at least 64 bits
-#define int32  long
-#elif defined(IRIX64)
-#define int64  long			! at least 64 bits
-#define int32  long
+from ESMC_Base.h:
+.
+.
+.
+#ifdef ESMF_IS_32BIT_MACHINE
+.
+.
+.
+  typedef long long ESMF_IKIND_I8;
+.
+.
+.
+#else // 64-bit or larger machine
+.
+.
+.
+  typedef long      ESMF_IKIND_I8;
 .
 .
 .
 #endif
+.
+.
+.
 \end{verbatim}

@@ -1,15 +1,16 @@
-% $Id: Alarm_design.tex,v 1.1 2002/10/08 18:13:09 eschwab Exp $
+% $Id: Alarm_design.tex,v 1.2 2003/02/11 18:58:54 eschwab Exp $
 
-The Alarm class contains TimeInstants and a TimeInterval to perform one-shot
-and interval alarming.  A single TimeInterval holds the alarm interval if
-used.  A TimeInstant is defined for the ring time, used for either the one-shot
-alarm time or for the next interval alarm time.  A TimeInstant is also
-defined for the previous ring time to keep track of alarm intervals.
-A TimeInstant for stop time defines when alarm intervals end.  If a one-shot
-alarm is defined, only the ring time attribute is used, the others are not.
-To keep track of alarm state, two logical attributes are defined, one for
-ringing on/off, and the other for alarm enabled/disabled.  An alarm is 
-enabled by default; if disabled by the user, it does not function at all.
+The {\tt Alarm} class contains {\tt Time} instants and a {\tt TimeInterval}
+to perform one-shot and interval alarming.  A single {\tt TimeInterval}
+holds the alarm interval if used.  A {\tt Time} instant is defined for the
+ring time, used for either the one-shot alarm time or for the next interval
+alarm time.  A {\tt Time} instant is also defined for the previous ring
+time to keep track of alarm intervals.  A {\tt Time} instant for stop time
+defines when alarm intervals end.  If a one-shot alarm is defined, only
+the ring time attribute is used, the others are not.  To keep track of
+alarm state, two logical attributes are defined, one for ringing on/off,
+and the other for alarm enabled/disabled.  An alarm is enabled by default;
+if disabled by the user, it does not function at all.
 
 The primary method is to check whether it is time to set the ringer, which
 is called by the associated clock after performing a time step.  The clock

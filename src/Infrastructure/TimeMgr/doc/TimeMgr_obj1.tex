@@ -1,4 +1,4 @@
-% $Id: TimeMgr_obj1.tex,v 1.2 2002/10/07 18:56:37 eschwab Exp $
+% $Id: TimeMgr_obj1.tex,v 1.3 2003/02/11 18:58:56 eschwab Exp $
 
 %\section{Object Model}
 
@@ -8,29 +8,29 @@ as shown in Figure 1 below.  The primary classes intended for
 direct model use are:
 
 \begin{itemize}
-\item ESMF\_TimeInterval
-\item ESMF\_TimeInstant
-\item ESMF\_Clock
-\item ESMF\_Alarm
-\item ESMF\_Calendar
+\item {\tt ESMF\_TimeInterval}
+\item {\tt ESMF\_Time}
+\item {\tt ESMF\_Clock}
+\item {\tt ESMF\_Alarm}
+\item {\tt ESMF\_Calendar}
 \end{itemize}
 
 These directly correspond to, and encapsulate the representation and
-behavior of, Time Intervals, Time Instants, Clocks, Alarms, and Calendars,
+behavior of, Time Intervals, Time instants, Clocks, Alarms, and Calendars,
 as specified in the ESMF Time Manager Requirements document.
-ESMF\_TimeInterval is independent of any calendar, whereas ESMF\_TimeInstant
-is dependent on a calendar type, such as Gregorian or Julian.  Multiple
-objects of all these primary classes can be instantiated within a single
-application.
+{\tt ESMF\_TimeInterval} is independent of any calendar (except when used
+as a Calendar interval), whereas {\tt ESMF\_Time} is dependent on a calendar
+type, such as Gregorian or Julian.  Multiple objects of all these primary
+classes can be instantiated within a single application.
 
 There is also one secondary supporting class, not intended for direct
-use in model applications.  This is ESMF\_Time.  ESMF\_Time serves as the
-base class for both ESMF\_TimeInterval and ESMF\_TimeInstant, capturing
-common core time representation and functionality.
+use in model applications.  This is {\tt ESMF\_BaseTime}.  {\tt ESMF\_BaseTime}
+serves as the base class for both {\tt ESMF\_TimeInterval} and
+{\tt ESMF\_Time},capturing common core time representation and functionality.
 
-ESMF\_Calendar encapsulates all the required calendar types and behavior,
-isolating them from Time Instants.  Specific calendar-type objects (e.g.
-Gregorian, Julian, no-leap, etc.) can be instantiated from ESMF\_Calendar.
+{\tt ESMF\_Calendar} encapsulates all the required calendar types and behavior,
+isolating them from Time instants.  Specific calendar-type objects (e.g.
+Gregorian, Julian, no-leap, etc.) can be instantiated from {\tt ESMF\_Calendar}.
 Ideally, for a given application, no more than one calendar
 object should be instantiated for each calendar type.  The idea is that
 a calendar object is analogous to a "wall calendar," serving as a single
@@ -42,8 +42,8 @@ MPMD application execution models, there may be multiple instantiations
 of a calendar type; for example, one per component.
 
 For object integrity, all class data members are private; access is via
-public member functions only. The entire ESMF\_Time base class will be
-"protected," so that it can only be inherited; it will not be directly
+public member functions only. The entire {\tt ESMF\_BaseTime} base class
+will be "protected," so that it can only be inherited; it will not be directly
 instantiable.
 
 \begin{center}

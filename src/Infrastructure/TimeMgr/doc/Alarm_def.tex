@@ -1,16 +1,15 @@
-% $Id: Alarm_def.tex,v 1.1 2002/10/08 18:13:09 eschwab Exp $
+% $Id: Alarm_def.tex,v 1.2 2003/02/11 18:58:53 eschwab Exp $
 \begin{verbatim}
-        type ESMF_Alarm
-            private
-            sequence
-                type(ESMF_TimeInterval) :: RingInterval
-                type(ESMF_TimeInstant)  :: RingTime
-                type(ESMF_TimeInstant)  :: NextRingTime
-                type(ESMF_TimeInstant)  :: PrevRingTime
-                type(ESMF_TimeInstant)  :: StopTime
-                logical :: Ringing
-                logical :: Enabled
-                integer :: ID
-                integer :: AlarmMutex
-        end type
+      type ESMF_Alarm
+      sequence
+      private
+        type(ESMF_TimeInterval) :: RingInterval
+        type(ESMF_Time)  :: RingTime
+        type(ESMF_Time)  :: PrevRingTime
+        type(ESMF_Time)  :: StopTime
+        logical :: Ringing
+        logical :: Enabled
+        integer :: ID
+        integer :: AlarmMutex
+      end type
 \end{verbatim}

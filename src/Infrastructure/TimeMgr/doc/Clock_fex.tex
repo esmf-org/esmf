@@ -1,4 +1,4 @@
-% $Id: Clock_fex.tex,v 1.1 2002/10/08 18:13:10 eschwab Exp $
+% $Id: Clock_fex.tex,v 1.2 2003/02/11 18:58:55 eschwab Exp $
 
 A Clock is the centerpiece of the Time Manager library, used to track time
 in an ESM component.  The following shows how to create and initialize one
@@ -17,12 +17,12 @@ call ESMF_CalendarInit(Gregorian, GREGORIAN)
 
 ! create and initialize clock time intervals and instants
 type(ESMF_TimeInterval) :: TimeStep
-type(ESMF_TimeInstant) :: StartTime, StopTime, RefTime
+type(ESMF_Time) :: StartTime, StopTime, RefTime
 
 call ESMF_TimeIntervalInit(TimeStep, ...)
-call ESMF_TimeInstantInit(StartTime, ..., Gregorian)
-call ESMF_TimeInstantInit(StopTime, ..., Gregorian)
-call ESMF_TimeInstantInit(RefTime, ..., Gregorian)
+call ESMF_TimeInit(StartTime, ..., Gregorian)
+call ESMF_TimeInit(StopTime, ..., Gregorian)
+call ESMF_TimeInit(RefTime, ..., Gregorian)
 
 ! initialize the clock
 call ESMF_ClockInit(ModelTime, TimeStep, StartTime, StopTime, RefTime)

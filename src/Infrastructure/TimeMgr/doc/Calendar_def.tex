@@ -1,21 +1,43 @@
-% $Id: Calendar_def.tex,v 1.1 2002/10/08 18:13:09 eschwab Exp $
+% $Id: Calendar_def.tex,v 1.2 2003/02/11 18:58:54 eschwab Exp $
 \begin{verbatim}
-        integer, parameter :: MonthsPerYear = 12
-            
-        type ESMF_DaysPerYear
-            private
-            sequence
-                integer :: D    ! whole days per year
-                integer :: Dn   ! fractional days per year numerator
-                integer :: Dd   ! fractional days per year denominator
-        end type
+      #define MONTHSPERYEAR 12
 
-        type ESMF_Calendar
-            private
-            sequence
-                integer :: Type
-                integer, dimension(MonthsPerYear) :: DaysPerMonth 
-                integer :: SecondsPerDay
-                type(ESMF_DaysPerYear) :: DaysPerYear
-        end type
+      type ESMF_CalendarType
+      sequence
+      private
+        integer :: caltype
+      end type
+
+      type(ESMF_CalendarType), parameter :: &
+                               ESMF_CAL_GREGORIAN =  ESMF_CalendarType(1), &
+                               ESMF_CAL_JULIAN =     ESMF_CalendarType(2), &
+
+                               ! like Gregorian, except Feb always has 28 days
+                               ESMF_CAL_NOLEAP =     ESMF_CalendarType(3), &
+
+                               ! 12 months, 30 days each
+                               ESMF_CAL_360DAY =     ESMF_CalendarType(4), &
+
+                               ! user defined
+                               ESMF_CAL_GENERIC =    ESMF_CalendarType(5), &
+
+                               ! track base time seconds only
+                               ESMF_CAL_NOCALENDAR = ESMF_CalendarType(6)
+
+      type ESMF_DaysPerYear
+      sequence
+      private
+        integer :: D     ! whole days per year
+        integer :: Dn    ! fractional days per year numerator
+        integer :: Dd    ! fractional days per year denominator
+      end type           ! e.g. for Venus, D=0, Dn=926, Dd=1000
+
+      type ESMF_Calendar
+      sequence
+      private
+        integer :: Type
+        integer, dimension(MONTHSPERYEAR) :: DaysPerMonth
+        integer :: SecondsPerDay
+        type(ESMF_DaysPerYear) :: DaysPerYear
+      end type
 \end{verbatim}
