@@ -1,0 +1,334 @@
+    program ESMF_FieldRegridUTest
+
+!------------------------------------------------------------------------------
+
+#include <ESMF_Macros.inc>
+
+    ! USES:Framework module
+    use ESMF_TestMod  ! test methods
+    use ESMF_Mod      ! Framework module
+    integer :: lrc,iFunction
+    integer ::  npets, localPet
+    type(ESMF_VM) :: vm
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: result=0.
+    integer :: loop_rc    !cumulative error indicator
+    integer :: iDistr, nXY(2,2)
+    integer :: TwoOrOne
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: name
+
+    call ESMF_TestStart(ESMF_SRCLINE, rc=lrc)
+    call ESMF_VMGetGlobal(vm, rc=lrc)
+    ! Get number of PETs we are running with
+    call ESMF_VMGet(vm, petCount=npets, localPET=localPet,  rc=lrc)
+
+
+    nXY(1,:)=(/ npets, 1 /)
+
+    TwoOrOne= 1 + mod(npets+1,2)
+    nXY(2,:)=(/ npets/TwoOrOne, TwoOrOne /)
+
+    loop_rc=ESMF_SUCCESS
+
+   !Two destination domain decomposition choices ( 1=(npets,1)  2=(npets/2,2) )
+    do iDistr=1,2
+     !Four test cases:
+      do iFunction=1,4
+        call RegridUtest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+      end do
+    end do
+
+#ifdef ESMF_EXHAUSTIVE
+   !Test for "success" of regridding
+   !--------------------------------
+   !EX_UTest
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid test"
+    call ESMF_Test((loop_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+
+    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    print *, "Regrid Unit test  returned"
+
+    contains
+
+    subroutine RegridUtest(FieldChoice, npetsXY)
+
+    implicit none
+
+      ! Choice of test function for the field to be regridded
+      ! 1 -->   f=x
+      ! 2 -->   f=2+cos(pi*r/L)
+      ! 3 -->   f=2+(cos(theta))**2 * cos(2*phi)
+      ! 4-->    f=2+ (sin(2*theta))**16 * cos(16*phi)
+
+      integer :: FieldChoice
+
+    ! Local variables
+    type(ESMF_Field) :: field1, field2
+    type(ESMF_Grid) :: srcgrid, dstgrid
+    type(ESMF_RouteHandle) :: regrid_rh
+    type(ESMF_Array) :: arraya, arrayb
+    type(ESMF_DELayout) :: layout1, layout2
+    integer :: rc
+
+    integer :: x, y
+    integer :: i, j, lb(2), ub(2), halo
+    integer :: TwoOrOne
+    integer :: npetsXY(2)
+    type(ESMF_ArraySpec) :: arrayspec
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
+    type (ESMF_Array), dimension(2) :: ESMF_coords, ESMF_coords2
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords,y_coords
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2,y_coords2
+    real (ESMF_KIND_R8), dimension(:,:), allocatable :: SolnOnTarget
+    real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
+    real (ESMF_KIND_R8) :: epsil, length_scale, pi,radius, RelativeError
+    real (ESMF_KIND_R8) :: max_error, avg_error
+
+
+!-------------------------------------------------------------------------
+!   ! Setup:
+!   !
+!   !  Create a source and destination grid with data on it, to use
+!   !  in the Regrid calls below.
+ 
+    TwoOrOne= 1 + mod(npets+1,2)
+    layout1 = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=rc)
+    layout2 = ESMF_DELayoutCreate(vm, npetsXY, rc=rc)
+  ! layout2 = ESMF_DELayoutCreate(vm, (/ npets/TwoOrOne, TwoOrOne /), rc=rc)
+  ! layout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=rc)
+
+    mincoords = (/  0.0,  0.0 /)
+    maxcoords = (/ 20.0,  30.0 /)
+   !epsil=epsilon(maxcoords(1))*maxcoords(1)*1.e3
+    epsil=.05
+
+    !Create thesource grid
+   !===========================
+    srcgrid = ESMF_GridCreateHorzXYUni((/100,150 /), &
+                   mincoords, maxcoords, &
+                   horzStagger=ESMF_GRID_HORZ_STAGGER_B_NE, &
+                   name="srcgrid", rc=rc)
+
+   !Distribute the source grid
+   !===========================
+    call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
+
+   !Create the destination grid
+   !===========================
+
+   !dstgrid = ESMF_GridCreateHorzXYUni((/ 64, 80 /), &
+    dstgrid = ESMF_GridCreateHorzXYUni((/100,150 /), &
+                   mincoords, maxcoords, &
+                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                   name="srcgrid", rc=rc)
+
+   !Distribute destination grid
+   !===========================
+    call ESMF_GridDistribute(dstgrid, delayout=layout2, rc=rc)
+ 
+
+
+   !Specify settings for the field array
+   !====================================
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
+
+   !Create the field (with halo width of 3)
+   !=======================================
+    halo = 3
+    field1 = ESMF_FieldCreate(srcgrid, arrayspec, &
+                              horzRelloc=ESMF_CELL_NECORNER, &
+                              haloWidth=halo, name="src pressure", rc=rc)
+
+   !Create a pointer to the source field data space
+   !===============================================
+    call ESMF_FieldGetDataPointer(field1, f90ptr1, ESMF_DATA_REF, rc=rc)
+
+   !Get the coordinates of the source grid
+   !======================================
+    call ESMF_GridGetCoord(srcgrid,horzRelLoc=ESMF_CELL_NECORNER,  &
+           centercoord=ESMF_coords,rc=rc)
+
+   !Get the actual values of the x and y coordinate arrays
+   !======================================================
+    call ESMF_ArrayGetData(ESMF_coords(1), x_coords, ESMF_DATA_COPY, rc=rc)
+
+    !======================
+    call ESMF_ArrayGetData(ESMF_coords(2), y_coords, ESMF_DATA_COPY, rc=rc)
+
+    !Assign values to the source field data (4 case choices) via pointer
+    lb(:) = lbound(f90ptr1)
+    ub(:) = ubound(f90ptr1)
+    pi = 3.1416
+    select case(FieldChoice)
+    case(1) !** f=x
+      !Set the values of the NE corner grid points equal to their x-coordinate
+      f90ptr1(:,:) = 0.0
+      do j=lb(2)+halo, ub(2)-halo
+        do i=lb(1)+halo, ub(1)-halo
+        f90ptr1(i, j) = x_coords(i-halo,j-halo)
+        enddo
+      enddo
+    case(2) !**f=2+cos(pi*r/L)
+      f90ptr1(:,:) = 0.0
+      length_scale=sqrt( maxcoords(1)**2 + maxcoords(2)**2 )
+      do j=lb(2)+halo, ub(2)-halo
+        do i=lb(1)+halo, ub(1)-halo
+          radius=sqrt( x_coords(i-halo,j-halo)**2 +   &
+                       y_coords(i-halo,j-halo)**2 )
+          f90ptr1(i, j) = 2. + cos( pi * radius / length_scale )
+        end do
+      end do
+    case(3) !**f=2+cos((pi/2)*y/ymax)*cos(4*pi*x/xmax)
+      do j=lb(2)+halo, ub(2)-halo
+        do i=lb(1)+halo, ub(1)-halo
+          f90ptr1(i, j) = 2. + &
+                        cos( pi*y_coords(i-halo,j-halo)/(2.*maxcoords(2)) ) &
+                         *cos( 4.*pi*x_coords(i-halo,j-halo)/maxcoords(1)  )
+        end do
+      end do
+    case(4) !**f=2+sin(pi*y/ymax)**16 * cos(16*pi*x/xmax)
+      do j=lb(2)+halo, ub(2)-halo
+        do i=lb(1)+halo, ub(1)-halo
+          f90ptr1(i, j) = 2. + &
+                 sin( pi*y_coords(i-halo,j-halo)/maxcoords(2) )**16 &
+                *cos( 16.*pi*x_coords(i-halo,j-halo)/maxcoords(1) )
+        end do
+      end do
+    end select
+
+
+    !Create the destination field
+   !=============================
+    field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+                                                   name="dst pressure", rc=rc)
+
+    ! fields all ready to go
+
+!\subsubsection{Precomputing and Executing a Regrid}
+      
+!  The user has already created an {\tt ESMF\_Grid}, an
+!  {\tt ESMF\_Array} with data, and put them together in an {\tt ESMF\_Field}.
+!  An {\tt ESMF\_RouteHandle} is created and the data movement needed to
+!  execute the regrid is stored with that handle by the store method. 
+!  To actually execute the operation, the source and destination data
+!  objects must be supplied, along with the same {\tt ESMF\_RouteHandle}.
+      
+
+   !Create a Route Handle
+   !=====================
+    regrid_rh = ESMF_RouteHandleCreate(rc)
+
+   !Do all the calculations in preparation for the actual re-gridding
+   !=================================================================
+    call ESMF_FieldRegridStore(field1, field2, vm, &
+                               routehandle=regrid_rh, &
+                               regridmethod=ESMF_REGRID_METHOD_CONSERV1, rc=rc)
+                              !regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+
+   !Regrid
+   !======
+    call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
+
+   !Get a pointer to the data in the destination field
+   !==================================================
+    call ESMF_FieldGetDataPointer(field2, f90ptr2, ESMF_DATA_REF, rc=rc)
+
+    !Array bounds in the destination grid
+    !------------------------------------
+    lb(:) = lbound(f90ptr2)
+    ub(:) = ubound(f90ptr2)
+    
+    print *, localPet,'In grid 2 lb=',lb,'  ub=',ub
+
+    !Compute the "exact" array values in the destination grid (for verification)
+    !---------------------------------------------------------------------------
+    allocate( SolnOnTarget( lb(1):ub(1) , lb(2):ub(2) ) )
+
+    call ESMF_GridGetCoord(dstgrid,horzRelLoc=ESMF_CELL_CENTER,  &
+           centercoord=ESMF_coords2,rc=rc)
+    call ESMF_ArrayGetData(ESMF_coords2(1), x_coords2, ESMF_DATA_COPY, rc=rc)
+    call ESMF_ArrayGetData(ESMF_coords2(2), y_coords2, ESMF_DATA_COPY, rc=rc)
+
+    !Solution values at the target grid -- 4 cases
+    select case (FieldChoice)
+    case(1) !** f=x
+      SolnOnTarget(:,:)=x_coords2(:,:)
+    case(2) !** f=2+cos(pi*r/L)
+      do j=lb(2),ub(2)
+        do i=lb(1),ub(1)
+          radius=sqrt( x_coords2(i,j)**2 + y_coords2(i,j)**2 )
+          SolnOnTarget(i, j) = 2. + cos( pi * radius / length_scale )
+        end do
+      end do
+    case(3) !**f=2+cos((pi/2)*y/ymax)*cos(4*pi*x/xmax)
+      do j=lb(2),ub(2)
+        do i=lb(1),ub(1)
+          SolnOnTarget(i, j) = 2. + &
+                        cos( pi*y_coords2(i,j)/(2.*maxcoords(2)) ) &
+                         *cos( 4.*pi*x_coords2(i,j)/maxcoords(1)  )
+        end do
+      end do
+    case(4) !**f=2+sin(pi*y/ymax)**16 * cos(16*pi*x/xmax)
+      do j=lb(2), ub(2)
+        do i=lb(1), ub(1)
+          SolnOnTarget(i, j) = 2. + &
+                 sin( pi*y_coords2(i,j)/maxcoords(2) )**16 &
+                *cos( 16.*pi*x_coords2(i,j)/maxcoords(1) )
+        end do
+      end do
+
+
+    end select
+ 
+   !Verify success in regridding. Compute maximum and average normalized error
+   !--------------------------------------------------------------------------
+   max_error=0.
+   avg_error=0.
+
+   do j=lb(2),ub(2)
+     do i=lb(1),ub(1)
+       RelativeError=abs( (SolnOnTarget(i,j)-f90ptr2(i,j)) / SolnOnTarget(i,j) )
+       if (RelativeError .gt. epsil ) then
+         loop_rc=ESMF_FAILURE
+         print*,localPet,'ERROR: FieldChoice=',FieldChoice,' npetsXY=', &
+                 npetsXY,' i,j=',i,j, &
+                ' SolnOnTarget=',SolnOnTarget(i,j), f90ptr2(i,j), RelativeError
+       end if
+       avg_error=avg_error+RelativeError
+       if(RelativeError > max_error) max_error=RelativeError
+     end do
+   end do
+
+   avg_error=avg_error/( (ub(1)-lb(1)+1) * (ub(2)-lb(2)+1) )
+   if (localPet .eq. 0) &
+   !write(*,*)'i=1,j=3 FieldChoice=',FieldChoice, &
+   !&         'SolnOnTarget, f90potr2 =',SolnOnTarget(1,3), f90ptr2(1,3)           
+   print*, 'localPet=',localPet, 'FieldChoice=',FieldChoice, &
+           '  maximum normalized error=',max_error, &
+           '  average normalized error=',avg_error 
+
+
+    call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+
+    call ESMF_RouteHandleDestroy(regrid_rh)
+
+
+!-------------------------------------------------------------------------
+!    ! Cleanup
+
+    call ESMF_FieldDestroy(field1, rc=rc)
+
+    call ESMF_FieldDestroy(field2, rc=rc)
+
+    call ESMF_GridDestroy(srcgrid, rc=rc)
+
+    call ESMF_GridDestroy(dstgrid, rc=rc)
+
+    end subroutine RegridUTest
+
+    end program ESMF_FieldRegridUTest

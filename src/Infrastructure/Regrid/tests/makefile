@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2005/03/14 18:16:10 nscollins Exp $
+# $Id: makefile,v 1.21 2005/03/22 21:49:05 rfaincht Exp $
 
 ALL:  build_tests
  
@@ -19,15 +19,18 @@ LOCDIR	  = src/Infrastructure/Regrid/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RegridUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridOptionsUTest \
-		$(ESMF_TESTDIR)/ESMF_Regrid1UTest
+		$(ESMF_TESTDIR)/ESMF_Regrid1UTest \
+		$(ESMF_TESTDIR)/ESMF_Regrid_bUTest
 
 TESTS_RUN     = RUN_ESMF_RegridUTest \
 		RUN_ESMF_RegridOptionsUTest \
-		RUN_ESMF_Regrid1UTest
+		RUN_ESMF_Regrid1UTest \
+		RUN_ESMF_Regrid_bUTest
 
 TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI \
 	        RUN_ESMF_RegridOptionsUTestUNI \
-	        RUN_ESMF_Regrid1UTestUNI
+	        RUN_ESMF_Regrid1UTestUNI \
+		RUN_ESMF_Regrid_bUTestUNI
 
 
 include $(ESMF_DIR)/makefile
@@ -52,7 +55,7 @@ RUN_ESMF_RegridUTestUNI:
 #
 #
 RUN_ESMF_RegridOptionsUTest:
-	-${MPIRUN} -np 6 $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest > $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest.stdout
+	-${MPIRUN} -np 8 $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest > $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest.stdout
 
 RUN_ESMF_RegridOptionsUTestUNI:
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest > $(ESMF_TESTDIR)/ESMF_RegridOptionsUTest.stdout
@@ -67,4 +70,11 @@ RUN_ESMF_Regrid1UTest:
 RUN_ESMF_Regrid1UTestUNI:
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_Regrid1UTest > $(ESMF_TESTDIR)/ESMF_Regrid1UTest.stdout
 
+#
+#
+#
+RUN_ESMF_Regrid_bUTest:
+	-${MPIRUN} -np 8 $(ESMF_TESTDIR)/ESMF_Regrid_bUTest > $(ESMF_TESTDIR)/ESMF_Regrid_bUTest.stdout
 
+RUN_ESMF_Regrid_bUTestUNI:
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_Regrid_bUTest > $(ESMF_TESTDIR)/ESMF_Regrid_bUTest.stdout
