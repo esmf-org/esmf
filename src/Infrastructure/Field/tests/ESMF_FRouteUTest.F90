@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.1 2003/03/17 21:53:20 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.2 2003/03/17 22:22:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.1 2003/03/17 21:53:20 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.2 2003/03/17 22:22:42 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,47 +57,98 @@
 
 !     !LOCAL VARIABLES:
       integer :: i, x, y
-      type(ESMF_Grid) :: grid, grid2, grid3, grid4
-      type(ESMF_Array) :: arr, arr2
+      type(ESMF_Grid) :: grid1, grid2, grid3, grid4
+      type(ESMF_Array) :: arr1, arr2
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
       type(ESMF_DELayout) :: layout
-      character (len = 20) :: fname, fname1, fname2
+      character (len = 20) :: fname, fname1, fname2, gname
       type(ESMF_IOSpec) :: ios
       type(ESMF_Field) :: f1, f2, f3, f4, f5
+      integer :: nDE_i, nDE_j
+      real :: x_min, x_max, y_min, y_max
+      integer :: i_max, j_max
+      integer :: horz_gridtype, vert_gridtype
+      integer :: horz_stagger, vert_stagger
+      integer :: horz_coord_system, vert_coord_system
+      integer :: status, myde
+
 
       print *, "*************FIELD ROUTE UNIT TESTS***************************"
       print *
 
-      !------------------------------------------------------------------------
+      ! the default layout
+      layout = ESMF_DELayoutCreate(rc=rc)
+      call ESMF_DELayoutGetDEid(layout, myde, rc)
 
-      ! Verifing that a Grid can be created
-      grid =  ESMF_GridCreate("atmgrid", rc=rc)
+      !------------------------------------------------------------------------
+      i_max = 40
+      j_max = 20
+      horz_gridtype = ESMF_GridType_XY
+      vert_gridtype = ESMF_GridType_Unknown
+      horz_stagger = ESMF_GridStagger_A
+      vert_stagger = ESMF_GridStagger_Unknown
+      horz_coord_system = ESMF_CoordSystem_Cartesian
+      vert_coord_system = ESMF_CoordSystem_Unknown
+      x_min = 0.0
+      x_max = 20.0
+      y_min = 0.0
+      y_max = 5.0
+      gname = "test grid 1"
+
+      grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+                             nDE_i=4, nDE_j=1, &
+                             horz_gridtype=horz_gridtype, &
+                             vert_gridtype=vert_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             vert_stagger=vert_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             vert_coord_system=vert_coord_system, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             name=gname, rc=status)
+
       write(failMsg, *) ""
       write(name, *) "Creating a source Test Grid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
      
       ! Second grid
-      grid2 =  ESMF_GridCreate("landgrid", rc=rc)
+      gname = "test grid 2"
+      grid2 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+                             nDE_i=2, nDE_j=2, &
+                             horz_gridtype=horz_gridtype, &
+                             vert_gridtype=vert_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             vert_stagger=vert_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             vert_coord_system=vert_coord_system, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             name=gname, rc=status)
+
       write(failMsg, *) ""
       write(name, *) "Creating a destination Test Grid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Verifing that an Array can be created
-      allocate(f90ptr1(10,20))
-      f90ptr1 = reshape( (/ (i,i=1,200) /), (/ 10, 20 /) )
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      allocate(f90ptr1(20,20))
+      !f90ptr1 = reshape( (/ (i,i=1,400) /), (/ 20, 20 /) )
+      !f90ptr1 = reshape( (/ (i,i=(400*myde)+1,400*(myde+1)) /), (/ 20, 20 /) )
+      f90ptr1 = myde
+      arr1 = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a src Test Array"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! second array
-      allocate(f90ptr2(10,20))
-      f90ptr2 = reshape( (/ (i,i=601,800) /), (/ 10, 20 /) )
+      allocate(f90ptr2(10,40))
+      !f90ptr2 = reshape( (/ (i,i=401,800) /), (/ 10, 40 /) )
+      !f90ptr2 = reshape( (/ (i,i=2001+(400*myde),2000*(myde+1)) /), (/ 10, 40 /) )
+      f90ptr2 = 100*myde
       arr2 = ESMF_ArrayCreate(f90ptr2, ESMF_NO_COPY, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a src Test Array"
@@ -105,7 +156,7 @@
       !------------------------------------------------------------------------
 
       ! Verifing that a Field can be created with a Grid and Array
-      f1 = ESMF_FieldCreate(grid, arr, ESMF_NO_COPY, ESMF_CELL_CENTER, &
+      f1 = ESMF_FieldCreate(grid1, arr1, ESMF_NO_COPY, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
@@ -122,9 +173,6 @@
       call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
-      ! the default layout is ok for now
-      layout = ESMF_DELayoutCreate(rc=rc)
-
       ! route test
       call ESMF_FieldRoute(f1, f2, layout, rc)
       write(failMsg, *) ""
@@ -137,9 +185,9 @@
 
       call ESMF_FieldDestroy(f1)
       call ESMF_FieldDestroy(f2)
-      call ESMF_GridDestroy(grid)
+      call ESMF_GridDestroy(grid1)
       call ESMF_GridDestroy(grid2)
-      call ESMF_ArrayDestroy(arr)
+      call ESMF_ArrayDestroy(arr1)
       call ESMF_ArrayDestroy(arr2)
 
       end program ESMF_FRouteUTest
