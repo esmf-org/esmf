@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.16 2003/04/04 15:11:53 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.17 2003/04/04 20:22:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.16 2003/04/04 15:11:53 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.17 2003/04/04 20:22:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -397,6 +397,7 @@
     return(ESMF_FAILURE);
   }
 
+  this->length = new int[3];
   this->length[0] = nDEs;
   this->length[1] = 1;
   this->length[2] = 1;
@@ -464,7 +465,7 @@
   nx=lengths[0];
   ny=lengths[1];
 
-  // Initialize comm, PE, DE, Machiney
+  // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
 
   // construct 2D array of ESMC_DE's
@@ -591,6 +592,7 @@
 // !REQUIREMENTS:  
 
   int nx, ny;
+  int maxdim = 3;  
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
@@ -624,6 +626,10 @@
     cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
     return(ESMF_FAILURE);
   }
+
+  // make space for the lists
+  this->commType = new ESMC_CommType[maxdim];
+  this->length = new int[maxdim];
 
   this->length[0] = nx;
   this->length[1] = ny;
@@ -865,9 +871,10 @@
 
   layout = 0;
   peList = 0;
-  length[0] = 0;
-  length[1] = 0;
-  length[2] = 0;
+  delete[] length;
+  length = ESMC_NULL_POINTER;
+  delete[] commType;
+  commType = ESMC_NULL_POINTER;
   commHint = ESMC_NOHINT;
 
   return(ESMF_SUCCESS);
