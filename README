@@ -1,4 +1,4 @@
- $Id: README,v 1.9 2003/02/27 17:53:46 flanigan Exp $
+ $Id: README,v 1.10 2003/03/06 20:52:32 flanigan Exp $
 ================================================================================
                                    README
 
@@ -40,23 +40,13 @@ for an optimized version.
 
 To build and run the system tests:
 
-  gmake BOPT=g system_tests
+  gmake BOPT=[g,O] system_tests
+  gmake BOPT=[g,O] system_tests_uni   ! for non-mpi machines
 
-To build and run C tests:
+To build and run the unit tests:
 
-  gmake BOPT=g test_c
-
-To build and run F90 tests:
-
-  gmake BOPT=g test_f90
-
-To build and run C tests (on a non-mpi machine):
-
-  gmake BOPT=g test_cuni
-
-To build and run F90 tests (on a non-mpi machine):
-
-  gmake BOPT=g test_f90uni
+  gmake BOPT=[g,O] tests
+  gmake BOPT=[g,O] tests_uni          ! for non-mpi machines
 
 Output files from the tests are directed to files in $ESMF_DIR/test${BOPT}/${ESMF_ARCH}
 directories.
