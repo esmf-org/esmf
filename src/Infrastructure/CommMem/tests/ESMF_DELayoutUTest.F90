@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.3 2003/06/05 22:39:14 svasquez Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.4 2003/06/17 19:50:28 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,6 +29,7 @@
 ! run with 8 MPI processes
 !-----------------------------------------------------------------------------
 ! !USES:
+      use ESMF_BaseMod
       use ESMF_TestMod     ! test methods
       use ESMF_DELayoutMod   ! the class to test
       implicit none
@@ -36,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.3 2003/06/05 22:39:14 svasquez Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.4 2003/06/17 19:50:28 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -94,8 +95,9 @@
 #endif
 
       !NEX_UTest
-      layout0 = ESMF_DELayoutCreate(2,4, layout1D, ESMF_XFAST, rc)
-      write(name, *) "ESMF_DELayoutCreate2D non-exclusive"
+      layout0 = ESMF_DELayoutCreate(layout1D, 2, (/2,4/), (/0,0/), &
+                                    de_indices=(/0,1,2,3,4,5,6,7/), rc=rc)
+      write(name, *) "ESMF_DELayoutCreateFromParent non-exclusive"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -110,7 +112,8 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !NEX_UTest
-      layout1 = ESMF_DELayoutCreate(2,2, layout1D, ESMF_XFAST, ESMF_EXCL, rc)
+      layout1 = ESMF_DELayoutCreate(layout1D, 2, (/2,2/), (/0,0/), &
+                                    de_indices=(/0,1,2,3/), rc=rc)
       write(name, *) "ESMF_DELayoutCreate2D exclusive -- 1st call"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -126,7 +129,8 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !NEX_UTest
-      layout2 = ESMF_DELayoutCreate(1,3, layout1D, ESMF_YFAST, ESMF_EXCL, rc)
+      layout2 = ESMF_DELayoutCreate(layout1D, 2, (/1,3/), (/0,0/), &
+                                    de_indices=(/5,6,7/), rc=rc)
       write(name, *) "ESMF_DELayoutCreate2D exclusive -- 2nd call"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -142,7 +146,8 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !NEX_UTest
-      layout3 = ESMF_DELayoutCreate(1,1, layout1D, ESMF_XFAST, ESMF_EXCL, rc)
+      layout3 = ESMF_DELayoutCreate(layout1D, 2, (/1,1/), (/0,0/), &
+                                    de_indices=(/4/), rc=rc)
       write(name, *) "ESMF_DELayoutCreate2D exclusive -- 3rd call"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
