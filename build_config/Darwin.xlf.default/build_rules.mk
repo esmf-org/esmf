@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.12 2005/01/10 21:26:29 jwolfe Exp $
+#  $Id: build_rules.mk,v 1.13 2005/01/12 00:09:37 nscollins Exp $
 #
 #  Darwin.xlf.default.mk
 #
@@ -107,8 +107,8 @@ SED			= /usr/bin/sed
 #
 COM_MEMCHECK_FLAG      = 
 COM_FULLPATH_FLAG      =
-COM_DEBUG_FLAG         = -g
-COM_ALL_DEBUG_FLAGS    = -g $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG)
+COM_DEBUG_FLAG         = $(DEBUG_FLAG)
+COM_ALL_DEBUG_FLAGS    = $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG) $(DEBUG_FLAG)
 COM_MAXMEM_FLAG        = -qmaxmem=4000
 COM_NOWARN_FLAG        = -w
 COM_SPILL_FLAG         = -qspill=3000
