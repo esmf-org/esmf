@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.21 2003/08/22 21:35:33 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.22 2003/08/22 22:18:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.21 2003/08/22 21:35:33 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.22 2003/08/22 22:18:51 nscollins Exp $'
 
 !==============================================================================
 !
@@ -214,19 +214,31 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
+      ! TODO: the interfaces have changed - this will no longer be called
+      !  with fields, but with the grid, datamap, and array which are either
+      !  contained in a field or are specified by the user separately in an
+      !  array method call.  i believe the code at this level needs to 
+      !  take an already declared routehandle and fill it in with the
+      !  route and weights that it computes.  we have no "Regrid" object
+      !  at this point - it is a subtype of a routehandle object.  so this
+      !  could either compute the route and weights and return them, or
+      !  it seems maybe better to fill them in here in case we end up with
+      !  more than just a single route and weight array.
+      ! TODO: so this code needs to be overhauled...   
+
       integer :: stat = ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
       type (ESMF_RegridType), pointer :: regrid
       character (len=ESMF_MAXSTR) :: regrid_name
 
-!     Initialize return code
+      ! Initialize return code
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 
-!     You have the right to define a name.  If you do not choose a name,
-!     one will be appointed for you.
+      ! You have the right to define a name.  If you do not choose a name,
+      ! one will be appointed for you.
 
       if(.not. present(name)) then
          regrid_name = 'WeDontNeedNoStinkinRegridName'  ! TODO: create a name here
@@ -234,10 +246,10 @@
          regrid_name = name
       endif
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(ESMF_RegridCreateFromField%ptr)
 
-!     Call the appropriate create routine based on method choice
+      ! Call the appropriate create routine based on method choice
 
       select case(method)
 
@@ -427,14 +439,14 @@
       type (ESMF_RegridType), pointer :: regrid
       character (len=ESMF_MAXSTR) :: regrid_name
 
-!     Initialize return code
+      ! Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 
-!     You have the right to define a name.  If you do not choose a name,
-!     one will be appointed for you.
+      ! You have the right to define a name.  If you do not choose a name,
+      ! one will be appointed for you.
 
       if(.not. present(name)) then
          regrid_name = 'WeDontNeedNoStinkinRegridName'  ! TODO: create a name here
@@ -442,10 +454,10 @@
          regrid_name = name
       endif
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(ESMF_RegridCreateFromBundle%ptr)
 
-!     Call the appropriate create routine based on method choice
+      ! Call the appropriate create routine based on method choice
 
       select case(method)
       case(ESMF_RegridMethod_Bilinear) ! bilinear
@@ -509,8 +521,8 @@
          stat = ESMF_FAILURE
       end select
 
-!     Set return values.
-!     ESMF_RegridCreateFromBundle set by above calls
+      ! Set return values.
+      ! ESMF_RegridCreateFromBundle set by above calls
 
       if (stat /= ESMF_SUCCESS) then
          ! Use error function eventually...
@@ -582,17 +594,17 @@
       integer :: status=ESMF_FAILURE      ! Error status
       logical :: rcpresent=.FALSE.        ! Return code present
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(ESMF_RegridCreateFromRegrid%ptr)
 
-!     Initialize return code
+      ! Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 
-!     No allocation here - construct must perform all necessary allocation
-!     Call construction method to allocate and initialize grid internals.
+      ! No allocation here - construct must perform all necessary allocation
+      ! Call construction method to allocate and initialize grid internals.
 
       !if (method == ESMF_RegridMethod_Shift) then
       !   call ESMF_RegridConstructFromRegrid(regrid, old_regrid%ptr, method, &
@@ -603,7 +615,7 @@
       !                                       name=name, rc=status)
       !endif
 
-!     Set return values.
+      ! Set return values.
 
       if (status /= ESMF_SUCCESS) then
          ! Use error function eventually...
@@ -868,13 +880,13 @@
       integer :: status=ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
 
-!     Initialize return code
+      ! Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 
-!     Call destruct method to free up internally-allocated memory
+      ! Call destruct method to free up internally-allocated memory
 
       call ESMF_RegridDestruct(regrid%ptr, status)
       if (status /= ESMF_SUCCESS) then
@@ -883,7 +895,7 @@
         return
       endif
 
-!     Set return values.
+      ! Set return values.
       nullify(regrid%ptr)
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -917,9 +929,10 @@
 !EOP
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
-!
-!  code goes here
-!
+      ! 
+      ! code goes here
+      ! 
+
       end subroutine ESMF_RegridValidate
 
 !------------------------------------------------------------------------------
@@ -951,9 +964,10 @@
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-!
-!  code goes here
-!
+      ! 
+      ! code goes here
+      ! 
+
       end subroutine ESMF_RegridPrint
 
 !------------------------------------------------------------------------------
