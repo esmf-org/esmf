@@ -1,4 +1,4 @@
-% $Id: GridComp_rest.tex,v 1.1 2004/03/23 22:50:11 cdeluca Exp $
+% $Id: GridComp_rest.tex,v 1.2 2004/06/15 13:49:34 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,18 +12,36 @@
 
 \begin{enumerate}
 
-\item Gridded Components must only communicate with other
+\item {\bf No concurrent components.}  While the design of concurrently 
+running Components is fairly complete, this release of the framework does 
+not support them.  Only sequentially executing Components can be run.
+
+\item {\bf No Transforms.}  Components must exchange data through   
+{\tt ESMF\_State} objects.  The input data are available at the time 
+the user Component code is called, and data to be returned to another 
+Component are available when that code returns.  
+{\tt ESMF\_Xform} objects provide a way for
+a Component to prepare data to be transformed and 
+sent to another Component from within the execution of 
+the user Component code.
+Transforms are not implemented in this version of the framework.
+
+\item {\bf Data Isolation.} 
+Gridded Components must only communicate with other
 components via data in State objects.  They must 
 not make direct references to data in other States.
 
-\item If possible, Gridded Components should attempt to make 
+\item {\bf Namespace Isolation.}
+If possible, Gridded Components should attempt to make 
 all data private, so public names do not interfere with data 
 in other components.
 
-\item It is not expected that a single Gridded Component be able 
+\item {\bf Single Execution Mode.}
+It is not expected that a single Gridded Component be able 
 to function in both sequential and concurrent modes, although 
 Gridded Components of different types can be nested. For example,
 a concurrently called Gridded Component can contain several nested 
-sequential Gridded Components.  
+sequential Gridded Components.   However, only sequentially executing
+Components are supported in this release of the framework.
 
 \end{enumerate}

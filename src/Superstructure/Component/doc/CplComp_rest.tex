@@ -1,4 +1,4 @@
-% $Id: CplComp_rest.tex,v 1.2 2004/04/20 19:20:05 cdeluca Exp $
+% $Id: CplComp_rest.tex,v 1.3 2004/06/15 13:49:34 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,9 +12,22 @@
 
 \begin{enumerate}
 
-\item {\bf No automatic unit conversions.}  The ESMF framework does not currently 
-contain tools for performing unit conversions, operations that are fairly 
-standard within Coupler Components.
+\item {\bf No concurrent components.}  While the design of concurrently 
+running components is fairly complete, this release of the framework 
+does not support them.  Only sequentially executing components can be run.
+
+\item {\bf No Transforms.}  Components must exchange data through 
+{\tt ESMF\_State} objects.  The input data are available at the time 
+the component code is called, and data to be returned to another 
+component are available
+when that code returns.  {\tt ESMF\_Xform} objects provide a way for
+a component to prepare data to be transformed and sent to another 
+component from within the execution of the component code.
+Transforms are not implemented in this version of the framework.
+
+\item {\bf No automatic unit conversions.}  The ESMF framework does not 
+currently contain tools for performing unit conversions, operations that 
+are fairly standard within Coupler Components.
 
 \item {\bf No accumulator.}  The ESMF does not have an accumulator tool, to
 perform time averaging of fields for coupling.  This is likely to be developed
