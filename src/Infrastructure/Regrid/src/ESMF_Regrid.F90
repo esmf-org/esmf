@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.40 2003/09/24 22:58:50 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.41 2003/09/25 16:29:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.40 2003/09/24 22:58:50 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.41 2003/09/25 16:29:02 jwolfe Exp $'
 
 !==============================================================================
 
@@ -417,9 +417,7 @@
      ! of the outgoing array?  so we can get the data type and shape from
      ! the dstarray argument to this function.  and what about halo widths?
 
-     !size = tv%domainlist%total_points
-     !size = domainlist%total_points
-     size = 2000
+     call ESMF_RouteGetRecvItems(rh, size, status)
 
      ! TODO: fix to allow for rank > gridrank
 
@@ -427,7 +425,6 @@
      gatheredArray = ESMF_LocalArrayCreate(1, type, kind, size, rc)
      srcLocalArray = srcarray
      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, status)
-
 
      call ESMF_LocalArrayGetData(gatheredArray, gatheredData, ESMF_DATA_REF, rc)
      call ESMF_ArrayGetData(dstarray, dstData, ESMF_DATA_REF, rc)
