@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.28 2003/02/18 22:50:31 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.29 2003/02/21 14:59:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.28 2003/02/18 22:50:31 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.29 2003/02/21 14:59:45 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -384,10 +384,10 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      //<value type> value) {     // in - value
+      //const <value type> *value) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the Array member <Value> with the given value.
+//     Sets the value of Array member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -396,8 +396,81 @@
 //
 //  code goes here
 //
+    //int rc = ESMF_FAILURE;
+
+    //return rc;
 
  //} // end ESMC_ArraySet<Value>
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayGetF90Ptr - get F90Ptr for a Array
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArrayGetF90Ptr(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      struct c_F90ptr *p) const {     // out - fortran 90 array pointer
+//
+// !DESCRIPTION:
+//     Return a stored F90 pointer block.  The size may vary with rank.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    int i, rank = this->rank;
+    int bytes = ESMF_F90_PTR_BASE_SIZE;
+  
+    // note - starts at 1; base includes rank 1 size
+    for (i=1; i<rank; i++)
+	bytes += ESMF_F90_PTR_PLUS_RANK;
+   
+    fprintf(stderr, "getting f90 ptr, from %lx to %lx, %d bytes\n", 
+                     (long int)(&this->f90dopev), (long int)p, bytes);
+
+    memcpy((void *)p, (void *)(&this->f90dopev), bytes);
+
+    return ESMF_SUCCESS; 
+
+ } // end ESMC_ArrayGetF90Ptr
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArraySetF90Ptr - set F90Ptr for a Array
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArraySetF90Ptr(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const struct c_F90ptr *p) {     // in - f90 pointer block
+//
+// !DESCRIPTION:
+//     Sets the Array member F90ptr with the given value.
+//     Can be multiple routines, one per value
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    int i, rank = this->rank;
+    int bytes = ESMF_F90_PTR_BASE_SIZE;
+  
+    for (i=0; i<rank; i++)
+	bytes += ESMF_F90_PTR_PLUS_RANK;
+   
+    fprintf(stderr, "setting f90 ptr, from %lx to %lx, %d bytes\n", 
+                      (long int)p,  (long int)(&this->f90dopev), bytes);
+
+    memcpy((void *)(&this->f90dopev), (void *)p, bytes);
+
+    return ESMF_SUCCESS; 
+
+ } // end ESMC_ArraySetF90Ptr
 
 //-----------------------------------------------------------------------------
 //BOP

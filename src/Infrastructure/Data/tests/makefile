@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/02/21 14:53:19 nscollins Exp $ 
+# $Id: makefile,v 1.7 2003/02/21 14:59:46 nscollins Exp $ 
 
 ALL:  tests
 
@@ -29,6 +29,11 @@ TESTEXAMPLES_9  = \
 TESTSF       = ESMF_ArrayTest.F90 ESMF_ArrayBasic.F90 ESMF_ArrayF90Ptr.F90
 
 test tests: chkdir_tests ESMF_ArrayF90Ptr ESMF_ArrayBasic ESMF_ArrayTest
+
+run: 
+	ESMF_ArrayF90Ptr 
+	ESMF_ArrayBasic 
+	ESMF_ArrayTest
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 

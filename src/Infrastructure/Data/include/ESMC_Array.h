@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.17 2003/02/15 00:09:07 jwolfe Exp $
+// $Id: ESMC_Array.h,v 1.18 2003/02/21 14:59:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,13 +47,14 @@
  class ESMC_Array;
 
  // dummy structure which is the right size for an F90 pointer on
- //  each architcture.  ESMF_F90_PTR_SIZE is defined in conf.h in
+ //  each architcture.  ESMF_F90_PTR_xxx are defined in conf.h in
  //  the build directories for each architecture
- //  TODO: check that this is a fixed size and does not vary per rank
+ // on many platforms this is a variable size based on rank...
  //  TODO: check if we can simply save the wrapper and save that and not
  //        have to save the full pointer/dopev
 struct c_F90ptr {
-   unsigned char pad[ESMF_F90_PTR_SIZE];   
+   unsigned char basepad[ESMF_F90_PTR_BASE_SIZE];      // one of these
+   unsigned char extrapad[7][ESMF_F90_PTR_PLUS_RANK];  // one per rank 
 };
 
 
@@ -190,18 +191,8 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     enum ESMC_ArrayOrigin ESMC_ArrayGetOrigin(void) { return this->origin; }
 
     // copy the contents of an f90 ptr
-    int ESMC_ArraySetF90Ptr(struct c_F90ptr *p) {
-        //fprintf(stderr, "setting f90 ptr, from %lx to %lx, %d bytes\n", 
-        //                  (long int)p,  (long int)(&this->f90dopev), 
-        //                  sizeof(struct c_F90ptr));
-        memcpy((void *)(&this->f90dopev), (void *)p, sizeof(struct c_F90ptr)); 
-        return ESMF_SUCCESS; }
-    int ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) {
-        //fprintf(stderr, "getting f90 ptr, from %lx to %lx, %d bytes\n", 
-        //                  (long int)(&this->f90dopev), (long int)p,
-        //                  sizeof(struct c_F90ptr));
-        memcpy((void *)p, (void *)(&this->f90dopev), sizeof(struct c_F90ptr)); 
-        return ESMF_SUCCESS; }
+    int ESMC_ArraySetF90Ptr(const struct c_F90ptr *p);
+    int ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) const;
 
     // set/get the dealloc flag
     int ESMC_ArraySetNoDealloc(void) { this->needs_dealloc = 0; 
@@ -216,7 +207,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     // int lbounds[ESMF_MAXDIM];      // real lower indicies
     // int ubounds[ESMF_MAXDIM];      // real upper indicies
 
- // misc methods that act on arrays
+    // misc methods that act on arrays
     int ESMC_ArrayRedist(ESMC_Layout *layout,
                          int rank_trans[], int size_rank_trans,
                          int olddecompids[], int decompids[], int size_decomp,
