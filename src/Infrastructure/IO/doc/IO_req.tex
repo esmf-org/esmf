@@ -1,4 +1,4 @@
-% $Id: IO_req.tex,v 1.2 2002/04/22 21:34:14 lzaslavsky Exp $
+% $Id: IO_req.tex,v 1.3 2002/04/25 01:27:33 lzaslavsky Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -9,29 +9,39 @@
 
 The following are general requirements for IO operations and are in
 addition to the applicable general ESMF requirements (see ESMF General 
-Requirements document).
+Requirements document, section 8.1.3).
+
+\sreq{Determine ESMF convention on Gridded Data}
+
+A set of metadata conventions on gridded data has to be determined
+within ESMF. Such convensions will be an extension of the NetCDF 
+Climate-Forecast (CF) Metadata Convensions \cite{NetCDF_CF_v1_beta3}.
 
 
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} DAO, NCEP required \\
+{\bf Status:} Proposed \\
+{\bf Verification:} ? \\
+\end{reqlist}
 
 
 \sreq{Reading and Writing netCDF files}
 
 ESMF has to provide interface and software to read and write netCDF
-files for data covered by CF conventions. 
+files for data covered by ESMF metadata conventions. 
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} DAO, NCEP required \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:} We have to decide whether netCDF2, or netCDF3 , or both
-have to be covered.
 \end{reqlist}
 
 \sreq{Reading and Writing HDF4 files}
 
 ESMF has to provide interfaces and software to read and write HDF4
-files for data covered by netCDF CF conventions. 
+files for data covered by ESMF metadata conventions. 
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -44,7 +54,7 @@ files for data covered by netCDF CF conventions.
 \sreq{Reading and Writing HDF5 files}
 
 ESMF has to provide interfaces and software to read and write HDF5
-files for data covered by netCDF CF conventions. 
+files for data covered by ESMF metadata conventions. 
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
@@ -58,7 +68,7 @@ native HDF5 interface. \\
 \sreq{Reading and Writing GRIB files}
 
 ESMF has to provide interfaces and software to read and write GRIB
-files for data covered by netCDF CF conventions. 
+files for data covered by ESMF metadata conventions. 
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -74,7 +84,7 @@ in the next two years.
 
 ESMF has to provide interfaces and software to read and write native
 binary files for each machine accompaniied by XML metadata for data
-covered by netCDF CF conventions, assuming that the computer architecture
+covered by ESMF metadata conventions, assuming that the computer architecture
 supports IEEE 754 Floating Point Standard. 
 
 \begin{reqlist}
@@ -89,9 +99,25 @@ ENDIAN and LITTLE ENDIAN bit ordering should be taken into account.
 
 \req{General IO requirements for Observational Data}
 
+\sreq{Determine ESMF convention on Observational Data}
+
+A set of metadata conventions on observational data has to be determined
+within ESMF.
+
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} DAO, NCEP required \\
+{\bf Status:} Proposed \\
+{\bf Verification:} ? \\
+\end{reqlist}
+
+
+
 \sreq{Reading BUFR Files}
 
-ESMF has to provide interfaces and software to read BUFR files.
+ESMF has to provide interfaces and software to read BUFR files for
+observational data covered by ESMF metadata convensions.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -101,52 +127,83 @@ ESMF has to provide interfaces and software to read BUFR files.
 {\bf Notes:} Limitations on types of data, etc.
 \end{reqlist}
 
+\sreq{Reading and writing in HDF-EOS Point Format}
 
-\req{IO Performance and Optimization Requirements}
+ESMF has to provide interfaces and software to read and write
+observational data in HDF-EOS Point Format.
 
-\sreq{Indexing GRIB files}
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} DAO \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Limitations on types of data, etc.
+\end{reqlist}
 
-ESMF has to provide an interface and software to create an index for a GRIB
-file allowing fast access to binary data.
+\sreq{Internal Database Representation of Observational Data}
+
+ESMF has to provide efficient relational database representation of
+observational data allowing efficient processing of quiries typical in
+the process of data analysis and assimilation.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} DAO \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test.
+\end{reqlist}
+
+ 
+
+
+\req{Parallel IO Requirements}
+
+
+\sreq{Single-threaded IO of distribuded data}
+
+ESMF should provide single-treaded IO of distributed data when a
+single process acquires all the data from other processors and writes
+them to the disk or read data from the disk and pass them to other processes. 
 
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} NCEP required \\
+{\bf Source:} DAO \\
 {\bf Status:} Proposed \\
-{\bf Verification:} performance test. \\
-{\bf Notes:} 
+{\bf Verification:} Unit test.
 \end{reqlist}
 
-
-\sreq{Optimization of encoding/decoding of BUFR messages}
-
-ESMF has to be able to use multithreading and parallelization in 
-encoding/decoding of BUFR messages. 
+\sreq{Multi-threaded IO of distribuded data to a single file}
 
 
-\begin{reqlist}
-{\bf Priority:} 3 \\
-{\bf Source:} NCEP required \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:} 
-\end{reqlist}
-
-
-\sreq{Optimization of physical access to data}
-
-ESMF should provide mechanisms to exploit operational system tools for
-optimized parallel physical access to disk files.
-
+ESMF should provide multi-treaded IO of distributed data when each
+process reads data from the disk and writes data to the disk. A proper
+synchronization mechanism is required. 
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} DAO, NCEP required \\
+{\bf Source:} DAO \\
 {\bf Status:} Proposed \\
-{\bf Verification:} Unit test. \\
-{\bf Notes:} 
+{\bf Verification:} Unit test.
 \end{reqlist}
+
+
+\sreq{Multi-threaded IO of distribuded data to a multiple files}
+
+
+ESMF should provide multi-treaded IO of distributed data when each
+process reads data from and writes data to an independent file. 
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} DAO \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test.
+\end{reqlist}
+
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.4 2002/04/24 00:33:38 lzaslavsky Exp $
+% $Id: IO_background.tex,v 1.5 2002/04/25 01:27:33 lzaslavsky Exp $
 
 \section{Background}
 
@@ -7,7 +7,8 @@ tools for input and output of gridded data and observational data streams.
 
 Interfaces and methods provided by ESMF should allow reading and
 writing of data in several standard formats as well as support
-efficient internal data representations. ESMF IO is supposed to
+efficient internal data representations (see ESMF General
+Requirements \cite{ESMFGenReq}, Section 8.1.3). ESMF IO is supposed to
 provide a unified interface to input data from a file with automatic 
 detection of file-type in runtime, and to output data in a requested format.
 
@@ -33,6 +34,23 @@ companion metadata file.
 
 
 \subsection{Gridded Data Formats}
+
+ESMF will extensively support a variety of different discrete grids to
+represent continious physical space. The gridded data are supported by
+three ESMF classes: {em PhysGrid} class for phyical grids
+\cite{ESMF-PhysGrid-Req}, {\em DistGrid} class for distributed grids
+\cite{ESMF-DistGrid-Req}, and {em Fields} class for fields
+\cite{ESMF-Field-Req}. 
+
+The {\em PhysGrid} class is responsible for maintaining information
+about physical coordinate based discretizations of simulation domains. The
+distributed grid class, {\em DistGrid}, is used for expressing, and
+performing operations that involve, dependencies among data
+distributed across processors. {\em Fields} class represents fields. 
+Fields within a model component are frequently defined on the same
+physical grid and are decomposed in memory in an identical fashion;
+that is, they share a distributed grid. They form a {\em bundle of
+fields} defined on the same distributed grid. 
 
 Several standard formats are currently used in earth science modeling
 for input/output of gridded data, including multiple versions of
@@ -84,7 +102,7 @@ desirable to be able to use efficient native representation,
 accompanied by XML metadata file \cite{XML-W3C}. 
 \end{itemize}
 
-\subsection{CF conventions} 
+\subsection{Metadata conventions} 
 
 The conventions for climate and forecast metadata, ``CF conventions'',
 \cite{NetCDF_CF_v1_beta3} promote processing and sharing of files
@@ -97,6 +115,20 @@ that an extenstion to CF conventions will be accepted by participants.
 
 Thus, ESMF IO interfaces and software for gridded data will cover only
 IO of data covered by the convention.
+
+
+\subsection{Unstructural gridded Data}
+
+Unstructural gridded data can be represented using structures that
+keep spacial coordinates of each point and topological information
+through list of neighbors. 
+
+A possible approach to represent unstructural gridded data in ESMF is
+to use HDF-EOS Point Format \cite{HDF-EOS} where spacial coordinates
+and list of neighbors are included in the hierarchy.
+
+Use of indexing procedures may be necessary to operate with such
+representation efficiently. 
 
 \subsection{Observational Data}
 
@@ -172,6 +204,11 @@ Balaji_Parallel_IO_1999, Balaji_Parallel_IO_2000}.
 Parallel IO implemented in GFDL (\cite{mpp_io}) has features described
 above.
 
+
+
+*********** WRF IO --- see \cite{WRF-Software}.
+
+
 \subsection{Location}
 
 Input/Output (IO) is part of the ESMF Infrastructure.  It will provide
@@ -187,6 +224,9 @@ implementation, providing input and outut of gridded data and
 observational data streams to and from the disk in multiple standard
 formats. Sequential IO and different versions of parallel IO have to
 be provided.  
+
+
+
 
 
 
