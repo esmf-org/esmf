@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.36 2003/08/22 21:56:47 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.37 2003/08/27 23:07:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@
         integer :: num_faces       ! likely assume same as num_corners
                                    ! but might specify storage of only
                                    ! 2 of 4 faces, for example
-        type (ESMF_LocalArray), pointer ::      &
+        type (ESMF_LocalArray) ::      &
            center_coord,          &! coordinates of centers each cell
            corner_coord,          &! coordinates of corners each cell
            face_coord              ! coords of face centers each cell
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.36 2003/08/22 21:56:47 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.37 2003/08/27 23:07:23 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -695,9 +695,9 @@
         physgrid%local_max(i) = 0.0
       enddo
 
-      nullify(physgrid%center_coord)
-      nullify(physgrid%corner_coord)
-      nullify(physgrid%face_coord)
+      ! nullify(physgrid%center_coord)  TODO: what about LocalArrays?
+      ! nullify(physgrid%corner_coord)
+      ! nullify(physgrid%face_coord)
       nullify(physgrid%metrics)
       nullify(physgrid%lmask)
       nullify(physgrid%mmask)
@@ -962,9 +962,9 @@
       enddo
 
       !TODO: deallocate these instead of nullify
-      nullify(physgrid%center_coord)
-      nullify(physgrid%corner_coord)
-      nullify(physgrid%face_coord)
+      ! nullify(physgrid%center_coord)  TODO: what about LocalArrays?
+      ! nullify(physgrid%corner_coord)
+      ! nullify(physgrid%face_coord)
       nullify(physgrid%metrics)
       nullify(physgrid%lmask)
       nullify(physgrid%mmask)
@@ -1297,7 +1297,7 @@
 
       type(ESMF_PhysGridType), intent(in) :: physgrid
 
-      type(ESMF_LocalArray), pointer, optional :: &
+      type(ESMF_LocalArray), optional :: &
          center_coord,       &! coordinates for each cell center
          corner_coord,       &! coordinates for corners of each cell
          face_coord           ! coordinates for face centers of each cell
@@ -1342,15 +1342,15 @@
       endif
 
       if (present(center_coord)) then
-         center_coord => physgrid%center_coord
+         center_coord = physgrid%center_coord
       endif
 
       if (present(corner_coord)) then
-         corner_coord => physgrid%corner_coord
+         corner_coord = physgrid%corner_coord
       endif
 
       if (present(face_coord)) then
-         face_coord => physgrid%face_coord
+         face_coord = physgrid%face_coord
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1370,7 +1370,7 @@
 
       type(ESMF_PhysGridType), intent(inout) :: physgrid
 
-      type(ESMF_LocalArray), intent(in), target, optional :: &
+      type(ESMF_LocalArray), intent(in), optional :: &
          center_coord,       &! coordinates for each cell center
          corner_coord,       &! coordinates for corners of each cell
          face_coord           ! coordinates for face centers of each cell
@@ -1416,15 +1416,15 @@
       endif
 
       if (present(center_coord)) then
-         physgrid%center_coord => center_coord
+         physgrid%center_coord = center_coord
       endif
 
       if (present(corner_coord)) then
-         physgrid%corner_coord => corner_coord
+         physgrid%corner_coord = corner_coord
       endif
 
       if (present(face_coord)) then
-         physgrid%face_coord => face_coord
+         physgrid%face_coord = face_coord
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1494,7 +1494,7 @@
       integer :: l1, l2
       logical :: rcpresent=.FALSE.                ! Return code present
       real(selected_real_kind(6,45)), dimension(:,:,:), pointer :: temp
-      type(ESMF_LocalArray), target :: array_temp
+      type(ESMF_LocalArray) :: array_temp
       
 
 !     Initialize return code
@@ -1529,7 +1529,7 @@
             enddo
           enddo
           array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
-          physgrid%center_coord => array_temp 
+          physgrid%center_coord = array_temp 
 !         nullify(temp)
 !         deallocate(temp)    ! TODO: figure out how to load one array
         case (ESMF_CellLoc_Center_Y)
@@ -1542,7 +1542,7 @@
             enddo
           enddo
           array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
-          physgrid%center_coord => array_temp 
+          physgrid%center_coord = array_temp 
           nullify(temp)
 !         deallocate(temp)
         case (ESMF_CellLoc_Corner_X)
