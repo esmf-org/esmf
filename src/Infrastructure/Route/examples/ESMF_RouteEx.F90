@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.24 2004/11/04 16:02:29 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.25 2004/12/09 00:27:26 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -171,7 +171,7 @@
     regrid_rh = ESMF_RouteHandleCreate(rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldRegridStore(field1, field2, layout2, &
+    call ESMF_FieldRegridStore(field1, field2, vm, &
                                routehandle=regrid_rh, &
                                regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
