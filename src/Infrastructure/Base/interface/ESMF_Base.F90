@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.33 2003/04/24 16:38:52 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.34 2003/04/28 17:40:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -246,9 +246,10 @@
       public ESMF_VERSION_STRING 
 
       public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
-      public ESMF_DataValue, ESMF_Attribute, ESMF_AxisIndex, ESMF_MemIndex
+      public ESMF_DataValue, ESMF_Attribute, ESMF_MemIndex
       public ESMF_BasePointer, ESMF_Base
 
+      public ESMF_AxisIndex, ESMF_AxisIndexInit, ESMF_AxisIndexGet
       public ESMF_Logical, ESMF_TF_TRUE, ESMF_TF_FALSE
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -315,7 +316,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.33 2003/04/24 16:38:52 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.34 2003/04/28 17:40:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -866,9 +867,73 @@ end function
       end subroutine ESMF_AttributeCopyAll
 
 !=========================================================================
+! Misc utility routines, perhaps belongs in a utility file?
+!-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMC_SetPointer - set an opaque value
+!IROUTINE:  ESMC_AxisIndexInit - initialize an AxisIndex object
+
+!
+! !INTERFACE:
+      subroutine ESMF_AxisIndexInit(ai, l, r, max, decomp, gstart, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_AxisIndex), intent(inout) :: ai
+      integer, intent(in) :: l, r, max, decomp, gstart
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!   Set the contents of an AxisIndex type.
+
+!
+!EOP
+! !REQUIREMENTS:
+
+      ai%l = l
+      ai%r = r
+      ai%max = max
+      ai%decomp = decomp
+      ai%gstart = gstart
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_AxisIndexInit
+
+!BOP
+!
+!IROUTINE:  ESMC_AxisIndexInit - initialize an AxisIndex object
+
+!
+! !INTERFACE:
+      subroutine ESMF_AxisIndexGet(ai, l, r, max, decomp, gstart, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_AxisIndex), intent(inout) :: ai
+      integer, intent(out), optional :: l, r, max, decomp, gstart
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!   Get the contents of an AxisIndex type.
+
+!
+!EOP
+! !REQUIREMENTS:
+
+      if (present(l)) l = ai%l
+      if (present(r)) r = ai%r
+      if (present(max)) max = ai%max
+      if (present(decomp)) decomp = ai%decomp
+      if (present(gstart)) gstart = ai%gstart
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_AxisIndexGet
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMF_SetPointer - set an opaque value
 
 !
 ! !INTERFACE:
@@ -894,7 +959,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMC_SetNullPointer - set an opaque value
+!IROUTINE:  ESMF_SetNullPointer - set an opaque value
 
 !
 ! !INTERFACE:
@@ -1006,7 +1071,6 @@ end function
       end subroutine ESMF_DataTypeString
 
 !-------------------------------------------------------------------------
-!BOP
 !
 !-------------------------------------------------------------------------
 ! put Print and Validate skeletons here - but they should be
