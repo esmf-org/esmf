@@ -23,24 +23,25 @@
 !------------------------------------------------------------------------------
 !
 !BOP
-! !MODULE: ESMF_ConfigMod - Implements ESMF configuration management.
-
-! !AUTHORS: Leonid Zaslavsky and Arlindo da Silva, NASA GSFC
+! !MODULE: ESMF_ConfigMod - Implements ESMF configuration management
 !
-! !DATE: April 2, 2003
 !
-! !INTRODUCTION: Package Overview
+! !DESCRIPTION:
 !
-!      ESMF Congiguration Management is based on NASA DAO's 
-!      Inpak 90 package. It is a Fortran (77/90) collection of 
-!      routines/functions for accessing {\em Resource Files} 
-!      in ASCII format. The package is optimized for minimizing 
-!      formatted I/O, performing all of its string operations in 
-!      memory using Fortran intrinsic functions.
+! The code in this file implements the {\tt Config} class that implements 
+! ESMF configuration management system.
 !
-! This type is implemented in Fortran 90.
+! \subsubsection{Package Overview}
 !
-! \subsection{Resource Files}
+!      ESMF Configuration Management is based on NASA DAO's 
+!      Inpak 90 package, a Fortran 90 collection of routines/functions
+!      for accessing {\em Resource Files} in ASCII format.The package 
+!      is optimized for minimizing formatted I/O, performing all of its 
+!      string operations in memory using Fortran intrinsic functions.\\
+!
+!      Module ${\tt ESMF\_ConfigMod}$ is implemented in Fortran 90.
+!
+! \subsubsection{Resource Files}
 !
 !      A {\em Resource File} is a text file consisting of variable
 !     length lines (records), each possibly starting with a {\em label}
@@ -73,24 +74,26 @@
 ! ::
 ! \end{verbatim}
 !
-! Resource files are random access, the particular order of the
-! records are not important (except between ::'s in a table definition).
+! Resource files are intended for random access (except between ::'s in a 
+! table definition). Normally, the order of records should not be important. 
+! However, the order of records may be important if the same label appears 
+! multiple times.
 !
-!    \subsection{A Quick Stroll}
+!    \subsubsection{A Quick Stroll}
 !
 !    The first step is to create the ESMF Configuration and load the 
 !    ASCII resource (rc) file into memory\footnote{See next section 
 !    for a complete description of parameters for each routine/function}:
 !
 ! \begin{verbatim}
-!       cf = ESMF_ConfigCreate ( layout, rc )
-!       call ESMF_ConfigLoadFile ( cf, fname, rc )
+!       cf = ESMF_ConfigCreate (layout, rc)
+!       call ESMF_ConfigLoadFile (cf, fname, rc = rc)
 ! \end{verbatim}
 !
 !    The next step is to select the label (record) of interest, say
 !
 ! \begin{verbatim}
-!       call ESMF_ConfigFindLabel ( cf, 'constants:', rc )
+!       call ESMF_ConfigFindLabel  ( cf, 'constants:', rc = rc )
 ! \end{verbatim}
 !
 !  The 2 constants above can be retrieved with the following code
@@ -98,9 +101,9 @@
 ! \begin{verbatim}
 !       real    r
 !       integer i
-!       call ESMF_ConfigFindLabel( cf, 'constants:', rc )
-!       r = ESMF_ConfigGetFloat( cf, rc )  ! results in r = 3.1415
-!       i = ESMF_CONFIG(cf, rc )           ! results in i = 25
+!       call ESMF_ConfigFindLabel( cf, 'constants:', rc = rc)
+!       r = ESMF_ConfigGetFloat( cf, rc = rc )       ! results in r = 3.1415
+!       i = ESMF_ConfigGetInt( cf, rc = rc )         ! results in i = 25
 ! \end{verbatim}
 !
 !  The file names above can be retrieved with the following
@@ -108,20 +111,20 @@
 ! \begin{verbatim}
 !       character*20 fn1, fn2, fn3
 !       integer      rc
-!       call ESMF_ConfigFindLabel ( cf, 'my_file_names:', rc )
-!       call ESMF_ConfigGetString ( cf, fn1, rc )  ! ==> fn1 = 'jan87.dat'
-!       call ESMF_ConfigGetString ( cf, fn2, rc )  ! ==> fn1 = 'jan88.dat'
-!       call ESMF_ConfigGetString ( cf, fn3, rc )  ! ==> fn1 = 'jan89.dat'
+!       call ESMF_ConfigFindLabel ( cf, 'my_file_names:', rc = rc )
+!       call ESMF_ConfigGetString ( cf, fn1, rc = rc )  ! ==> fn1 = 'jan87.dat'
+!       call ESMF_ConfigGetString ( cf, fn2, rc = rc )  ! ==> fn1 = 'jan88.dat'
+!       call ESMF_ConfigGetString ( cf, fn3, rc = rc )  ! ==> fn1 = 'jan89.dat'
 ! \end{verbatim}
 !
 ! To access the table above, the user first must use 
-! {\tt ESMF_ConfigFindLabel()} to locate the beginning of the table, e.g.,
+! ${\tt ESMF\_ConfigFindLabel()}$ to locate the beginning of the table, e.g.,
 !
 ! \begin{verbatim}
-!       call ESMF_ConfigFindLabel( cf, 'my_table_name::', rc )
+!       call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc = rc)
 ! \end{verbatim}
 !
-! Subsequently, {\tt call ESMF_ConfigNextLine()} can be used to gain 
+! Subsequently, ${\tt call ESMF\_ConfigNextLine()}$ can be used to gain 
 ! access to each row of the table. Here is a code fragment to read the above
 ! table (7 rows, 3 columns):
 !
@@ -129,19 +132,24 @@
 !       real          table(7,3)
 !       character*20  word
 !       integer       rc
-!       call  ESMF_ConfigFindLabel( cf, 'my_table_name::', rc )
+!       call  ESMF_ConfigFindLabel(cf, 'my_table_name::', rc = rc)
 !       do i = 1, 7
-!          call  call ESMF_ConfigNextLine( cf, rc )
+!          call  call ESMF_ConfigNextLine( cf, rc = rc )
 !          do j = 1, 3
-!             table(i,j) = ESMF_ConfigGetFloat ( cf, rc)
+!             table(i,j) = ESMF_ConfigGetFloat( cf, rc = rc )
 !          end do                   
 !       end do
 ! \end{verbatim}
 !
-! Get the idea?
-! 
-! \newpage
-! \subsection{Main Routine/Functions}
+! The work with the configuration {\tt cf} is finalized by call to
+! ${\tt ESMF\_ConfigDestroy()}$:
+! \begin{verbatim}
+!       integer rc
+!       call ESMF_ConfigDestroy( cf, rc )
+! \end{verbatim}
+
+!
+! \subsubsection{Main Routine/Functions}
 !
 ! \begin{verbatim}
 !  ------------------------------------------------------------------
@@ -150,24 +158,20 @@
 !  ESMF_ConfigCreate ( fname, layout, rc )  creates configuration
 !  ESMF_ConfigDestroy ( cf, rc )            destroys configuration
 !
-!  ESMF_ConfigLoadFile ( cf, fname, rc,     loads resource file 
-!                        unique )           into memory
+!  ESMF_ConfigLoadFile ( cf, fname, unique, loads resource file 
+!                        rc )               into memory
 !
-!  ESMF_ConfigFindLabel( cf, label, rc )    selects a label (key)
+!  ESMF_ConfigFindLabel( cf, label, unique, selects a label (key)
+!                        rc )  
 !
-!  ESMF_ConfigNextLine ( cf, rc )           selects next line (for 
+!  ESMF_ConfigNextLine ( cf, end, rc )      selects next line (for 
 !                                           tables)
-!....
-!  I90_Gtoken ( word, iret )     get next token
-!...
-!HOW TO INTERPRET TOKEN ???  <<<<<<<<<<<<<<<<<
 !
+!  ESMF_ConfigGetFloat ( cf, label, size,   returns next float number 
+!                        default, rc )      (function)
 !
-!  ESMF_ConfigGetFloat ( cf, label, rc,     returns next float number 
-!                        size, default )    (function)
-!
-!  ESMF_ConfigGetInt ( cf, label, rc,       returns next integer number 
-!                      size, default )      (function)
+!  ESMF_ConfigGetInt ( cf, label, size,     returns next integer number 
+!                      default, rc )        (function)
 ! 
 !  ESMF_ConfigGetChar ( cf, label, rc )     returns next charecter array
 !                                           /word (function)
@@ -175,18 +179,18 @@
 !  ESMF_ConfigGetString ( cf, label,        retutns next string 
 !                         string, rc )
 !
-!  ESMF_ConfigStringtoFloat ( string,       transfrorms ASCII string to
-!                             rc )          float (function)
+!  ESMF_ConfigStringtoFloat ( string, rc )  transfrorms ASCII string to
+!                                           float (function)
 !
-!  ESMF_ConfigStringtoInt ( string,         transfrorms ASCII string to
-!                             rc )          integer (function)
+!  ESMF_ConfigStringtoInt ( string, rc )    transfrorms ASCII string to
+!                                           integer (function)
 !
-!  ESMF_CongigGetLen ( cf, label,nwords,    gets number of words in the line
+!  ESMF_ConfigGetLen ( cf, label, unique,   gets number of words in the line
 !                      rc)                  by counting disregarding type 
 !                                           (function)
 !
-!  ESMF_CongigGetDim ( cf, label, lines,    gets number of lines in the tables
-!                      columns, rc)         and max number of columns by word 
+!  ESMF_ConfigGetDim ( cf, label, lines,    gets number of lines in the tables
+!                      columns, unique, rc) and max number of columns by word 
 !                                           counting disregarding type
 !                                           (function)
 !  ------------------------------------------------------------------
@@ -205,7 +209,7 @@
 ! See the Prologues in the next section for additional details.
 !
 !
-!    \subsection{Package History}
+!    \subsubsection{Package History}
 !       The ESMF Configuration Management Package was evolved by 
 !       Leonid Zaslavsky and Arlindo da Silva from Ipack90 package
 !       created by Arlindo da Silva at NASA DAO.
@@ -218,13 +222,10 @@
 !       Inpak77, and parses the whole resource file in memory for
 !       performance. 
 !
-
-
-!
 ! !REVISION HISTORY:
 !
 !       2apr2003 Leonid Zaslavsky created from m_inpak90.F90
-!EOI_______________________________________________________________________
+
 ! !USES:
 
       use ESMF_DELayoutMod
@@ -253,6 +254,7 @@
 ! !PUBLIC TYPES:
 !------------------------------------------------------------------------------
        public :: ESMF_Config     ! WHY DO WE NEED IT PUBLIC?
+!EOP
 
 ! PRIVATE PARAMETER  SETTINGS:
 !------------------------------------------------------------------------------
@@ -305,7 +307,7 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_CongigCreate - Create Configuration
+! !IROUTINE: ESMF_ConfigCreate - Create Configuration
 !
 ! !DESCRIPTION: Create ESMF configuration for a given layout.
 !
@@ -335,7 +337,7 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_CongigDestroys - destroys configuration
+! !IROUTINE: ESMF_ConfigDestroy - destroys configuration
 !
 ! !DESCRIPTION: Destroys an ESMF configuration.
 !
@@ -354,13 +356,6 @@
 
       rc = 0
     end subroutine ESMF_ConfigDestroy
-
-
-
-
-
-
-
 
 
 !-----------------------------------------------------------------------
