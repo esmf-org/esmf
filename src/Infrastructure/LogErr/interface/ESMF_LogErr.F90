@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.6 2003/04/14 16:40:14 shep_smith Exp $
+! $Id: ESMF_LogErr.F90,v 1.7 2003/04/14 20:26:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -84,11 +84,11 @@ subroutine ESMF_LogInit(aLog,verbose,flush,haltOnErr,haltOnWarn)
  integer, intent(in),optional::verbose, flush, haltOnErr,haltOnWarn 
 !
 ! !DESCRIPTION:
-!   Most of the Fortran wrapper routines for the C/C++ ESMC\_Log class are
+!   Most of the Fortran wrapper routines for the C/C++ ESMC/_Log class are
 !   written in C. This is the only routine that isn't. See the class design
 !   section for the rational for doing this. 
 !
-!   With the exception of the ESMF\_Log object, all the arguments are optional.
+!   With the exception of the ESMF/_Log object, all the arguments are optional.
 !   See the Examples section of the document for a discussion of how to use the
 !   routine.
 !
@@ -127,7 +127,7 @@ subroutine ESMF_LogCloseFortran(unitNumber)
 ! !DESCRIPTION:
 ! This routine closes any log files that have been written to using
 ! the Fortran interface.  It is called by by the C/C++ Log
-! method ESMC\_LogFinalize().
+! method ESMC/_LogFinalize().
 ! Note: This routine is not a module procedure
 ! because it needs to be called from Log's C++ method and
 ! F90 mangles the names of functions
@@ -162,11 +162,11 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 !    
 !
 ! !DESCRIPTION:
-! This routine opens the log file and is called by ESMC\_LogWrite.
-! See the ESMC\_LogErr.C file for more details.
+! This routine opens the log file and is called by ESMC/_LogWrite.
+! See the ESMC/_LogErr.C file for more details.
 ! This routine is not a module procedure because F90 mangles
 ! the names of functions
-! inside modules and this routine is called by ESMC\_LogWrite() - a C++
+! inside modules and this routine is called by ESMC/_LogWrite() - a C++
 ! method.
 !
 !EOP
@@ -226,14 +226,14 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 					   !printed out if length is
 					   !greater than zero.
 ! !DESCRIPTION:
-! This routine, and the routines that follow it, are used by ESMC\_LogPrint()
-! ESMC\_LogPrintHeader() in the Log class.  Ordinarily, these Log routines would
+! This routine, and the routines that follow it, are used by ESMC/_LogPrint()
+! ESMC/_LogPrintHeader() in the Log class.  Ordinarily, these Log routines would
 ! have just used fprintf.  However, because we needed to use the Fortran I/O 
 ! libraries when calling Log from a Fortran code
 ! (see the discussion about the class design), we had to make 
-! calls to ESMF\_LogPrintChar() and the subroutines below, in addition to
+! calls to ESMF/_LogPrintChar() and the subroutines below, in addition to
 ! C's fprintf() (We still have to support C/C++, so we still need fprintf() ).
-! ESMF\_LogPrintChar() and the routines below are not particularly general,
+! ESMF/_LogPrintChar() and the routines below are not particularly general,
 ! but do the trick.
 !EOP
 !========================================================================
@@ -241,7 +241,7 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
   if (length /= 0) write(unitNumber,10) (msg(i:i),i=1,length) 
   write(unitNumber,10) charData
   if (flushSet == ESMF_LOG_TRUE) call flush(unitNumber, istat)
-  10 format(\A)
+  10 format(/A)
  end subroutine
 
 !======================================================================
@@ -258,7 +258,7 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 ! !ARGUMENTS:
   integer, intent(in)::unitNumber,flushSet  !see above
 ! !DESCRIPTION:
-! Prints a newline character.  See ESMF\_LogPrintChar for more 
+! Prints a newline character.  See ESMF/_LogPrintChar for more 
 ! discussion
 !EOP
 !=====================================================================
@@ -282,14 +282,14 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
   integer, intent(in)::unitNumber,flushSet,len1,len2
   character(len=32), intent(in)::msg,stringData
 ! !DESCRIPTION:
-! Prints a string; see ESMF\_LogPrintChar() for a fuller discussion
+! Prints a string; see ESMF/_LogPrintChar() for a fuller discussion
 !EOP
 !======================================================================
   integer :: i,istat
   if (len2 /= 0) write(unitNumber,10) (msg(i:i),i=1,len2)
   write(unitNumber,10) (stringData(i:i), i=1,len1)
   if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
-  10 format(\A)
+  10 format(/A)
  end subroutine
 
   
@@ -307,15 +307,15 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
   integer, intent(in)::unitNumber,flushSet,intData
   character(len=32), intent(in):: msg
 ! !DESCRIPTION
-! Prints an integer; see ESMF\_LogPrintChar() for more details
+! Prints an integer; see ESMF/_LogPrintChar() for more details
 !
 !EOP
 !======================================================================
   if (length /= 0) write(unitNumber,20) (msg(i:i),i=1,length)
   write(unitNumber,10) intData
   if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
-  10 format(\I3)
-  20 format(\A1)
+  10 format(/I3)
+  20 format(/A1)
  end subroutine
 
 !======================================================================
@@ -332,14 +332,14 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
   real, intent(in):: floatData
   character(len=32), intent(in):: msg
 ! !DESCRIPTION:
-! Prints a real number; see ESMF\_LogPrintChar() for a longer discussion
+! Prints a real number; see ESMF/_LogPrintChar() for a longer discussion
 !
 !EOP
 !======================================================================
   if (length /= 0) write(unitNumber,20) (msg(i:i),i=1,length)
   write(unitNumber,10) floatdata 
   if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
-  10 format(\F14.7)
-  20 format(\A)
+  10 format(/F14.7)
+  20 format(/A)
  end subroutine
 
