@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.15 2003/02/11 22:05:35 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.16 2003/02/11 23:10:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -242,7 +242,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.15 2003/02/11 22:05:35 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.16 2003/02/11 23:10:29 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -337,6 +337,7 @@ end interface
 
 !------------------------------------------------------------------------------
 interface operator (.eq.)
+ module procedure ESMF_oteq
  module procedure ESMF_imexeq
  module procedure ESMF_needeq
  module procedure ESMF_redyeq
@@ -344,6 +345,7 @@ interface operator (.eq.)
 end interface
 
 interface operator (.ne.)
+ module procedure ESMF_otne
  module procedure ESMF_imexne
  module procedure ESMF_needne
  module procedure ESMF_redyne
@@ -358,6 +360,21 @@ end interface
 !==============================================================================
 
 ! functions to compare two ESMF types to see if they're the same or not
+
+function ESMF_oteq(s1, s2)
+ logical ESMF_oteq
+ type(ESMF_StateObjectType), intent(in) :: s1, s2
+
+ ESMF_oteq = (s1%ot .eq. s2%ot)
+end function
+
+function ESMF_otne(s1, s2)
+ logical ESMF_otne
+ type(ESMF_StateObjectType), intent(in) :: s1, s2
+
+ ESMF_otne = (s1%ot .ne. s2%ot)
+end function
+
 
 function ESMF_imexeq(s1, s2)
  logical ESMF_imexeq
@@ -1581,6 +1598,82 @@ end function
 !
         end subroutine ESMF_StateGetInfo
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateTypeFindData - internal routine to find data item by name
+!
+! !INTERFACE:
+      function ESMF_StateTypeFindData(stypep, dataname, dataitem, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_StateTypeFindData
+!
+! !ARGUMENTS:
+      type(ESMF_StateType), intent(in) :: stypep
+      character (len=*), intent(in) :: dataname
+      type(ESMF_StateData), pointer, intent(out) :: dataitem
+      integer, intent(out), optional :: rc             
+
+! !DESCRIPTION:
+!    Returns {\tt TRUE} if a data item with this name is found, and returns
+!    a pointer to it in the {\tt dataitem} argument.  Returns {\tt FALSE}
+!    (without setting the error code) if this name is not found.
+!
+!  \begin{description}     
+!  \item[stypep]
+!    {\tt StateType} to query.
+!   \item[dataname]
+!    Name of the data item to query.
+!   \item[dataitem]
+!    Pointer to the corresponding {\tt ESMF\_StateData} item if one is
+!    found with the right name.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      type(ESMF_StateData), pointer :: nextitem
+      integer :: i, dcount
+      logical :: itemfound=.FALSE.
+      integer :: itemindex
+
+      ! Initialize return code.  Assume failure until success assured.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+  
+      ! For each item in the array, check the name
+      dcount = stypep%datacount
+           
+      do i=1, dcount
+        nextitem => stypep%datalist(i)
+        if (nextitem%namep .eq. dataname) then
+           itemfound = .TRUE.
+           itemindex = i
+           exit             ! leave loop at this point
+        endif
+      enddo
+  
+      if (itemfound) then
+        ESMF_StateTypeFindData = .TRUE.
+        dataitem => stypep%datalist(itemindex) 
+
+      else   ! item not found
+        ESMF_StateTypeFindData = .FALSE.
+        nullify(dataitem)
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_StateTypeFindData
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_StateIsNeeded -- Return logical true if state needed
@@ -1619,9 +1712,26 @@ end function
 !
 ! TODO: code goes here
 !
-        ESMF_StateIsNeeded = .false.
+      type(ESMF_StateData), pointer :: dataitem
+      logical :: exists
+      integer :: status=ESMF_FAILURE
+       
+      ! Assume no unless we find it and it is needed.
+      ESMF_StateIsNeeded = .FALSE.
+      if (present(rc)) rc=ESMF_FAILURE
 
-        end function ESMF_StateIsNeeded
+      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, status)
+      if (.not. exists) then
+          return
+      endif
+
+      if (dataitem%needed .eq. ESMF_STATEDATAISNEEDED) then
+        ESMF_StateIsNeeded = .TRUE.
+      endif
+  
+      if (present(rc)) rc=ESMF_SUCCESS
+
+      end function ESMF_StateIsNeeded
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1699,12 +1809,23 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        state%statep%datalist(1)%needed = needed
+      type(ESMF_StateData), pointer :: dataitem
+      logical :: exists
+      integer :: status=ESMF_FAILURE
+       
+      ! Assume failure until we know we will succeed
+      if (present(rc)) rc=ESMF_FAILURE
 
-        end subroutine ESMF_StateSetNeeded
+      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, status)
+      if (.not. exists) then
+          return
+      endif
+
+      dataitem%needed = needed
+
+      if (present(rc)) rc=ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetNeeded
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1738,10 +1859,28 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_StateGetBundle
+      type(ESMF_StateData), pointer :: dataitem
+      logical :: exists
+      integer :: status=ESMF_FAILURE
+       
+      ! Assume failure until we know we will succeed
+      if (present(rc)) rc=ESMF_FAILURE
+      ! TODO: do we need an empty bundle to mark failure?
+
+      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, status)
+      if (.not. exists) then
+          return
+      endif
+
+      if (dataitem%otype .ne. ESMF_STATEBUNDLE) then
+          return
+      endif
+
+      bundle = dataitem%datap%bp
+
+      if (present(rc)) rc=ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetBundle
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1775,10 +1914,28 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_StateGetField
+      type(ESMF_StateData), pointer :: dataitem
+      logical :: exists
+      integer :: status=ESMF_FAILURE
+       
+      ! Assume failure until we know we will succeed
+      if (present(rc)) rc=ESMF_FAILURE
+      ! TODO: do we need an empty field to mark failure?
+
+      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, status)
+      if (.not. exists) then
+          return
+      endif
+
+      if (dataitem%otype .ne. ESMF_STATEFIELD) then
+          return
+      endif
+
+      field = dataitem%datap%fp
+
+      if (present(rc)) rc=ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetField
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1812,10 +1969,28 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_StateGetArray
+      type(ESMF_StateData), pointer :: dataitem
+      logical :: exists
+      integer :: status=ESMF_FAILURE
+       
+      ! Assume failure until we know we will succeed
+      if (present(rc)) rc=ESMF_FAILURE
+      ! TODO: do we need an empty array to mark failure?
+
+      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, status)
+      if (.not. exists) then
+          return
+      endif
+
+      if (dataitem%otype .ne. ESMF_STATEARRAY) then
+          return
+      endif
+
+      array = dataitem%datap%ap
+
+      if (present(rc)) rc=ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetArray
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
