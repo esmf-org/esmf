@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.24 2003/09/04 18:57:55 cdeluca Exp $
+// $Id: ESMC_Base.h,v 1.25 2003/09/04 19:37:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -233,6 +233,7 @@ int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, char *name,
 
 int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max, int stride);
 int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *min, int *max, int *stride);
+int ESMC_AxisIndexPrint(ESMC_AxisIndex *ai);
 ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
 
 #endif  // ESMC_BASE_H
