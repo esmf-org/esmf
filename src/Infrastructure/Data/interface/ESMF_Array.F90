@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.7 2002/12/09 23:16:40 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.8 2002/12/10 00:03:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.7 2002/12/09 23:16:40 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.8 2002/12/10 00:03:42 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -489,9 +489,9 @@ end function
         endif
 
 !       call Destruct first, then free this memory
-        call c_ESMC_ArrayDestroy(array, status)
+        call c_ESMC_ArrayDestroy(array%this, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Array destruction error"
+          print *, "Array contents destruction error"
           return
         endif
 
