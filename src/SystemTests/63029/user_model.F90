@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.10 2003/04/29 22:02:02 nscollins Exp $
+! $Id: user_model.F90,v 1.11 2003/05/07 16:07:38 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -51,8 +51,8 @@
 
         ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
-                                                          ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init1, 1, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init2, 2, rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
                                                           ESMF_SINGLEPHASE, rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
@@ -79,10 +79,26 @@
 
 !-------------------------------------------------------------------------
 !   !  User Comp Component created by higher level calls, here is the
-!   !   Initialization routine.
+!   !   first Initialization routine.
  
     
-    subroutine user_init(comp, importstate, exportstate, clock, rc)
+    subroutine user_init1(comp, importstate, exportstate, clock, rc)
+        type(ESMF_GridComp) :: comp
+        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_Clock) :: clock
+        integer :: rc
+
+        print *, "first init routine called"
+        rc = ESMF_SUCCESS
+
+    end subroutine user_init1
+
+!-------------------------------------------------------------------------
+!   !  User Comp Component created by higher level calls, here is the
+!   !   second and main Initialization routine.
+ 
+    
+    subroutine user_init2(comp, importstate, exportstate, clock, rc)
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importstate, exportstate
         type(ESMF_Clock) :: clock
@@ -94,7 +110,7 @@
         type(wrapper) :: mywrapper
         integer :: dtype
 
-        print *, "User Comp Init starting"
+        print *, "User Comp Init 2 starting"
 
         ! This is where the model specific setup code goes.  
 
@@ -118,7 +134,7 @@
 
         print *, "User Comp Init returning"
    
-    end subroutine user_init
+    end subroutine user_init2
 
 
 !-------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.12 2003/04/22 21:33:33 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.13 2003/05/07 16:07:38 nscollins Exp $
 !
 ! System test code #63029
 
@@ -24,7 +24,7 @@
     
 !   Local variables
     integer :: delist(64), dummy(2)
-    integer :: i, de_id, ndes, mid, rc
+    integer :: i, de_id, ndes, mid, by2, rc
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_GridComp) :: comp1
@@ -47,17 +47,19 @@
     ! Create a default 1xN DELayout
     layout1 = ESMF_DELayoutCreate(rc)
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
-    if (ndes .le. 1) then
-        print *, "Cannot run this test uniprocessor"
-        goto 10
-    endif
 
-    mid = ndes/2
+    if (ndes .le. 1) then
+     mid = 1
+     by2 = 1
+    else
+     mid = ndes/2
+     by2 = 2
+    endif
 
     ! Create a child DELayout for the Component which is 2 by half the
     !  total number of procs.
     delist = (/ (i, i=0, ndes-1) /)
-    layout2 = ESMF_DELayoutCreate(layout1, 2, (/ mid, 2 /), (/ 0, 0 /), &
+    layout2 = ESMF_DELayoutCreate(layout1, 2, (/ mid, by2 /), (/ 0, 0 /), &
                                                    de_indices=delist, rc=rc)
 
     cname = "System Test #63029"
@@ -84,8 +86,11 @@
       imp = ESMF_StateCreate("grid import state", ESMF_STATEIMPORT, rc=rc)
       exp = ESMF_StateCreate("grid export state", ESMF_STATEEXPORT, rc=rc)
 
-      call ESMF_GridCompInitialize(comp1, imp, exp, rc=rc)
-      print *, "Comp Initialize finished"
+      call ESMF_GridCompInitialize(comp1, imp, exp, phase=1, rc=rc)
+      print *, "Comp Initialize 1 finished"
+ 
+      call ESMF_GridCompInitialize(comp1, imp, exp, phase=2, rc=rc)
+      print *, "Comp Initialize 2 finished"
  
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
