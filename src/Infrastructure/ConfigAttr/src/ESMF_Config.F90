@@ -643,9 +643,10 @@
 !      11apr2003  Zaslavsky  Coded using DAO code written by da Silva 
 !EOP -------------------------------------------------------------------
       integer :: i, j, iret
+      logical :: local_tend
 
       iret = 0
-      tend = .false.
+      local_tend = .false.
 
       if ( cf%next_line >= cf%nbuf ) then
          iret = -1
@@ -659,15 +660,17 @@
       
       if ( cf%this_line(1:2) .eq. '::' ) then
          iret = 0                    ! end of table. We set iret = 0
-         tend = .true.                ! and end = .true. Used to be
+         local_tend = .true.         ! and end = .true. Used to be
       ! iret = 1  
          cf%next_line = cf%nbuf + 1
+         if ( present (tend )) tend = local_tend
          if ( present (rc )) rc = iret
          return
       end if
 
       cf%next_line = j + 2
       iret = 0
+      if ( present (tend )) tend = local_tend
       if ( present (rc )) rc = iret
       return
 
