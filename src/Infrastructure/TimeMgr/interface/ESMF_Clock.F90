@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.17 2003/05/07 16:28:00 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.18 2003/06/06 23:08:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 ! Part of Time Manager F90 API wrapper of C++ implemenation
 !
 ! Defines F90 wrapper entry points for corresponding
-! C++ class ESMC\_Time implementation
+! C++ class {\tt ESMC\_Time} implementation
 !     
 !------------------------------------------------------------------------------
 ! !USES:
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.17 2003/05/07 16:28:00 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.18 2003/06/06 23:08:00 eschwab Exp $'
 
 !==============================================================================
 
@@ -132,7 +132,7 @@
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Initialize a {\tt Clock}
+!     Initialize a {\tt ESMF\_Clock}
 !     
 !     The arguments are:
 !     \begin{description}
@@ -141,11 +141,11 @@
 !     \item[{[TimeStep]}]
 !          The {\tt Clock}'s time step interval
 !     \item[StartTime]
-!          The {\tt Clock}'s starting time
+!          The {\tt ESMF\_Clock}'s starting time
 !     \item[StopTime]
-!          The {\tt Clock}'s stopping time
+!          The {\tt ESMF\_Clock}'s stopping time
 !     \item[{[RefTime]}]
-!          The {\tt Clock}'s reference time
+!          The {\tt ESMF\_Clock}'s reference time
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -172,14 +172,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Add an {\tt Alarm} to a {\tt Clock}'s {\tt Alarm} list
+!     Add an {\tt ESMF\_Alarm} to a {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          The object instance to add an {\tt Alarm} to
 !     \item[Alarm]
-!          The {\tt Alarm} to add to the {\tt Clock}'s {\tt Alarm} list
+!          The {\tt ESMF\_Alarm} to add to the {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -205,14 +205,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt Clock}'s {\tt Alarm} list     
+!     Get a {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list     
 !   
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!          The object instance to get the {\tt Alarm} list from
+!          The object instance to get the {\tt ESMF\_Alarm} list from
 !     \item[AlarmList]
-!          The {\tt Clock}'s {\tt Alarm} list
+!          The {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -238,14 +238,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the number of {\tt Alarm}s in a {\tt Clock}'s {\tt Alarm} list     
+!     Get the number of {\tt ESMF\_Alarm}s in a {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list     
 !   
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!          The object instance to get the number of {\tt Alarm}s from
+!          The object instance to get the number of {\tt ESMF\_Alarm}s from
 !     \item[NumAlarms]
-!          The number of {\tt Alarm}s in the {\tt Clock}'s {\tt Alarm} list
+!          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -270,7 +270,7 @@
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Set a {\tt Clock}'s current time to wall clock time     
+!     Set a {\tt ESMF\_Clock}'s current time to wall clock time     
 !   
 !     The arguments are:
 !     \begin{description}
@@ -304,7 +304,7 @@
       integer, intent(out), optional :: rc
 !   
 ! !DESCRIPTION:
-!     Advance a {\tt Clock}'s current time by one time step
+!     Advance a {\tt ESMF\_Clock}'s current time by one time step
 !  
 !     The arguments are:
 !     \begin{description}
@@ -341,7 +341,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Return true if {\tt Clock} has reached its stop time, false otherwise     
+!     Return true if {\tt ESMF\_Clock} has reached its stop time, false otherwise     
 !
 !     The arguments are:
 !     \begin{description}
@@ -372,7 +372,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Returns the number of times the {\tt Clock} has been advanced
+!     Returns the number of times the {\tt ESMF\_Clock} has been advanced
 !     (time stepped)
 !
 !     The arguments are:
@@ -380,7 +380,7 @@
 !     \item[clock]
 !          The object instance to get the advance count from
 !     \item[AdvanceCount]
-!          The number of times the {\tt Clock} has been advanced
+!          The number of times the {\tt ESMF\_Clock} has been advanced
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -406,7 +406,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt Clock}'s timestep interval
+!     Get a {\tt ESMF\_Clock}'s timestep interval
 !
 !     The arguments are:
 !     \begin{description}
@@ -439,7 +439,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set a {\tt Clock}'s timestep interval
+!     Set a {\tt ESMF\_Clock}'s timestep interval
 !
 !     The arguments are:
 !     \begin{description}
@@ -472,7 +472,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt Clock}'s current time     
+!     Get a {\tt ESMF\_Clock}'s current time     
 !
 !     The arguments are:
 !     \begin{description}
@@ -505,7 +505,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set a {\tt Clock}'s current time
+!     Set a {\tt ESMF\_Clock}'s current time
 !
 !     The arguments are:
 !     \begin{description}
@@ -538,7 +538,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt Clock}'s start time
+!     Get a {\tt ESMF\_Clock}'s start time
 !
 !     The arguments are:
 !     \begin{description}
@@ -571,7 +571,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt Clock}'s stop time
+!     Get a {\tt ESMF\_Clock}'s stop time
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -604,7 +604,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt Clock}'s reference time
+!     Get a {\tt ESMF\_Clock}'s reference time
 !
 !     The arguments are:
 !     \begin{description}
@@ -637,7 +637,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt Clock}'s previous current time
+!     Get a {\tt ESMF\_Clock}'s previous current time
 !
 !     The arguments are:
 !     \begin{description}
@@ -670,7 +670,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt Clock}'s current simulation time
+!     Get a {\tt ESMF\_Clock}'s current simulation time
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -703,7 +703,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt Clock}'s previous simulation time
+!     Get a {\tt ESMF\_Clock}'s previous simulation time
 !
 !     The arguments are:
 !     \begin{description}
@@ -750,7 +750,7 @@
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Restore a {\tt Clock}
+!     Restore a {\tt ESMF\_Clock}
 !     
 !     The arguments are:
 !     \begin{description}
@@ -769,9 +769,9 @@
 !     \item[PrevTime]
 !          The {\tt Clock}'s previous time
 !     \item[AdvanceCount]
-!          The number of times the {\tt Clock} has been advanced
+!          The number of times the {\tt ESMF\_Clock} has been advanced
 !     \item[AlarmList]
-!          The {\tt Clock}'s {\tt Alarm} list
+!          The {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -807,28 +807,28 @@
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Save a {\tt Clock}
+!     Save a {\tt ESMF\_Clock}
 !     
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          The object instance to save
 !     \item[TimeStep]
-!          The {\tt Clock}'s time step interval
+!          The {\tt ESMF\_Clock}'s time step interval
 !     \item[StartTime]
-!          The {\tt Clock}'s starting time
+!          The {\tt ESMF\_Clock}'s starting time
 !     \item[StopTime]
-!          The {\tt Clock}'s stopping time
+!          The {\tt ESMF\_Clock}'s stopping time
 !     \item[RefTime]
-!          The {\tt Clock}'s reference time
+!          The {\tt ESMF\_Clock}'s reference time
 !     \item[CurrTime]
-!          The {\tt Clock}'s current time
+!          The {\tt ESMF\_Clock}'s current time
 !     \item[PrevTime]
-!          The {\tt Clock}'s previous time
+!          The {\tt ESMF\_Clock}'s previous time
 !     \item[AdvanceCount]
-!          The number of times the {\tt Clock} has been advanced
+!          The number of times the {\tt ESMF\_Clock} has been advanced
 !     \item[AlarmList]
-!          The {\tt Clock}'s {\tt Alarm} list
+!          The {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -855,7 +855,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt Clock}'s properties
+!     Perform a validation check on a {\tt ESMF\_Clock}'s properties
 !
 !     The arguments are:  
 !     \begin{description}
@@ -888,7 +888,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out a {\tt Clock}'s
+!     To support testing/debugging, print out a {\tt ESMF\_Clock}'s
 !     properties.
 ! 
 !     The arguments are:

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.18 2003/04/25 21:10:50 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.19 2003/06/06 23:07:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 ! Part of Time Manager F90 API wrapper of C++ implemenation
 !
 ! Defines F90 wrapper entry points for corresponding
-! C++ class ESMC\_Calendar implementation
+! C++ class { \tt ESMC\_Calendar} implementation
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.18 2003/04/25 21:10:50 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.19 2003/06/06 23:07:14 eschwab Exp $'
 
 !==============================================================================
 
@@ -153,7 +153,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes a {\tt Calendar} to the given {\tt CalendarType}
+!     Initializes a {\tt ESMF\_Calendar} to the given {\tt ESMF\_CalendarType}
 !
 !     The arguments are:
 !     \begin{description}
@@ -192,7 +192,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes a {\tt Calendar} to a user-specified type
+!     Initializes a {\tt ESMF\_Calendar} to a user-specified type
 !
 !     The arguments are:
 !     \begin{description}
@@ -248,14 +248,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a restore on a {\tt Calendar}'s properties
+!     Perform a restore on a {\tt ESMF\_Calendar}'s properties
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
 !          Calendar to restore
 !     \item[Type]
-!          The {\tt CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIAN, etc.
+!          The {\tt ESMF\_CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIAN, etc.
 !     \item[DaysPerMonth]
 !          Integer array of days per month, for each of the 12 months
 !     \item[SecondsPerDay]
@@ -300,14 +300,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a save on a {\tt Calendar}'s properties
+!     Perform a save on a {\tt ESMF\_Calendar}'s properties
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
 !          Calendar to save
 !     \item[Type]
-!          The {\tt CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIAN, etc.
+!          The {\tt ESMF\_CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIAN, etc.
 !     \item[DaysPerMonth]
 !          Integer array of days per month, for each of the 12 months
 !     \item[SecondsPerDay]
@@ -345,7 +345,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt Calendar}'s properties
+!     Perform a validation check on a {\tt ESMF\_Calendar}'s properties
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -378,7 +378,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out a {\tt Calendar}'s  
+!     To support testing/debugging, print out a {\tt ESMF\_Calendar}'s  
 !     properties.
 !
 !     The arguments are:

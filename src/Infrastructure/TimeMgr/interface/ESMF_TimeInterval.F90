@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.20 2003/05/07 16:30:38 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.21 2003/06/06 23:09:25 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.20 2003/05/07 16:30:38 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.21 2003/06/06 23:09:25 eschwab Exp $'
 
 !==============================================================================
 !
@@ -148,7 +148,7 @@
 
 ! !DESCRIPTION:
 !     This interface defines a new .DIV. operator for the
-!     {\tt TimeInterval} class
+!     {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -165,7 +165,7 @@
       module procedure ESMF_TimeIntervalQuotR
 
 ! !DESCRIPTION:
-!     This interface overloads the / operator for the {\tt TimeInterval} class
+!     This interface overloads the / operator for the {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -181,7 +181,7 @@
       module procedure ESMF_TimeIntervalProdR
 
 ! !DESCRIPTION:
-!     This interface overloads the * operator for the {\tt TimeInterval} class
+!     This interface overloads the * operator for the {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -196,7 +196,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the + operator for the
-!     {\tt TimeInterval} class
+!     {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -211,7 +211,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the - operator for the
-!     {\tt TimeInterval} class
+!     {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -226,7 +226,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the .EQ. operator for the
-!     {\tt TimeInterval} class
+!     {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -241,7 +241,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the .NE. operator for the
-!     {\tt TimeInterval} class
+!     {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -256,7 +256,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the .LT. operator for the
-!     {\tt TimeInterval} class
+!     {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -271,7 +271,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the .GT. operator for the
-!     {\tt TimeInterval} class
+!     {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -286,7 +286,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the .LE. operator for the
-!     {\tt TimeInterval} class
+!     {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -301,7 +301,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the .GE. operator for the
-!     {\tt TimeInterval} class
+!     {\tt ESMF\_TimeInterval} class
 !
 !EOP
       end interface
@@ -448,7 +448,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the value of the {\tt TimeInterval} in units specified by the user
+!     Get the value of the {\tt ESMF\_TimeInterval} in units specified by the user
 !     via F90 optional arguments
 !     
 !     The arguments are:
@@ -538,7 +538,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set the value of the {\tt TimeInterval} in units specified by the user
+!     Set the value of the {\tt ESMF\_TimeInterval} in units specified by the user
 !     via F90 optional arguments
 !     
 !     The arguments are:
@@ -609,7 +609,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Convert {\tt TimeInterval}'s value into string format
+!     Convert {\tt ESMF\_TimeInterval}'s value into string format
 !
 !     The arguments are:
 !     \begin{description}
@@ -643,7 +643,7 @@
       type(ESMF_TimeInterval), intent(in) :: timeinterval
 
 ! !DESCRIPTION:
-!     Return a {\tt TimeInterval}'s absolute value.
+!     Return a {\tt ESMF\_TimeInterval}'s absolute value.
 !
 !     The arguments are:
 !     \begin{description}
@@ -783,7 +783,7 @@
       integer, intent(in) :: divisor
 
 ! !DESCRIPTION:
-!     Divides a {\tt TimeInterval} by an integer divisor, returns quotient as a
+!     Divides a {\tt ESMF\_TimeInterval} by an integer divisor, returns quotient as a
 !     {\tt TimeInterval}
 !
 !     The arguments are:
@@ -818,8 +818,8 @@
       double precision, intent(in) :: divisor
 
 ! !DESCRIPTION:
-!     Divides a {\tt TimeInterval} by a double precision divisor, returns
-!     quotient as a {\tt TimeInterval}
+!     Divides a {\tt ESMF\_TimeInterval} by a double precision divisor, returns
+!     quotient as a {\tt ESMF\_TimeInterval}
 !
 !     The arguments are:
 !     \begin{description}
@@ -853,8 +853,8 @@
       integer, intent(in) :: multiplier
 
 ! !DESCRIPTION:
-!     Multiply a {\tt TimeInterval} by an integer, return product as a
-!     {\tt TimeInterval}
+!     Multiply a {\tt ESMF\_TimeInterval} by an integer, return product as a
+!     {\tt ESMF\_TimeInterval}
 !
 !     The arguments are:
 !     \begin{description}
@@ -888,8 +888,8 @@
       type(ESMF_Fraction), intent(in) :: multiplier
 
 ! !DESCRIPTION:
-!     Multiply a {\tt TimeInterval} by a fraction, return product as a
-!     {\tt TimeInterval}
+!     Multiply a {\tt ESMF\_TimeInterval} by a fraction, return product as a
+!     {\tt ESMF\_TimeInterval}
 !
 !     The arguments are:
 !     \begin{description}
@@ -922,8 +922,8 @@
       double precision, intent(in) :: multiplier
 
 ! !DESCRIPTION:
-!     Multiply a {\tt TimeInterval} by a double precision number,
-!     return product as a {\tt TimeInterval}
+!     Multiply a {\tt ESMF\_TimeInterval} by a double precision number,
+!     return product as a {\tt ESMF\_TimeInterval}
 !
 !     The arguments are:
 !     \begin{description}
@@ -961,7 +961,7 @@
       type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
-!     Add two {\tt TimeIntervals}, return sum as a {\tt TimeInterval}.
+!     Add two {\tt ESMF\_TimeIntervals}, return sum as a {\tt ESMF\_TimeInterval}.
 !     Maps overloaded (+) operator interface function to {\tt ESMF\_BaseTime}
 !     base class.
 !
@@ -1000,7 +1000,7 @@
 
 ! !DESCRIPTION:
 !     Subtract timeinterval2 from timeinterval1, return remainder as a 
-!     {\tt TimeInterval}.
+!     {\tt ESMF\_TimeInterval}.
 !     Map overloaded (-) operator interface function to {\tt ESMF\_BaseTime}
 !     base class.
 !
@@ -1038,7 +1038,7 @@
 
 !DESCRIPTION:
 !     Return true if both given time intervals are equal, false otherwise.
-!     Maps overloaded (==) operator interface function to {\tt ESMF\_BaseTime}
+!     Maps overloaded (==) operator interface function to {\tt ESMF\_ESMF\_BaseTime}
 !     base class.
 !
 !     The arguments are:
@@ -1264,7 +1264,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a restore on a {\tt TimeInterval}'s properties
+!     Perform a restore on a {\tt ESMF\_TimeInterval}'s properties
 !
 !     The arguments are:
 !     \begin{description}
@@ -1309,7 +1309,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a save on a {\tt TimeInterval}'s properties
+!     Perform a save on a {\tt ESMF\_TimeInterval}'s properties
 !
 !     The arguments are:
 !     \begin{description}
@@ -1350,7 +1350,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt TimeInterval}'s properties
+!     Perform a validation check on a {\tt ESMF\_TimeInterval}'s properties
 !
 !     The arguments are:
 !     \begin{description}
@@ -1383,7 +1383,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out a {\tt TimeInterval}'s
+!     To support testing/debugging, print out a {\tt ESMF\_TimeInterval}'s
 !     properties.
 !
 !     The arguments are:

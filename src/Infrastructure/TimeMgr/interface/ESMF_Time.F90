@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.28 2003/05/07 07:44:38 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.29 2003/06/06 23:08:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 ! Part of Time Manager F90 API wrapper of C++ implemenation
 !
 ! Defines F90 wrapper entry points for corresponding
-! C++ class ESMC\_Time implementation
+! C++ class {\tt ESMC\_Time} implementation
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.28 2003/05/07 07:44:38 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.29 2003/06/06 23:08:56 eschwab Exp $'
 
 !==============================================================================
 !
@@ -150,8 +150,8 @@
       module procedure ESMF_TimeGetCalendarPtr
 
 ! !DESCRIPTION:
-!     This interface overloads the ESMF\_GetCalendar method
-!     for the {\tt Time} class
+!     This interface overloads the {\tt ESMF\_GetCalendar} method
+!     for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -166,8 +166,8 @@
       module procedure ESMF_TimeSetCalendarPtrPtr
 
 ! !DESCRIPTION:
-!     This interface overloads the ESMF\_SetCalendar method
-!     for the {\tt Time} class
+!     This interface overloads the {\tt ESMF\_SetCalendar} method
+!     for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -183,8 +183,8 @@
       module procedure ESMF_TimeGetDayOfYearTimeInt
 
 ! !DESCRIPTION:
-!     This interface overloads the ESMF\_GetDayOfYear method
-!     for the {\tt Time} class
+!     This interface overloads the {\tt ESMF\_GetDayOfYear} method
+!     for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -198,7 +198,7 @@
       module procedure ESMF_TimeInc
 
 ! !DESCRIPTION:
-!     This interface overloads the + operator for the {\tt Time} class
+!     This interface overloads the + operator for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -212,7 +212,7 @@
       module procedure ESMF_TimeDec
 
 ! !DESCRIPTION:
-!     This interface overloads the - operator for the {\tt Time} class
+!     This interface overloads the - operator for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -226,7 +226,7 @@
       module procedure ESMF_TimeDiff
 
 ! !DESCRIPTION:
-!     This interface overloads the - operator for the {\tt Time} class
+!     This interface overloads the - operator for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -240,7 +240,7 @@
       module procedure ESMF_TimeEQ
 
 ! !DESCRIPTION:
-!     This interface overloads the .EQ. operator for the {\tt Time} class
+!     This interface overloads the .EQ. operator for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -254,7 +254,7 @@
       module procedure ESMF_TimeNE
 
 ! !DESCRIPTION:
-!     This interface overloads the .NE. operator for the {\tt Time} class
+!     This interface overloads the .NE. operator for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -268,7 +268,7 @@
       module procedure ESMF_TimeLT
 
 ! !DESCRIPTION:
-!     This interface overloads the .LT. operator for the {\tt Time} class
+!     This interface overloads the .LT. operator for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -282,7 +282,7 @@
       module procedure ESMF_TimeGT
 
 ! !DESCRIPTION:
-!     This interface overloads the .GT. operator for the {\tt Time} class
+!     This interface overloads the .GT. operator for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -296,7 +296,7 @@
       module procedure ESMF_TimeLE
 
 ! !DESCRIPTION:
-!     This interface overloads the .LE. operator for the {\tt Time} class
+!     This interface overloads the .LE. operator for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -310,7 +310,7 @@
       module procedure ESMF_TimeGE
 
 ! !DESCRIPTION:
-!     This interface overloads the .GE. operator for the {\tt Time} class
+!     This interface overloads the .GE. operator for the {\tt ESMF\_Time} class
 !
 !EOP
       end interface
@@ -406,7 +406,7 @@
 !     \item[{[Sd]}]
 !          Integer fractional seconds - denominator
 !     \item[{[cal]}]
-!          Associated {\tt Calendar}
+!          Associated {\tt ESMF\_Calendar}
 !     \item[{[tz]}]
 !          Associated timezone (hours offset from GMT, e.g. EST = -5)
 !     \item[{[rc]}]
@@ -464,7 +464,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the value of the {\tt Time} in units specified by the user
+!     Get the value of the {\tt ESMF\_Time} in units specified by the user
 !     via F90 optional arguments
 !     
 !     The arguments are:
@@ -555,7 +555,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set the value of the {\tt Time} in units specified by the user
+!     Set the value of the {\tt ESMF\_Time} in units specified by the user
 !     via F90 optional arguments
 !     
 !     The arguments are:
@@ -627,14 +627,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get copy of the associated {\tt Calendar}
+!     Get copy of the associated {\tt ESMF\_Calendar}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
 !          The object instance to query
 !     \item[{cal}]
-!          Associated {\tt Calendar}
+!          Associated {\tt ESMF\_Calendar}
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -660,14 +660,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get pointer to the associated {\tt Calendar}
+!     Get pointer to the associated {\tt ESMF\_Calendar}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
 !          The object instance to query
 !     \item[{cal}]
-!          Pointer to associated {\tt Calendar}
+!          Pointer to associated {\tt ESMF\_Calendar}
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -693,14 +693,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set the associated {\tt Calendar} by passing its pointer
+!     Set the associated {\tt ESMF\_Calendar} by passing its pointer
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
 !          The object instance to set
 !     \item[{cal}]
-!          Associated {\tt Calendar}
+!          Associated {\tt ESMF\_Calendar}
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -726,14 +726,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set the associated {\tt Calendar} by passing the address of its pointer
+!     Set the associated {\tt ESMF\_Calendar} by passing the address of its pointer
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
 !          The object instance to set
 !     \item[{cal}]
-!          Associated {\tt Calendar} pointer
+!          Associated {\tt ESMF\_Calendar} pointer
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -762,7 +762,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Returns true if both {\tt Time}'s {\tt Calendar}s are the same,
+!     Returns true if both {\tt ESMF\_Time}'s {\tt ESMF\_Calendar}s are the same,
 !     false otherwise
 !
 !     The arguments are:
@@ -796,7 +796,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the time zone of the given {\tt Time} instant
+!     Get the time zone of the given {\tt ESMF\_Time} instant
 !
 !     The arguments are:
 !     \begin{description}
@@ -829,7 +829,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set the time zone of the given {\tt Time} instant
+!     Set the time zone of the given {\tt ESMF\_Time} instant
 !
 !     The arguments are:
 !     \begin{description}
@@ -862,7 +862,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Convert {\tt Time}'s value into ISO 8601 format YYYY-MM-DDThh:mm:ss
+!     Convert {\tt ESMF\_Time}'s value into ISO 8601 format YYYY-MM-DDThh:mm:ss
 !
 !     The arguments are:
 !     \begin{description}
@@ -895,7 +895,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the day of the year the given {\tt Time} instant falls on (1.x-365.x)
+!     Get the day of the year the given {\tt ESMF\_Time} instant falls on (1.x-365.x)
 !     Returned as floating point value; fractional part represents the
 !     time of day. 
 !
@@ -930,7 +930,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the day of the year the given {\tt Time} instant falls on (1-365)
+!     Get the day of the year the given {\tt ESMF\_Time} instant falls on (1-365)
 !     Returned as an integer value
 !
 !     The arguments are:
@@ -963,7 +963,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the day of the year the given {\tt Time} instant falls on (1-365)
+!     Get the day of the year the given {\tt ESMF\_Time} instant falls on (1-365)
 !     Returned as a Time Interval
 !
 !     The arguments are:
@@ -997,7 +997,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the day of the week the given time instant falls on.
+!     Get the day of the week the given {\tt ESMF\_Time} instant falls on.
 !     ISO 8601 standard:  Monday = 1 through Sunday = 7
 !
 !     The arguments are:
@@ -1031,7 +1031,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the day of the month the time instant falls on (1-31)
+!     Get the day of the month the {\tt ESMF\_Time} instant falls on (1-31)
 !
 !     The arguments are:
 !     \begin{description}
@@ -1064,7 +1064,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the middle time instant of the month the given time instant
+!     Get the middle time instant of the month the given {\tt ESMF\_Time} instant
 !     falls on
 !
 !     The arguments are:
@@ -1097,7 +1097,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the system real time (wall clock time), return in given time
+!     Get the system real {\tt ESMF\_Time} (wall clock time), return in given {\tt ESMF\_Time}
 !     instant
 !
 !     The arguments are:
@@ -1131,8 +1131,8 @@
       type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
 ! !DESCRIPTION:
-!     Increment {\tt Time} instant with a {\tt TimeInterval},
-!     return resulting {\tt Time} instant
+!     Increment {\tt ESMF\_Time} instant with a {\tt ESMF\_TimeInterval},
+!     return resulting {\tt ESMF\_Time} instant
 !
 !     Maps overloaded (+) operator interface function to
 !     {\tt ESMF\_BaseTime} base class
@@ -1142,7 +1142,7 @@
 !     \item[time]
 !          The given {\tt Time} to increment
 !     \item[timeinterval]
-!          The {\tt TimeInterval} to add to the given {\tt Time}
+!          The {\tt TimeInterval} to add to the given {\tt ESMF\_Time}
 !     \end{description}
 !
 ! !REQUIREMENTS:
@@ -1171,8 +1171,8 @@
       type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
 ! !DESCRIPTION:
-!     Decrement {\tt Time} instant with a {\tt TimeInterval},
-!     return resulting {\tt Time} instant
+!     Decrement {\tt ESMF\_Time} instant with a {\tt ESMF\_TimeInterval},
+!     return resulting {\tt ESMF\_Time} instant
 !
 !     Maps overloaded (-) operator interface function to
 !     {\tt ESMF\_BaseTime} base class
@@ -1180,9 +1180,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
-!          The given {\tt Time} to decrement
+!          The given {\tt ESMF\_Time} to decrement
 !     \item[timeinterval]
-!          The {\tt TimeInterval} to subtract from the given {\tt Time}
+!          The {\tt ESMF\_TimeInterval} to subtract from the given {\tt ESMF\_Time}
 !     \end{description}
 !     
 ! !REQUIREMENTS:
@@ -1212,7 +1212,7 @@
       type(ESMF_Time), intent(in) :: time2
 
 ! !DESCRIPTION:
-!     Return the {\tt TimeInterval} difference between two {\tt Time} instants
+!     Return the {\tt ESMF\_TimeInterval} difference between two {\tt ESMF\_Time} instants
 !
 !     Maps overloaded (-) operator interface function to
 !     {\tt ESMF\_BaseTime} base class
@@ -1220,9 +1220,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          The first {\tt Time} instant
+!          The first {\tt ESMF\_Time} instant
 !     \item[time2]
-!          The second {\tt Time} instant
+!          The second {\tt ESMF\_Time} instant
 !     \end{description}
 !
 ! !REQUIREMENTS:
@@ -1249,7 +1249,7 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if both given time instants are equal, false otherwise.
+!     Return true if both given {\tt ESMF\_Time} instants are equal, false otherwise.
 !     Maps overloaded (==) operator interface function to {\tt ESMF\_BaseTime}
 !     base class.
 !
@@ -1285,7 +1285,7 @@
       type(ESMF_Time), intent(in) :: time2
 
 ! !DESCRIPTION:
-!     Return true if both given time instants are not equal, false otherwise.
+!     Return true if both given {\tt ESMF\_Time} instants are not equal, false otherwise.
 !     Maps overloaded (/=) operator interface function to {\tt ESMF\_BaseTime}
 !     base class.
 !
@@ -1321,7 +1321,7 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if first time instant is less than second time instant,
+!     Return true if first {\tt ESMF\_Time} instant is less than second {\tt ESMF\_Time} instant,
 !     false otherwise.
 !     Maps overloaded (<) operator interface function to {\tt ESMF\_BaseTime}
 !     base class.
@@ -1358,7 +1358,7 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if first time instant is greater than second time instant,
+!     Return true if first {\tt ESMF\_Time} instant is greater than second {\tt ESMF\_Time} instant,
 !     false otherwise.
 !     Maps overloaded (>) operator interface function to {\tt ESMF\_BaseTime}
 !     base class.
@@ -1395,7 +1395,7 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if first time instant is less than or equal to second time
+!     Return true if first {\tt ESMF\_Time} instant is less than or equal to second {\tt ESMF\_Time}
 !     instant, false otherwise.
 !     Maps overloaded (<=) operator interface function to {\tt ESMF\_BaseTime}
 !     base class.
@@ -1432,8 +1432,8 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if first time instant is greater than or equal to second
-!     time instant, false otherwise.
+!     Return true if first {\tt ESMF\_Time} instant is greater than or equal to second
+!     {\tt ESMF\_Time }instant, false otherwise.
 !     Maps overloaded (>=) operator interface function to {\tt ESMF\_BaseTime}
 !     base class.
 !
@@ -1476,7 +1476,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a restore on a {\tt Time}'s properties
+!     Perform a restore on a {\tt ESMF\_Time}'s properties
 !
 !     The arguments are:
 !     \begin{description}
@@ -1489,7 +1489,7 @@
 !     \item[Sd]
 !          Integer fractional seconds - denominator
 !     \item[cal]
-!          Associated {\tt Calendar}
+!          Associated {\tt ESMF\_Calendar}
 !     \item[tz]
 !          Associated timezone (hours offset from GMT, e.g. EST = -5)
 !     \item[{[rc]}]
@@ -1521,7 +1521,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a save on a {\tt Time}'s properties
+!     Perform a save on a {\tt ESMF\_Time}'s properties
 !
 !     The arguments are:
 !     \begin{description}
@@ -1534,7 +1534,7 @@
 !     \item[Sd]
 !          Integer fractional seconds - denominator
 !     \item[cal]
-!          Associated {\tt Calendar}
+!          Associated {\tt ESMF\_Calendar}
 !     \item[tz]
 !          Associated timezone (hours offset from GMT, e.g. EST = -5)
 !     \item[{[rc]}]
@@ -1562,7 +1562,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt Time}'s properties
+!     Perform a validation check on a {\tt ESMF\_Time}'s properties
 !
 !     The arguments are:
 !     \begin{description}
@@ -1595,7 +1595,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out a {\tt Time}'s
+!     To support testing/debugging, print out a {\tt ESMF\_Time}'s
 !     properties.
 !
 !     The arguments are:

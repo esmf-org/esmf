@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.15 2003/05/02 00:59:40 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.16 2003/06/06 23:05:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 ! Part of Time Manager F90 API wrapper of C++ implemenation
 !
 ! Defines F90 wrapper entry points for corresponding
-! C++ class ESMC\_Alarm
+! C++ class {\tt ESMC\_Alarm}
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.15 2003/05/02 00:59:40 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.16 2003/06/06 23:05:47 eschwab Exp $'
 
 !==============================================================================
 !
@@ -119,7 +119,7 @@
       module procedure ESMF_AlarmEQ
 
 ! !DESCRIPTION:
-!     This interface overloads the == operator for the {\tt Alarm} class
+!     This interface overloads the == operator for the {\tt ESMF\_Alarm} class
 !
 !EOP
       end interface
@@ -191,7 +191,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Enables an {\tt Alarm} to function
+!     Enables an {\tt ESMF\_Alarm} to function
 !
 !     The arguments are:
 !     \begin{description}
@@ -221,7 +221,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Disables an {\tt Alarm}
+!     Disables an {\tt ESMF\_Alarm}
 !
 !     The arguments are:
 !     \begin{description}
@@ -252,7 +252,7 @@
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Turn on an {\tt Alarm}; sets ringing state
+!     Turn on an {\tt ESMF\_Alarm}; sets ringing state
 !
 !     The arguments are:
 !     \begin{description}
@@ -282,7 +282,7 @@
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Turn off an {\tt Alarm}; unsets ringing state
+!     Turn off an {\tt ESMF\_Alarm}; unsets ringing state
 !
 !     The arguments are:
 !     \begin{description}
@@ -315,7 +315,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Check if {\tt Alarm} is ringing.
+!     Check if {\tt ESMF\_Alarm} is ringing.
 !
 !     The arguments are:
 !     \begin{description}
@@ -350,7 +350,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Main method used by a {\tt Clock} to check whether to trigger
+!     Main method used by a {\tt ESMF\_Clock} to check whether to trigger
 !     the {\tt Alarm} 
 !
 !     The arguments are:
@@ -395,9 +395,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm1]
-!          The first {\tt Alarm} to compare
+!          The first {\tt ESMF\_Alarm} to compare
 !     \item[alarm2]
-!          The first {\tt Alarm} to compare
+!          The first {\tt ESMF\_Alarm} to compare
 !     \end{description}
 !
 ! !REQUIREMENTS:  
@@ -420,7 +420,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get an {\tt Alarm}'s ring interval
+!     Get an {\tt ESMF\_Alarm}'s ring interval
 !
 !     The arguments are:
 !     \begin{description}
@@ -453,7 +453,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set an {\tt Alarm}'s ring interval
+!     Set an {\tt ESMF\_Alarm}'s ring interval
 !
 !     The arguments are:
 !     \begin{description}
@@ -486,7 +486,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get an {\tt Alarm}'s time to ring
+!     Get an {\tt ESMF\_Alarm}'s time to ring
 !
 !     The arguments are:
 !     \begin{description}
@@ -519,14 +519,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set an {\tt Alarm}'s time to ring
+!     Set an {\tt ESMF\_Alarm}'s time to ring
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
 !          The object instance to set the ring time
 !     \item[RingTime]
-!          The {\tt Alarm}'s ring time to set
+!          The {\tt ESMF\_Alarm}'s ring time to set
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -552,7 +552,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get an {\tt Alarm}'s previous ring time
+!     Get an {\tt ESMF\_Alarm}'s previous ring time
 !
 !     The arguments are:
 !     \begin{description}
@@ -585,14 +585,14 @@
       integer, intent(out), optional :: rc
    
 ! !DESCRIPTION:
-!     Set an {\tt Alarm}'s previous ring time
+!     Set an {\tt ESMF\_Alarm}'s previous ring time
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
 !          The object instance to set the previous ring time
 !     \item[PrevRingTime]
-!          The {\tt Alarm}'s previous ring time to set
+!          The {\tt ESMF\_Alarm}'s previous ring time to set
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -618,14 +618,14 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get an {\tt Alarm}'s stop time
+!     Get an {\tt ESMF\_Alarm}'s stop time
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
 !          The object instance to get the stop time
 !     \item[StopTime]
-!          The {\tt Alarm}'s stop time
+!          The {\tt ESMF\_Alarm}'s stop time
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -651,19 +651,19 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set an {\tt Alarm}'s stop time
+!     Set an {\tt ESMF\_Alarm}'s stop time
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
 !          The object instance to set the stop time
 !     \item[StopTime]
-!          The {\tt Alarm}'s stop time
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
+!          The {\tt ESMF\_Alarm}'s stop time 
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.  
+!     \end{description} 
+!  
+! !REQUIREMENTS: 
 !     TMG4.5.2, TMG4.7
 !EOP
 
@@ -697,7 +697,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Restores an {\tt Alarm}
+!     Restores an {\tt ESMF\_Alarm}
 !
 !     The arguments are:
 !     \begin{description}
@@ -708,15 +708,15 @@
 !     \item[RingTime]
 !          Ring time for one-shot or first repeating alarm
 !     \item[PrevRingTime]
-!          The {\tt Alarm}'s previous ring time
+!          The {\tt ESMF\_Alarm}'s previous ring time
 !     \item[StopTime]
 !          Stop time for repeating alarms
 !     \item[Ringing]
-!          The {\tt Alarm}'s ringing state
+!          The {\tt ESMF\_Alarm}'s ringing state
 !     \item[Enabled]
 !          Alarm enabled/disabled
 !     \item[ID]
-!          The {\tt Alarm}'s ID
+!          The {\tt ESMF\_Alarm}'s ID
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -750,7 +750,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Saves an {\tt Alarm}
+!     Saves an {\tt ESMF\_Alarm}
 !
 !     The arguments are:
 !     \begin{description}
@@ -761,15 +761,15 @@
 !     \item[RingTime]
 !          Ring time for one-shot or first repeating alarm
 !     \item[PrevRingTime]
-!          The {\tt Alarm}'s previous ring time
+!          The {\tt ESMF\_Alarm}'s previous ring time
 !     \item[StopTime]
 !          Stop time for repeating alarms
 !     \item[Ringing]
-!          The {\tt Alarm}'s ringing state
+!          The {\tt ESMF\_Alarm}'s ringing state
 !     \item[Enabled]
 !          Alarm enabled/disabled
 !     \item[ID]
-!          The {\tt Alarm}'s ID
+!          The {\tt ESMF\_Alarm}'s ID
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -795,7 +795,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt Alarm}'s properties
+!     Perform a validation check on a {\tt ESMF\_Alarm}'s properties
 !
 !     The arguments are:  
 !     \begin{description}
@@ -828,7 +828,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out a {\tt Alarm}'s
+!     To support testing/debugging, print out a {\tt ESMF\_Alarm}'s
 !     properties.
 ! 
 !     The arguments are:
