@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.16 2004/12/22 21:45:08 cpboulder Exp $
+% $Id: LogErr_usage.tex,v 1.17 2004/12/29 19:47:57 nscollins Exp $
 
 %\subsection{Use and Examples}
 
@@ -49,7 +49,7 @@ flushes).
 For every {\tt ESMF\_LogWrite()}, a time and date stamp is prepended to the
 log entry.  The time is given in microsecond precision.  The user call other 
 methods to write to the log.  In every case, all methods eventually make a call
-implicitly to \tt ESMF\_LogWrite()} even though the user may never explicitly
+implicitly to {\tt ESMF\_LogWrite()} even though the user may never explicitly
 call it.
 
 When calling {\tt ESMF\_LogWrite()}, the user can supply an optional line,
@@ -64,19 +64,19 @@ it is a value supplied by cpp.
 An example of log output is given below running with {\tt defaultlogtype} 
 property set to {\tt ESMF\_LOG\_SINGLE} using the default log:
 
-(Log file {\tt ESMF_LogFile}
+(Log file {\tt ESMF\_LogFile}
 20041105 163418.472210 INFO      pet0     Running with ESMF Version 2.0.2   
 20041105 163419.186153 ERROR     pet1     ESMF\_Field.F90             812  
 ESMF\_FieldGet No Grid or Bad Grid attached to Field
 
-The results are all put into the log file {\tt ESMF_LogFile}.
+The results are all put into the log file {\tt ESMF\_LogFile}.
 
 The next example shows same messages running with {\tt defaultlogtype} 
 property set to {\tt ESMF\_LOG\_MULTI} using the default log:
 
-(Log file {\tt pet0.ESMF_LogFile}
+(Log file {\tt pet0.ESMF\_LogFile}
 20041105 163418.472210 INFO      pet0     Running with ESMF Version 2.0.2   
-(Log file {\tt pet1.ESMF_LogFile}
+(Log file {\tt pet1.ESMF\_LogFile}
 20041105 163419.186153 ERROR     pet1     ESMF\_Field.F90             812  
 ESMF\_FieldGet No Grid or Bad Grid attached to Field
 

@@ -1,4 +1,4 @@
-+% $Id: LogErr_implnotes.tex,v 1.11 2004/12/22 21:45:08 cpboulder Exp $
++% $Id: LogErr_implnotes.tex,v 1.12 2004/12/29 19:47:57 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,8 @@ At initialization an {\tt ESMF\_LOG} is created.  The {\tt ESMF\_LOG} stores
 information for a specific Log file.   When working with more than one 
 Log file, multiple {\tt ESMF\_LOG} are required (one {\tt ESMF\_LOG} for each 
 Log file).  For each Log, a handle is returned through the 
-{\tt ESMF\_LogInitialize} method for the default log or {\tt ESMF\LogOpen} for a
+{\tt ESMF\_LogInitialize} method for the default log or {\tt ESMF\_LogOpen} 
+for a
 user created log.  The user can specify single or multi logs by setting the
 {\tt defaultlogtype} property in the {\tt ESMF\_LogInitialize} or 
 {\tt ESMF\_Open} method to {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
