@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/02/11 19:03:47 nscollins Exp $
+# $Id: makefile,v 1.7 2004/03/16 18:02:19 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -12,7 +12,8 @@ FFLAGS    =
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_Array_F.C
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_ArrayBase.F90 ESMF_ArrayExpand.F90 ESMF_Alloc_C.F90
+SOURCEF	  =  ESMF_ArrayBase.F90 ESMF_ArrayCreate.F90 \
+             ESMF_ArrayGet.F90 ESMF_Alloc_C.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  =
 
@@ -43,8 +44,10 @@ endif
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  =
+CLEANFILES  = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90
 CLOBBERDIRS =
+
+ESMF_ArrayCreate.o: ESMF_ArrayCreate.F90
 
 # rule for making ESMF_Array.F90 from ESMF_Array_F90.cpp:
 # either use the F90 with cpp only, or gcc and ignore the
@@ -60,7 +63,7 @@ CLOBBERDIRS =
 # actual compile. (These lines are: ^include "fred" in the
 # original source to shield them from the first preprocess pass.)
 #
-#ESMF_ArrayExpand.F90: ESMF_ArrayExpand_F90.cpp
+ESMF_ArrayCreate.F90: ESMF_ArrayCreate.cpp ESMF_ArrayCreateMacros.h
 #	gcc -E -P ESMF_ArrayExpand_F90.cpp|tr "@^" "\n#" >ESMF_ArrayExpand.F90
 #
 
