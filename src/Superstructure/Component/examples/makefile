@@ -1,56 +1,55 @@
-# $Id: makefile,v 1.1 2003/01/07 21:39:19 nscollins Exp $
-
-# makefile template for the examples directory.
+# $Id: makefile,v 1.2 2003/01/09 20:50:32 nscollins Exp $ 
 
 ALL: 
 
-# don't set these unless absolutely necessary - they've got to be
-#  architecture and compiler independent and should be inherited
-#  from the upper level makefile if possible.
 CFLAGS    =
 FFLAGS    =
-
-# in general, leave these blank at this point.
 SOURCEC	  = 
-SOURCEF	  = 
+SOURCEF	  =
+
 SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-
-# fill in the names of the F90 source files for the tests/examples
-EXAMPLESF =
-# fill in the names of the C++ source files for the tests/examples
-EXAMPLESC =
-
-# leave the following lines blank.
+OBJSC	  =  
+OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
 DIRS	  = 
-
-# fill in the following with the executable names
-TESTEXAMPLES =
-
-# the following line must be set to the current subdir name relative
-# to the top level esmf directory. 
 LOCDIR	  = src/Superstructure/Component/examples
 
-# leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+TESTEXAMPLES_3  = \
+	ESMF_CompCreateEx RUN_ESMF_CompCreateEx ESMF_CompCreateEx.rm
+
+TESTEXAMPLES_9  = \
+	ESMF_CompCreateEx RUN_ESMF_CompCreateExUNI ESMF_CompCreateEx.rm
+
+EXAMPLESF       = ESMF_CompCreateEx.F90
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
+ESMF_CompCreateDir:
+	mkdir -p ${ESMC_TESTDIR}
 
-# if you have dependencies between source files in this dir,
-#   list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
+ESMF_CompCreateEx: ESMF_CompCreateEx.o  chkopts
+	${F90CXXLD} -g -o ESMF_CompCreateEx ESMF_CompCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	${RM} ESMF_CompCreateEx.o
 
+RUN_ESMF_CompCreateEx:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreateEx.tmps
+	${MPIRUN} -np 4 ESMF_CompCreateEx > ESMF_CompCreateEx.stdout
+	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_CompCreateEx.tmp
+	#@if (diff ESMF_CompCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_CompCreateEx.out) then \
+	#echo "PASS CompCreateEx test" > ${ESMC_TESTDIR}/ESMF_CompCreateEx.log; else \
+	#echo "FAIL CompCreateEx test" > ${ESMC_TESTDIR}/ESMF_CompCreateEx.log; fi
+	#@rm -f testlog stdlog.* logfile.* ESMF_CompCreateEx.tmp optlog
 
+RUN_ESMF_CompCreateExUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreateEx.tmps
+	${MPIRUN} -np 1 ESMF_CompCreateEx > ESMF_CompCreateEx.stdout
+	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_CompCreateEx.tmp
+	#@if (diff ESMF_CompCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_CompCreateEx.outuni) then \
+	#echo "PASS CompCreateEx test" > ${ESMC_TESTDIR}/ESMF_CompCreateEx.log; else \
+	#echo "FAIL CompCreateEx test" > ${ESMC_TESTDIR}/ESMF_CompCreateEx.log; fi
+	#@rm -f testlog stdlog.* logfile.* ESMF_CompCreateEx.tmp optlog
 
+ESMF_CompCreateEx.rm:
+	echo "ESMF_CompCreateEx.rm target called here."
 
