@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.8 2002/10/10 20:20:10 nscollins Exp $
+#  $Id: protex,v 1.9 2003/02/10 17:55:04 rstaufer Exp $
 #
 #BOP
 #
@@ -433,7 +433,10 @@ LINE:
               $_ = join(' ', @Fld);
               $name_is = $_;
               s/_/\\_/g;                        # Replace "_" with "\_"
-              printf "\\subsubsection{%s}\n\n", $_;
+	      @words = split " ", $_;
+              #print @words;
+              #printf "\\subsubsection {%s} \n\n", $_;
+              printf "\\subsubsection [$words[1]] {$_}\n\n";
               $have_name = 1;
               next LINE;
 }#         end if
