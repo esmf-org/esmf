@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.66 2004/06/15 21:31:11 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.67 2004/12/01 01:18:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.66 2004/06/15 21:31:11 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.67 2004/12/01 01:18:09 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -134,7 +134,15 @@ int ESMC_Clock::count=0;
     else clock->refTime = clock->startTime;
 
     clock->currTime = clock->startTime;
-    clock->prevTime = clock->currTime;
+
+    // Initialize previous time a fraction of second before the current time
+    //   so any alarm defined to ring at the clock start time will ring before
+    //   the first clock advance (timestep).  See ESMC_AlarmCheckRingTime().
+    // This does not break the lower limit of the Fliegel algorithm (for
+    //   Gregorian or Julian Day calendars) since that is based on
+    //   whole seconds.
+    ESMC_TimeInterval oneNanosecond(0, 1, 1000000000);
+    clock->prevTime = clock->currTime - oneNanosecond;
 
     returnCode = clock->ESMC_ClockValidate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
