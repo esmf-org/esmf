@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.21 2003/06/17 19:52:53 jwolfe Exp $
+! $Id: ESMF_DELayout.F90,v 1.22 2003/07/09 17:24:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.21 2003/06/17 19:52:53 jwolfe Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.22 2003/07/09 17:24:16 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -1014,10 +1014,10 @@
 ! subtract one from location parts of indices to translate to C++
         size_AI = size(AIPtr)
         do i = 1,size_AI
-          AIPtr(i)%l  = AIPtr(i)%l  - 1
-          AIPtr(i)%r  = AIPtr(i)%r  - 1
-          AIPtr2(i)%l = AIPtr2(i)%l - 1
-          AIPtr2(i)%r = AIPtr2(i)%r - 1
+          AIPtr(i)%min  = AIPtr(i)%min  - 1
+          AIPtr(i)%max  = AIPtr(i)%max  - 1
+          AIPtr2(i)%min = AIPtr2(i)%min - 1
+          AIPtr2(i)%max = AIPtr2(i)%max - 1
         enddo
 
 !       Routine which interfaces to the C++ routine.
@@ -1032,10 +1032,10 @@
 
 ! add one back to location parts of indices to translate from C++
         do i = 1,size_AI
-          AIPtr(i)%l  = AIPtr(i)%l  + 1
-          AIPtr(i)%r  = AIPtr(i)%r  + 1
-          AIPtr2(i)%l = AIPtr2(i)%l + 1
-          AIPtr2(i)%r = AIPtr2(i)%r + 1
+          AIPtr(i)%min  = AIPtr(i)%min  + 1
+          AIPtr(i)%max  = AIPtr(i)%max  + 1
+          AIPtr2(i)%min = AIPtr2(i)%min + 1
+          AIPtr2(i)%max = AIPtr2(i)%max + 1
         enddo
 
 !       set return code if user specified it
@@ -1086,10 +1086,10 @@
 ! subtract one from location parts of indices to translate to C++
         size_AI = size(AIPtr)
         do i = 1,size_AI
-          AIPtr(i)%l  = AIPtr(i)%l  - 1
-          AIPtr(i)%r  = AIPtr(i)%r  - 1
-          AIPtr2(i)%l = AIPtr2(i)%l - 1
-          AIPtr2(i)%r = AIPtr2(i)%r - 1
+          AIPtr(i)%min  = AIPtr(i)%min  - 1
+          AIPtr(i)%max  = AIPtr(i)%max  - 1
+          AIPtr2(i)%min = AIPtr2(i)%min - 1
+          AIPtr2(i)%max = AIPtr2(i)%max - 1
         enddo
 
 !       Routine which interfaces to the C++ routine.
@@ -1104,10 +1104,10 @@
 
 ! add one back to location parts of indices to translate from C++
         do i = 1,size_AI
-          AIPtr(i)%l  = AIPtr(i)%l  + 1
-          AIPtr(i)%r  = AIPtr(i)%r  + 1
-          AIPtr2(i)%l = AIPtr2(i)%l + 1
-          AIPtr2(i)%r = AIPtr2(i)%r + 1
+          AIPtr(i)%min  = AIPtr(i)%min  + 1
+          AIPtr(i)%max  = AIPtr(i)%max  + 1
+          AIPtr2(i)%min = AIPtr2(i)%min + 1
+          AIPtr2(i)%max = AIPtr2(i)%max + 1
         enddo
 
 !       set return code if user specified it
