@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.9 2004/03/18 23:29:11 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.10 2004/03/20 03:55:04 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -104,7 +104,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       integer :: counts(2)
       real :: in_energy, in_velocity, in_rho
       integer :: printout
-      type(ESMF_GridKind) :: horz_gridkind
+      type(ESMF_GridType) :: horz_gridtype
       type(ESMF_GridStagger) :: horz_stagger
       type(ESMF_CoordSystem) :: horz_coord_system
       integer :: myde
@@ -163,7 +163,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       ! Create the Grid
       !
-      horz_gridkind = ESMF_GridKind_XY
+      horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_C_NE
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
@@ -171,7 +171,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              layout=layout, &
-                             horzGridKind=horz_gridkind, &
+                             horzGridType=horz_gridtype, &
                              horzStagger=horz_stagger, &
                              horzCoordSystem=horz_coord_system, &
                              name="source grid", rc=rc)

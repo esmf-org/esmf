@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.10 2004/03/18 23:21:24 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.11 2004/03/20 03:55:03 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -213,7 +213,7 @@
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              layout=layoutTop, &   
-                             horzGridKind=ESMF_GridKind_XY, &
+                             horzGridType=ESMF_GridType_XY, &
                              horzStagger=ESMF_GridStagger_C_NE, &
                              horzCoordSystem=ESMF_CoordSystem_Cartesian, &
                              name="source grid", rc=rc)

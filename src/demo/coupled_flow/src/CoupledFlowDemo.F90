@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.9 2004/03/18 23:21:24 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.10 2004/03/20 03:55:03 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -135,7 +135,7 @@
     type(ESMF_Grid) :: gridTop, gridIN, gridFS
     real(ESMF_KIND_R8) :: mincoords(ESMF_MAXGRIDDIM), maxcoords(ESMF_MAXGRIDDIM)
     integer :: counts(ESMF_MAXGRIDDIM)
-    type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+    type(ESMF_GridType) :: horz_gridtype, vert_gridtype
     type(ESMF_GridStagger) :: horz_stagger, vert_stagger
     type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
     integer :: halo_width = 1
@@ -233,8 +233,8 @@
     call ESMF_GridGet(gridTop, globalCellCountPerDim=counts, &
                                minGlobalCoordPerDim=mincoords, &
                                maxGlobalCoordPerDim=maxcoords, &
-                               horzGridKind=horz_gridkind, &
-                               vertGridKind=vert_gridkind, &       
+                               horzGridType=horz_gridtype, &
+                               vertGridType=vert_gridtype, &       
                                horzStagger=horz_stagger, &      
                                vertStagger=vert_stagger, &
                                horzCoordSystem=horz_coord_system, &
@@ -245,8 +245,8 @@
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
                              layout=layoutIN, &
-                             horzGridKind=horz_gridkind, &
-                             vertGridKind=vert_gridkind, &       
+                             horzGridType=horz_gridtype, &
+                             vertGridType=vert_gridtype, &       
                              horzStagger=horz_stagger, &      
                              vertStagger=vert_stagger, &
                              horzCoordSystem=horz_coord_system, &
@@ -259,8 +259,8 @@
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
                              layout=layoutFS, &
-                             horzGridKind=horz_gridkind, &
-                             vertGridKind=vert_gridkind, &       
+                             horzGridType=horz_gridtype, &
+                             vertGridType=vert_gridtype, &       
                              horzStagger=horz_stagger, &      
                              vertStagger=vert_stagger, &
                              horzCoordSystem=horz_coord_system, &

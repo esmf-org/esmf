@@ -26,7 +26,7 @@
 !     ! Local variables
       integer :: status, rc
       integer :: delist(4)
-      type(ESMF_GridKind) :: horz_gridkind
+      type(ESMF_GridType) :: horz_gridtype
       type(ESMF_GridStagger) :: horz_stagger
       integer, dimension(2) :: counts
       real(ESMF_KIND_R8), dimension(2) :: min, max
@@ -56,7 +56,7 @@
 
       counts(1) = 10
       counts(2) = 12
-      horz_gridkind = ESMF_GridKind_XY
+      horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
       min(1) = 0.0
@@ -79,7 +79,7 @@
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               layout=layout, &
-                              horzGridKind=horz_gridkind, &
+                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
                               name=name, rc=status)

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.4 2004/03/20 00:08:40 cdeluca Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.5 2004/03/20 03:54:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.4 2004/03/20 00:08:40 cdeluca Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.5 2004/03/20 03:54:51 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -66,7 +66,7 @@
 
       integer :: counts(ESMF_MAXGRIDDIM)
       integer :: nDE_i, nDE_j
-      type(ESMF_GridKind) :: horz_gridtype, vert_gridtype
+      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
       type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: status
@@ -94,10 +94,10 @@
       counts(3) = 15
       nDE_i = 2
       nDE_j = 2
-      horz_gridtype = ESMF_GridKind_XY
+      horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
-      vert_gridtype = ESMF_GridKind_XY
+      vert_gridtype = ESMF_GridType_XY
       vert_stagger = ESMF_GridStagger_VertCenter
       vert_coord_system = ESMF_CoordSystem_Cartesian
       grid_min(1) = -90.0
@@ -119,10 +119,10 @@
       !grid = ESMF_GridCreateLogRectUniform(3, counts=counts, &
                               !minGlobalCoordPerDim=grid_min, &
                               !maxGlobalCoordPerDim=grid_max, &
-                              !horzGridKind=horz_gridtype, &
+                              !horzGridType=horz_gridtype, &
                               !horzStagger=horz_stagger, &
                               !horzCoordSystem=horz_coord_system, &
-                              !vertGridKind=horz_gridtype, &
+                              !vertGridType=horz_gridtype, &
                               !vertStagger=horz_stagger, &
                               !vertCoordSystem=horz_coord_system, &
                               !layout=layout, &

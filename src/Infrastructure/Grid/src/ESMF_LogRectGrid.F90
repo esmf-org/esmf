@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.42 2004/03/20 00:08:40 cdeluca Exp $
+! $id: ESMF_LogRectGrid.F90,v 1.42 2004/03/20 00:08:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.42 2004/03/20 00:08:40 cdeluca Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.43 2004/03/20 03:54:51 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -229,7 +229,7 @@
       function ESMF_GridCreateLogRectUniform(dimCount, counts, &
                                              minGlobalCoordPerDim, &
                                              maxGlobalCoordPerDim, deltaPerDim, &
-                                             horzGridKind, vertGridKind, &
+                                             horzGridType, vertGridType, &
                                              horzStagger, vertStagger, &
                                              horzCoordSystem, vertCoordSystem, &
                                              dimNames, dimUnits, &
@@ -248,8 +248,8 @@
       real(ESMF_KIND_R8), dimension(dimCount), intent(in), optional :: &
                                                             maxGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(dimCount), intent(in), optional :: deltaPerDim
-      type(ESMF_GridKind), intent(in), optional :: horzGridKind
-      type(ESMF_GridKind), intent(in), optional :: vertGridKind
+      type(ESMF_GridType), intent(in), optional :: horzGridType
+      type(ESMF_GridType), intent(in), optional :: vertGridType
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
       type(ESMF_GridStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
@@ -288,10 +288,10 @@
 !          Array of maximum physical coordinates in each direction.
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
-!     \item[{[horzGridKind]}]
-!          {\tt ESMF\_GridKind} specifier to denote horizontal grid type.
-!     \item[{[vertGridKind]}]
-!          {\tt ESMF\_GridKind} specifier to denote vertical grid type.
+!     \item[{[horzGridType]}]
+!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
+!     \item[{[vertGridType]}]
+!          {\tt ESMF\_GridType} specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
 !          {\tt ESMF\_GridStagger} specifier to denote horizontal grid stagger.
 !     \item[{[vertStagger]}]
@@ -362,7 +362,7 @@
       call ESMF_LRGridConstructUniform(grid, dimCount, counts, &
                                        minGlobalCoordPerDim, &
                                        maxGlobalCoordPerDim, deltaPerDim, &
-                                       horzGridKind, vertGridKind, &
+                                       horzGridType, vertGridType, &
                                        horzStagger, vertStagger, &
                                        horzCoordSystem, vertCoordSystem, &
                                        dimNames, dimUnits, &
@@ -400,7 +400,7 @@
       function ESMF_GridCreateLogRect(dimCount, counts, minGlobalCoordPerDim, &
                                       delta1, delta2, delta3, &
                                       coord1, coord2, coord3, &
-                                      horzGridKind, vertGridKind, &
+                                      horzGridType, vertGridType, &
                                       horzStagger, vertStagger, &
                                       horzCoordSystem, vertCoordSystem, &
                                       dimNames, dimUnits, &
@@ -423,8 +423,8 @@
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord3
-      type(ESMF_GridKind), intent(in), optional :: horzGridKind
-      type(ESMF_GridKind), intent(in), optional :: vertGridKind
+      type(ESMF_GridType), intent(in), optional :: horzGridType
+      type(ESMF_GridType), intent(in), optional :: vertGridType
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
       type(ESMF_GridStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
@@ -471,10 +471,10 @@
 !          Array of physical coordinates in the second direction.
 !     \item[{[coord3]}]
 !          Array of physical coordinates in the third direction.
-!     \item[{[horzGridKind]}]
-!          {\tt ESMF\_GridKind} specifier to denote horizontal grid type.
-!     \item[{[vertGridKind]}]
-!          {\tt ESMF\_GridKind} specifier to denote vertical grid type.
+!     \item[{[horzGridType]}]
+!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
+!     \item[{[vertGridType]}]
+!          {\tt ESMF\_GridType} specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
 !          {\tt ESMF\_GridStagger} specifier to denote horizontal grid stagger.
 !     \item[{[vertStagger]}]
@@ -545,8 +545,8 @@
       call ESMF_LRGridConstructSpecd(grid, dimCount, coord1, coord2, coord3, &
                                      minGlobalCoordPerDim=minGlobalCoordPerDim, &
                                      delta1=delta1, delta2=delta2, delta3=delta3, &
-                                     horzGridKind=horzGridKind, &
-                                     vertGridKind=vertGridKind, &
+                                     horzGridType=horzGridType, &
+                                     vertGridType=vertGridType, &
                                      horzStagger=horzStagger, &
                                      vertStagger=vertStagger, &
                                      horzCoordSystem=horzCoordSystem, &
@@ -1002,7 +1002,7 @@
                                              minGlobalCoordPerDim, &
                                              maxGlobalCoordPerDim, &
                                              deltaPerDim, &
-                                             horzGridKind, vertGridKind, &
+                                             horzGridType, vertGridType, &
                                              horzStagger, vertStagger, &
                                              horzCoordSystem, vertCoordSystem, &
                                              dimNames, dimUnits, &
@@ -1018,8 +1018,8 @@
                                                             maxGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(dimCount), intent(in), optional :: &
                                                             deltaPerDim
-      type(ESMF_GridKind), intent(in), optional :: horzGridKind
-      type(ESMF_GridKind), intent(in), optional :: vertGridKind
+      type(ESMF_GridType), intent(in), optional :: horzGridType
+      type(ESMF_GridType), intent(in), optional :: vertGridType
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
       type(ESMF_GridStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
@@ -1052,9 +1052,9 @@
 !          Array of minimum physical coordinates in each dimension.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum physical coordinates in each direction.
-!     \item[{[horzGridKind]}]
+!     \item[{[horzGridType]}]
 !          Integer specifier to denote horizontal grid type.
-!     \item[{[vertGridKind]}]
+!     \item[{[vertGridType]}]
 !          Integer specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
 !          Integer specifier to denote horizontal grid stagger.
@@ -1161,8 +1161,8 @@
       ! Fill in grid derived type with subroutine arguments
       grid%dimCount      = dimCount
       grid%gridStructure = ESMF_GridStructure_LogRect
-      if (present(horzGridKind   )) grid%horzGridKind    = horzGridKind
-      if (present(vertGridKind   )) grid%vertGridKind    = vertGridKind
+      if (present(horzGridType   )) grid%horzGridType    = horzGridType
+      if (present(vertGridType   )) grid%vertGridType    = vertGridType
       if (present(horzStagger    )) grid%horzStagger     = horzStagger
       if (present(vertStagger    )) grid%vertStagger     = vertStagger
       if (present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
@@ -1231,7 +1231,7 @@
                                            coord1, coord2, coord3, &
                                            minGlobalCoordPerDim, &
                                            delta1, delta2, delta3, &
-                                           horzGridKind, vertGridKind, &
+                                           horzGridType, vertGridType, &
                                            horzStagger, vertStagger, &
                                            horzCoordSystem, vertCoordSystem, &
                                            dimNames, dimUnits, &
@@ -1249,8 +1249,8 @@
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta3
-      type(ESMF_GridKind), intent(in), optional :: horzGridKind
-      type(ESMF_GridKind), intent(in), optional :: vertGridKind
+      type(ESMF_GridType), intent(in), optional :: horzGridType
+      type(ESMF_GridType), intent(in), optional :: vertGridType
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
       type(ESMF_GridStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
@@ -1295,9 +1295,9 @@
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
-!     \item[{[horzGridKind]}]
+!     \item[{[horzGridType]}]
 !          Integer specifier to denote horizontal grid type.
-!     \item[{[vertGridKind]}]
+!     \item[{[vertGridType]}]
 !          Integer specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
 !          Integer specifier to denote horizontal grid stagger.
@@ -1464,8 +1464,8 @@
       ! Fill in grid derived type with subroutine arguments
       grid%dimCount      = dimCount
       grid%gridStructure = ESMF_GridStructure_LogRect
-      if (present(horzGridKind   )) grid%horzGridKind    = horzGridKind
-      if (present(vertGridKind   )) grid%vertGridKind    = vertGridKind
+      if (present(horzGridType   )) grid%horzGridType    = horzGridType
+      if (present(vertGridType   )) grid%vertGridType    = vertGridType
       if (present(horzStagger    )) grid%horzStagger     = horzStagger
       if (present(vertStagger    )) grid%vertStagger     = vertStagger
       if (present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
@@ -2193,8 +2193,8 @@
       !TODO: destruct these
       !  type (ESMF_Base) :: base
       !  type (ESMF_Status) :: gridStatus
-      grid%horzGridKind    = ESMF_GridKind_Unknown
-      grid%vertGridKind    = ESMF_GridKind_Unknown
+      grid%horzGridType    = ESMF_GridType_Unknown
+      grid%vertGridType    = ESMF_GridType_Unknown
       grid%horzStagger     = ESMF_GridStagger_Unknown
       grid%vertStagger     = ESMF_GridStagger_Unknown
       grid%horzCoordSystem = ESMF_CoordSystem_Unknown
@@ -2534,9 +2534,9 @@
       enddo
 
       ! set parameters based on grid type
-      select case (grid%horzGridKind%gridKind)
+      select case (grid%horzGridType%gridType)
 
-        ! ESMF_GridKind_LatLon
+        ! ESMF_GridType_LatLon
         case (1)
           coordSystem         = ESMF_CoordSystem_Spherical
           coordNames(1)       = 'latitude'
@@ -2549,7 +2549,7 @@
           coordCyclic(1)      = .true.
           coordCyclic(2)      = .false.
 
-        ! ESMF_GridKind_XY
+        ! ESMF_GridType_XY
         case (7)
           coordSystem         = ESMF_CoordSystem_Cartesian
           coordNames(1)       = 'x'
@@ -4281,7 +4281,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_LRGridGet(grid, horzRelLoc, vertRelLoc, &
-                                horzGridKind, vertGridKind, &
+                                horzGridType, vertGridType, &
                                 horzStagger, vertStagger, &
                                 horzCoordSystem, vertCoordSystem, &
                                 coordOrder, dimCount, minGlobalCoordPerDim, &
@@ -4293,8 +4293,8 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      type(ESMF_GridKind), intent(out), optional :: horzGridKind
-      type(ESMF_GridKind), intent(out), optional :: vertGridKind
+      type(ESMF_GridType), intent(out), optional :: horzGridType
+      type(ESMF_GridType), intent(out), optional :: vertGridType
       type(ESMF_GridStagger), intent(out), optional :: horzStagger
       type(ESMF_GridStagger), intent(out), optional :: vertStagger
       type(ESMF_CoordSystem), intent(out), optional :: horzCoordSystem
@@ -4322,9 +4322,9 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[{[horzGridKind]}]
+!     \item[{[horzGridType]}]
 !          Integer specifier to denote horizontal grid type.
-!     \item[{[vertGridKind]}]
+!     \item[{[vertGridType]}]
 !          Integer specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
 !          Integer specifier to denote horizontal grid stagger.
@@ -4397,8 +4397,8 @@
       order(:) = gridOrder(gridp%coordOrder%order,:)
 
       ! if present, gets information from the grid derived type
-      if (present(horzGridKind   )) horzGridKind    = gridp%horzGridKind
-      if (present(vertGridKind   )) vertGridKind    = gridp%vertGridKind
+      if (present(horzGridType   )) horzGridType    = gridp%horzGridType
+      if (present(vertGridType   )) vertGridType    = gridp%vertGridType
       if (present(horzStagger    )) horzStagger     = gridp%horzStagger
       if (present(vertStagger    )) vertStagger     = gridp%vertStagger
       if (present(horzCoordSystem)) horzCoordSystem = gridp%horzCoordSystem
@@ -4591,7 +4591,7 @@
 ! !IROUTINE: ESMF_LRGridSet - Sets a variety of information about the grid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridSet(grid, horzGridKind, vertGridKind, &
+      subroutine ESMF_LRGridSet(grid, horzGridType, vertGridType, &
                               horzStagger, vertStagger, &
                               horzCoordSystem, vertCoordSystem, &
                               coordOrder, minGlobalCoordPerDim, &
@@ -4599,8 +4599,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
-      type(ESMF_GridKind), intent(in), optional :: horzGridKind
-      type(ESMF_GridKind), intent(in), optional :: vertGridKind
+      type(ESMF_GridType), intent(in), optional :: horzGridType
+      type(ESMF_GridType), intent(in), optional :: vertGridType
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
       type(ESMF_GridStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
@@ -4619,9 +4619,9 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[{[horzGridKind]}]
+!     \item[{[horzGridType]}]
 !          Integer specifier to denote horizontal grid type.
-!     \item[{[vertGridKind]}]
+!     \item[{[vertGridType]}]
 !          Integer specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
 !          Integer specifier to denote horizontal grid stagger.
@@ -4664,8 +4664,8 @@
       endif
 
       ! if present, set information filling in grid derived type
-      if (present(horzGridKind)) grid%horzGridKind = horzGridKind
-      if (present(vertGridKind)) grid%vertGridKind = vertGridKind
+      if (present(horzGridType)) grid%horzGridType = horzGridType
+      if (present(vertGridType)) grid%vertGridType = vertGridType
       if (present(horzStagger)) grid%horzStagger = horzStagger
       if (present(vertStagger)) grid%vertStagger = vertStagger
       if (present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
@@ -5809,26 +5809,26 @@
 !      ! combine these queries?  format of query functions?
 !      call ESMF_LRGridGet(searchGrid, physGrid=physGridId) ??? 
 !      call ESMF_LRGridGet(searchGrid, distGrid = ??)
-!      call ESMF_LRGridGet(searchGrid, horzGridKind = searchGridKind)
+!      call ESMF_LRGridGet(searchGrid, horzGridType = searchGridType)
 !!
 !!     Call appropriate search routine based on coordinate system and
 !!     grid type.
 !!
 ! 
-!      select case (srchGridKind)
-!      case(ESMF_GridKind_LatLon,      ESMF_GridKind_LatLonMercator, &
-!           ESMF_GridKind_LatLonGauss, ESMF_GridKind_Reduced)
+!      select case (srchGridType)
+!      case(ESMF_GridType_LatLon,      ESMF_GridType_LatLonMercator, &
+!           ESMF_GridType_LatLonGauss, ESMF_GridType_Reduced)
 !         !*** simple search adequate for these cases
 !         call ESMF_PhysGridSearchBboxSpherical(dstAdd, x, y, DEId, physGrid, &
 !                                               distGrid, status)
 !
-!      case(ESMF_GridKind_Dipole,   ESMF_GridKind_Tripole, &
-!           ESMF_GridKind_Geodesic, ESMF_GridKind_CubedSphere)
+!      case(ESMF_GridType_Dipole,   ESMF_GridType_Tripole, &
+!           ESMF_GridType_Geodesic, ESMF_GridType_CubedSphere)
 !         !*** must use more general algorithm for these cases
 !         call ESMF_PhysGridSearchGeneralSpherical(dstAdd, x, y, DEId, physGrid, &
 !                                                  distGrid, status)
 !
-!      case(ESMF_GridKind_XY, ESMF_GridKind_XYVar)
+!      case(ESMF_GridType_XY, ESMF_GridType_XYVar)
 !         call ESMF_PhysGridSearchBboxCartesian(dstAdd, x, y, DEId, physGrid, &
 !                                               distGrid, status)
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.19 2004/03/20 00:08:40 cdeluca Exp $
+! $Id: ESMF_GridTypes.F90,v 1.20 2004/03/20 03:54:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,16 +101,16 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_GridKind
+!     ! ESMF_GridType
 !
 !     ! Type to specify kind of grid for supported ESMF Grids.
 !     !  See the public parameters declared below for the possible valid
 !     !  values for this.
 
-      type ESMF_GridKind
+      type ESMF_GridType
       sequence
 !      private
-        integer :: gridKind
+        integer :: gridType
       end type
 
 !------------------------------------------------------------------------------
@@ -167,8 +167,8 @@
         type (ESMF_GridStructure) :: gridStructure
                                                ! enum for structure of grid
                                                ! i.e. logically rectangular, etc
-        type (ESMF_GridKind) :: horzGridKind   ! enum for type of horizontal grid
-        type (ESMF_GridKind) :: vertGridKind   ! enum for type of vertical grid
+        type (ESMF_GridType) :: horzGridType   ! enum for type of horizontal grid
+        type (ESMF_GridType) :: vertGridType   ! enum for type of vertical grid
         type (ESMF_GridStagger) :: horzStagger ! enum for horizontal grid staggering
         type (ESMF_GridStagger) :: vertStagger ! enum for vertical grid staggering
         type (ESMF_CoordSystem) :: horzCoordSystem  
@@ -236,7 +236,7 @@
 
       public ESMF_LogRectGrid, ESMF_GridSpecific, ESMF_GridStatus
       public ESMF_GridStructure
-      public ESMF_GridClass,    ESMF_GridKind,     ESMF_GridStagger
+      public ESMF_GridClass,    ESMF_GridType,     ESMF_GridStagger
       public ESMF_CoordOrder,  ESMF_CoordIndex,   ESMF_Grid
 
 !------------------------------------------------------------------------------
@@ -300,40 +300,40 @@
 
   ! TODO: add kinds for vertical coordinates
   ! Supported ESMF grid kinds:
-  !   ESMF_GridKind_Unknown           ! unknown or undefined grid
-  !   ESMF_GridKind_LatLon            ! aligned with longitude,latitude
-  !   ESMF_GridKind_LatLonGauss       ! LatLon with gaussian-spaced latitudes
-  !   ESMF_GridKind_LatLonMercator    ! LatLon with Mercator-spaced latitudes
-  !   ESMF_GridKind_Reduced           ! LatLon with num lon pts a fcn of lat
-  !   ESMF_GridKind_Dipole            ! Displaced-pole dipole grid
-  !   ESMF_GridKind_Tripole           ! Tripolar grids
-  !   ESMF_GridKind_XY                ! aligned with Cartesian x-y coords
-  !   ESMF_GridKind_XYVar             ! XY grid with unequal spacing
-  !   ESMF_GridKind_DataStream        ! Data stream - set of locations
-  !   ESMF_GridKind_PhysFourier       ! Mixed Fourier/Phys Space grid
-  !   ESMF_GridKind_SphericalSpectral ! spectral space:spherical harmonics
-  !   ESMF_GridKind_CartSpectral      ! spectral space:Cartesian coords
-  !   ESMF_GridKind_Geodesic          ! spherical geodesic grid
-  !   ESMF_GridKind_CubedSphere       ! cubed sphere grid
-  !   ESMF_GridKind_Exchange          ! intersection of two grids
+  !   ESMF_GridType_Unknown           ! unknown or undefined grid
+  !   ESMF_GridType_LatLon            ! aligned with longitude,latitude
+  !   ESMF_GridType_LatLonGauss       ! LatLon with gaussian-spaced latitudes
+  !   ESMF_GridType_LatLonMercator    ! LatLon with Mercator-spaced latitudes
+  !   ESMF_GridType_Reduced           ! LatLon with num lon pts a fcn of lat
+  !   ESMF_GridType_Dipole            ! Displaced-pole dipole grid
+  !   ESMF_GridType_Tripole           ! Tripolar grids
+  !   ESMF_GridType_XY                ! aligned with Cartesian x-y coords
+  !   ESMF_GridType_XYVar             ! XY grid with unequal spacing
+  !   ESMF_GridType_DataStream        ! Data stream - set of locations
+  !   ESMF_GridType_PhysFourier       ! Mixed Fourier/Phys Space grid
+  !   ESMF_GridType_SphericalSpectral ! spectral space:spherical harmonics
+  !   ESMF_GridType_CartSpectral      ! spectral space:Cartesian coords
+  !   ESMF_GridType_Geodesic          ! spherical geodesic grid
+  !   ESMF_GridType_CubedSphere       ! cubed sphere grid
+  !   ESMF_GridType_Exchange          ! intersection of two grids
 
-   type (ESMF_GridKind), parameter, public ::              &
-      ESMF_GridKind_Unknown           = ESMF_GridKind( 0), &
-      ESMF_GridKind_LatLon            = ESMF_GridKind( 1), &
-      ESMF_GridKind_LatLonGauss       = ESMF_GridKind( 2), &
-      ESMF_GridKind_LatLonMercator    = ESMF_GridKind( 3), &
-      ESMF_GridKind_Reduced           = ESMF_GridKind( 4), &
-      ESMF_GridKind_Dipole            = ESMF_GridKind( 5), &
-      ESMF_GridKind_Tripole           = ESMF_GridKind( 6), &
-      ESMF_GridKind_XY                = ESMF_GridKind( 7), &
-      ESMF_GridKind_XYVar             = ESMF_GridKind( 8), &
-      ESMF_GridKind_DataStream        = ESMF_GridKind( 9), &
-      ESMF_GridKind_PhysFourier       = ESMF_GridKind(10), &
-      ESMF_GridKind_SphericalSpectral = ESMF_GridKind(11), &
-      ESMF_GridKind_CartSpectral      = ESMF_GridKind(12), &
-      ESMF_GridKind_Geodesic          = ESMF_GridKind(13), &
-      ESMF_GridKind_CubedSphere       = ESMF_GridKind(14), &
-      ESMF_GridKind_Exchange          = ESMF_GridKind(15)
+   type (ESMF_GridType), parameter, public ::              &
+      ESMF_GridType_Unknown           = ESMF_GridType( 0), &
+      ESMF_GridType_LatLon            = ESMF_GridType( 1), &
+      ESMF_GridType_LatLonGauss       = ESMF_GridType( 2), &
+      ESMF_GridType_LatLonMercator    = ESMF_GridType( 3), &
+      ESMF_GridType_Reduced           = ESMF_GridType( 4), &
+      ESMF_GridType_Dipole            = ESMF_GridType( 5), &
+      ESMF_GridType_Tripole           = ESMF_GridType( 6), &
+      ESMF_GridType_XY                = ESMF_GridType( 7), &
+      ESMF_GridType_XYVar             = ESMF_GridType( 8), &
+      ESMF_GridType_DataStream        = ESMF_GridType( 9), &
+      ESMF_GridType_PhysFourier       = ESMF_GridType(10), &
+      ESMF_GridType_SphericalSpectral = ESMF_GridType(11), &
+      ESMF_GridType_CartSpectral      = ESMF_GridType(12), &
+      ESMF_GridType_Geodesic          = ESMF_GridType(13), &
+      ESMF_GridType_CubedSphere       = ESMF_GridType(14), &
+      ESMF_GridType_Exchange          = ESMF_GridType(15)
 
    ! Recognized ESMF staggering types
    !   ESMF_GridStagger_Unknown    ! unknown or undefined staggering
@@ -418,7 +418,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.19 2004/03/20 00:08:40 cdeluca Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.20 2004/03/20 03:54:51 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -432,7 +432,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridStatusEqual
          module procedure ESMF_GridStructureEqual
-         module procedure ESMF_GridKindEqual
+         module procedure ESMF_GridTypeEqual
          module procedure ESMF_GridStaggerEqual
          module procedure ESMF_CoordOrderEqual
          module procedure ESMF_CoordIndexEqual
@@ -453,7 +453,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridStatusNotEqual
          module procedure ESMF_GridStructureNotEqual
-         module procedure ESMF_GridKindNotEqual
+         module procedure ESMF_GridTypeNotEqual
          module procedure ESMF_GridStaggerNotEqual
          module procedure ESMF_CoordOrderNotEqual
          module procedure ESMF_CoordIndexNotEqual
@@ -526,8 +526,8 @@
       ! Initialize grid contents
       grid%gridStatus      = ESMF_GridStatus_Ready
       grid%gridStructure   = ESMF_GridStructure_Unknown
-      grid%horzGridKind    = ESMF_GridKind_Unknown
-      grid%vertGridKind    = ESMF_GridKind_Unknown
+      grid%horzGridType    = ESMF_GridType_Unknown
+      grid%vertGridType    = ESMF_GridType_Unknown
       grid%horzStagger     = ESMF_GridStagger_Unknown
       grid%vertStagger     = ESMF_GridStagger_Unknown
       grid%horzCoordSystem = ESMF_CoordSystem_Unknown
@@ -609,7 +609,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridAddAttribute(grid,  name,            &
-                              horzGridKind,    vertGridKind,    &
+                              horzGridType,    vertGridType,    &
                               horzStagger,     vertStagger,     &
                               horzCoordSystem, vertCoordSystem, &
                               coordOrder,      coordIndex,      &
@@ -623,8 +623,8 @@
       type(ESMF_Grid), intent(inout) :: grid
 
       character (len=*),       intent(in), optional :: name
-      type (ESMF_GridKind),    intent(in), optional :: horzGridKind
-      type (ESMF_GridKind),    intent(in), optional :: vertGridKind
+      type (ESMF_GridType),    intent(in), optional :: horzGridType
+      type (ESMF_GridType),    intent(in), optional :: vertGridType
       type (ESMF_GridStagger), intent(in), optional :: horzStagger
       type (ESMF_GridStagger), intent(in), optional :: vertStagger
       type (ESMF_CoordSystem), intent(in), optional :: horzCoordSystem  
@@ -655,10 +655,10 @@
 !          The {\tt ESMF\_Grid} to be modified.
 !     \item[{[name]}]
 !          Character name to be assigned to this grid.
-!     \item[{[horzGridKind]}]
-!          {\tt ESMF\_GridKind} describing the horizontal grid.
-!     \item[{[vertGridKind]}]
-!          {\tt ESMF\_GridKind} describing the vertical   grid.
+!     \item[{[horzGridType]}]
+!          {\tt ESMF\_GridType} describing the horizontal grid.
+!     \item[{[vertGridType]}]
+!          {\tt ESMF\_GridType} describing the vertical   grid.
 !     \item[{[horzStagger]}]
 !          {\tt ESMF\_GridStagger} describing staggering of variables on
 !          horizontal grid.
@@ -710,8 +710,8 @@
       endif
 
       ! if present, set information filling in grid derived type
-      if (present(horzGridKind   )) grid%ptr%horzGridKind    = horzGridKind 
-      if (present(vertGridKind   )) grid%ptr%vertGridKind    = vertGridKind 
+      if (present(horzGridType   )) grid%ptr%horzGridType    = horzGridType 
+      if (present(vertGridType   )) grid%ptr%vertGridType    = vertGridType 
       if (present(horzStagger    )) grid%ptr%horzStagger     = horzStagger 
       if (present(vertStagger    )) grid%ptr%vertStagger     = vertStagger 
       if (present(horzCoordSystem)) grid%ptr%horzCoordSystem = horzCoordSystem  
@@ -780,7 +780,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridGetAttributes(grid,  name,            &
-                              horzGridKind,    vertGridKind,    &
+                              horzGridType,    vertGridType,    &
                               horzStagger,     vertStagger,     &
                               horzCoordSystem, vertCoordSystem, &
                               coordOrder,      coordIndex,      &
@@ -794,8 +794,8 @@
       type(ESMF_Grid), intent(in) :: grid
 
       character(len=ESMF_MAXSTR), intent(out), optional :: name
-      type (ESMF_GridKind),       intent(out), optional :: horzGridKind
-      type (ESMF_GridKind),       intent(out), optional :: vertGridKind
+      type (ESMF_GridType),       intent(out), optional :: horzGridType
+      type (ESMF_GridType),       intent(out), optional :: vertGridType
       type (ESMF_GridStagger),    intent(out), optional :: horzStagger
       type (ESMF_GridStagger),    intent(out), optional :: vertStagger
       type (ESMF_CoordSystem),    intent(out), optional :: horzCoordSystem  
@@ -827,10 +827,10 @@
 !          The {\tt ESMF\_Grid} to be queried.
 !     \item[{[name]}]
 !          Character name assigned to this grid.
-!     \item[{[horzGridKind]}]
-!          {\tt ESMF\_GridKind} describing the horizontal grid.
-!     \item[{[vertGridKind]}]
-!          {\tt ESMF\_GridKind} describing the vertical   grid.
+!     \item[{[horzGridType]}]
+!          {\tt ESMF\_GridType} describing the horizontal grid.
+!     \item[{[vertGridType]}]
+!          {\tt ESMF\_GridType} describing the vertical   grid.
 !     \item[{[horzStagger]}]
 !          {\tt ESMF\_GridStagger} describing staggering of variables on
 !          horizontal grid.
@@ -891,8 +891,8 @@
       endif
 
       ! if present, get information from grid derived type
-      if (present(horzGridKind   )) horzGridKind    = grid%ptr%horzGridKind
-      if (present(vertGridKind   )) vertGridKind    = grid%ptr%vertGridKind
+      if (present(horzGridType   )) horzGridType    = grid%ptr%horzGridType
+      if (present(vertGridType   )) vertGridType    = grid%ptr%vertGridType
       if (present(horzStagger    )) horzStagger     = grid%ptr%horzStagger
       if (present(vertStagger    )) vertStagger     = grid%ptr%vertStagger
       if (present(horzCoordSystem)) horzCoordSystem = grid%ptr%horzCoordSystem
@@ -1636,19 +1636,19 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridKindEqual - equality of Grid kinds
+! !IROUTINE: ESMF_GridTypeEqual - equality of Grid types
 !
 ! !INTERFACE:
-      function ESMF_GridKindEqual(GridKind1, GridKind2)
+      function ESMF_GridTypeEqual(GridType1, GridType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridKindEqual
+      logical :: ESMF_GridTypeEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridKind), intent(in) :: &
-         GridKind1,      &! Two grid kinds to compare for
-         GridKind2        ! equality
+      type (ESMF_GridType), intent(in) :: &
+         GridType1,      &! Two grid kinds to compare for
+         GridType2        ! equality
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF Grid kinds to see if
@@ -1656,17 +1656,17 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[GridKind1, GridKind2]
+!     \item[GridType1, GridType2]
 !          Two region types to compare for equality
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_GridKindEqual = (GridKind1%gridkind == &
-                            GridKind2%gridkind)
+      ESMF_GridTypeEqual = (GridType1%gridType == &
+                            GridType2%gridType)
 
-      end function ESMF_GridKindEqual
+      end function ESMF_GridTypeEqual
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1840,19 +1840,19 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridKindNotEqual - non-equality of Grid kinds
+! !IROUTINE: ESMF_GridTypeNotEqual - non-equality of Grid kinds
 !
 ! !INTERFACE:
-      function ESMF_GridKindNotEqual(GridKind1, GridKind2)
+      function ESMF_GridTypeNotEqual(GridType1, GridType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridKindNotEqual
+      logical :: ESMF_GridTypeNotEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridKind), intent(in) :: &
-         GridKind1,      &! Two Grid kinds to compare for
-         GridKind2        ! inequality
+      type (ESMF_GridType), intent(in) :: &
+         GridType1,      &! Two Grid kinds to compare for
+         GridType2        ! inequality
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF Grid kinds to see if
@@ -1860,17 +1860,16 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[GridKind1, GridKind2]
+!     \item[GridType1, GridType2]
 !          Two kinds of Grids to compare for inequality
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_GridKindNotEqual = (GridKind1%gridkind /= &
-                               GridKind2%gridkind)
+      ESMF_GridTypeNotEqual = (GridType1%gridType /= &
+                               GridType2%gridType)
 
-      end function ESMF_GridKindNotEqual
+      end function ESMF_GridTypeNotEqual
 
 !------------------------------------------------------------------------------
 !BOP

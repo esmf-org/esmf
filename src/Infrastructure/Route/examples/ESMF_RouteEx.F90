@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.11 2004/03/16 23:28:16 cdeluca Exp $
+! $Id: ESMF_RouteEx.F90,v 1.12 2004/03/20 03:55:02 cdeluca Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -62,7 +62,7 @@
     mincoords = (/ 20.0, 30.0 /)
     srcgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzGridKind=ESMF_GridKind_XY, &
+                   horzGridType=ESMF_GridType_XY, &
                    horzStagger=ESMF_GridStagger_A, &
                    horzCoordSystem=ESMF_CoordSystem_Cartesian, &
                    layout=layout1, name="srcgrid", rc=rc)
@@ -70,7 +70,7 @@
     ! same grid coordinates, but different layout
     dstgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzGridKind=ESMF_GridKind_XY, &
+                   horzGridType=ESMF_GridType_XY, &
                    horzStagger=ESMF_GridStagger_A, &
                    horzCoordSystem=ESMF_CoordSystem_Cartesian, &
                    layout=layout2, name="srcgrid", rc=rc)

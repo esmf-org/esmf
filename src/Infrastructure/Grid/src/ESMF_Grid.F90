@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.151 2004/03/20 00:08:40 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.152 2004/03/20 03:54:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.151 2004/03/20 00:08:40 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.152 2004/03/20 03:54:49 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1035,7 +1035,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridGet(grid, horzRelLoc, vertRelLoc, &
-                              horzGridKind, vertGridKind, &
+                              horzGridType, vertGridType, &
                               horzStagger, vertStagger, &
                               horzCoordSystem, vertCoordSystem, &
                               coordOrder, dimCount, minGlobalCoordPerDim, &
@@ -1047,8 +1047,8 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      type(ESMF_GridKind), intent(out), optional :: horzGridKind
-      type(ESMF_GridKind), intent(out), optional :: vertGridKind
+      type(ESMF_GridType), intent(out), optional :: horzGridType
+      type(ESMF_GridType), intent(out), optional :: vertGridType
       type(ESMF_GridStagger), intent(out), optional :: horzStagger
       type(ESMF_GridStagger), intent(out), optional :: vertStagger
       type(ESMF_CoordSystem), intent(out), optional :: horzCoordSystem
@@ -1082,9 +1082,9 @@
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
-!     \item[{[horzGridKind]}]
+!     \item[{[horzGridType]}]
 !          Integer specifier to denote horizontal grid type.
-!     \item[{[vertGridKind]}]
+!     \item[{[vertGridType]}]
 !          Integer specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
 !          Integer specifier to denote horizontal grid stagger.
@@ -1151,7 +1151,7 @@
       ! ESMF_GridStructure_LogRect
       case(1)
         call ESMF_LRGridGet(grid, horzRelLoc, vertRelLoc, &
-                            horzGridKind, vertGridKind, &
+                            horzGridType, vertGridType, &
                             horzStagger, vertStagger, &
                             horzCoordSystem, vertCoordSystem, &
                             coordOrder, dimCount, minGlobalCoordPerDim, &
@@ -2000,7 +2000,7 @@
 ! !IROUTINE: ESMF_GridSet - Sets a variety of information about the grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSet(grid, horzGridKind, vertGridKind, &
+      subroutine ESMF_GridSet(grid, horzGridType, vertGridType, &
                               horzStagger, vertStagger, &
                               horzCoordSystem, vertCoordSystem, &
                               coordOrder, minGlobalCoordPerDim, &
@@ -2008,8 +2008,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
-      type(ESMF_GridKind), intent(in), optional :: horzGridKind
-      type(ESMF_GridKind), intent(in), optional :: vertGridKind
+      type(ESMF_GridType), intent(in), optional :: horzGridType
+      type(ESMF_GridType), intent(in), optional :: vertGridType
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
       type(ESMF_GridStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
@@ -2028,9 +2028,9 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[{[horzGridKind]}]
+!     \item[{[horzGridType]}]
 !          Integer specifier to denote horizontal grid type.
-!     \item[{[vertGridKind]}]
+!     \item[{[vertGridType]}]
 !          Integer specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
 !          Integer specifier to denote horizontal grid stagger.
@@ -2073,8 +2073,8 @@
       endif
 
 !     if present, set information filling in grid derived type
-      if(present(horzGridKind)) grid%horzGridKind = horzGridKind
-      if(present(vertGridKind)) grid%vertGridKind = vertGridKind
+      if(present(horzGridType)) grid%horzGridType = horzGridType
+      if(present(vertGridType)) grid%vertGridType = vertGridType
       if(present(horzStagger)) grid%horzStagger = horzStagger
       if(present(vertStagger)) grid%vertStagger = vertStagger
       if(present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.8 2004/03/18 18:40:17 nscollins Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.9 2004/03/20 03:55:03 cdeluca Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -44,7 +44,7 @@
     real(ESMF_KIND_R8), dimension(2) :: min, max
     real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
     real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, resdata
-    type(ESMF_GridKind)    :: horzGridKind
+    type(ESMF_GridType)    :: horzGridType
     type(ESMF_GridStagger) :: horzStagger
     type(ESMF_CoordSystem) :: horzCoordSystem
     type(ESMF_DELayout) :: layout0, layout1
@@ -118,7 +118,7 @@
     max(1)          = 60.0
     min(2)          = 0.0
     max(2)          = 50.0
-    horzGridKind    = ESMF_GridKind_XY
+    horzGridType    = ESMF_GridType_XY
     horzStagger     = ESMF_GridStagger_A
     horzCoordSystem = ESMF_CoordSystem_Cartesian
     call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
@@ -131,7 +131,7 @@
                                           maxGlobalCoordPerDim=max, &
                                           layout=layout1, &
                                           decompIds=decompids1, &
-                                          horzGridKind=horzGridKind, &
+                                          horzGridType=horzGridType, &
                                           horzStagger=horzStagger, &
                                           horzCoordSystem=horzCoordSystem, &
                                           name="source grid", rc=status)
@@ -147,7 +147,7 @@
                                           maxGlobalCoordPerDim=max, &
                                           layout=layout1, &
                                           decompIds=decompids2, &
-                                          horzGridKind=horzGridKind, &
+                                          horzGridType=horzGridType, &
                                           horzStagger=horzStagger, &
                                           horzCoordSystem=horzCoordSystem, &
                                           name="destination grid", rc=status)

@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.29 2004/03/08 16:18:22 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.30 2004/03/20 03:54:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.29 2004/03/08 16:18:22 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.30 2004/03/20 03:54:49 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -67,7 +67,7 @@
       integer :: half, quart
       real (ESMF_KIND_R8):: min(2), max(2)
       integer :: counts(ESMF_MAXGRIDDIM)
-      type(ESMF_GridKind) :: horz_gridtype, vert_gridtype
+      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
       type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: status, myde
@@ -119,7 +119,7 @@
       max(1) = 20.0
       min(2) = 0.0
       max(2) = 5.0
-      horz_gridtype = ESMF_GridKind_XY
+      horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
       gname = "test grid 1"
@@ -128,7 +128,7 @@
       grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
-                              horzGridKind=horz_gridtype, &
+                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
                               layout=layout1, &
@@ -150,7 +150,7 @@
       grid2 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
-                              horzGridKind=horz_gridtype, &
+                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
                               layout=layout1, &

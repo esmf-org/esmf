@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.5 2004/03/18 23:22:53 nscollins Exp $
+! $Id: FlowMod.F90,v 1.6 2004/03/20 03:55:04 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -64,7 +64,7 @@
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
       type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde, halo_width
@@ -85,8 +85,8 @@
         g_max(1) = 200.0
         g_min(2) = 0.0
         g_max(2) = 50.0
-        horz_gridkind = ESMF_GridKind_XY
-        vert_gridkind = ESMF_GridKind_Unknown
+        horz_gridtype = ESMF_GridType_XY
+        vert_gridtype = ESMF_GridType_Unknown
         horz_stagger = ESMF_GridStagger_D_NE
         vert_stagger = ESMF_GridStagger_Unknown
         horz_coord_system = ESMF_CoordSystem_Cartesian
@@ -97,8 +97,8 @@
                                minGlobalCoordPerDim=g_min, &
                                maxGlobalCoordPerDim=g_max, &
                                layout=layout, &
-                               horzGridKind=horz_gridkind, &
-                               vertGridKind=vert_gridkind, &
+                               horzGridType=horz_gridtype, &
+                               vertGridType=vert_gridtype, &
                                horzStagger=horz_stagger, &
                                vertStagger=vert_stagger, &
                                horzCoordSystem=horz_coord_system, &

@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.5 2004/03/18 23:21:06 nscollins Exp $
+! $Id: user_model3.F90,v 1.6 2004/03/20 03:55:04 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -95,7 +95,7 @@
         real(ESMF_KIND_R8) :: g_min(2), g_max(2)
         integer :: counts(2)
         integer :: ni, nj, de_id
-        type(ESMF_GridKind) :: horz_gridkind
+        type(ESMF_GridType) :: horz_gridtype
         type(ESMF_GridStagger) :: horz_stagger
         type(ESMF_CoordSystem) :: horz_coord_system
         integer :: status, myde
@@ -112,7 +112,7 @@
         g_max(1) = 20.0
         g_min(2) = 0.0
         g_max(2) = 5.0
-        horz_gridkind = ESMF_GridKind_XY
+        horz_gridtype = ESMF_GridType_XY
         horz_stagger = ESMF_GridStagger_A
         horz_coord_system = ESMF_CoordSystem_Cartesian
 
@@ -120,7 +120,7 @@
                                 minGlobalCoordPerDim=g_min, &
                                 maxGlobalCoordPerDim=g_max, &
                                 layout=layout, &
-                                horzGridKind=horz_gridkind, &
+                                horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
                                 name="source grid", rc=status)

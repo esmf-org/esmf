@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.12 2004/03/18 23:09:03 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.13 2004/03/20 03:55:03 cdeluca Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -277,7 +277,7 @@
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: de_id
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
       type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       real(ESMF_KIND_R8) :: min(2), max(2)
@@ -299,7 +299,7 @@
       max(1) = 15.0
       min(2) = 0.0
       max(2) = 12.0
-      horz_gridkind = ESMF_GridKind_XY
+      horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
@@ -313,7 +313,7 @@
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
                                 layout=layout1, &
-                                horzGridKind=horz_gridkind, &
+                                horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
                                 periodic=periodic, &
@@ -332,7 +332,7 @@
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
                                 layout=layout1, &
-                                horzGridKind=horz_gridkind, &
+                                horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
                                 periodic=periodic, &
@@ -351,7 +351,7 @@
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
                                 layout=layout1, &
-                                horzGridKind=horz_gridkind, &
+                                horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
                                 periodic=periodic, &
@@ -370,7 +370,7 @@
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
                                 layout=layout1, &
-                                horzGridKind=horz_gridkind, &
+                                horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
                                 periodic=periodic, &

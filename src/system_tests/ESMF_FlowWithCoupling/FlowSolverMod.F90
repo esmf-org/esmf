@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.6 2004/03/18 23:29:11 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.7 2004/03/20 03:55:04 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -114,7 +114,7 @@
       real(kind=ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(kind=ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2)
-      type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
       type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde
@@ -153,7 +153,7 @@
 !
 ! Create the Grid
 !
-      horz_gridkind = ESMF_GridKind_XY
+      horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_C_NE
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
@@ -161,7 +161,7 @@
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              layout=layout, &
-                             horzGridKind=horz_gridkind, &
+                             horzGridType=horz_gridtype, &
                              horzStagger=horz_stagger, &
                              horzCoordSystem=horz_coord_system, &
                              name="source grid", rc=status)

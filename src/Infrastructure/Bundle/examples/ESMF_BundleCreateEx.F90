@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.12 2004/03/16 23:28:16 cdeluca Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.13 2004/03/20 03:54:48 cdeluca Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -52,7 +52,7 @@
     max_coord = (/ 50.0, 60.0 /)
     delayout = ESMF_DELayoutCreate(rc=rc)
     grid = ESMF_GridCreateLogRectUniform(2, counts, min_coord, max_coord, &
-                horzGridKind=ESMF_GridKind_XY, &
+                horzGridType=ESMF_GridType_XY, &
                 horzStagger=ESMF_GridStagger_A, &
                 horzCoordSystem=ESMF_CoordSystem_Cartesian, &
                 layout=delayout, rc=rc)
