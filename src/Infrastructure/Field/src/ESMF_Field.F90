@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.115 2004/03/08 16:03:23 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.116 2004/03/08 22:47:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.115 2004/03/08 16:03:23 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.116 2004/03/08 22:47:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3699,6 +3699,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       type(ESMF_Array) :: array                   ! New array
+      type(ESMF_RelLoc) :: hRelLoc
       integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
       integer, dimension(ESMF_MAXDIM) :: dimorder, counts
       integer :: hwidth
@@ -3736,7 +3737,20 @@
         print *, "ERROR in ESMF_GridGet"
         return
       endif 
-      call ESMF_GridGetDE(grid, horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+
+      ! make sure hRelLoc has a value before GridGetDE call
+      if (present(horzRelLoc)) then
+          hRelLoc = horzRelloc
+      else
+          if (present(datamap)) then
+              call ESMF_DataMapGet(datamap, horzRelLoc=hRelLoc, rc=status)
+          else
+              print *, "ERROR in ESMF_FieldConstructNew: ", & 
+                       "no valid RelLoc in either argument list or datamap."
+              return
+          endif
+      endif
+      call ESMF_GridGetDE(grid, horzRelLoc=hRelLoc, vertRelLoc=vertRelLoc, &
                           localCellCountPerDim=gridcounts(1:gridRank), rc=status)
       if(status .ne. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE"
