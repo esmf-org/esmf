@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/03/04 17:02:24 nscollins Exp $ 
+# $Id: makefile,v 1.8 2003/03/06 15:28:45 flanigan Exp $ 
 
 ALL:  system_tests
 
@@ -35,11 +35,10 @@ $(ESMC_TESTDIR)/ESMF_SysTest70385: ESMF_SysTest70385.o  chkopts
 RUN_ESMF_SysTest70385:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest70385.tmps
 	${MPIRUN} -np 12 $(ESMC_TESTDIR)/ESMF_SysTest70385 > $(ESMC_TESTDIR)/ESMF_SysTest70385.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_SysTest70385.tmp
-	#@if (diff ESMF_SysTest70385.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_SysTest70385.out) then \
-	#echo "PASS SysTest70385 test" > ${ESMC_TESTDIR}/ESMF_SysTest70385.log; else \
-	#echo "FAIL SysTest70385 test" > ${ESMC_TESTDIR}/ESMF_SysTest70385.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_SysTest70385.tmp optlog
+
+RUN_ESMF_SysTest70385UNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest70385.tmps
+	${MPIRUN} -np 1 ESMF_SysTest70385 > ESMF_SysTest70385.stdout
 
 ESMF_SysTest70385.rm:
 	echo "ESMF_SysTest70385.rm target called here."

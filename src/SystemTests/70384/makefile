@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/02/27 23:28:17 nscollins Exp $ 
+# $Id: makefile,v 1.4 2003/03/06 15:28:44 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -32,20 +32,10 @@ $(ESMC_TESTDIR)/ESMF_SysTest70384: ESMF_SysTest70384.o  chkopts
 RUN_ESMF_SysTest70384:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest70384.tmps
 	${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_SysTest70384 > $(ESMC_TESTDIR)/ESMF_SysTest70384.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_SysTest70384.tmp
-	#@if (diff ESMF_SysTest70384.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_SysTest70384.out) then \
-	#echo "PASS SysTest70384 test" > ${ESMC_TESTDIR}/ESMF_SysTest70384.log; else \
-	#echo "FAIL SysTest70384 test" > ${ESMC_TESTDIR}/ESMF_SysTest70384.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_SysTest70384.tmp optlog
 
 RUN_ESMF_SysTest70384UNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest70384.tmps
 	${MPIRUN} -np 1 ESMF_SysTest70384 > ESMF_SysTest70384.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_SysTest70384.tmp
-	#@if (diff ESMF_SysTest70384.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_SysTest70384.outuni) then \
-	#echo "PASS SysTest70384 test" > ${ESMC_TESTDIR}/ESMF_SysTest70384.log; else \
-	#echo "FAIL SysTest70384 test" > ${ESMC_TESTDIR}/ESMF_SysTest70384.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_SysTest70384.tmp optlog
 
 ESMF_SysTest70384.rm:
 	echo "ESMF_SysTest70384.rm target called here."
