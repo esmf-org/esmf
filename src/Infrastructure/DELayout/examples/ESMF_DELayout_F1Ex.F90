@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F1Ex.F90,v 1.1 2003/09/19 17:00:03 cdeluca Exp $
+! $Id: ESMF_DELayout_F1Ex.F90,v 1.2 2003/11/04 23:47:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -24,13 +24,22 @@
 
 program ESMF_DELayout_FEx
 
-  use ESMF_DELayoutMod
+#include <ESMF_Macros.inc>
+
+  ! ESMF Framework module
+  use ESMF_Mod
+  use ESMF_TestMod
+
+  implicit none
 
   type(ESMF_DELayout) :: layout
   integer, dimension(2) :: delist
   integer :: nx, ny, x, y, id, rc
   integer, dimension(20) :: array1, array2
   integer :: i, result, len
+
+  ! initialize framework
+  call ESMF_Initialize(rc)
 
   ! 2 DEs: DE 0 and DE 1
   delist = (/ 0, 1 /)
@@ -39,7 +48,7 @@ program ESMF_DELayout_FEx
   len = 20
 
   ! create 2x1 layout of DEs in X-direction
-  layout = ESMF_DELayoutCreate(2, 1, delist, ESMF_XFAST, rc)
+  layout = ESMF_DELayoutCreate(delist, 2, (/ 2, 1 /), (/ 0, 0 /), rc)
 
   ! verify size of layout
   call ESMF_DELayoutGetSize(layout, nx, ny, rc)
@@ -79,5 +88,7 @@ program ESMF_DELayout_FEx
   print *, "ESMF_DELayoutAllReduce(sum) = ", result
 
   call ESMF_DELayoutDestroy(layout, rc)
+
+  call ESMF_Finalize(rc)
 
 end program ESMF_DELayout_FEx
