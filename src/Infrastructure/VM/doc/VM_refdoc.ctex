@@ -1,4 +1,4 @@
-% $Id: VM_refdoc.ctex,v 1.12 2004/06/09 12:10:58 theurich Exp $ 
+% $Id: VM_refdoc.ctex,v 1.13 2004/06/18 21:47:30 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -65,20 +65,20 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{VM_usage}
-\input{ESMF_VMTest1Ex_fapi}
-\input{ESMF_VMTest2Ex_fapi}
-\input{ESMF_VMTest3Ex_fapi}
-\input{ESMF_VMTest4Ex_fapi}
-\input{ESMF_VMTest5Ex_fapi}
-\input{ESMF_VMTest6Ex_fapi}
+\input{ESMF_VMDefaultBasicsEx_fapi}
+\input{ESMF_VMGetMPICommunicatorEx_fapi}
+\input{ESMF_VMSendVMRecvEx_fapi}
+\input{ESMF_VMScatterVMGatherEx_fapi}
+\input{ESMF_VMAllFullReduceEx_fapi}
+\input{ESMF_VMComponentEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/VM/doc/VM_usage}
-\input{../Infrastructure/VM/doc/ESMF_VMTest1Ex_fapi}
-\input{../Infrastructure/VM/doc/ESMF_VMTest2Ex_fapi}
-\input{../Infrastructure/VM/doc/ESMF_VMTest3Ex_fapi}
-\input{../Infrastructure/VM/doc/ESMF_VMTest4Ex_fapi}
-\input{../Infrastructure/VM/doc/ESMF_VMTest5Ex_fapi}
-\input{../Infrastructure/VM/doc/ESMF_VMTest6Ex_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMDefaultBasicsEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMGetMPICommunicatorEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMSendVMRecvEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMScatterVMGatherEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMAllFullReduceEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMComponentEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}

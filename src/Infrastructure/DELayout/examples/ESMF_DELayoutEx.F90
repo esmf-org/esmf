@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.1 2004/06/18 21:27:24 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.2 2004/06/18 21:47:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,11 +30,13 @@ program ESMF_DELayoutEx
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
 !BOE
-! \subsubsection{Create default 1-D DELayout}
+! \subsubsection{Default 1-D DELayout}
 ! 
-! The default DELayout holds as many DEs as there are PETs in the 
-! associated VM object.
+! With no additional parameters provided the created {\tt ESMF\_DELayout} will\
+! default into a 1-dimensional DELayout with as many DEs as there are PETs in
+! the associated VM object.
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(vm, rc=rc)
@@ -48,8 +50,46 @@ program ESMF_DELayoutEx
   call ESMF_DELayoutDestroy(delayout, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC  
+
+!BOE
+! \subsubsection{1-D DELayout with fixed number of DEs}
+! 
+! The {\tt deCountList} has to functions. First it specifies the total number
+! of DEs and second it specifies the dimensionallity of the DELayout. Here a 
+! 1-dimensional DELayout will be created with 4 DEs. 
+!EOE
+!BOC
+  delayout = ESMF_DELayoutCreate(vm, deCountList=(/4/), rc=rc)
 !EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC  
+  call ESMF_DELayoutPrint(delayout, rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC  
+  call ESMF_DELayoutDestroy(delayout, rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOE
+! \subsubsection{2-D DELayout with fixed number of DEs}
+! 
+! Here a 2-dimensional DELayout will be created with 2x3 DEs. 
+!EOE
+!BOC
+  delayout = ESMF_DELayoutCreate(vm, deCountList=(/2, 3/), rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC  
+  call ESMF_DELayoutPrint(delayout, rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC  
+  call ESMF_DELayoutDestroy(delayout, rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+
   call ESMF_Finalize(rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
