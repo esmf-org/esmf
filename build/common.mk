@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.27 2003/11/11 00:15:35 nscollins Exp $
+#  $Id: common.mk,v 1.29 2003/11/13 22:45:52 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -705,7 +705,7 @@ tree_build_quick_start: chkdir_quick_start
 	@for DIR in $(QUICKSTART_COPYDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
 	      echo "Copying $$DIR files to $(QUICKSTART_DIR)" ;\
-	      cp $$DIR/* $(QUICKSTART_DIR) ;\
+	      cp -f $$DIR/* $(QUICKSTART_DIR) ;\
 	   fi ;\
 	done
 
@@ -867,6 +867,13 @@ build_shared:
 %_ccapi.tex : ../examples/%.C
 	export PROTEX=$(PROTEX) ;\
 	$(CC_PROTEX) $* $<
+
+# special for the AppDriver dir. 
+%_fapi.tex : ../seq_pairwise_fdriver_spmd/%.F90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+
 
 #-------------------------------------------------------------------------------
 # Pattern rules for making dvi, pdf and html files.
