@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.5 2003/10/23 21:55:03 jwolfe Exp $
+! $Id: CoupledFlowApp.F90,v 1.6 2003/11/10 18:30:14 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -7,7 +7,7 @@
 !
 ! !DESCRIPTION:
 ! ESMF Application Wrapper for Coupled Flow Demo.  This file contains the
-!  main program, and creates an ESMF Application Component to contain
+!  main program, and creates a top level ESMF Gridded Component to contain
 !  all other Components.
 !
 !
@@ -26,11 +26,10 @@
     ! Local variables
 
     ! Components
-    type(ESMF_AppComp) :: compApp
     type(ESMF_GridComp) :: compGridded
 
     ! States and Layouts
-    type(ESMF_DELayout) :: layoutApp
+    type(ESMF_DELayout) :: layoutTop
     type(ESMF_State) :: flowstate
     integer :: de_id
 
@@ -124,17 +123,16 @@
 !------------------------------------------------------------------------------
 !
 
-    ! Create the top level application component.  This initializes the
-    ! ESMF Framework as well.
-    compApp = ESMF_AppCompCreate("Coupled Flow Application", rc=rc)
+    ! Initialize the ESMF Framework
+    call ESMF_Initialize(rc)
 
-    ! Query application for default layout and save our DE id number.
-    call ESMF_AppCompGet(compApp, layout=layoutApp, rc=rc)
-    call ESMF_DELayoutGetDEId(layoutApp, de_id, rc)
+    ! Create a default layout and save our DE id number.
+    layoutTop = ESMF_DELayoutCreate(rc=rc)
+    call ESMF_DELayoutGetDEId(layoutTop, de_id, rc)
 
    
     ! Create the Gridded component, passing in the default layout.
-    compGridded = ESMF_GridCompCreate("Coupled Flow Demo", layout=layoutApp, rc=rc)
+    compGridded = ESMF_GridCompCreate("Coupled Flow Demo", layout=layoutTop, rc=rc)
 
 
     print *, "Comp Creates finished"
@@ -197,12 +195,12 @@
 ! !DESCRIPTION:
 ! \subsubsection{Example of Grid Creation:}
 !
-!     The following piece of code provides an example of Grid creation used in
-!     the Demo.  The extents of the Grid were previously read in from an input
-!     file, but the rest of the Grid parameters are set here by default.  The
-!     Grid spans the Application's Layout, while the type of the Grid is assumed to
-!     be horizontal and cartesian x-y with an Arakawa C staggering.  The Halo width
-!     for the Grid is set to one and the name to "source grid":
+!  The following piece of code provides an example of Grid creation used in
+!  the Demo.  The extents of the Grid were previously read in from an input
+!  file, but the rest of the Grid parameters are set here by default.  The
+!  Grid spans the Application's Layout, while the type of the Grid is assumed to
+!  be horizontal and cartesian x-y with an Arakawa C staggering.  The Halo width
+!  for the Grid is set to one and the name to "source grid":
 !\begin{verbatim}
       counts(1) = i_max
       counts(2) = j_max
@@ -212,7 +210,7 @@
       g_max(2) = y_max
       grid = ESMF_GridCreate(2, counts=counts, &
                              min=g_min, max=g_max, &
-                             layout=layoutApp, &   
+                             layout=layoutTop, &   
                              horz_gridtype=ESMF_GridType_XY, &
                              horz_stagger=ESMF_GridStagger_C, &
                              horz_coord_system=ESMF_CoordSystem_Cartesian, &
@@ -264,7 +262,7 @@
 
       call ESMF_GridCompDestroy(compGridded, rc)
 
-      call ESMF_DELayoutDestroy(layoutApp, rc)
+      call ESMF_DELayoutDestroy(layoutTop, rc)
 
 
 !------------------------------------------------------------------------------
@@ -286,7 +284,11 @@
         write(0, *) ""
       endif
 
-      call ESMF_AppCompDestroy(compApp, rc)
+      ! Finalize must be after the message, since this call shuts down MPI if
+      ! it is being used and on some platforms that prevents messages from
+      ! reaching their destination files.
+
+      call ESMF_Finalize(rc)
 
       end program ESMF_ApplicationWrapper
     
