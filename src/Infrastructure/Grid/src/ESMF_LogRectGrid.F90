@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.98 2004/10/05 22:48:57 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.99 2004/10/14 16:55:27 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.98 2004/10/05 22:48:57 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.99 2004/10/14 16:55:27 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5658,7 +5658,7 @@
       if (present(globalAI2D)) then
         tempSize  = size(globalAI2D,1)
         tempSize2 = size(globalAI2D,2)
-        aSize = max(aSize, tempSize)
+        aSize = max(aSize, tempSize2)
         allocate(gtempAI2D(tempSize,tempSize2), &
                  ltempAI2D(tempSize,tempSize2), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "tempAI2D arrays", &
