@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.41 2004/05/27 11:35:21 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.42 2004/06/08 20:06:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.41 2004/05/27 11:35:21 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.42 2004/06/08 20:06:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -121,7 +121,6 @@
       horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       gname = "test grid 1"
 
-      !NEX_UTest
       grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
@@ -133,7 +132,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
       ! Destroy Grid Test
       write(failMsg, *) ""
       write(name, *) "Destroy Grid Test"
@@ -143,7 +141,6 @@
 
 #ifdef ESMF_EXHAUSTIVE
      
-      !EX_UTest
       grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
@@ -155,7 +152,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-      !EX_UTest
       ! Verifing that an uninitialized Grid can be printed
       call ESMF_GridPrint(grid3, "", rc=rc)
       write(failMsg, *) ""
@@ -175,7 +171,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Verifing that an Array can be created
       call ESMF_GridGetDE(grid1, localCellCountPerDim=g1_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
@@ -188,7 +183,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! second array
       call ESMF_GridGetDE(grid2, localCellCountPerDim=g2_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
@@ -201,7 +195,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Verifing that a Field can be created with a Grid and Array
       call ESMF_FieldDataMapSetDefault(dm, ESMF_INDEX_IJ)
       f1 = ESMF_FieldCreate(grid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
@@ -211,7 +204,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! second field
       f2 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 1", ios, rc)
@@ -220,7 +212,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! route test
       rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(f1, f2, layout1, rh, rc=rc)
