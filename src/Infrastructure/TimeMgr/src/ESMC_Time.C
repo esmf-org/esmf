@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.70 2004/11/24 00:31:12 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.71 2004/11/24 22:42:42 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.70 2004/11/24 00:31:12 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.71 2004/11/24 22:42:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -409,6 +409,7 @@
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLen = strlen(tempTimeString);
+      // see also method ESMC_TimePrint()
     }
     if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
         timeStringLenISOFrac > 0) {
@@ -416,6 +417,7 @@
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLenISOFrac = strlen(tempTimeStringISOFrac);
+      // see also method ESMC_TimePrint()
     }
     if (dayOfWeek != ESMC_NULL_POINTER) {
       rc = ESMC_TimeGetDayOfWeek(dayOfWeek);
@@ -1034,6 +1036,7 @@
         char timeString[ESMF_MAXSTR];
         ESMC_TimeGetString(timeString, &options[6]);
         cout << timeString << endl;
+        // see also method ESMC_TimeGet()
       }
     } else {
       // default
@@ -1170,6 +1173,7 @@
 //      Gets a {\tt time}'s value in ISO 8601 string format
 //      YYYY-MM-DDThh:mm:ss[:n/d]  (hybrid) (default, options == "")
 //      or YYYY-MM-DDThh:mm:ss[.f] (strict) (options == "isofrac")
+//      Supports {\tt ESMC\_TimeGet()} and {\tt ESMC\_TimePrint()}.
 //
 //EOP
 // !REQUIREMENTS:  

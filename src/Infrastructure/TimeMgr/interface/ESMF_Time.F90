@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.77 2004/11/24 00:38:47 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.78 2004/11/24 22:44:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.77 2004/11/24 00:38:47 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.78 2004/11/24 22:44:01 eschwab Exp $'
 
 !==============================================================================
 !
@@ -532,10 +532,12 @@
 !     Julian day or no calendar. \\
 !
 !     For timeString, convert {\tt ESMF\_Time}'s value into partial ISO 8601
-!     format YYYY-MM-DDThh:mm:ss[:n/d].  See ~\cite{ISO}.
+!     format YYYY-MM-DDThh:mm:ss[:n/d].  See ~\cite{ISO}.  See also method
+!     {\tt ESMF\_TimePrint()}.
 !     
 !     For timeStringISOFrac, convert {\tt ESMF\_Time}'s value into full ISO 8601
-!     format YYYY-MM-DDThh:mm:ss[.f].  See ~\cite{ISO}.
+!     format YYYY-MM-DDThh:mm:ss[.f].  See ~\cite{ISO}.  See also method
+!     {\tt ESMF\_TimePrint()}.
 !     
 !     For dayOfWeek, gets the day of the week the given {\tt ESMF\_Time}
 !     instant falls on.  ISO 8601 standard:  Monday = 1 through Sunday = 7.
@@ -615,10 +617,11 @@
 !          Convert time value to format string YYYY-MM-DDThh:mm:ss[:n/d],
 !          where n/d is numerator/denominator of any fractional seconds and
 !          all other units are in ISO 8601 format.  See ~\cite{ISO}.
+!          See also method {\tt ESMF\_TimePrint()}.
 !     \item[{[timeStringISOFrac]}]
 !          Convert time value to strict ISO 8601 format string
 !          YYYY-MM-DDThh:mm:ss[.f], where f is decimal form of any fractional
-!          seconds.  See ~\cite{ISO}.
+!          seconds.  See ~\cite{ISO}.  See also method {\tt ESMF\_TimePrint()}.
 !     \item[{[dayOfWeek]}]
 !          The time instant's day of the week [1-7].
 !     \item[{[MidMonth]}]
@@ -735,9 +738,9 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Prints out the contents of an {\tt ESMF\_Time} to {\tt stdout}, in support of testing
-!     and debugging.  The options control the type of information and level
-!     of detail.
+!     Prints out the contents of an {\tt ESMF\_Time} to {\tt stdout}, in
+!     support of testing and debugging.  The options control the type of
+!     information and level of detail.
 !
 !     The arguments are:
 !     \begin{description}
@@ -750,12 +753,14 @@
 !                     prints in integer rational fraction form n/d.  Format is
 !                     YYYY-MM-DDThh:mm:ss[:n/d], where [:n/d] is the 
 !                     integer numerator and denominator of the fractional
-!                     seconds value, if present.  See ~\cite{ISO}. \\
+!                     seconds value, if present.  See ~\cite{ISO}.
+!                     See also method {\tt ESMF\_TimeGet(..., timeString= , ...)} \\
 !          "string isofrac" - prints {\tt time}'s value in strict ISO 8601
 !                     format for all units, including any fractional seconds
 !                     part.  Format is YYYY-MM-DDThh:mm:ss[.f] where [.f]
 !                     represents fractional seconds in decimal form, if present.
-!                     See ~\cite{ISO}. \\
+!                     See ~\cite{ISO}.  See also method
+!                     {\tt ESMF\_TimeGet(..., timeStringISOFrac= , ...)} \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

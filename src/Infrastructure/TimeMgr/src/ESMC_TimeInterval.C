@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.74 2004/11/24 00:33:47 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.75 2004/11/24 22:42:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.74 2004/11/24 00:33:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.75 2004/11/24 22:42:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -765,6 +765,7 @@
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLen = strlen(tempTimeString);
+      // see also method ESMC_TimeIntervalPrint()
     }
     if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
         timeStringLenISOFrac > 0) {
@@ -772,6 +773,7 @@
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLenISOFrac = strlen(tempTimeStringISOFrac);
+      // see also method ESMC_TimeIntervalPrint()
     }
 
     return(ESMF_SUCCESS);
@@ -2687,6 +2689,7 @@
         char timeString[ESMF_MAXSTR];
         ESMC_TimeIntervalGetString(timeString, &options[6]);
         cout << timeString << endl;
+        // see also method ESMC_TimeIntervalGet()
       }
     } else {
       // default
@@ -2867,6 +2870,8 @@
 //      Gets a {\tt ESMC\_TimeInterval}'s value in ISO 8601 string format
 //      PyYmMdDThHmMs[:n/d]S (hybrid) (default, options == "")
 //      PyYmMdDThHmMs[.f]S   (strict) (options == "isofrac")
+//      Supports {\tt ESMC\_TimeIntervalGet()} and
+//               {\tt ESMC\_TimeIntervalPrint()}
 //
 //EOP
 // !REQUIREMENTS:  
