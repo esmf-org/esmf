@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.15 2003/03/14 22:55:36 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.16 2003/03/15 00:14:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.15 2003/03/14 22:55:36 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.16 2003/03/15 00:14:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -353,8 +353,8 @@
     int srcbytes, rcvbytes;
     int sleft, rleft;
     int sright, rright;
-    int *sstrides, *rstrides;
-    int *snums, *rnums;
+    int sstrides[ESMF_MAXDIM], rstrides[ESMF_MAXDIM];
+    int snums[ESMF_MAXDIM], rnums[ESMF_MAXDIM];
 
     //rc = layout->ESMC_DELayout
     //rc = sendRT->ESMC_RTable
@@ -375,11 +375,11 @@
         // look up the corresponding send/recv xpackets in the rtables
         rc = sendRT->ESMC_RTableGetEntry(theirdeid, &xscount, &sendxp);
         if (xscount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
-        rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, &sstrides, &snums);
+        rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, sstrides, snums);
 
         rc = recvRT->ESMC_RTableGetEntry(theirdeid, &xrcount, &recvxp);
         if (xrcount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
-        rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, &rstrides, &rnums);
+        rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, rstrides, rnums);
         
         // ready to call the comm routines - possibly multiple times, one for
         //  each disjoint memory piece?
