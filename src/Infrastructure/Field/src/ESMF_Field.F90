@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.84 2003/12/04 21:04:19 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.85 2003/12/08 18:33:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -236,7 +236,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.84 2003/12/04 21:04:19 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.85 2003/12/08 18:33:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2296,8 +2296,10 @@
 
       ! Call Array method to perform actual work
       call ESMF_GridGetDELayout(ftypep%grid, layout, status)
-      call ESMF_ArrayAllGather(ftypep%localfield%localdata, layout, decompids, &
-                               global_dimlengths, array, status)
+ !     call ESMF_ArrayAllGather(ftypep%localfield%localdata, layout, decompids, &
+ !                              global_dimlengths, array, status)
+      call ESMF_ArrayAllGather(ftypep%localfield%localdata, ftypep%grid, &
+                               ftypep%mapping, array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: Array AllGather returned failure"
         return
