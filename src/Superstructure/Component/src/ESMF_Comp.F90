@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.12 2003/02/13 15:11:08 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.13 2003/02/14 22:34:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,6 +55,7 @@
         integer :: ctype
       end type
 
+      ! these values need to be composable
       type(ESMF_CompType), parameter :: &
                   ESMF_APPCOMP  = ESMF_CompType(1), &   ! binary 001
                   ESMF_GRIDCOMP = ESMF_CompType(2), &   ! binary 010
@@ -76,12 +77,25 @@
                   ESMF_LAND = ESMF_ModelType(2), &
                   ESMF_OCEAN = ESMF_ModelType(3), &
                   ESMF_SEAICE = ESMF_ModelType(4), &
-                  ESMF_RIVER = ESMF_ModelType(5)
+                  ESMF_RIVER = ESMF_ModelType(5), &
+                  ESMF_OTHER = ESMF_ModelType(6)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_CompPrivateData
+!
+!     ! Private data and internal state for this component
+!
+      type ESMF_CompPrivateData
+      sequence
+      private
+        type(ESMF_Pointer) :: opaque
+      end type
 
 !------------------------------------------------------------------------------
 !     ! ESMF_CompClass
 !
-!     ! Component class data. 
+!     ! Component class data.   (Unlike other internal names, this one is
+!     !  class because CompType is a public name for the component type.)
 
       type ESMF_CompClass
       sequence
@@ -90,7 +104,9 @@
          type(ESMF_State) :: exportstate
          type(ESMF_State), dimension(:), pointer :: statelist
          type(ESMF_Clock) :: clock
-         integer :: instance_id
+         type(ESMF_Layout) :: layout
+         type(ESMF_CompPrivateData) :: opaque_private_data
+         integer :: instance_id  ! for ensembles
          ! lists of required entry points supplied by the component code
          integer :: function_count
          character(len=ESMF_MAXSTR), dimension(:), pointer :: function_name
@@ -113,37 +129,41 @@
       public ESMF_Comp
       public ESMF_CompType, ESMF_APPCOMP, ESMF_GRIDCOMP, ESMF_CPLCOMP
       public ESMF_ModelType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
-                             ESMF_SEAICE, ESMF_RIVER
+                             ESMF_SEAICE, ESMF_RIVER, ESMF_OTHER
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
       public ESMF_CompCreate
       public ESMF_CompDestroy
- 
-      public ESMF_CompInit  !  (comptype, modeltype, ...)
-      !public ESMF_CompSetRoutine  ! (component, "init", My_Init)
-      !   expected values: "init", "run", "finalize", "checkpoint", "restart"
-      public ESMF_CompRun   ! (component, time) or (coupler, statelist?, time)
-      public ESMF_CompFinalize   ! (component)
+
       !public ESMF_CompGetState  ! (component, "import"/"export"/"list", state)
       !public ESMF_CompSetState  ! (component, "import"/"export"/"list", state)
       !public ESMF_CompQueryState 
       !public ESMF_Comp{Get/Set}Clock
+      !public ESMF_Comp{Get/Set}Layout
  
+      public ESMF_CompValidate
+      public ESMF_CompPrint
+ 
+      ! These are the primary routines the user must provide.
+      public ESMF_CompInit        !  (comptype, modeltype, ...)
+      public ESMF_CompSetRoutine  ! (component, "init", My_Init)
+      !   expected values: "init", "run", "finalize", "checkpoint", "restart"
+      public ESMF_CompRun   ! (component, time) or (coupler, statelist?, time)
+      public ESMF_CompFinalize   ! (component)
+
+      ! Other routines the user might set.
       !public ESMF_CompCheckpoint
       !public ESMF_CompRestore
       !public ESMF_CompWrite
       !public ESMF_CompRead
- 
-      public ESMF_CompValidate
-      public ESMF_CompPrint
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.12 2003/02/13 15:11:08 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.13 2003/02/14 22:34:08 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -246,15 +266,16 @@ end interface
 ! !REQUIREMENTS:
 
 
-!       local vars
-        type (ESMF_CompClass) :: comptype       ! the new Component
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
+        ! local vars
+        type (ESMF_CompClass), pointer :: comptype       ! the new Component
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
 
-!       Initialize the pointer to null.
+        ! Initialize the pointer to null.
         nullify(ESMF_CompCreateNew%compp)
+        nullify(comptype)
 
-!       Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -262,15 +283,22 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       Routine which interfaces to the C++ creation routine.
-        !call ESMF_CompConstruct(comp, name, layout, ctype, mtype, &
-        !                            filepath, status)
+        ! Allocate a new comp class
+        allocate(comptype, stat=status)
+        if(status .NE. 0) then
+          print *, "ERROR in ESMF_ComponentCreateNew: Allocate"
+          return
+        endif
+
+        ! Call construction method to initialize component internals
+        call ESMF_CompConstruct(comptype, name, layout, ctype, mtype, &
+                                                             filepath, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
         endif
 
-!       set return values
+        ! Set return values
         ESMF_CompCreateNew%compp = comptype
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -305,15 +333,16 @@ end interface
 ! !REQUIREMENTS:
 
 
-!       ! Local variables
-        type (ESMF_CompClass) :: comptype       ! the new Component
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
+        ! Local variables
+        type (ESMF_CompClass), pointer :: comptype       ! the new Component
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
 
-!       ! Initialize pointer
+        ! Initialize pointer
         nullify(ESMF_CompCreateNoData%compp)
+        nullify(comptype)
 
-!       ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -321,14 +350,14 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       ! construct routine
+        ! construct routine
         !call ESMF_CompConstructNoData(comp, arglist, status)
         !if (status .ne. ESMF_SUCCESS) then
         !  print *, "Component construction error"
         !  return
         !endif
 
-!       set return values
+        ! Set return values
         ESMF_CompCreateNoData%compp = comptype
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -363,11 +392,11 @@ end interface
 !EOP
 ! !REQUIREMENTS:
 
-!       local vars
+        ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
 
-!       initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -375,14 +404,22 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       call Destroy to release resources on the C++ side
-        call c_ESMC_CompDestroy(component, status)
+        ! call Destroy to release resources
+        call ESMF_CompDestruct(component%compp, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component contents destruction error"
           return
         endif
 
-!       set return code if user specified it
+        ! Deallocate the component struct itself
+        deallocate(component%compp, stat=status)
+        if (status .ne. 0) then
+          print *, "Component contents destruction error"
+          return
+        endif
+        nullify(component%compp)
+ 
+        ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CompDestroy
@@ -425,11 +462,11 @@ end interface
 ! !REQUIREMENTS:
 
 
-!       local vars
+        ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
 
-!       Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -437,14 +474,19 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_CompInit(component, status)
+        ! TODO: anything useful to do here?  optional args?
+        ! Call user-supplied init routine.
+        ! TODO: add code here
+        ! look up init routine in the list (or use #define index?)
+        ! and call it (from here? from C++?)
+        !call c_ESMC_CompInit(component, status)
+        !call (component%funclist(init))(component, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
           return
         endif
 
-!       set return values
+        ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CompInit
@@ -473,6 +515,9 @@ end interface
 !   \item[component]
 !    Component for which to call Run routine.
 !
+!   \item[clock]
+!    Clock time - !! TODO: fix this
+!
 !   \item[timesteps]
 !    How long the Run interval is.
 !
@@ -485,11 +530,11 @@ end interface
 ! !REQUIREMENTS:
 
 
-!       local vars
+        ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
 
-!       Initalize return code; assume failure until success is certain
+        ! Initalize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -497,14 +542,16 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_CompRun(component, timesteps, status)
+        ! Verify are are on a PE which is part of this layout
+        ! Call user-specified run routine
+        ! TODO: supply optional args
+        !call c_ESMC_CompRun(component, timesteps, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component run error"
           return
         endif
 
-!       set return values
+        ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CompRun
