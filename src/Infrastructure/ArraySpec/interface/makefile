@@ -1,14 +1,16 @@
-# $Id: makefile,v 1.2 2004/03/17 18:23:28 nscollins Exp $
+# $Id: makefile,v 1.1 2004/03/17 18:23:28 nscollins Exp $
 
 # leave alone.
-ALL: build_here 
+ALL: build_here
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  =  
+SOURCEC	  = ESMC_ArraySpec.C
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_ArraySpec.F90
+SOURCEF	  =  
 # if you have .h include files in this dir, list them all on the line below.
-STOREH	  = 
+SOURCEH	  = 
+# include files which go into the public src dir
+STOREH	  =  ESMC_ArraySpec.h
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -18,9 +20,11 @@ MANSEC	  = ArraySpecobj
 LIBBASE	  = libesmf
 
 
+
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/ArraySpec/src
+LOCDIR	  = src/Infrastructure/ArraySpec/interface
+
 
 include $(ESMF_DIR)/makefile
 
@@ -30,17 +34,3 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
-
-# if you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
-
-
-
-
