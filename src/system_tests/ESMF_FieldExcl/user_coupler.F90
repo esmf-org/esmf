@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2004/10/11 22:45:18 nscollins Exp $
+! $Id: user_coupler.F90,v 1.4 2004/10/11 22:54:08 jwolfe Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -13,8 +13,6 @@
 !
 !\begin{verbatim}
 
-#include "ESMF.h"
-
     module user_coupler
 
     ! ESMF Framework module
@@ -26,10 +24,6 @@
         
     ! global data
     type(ESMF_RouteHandle), save :: routehandle
-
-    type wrap2DR8
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: value
-    end type
 
     contains
 
@@ -75,22 +69,18 @@
       ! Local variables
       integer :: itemcount, status
       type(ESMF_Field) :: humidity1, humidity2
-      type(ESMF_Field) :: humidity1proxy, humidity2proxy
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: cplDElayout, delayout
-      type(ESMF_Array) :: array1, array2, array1p, array2p
+      type(ESMF_Array) :: array1, array2
       type(ESMF_ArraySpec) :: arrayspec
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: array1ptr, array1pptr
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: array2ptr, array2pptr
       type(ESMF_Grid) :: grid1, grid2
       real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
       real(ESMF_KIND_R8) :: min(2), max(2)
-      integer :: counts(ESMF_MAXGRIDDIM), lb(ESMF_MAXDIM)
+      integer :: counts(ESMF_MAXGRIDDIM)
       integer :: npets, pet_id, countsPerDE1(4), countsPerDE2(2)
       logical :: i_have_comp1, i_have_comp2
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       type(ESMF_GridHorzStagger) :: horz_stagger
-      type(wrap2DR8) :: wrap
 
 
       print *, "User Coupler Init starting"
@@ -119,130 +109,100 @@
       call ESMF_StateReconcile(importState, vm, rc=status)
       call ESMF_StateReconcile(exportState, vm, rc=status)
 
-
       ! Query component for VM and create a layout with the right breakdown
       delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
+      ! Set up a 2D real arrayspec
+      call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
+                             kind=ESMF_R8)
+      if (status .ne. ESMF_SUCCESS) goto 10
+
       print *, pet_id, "User Comp 1 Init proxy creation starting"
 
-      ! Add a "humidity" field to the export state.
-      countsPerDE1 = (/ 15, 15, 15, 15 /)
-      countsPerDE2 = (/ 40, 0 /)
+      if (.not.i_have_comp1) then
+        ! Add a "humidity" field to the export state.
+        countsPerDE1 = (/ 15, 15, 15, 15 /)
+        countsPerDE2 = (/ 40, 0 /)
 
-      counts(1) = 60
-      counts(2) = 40
-      min(1) = 0.0
-      max(1) = 60.0
-      min(2) = 0.0
-      max(2) = 50.0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+        counts(1) = 60
+        counts(2) = 40
+        min(1) = 0.0
+        max(1) = 60.0
+        min(2) = 0.0
+        max(2) = 50.0
+        horz_stagger = ESMF_GRID_HORZ_STAGGER_A
 
-      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
-                                minGlobalCoordPerDim=min, &
-                                maxGlobalCoordPerDim=max, &
-                                horzStagger=horz_stagger, &
-                                name="source grid", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridDistribute(grid1, delayout=delayout, &
+        grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                  minGlobalCoordPerDim=min, &
+                                  maxGlobalCoordPerDim=max, &
+                                  horzStagger=horz_stagger, &
+                                  name="source grid", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_GridDistribute(grid1, delayout=delayout, &
                                  countsPerDEDim1=countsPerDE1, &
                                  countsPerDEDim2=countsPerDE2, &
                                  rc=status)
 
-      if (status .ne. ESMF_SUCCESS) goto 10
-
-      ! Set up a 2D real array
-      call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                              kind=ESMF_R8)
-      if (status .ne. ESMF_SUCCESS) goto 10
-
-      ! Create the field and have it create the array internally
-      humidity1proxy = ESMF_FieldCreate(grid1, arrayspec, &
-                                 horzRelloc=ESMF_CELL_CENTER, &
-                                 haloWidth=0, name="humidity1proxy", rc=status)
-
-      ! Get array from import state to add to this field
-      if (i_have_comp1) then
-        call ESMF_StateGetField(importstate, "humidity", humidity1, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_FieldGetDataPointer(humidity1, array1ptr, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_FieldGetArray(humidity1proxy, array1p, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        ! point at real data where we have it
-        wrap%value => array1ptr
-        call c_ESMC_ArraySetF90Ptr(array1p, wrap, status)
-        lb(1:2) = lbound(array1ptr)
-        call c_ESMC_ArraySetBaseAddr(array1p, &
-                  ESMF_DATA_ADDRESS(array1ptr(lb(1), lb(2))), status)
+        ! Create the field and have it create the array internally
+        humidity1 = ESMF_FieldCreate(grid1, arrayspec, &
+                                   horzRelloc=ESMF_CELL_CENTER, &
+                                   haloWidth=0, name="humidity1", rc=status)
+
+        call ESMF_StateAddField(importState, humidity1, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+  !     call ESMF_StatePrint(importState, rc=status)
+
+        print *, pet_id, "end of proxy field 1 creation"
       endif
-
-      call ESMF_StateAddField(importState, humidity1proxy, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-  !   call ESMF_StatePrint(importState, rc=status)
-
-      print *, pet_id, "end of proxy field 1 creation"
    
 
       ! Query component for VM and create a layout with the right breakdown
       print *, pet_id, "User Comp 2 Init starting"
 
-      ! Add a "humidity" field to the import state.
-      countsPerDE1 = (/ 10, 6, 12, 12 /)
-      countsPerDE2 = (/ 0, 50 /)
-      min(1) = 0.0
-      delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
-                  1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
-                  1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
-                  2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
-      min(2) = 0.0
-      delta2 = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
-                  0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
-                  1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
-                  1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
-                  1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
-      min(1) = 0.0
-      min(2) = 0.0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
+      if (.not.i_have_comp2) then
+        ! Add a "humidity" field to the import state.
+        countsPerDE1 = (/ 10, 6, 12, 12 /)
+        countsPerDE2 = (/ 0, 50 /)
+        min(1) = 0.0
+        delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
+                    1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
+                    1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
+                    2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
+        min(2) = 0.0
+        delta2 = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
+                    0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
+                    1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
+                    1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
+                    1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
+        min(1) = 0.0
+        min(2) = 0.0
+        horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
 
-      grid2 = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=min, &
-                                    delta1=delta1, delta2=delta2, &
-                                    horzStagger=horz_stagger, &
-                                    name="source grid", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridDistribute(grid2, delayout=delayout, &
-                               countsPerDEDim1=countsPerDE1, &
-                               countsPerDEDim2=countsPerDE2, &
-                               rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-
-
-      ! Create the field and have it create the array internally
-      humidity2proxy = ESMF_FieldCreate(grid2, arrayspec, &
-                                 horzRelloc=ESMF_CELL_NFACE, &
-                                 haloWidth=0, name="humidity2proxy", rc=status)
-
-      if (i_have_comp2) then
-        ! Get array from import state to add to this field
-        call ESMF_StateGetField(exportstate, "humidity",  humidity2, rc=status)
+        grid2 = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=min, &
+                                      delta1=delta1, delta2=delta2, &
+                                      horzStagger=horz_stagger, &
+                                      name="source grid", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_FieldGetDataPointer(humidity2, array2ptr, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_FieldGetArray(humidity2proxy, array2p, rc=status)
+        call ESMF_GridDistribute(grid2, delayout=delayout, &
+                                 countsPerDEDim1=countsPerDE1, &
+                                 countsPerDEDim2=countsPerDE2, &
+                                 rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        ! point at real data where we have it
-        wrap%value => array2ptr
-        call c_ESMC_ArraySetF90Ptr(array2p, wrap, status)
-        lb(1:2) = lbound(array2ptr)
-        call c_ESMC_ArraySetBaseAddr(array2p, &
-                  ESMF_DATA_ADDRESS(array2ptr(lb(1), lb(2))), status)
+
+        ! Create the field and have it create the array internally
+        humidity2 = ESMF_FieldCreate(grid2, arrayspec, &
+                                     horzRelloc=ESMF_CELL_NFACE, &
+                                     haloWidth=0, name="humidity2", rc=status)
+  
+        call ESMF_StateAddField(exportState, humidity2, rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        !   call ESMF_StatePrint(exportState, rc=status)
+
       endif
-
-      call ESMF_StateAddField(exportState, humidity2proxy, rc)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      !   call ESMF_StatePrint(exportState, rc=status)
   
       print *, pet_id, "User Comp 2 Init returning"
   
@@ -253,11 +213,11 @@
        
 
       ! Get input data
-      call ESMF_StateGetField(importState, "humidity1proxy", humidity1, rc=status)
+      call ESMF_StateGetField(importState, "humidity1", humidity1, rc=status)
       ! call ESMF_FieldPrint(humidity1, rc=status)
 
       ! Get location of output data
-      call ESMF_StateGetField(exportState, "humidity2proxy", humidity2, rc=status)
+      call ESMF_StateGetField(exportState, "humidity2", humidity2, rc=status)
       ! call ESMF_FieldPrint(humidity2, rc=status)
 
       ! Create a layout with all the PETs
@@ -301,11 +261,11 @@
       print *, "User Coupler Run starting"
 
       ! Get input data
-      call ESMF_StateGetField(importState, "humidity1proxy", humidity1, rc=status)
+      call ESMF_StateGetField(importState, "humidity1", humidity1, rc=status)
       ! call ESMF_FieldPrint(humidity1, rc=status)
 
       ! Get location of output data
-      call ESMF_StateGetField(exportState, "humidity2proxy", humidity2, rc=status)
+      call ESMF_StateGetField(exportState, "humidity2", humidity2, rc=status)
       ! call ESMF_FieldPrint(humidity2, rc=status)
 
       ! These are fields on different Grids - call Regrid to rearrange
