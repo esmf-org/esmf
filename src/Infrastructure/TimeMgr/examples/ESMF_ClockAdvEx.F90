@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.4 2003/05/07 21:25:46 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.5 2003/05/07 21:42:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.4 2003/05/07 21:25:46 eschwab Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.5 2003/05/07 21:42:11 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -48,9 +48,9 @@
 
       ! temp variables for Get functions
       integer :: MM, DD, H, M, yD
-      type(ESMF_TimeInterval) :: time_step
+      type(ESMF_TimeInterval) :: time_step, time_step_copy
       type(ESMF_TimeInterval) :: time_diff
-      type(ESMF_Time) :: curr_time
+      type(ESMF_Time) :: curr_time, curr_time_copy
       integer(ESMF_IKIND_I8) :: advanceCount, YR, D, S
       double precision :: d_
       logical alarmRinging
@@ -160,6 +160,19 @@
       call ESMF_ClockGetPrevSimTime(clock, prevSimTime, rc)
       call ESMF_TimeIntervalGet(prevSimTime, D=D, S=S, rc=rc)
       print *, "Clock's previous simulation time = ", D, " days", S, " seconds."
+      print *
+
+      !
+      ! copy time step and current time
+      !
+
+      time_step_copy = time_step
+      print *, "Time step copy = "
+      call ESMF_TimeIntervalPrint(time_step_copy, "string", rc)
+
+      curr_time_copy = curr_time
+      print *, "Current time copy = "
+      call ESMF_TimePrint(curr_time_copy, "string", rc)
 
       !
       ! change time step and current time
@@ -178,9 +191,8 @@
       print *, "Previous time = "
       call ESMF_ClockPrint(clock, "prevtime string", rc)
 
-      curr_time = refTime  ! copy refTime to get calendar
-      call ESMF_TimeSet(curr_time, YR=int(1776,kind=ESMF_IKIND_I8), &
-                         MM=7, DD=4, rc=rc)
+      call ESMF_TimeInit(curr_time, YR=int(1776,kind=ESMF_IKIND_I8), &
+                         MM=7, DD=4, cal=gregorianCalendar, rc=rc)
       call ESMF_ClockSetCurrTime(clock, curr_time, rc)
       print *, "Current Time changed to = "
       call ESMF_ClockPrint(clock, "currtime string", rc)
