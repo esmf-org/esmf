@@ -64,6 +64,7 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_ClockCreate
+      public ESMF_ClockCreateCopy
       public ESMF_ClockDestroy
       public ESMF_ClockSet
       public ESMF_ClockGet
@@ -95,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.39 2004/01/30 19:57:14 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.40 2004/01/31 02:25:42 eschwab Exp $'
 
 !==============================================================================
 !
@@ -146,7 +147,7 @@
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Sets the initial values in an {\tt ESMF\_Clock}.    
+!     Creates and sets the initial values in an {\tt ESMF\_Clock}.    
 !     
 !     The arguments are:
 !     \begin{description}
@@ -197,6 +198,39 @@
                               runTimeStepCount, refTime, rc)
 
       end function ESMF_ClockCreate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockCreateCopy - Create a copy of a Clock
+
+! !INTERFACE:
+      function ESMF_ClockCreateCopy(clock, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Clock) :: ESMF_ClockCreateCopy
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in)            :: clock
+      integer,          intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Creates a copy of a given {\tt ESMF\_Clock}.    
+!     
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!        The {\tt ESMF\_Clock} to copy.
+!     \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!     
+!EOP
+! !REQUIREMENTS:
+
+!     invoke C to C++ entry point to copy clock
+      call c_ESMC_ClockCreateCopy(ESMF_ClockCreateCopy, clock, rc)
+
+      end function ESMF_ClockCreateCopy
 
 !------------------------------------------------------------------------------
 !BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.43 2004/01/30 19:57:14 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.44 2004/01/31 02:25:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.43 2004/01/30 19:57:14 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.44 2004/01/31 02:25:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -54,7 +54,7 @@ int ESMC_Clock::count=0;
       ESMC_Clock *ESMC_ClockCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Alarm
+//     pointer to newly allocated ESMC_Clock
 //
 // !ARGUMENTS:
       int                nameLen,          // in
@@ -130,6 +130,51 @@ int ESMC_Clock::count=0;
     return(clock);
 
  } // end ESMC_ClockCreate
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockCreateCopy - Creates a copy of a clock
+//
+// !INTERFACE:
+      ESMC_Clock *ESMC_ClockCreateCopy(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Clock
+//
+// !ARGUMENTS:
+      ESMC_Clock *clock,  // in
+      int        *rc) {   // out - return code
+
+// !DESCRIPTION:
+//      Creates a new copy of the given clock.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int returnCode;
+    ESMC_Clock *clockCopy;
+
+    try {
+      // allocate new clock and pass given clock to copy constructor.
+      clockCopy = new ESMC_Clock(*clock);
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_ClockCreateCopy() memory allocation failed\n";
+      if (rc != ESMC_NULL_POINTER) {
+        *rc = ESMF_FAILURE;
+      }
+      return(ESMC_NULL_POINTER);
+    }
+
+    returnCode = clockCopy->ESMC_ClockValidate();
+    if (rc != ESMC_NULL_POINTER) {
+      *rc = returnCode;
+    }
+
+    return(clockCopy);
+
+ } // end ESMC_ClockCreateCopy
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1047,6 +1092,29 @@ int ESMC_Clock::count=0;
     advanceCount = 0;
     alarmCount = 0;
     id = ++count;  // TODO: inherit from ESMC_Base class
+
+ } // end ESMC_Clock
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Clock - native C++ copy constructor
+//
+// !INTERFACE:
+      ESMC_Clock::ESMC_Clock(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+      const ESMC_Clock &clock) {  // in - clock to copy
+//
+// !DESCRIPTION:
+//      Copies members of given clock.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    *this = clock;
 
  } // end ESMC_Clock
 

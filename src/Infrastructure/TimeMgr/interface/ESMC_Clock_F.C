@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.22 2004/01/30 19:57:14 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.23 2004/01/31 02:25:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,6 +61,16 @@ extern "C" {
                     ((void*) refTime     == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : refTime),
                     ((void*) status      == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : status) );
+       }
+
+       void FTN(c_esmc_clockcreatecopy)(ESMC_Clock **ptr,
+                                        ESMC_Clock **clock,
+                                        int *status) {
+          *ptr = ESMC_ClockCreateCopy(
+                    *clock,   // required
+
+                    ((void*) status == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : status) );
        }
 

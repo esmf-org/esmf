@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.28 2004/01/30 19:57:12 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.29 2004/01/31 02:25:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -190,6 +190,7 @@
 
     // native C++ constructors/destructors
     ESMC_Clock(void);
+    ESMC_Clock(const ESMC_Clock &clock);
     ~ESMC_Clock(void);
 
  // < declare the rest of the public interface methods here >
@@ -200,6 +201,9 @@
                                  ESMC_Time*, ESMC_Time*, ESMC_TimeInterval*,
                                  int*, ESMC_Time*, int*);
 // TODO: add overload for ESMF_KIND_R8  *runTimeStepCount
+
+    // friend function to copy a clock
+    friend ESMC_Clock *ESMC_ClockCreateCopy(ESMC_Clock*, int*);
 
     // friend function to de-allocate clock
     friend int ESMC_ClockDestroy(ESMC_Clock *);
@@ -244,6 +248,9 @@
 // TODO: add overload for ESMF_KIND_R8             *runTimeStepCount=0,
                                  ESMC_Time*         refTime=0,
                                  int*               rc=0);
+
+    // friend function to copy a clock
+    ESMC_Clock *ESMC_ClockCreateCopy(ESMC_Clock *clock, int *rc=0);
 
     // friend function to de-allocate clock
     int ESMC_ClockDestroy(ESMC_Clock *clock);
