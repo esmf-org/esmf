@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2004/11/04 17:40:05 theurich Exp $
+# $Id: build_rules.mk,v 1.21 2004/11/19 16:14:00 theurich Exp $
 #
 # Linux.intel.default.mk
 #
@@ -137,9 +137,9 @@ CXX_CC		   = mpiCC -size_lp64
 C_FC		   = mpif90 -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
-C_CC		   = mpicc
-CXX_CC		   = mpiCC 
-C_FC		   = mpif90
+C_CC		   = mpicc -pthread
+CXX_CC		   = mpiCC -pthread
+C_FC		   = mpif90 -pthread
 endif
 endif
 
