@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.44 2004/04/05 20:39:31 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.45 2004/04/08 16:14:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@
       public ESMF_RouteRunF90PtrI421D
       public ESMF_RouteRunF90PtrR811D
       public ESMF_RouteRunF90PtrR821D
-      public ESMF_RouteRunF90PtrR831D
+      public ESMF_RouteRunF90PtrR832D
  
       public ESMF_RouteValidate
       public ESMF_RoutePrint
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.44 2004/04/05 20:39:31 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.45 2004/04/08 16:14:28 nscollins Exp $'
 
 !==============================================================================
 !
@@ -970,15 +970,15 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RouteRunF90PtrR831D - Execute the communications the Route represents
+! !IROUTINE: ESMF_RouteRunF90PtrR832D - Execute the communications the Route represents
 
 ! !INTERFACE:
-      subroutine ESMF_RouteRunF90PtrR831D(route, srcarray, dstarray, rc)
+      subroutine ESMF_RouteRunF90PtrR832D(route, srcarray, dstarray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       real(ESMF_KIND_R8), pointer, optional :: srcarray(:,:,:)
-      real(ESMF_KIND_R8), pointer, optional :: dstarray(:)
+      real(ESMF_KIND_R8), pointer, optional :: dstarray(:,:)
       integer, intent(out), optional :: rc            
 
 !
@@ -1023,7 +1023,7 @@
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_RouteRunF90PtrR831D
+        end subroutine ESMF_RouteRunF90PtrR832D
 
 !------------------------------------------------------------------------------
 !BOP
