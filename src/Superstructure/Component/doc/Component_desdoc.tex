@@ -1,0 +1,440 @@
+% $Id: Component_desdoc.tex,v 1.1 2003/01/07 21:34:22 nscollins Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{<Title>}
+\newcommand{\myauthors}{<Authors>}
+
+
+
+\begin{document}
+
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+
+
+\section{Synopsis}
+
+\input{Component_syn}
+
+
+%\section{Algorithmic Description}
+
+%\input{Component_alg}
+
+
+\section{Object Model}
+
+\input{Component_obj}
+
+
+%\section{Global Parameters and Definitions}
+%#ifdef 1 
+%\input{Component_param}
+%#elif defined(CONSTITUENT)
+%\input{comppath/Component_param}
+%#endif
+
+%%%%%%%%%%%%% Component Superclass %%%%%%%%%
+\section{Component Design}
+
+\subsection{Description}
+
+\input{comp_desc}
+
+
+\subsection{Design}
+
+\input{comp_design}
+
+
+\subsubsection{Class Definition}
+
+\input{comp_def}
+
+
+\subsubsection{Restrictions}
+
+\input{comp_rest}
+
+
+\section{Component F90 Interface}
+
+\subsection{Use and Examples}
+
+\input{comp_fex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{comp_fparam}
+
+
+%\subsection{Class API}
+
+\input{comp_fapi}
+
+
+\section{Component C++ Interface}
+
+\subsection{Use and Examples}
+
+\input{comp_ccex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{comp_ccparam}
+
+
+%\subsection{Class API}
+
+\input{comp_ccapi}
+
+
+
+%%%%%%%%%%%%% Application Class %%%%%%%%%
+\section{Application Design}
+
+\subsection{Description}
+
+\input{app_desc}
+
+
+\subsection{Design}
+
+\input{app_design}
+
+
+\subsubsection{Class Definition}
+
+\input{app_def}
+
+
+\subsubsection{Restrictions}
+
+\input{app_rest}
+
+
+\section{Application F90 Interface}
+
+\subsection{Use and Examples}
+
+\input{app_fex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{app_fparam}
+
+
+%\subsection{Class API}
+
+\input{app_fapi}
+
+
+\section{Application C++ Interface}
+
+\subsection{Use and Examples}
+
+\input{app_ccex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{app_ccparam}
+
+
+%\subsection{Class API}
+
+\input{app_ccapi}
+
+
+
+
+
+%%%%%%%%%%%%% Coupler Class %%%%%%%%%
+\section{Coupler Design}
+
+\subsection{Description}
+
+\input{cpl_desc}
+
+
+\subsection{Design}
+
+\input{cpl_design}
+
+
+\subsubsection{Class Definition}
+
+\input{cpl_def}
+
+
+\subsubsection{Restrictions}
+
+\input{cpl_rest}
+
+
+\section{Coupler F90 Interface}
+
+\subsection{Use and Examples}
+
+\input{cpl_fex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{cpl_fparam}
+
+
+%\subsection{Class API}
+
+\input{cpl_fapi}
+
+
+\section{Coupler C++ Interface}
+
+\subsection{Use and Examples}
+
+\input{cpl_ccex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{cpl_ccparam}
+
+
+%\subsection{Class API}
+
+\input{cpl_ccapi}
+
+
+
+
+
+%%%%%%%%%%%%% Gridded Component Class %%%%%%%%%
+\section{Gridded Component Design}
+
+\subsection{Description}
+
+\input{gcomp_desc}
+
+
+\subsection{Design}
+
+\input{gcomp_design}
+
+
+\subsubsection{Class Definition}
+
+\input{gcomp_def}
+
+
+\subsubsection{Restrictions}
+
+\input{gcomp_rest}
+
+
+\section{Gridded Component F90 Interface}
+
+\subsection{Use and Examples}
+
+\input{gcomp_fex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{gcomp_fparam}
+
+
+%\subsection{Class API}
+
+\input{gcomp_fapi}
+
+
+\section{Gridded Component C++ Interface}
+
+\subsection{Use and Examples}
+
+\input{gcomp_ccex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{gcomp_ccparam}
+
+
+%\subsection{Class API}
+
+\input{gcomp_ccapi}
+
+
+
+
+%%%%%%%%%%%%% State Class %%%%%%%%%
+\section{State Design}
+
+\subsection{Description}
+
+\input{state_desc}
+
+
+\subsection{Design}
+
+\input{state_design}
+
+
+\subsubsection{Class Definition}
+
+\input{state_def}
+
+
+\subsubsection{Restrictions}
+
+\input{state_rest}
+
+
+\section{State F90 Interface}
+
+\subsection{Use and Examples}
+
+\input{state_fex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{state_fparam}
+
+
+%\subsection{Class API}
+
+\input{state_fapi}
+
+
+\section{State C++ Interface}
+
+\subsection{Use and Examples}
+
+\input{state_ccex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{state_ccparam}
+
+
+%\subsection{Class API}
+
+\input{state_ccapi}
+
+
+
+
+%%%%%%%%%%%%% Transform Class %%%%%%%%%
+\section{Transform Design}
+
+\subsection{Description}
+
+\input{xform_desc}
+
+
+\subsection{Design}
+
+\input{xform_design}
+
+
+\subsubsection{Class Definition}
+
+\input{xform_def}
+
+
+\subsubsection{Restrictions}
+
+\input{xform_rest}
+
+
+\section{Transform F90 Interface}
+
+\subsection{Use and Examples}
+
+\input{xform_fex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{xform_fparam}
+
+
+%\subsection{Class API}
+
+\input{xform_fapi}
+
+
+\section{Transform C++ Interface}
+
+\subsection{Use and Examples}
+
+\input{xform_ccex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{xform_ccparam}
+
+
+%\subsection{Class API}
+
+\input{xform_ccapi}
+
+
+
+%%%%%%% end class sections %%%%%%%%
+
+
+\section{Review Status}
+\input{Component_desrev}
+
+
+
+%\section{Glossary}
+\input{Component_glos}
+
+
+
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+
+
+
+\end{document}
+
