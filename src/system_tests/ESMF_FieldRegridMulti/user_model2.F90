@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2004/02/20 21:27:12 jwolfe Exp $
+! $Id: user_model2.F90,v 1.4 2004/03/04 18:19:27 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -287,7 +287,7 @@
       call ESMF_FieldGetRelLoc(humidity, horizRelloc=relloc, rc=status)
       call ESMF_FieldGetGrid(humidity, grid, rc=status)
       call ESMF_GridGetDE(grid, myDE=myDE, localCellCountPerDim=counts, &
-                          rc=status)
+                          horzRelloc=ESMF_CELL_CENTER, rc=status)
       call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &
                               rc=status)
       call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
