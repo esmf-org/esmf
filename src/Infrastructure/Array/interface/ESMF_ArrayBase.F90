@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.27 2004/01/28 21:46:48 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.28 2004/02/11 16:31:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.27 2004/01/28 21:46:48 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.28 2004/02/11 16:31:24 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -831,6 +831,13 @@ end subroutine
        if (present(rc)) then
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
+       endif
+
+       if (array%this .eq. ESMF_NULL_POINTER) then
+         print *, "Array Print:"
+         print *, " Empty or Uninitialized Array"
+         if (present(rc)) rc = ESMF_SUCCESS
+         return
        endif
 
        defaultopts = "brief"
