@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.19 2004/03/16 22:01:37 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.20 2004/03/17 18:10:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 
 
 #define ArrayLocalVarMacro(mname, mtypekind, mrank, mdim) \
-        type(ESMF_ArrWrap##mrank##D##mtypekind) :: local##mrank##D##mtypekind
+        type(ESMF_ArrWrap##mrank##D##mtypekind) :: l##mrank##D##mtypekind
 
 
 #if 0
