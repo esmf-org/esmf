@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.32 2004/01/29 04:44:34 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.33 2004/02/05 21:29:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,6 +44,7 @@
       type(ESMF_TimeInterval) :: time_diff
       integer(ESMF_KIND_I8) :: advanceCount
       real(ESMF_KIND_R8) :: days_r8
+      type(ESMF_Calendar) :: cal
       integer :: rc
 !\end{verbatim}
 !EOP
@@ -117,7 +118,7 @@
 !BOP
 !\begin{verbatim}
       ! print starting time (initial current time)
-      call ESMF_ClockPrint(clock, "currtime string", rc)
+      call ESMF_ClockPrint(clock, "currTime string", rc)
 !\end{verbatim}
 !EOP
 
@@ -151,7 +152,7 @@
 
 !BOP
 !\begin{verbatim}
-        call ESMF_ClockPrint(clock, "currtime string", rc)
+        call ESMF_ClockPrint(clock, "currTime string", rc)
 !\end{verbatim}
 !EOP
 
@@ -177,7 +178,7 @@
 
 !BOP
 !\begin{verbatim}
-      call ESMF_ClockPrint(clock, "timestep string", rc)
+      call ESMF_ClockPrint(clock, "timeStep string", rc)
 !\end{verbatim}
 !EOP
 
@@ -231,6 +232,27 @@
       call ESMF_TimeGet(stopTime, dayOfYear=yD, rc=rc)
 
       print *, "Stop time's integer day of the year = ", yD
+!\end{verbatim}
+!EOP
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+      ! get clock's calendar
+      call ESMF_ClockGet(clock, calendar=cal, rc=rc)
+      print *, "Clock's calendar type = "
+!\end{verbatim}
+!EOP
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+      call ESMF_CalendarPrint(cal, "calendarType", rc)
 !\end{verbatim}
 !EOP
 
