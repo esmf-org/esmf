@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2004/06/17 17:03:42 theurich Exp $
+# $Id: makefile,v 1.9 2004/06/17 18:36:20 theurich Exp $
 
 ALL: build_examples
 
@@ -60,7 +60,7 @@ LOCDIR	  = src/Infrastructure/VM/examples
 
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
                     $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx \
-                    $(ESMF_EXDIR)/ESMF_VMTest3Ex \
+                    $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx \
                     $(ESMF_EXDIR)/ESMF_VMTest4Ex \
                     $(ESMF_EXDIR)/ESMF_VMTest5Ex \
                     $(ESMF_EXDIR)/ESMF_VMTest6Ex
@@ -72,10 +72,12 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
 #
 
 EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
-                    run_ESMF_VMGetMPICommunicatorEx
+                    run_ESMF_VMGetMPICommunicatorEx \
+                    run_ESMF_VMSendVMRecvEx
 
 EXAMPLES_RUN_UNI  = run_ESMF_VMTest1Ex_uni \
-                    run_ESMF_VMGetMPICommunicatorEx_uni
+                    run_ESMF_VMGetMPICommunicatorEx_uni \
+                    run_ESMF_VMSendVMRecvEx_uni
 
 
 include $(ESMF_DIR)/makefile
@@ -87,7 +89,7 @@ CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 #
-#  ESMF_VMTest1
+#  Run targets
 #
 run_ESMF_VMDefaultBasicsEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx > $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx.stdout
@@ -100,6 +102,12 @@ run_ESMF_VMGetMPICommunicatorEx:
 
 run_ESMF_VMGetMPICommunicatorEx_uni:
 	echo "ESMF_VMGetMPICommunicatorEx not set up to run on one processor."
+
+run_ESMF_VMSendVMRecvEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx > $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx.stdout
+
+run_ESMF_VMSendVMRecvEx_uni:
+	echo "ESMF_VMSendVMRecvEx not set up to run on one processor."
 
 
 
