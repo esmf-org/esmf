@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMemEx.C,v 1.3 2004/01/09 21:00:11 svasquez Exp $
+// $Id: ESMC_CommMemEx.C,v 1.4 2004/01/09 21:29:50 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,6 +33,7 @@
 #include <ESMC_PEList.h>
 #include <ESMC_Comm.h>
 #include <ESMC_DELayout.h>
+#include <ESMC_Comp.h>
 #include <iostream.h>
 //#include <iostream> // TODO: use when namespaces consistently implemented
 //using std::cout; 
@@ -74,6 +75,9 @@ int main(int argc, char **argv)
 {
   // Define return codes
   int  *threadrc, rc, finalrc=ESMF_SUCCESS;
+
+  //rc = ESMC_Initialize();
+
   // allocate ESMC_Comm_tid array to share with ESMC_Comm
   ESMC_Comm_tid = new pthread_t[ESMC_COMM_NTHREADSPERPROC];
 
@@ -94,7 +98,7 @@ int main(int argc, char **argv)
   }
 
   // allow other threads to start before main thread continues
-  sleep(1);  // TODO:  ?? avoids MPI_Init() vs. thread creation race condition
+  sleep(10);  // TODO:  ?? avoids MPI_Init() vs. thread creation race condition
              //           condition variable initCV in CommInit not enough ? 
              //           - no, doesn't prevent main from racing thru first
              //           need "all threads created" condition variable ?
@@ -123,6 +127,8 @@ int main(int argc, char **argv)
 
 
   }
+
+  //rc = ESMC_Finalize();
 
 }
 
