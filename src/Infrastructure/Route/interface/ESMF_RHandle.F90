@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.4 2003/08/27 23:28:13 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.5 2003/08/29 20:21:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.4 2003/08/27 23:28:13 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.5 2003/08/29 20:21:44 nscollins Exp $'
 
 !==============================================================================
 
@@ -371,6 +371,12 @@
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
+        logical :: changed
+        integer, intent(in), optional :: oldhtype
+        type(ESMF_Route), intent(in), optional :: oldroute1
+        type(ESMF_Route), intent(in), optional :: oldroute2
+        type(ESMF_TransformValues), intent(in), optional :: oldtdata
+        character(len=ESMF_MAXSTR), intent(in), optional :: oldlabel
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -382,33 +388,46 @@
           rc = ESMF_FAILURE
         endif
 
+        ! Get old values and only replace the ones specified.
+        call ESMF_RouteHandleGet(rhandle, oldhtype, oldroute1, oldroute2, &
+                                 oldtdata, oldlabel, status)
+        changed = .false.
+
         if (present(htype)) then
-          ! code to be added here
+          changed = .true.
+          oldhtype = htype
         endif
 
         if (present(route1)) then
-          ! code to be added here
+          changed = .true.
+          oldroute1 = route1
         endif
 
         if (present(route2)) then
-          ! code to be added here
+          changed = .true.
+          oldroute2 = route2
         endif
 
         if (present(tdata)) then
-          ! code to be added here
+          changed = .true.
+          oldtdata = tdata
         endif
 
         if (present(label)) then
-          ! code to be added here
+          changed = .true.
+          oldlabel = label
         endif
 
-        ! Call C++  code
-        ! TODO: handle label string going through the interface
-        call c_ESMC_RouteHandleSet(rhandle, htype, route1, route2, &
-                                   tdata, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RouteHandle Set error"
-          return  
+        ! Overwrite the changed values
+        if (changed) then
+            ! Call C++  code
+            ! TODO: handle label string going through the interface
+            call c_ESMC_RouteHandleSet(rhandle, oldhtype, oldroute1, &
+                                       oldroute2, oldtdata, status)
+            if (status .ne. ESMF_SUCCESS) then  
+              print *, "RouteHandle Set error"
+              return  
+            endif
         endif
 
         if (rcpresent) rc = ESMF_SUCCESS
