@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.26 2004/12/02 18:45:28 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.27 2004/12/03 16:19:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.26 2004/12/02 18:45:28 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.27 2004/12/03 16:19:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -750,12 +750,16 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     cp = (char *)(buffer + *offset);
     
     // TODO: for now, send NULL as the vm, because i do not know how to
-    // serialize a VM.
+    // serialize a VM.   probably sending an integer VM ID number would be
+    // what we want in the long run.
     vp = (ESMC_VM **)cp;   
     *vp++ = NULL;     
 
     ip = (int *)vp;
     *ip++ = ndes;
+    // ndim must be available before decoding the next loop, so it has
+    // to be sent now.
+    *ip++ = ndim;
 
     for (i=0, dep=des; i<ndes; i++, dep++) {
         *ip++ = dep->deid;
@@ -765,21 +769,24 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
         for (j=0; j<ndes; j++) {
             *ip++ = dep->connect_de[j];
             *ip++ = dep->connect_w[j];
-            *ip++ = dep->coord[j];
         }
+        for (j=0; j<ndim; j++) 
+            *ip++ = dep->coord[j];
     }
   
     *ip++ = nmydes;
     for (i=0; i<nmydes; i++) 
         *ip++ = mydes[i];
 
-    *ip++ = ndim;
-    for (i=0; i<ndim; i++) 
-        *ip++ = dims[i];
-
+    // this has to come before dims, since they are not allocated unless
+    // logRectFlag is true.
     lp = (ESMC_Logical *)ip;
-    *lp++ = oneToOneFlag;
     *lp++ = logRectFlag;
+    *lp++ = oneToOneFlag;
+
+    if (logRectFlag == ESMF_TRUE)
+        for (i=0; i<ndim; i++) 
+            *ip++ = dims[i];
 
     cp = (char *)lp;
 
@@ -834,29 +841,42 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     ip = (int *)vp;
     a->ndes = *ip++;
 
+    // ndim must be known before this loop.
+    a->ndim = *ip++;
+    a->des = new de_type[a->ndes];
     for (i=0, dep=a->des; i<a->ndes; i++, dep++) {
         dep->deid = *ip++;
         dep->petid = *ip++;
         dep->pid = *ip++;
         dep->nconnect = *ip++;
+
+        dep->connect_de = new int[dep->nconnect];
+        dep->connect_w = new int[dep->nconnect];
+        dep->coord = new int[a->ndim];
         for (j=0; j<a->ndes; j++) {
             dep->connect_de[j] = *ip++;
             dep->connect_w[j] = *ip++;
-            dep->coord[j] = *ip++;
         }
+        for (j=0; j<a->ndim; j++) 
+            dep->coord[j] = *ip++;
     }
   
     a->nmydes = *ip++;
+    a->mydes = new int[a->nmydes];
     for (i=0; i<a->nmydes; i++) 
         a->mydes[i] = *ip++;
-
-    a->ndim = *ip++;
-    for (i=0; i<a->ndim; i++) 
-        a->dims[i] = *ip++;
-
+  
+    // decode flags first, because dims is not sent unless logRectFlag is true.
     lp = (ESMC_Logical *)ip;
     a->oneToOneFlag = *lp++;
     a->logRectFlag = *lp++;
+
+    if (a->logRectFlag == ESMF_TRUE) {
+        a->dims = new int[a->ndim];
+        for (i=0; i<a->ndim; i++) 
+            a->dims[i] = *ip++;
+    } else
+        a->dims = NULL;
 
     cp = (char *)lp;
 
