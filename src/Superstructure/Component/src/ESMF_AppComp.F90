@@ -1,4 +1,4 @@
-! $Id: ESMF_AppComp.F90,v 1.1 2003/04/28 17:37:36 nscollins Exp $
+! $Id: ESMF_AppComp.F90,v 1.2 2003/04/29 14:44:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_AppComp.F90,v 1.1 2003/04/28 17:37:36 nscollins Exp $'
+      '$Id: ESMF_AppComp.F90,v 1.2 2003/04/29 14:44:18 nscollins Exp $'
 
 !==============================================================================
 
@@ -332,6 +332,12 @@
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        endif
+
+        ! Check to see if already destroyed
+        if (.not.associated(component%compp)) then  
+          print *, "Component already destroyed"
+          return
         endif
 
         ! call Destruct to release resources
