@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2004/11/03 00:14:00 nscollins Exp $
+! $Id: user_model1.F90,v 1.7 2004/12/07 23:36:32 jwolfe Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -72,7 +72,7 @@
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(ESMF_MAXGRIDDIM)
-        integer :: npets, pet_id, countsPerDE1(4), countsPerDE2(1)
+        integer :: npets, pet_id, countsPerDE1(2), countsPerDE2(2)
         type(ESMF_GridHorzStagger) :: horz_stagger
         type(ESMF_Field) :: temp1
         type(ESMF_Bundle) :: bundle1
@@ -87,14 +87,15 @@
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        delayout = ESMF_DELayoutCreate(vm, (/ 4, 1 /), rc=status)
+      !  delayout = ESMF_DELayoutCreate(vm, (/ 4, 1 /), rc=status)
+        delayout = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         print *, pet_id, "User Comp 1 Init starting"
 
         ! Add a "humidity1" field to the export state.
-        countsPerDE1 = (/ 15, 15, 15, 15 /)
-        countsPerDE2 = (/ 40 /)
+        countsPerDE1 = (/ 30, 30 /)
+        countsPerDE2 = (/ 20, 20 /)
 
         counts(1) = 60
         counts(2) = 40
