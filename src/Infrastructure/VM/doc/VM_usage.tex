@@ -1,14 +1,14 @@
-% $Id: VM_usage.tex,v 1.5 2004/05/22 04:44:43 theurich Exp $
+% $Id: VM_usage.tex,v 1.6 2004/06/09 14:00:03 theurich Exp $
 
 The concept of the ESMF virtual machine (VM) is so fundamental to the framework, that every ESMF application uses it. Even in the simplest case, that of an ESMF main program without any components, a global default VM is being created during the {\tt ESMF\_Initialize()} call and removed during {\tt ESMF\_Finalize()}.
 
-By its very nature the VM class is quite different from other ESMF classes. One reflection of this fact is that VM objects appear in the API of infrastructure and superstructure ESMF classes. The first place to encounter a VM object is at the {\tt ESMF\_Initialize()} call. If the optional {\tt vm=} argument is specified the global default VM will be returned to the user code. The default VM can also be obtained throughout the application by calling {\tt ESMF\_VMGetGlobal}.
+By its very nature the VM class is quite different from other ESMF classes. One reflection of this fact is that VM objects appear in the API of infrastructure {\it and} superstructure ESMF classes. The first place to encounter a VM object is at the {\tt ESMF\_Initialize()} call. If the optional {\tt vm=} argument is specified the global default VM will be returned to the user code. The default VM can also be obtained throughout the application by calling {\tt ESMF\_VMGetGlobal}.
 
 The default VM is an MPI--only VM that spans all processes in {\tt MPI\_COMM\_WORLD} and it is the context in which the main program is executing. After the initialization the default VM may be used within the main program in query or communication calls. 
 
 One of the main tasks of the VM class is resource management. Thus the VM plays a major part when a new ESMF component is created. On the parent side of this process the parent VM serves as a contributor of resources. When the parent component creates a child component it provides its own VM object and further may specify a list of resources (in terms of PETs) that it wants to give to the child component. This allows a parent to divide its resources among several children without oversubscribing the computational resources it holds.
 
-On the children side of the creation process each child may set key properties of its VM, i.e. it is up to the child component to decide on how to use the resources it received from the parent component. In the current version of ESMF multi--threading has been deactivated and only the default MPI--only VM option is supported.
+On the children side of the creation process each child may set key properties of its VM, i.e. it is up to the child component to decide on how to use the resources it receives from the parent component. In the current version of ESMF multi--threading has been deactivated and only the default MPI--only VM option is supported.
 
 %TODO: when we allow multi-threading here is the place to describe on how the
 %      child sets its VM properties.
