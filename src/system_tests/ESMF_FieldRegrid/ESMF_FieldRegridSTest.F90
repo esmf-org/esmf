@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.11 2004/01/30 00:34:29 nscollins Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.12 2004/02/01 13:59:46 nscollins Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -42,7 +42,7 @@
     integer :: i, de_id, ndes, mid, rc, delist(64), pid, cid
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_DELayout) :: layout1, layout2, layout3
-    type(ESMF_State) :: c1exp, c2imp, cplstate
+    type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
 
@@ -233,7 +233,6 @@
 
       call ESMF_StateDestroy(c1exp, rc)
       call ESMF_StateDestroy(c2imp, rc)
-      call ESMF_StateDestroy(cplstate, rc)
 
       call ESMF_ClockDestroy(clock, rc)
       call ESMF_CalendarDestroy(gregorianCalendar, rc)

@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2003/10/20 23:46:50 jwolfe Exp $
+! $Id: user_coupler.F90,v 1.3 2004/02/01 13:59:46 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -57,37 +57,30 @@
 !   ! Initialization routine.
  
     
-    subroutine user_init(comp, statelist, clock, rc)
+    subroutine user_init(comp, importstate, exportstate, clock, rc)
       type(ESMF_CplComp) :: comp
-      type(ESMF_State) :: statelist
+      type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: clock
       integer :: rc
 
       ! Local variables
       integer :: itemcount
-      type(ESMF_State) :: state1, state2
       type(ESMF_Field) :: humidity1, humidity2
       type(ESMF_DELayout) :: cpllayout
 
 
       print *, "User Coupler Init starting"
 
-      call ESMF_StateGetInfo(statelist, itemcount=itemcount, rc=rc)
-      print *, "Statelist contains ", itemcount, " items."
+      call ESMF_StateGetInfo(importstate, itemcount=itemcount, rc=rc)
+      print *, "Import State contains ", itemcount, " items."
        
-      call ESMF_StateGetData(statelist, "comp1 export", state1, rc)
-   !   call ESMF_StatePrint(state1, rc=rc)
-
-      call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
-   !   call ESMF_StatePrint(state2, rc=rc)
-
       ! Get input data
-      call ESMF_StateGetData(state1, "humidity", humidity1, rc=rc)
-   !   call ESMF_FieldPrint(humidity1, rc=rc)
+      call ESMF_StateGetField(importstate, "humidity", humidity1, rc=rc)
+      ! call ESMF_FieldPrint(humidity1, rc=rc)
 
       ! Get location of output data
-      call ESMF_StateGetData(state2, "humidity", humidity2, rc=rc)
-   !   call ESMF_FieldPrint(humidity2, rc=rc)
+      call ESMF_StateGetField(exportstate, "humidity", humidity2, rc=rc)
+      ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! Get layout from coupler component
       call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
@@ -113,14 +106,13 @@
 !   !  The Run routine where data is coupled.
 !   !
  
-    subroutine user_run(comp, statelist, clock, rc)
+    subroutine user_run(comp, importstate, exportstate, clock, rc)
       type(ESMF_CplComp) :: comp
-      type(ESMF_State) :: statelist
+      type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: clock
       integer :: rc
 
       ! Local variables
-      type(ESMF_State) :: mysource, mydest
       type(ESMF_Field) :: humidity1, humidity2
       type(ESMF_DELayout) :: cpllayout
       integer :: status
@@ -128,31 +120,24 @@
       print *, "User Coupler Run starting"
 
       ! Get input data
-      call ESMF_StateGetData(statelist, "comp1 export", mysource, rc)
-  !    call ESMF_StatePrint(mysource, rc=status)
-      call ESMF_StateGetData(mysource, "humidity", humidity1, rc=status)
-  !    call ESMF_FieldPrint(humidity1, rc=status)
+      call ESMF_StateGetField(importstate, "humidity", humidity1, rc=rc)
+      ! call ESMF_FieldPrint(humidity1, rc=rc)
 
       ! Get location of output data
-      call ESMF_StateGetData(statelist, "comp2 import", mydest, rc)
-  !    call ESMF_StatePrint(mydest, rc=status)
-      call ESMF_StateGetData(mydest, "humidity", humidity2, rc=status)
-  !    call ESMF_FieldPrint(humidity1, rc=status)
+      call ESMF_StateGetField(exportstate, "humidity", humidity2, rc=rc)
+      ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! Get layout from coupler component
       call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
 
       ! These are fields on different Grids - call Regrid to rearrange
-      !  the data.  nsc - i think even if we make a regrid object, that
-      !  this will still be a field method and take a regrid argument?
-      !  The communication and weights have been precomputed during the
-      !  init phase.
+      !  the data.   The communication pattern was computed at init,
+      !  this simply has to execute the send and receive equivalents.
 
       call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=status)
 
-      ! Set output data
-      call ESMF_StateAddData(mydest, humidity2, rc=status)
-   !   call ESMF_StatePrint(mydest, rc=status)
+      ! Data is moved directly to the field in the output state, so no
+      ! "put" is needed here.
  
       print *, "User Coupler Run returning"
 
@@ -165,9 +150,9 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, statelist, clock, rc)
+    subroutine user_final(comp, importstate, exportstate, clock, rc)
       type(ESMF_CplComp) :: comp
-      type(ESMF_State) :: statelist
+      type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: clock
       integer :: rc
 
@@ -175,11 +160,6 @@
       type(ESMF_State) :: state1, state2
 
       print *, "User Coupler Final starting"
-      call ESMF_StateGetData(statelist, "comp1 export", state1, rc)
-   !   call ESMF_StatePrint(state1, rc=rc)
-
-      call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
-   !   call ESMF_StatePrint(state2, rc=rc)
    
       ! Release resources stored for the Regridding.
       call ESMF_FieldRegridRelease(routehandle, rc)

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.1 2003/10/09 20:56:13 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.2 2004/02/01 13:59:46 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -29,164 +29,160 @@
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
-    subroutine Coupler_register(comp, rc)
-        type(ESMF_CplComp), intent(inout) :: comp
-        integer, intent(out) :: rc
+  subroutine Coupler_register(comp, rc)
+      type(ESMF_CplComp), intent(inout) :: comp
+      integer, intent(out) :: rc
 
-        print *, "in user setservices routine"
+      print *, "in user setservices routine"
 
-        ! Register the callback routines.
+      ! Register the callback routines.
 
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, coupler_init, &
-                                                  ESMF_SINGLEPHASE, rc)
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, coupler_run, &
-                                                  ESMF_SINGLEPHASE, rc)
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, coupler_final, &
-                                                  ESMF_SINGLEPHASE, rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, coupler_init, &
+                                                ESMF_SINGLEPHASE, rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, coupler_run, &
+                                                ESMF_SINGLEPHASE, rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, coupler_final, &
+                                                ESMF_SINGLEPHASE, rc)
 
-        print *, "Registered Initialize, Run, and Finalize routines"
+      print *, "Registered Initialize, Run, and Finalize routines"
 
-        rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
-    end subroutine
+  end subroutine
 
 !-------------------------------------------------------------------------
 !   !  Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
  
     
-    subroutine coupler_init(comp, statelist, clock, rc)
-        type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: statelist
-        type(ESMF_Clock) :: clock
-        integer :: rc
+  subroutine coupler_init(comp, importstate, exportstate, clock, rc)
+      type(ESMF_CplComp) :: comp
+      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_Clock) :: clock
+      integer :: rc
 
-!     ! Local variables
-        type(ESMF_State) :: flowstates, injectstates
-        type(ESMF_State) :: toflow, fromflow
-        type(ESMF_State) :: toinject, frominject
+      ! Local variables
+      character (len=ESMF_MAXSTR) :: statename
 
-        print *, "Coupler Init starting"
+      print *, "Coupler Init starting"
 
-        call ESMF_StateGetData(statelist, &
-                     "Coupler States FlowSolver to Injector", flowstates, rc)
+      call ESMF_StateGetName(importstate, statename, rc)
+      if (trim(statename) .eq. "FlowSolver Feedback") then
 
-        call ESMF_StateGetData(flowstates, "FlowSolver Feedback", fromflow, rc)
-        call ESMF_StateSetNeeded(fromflow, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(fromflow, "V", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(fromflow, "RHO", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(fromflow, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importstate, "SIE", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
 
-        call ESMF_StateGetData(statelist, &
-                       "Coupler States Injector to FlowSolver", injectstates, rc)
+      endif
 
-        call ESMF_StateGetData(injectstates, "Injection Feedback", frominject, rc)
-        call ESMF_StateSetNeeded(frominject, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(frominject, "V", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(frominject, "RHO", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(frominject, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+      if (trim(statename) .eq. "Injection Feedback") then
 
-        print *, "Coupler Init returning"
-   
-        rc = ESMF_SUCCESS
+        call ESMF_StateSetNeeded(importstate, "SIE", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
 
-    end subroutine coupler_init
+      endif
+
+      print *, "Coupler Init returning"
+ 
+      rc = ESMF_SUCCESS
+
+  end subroutine coupler_init
 
 
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is coupled.
 !   !
  
-    subroutine coupler_run(comp, statelist, clock, rc)
-        type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: statelist
-        type(ESMF_Clock) :: clock
-        integer :: rc
+  subroutine coupler_run(comp, importstate, exportstate, clock, rc)
+      type(ESMF_CplComp) :: comp
+      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_Clock) :: clock
+      integer :: rc
 
-      ! Local variables
-        type(ESMF_State) :: toflow, toinjector
-        type(ESMF_State) :: mysource, mydest
-        type(ESMF_Field) :: srcfield, dstfield
-        type(ESMF_Array) :: srcarray, dstarray
-        real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: srcptr, dstptr
-        type(ESMF_DELayout) :: cpllayout
-      
-        character(len=ESMF_MAXSTR) :: statename
-       
-        integer :: status
-        integer :: i, datacount
-        character(len=ESMF_MAXSTR), dimension(7) :: datanames
+    ! Local variables
+      type(ESMF_State) :: toflow, toinjector
+      type(ESMF_State) :: mysource, mydest
+      type(ESMF_Field) :: srcfield, dstfield
+      type(ESMF_Array) :: srcarray, dstarray
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: srcptr, dstptr
+      type(ESMF_DELayout) :: cpllayout
+    
+      character(len=ESMF_MAXSTR) :: statename
+     
+      integer :: status
+      integer :: i, datacount
+      character(len=ESMF_MAXSTR), dimension(7) :: datanames
+      logical :: injecttoflow
 
-        datacount = 7
-        datanames(1) = "SIE"
-        datanames(2) = "U"
-        datanames(3) = "V"
-        datanames(4) = "RHO"
-        datanames(5) = "P"
-        datanames(6) = "Q"
-        datanames(7) = "FLAG"
+      datacount = 7
+      datanames(1) = "SIE"
+      datanames(2) = "U"
+      datanames(3) = "V"
+      datanames(4) = "RHO"
+      datanames(5) = "P"
+      datanames(6) = "Q"
+      datanames(7) = "FLAG"
 
-        ! Find which direction we are coupling based on the name of the state we have.
-        call ESMF_StateGetName(statelist, statename, rc)
-        if (trim(statename) .eq. "Coupler States Injector to FlowSolver") then
+      ! In this case, we don't actually care which way we're coupling,
+      ! since the transformations are symmetric.  But if we cared, here is
+      ! one way of telling.
 
-            ! Injector to FlowSolver
-            call ESMF_StateGetData(statelist, "Injection Feedback", mysource, rc)
-            call ESMF_StateGetData(statelist, "FlowSolver Input", mydest, rc)
+      call ESMF_StateGetName(importstate, statename, rc)
+      if (trim(statename) .eq. "Injector Feedback") then
+          ! Injector to FlowSolver
+          injecttoflow = .TRUE.
+      else if (trim(statename) .eq. "FlowSolver Feedback") then
+          ! FlowSolver to Injector
+          injecttoflow = .FALSE.
+      else
+         print *, "Unexpected State in Coupler Run routine, named ", trim(statename)
+         rc = ESMF_FAILURE
+         return
+      endif
 
-        else if (trim(statename) .eq. "Coupler States FlowSolver to Injector") then
+      ! Get layout from coupler component
+      call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
 
-            ! FlowSolver to Injector
-            call ESMF_StateGetData(statelist, "FlowSolver Feedback", mysource, rc)
-            call ESMF_StateGetData(statelist, "Injection Input", mydest, rc)
+      do i=1, datacount
 
-        else
+         ! check isneeded flag here
+         if (.not. ESMF_StateIsNeeded(importstate, datanames(i), rc)) then 
+             !print *, "skipping field ", trim(datanames(i)), " not needed"
+             cycle
+         endif
 
-           print *, "Unexpected Statelist in Coupler Run routine, named ", trim(statename)
-           rc = ESMF_FAILURE
-           return
-        endif
+         !print *, "processing field ", trim(datanames(i)), " as needed"
+         call ESMF_StateGetData(importstate, datanames(i), srcfield, rc=status)
+         call ESMF_StateGetData(exportstate, datanames(i), dstfield, rc=status)
 
-        ! Get layout from coupler component
-        call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
+         ! These are fields on different layouts - call Redist to rearrange
+         !  the data using the Comm routines.
+         call ESMF_FieldRedist(srcfield, dstfield, cpllayout, rc=status)
 
-        do i=1, datacount
+         ! TODO: why is this commented out?
+         !call ESMF_FieldHalo(dstfield, rc) 
 
-           ! check isneeded flag here
-           if (.not. ESMF_StateIsNeeded(mysource, datanames(i), rc)) then 
-               !print *, "skipping field ", trim(datanames(i)), " not needed"
-               cycle
-           endif
-
-           !print *, "processing field ", trim(datanames(i)), " as needed"
-           call ESMF_StateGetData(mysource, datanames(i), srcfield, rc=status)
-           call ESMF_StateGetData(mydest, datanames(i), dstfield, rc=status)
-
-           ! These are fields on different layouts - call Redist to rearrange
-           !  the data using the Comm routines.
-           call ESMF_FieldRedist(srcfield, dstfield, cpllayout, rc=status)
-
-           !call ESMF_FieldHalo(dstfield, rc)
-
-        enddo
+      enddo
  
-        rc = status
+      rc = status
 
-    end subroutine coupler_run
+  end subroutine coupler_run
 
 
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine coupler_final(comp, statelist, clock, rc)
+    subroutine coupler_final(comp, importstate, exportstate, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: statelist
+        type(ESMF_State) :: importstate, exportstate
         type(ESMF_Clock) :: clock
         integer, intent(out) :: rc
 
         ! Local variables
-        type(ESMF_State) :: state1, state2
 
         print *, "Coupler Final starting"
   

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.6 2004/01/29 04:51:37 eschwab Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.7 2004/02/01 13:59:46 nscollins Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -34,7 +34,7 @@
     integer :: i, de_id, ndes, mid, rc, delist(64), pid, cid
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_DELayout) :: layout1, layout2, layout3
-    type(ESMF_State) :: c1exp, c2imp, cplstate
+    type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
 
@@ -167,11 +167,7 @@
       call ESMF_GridCompInitialize(comp2, importstate=c2imp, clock=clock, rc=rc)
       print *, "Comp 1a Initialize finished, rc =", rc
  
-      cplstate = ESMF_StateCreate("coupler list", ESMF_STATELIST, cplname)
-      call ESMF_StateAddData(cplstate, c1exp, rc=rc)
-      call ESMF_StateAddData(cplstate, c2imp, rc=rc)
-
-      call ESMF_CplCompInitialize(cpl, statelist=cplstate, clock=clock, rc=rc)
+      call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=rc)
       print *, "Coupler Initialize finished, rc =", rc
  
 !-------------------------------------------------------------------------
@@ -185,7 +181,7 @@
         call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, rc=rc)
         print *, "Comp 1 Run returned, rc =", rc
   
-        call ESMF_CplCompRun(cpl, statelist=cplstate, clock=clock, rc=rc)
+        call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=rc)
         print *, "Coupler Run returned, rc =", rc
   
         call ESMF_GridCompRun(comp2, importstate=c2imp, clock=clock, rc=rc)
@@ -209,7 +205,7 @@
       call ESMF_GridCompFinalize(comp2, importstate=c2imp, clock=clock, rc=rc)
       print *, "Comp 2 Finalize finished, rc =", rc
 
-      call ESMF_CplCompFinalize(cpl, statelist=cplstate, clock=clock, rc=rc)
+      call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=rc)
       print *, "Coupler Finalize finished, rc =", rc
 
 
@@ -235,7 +231,6 @@
 
       call ESMF_StateDestroy(c1exp, rc)
       call ESMF_StateDestroy(c2imp, rc)
-      call ESMF_StateDestroy(cplstate, rc)
 
       call ESMF_ClockDestroy(clock, rc)
       call ESMF_CalendarDestroy(gregorianCalendar, rc)

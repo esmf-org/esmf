@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2003/10/09 20:56:11 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.2 2004/02/01 13:59:46 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -55,30 +55,32 @@
 !   !   Initialization routine.
  
     
-    subroutine user_init(comp, statelist, clock, rc)
+    subroutine user_init(comp, importstate, exportstate, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: statelist
+        type(ESMF_State) :: importstate, exportstate
         type(ESMF_Clock) :: clock
         integer :: rc
 
         ! Local variables
         integer :: itemcount
-        type(ESMF_State) :: state1, state2
-        type(ESMF_Field) :: humidity
-
-        print *, "User Coupler Init starting"
-
-        call ESMF_StateGetInfo(statelist, itemcount=itemcount, rc=rc)
-        print *, "Statelist contains ", itemcount, " items."
-       
-        call ESMF_StateGetData(statelist, "comp1 export", state1, rc)
-        call ESMF_StatePrint(state1, rc=rc)
-
-        call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
-        call ESMF_StatePrint(state2, rc=rc)
-
+        real, dimension(:,:), pointer :: mydata
 
         ! This is where the model specific setup code goes.  
+        print *, "User Coupler Init starting"
+
+        ! Examples of info routines
+        call ESMF_StateGetInfo(importstate, itemcount=itemcount, rc=rc)
+        print *, "Import State contains ", itemcount, " items."
+
+        call ESMF_StatePrint(importstate, rc=rc)
+
+        call ESMF_StateGetInfo(exportstate, itemcount=itemcount, rc=rc)
+        print *, "Export State contains ", itemcount, " items."
+
+        call ESMF_StatePrint(exportstate, rc=rc)
+
+        ! direct access to field contents
+        call ESMF_StateGetDataPointer(importstate, "humidity", mydata, rc=rc)
 
         print *, "User Coupler Init returning"
    
@@ -91,14 +93,13 @@
 !   !  The Run routine where data is coupled.
 !   !
  
-    subroutine user_run(comp, statelist, clock, rc)
+    subroutine user_run(comp, importstate, exportstate, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: statelist
+        type(ESMF_State) :: importstate, exportstate
         type(ESMF_Clock) :: clock
         integer :: rc
 
         ! Local variables
-        type(ESMF_State) :: mysource, mydest
         type(ESMF_Field) :: humidity1, humidity2
         type(ESMF_DELayout) :: cpllayout
         integer :: status
@@ -106,16 +107,12 @@
         print *, "User Coupler Run starting"
 
         ! Get input data
-        call ESMF_StateGetData(statelist, "comp1 export", mysource, rc)
-        call ESMF_StatePrint(mysource, rc=status)
-        call ESMF_StateGetData(mysource, "humidity", humidity1, rc=status)
+        call ESMF_StateGetField(importstate, "humidity", humidity1, rc=rc)
         call ESMF_FieldPrint(humidity1, rc=status)
 
         ! Get location of output data
-        call ESMF_StateGetData(statelist, "comp2 import", mydest, rc)
-        call ESMF_StatePrint(mydest, rc=status)
-        call ESMF_StateGetData(mydest, "humidity", humidity2, rc=status)
-        call ESMF_FieldPrint(humidity1, rc=status)
+        call ESMF_StateGetData(exportstate, "humidity", humidity2, rc=rc)
+        call ESMF_FieldPrint(humidity2, rc=status)
 
         ! Get layout from coupler component
         call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
@@ -126,11 +123,8 @@
         call ESMF_FieldRedist(humidity1, humidity2, cpllayout, rc=status)
 
 
-        ! Set output data
-        call ESMF_StateAddData(mydest, humidity2, rc=status)
-        call ESMF_StatePrint(mydest, rc=status)
+        ! Output data is accessed in place, so no "put" is needed.
 
- 
         print *, "User Coupler Run returning"
 
         rc = status
@@ -142,21 +136,18 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, statelist, clock, rc)
+    subroutine user_final(comp, importstate, exportstate, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: statelist
+        type(ESMF_State) :: importstate, exportstate
         type(ESMF_Clock) :: clock
         integer :: rc
 
         ! Local variables
-        type(ESMF_State) :: state1, state2
 
         print *, "User Coupler Final starting"
-        call ESMF_StateGetData(statelist, "comp1 export", state1, rc)
-        call ESMF_StatePrint(state1, rc=rc)
 
-        call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
-        call ESMF_StatePrint(state2, rc=rc)
+        call ESMF_StatePrint(importstate, rc=rc)
+        call ESMF_StatePrint(exportstate, rc=rc)
     
         print *, "User Coupler Final returning"
    

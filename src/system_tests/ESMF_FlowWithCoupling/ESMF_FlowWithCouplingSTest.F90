@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.7 2004/01/30 01:31:27 nscollins Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.8 2004/02/01 13:59:46 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -206,8 +206,11 @@
       print *, "Flow Model Initialize finished, rc =", rc
 
       ! initialize the coupler information going from injector to flow solver
-      ! TODO: what about the other direction?  make 2 phases?
+      ! and back again.  in this case, it's ok to call init multiple times.
+      ! if it wasn't, we could make a 2-phase init and call the first and
+      ! second phases independently.
       call ESMF_CplCompInitialize(cpl, INexp, FSimp, clock, rc=rc)
+      call ESMF_CplCompInitialize(cpl, FSexp, INimp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Initialize finished, rc =", rc
  
