@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.18 2003/04/25 15:42:16 nscollins Exp $
+
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt DELayout} class functions.
+//  allows F90 to call C++ for supporting {\tt ESMC\_DELayout} class functions.
 //
 //EOP
 
