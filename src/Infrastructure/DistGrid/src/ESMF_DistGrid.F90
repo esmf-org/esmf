@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.31 2003/02/26 20:24:19 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.32 2003/02/28 23:39:56 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.31 2003/02/26 20:24:19 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.32 2003/02/28 23:39:56 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1218,8 +1218,8 @@
           distgrid%lcellexc_index(de,1)%max = i_max
           distgrid%lcellexc_index(de,1)%decomp = 1
           distgrid%lcelltot_index(de,1)%decomp = 1
-          distgrid%lcellexc_index(de,1)%gstart = exc_global_s
-          distgrid%lcelltot_index(de,1)%gstart = tot_global_s
+          distgrid%lcellexc_index(de,1)%gstart = exc_global_s - 1
+          distgrid%lcelltot_index(de,1)%gstart = tot_global_s - 1
         enddo
         exc_global_s = exc_global_e + 1
         tot_global_s = tot_global_e + 1
@@ -1249,8 +1249,8 @@
           distgrid%lcellexc_index(de,2)%max = j_max
           distgrid%lcellexc_index(de,2)%decomp = 2
           distgrid%lcelltot_index(de,2)%decomp = 2
-          distgrid%lcellexc_index(de,2)%gstart = exc_global_s
-          distgrid%lcelltot_index(de,2)%gstart = tot_global_s
+          distgrid%lcellexc_index(de,2)%gstart = exc_global_s - 1
+          distgrid%lcelltot_index(de,2)%gstart = tot_global_s - 1
         enddo
         exc_global_s = exc_global_e + 1
         tot_global_s = tot_global_e + 1
