@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.26 2004/12/03 20:47:50 nscollins Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.27 2004/12/28 07:11:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.26 2004/12/03 20:47:50 nscollins Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.27 2004/12/28 07:11:04 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -45,7 +45,7 @@
        use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
-       use ESMF_VMTypesMod
+       use ESMF_VMMod
 
        type(ESMF_CWrap)   :: comp
        type(ESMF_Pointer) :: vm_info
@@ -59,7 +59,7 @@
        use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
-       use ESMF_VMTypesMod
+       use ESMF_VMMod
 
        type(ESMF_CWrap) :: comp
        type(ESMF_VM)    :: vm_parent
@@ -73,7 +73,7 @@
        use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
-       use ESMF_VMTypesMod
+       use ESMF_VMMod
 
        type(ESMF_CWrap) :: comp
        type(ESMF_VMPlan)    :: vmplan
@@ -87,7 +87,7 @@
        use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
-       use ESMF_VMTypesMod
+       use ESMF_VMMod
 
        type(ESMF_CWrap) :: comp
        type(ESMF_VM)    :: vm
@@ -114,7 +114,7 @@
        use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
-       use ESMF_VMTypesMod
+       use ESMF_VMMod
 
        type(ESMF_CWrap) :: comp
        type(ESMF_CWrap) :: comp_src
@@ -136,7 +136,7 @@
        use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
-       use ESMF_VMTypesMod
+       use ESMF_VMMod
 
        type(ESMF_CWrap) :: comp_src
        type(ESMF_CWrap) :: comp
