@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.1 2003/04/01 23:51:46 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.2 2003/08/01 21:10:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.1 2003/04/01 23:51:46 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.2 2003/08/01 21:10:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -467,6 +467,7 @@
         if (strcmp(name, funcs[i].funcname))
 	   continue;
    
+        *rc = 0;
         switch (funcs[i].ftype) {
           case FT_VOID: {
             VoidFunc vf;
@@ -512,6 +513,7 @@
                         funcs[i].funcarg[2],
                         funcs[i].funcarg[3],
                  (int *)funcs[i].funcarg[4]);
+            *rc = *(int *)(funcs[i].funcarg[4]);
             break;
           }
           case FT_CPL: {
@@ -521,6 +523,7 @@
                         funcs[i].funcarg[1],
                         funcs[i].funcarg[2],
                  (int *)funcs[i].funcarg[3]);
+            *rc = *(int *)(funcs[i].funcarg[3]);
             break;
           }
           default:
@@ -528,7 +531,6 @@
             return ESMF_FAILURE;
         }
 
-        *rc = 0;
         return ESMF_SUCCESS;
     }
 

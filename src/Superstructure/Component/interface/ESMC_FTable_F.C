@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.6 2003/06/26 23:06:12 nscollins Exp $
+// $Id: ESMC_FTable_F.C,v 1.7 2003/08/01 21:10:41 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,6 +91,7 @@ extern "C" {
      void FTN(c_esmc_ftablecallentrypoint)(ESMC_FTable **ptr, char *type, 
                                          int *phase, int *status, int slen) {
          int funcrc;
+         int localrc;
          char *name;
 
          newtrim(type, slen, phase, &name);
@@ -100,7 +101,9 @@ extern "C" {
          // the right function to call; the other is the actual return code
          // from the user function itself.
 
-         *status = (*ptr)->ESMC_FTableCallVFuncPtr(name, &funcrc);
+         localrc = (*ptr)->ESMC_FTableCallVFuncPtr(name, &funcrc);
+
+         *status = funcrc;
 
          delete[] name;
      }
