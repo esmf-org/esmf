@@ -1,4 +1,4 @@
-/* $Id: mpi.h,v 1.4 2003/07/23 16:50:47 eschwab Exp $ */
+/* $Id: mpi.h,v 1.5 2004/05/19 12:36:04 theurich Exp $ */
 
 /*
    This is a special set of bindings for uni-processor use of MPI by the PETSc library.
@@ -608,6 +608,8 @@ extern int    Petsc_MPI_Finalized(int *);
 
 #define MPI_NULL_COPY_FN   0
 #define MPI_NULL_DELETE_FN 0
+
+#define MPI_Comm_c2f(comm) ((int)comm)
 
 #ifdef __cplusplus
 }
