@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/03/21 17:57:58 flanigan Exp $ 
+# $Id: makefile,v 1.7 2003/03/24 17:24:55 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -13,15 +13,15 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/PerfProf/doc
 
 DVIFILES  = \
-		${ESMC_DOCDIR}/PerfProf_reqdoc.dvi 
-#		${ESMC_DOCDIR}/PerfProf_desdoc.dvi \
+		${ESMC_DOCDIR}/PerfProf_reqdoc.dvi \
+		${ESMC_DOCDIR}/PerfProf_desdoc.dvi 
 #		${ESMC_DOCDIR}/PerfProf_refdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
 HTMLFILES = \
-		${ESMC_DOCDIR}/PerfProf_reqdoc 
-#		${ESMC_DOCDIR}/PerfProf_desdoc \
+		${ESMC_DOCDIR}/PerfProf_reqdoc \
+		${ESMC_DOCDIR}/PerfProf_desdoc 
 #		${ESMC_DOCDIR}/PerfProf_refdoc
 
 #

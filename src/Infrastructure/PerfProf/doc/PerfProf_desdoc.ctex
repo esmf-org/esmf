@@ -1,4 +1,4 @@
-% $Id: PerfProf_desdoc.ctex,v 1.6 2002/11/22 23:28:38 ekluz Exp $
+% $Id: PerfProf_desdoc.ctex,v 1.7 2003/03/24 17:24:54 flanigan Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,28 +44,28 @@
 #ifdef STANDALONE
 \input{PerfProf_syn}
 #elif defined(CONSTITUENT)
-\input{comppath/PerfProf_syn}
+\input{../src/Infrastructure/PerfProf/doc/PerfProf_syn}
 #endif
 
 %\section{Algorithmic Description}
 #ifdef STANDALONE
 %\input{PerfProf_alg}
 #elif defined(CONSTITUENT)
-%\input{comppath/PerfProf_alg}
+%\input{../src/Infrastructure/PerfProf/doc/PerfProf_alg}
 #endif
 
 \section{Object Model}
 #ifdef STANDALONE
 \input{PerfProf_obj}
 #elif defined(CONSTITUENT)
-\input{comppath/PerfProf_obj}
+\input{../src/Infrastructure/PerfProf/doc/PerfProf_obj}
 #endif
 
 \section{Global Parameters and Definitions}
 #ifdef STANDALONE
 \input{PerfProf_param}
 #elif defined(CONSTITUENT)
-\input{comppath/PerfProf_param}
+\input{../src/Infrastructure/PerfProf/doc/PerfProf_param}
 #endif
 
 \section{Perf Design}
@@ -74,28 +74,28 @@
 #ifdef STANDALONE
 \input{Perf_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/Perf_desc}
+\input{../src/Infrastructure/PerfProf/doc/Perf_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{Perf_design}
 #elif defined(CONSTITUENT)
-\input{comppath/Perf_design}
+\input{../src/Infrastructure/PerfProf/doc/Perf_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{Perf_def}
 #elif defined(CONSTITUENT)
-\input{comppath/Perf_def}
+\input{../src/Infrastructure/PerfProf/doc/Perf_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{Perf_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/Perf_rest}
+\input{../src/Infrastructure/PerfProf/doc/Perf_rest}
 #endif
 
 %\subsection{Class API}
@@ -103,8 +103,8 @@
 %\input{Perf_chapi}
 %\input{Perf_ccapi}
 %#elif defined(CONSTITUENT)
-%\input{comppath/Perf_chapi}
-%\input{comppath/Perf_ccapi}
+%\input{../src/Infrastructure/PerfProf/doc/Perf_chapi}
+%\input{../src/Infrastructure/PerfProf/doc/Perf_ccapi}
 %#endif
 
 \section{Segment Design}
@@ -113,28 +113,28 @@
 #ifdef STANDALONE
 \input{Segment_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/Segment_desc}
+\input{../src/Infrastructure/PerfProf/doc/Segment_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{Segment_design}
 #elif defined(CONSTITUENT)
-\input{comppath/Segment_design}
+\input{../src/Infrastructure/PerfProf/doc/Segment_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{Segment_def}
 #elif defined(CONSTITUENT)
-\input{comppath/Segment_def}
+\input{../src/Infrastructure/PerfProf/doc/Segment_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{Segment_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/Segment_rest}
+\input{../src/Infrastructure/PerfProf/doc/Segment_rest}
 #endif
 
 %\subsection{Class API}
@@ -142,8 +142,8 @@
 %\input{Segment_chapi}
 %\input{Segment_ccapi}
 %#elif defined(CONSTITUENT)
-%\input{comppath/Segment_chapi}
-%\input{comppath/Segment_ccapi}
+%\input{../src/Infrastructure/PerfProf/doc/Segment_chapi}
+%\input{../src/Infrastructure/PerfProf/doc/Segment_ccapi}
 %#endif
 
 \section{HWMonitor Design}
@@ -152,45 +152,45 @@
 #ifdef STANDALONE
 \input{HWMonitor_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/HWMonitor_desc}
+\input{../src/Infrastructure/PerfProf/doc/HWMonitor_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{HWMonitor_design}
 #elif defined(CONSTITUENT)
-\input{comppath/HWMonitor_design}
+\input{../src/Infrastructure/PerfProf/doc/HWMonitor_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{HWMonitor_def}
 #elif defined(CONSTITUENT)
-\input{comppath/HWMonitor_def}
+\input{../src/Infrastructure/PerfProf/doc/HWMonitor_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{HWMonitor_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/HWMonitor_rest}
+\input{../src/Infrastructure/PerfProf/doc/HWMonitor_rest}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 \input{HWMonitor_ccparam}
 #elif defined(CONSTITUENT)
-\input{comppath/HWMonitor_ccparam}
+\input{../src/Infrastructure/PerfProf/doc/HWMonitor_ccparam}
 #endif
 
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{HWMonitor_chapi}
-\input{HWMonitor_ccapi}
+\input{ESMC_HWMonitor_chapi}
+\input{ESMC_HWMonitor_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/HWMonitor_chapi}
-\input{comppath/HWMonitor_ccapi}
+\input{../src/Infrastructure/PerfProf/doc/HWMonitor_chapi}
+\input{../src/Infrastructure/PerfProf/doc/HWMonitor_ccapi}
 #endif
 
 \section{Timer Design}
@@ -199,28 +199,28 @@
 #ifdef STANDALONE
 \input{Timer_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/Timer_desc}
+\input{../src/Infrastructure/PerfProf/doc/Timer_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{Timer_design}
 #elif defined(CONSTITUENT)
-\input{comppath/Timer_design}
+\input{../src/Infrastructure/PerfProf/doc/Timer_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{Timer_def}
 #elif defined(CONSTITUENT)
-\input{comppath/Timer_def}
+\input{../src/Infrastructure/PerfProf/doc/Timer_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{Timer_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/Timer_rest}
+\input{../src/Infrastructure/PerfProf/doc/Timer_rest}
 #endif
 
 %\subsection{Class API}
@@ -228,8 +228,8 @@
 %\input{Timer_chapi}
 %\input{Timer_ccapi}
 %#elif defined(CONSTITUENT)
-%\input{comppath/Timer_chapi}
-%\input{comppath/Timer_ccapi}
+%\input{../src/Infrastructure/PerfProf/doc/Timer_chapi}
+%\input{../src/Infrastructure/PerfProf/doc/Timer_ccapi}
 %#endif
 
 \section{Perf F90 Interface}
@@ -238,7 +238,7 @@
 #ifdef STANDALONE
 \input{Perf_fex}
 #elif defined(CONSTITUENT)
-\input{comppath/Perf_fex}
+\input{../src/Infrastructure/PerfProf/doc/Perf_fex}
 #endif
 
 \section{Perf C++ Interface}
@@ -247,7 +247,7 @@
 #ifdef STANDALONE
 \input{Perf_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/Perf_ccex}
+\input{../src/Infrastructure/PerfProf/doc/Perf_ccex}
 #endif
 
 #ifdef STANDALONE
