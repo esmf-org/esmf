@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.23 2003/08/04 20:22:21 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.24 2003/08/06 23:05:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.23 2003/08/04 20:22:21 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.24 2003/08/06 23:05:11 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -605,9 +605,9 @@
 ! !INTERFACE:
       subroutine ESMF_RoutePrecompute(route, rank, &
                my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
-               dst_global_start, dst_global_stride, layout_dst, &
+               dst_global_start, dst_global_count, layout_dst, &
                my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-               src_global_start, src_global_stride, layout_src, rc)
+               src_global_start, src_global_count, layout_src, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -617,14 +617,14 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
       integer, intent(in) :: AI_dst_count
       integer, dimension(:,:), intent(in) :: dst_global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_stride
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_count
       type(ESMF_DELayout), intent(in) :: layout_dst
       integer, intent(in) :: my_DE_src
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
       integer, dimension(:,:), intent(in) :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_stride
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
       type(ESMF_DELayout), intent(in) :: layout_src
       integer, intent(out), optional :: rc
 
@@ -678,9 +678,9 @@
         ! Call C++  code
         call c_ESMC_RoutePrecompute(route, rank, &
            my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
-           dst_global_start, dst_global_stride, layout_dst, &
+           dst_global_start, dst_global_count, layout_dst, &
            my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-           src_global_start, src_global_stride, layout_src, status)
+           src_global_start, src_global_count, layout_src, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Precompute error"
           ! don't return before adding 1 back to AIs
@@ -713,7 +713,7 @@
 ! !INTERFACE:
       subroutine ESMF_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
                                           AI_count, global_start, &
-                                          global_stride, layout, periodic, rc)
+                                          global_count, layout, periodic, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -723,7 +723,7 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_tot
       integer, intent(in) :: AI_count
       integer, dimension(:,:), intent(in) :: global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: global_stride
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: global_count
       type(ESMF_DELayout), intent(in) :: layout
       type(ESMF_Logical), intent(in) :: periodic(:)
       integer, intent(out), optional :: rc
@@ -771,7 +771,7 @@
 
         ! Call C++  code
         call c_ESMC_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
-                                        AI_count, global_start, global_stride, &
+                                        AI_count, global_start, global_count, &
                                         layout, periodic, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Precompute Halo error"
