@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.10 2004/04/09 19:53:56 eschwab Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.11 2004/04/15 17:17:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.10 2004/04/09 19:53:56 eschwab Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.11 2004/04/15 17:17:51 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -44,7 +44,8 @@
 !     ! Local variables
       integer :: i, x, y, rc, mycell, fieldcount
       type(ESMF_Grid) :: grid, grid2
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
+      type(ESMF_VM) :: vm
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: arraya, arrayb
       type(ESMF_DataMap) :: datamap
@@ -82,6 +83,7 @@
 !-------------------------------------------------------------------------------
 
       call ESMF_Initialize(rc=rc)
+      call ESMF_VMGetGlobal(vm, rc)
 
       !------------------------------------------------------------------------
 
@@ -148,10 +150,10 @@
 
       !NEX_UTest
       ! Add a field to an empty Bundle
-      layout = ESMF_DELayoutCreate(rc=rc)
+      layout = ESMF_newDELayoutCreate(vm, rc=rc)
       mincoord = (/ 0.0, 0.0 /)
       grid = ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), mincoord, &
-                                           layout=layout, rc=rc)
+                                           delayout=layout, rc=rc)
       simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
       call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
       write(failMsg, *) ""
