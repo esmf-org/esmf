@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.84 2004/01/07 22:10:28 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.85 2004/01/07 22:25:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,7 +209,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.84 2004/01/07 22:10:28 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.85 2004/01/07 22:25:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -921,13 +921,13 @@
 ! !IROUTINE: ESMF_DistGridGet - Get information from a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGet(dgtype, coversDomain, &
+      subroutine ESMF_DistGridGet(distgrid, coversDomain, &
                                   global_cell_count, global_cell_dim, &
                                   globalStart, local_cell_max, local_cell_max_dim, &
                                   name, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), pointer :: dgtype
+      type(ESMF_DistGrid), intent(in) :: distgrid
       logical, intent(inout), optional :: coversDomain
       integer, intent(inout), optional :: global_cell_count
       integer, dimension(:), intent(inout), optional :: global_cell_dim
@@ -943,7 +943,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[dgtype] 
+!     \item[distgrid] 
 !          Class to be queried.
 !     \item[{[covers\_domain]}]
 !          Logical identifier if distgrid covers the entire physical domain.
@@ -975,6 +975,7 @@
       logical :: rcpresent                          ! Return code present
       integer :: i, j, nDEs(2)
       type(ESMF_DistGridGlobal), pointer :: glob
+      type(ESMF_DistGridType), pointer :: dgtype
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -986,7 +987,8 @@
 
       ! If total is true, get info for the total cells including
       ! boundary areas; otherwise get only computational areas.
-      glob => dgtype%global_comp
+      dgtype => distgrid%ptr
+      glob => distgrid%ptr%global_comp
       if (present(total)) then
         if (total) glob => dgtype%global_total
       endif
@@ -1027,7 +1029,7 @@
       endif
 
       if (present(name)) then
-         call ESMF_GetName(distgrid%ptr%base, name, status)
+         call ESMF_GetName(dgtype%base, name, status)
          if (status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_DistGridGet: get name"
             return
