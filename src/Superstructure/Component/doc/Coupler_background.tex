@@ -1,0 +1,94 @@
+% $Id: Coupler_background.tex,v 1.1 2003/02/24 22:59:05 cdeluca Exp $
+
+
+%% I will make use of the following ESMF Design Elements, which I assume come
+%% from the General Design Document:
+%% ----------
+%% Text for these is in the Terms Section--
+%% Gridded Components (Dsgn\_GENn.m)
+%% Couplers (Dsgn\_GENn.m)
+%% ---------
+%% Text for these needs to be written--
+%% Integrated Applications (Dsgn\_GENn.m)
+%% Object-Oriented Approach (Dsgn\_GENn.m)
+%% Superstructure (Dsgn\_GENn.m)
+%% Infrastructure (Dsgn\_GENn.m)
+
+
+
+An important function of ESMF is to support the integration of
+complex computational modules developed by earth scientists into
+larger models and data assimilation systems, and to facilitate
+the interoperability of these modules. 
+In the ESMF design, these integration functions 
+are achieved by combining Couplers
+and Gridded Components into Integrated Applications.
+
+Gridded Components will contain the 
+computational modules and will thus be the main arena for interaction
+between computational scientists and the Framework.  Couplers will
+provide all necessary functionality required to integrate Gridded Components
+into a larger application (e.g., ocean and atmosphere components into
+a climate model).
+
+Following the ESMF general design, Couplers and Gridded Components
+are to be implemented using an object-oriented approach  
+in which the data and actions of these components are encapsulated in 
+ESMF specified ways.
+
+\subsection{Location}
+
+Couplers and Gridded Components, being key elements in the
+Framework's integration functions fall in the Superstructure.
+They will be invoked in ESMF specified ways by Integrated Applications 
+and will, in turn, rely on other Superstructure and Infrastructure
+elements in their internal design.  Coupling between computational
+modules, for example, often requires interpolation of data and
+its reorganization in memory. To perform these tasks, couplers will
+rely on Superstructure Regridding methods, which in turn rely on the 
+Infrastructure's uniform  implementation of various machine memory
+organizations and user-chosen data decompositions.
+
+
+
+
+\subsection{Scope}
+
+
+
+Requirements on gridded components represent a compromise between
+the desire to facilitate their interoperability and the need for
+computational modules to have essentially no restriction on their
+physical content or computational approach.
+A fully interoperable framework would
+have to prescribe the actual physical quantities to be exchanges
+by components, as well as placing strong inclusive and exclusive 
+restrictions on the physics that they represent. The General Requirements
+ preclude ESMF from acheiving this  ``strong'' interoperability.
+ESMF is intended for  diverse
+applications and must support  the rapidly  evolving 
+models and data handling techniques.
+The scope of requirements on components will thus be limited to the
+way in which data is exchange between them and some restriction
+on how their internal data must be structured to access Framework
+services and to allow its instanziation by Integrated Applications.
+They will {\em not} include requirements on what physical quantities
+components must provide or accept, or what calculations they
+must perform.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
