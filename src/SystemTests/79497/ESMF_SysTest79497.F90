@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.8 2003/08/28 20:19:29 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.9 2003/08/28 21:04:53 jwolfe Exp $
 !
 ! System test code #79497
 
@@ -79,8 +79,8 @@
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layout1, rc=rc)
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc=rc)
-    if (ndes .lt. 4) then
-      print *, "This system test needs to run at least 4-way, current np = ", ndes
+    if (ndes .lt. 6) then
+      print *, "This system test needs to run at least 6-way, current np = ", ndes
       goto 10
     endif
 
@@ -98,7 +98,7 @@
 
     cname2 = "user model 2"
     delist = (/ (i, i=0, ndes-1) /)
-    layout3 = ESMF_DELayoutCreate(layout1, 2, (/ 1, ndes /), (/ 0, 0 /), &
+    layout3 = ESMF_DELayoutCreate(layout1, 2, (/ mid, 2 /), (/ 0, 0 /), &
                                   de_indices=delist, rc=rc)
 
     comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
