@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/03/10 21:54:20 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/03/10 22:32:38 cdeluca Exp $ 
 
 ALL: 
 
@@ -12,7 +12,7 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/Fields/examples
+LOCDIR	  = src/Infrastructure/Field/examples
 
 TESTEXAMPLES_3  = \
 	ESMF_FieldCreateEx RUN_ESMF_FieldCreateEx ESMF_FieldCreateEx.rm \
