@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.3 2004/01/28 17:47:50 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.4 2004/03/09 14:35:30 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -188,7 +188,7 @@
       P_OUT2("ESMF_FieldCreate", trim(fname))
 
       P_IN("ESMF_BundleAddFields")
-      call ESMF_BundleAddFields(bundle2, field1, rc=rc) 
+      call ESMF_BundleAddField(bundle2, field1, rc=rc) 
       P_OUT("ESMF_BundleAddFields")
 
       P_IN("ESMF_StateAddData (Bundle)")
@@ -275,7 +275,7 @@
     P_OUT2("ESMF_FieldCreate", trim(fname))
 
     P_IN("ESMF_BundleAddFields")
-    call ESMF_BundleAddFields(bundle2, field1, rc=rc) 
+    call ESMF_BundleAddField(bundle2, field1, rc=rc) 
     P_OUT("ESMF_BundleAddFields")
 
     fname = "Energy Flux"
@@ -284,7 +284,7 @@
     P_OUT2("ESMF_FieldCreate", trim(fname))
 
     P_IN("ESMF_BundleAddFields")
-    call ESMF_BundleAddFields(bundle2, field2, rc=rc) 
+    call ESMF_BundleAddField(bundle2, field2, rc=rc) 
     P_OUT("ESMF_BundleAddFields")
 
     P_IN("ESMF_BundlePrint")
