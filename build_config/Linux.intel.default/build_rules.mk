@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23 2004/12/30 21:43:15 nscollins Exp $
+# $Id: build_rules.mk,v 1.24 2005/02/02 23:08:50 theurich Exp $
 #
 # Linux.intel.default.mk
 #
@@ -112,7 +112,7 @@ endif
 # MP_LIB is for openMP
 MP_LIB          = 
 # For pthreads (or omp)
-THREAD_LIB      = -lpthread
+THREAD_LIB      =
 
 #
 AR		   = ar
@@ -126,22 +126,22 @@ SED		   = /bin/sed
 #
 ifneq ($(ESMF_COMM),mpich)
 ifeq ($(ESMF_PREC),64)
-C_CC		   = icc -size_lp64
-CXX_CC		   = icpc
-C_FC		   = ifort -size_lp64
+C_CC		   = icc -pthread -size_lp64
+CXX_CC		   = icpc -pthread
+C_FC		   = ifort -threads -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
-C_CC		   = icc
-CXX_CC		   = icpc
-C_FC		   = ifort
+C_CC		   = icc -pthread
+CXX_CC		   = icpc -pthread
+C_FC		   = ifort -threads
 endif
 endif
 
 ifeq ($(ESMF_COMM),mpich)
 ifeq ($(ESMF_PREC),64)
-C_CC		   = mpicc -size_lp64
-CXX_CC		   = mpiCC -size_lp64
-C_FC		   = mpif90 -size_lp64
+C_CC		   = mpicc -pthread -size_lp64
+CXX_CC		   = mpiCC -pthread -size_lp64
+C_FC		   = mpif90 -threads -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
 C_CC		   = mpicc -pthread
@@ -152,9 +152,9 @@ endif
 
 ifeq ($(ESMF_COMM),mpich2)
 ifeq ($(ESMF_PREC),64)
-C_CC		   = mpicc -size_lp64
-CXX_CC		   = mpicxx -size_lp64
-C_FC		   = mpif90 -size_lp64
+C_CC		   = mpicc -pthread -size_lp64
+CXX_CC		   = mpicxx -pthread -size_lp64
+C_FC		   = mpif90 -threads -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
 C_CC		   = mpicc -pthread
@@ -190,7 +190,7 @@ F_FIXNOCPP         = -cpp0
 G_COPTFLAGS	   = -g 
 G_FOPTFLAGS	   = -g
 # ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS	   = -O 
+O_COPTFLAGS	   = -O
 O_FOPTFLAGS	   = -O
 #
 # C++ compiler flags 
@@ -224,8 +224,8 @@ else
 C_LIB_NEEDED = -lstdc++
 #C_LIB_NEEDED = -L/usr/lib/gcc-lib/ia64-redhat-linux/3.2.3 -lstdc++
 endif
-C_F90CXXLIBS    = $(LD_PATHS) $(LIB_PATHS) $(C_LIB_NEEDED) -lifcore -lrt -ldl
-C_CXXF90LIBS    = $(LD_PATHS) $(LIB_PATHS) -lifcore -lrt -ldl
+C_F90CXXLIBS    = $(LD_PATHS) $(LIB_PATHS) $(C_LIB_NEEDED) -lrt -ldl
+C_CXXF90LIBS    = $(LD_PATHS) $(LIB_PATHS) $(C_LIB_NEEDED) -lifcoremt -lrt -ldl
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
