@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.17 2004/05/20 18:54:24 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.18 2004/05/20 18:55:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.17 2004/05/20 18:54:24 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.18 2004/05/20 18:55:44 theurich Exp $'
 
 !==============================================================================
 
@@ -1748,7 +1748,7 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMPlanMinThreads()"
+#define ESMF_METHOD "ESMF_VMPlanMaxPEs()"
 !BOPI
 ! !IROUTINE: ESMF_VMPlanMaxPEs - Set up a MaxPEs vmplan
 
