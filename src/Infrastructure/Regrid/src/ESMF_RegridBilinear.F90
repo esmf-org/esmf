@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.17 2003/08/28 21:03:18 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.18 2003/08/28 21:30:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.17 2003/08/28 21:03:18 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.18 2003/08/28 21:30:16 nscollins Exp $'
 
 !==============================================================================
 
@@ -124,6 +124,8 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      logical :: hassrcdata        ! does this DE contain localdata from src?
+      logical :: hasdstdata        ! does this DE contain localdata from dst?
       integer :: start, stop, my_DE
       integer :: src_size_x, src_size_y, dst_size_x, dst_size_y, size
       integer :: size_xy(2), size_x0(2)
@@ -132,12 +134,13 @@
       real(ESMF_IKIND_R8), dimension(:), pointer :: src_center_x, src_center_y
       real(ESMF_IKIND_R8), dimension(:,:), pointer :: centerCoordX, centerCoordY
       real(ESMF_IKIND_R8), dimension(:,:,:), pointer :: center_coord
+      real, dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max, src_min, src_max
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
       type(ESMF_LocalArray) :: srcCenterX, srcCenterY, centerCoordArray
       type(ESMF_DomainList), pointer :: sendDomainList, recvDomainList
       type(ESMF_DELayout) :: srcDELayout
-      type(ESMF_RelLoc) :: srcRelLoc
+      type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route
       type(ESMF_RouteHandle) :: rh
       type(ESMF_RegridType) :: temp_regrid
@@ -221,16 +224,47 @@
                                   ESMF_DATA_REF, status)
 
       ! Calculate the intersections of this DE's bounding box with all others
-      !call ESMF_FieldBoxIntersect(src_field, dst_field, recvDomainlist, &
-      !                            sendDomainList, status)
+      hassrcdata = .true.   ! temp for now
+      hasdstdata = .true.   ! temp for now
+
+      ! Retrieve the relative location of source data
+      call ESMF_DataMapGet(srcDataMap, relloc=srcRelLoc, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: FieldBoxIntersect ", &
+        print *, "ERROR in BoxIntersect: DataMapGetRelloc returned failure"
+        return
+      endif
+      ! From the grid get the bounding box on this DE
+      call ESMF_GridGetPhysGrid(srcGrid, srcRelLoc, local_min=src_min, &   
+                                local_max=src_max, rc=status)
+      call ESMF_GridBoxIntersect(dstGrid, src_min, src_max, sendDomainList, &
+                                 status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in RegridConsByFieldBilinear: GridBoxIntersect ", &
                  "returned failure"
         return
       endif
 
-      ! create Route
-      ! TODO: should route be a route handle?
+      ! Retrieve the relative location of destination data
+      call ESMF_DataMapGet(dstDataMap, relloc=dstRelLoc, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in BoxIntersect: DataMapGetRelloc returned failure"
+        return
+      endif
+      ! From the grid get the bounding box on this DE
+      call ESMF_GridGetPhysGrid(dstGrid, dstRelLoc, local_min=dst_min, &
+                                local_max=dst_max, rc=status)
+      call ESMF_GridBoxIntersect(srcGrid, dst_min, dst_max, recvDomainList, &
+                                 status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in RegridConsByFieldBilinear: GridBoxIntersect ", &
+                 "returned failure"
+        return
+      endif
+
+      ! Create Route
+      ! TODO: this must be either a parent layout, or the src and dst layouts
+      !  must be identical.
+      route = ESMF_RouteCreate(srcDELayout, status)
       call ESMF_RoutePrecomputeDomList(route, 2, my_DE, sendDomainList, &
                                        recvDomainList, status)
       if(status .NE. ESMF_SUCCESS) then
@@ -238,8 +272,12 @@
                  "RoutePrecomputeDomList returned failure"
         return
       endif
+      ! Save route in the routehandle object
+      call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
-      ! use Route to gather grid center coordinates from source
+      ! Execute Route now to gather grid center coordinates from source
+      ! This same Route will be executed at RegridRun time to bring over
+      !  data values using the same patterns.
       size = recvDomainList%total_size
       srcCenterX = ESMF_LocalArrayCreate(1, type, kind, size, status)
       srcCenterY = ESMF_LocalArrayCreate(1, type, kind, size, status)
