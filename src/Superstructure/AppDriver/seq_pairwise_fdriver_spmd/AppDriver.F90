@@ -82,7 +82,6 @@
     config = ESMF_ConfigCreate(rc)
     call ESMF_ConfigLoadFile(config, USER_CONFIG_FILE, rc = rc)
 
-    !  *** this section is incomplete. ***
     ! Get standard config parameters, for example:
 
     ! the default grid size and type
