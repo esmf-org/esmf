@@ -214,26 +214,25 @@ The application begins by creating atmosphere, ocean, and coupler components.
 The atmosphere initialization method defines the atmosphere import and export states
 (import state creation is not shown) and the ocean initialization method defines
 the ocean import and export states (export state creation is not shown).  The
-coupler initialization method creates input and export packets, which at this
-stage may include empty buffers for packing and unpacking data.  It returns
-transforms (in this case, perhaps a combined unit change, regrid and communication 
+coupler initialization method creates input and output packets, which at this
+stage may include empty buffers for packing and unpacking data.  The coupler returns a
+transform (in this case, perhaps a combined unit change, regrid and communication 
 operation) that will occur while the atmosphere 
 component is in the midst of its iteration loop.  The application calls the run methods
-of the atmosphere and ocean components, which check that their import states are 
-valid as they begin executing concurrently on
-different {\tt DE} sets.  Arguments to these run methods include a run time interval
-and the transform provided by the coupler, which contains different
-tasks for the two components.  At an appropriate time the
+of the atmosphere and ocean components with the transform provided by the coupler,
+which contains different tasks for the two components.  The atmosphere and ocean 
+check that their import states are valid as they begin executing concurrently on
+different {\tt DE} sets.  At an appropriate time the
 ocean component calls a state transform method using the transform it was passed, 
 which posts a message passing receive.  When the atmosphere's data is ready to send, 
 it calls a state transform method with the transform it was passed, which performs
 the unit conversion and regridding, initiates a send
 to the ocean and returns.  (Although this calculation is performed on the atmosphere 
-DEs in the example, the transform could be staged on a separate set of coupler
-DEs.)  The atmosphere calls a state transform complete call with the transform
+{\tt DE}s in this example, the transform could be staged on a separate set of coupler
+{\tt DE}s.)  The atmosphere calls a state transform complete call with the transform
 as an argument before it proceeds to make any changes to data in the export state
 that may still needed.  The atmosphere and ocean proceed to the next 
-timestep, and import states are validated as the timestep begins.
+timestep, and validate their import states as the timestep begins.  
 
 \begin{figure}
 \caption[{Coupling Sequence}]{One-way coupling between an atmosphere and

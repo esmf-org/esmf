@@ -1,10 +1,11 @@
-% $Id: ESMF_archdoc.ctex,v 1.6 2002/09/10 20:38:37 cdeluca Exp $
+% $Id: ESMF_archdoc.ctex,v 1.7 2002/09/10 20:49:21 cdeluca Exp $
 
 %
 \documentclass[]{article}
 
 \usepackage[dvips]{graphics,color}
 \usepackage{epsf}
+\usepackage{times}
 \usepackage{html}
 \usepackage[T1]{fontenc}
 
