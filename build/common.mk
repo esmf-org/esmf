@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.48 2004/04/14 17:49:55 jwolfe Exp $
+#  $Id: common.mk,v 1.49 2004/04/27 21:01:42 slswift Exp $
 #===============================================================================
 #   common.mk
 #
@@ -140,7 +140,8 @@ ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
 		  ${LOCAL_INCLUDE} \
 		  -I${ESMF_BUILD_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE) \
-		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) $(MPI_INCLUDE)
+		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) $(MPI_INCLUDE) \
+                  ${NETCDF_INCLUDE}
 
 CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'
@@ -184,6 +185,7 @@ CC	       = ${C_CC}
 CXX	       = ${CXX_CC}
 FC	       = ${C_FC}
 CPP	       = gcc
+M4	       = m4
 CLINKER_SLFLAG = ${C_CLINKER_SLFLAG}
 FLINKER_SLFLAG = ${C_FLINKER_SLFLAG}
 CLINKER	       = ${C_CLINKER} ${COPTFLAGS} ${C_SH_LIB_PATH}
