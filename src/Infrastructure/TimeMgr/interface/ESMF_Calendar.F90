@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.12 2003/04/11 23:02:08 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.13 2003/04/14 22:21:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,17 +63,13 @@
       type(ESMF_CalendarType), parameter :: &
                                ESMF_CAL_GREGORIAN =  ESMF_CalendarType(1), &
                                ESMF_CAL_JULIAN =     ESMF_CalendarType(2), &
-
-                               ! like Gregorian, except Feb always has 28 days
+                           ! like Gregorian, except Feb always has 28 days
                                ESMF_CAL_NOLEAP =     ESMF_CalendarType(3), & 
-
-                               ! 12 months, 30 days each
+                           ! 12 months, 30 days each
                                ESMF_CAL_360DAY =     ESMF_CalendarType(4), & 
-
-                               ! user defined
+                           ! user defined
                                ESMF_CAL_GENERIC =    ESMF_CalendarType(5), &
-
-                               ! track base time seconds only
+                           ! track base time seconds only
                                ESMF_CAL_NOCALENDAR = ESMF_CalendarType(6)
 
 !------------------------------------------------------------------------------
@@ -129,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.12 2003/04/11 23:02:08 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.13 2003/04/14 22:21:23 eschwab Exp $'
 
 !==============================================================================
 
