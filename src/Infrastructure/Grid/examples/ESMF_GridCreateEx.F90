@@ -22,7 +22,7 @@
       implicit none
     
 !     ! Local variables
-      integer :: status, rc, finalrc
+      integer :: status, rc
       integer :: delist(4)
       integer :: horz_gridtype, horz_stagger
       integer, dimension(2) :: counts
@@ -31,13 +31,28 @@
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       character (len = ESMF_MAXSTR) :: name
+
+!\end{verbatim}
+!EOP
+
+      integer :: finalrc
       finalrc = ESMF_SUCCESS
+
+!BOP
+!\begin{verbatim}
+
         
       call ESMF_Initialize(rc)
+
+!\end{verbatim}
+!EOP
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
+
+!BOP
+!\begin{verbatim}
 
 !-------------------------------------------------------------------------
 !   ! Example 1:
@@ -59,34 +74,53 @@
       ! Create a 2 x 2 layout for the Grid
       delist = (/ 0, 1, 2, 3 /)
       layout = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc=status)
+
+!\end{verbatim}
+!EOP
  
       if (status.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
+!BOP
+!\begin{verbatim}
 
       grid = ESMF_GridCreate(numDims=2, counts=counts, min=min, max=max, &
                              layout=layout, horz_gridtype=horz_gridtype, &
                              horz_stagger=horz_stagger, &
                              horz_coord_system=horz_coord_system, &
                              name=name, rc=status)
+
+!\end{verbatim}
+!EOP
  
       if (status.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
+!BOP
+!\begin{verbatim}
+
       print *, "Grid example 1 returned"
 
       call ESMF_GridDestroy(grid, status)
+
+!\end{verbatim}
+!EOP
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
+!BOP
+!\begin{verbatim}
 
       print *, "Grid example 1 destroyed"
 
       call ESMF_Finalize(rc)
+
+!\end{verbatim}
+!EOP
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
@@ -98,8 +132,10 @@
         print *, "FAIL: ESMF_GridCreateEx.F90"
      end if
 
+!BOP
+!\begin{verbatim}
 
       end program ESMF_GridCreateEx
     
 !\end{verbatim}
-    
+!EOP   
