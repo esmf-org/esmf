@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.1 2004/08/16 22:22:38 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.2 2004/08/17 19:26:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,6 +15,7 @@
 !------------------------------------------------------------------------------
  
 #include <ESMF_Macros.inc>
+#include <ESMF.h>
 
 !==============================================================================
 !BOP
@@ -36,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.1 2004/08/16 22:22:38 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.2 2004/08/17 19:26:22 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,6 +51,8 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
+      integer :: rc1, rc2
+      type(ESMF_Log) :: log1
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -59,22 +62,145 @@
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------- 
-      print *, "Starting job"
+      print *, "Starting LogErr Tests"
 
       call ESMF_Initialize(rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Test Log Write
+      ! Test Log Open
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      rc=ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
-      write(name, *) "Use of default log Test"
+      call ESMF_LogOpen(log1, "Log Test File", rc=rc)
+      write(name, *) "Open Log Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Log Close
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogClose(log1, rc)
+      write(name, *) "Close Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
       !------------------------------------------------------------------------
 
 
 #ifdef ESMF_EXHAUSTIVE
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Write
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      rc=ESMF_LogWrite(msg="Log Write 2",msgtype=ESMF_LOG_INFO)
+      write(name, *) "Use of default log Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Error Msg Found Error
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      rc=ESMF_LogMsgFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      write(name, *) "Error Msg Found Error Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Error Msg Found Error
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      rc=ESMF_LogMsgFoundError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      write(name, *) "Error Msg Found Error Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Found Alloc Error
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      rc=ESMF_LogFoundAllocError(ESMF_FAILURE,rcToReturn=rc2)
+      write(name, *) "Log Found Alloc Error Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_RC_MEM"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_RC_MEM), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Found Alloc Error
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      rc=ESMF_LogFoundAllocError(ESMF_SUCCESS,rcToReturn=rc2)
+      write(name, *) "Log Found Alloc Error Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Found Error
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      rc=ESMF_LogFoundError(ESMF_SUCCESS,rcToReturn=rc2)
+      write(name, *) "Log Found Error Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+      !------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Found Error
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      rc=ESMF_LogFoundError(ESMF_FAILURE,rcToReturn=rc2)
+      write(name, *) "Log Found Error Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+      !------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
 
 #endif
 
