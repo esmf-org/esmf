@@ -1,8 +1,8 @@
-% $Id: ESMF_usrdoc.tex,v 1.8 2003/04/04 15:11:56 cdeluca Exp $
+% $Id: ESMF_usrdoc.tex,v 1.9 2003/04/08 16:06:09 cdeluca Exp $
 
 \documentclass[]{article}
 
-\usepackage{epsf}
+\usepackage{graphicx}
 \usepackage{html}
 \usepackage{times}
 \usepackage[T1]{fontenc}
@@ -47,30 +47,35 @@
 \setlength{\parskip}{2ex}
 \setlength{\parindent}{0ex}
 
-\section{Introduction}
+%\section{Introduction}
+\input{ESMF_usrintro}
 
-This Guide to the Earth System Modeling Framework (ESMF) is intended 
-for a new user.  It outlines the scope, structure, and function of the 
-ESMF software in order to help the user understand what benefits the ESMF 
-can provide.  It also describes how to install the ESMF software and how 
-to incorporate it into applications.
+%\section{ESMF Support and Contacts}
+\input{ESMF_support}
 
-The ESMF Software Developer's Guide contains detailed information on how 
-to extend the ESMF system.  Reference manuals are available for individual 
-libraries within ESMF; see these for additional information on interfaces 
-and usage.
+\newpage
+\section{Quick Start}
+%\subsection{Description}
+\input{ESMF_install}
+\input{ESMF_wavedemo}
 
-%\section{Description}
-\input{ESMF_desc}
+%\section{ESMF Architectural Overview}
+\input{ESMF_archoverview}
 
-%\section{Testing}
+\section{ESMF Technical Overview}
+\input{ESMF_shareobj}
+%section{Build description}
+\input{ESMF_builddesc}
+
+%\section{Running ESMF Self-Tests}
 \input{ESMF_testing}
 
+%\subsection{Shared Objects}
 
-%\section{Installation}
-\input{ESMF_install}
 
 \end{document}
+
+
 
 
 

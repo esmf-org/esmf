@@ -1,0 +1,56 @@
+\section{Introduction to the Earth System Modeling Framework}
+
+The Earth System Modeling Framework (ESMF) is a structured collection of software 
+building blocks that can be used or customized to develop model components, assemble 
+them into an application, and run the application.  The functional split between developing 
+and combining components is the foremost feature of the ESMF architecture.  The 
+simplest view of the ESMF is that it consists of a layered {\it infrastructure} of 
+utilities and data structures for building model components and a {\it superstructure} 
+for coupling them.  
+
+This {\it ESMF User Guide} will eventually serve as an introduction for the new ESMF 
+user and as a reference for the experienced user.  Since ESMF Release 1.0 is the first 
+public ESMF release, and is a prototype rather than a production-ready package, 
+we will assume you are a 
+potential user interested in learning more about the ESMF software.  This edition
+of the {\it User Guide} is designed to guide you through that process.  It contains 
+a {\it Quick Start} section that explains how to install the ESMF software and 
+run examples, and an architectural overview that describes the framework's basic 
+goals and features.  To help you become familiar with ESMF terminology, the 
+{\it User Guide} also includes a glossary.
+
+The purpose of ESMF Release 1.0 is to provide a first look at the ESMF
+Application Programming Interface (API), and to demonstrate the viability 
+of the ESMF architecture and implementation.  We encourage you to run a 
+demonstration program, {\tt ESMF\_COUPLED\_WAVE}, that illustrates both ESMF 
+utilities and coupling services.  This program is described in section \ref{sec:demo}.  
+
+Those curious about specific interfaces should refer to the {\it ESMF Reference 
+Manual for Fortran90}, which contains a detailed listing and description of 
+the ESMF API.
+
+While we are delighted to have potential users experiment with ESMF, the
+ESMF team can offer only limited support to those who are trying to incorporate 
+the framework into applications at this early stage.  The ESMF is still
+too young to be considered viable infrastructure for active research and 
+operational codes.  For ESMF Release 1.0, we have focused on implementing 
+major architectural features and basic functionality.  The current performance 
+characteristics and memory requirements of the software are unlikely to resemble 
+those in later releases.
+
+Our next major release will occur in April 2004.  At that time, the {\it ESMF 
+User Guide} will be expanded to include a comprehensive section on how to adapt 
+application codes for the framework, and support staff will be available to 
+assist users with ESMF adoption.  In the interim, we are relying on Earth
+system modelers to provide us with the design feedback essential for creating a 
+shared, easy to use, high performance software framework.  
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,39 @@
+% $Id: ESMF_use.tex,v 1.1 2003/04/08 16:06:08 cdeluca Exp $
+
+\subsection{Using the ESMF library}
+\label{UsingLibrary}
+To use the library from C/C++, link with the library executable and include
+the {\tt ``ESMC.h''} file.
+To use the library from Fortran, link with the library executable and
+create links to the library modules in your build directory.  These are
+in the top level {\tt mod} directory under the appropriate architecture.  Alternately, 
+most compilers have a module-include-path directive which may be used to point
+to the correct module directory.
+
+Include the library in application modules with the Fortran {\tt USE}
+construct:  {\tt USE ESMF}.  It is not necessary to include any header files.
+
+There is an install target which will copy the library and mod files to an
+install location.  To invoke this target use:
+\begin{verbatim}
+  gmake BOPT=[O,g] ESMF_LIB_INSTALL=dir_for_lib ESMF_MOD_INSTALL=dir_for_mod_files install 
+\end{verbatim}
+
+Some users may wish for the library to be built in a directory different from 
+where the source code resides.  To do this, build using:
+\begin{verbatim}
+   gmake ESMF_BUILD=build_directory_here BOPT=[O,g]
+\end{verbatim}
+
+The {\tt ESMF\_BUILD} variable gives an alternate path in which to place the libraries,
+mod files and object files.  This variable defaults to {\tt ESMF\_DIR}.  If it is 
+assigned another value, the {\tt ESMF\_BUILD} variable will need to be passed as
+an additional argument to the the above make commands.  (Alternatively the variable
+{\tt ESMF\_BUILD} can be set in the environment (using setenv or export) and then it 
+need not be passed to any make calls).
+
+
+
+
+
+

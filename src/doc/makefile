@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2003/04/07 22:28:20 flanigan Exp $ 
+# $Id: makefile,v 1.24 2003/04/08 16:06:09 cdeluca Exp $ 
 ALL: alldoc 
 
 #
@@ -53,7 +53,6 @@ DIRS =
 CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc
 CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG ESMF_reqdoc.tex ESMF_refdoc.tex
 CLOBBERDIRS = 
-
 
 #
 # The build rules for the req are in 
