@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.11 2003/02/21 18:49:32 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.12 2003/02/21 21:17:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -143,7 +143,7 @@
 
       public ESMF_ArraySetData, ESMF_ArrayGetData
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex
-      public ESMF_ArrayRedist
+      public ESMF_ArrayRedist, ESMF_ArrayHalo
       public ESMF_ArrayGet, ESMF_ArrayGetName
  
       public ESMF_ArrayCheckpoint
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.11 2003/02/21 18:49:32 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.12 2003/02/21 21:17:26 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -942,6 +942,51 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayRedist
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayHalo(array, layout, decompids, AI_exc, AI_tot, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array) :: array
+      type(ESMF_Layout) :: layout
+      integer, dimension(:), intent(in) :: decompids
+      type(ESMF_AxisIndex), dimension(:), intent(in) :: AI_exc
+      type(ESMF_AxisIndex), dimension(:), intent(in) :: AI_tot
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Used to halo an Array.
+!
+!
+!EOP
+! !REQUIREMENTS:
+        integer :: status         ! local error status
+        logical :: rcpresent      ! did user specify rc?
+        integer :: size_decomp
+
+! initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+! call c routine to halo
+        size_decomp = size(decompids)
+        call c_ESMC_ArrayHalo(array, layout, decompids, size_decomp, &
+                              AI_exc, AI_tot, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "c_ESMC_ArrayHalo returned error"
+          return
+        endif
+
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayHalo
 
 !------------------------------------------------------------------------------
 !BOP
