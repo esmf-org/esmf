@@ -1,7 +1,6 @@
-! $Id: ESMF_AppMainEx.F90,v 1.7 2003/03/10 03:23:11 cdeluca Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.8 2003/04/04 15:13:16 nscollins Exp $
 !
-! Example code for a main program Application.  See ESMF_AppCompEx.F90
-!   for an example of an embeddable Application.
+! Example code for a main program Application. 
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -9,31 +8,23 @@
 !BOP
 !
 ! !DESCRIPTION:
-! Example of a main program Application.  See also the following example
-!  for a Component which can either be an Application or can be nested
-!  in a higher level Component.
+! Example of a main program Application.
 !
 !
 !\begin{verbatim}
 
-!   ! Example main program showing calls to the Component routines.
-!   ! This version is not nestable inside a larger application.
+!   ! Example main program showing calls to the Application Component routines.
+!   ! An Application Component is not nestable inside a larger application.
+
     program ESMF_AppMainEx
     
-!   ! Some common definitions.  This requires the C preprocessor.
-    #include "ESMF.h"
-
-!   ! Other ESMF modules which are needed by Comps
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_ClockMod
-    use ESMF_StateMod
-    use ESMF_CompMod
+!   ! The ESMF Framework module
+    use ESMF_Mod
     
     ! User supplied modules
-    use PHYS_Mod, only: PHYS_Register
-    use DYNM_Mod, only: DYNM_Register
-    use CPLR_Mod, only: CPLR_Register
+    use PHYS_Mod, only: PHYS_SetServices
+    use DYNM_Mod, only: DYNM_SetServices
+    use CPLR_Mod, only: CPLR_SetServices
     implicit none
     
 !   ! Local variables
@@ -44,8 +35,10 @@
     integer :: delistall(18), delist1(8), delist2(8), delist3(2)
     character(ESMF_MAXSTR) :: cname
     type(ESMF_DELayout) :: layoutall, layout1, layout2, layout3
-    type(ESMF_State) :: statelist(2)
-    type(ESMF_Comp) :: app, comp1, comp2, cpl
+    type(ESMF_State) :: states(2)
+    type(ESMF_AppComp) :: app
+    type(ESMF_GridComp) :: gcomp1, gcomp2, cpl
+    type(ESMF_CplComp) :: cpl
         
 !-------------------------------------------------------------------------
 !   !
@@ -53,32 +46,23 @@
  
     print *, "Application Example 1:"
 
-    ! Create the top level application component.  Create a DELayout and
-    !  a Clock to pass in.  
-
-    delistall = (/ (i, i=0,17) /)
-    layoutall = ESMF_DELayoutCreate(1, 18, delistall, rc)
-
-    ! See the TimeMgr document for the details on this.
-    clock = ESMF_ClockInit()
+    ! Create the top level application component
 
     cname = "Top Level Application"
-    app = ESMF_CompCreate(cname, layoutall, ESMF_APPCOMP, ESMF_GENERAL, &
-                            clock, "/home/myname/model1/setup", rc=rc)  
+    app = ESMF_AppCompCreate(cname, configfile="/home/myname/model1/setup", rc=rc)  
 
     delist1 = (/ (i, i=0,7) /)
     layout1 = ESMF_DELayoutCreate(2, 4, delist1, ESMF_XFAST, rc)
 
     cname = "Atmosphere Physics"
-    comp1 = ESMF_CompCreate(cname, layout1, ESMF_GRIDCOMP, ESMF_ATM, &
-                             clock, "/home/myname/model1/setup", rc=rc)  
+    comp1 = ESMF_GridCompCreate(cname, layout1, ESMF_ATM, rc=rc)  
 
-    ! This single user-supplied subroutine must be a public entry point,
-    !  and must be either a unique name among all components, or be 
-    !  renamed with the 'use localname => modulename' syntax.
-    call ESMF_CompRegister(comp1, PHYS_Register, rc=rc)
+    ! This single user-supplied subroutine must be a public entry point 
+    !  and can renamed with the 'use localname => modulename' syntax if
+    !  the name is not unique.
+    call ESMF_GridCompSetServices(comp1, PHYS_SetServices, rc=rc)
 
-    ! (see below for what the Register routine will need to do.)
+    ! (see below for what the SetServices routine will need to do.)
 
     print *, "Comp Create returned, name = ", trim(cname)
 
@@ -86,68 +70,72 @@
     layout2 = ESMF_DELayoutCreate(2, 4, delist2, ESMF_XFAST, rc)
 
     cname = "Atmosphere Dynamics"
-    comp2 = ESMF_CompCreate(cname, layout2, ESMF_GRIDCOMP, ESMF_ATM, &
-                             clock, "/home/myname/model1/setup", rc=rc)  
+    comp2 = ESMF_GridCompCreate(cname, layout2, ESMF_ATM, rc=rc)
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_CompRegister(comp1, DYNM_Register, rc=rc)
+    call ESMF_GridCompSetServices(comp1, DYNM_SetServices, rc=rc)
 
     print *, "Comp Create returned, name = ", trim(cname)
 
-    delist3 = (/ (i, i=16,17) /)
-    layout3 = ESMF_DELayoutCreate(2, 1, delist3, ESMF_XFAST, rc)
+    delist3 = (/ (i, i=0,16) /)
+    layout3 = ESMF_DELayoutCreate(1, 16, delist3, ESMF_XFAST, rc)
 
     cname = "Atmosphere Coupler"
-    comps(1) = comp1
-    comps(2) = comp2
-    cpl = ESMF_CompCreate(cname, layout3, ESMF_CPLCOMP, comps, &
-                           filepath="/home/myname/model1/setup", rc=rc)  
+    cpl = ESMF_CplCompCreate(cname, layout3, rc=rc)
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_CompRegister(comp1, CPLR_Register, rc=rc)
+    call ESMF_CplCompSetServices(comp1, CPLR_SetServices, rc=rc)
 
     print *, "Comp Create returned, name = ", trim(cname)
 
-    ! Query the components for their import and export states, and
-    ! set them in the coupler state list.
-    call ESMF_CompGetState(comp1, ESMF_IMPORTSTATE, localstates(1), rc=rc)
-    call ESMF_CompGetState(comp2, ESMF_EXPORTSTATE, localstates(2), rc=rc)
-    call ESMF_CompSetState(cpl, statelist=localstates, rc=rc)
+    ! Create the necessary import and export states used to pass data
+    !  between components.
+
+    states(1) = ESMF_StateCreate(cname1, ESMF_EXPORTSTATE, rc=rc)
+    states(2) = ESMF_StateCreate(cname2, ESMF_IMPORTSTATE, rc=rc)
+
+    ! See the TimeMgr document for the details on the actual code needed
+    !  to set up a clock.
+    clock = ESMF_ClockInit()
      
     ! Call each Init routine in turn.  There is an optional index number
     !  for those components which have multiple entry points.
-    call ESMF_CompInit(comp1, rc=rc)
-    call ESMF_CompInit(comp2, rc=rc)
-    call ESMF_CompInit(cpl, rc=rc)
-    print *, "Comp Init returned"
+    call ESMF_GridCompInitialize(comp1, exportstate=states(1), clock=clock, rc=rc)
+    call ESMF_GridCompInitialize(comp2, importstate=states(2), clock=clock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, statelist=states, clock=clock, rc=rc)
+    print *, "Comp Initialize complete"
 
 
     ! Main run loop.
     finished = .false.
-    timesteps = 5
     do while (.not. finished)
 
-        call ESMF_CompRun(comp1, clock, timesteps, rc)
-        call ESMF_CompRun(comp2, clock, timesteps, rc)
-        call ESMF_CompRun(cpl, clock, rc)
+        call ESMF_GridCompRun(comp1, exportstate=states(1), clock=clock, rc=rc)
+        call ESMF_CplCompRun(cpl, statelist=states, clock=clock, rc=rc)
+        call ESMF_GridCompRun(comp2, importstate=states(2), clock=clock, rc=rc)
    
         call ESMF_ClockAdvance(clock, timesteps)
 
         ! query clock for current time
-        if (currenttime .gt. endtime) finished = .true.
+        if (ESMF_ClockIsStopTime(clock) finished = .true.
+
     enddo
+    print *, "Comp Run complete"
 
 
-    !
-    call ESMF_CompFinalize(comp1, rc)
-    call ESMF_CompFinalize(comp2, rc)
-    call ESMF_CompFinalize(cpl, rc)
-    print *, "Comp Finalize returned"
+    ! Give each component a chance to write out final results, clean up.
+    ! Call each Init routine in turn.  There is an optional index number
+    !  for those components which have multiple entry points.
+    call ESMF_GridCompFinalize(comp1, exportstate=states(1), clock=clock, rc=rc)
+    call ESMF_GridCompFinalize(comp2, importstate=states(2), clock=clock, rc=rc)
+    call ESMF_CplCompFinalize(cpl, statelist=states, clock=clock, rc=rc)
+    print *, "Comp Finalize complete"
 
 
-    call ESMF_CompDestroy(comp1, rc)
-    call ESMF_CompDestroy(comp2, rc)
-    call ESMF_CompDestroy(cpl, rc)
+    ! Destroy components.
+    call ESMF_GridCompDestroy(comp1, rc)
+    call ESMF_GridCompDestroy(comp2, rc)
+    call ESMF_CplCompDestroy(cpl, rc)
     print *, "Comp Destroy returned"
 
 
@@ -157,16 +145,19 @@
     end program ESMF_AppMainEx
     
 
-    ! Each Component must supply a Register routine which makes the
-    !  following calls:
-    !! call ESMF_CompSetRoutine(comp1, "init", 1, PHYS_Init)
-    !! call ESMF_CompSetRoutine(comp1, "init", 2, PHYS_InitPhase2)
-    !! call ESMF_CompSetRoutine(comp1, "run", 1, PHYS_Run)
-    !! call ESMF_CompSetRoutine(comp1, "final", 1, PHYS_Final)
-    ! (so PHYS_Init(), etc can be private methods inside the module).
-    ! The arguments are: the component, the type of routine, the index
-    !  number (to support multiple entry points of the same type), and
-    !  the name of the internal subroutine which contains the user code.
+    ! Each Component must supply a SetServices routine which makes the
+    !  following types of calls:
+    !
+    !! call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, PHYS_Init, 1, rc)
+    !! call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, PHYS_InitPhase2, 2, rc)
+    !! call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETRUN, PHYS_Run, 0, rc)
+    !! call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETFINAL, PHYS_Final, 0, rc)
+    !
+    ! The arguments are: the component, the type of routine, 
+    !  the name of the internal subroutine which contains the user code, 
+    !  and a "phase" or index number to support multiple entry points 
+    !  of the same type for codes which need to compute part of the process
+    !  and then allow another component to run before completing the function.
 
 !\end{verbatim}
     
