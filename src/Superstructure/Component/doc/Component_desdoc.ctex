@@ -1,4 +1,4 @@
-% $Id: Component_desdoc.ctex,v 1.9 2003/09/19 22:13:46 cdeluca Exp $
+% $Id: Component_desdoc.ctex,v 1.10 2003/11/11 18:31:42 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,12 +45,12 @@
 \newpage
 #endif
 
-\section{Synopsis}
-#ifdef STANDALONE
-\input{Component_syn}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/Component_syn}
-#endif
+%\section{Synopsis}
+%#ifdef STANDALONE
+%\input{Component_syn}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/Component_syn}
+%#endif
 
 \section{Object Model}
 #ifdef STANDALONE
@@ -108,54 +108,6 @@
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/ESMC_Comp_chapi}
 #endif
-
-
-%%%%%%%%%%%%% Application Class %%%%%%%%%
-\section{Application Component Design}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{app_desc}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/app_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{app_design}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/app_design}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{app_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/app_rest}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_AppComp_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_AppComp_fapi}
-#endif
-
-\subsection{Application F90 Use and Examples}
-#ifdef STANDALONE
-\input{ESMF_AppMainEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_AppMainEx_fapi}
-#endif
-
-\subsection{Application C++ Use and Examples}
-#ifdef STANDALONE
-\input{ESMC_AppMainEx_ccapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMC_AppMainEx_ccapi}
-#endif
-
-
 
 
 %%%%%%%%%%%%% Gridded Component Class %%%%%%%%%
@@ -248,124 +200,6 @@
 \input{ESMC_CplEx_ccapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/ESMC_CplEx_ccapi}
-#endif
-
-
-
-
-
-%%%%%%%%%%%%% State Class %%%%%%%%%
-\section{State Design}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{state_desc}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{state_design}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_design}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{state_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_rest}
-#endif
-
-\section{State Fortran Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{ESMF_StateEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_StateEx_fapi}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_State_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_State_fapi}
-#endif
-
-\section{State C++ Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{ESMC_StateEx_ccapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMC_StateEx_ccapi}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMC_State_chapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMC_State_chapi}
-#endif
-
-
-
-%%%%%%%%%%%%% Transform Class %%%%%%%%%
-\section{Transform Design}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{xform_desc}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/xform_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{xform_design}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/xform_design}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{xform_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/xform_rest}
-#endif
-
-\section{Transform Fortran Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{ESMF_XformEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_XformEx_fapi}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_Xform_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_Xform_fapi}
-#endif
-
-\section{Transform C++ Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{ESMC_XformEx_ccapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMC_XformEx_ccapi}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMC_Xform_chapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMC_Xform_ccapi}
 #endif
 
 
