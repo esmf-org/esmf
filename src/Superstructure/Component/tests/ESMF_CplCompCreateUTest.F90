@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.7 2004/09/22 20:18:29 nscollins Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.8 2004/10/04 22:30:57 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -69,7 +69,7 @@
    ! Initialize framework and get back default global VM
    call ESMF_Initialize(vm=vm, rc=rc)
    call ESMF_VMGet(vm, petCount=npets, rc=rc)
-   print *, "NUMBER_OF_PROCESSORS ", npets
+   print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
 
 
 !-------------------------------------------------------------------------
