@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.18 2005/01/10 18:09:51 cpboulder Exp $
+% $Id: LogErr_usage.tex,v 1.19 2005/01/10 20:45:50 cpboulder Exp $
 
 %\subsection{Use and Examples}
 
@@ -65,21 +65,26 @@ An example of log output is given below running with {\tt defaultlogtype}
 property set to {\tt ESMF\_LOG\_SINGLE} using the default log:
 
 (Log file {\tt ESMF\_LogFile}
+\begin {verbatim}
 20041105 163418.472210 INFO      PET0     Running with ESMF Version 2.0.2   
-20041105 163419.186153 ERROR     PET1     ESMF\_Field.F90             812  
-ESMF\_FieldGet No Grid or Bad Grid attached to Field
+20041105 163419.186153 ERROR     PET1     ESMF_Field.F90             812  
+ESMF_FieldGet No Grid or Bad Grid attached to Field
+\end {verbatim}
 
 The results are all put into the log file {\tt ESMF\_LogFile}.
 
 The next example shows same messages running with {\tt defaultlogtype} 
 property set to {\tt ESMF\_LOG\_MULTI} using the default log:
 
-\begin {verbatim}
 (Log file {\tt PET0.ESMF\_LogFile}
+\begin {verbatim}
 20041105 163418.472210 INFO      PET0     Running with ESMF Version 2.0.2   
+\end {verbatim}
+
 (Log file {\tt PET1.ESMF\_LogFile}
-20041105 163419.186153 ERROR     PET1     ESMF\_Field.F90             812  
-ESMF\_FieldGet No Grid or Bad Grid attached to Field
+\begin {verbatim}
+20041105 163419.186153 ERROR     PET1     ESMF_Field.F90             812  
+ESMF_FieldGet No Grid or Bad Grid attached to Field
 \end {verbatim}
 
 Note in this example that a separate file is created for each PET when using
