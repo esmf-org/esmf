@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.34 2004/02/11 06:48:28 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.35 2004/02/13 01:01:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -140,7 +140,7 @@ class ESMC_Calendar {
     int ESMC_CalendarSet(int           nameLen,      
                          const char   *name=0,
                          int          *daysPerMonth=0,
-                         int          *monthsPerYear=0,
+                         int           monthsPerYear=0,
                          ESMF_KIND_I4 *secondsPerDay=0,
                          ESMF_KIND_I4 *daysPerYear=0,
                          ESMF_KIND_I4 *daysPerYearDn=0,
@@ -198,7 +198,7 @@ class ESMC_Calendar {
     ESMC_Calendar(void);
     ESMC_Calendar(const ESMC_Calendar &calendar);  // copy constructor
     ESMC_Calendar(const char *name, ESMC_CalendarType calendarType);
-    ESMC_Calendar(const char *name, int *daysPerMonth, int *monthsPerYear,
+    ESMC_Calendar(const char *name, int *daysPerMonth, int monthsPerYear,
                   ESMF_KIND_I4 *secondsPerDay, ESMF_KIND_I4 *daysPerYear,
                   ESMF_KIND_I4 *daysPerYeardN, ESMF_KIND_I4 *daysPerYearDd);
     ~ESMC_Calendar(void);
@@ -211,7 +211,7 @@ class ESMC_Calendar {
 
     // friend function to allocate and initialize custom calendar from heap
     friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
-                                              int*, int*,
+                                              int*, int,
                                               ESMF_KIND_I4*,
                                               ESMF_KIND_I4*,
                                               ESMF_KIND_I4*,
@@ -253,7 +253,7 @@ class ESMC_Calendar {
     ESMC_Calendar *ESMC_CalendarCreate(int           nameLen,
                                        const char   *name=0,
                                        int          *daysPerMonth=0,
-                                       int          *monthsPerYear=0,
+                                       int           monthsPerYear=0,
                                        ESMF_KIND_I4 *secondsPerDay=0,
                                        ESMF_KIND_I4 *daysPerYear=0,
                                        ESMF_KIND_I4 *daysPerYearDn=0,

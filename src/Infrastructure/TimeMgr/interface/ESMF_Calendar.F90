@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.52 2004/02/05 21:30:48 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.53 2004/02/13 01:02:05 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.52 2004/02/05 21:30:48 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.53 2004/02/13 01:02:05 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -455,16 +455,16 @@
 !     invoke C to C++ entry point
 
       if (present(daysPerMonth)) then
-        call c_ESMC_CalendarCreateCustom(ESMF_CalendarCreateCustom, &
+        call c_ESMC_CalendarCreateCustom1(ESMF_CalendarCreateCustom, &
                                          nameLen, name, &
-                                         daysPerMonth, monthsPerYear, &
+                                         daysPerMonth(1), monthsPerYear, &
                                          secondsPerDay, &
                                          daysPerYear, daysPerYearDn, &
                                          daysPerYearDd, rc)
       else
-        call c_ESMC_CalendarCreateCustom(ESMF_CalendarCreateCustom, &
+        call c_ESMC_CalendarCreateCustom0(ESMF_CalendarCreateCustom, &
                                          nameLen, name, &
-                                         ESMF_NULL_POINTER, monthsPerYear, &
+                                         monthsPerYear, &
                                          secondsPerDay, &
                                          daysPerYear, daysPerYearDn, &
                                          daysPerYearDd, rc)
@@ -675,16 +675,16 @@
 !     invoke C to C++ entry point
 
       if (present(daysPerMonth)) then
-        call c_ESMC_CalendarSetCustom(calendar, &
+        call c_ESMC_CalendarSetCustom1(calendar, &
                                       nameLen, name, &
-                                      daysPerMonth, monthsPerYear, &
+                                      daysPerMonth(1), monthsPerYear, &
                                       secondsPerDay, &
                                       daysPerYear, daysPerYearDn, &
                                       daysPerYearDd, rc)
       else
-        call c_ESMC_CalendarSetCustom(calendar, &
+        call c_ESMC_CalendarSetCustom0(calendar, &
                                       nameLen, name, &
-                                      ESMF_NULL_POINTER, monthsPerYear, &
+                                      monthsPerYear, &
                                       secondsPerDay, &
                                       daysPerYear, daysPerYearDn, &
                                       daysPerYearDd, rc)
@@ -780,15 +780,15 @@
 !     invoke C to C++ entry point
 
       if (present(daysPerMonth)) then
-        call c_ESMC_CalendarGet(calendar, nameLen, tempNameLen, tempName, &
+        call c_ESMC_CalendarGet1(calendar, nameLen, tempNameLen, tempName, &
                                 calendarType, &
-                                daysPerMonth, sizeofDaysPerMonth, &
+                                daysPerMonth(1), sizeofDaysPerMonth, &
                                 monthsPerYear, secondsPerDay, secondsPerYear, &
                                 daysPerYear, daysPerYearDn, daysPerYearDd, rc)
       else
-        call c_ESMC_CalendarGet(calendar, nameLen, tempNameLen, tempName, &
+        call c_ESMC_CalendarGet0(calendar, nameLen, tempNameLen, tempName, &
                                 calendarType, &
-                                ESMF_NULL_POINTER, sizeofDaysPerMonth, &
+                                sizeofDaysPerMonth, &
                                 monthsPerYear, secondsPerDay, secondsPerYear, &
                                 daysPerYear, daysPerYearDn, daysPerYearDd, rc)
       end if

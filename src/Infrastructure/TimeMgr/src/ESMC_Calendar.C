@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.48 2004/02/11 06:50:30 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.49 2004/02/13 01:01:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.48 2004/02/11 06:50:30 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.49 2004/02/13 01:01:59 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -132,7 +132,7 @@ int ESMC_Calendar::count=0;
       int           nameLen,       // in
       const char   *name,          // in
       int          *daysPerMonth,  // in
-      int          *monthsPerYear, // in  
+      int           monthsPerYear, // in  
       ESMF_KIND_I4 *secondsPerDay, // in
       ESMF_KIND_I4 *daysPerYear,   // in
       ESMF_KIND_I4 *daysPerYearDn, // in
@@ -402,7 +402,7 @@ int ESMC_Calendar::count=0;
       int           nameLen,          // in
       const char   *name,             // in
       int          *daysPerMonth,     // in
-      int          *monthsPerYear,    // in
+      int           monthsPerYear,    // in
       ESMF_KIND_I4 *secondsPerDay,    // in
       ESMF_KIND_I4 *daysPerYear,      // in
       ESMF_KIND_I4 *daysPerYeardN,    // in
@@ -434,14 +434,12 @@ int ESMC_Calendar::count=0;
     this->calendarType = ESMC_CAL_CUSTOM;
 
     // TODO: replace MONTHS_PER_YEAR with dynamic daysPerMonth[monthsPerYear]
-    if (monthsPerYear != ESMC_NULL_POINTER) {
-      if (*monthsPerYear <= MONTHS_PER_YEAR) {
-        this->monthsPerYear = *monthsPerYear;
-      } else {
-        // error, restore previous state and return ESMF_FAILURE
-        *this = saveCalendar;
-        return(ESMF_FAILURE);
-      }
+    if (monthsPerYear <= MONTHS_PER_YEAR) {
+      this->monthsPerYear = monthsPerYear;
+    } else {
+      // error, restore previous state and return ESMF_FAILURE
+      *this = saveCalendar;
+      return(ESMF_FAILURE);
     }
 
     if (daysPerMonth != ESMC_NULL_POINTER) {
@@ -541,16 +539,12 @@ int ESMC_Calendar::count=0;
     if (calendarType != ESMC_NULL_POINTER) {
       *calendarType = this->calendarType;
     }
-#if 0
-// TODO:  make daysPerMonth array work like ESMC_GetAlarmList(alarmList) ?
-          daysPerMonth is not NULL when not passed from F90!
     if (daysPerMonth != ESMC_NULL_POINTER) {
       if (sizeofDaysPerMonth < this->monthsPerYear) return(ESMF_FAILURE);
       for (int i=0; i<this->monthsPerYear; i++) {
         daysPerMonth[i] = this->daysPerMonth[i];
       }
     }
-#endif
     if (monthsPerYear != ESMC_NULL_POINTER) {
       *monthsPerYear = this->monthsPerYear;
     }
@@ -1265,7 +1259,7 @@ int ESMC_Calendar::count=0;
 // !ARGUMENTS:
       const char   *name,              // in
       int          *daysPerMonth,      // in
-      int          *monthsPerYear,     // in
+      int           monthsPerYear,     // in
       ESMF_KIND_I4 *secondsPerDay,     // in
       ESMF_KIND_I4 *daysPerYear,       // in
       ESMF_KIND_I4 *daysPerYeardN,     // in
